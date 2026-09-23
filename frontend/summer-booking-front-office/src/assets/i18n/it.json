@@ -4,7 +4,7 @@
   },
   "login": {
     "title": "Accesso",
-    "description": "Il progetto frontend è pronto. L'accesso sarà collegato al servizio di autenticazione quando il backend sarà disponibile.",
+    "description": "L'accesso sarà collegato al servizio di autenticazione quando il backend sarà disponibile.",
     "action": "Accedi",
     "languageSelector": "Seleziona lingua",
     "italian": "Italiano",

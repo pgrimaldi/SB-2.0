@@ -4,7 +4,7 @@
   },
   "login": {
     "title": "Sign in",
-    "description": "The frontend project is ready. Sign-in will be connected to the authentication service when the backend is available.",
+    "description": "Sign-in will be connected to the authentication service when the backend is available.",
     "action": "Sign in",
     "languageSelector": "Select language",
     "italian": "Italian",
