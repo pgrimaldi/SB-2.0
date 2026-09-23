@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+    commands:
+      - npm ci --prefix frontend/summer-booking-front-office
+  pre_build:
+    commands:
+      - test -n "$S3_BUCKET"
+      - test -n "$CLOUDFRONT_DISTRIBUTION_ID"
+  build:
+    commands:
+      - npm run build:prod --prefix frontend/summer-booking-front-office
+  post_build:
+    commands:
+      - aws s3 sync frontend/summer-booking-front-office/dist/summer-booking-front-office/browser "s3://$S3_BUCKET" --delete
+      - aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: frontend/summer-booking-front-office/dist/summer-booking-front-office/browser

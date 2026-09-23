@@ -1,0 +1,7 @@
+{
+  "name": "Summer Booking",
+  "short_name": "Summer Booking",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./"
+}

@@ -1,0 +1,21 @@
+@if (appearance() === 'primary') {
+  <button
+    mat-flat-button
+    [attr.aria-label]="accessibleLabel() ?? null"
+    [attr.type]="buttonType()"
+    [disabled]="disabled()"
+    (click)="clicked.emit()"
+  >
+    <ng-content />
+  </button>
+} @else {
+  <button
+    mat-button
+    [attr.aria-label]="accessibleLabel() ?? null"
+    [attr.type]="buttonType()"
+    [disabled]="disabled()"
+    (click)="clicked.emit()"
+  >
+    <ng-content />
+  </button>
+}

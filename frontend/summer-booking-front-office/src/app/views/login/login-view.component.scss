@@ -1,0 +1,57 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.login-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: linear-gradient(145deg, var(--mat-sys-surface-container-low), var(--mat-sys-surface));
+}
+
+.language-switcher {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.login-panel {
+  width: min(100%, 30rem);
+  padding: clamp(2rem, 6vw, 3.5rem);
+  border-radius: 1.5rem;
+  background: var(--mat-sys-surface-container-lowest);
+  box-shadow: var(--mat-sys-level2);
+}
+
+.product-name {
+  margin: 0 0 2rem;
+  color: var(--mat-sys-primary);
+  font: var(--mat-sys-title-medium);
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-display-small);
+}
+
+.description {
+  margin: 1rem 0 2rem;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.6;
+}
+
+@media (max-width: 40rem) {
+  .login-page {
+    align-items: start;
+    padding: 5rem 1rem 1rem;
+  }
+
+  .login-panel {
+    padding: 2rem;
+  }
+}

@@ -1,0 +1,27 @@
+<main class="login-page">
+  <nav class="language-switcher" [attr.aria-label]="'login.languageSelector' | translate">
+    <sb-button
+      appearance="secondary"
+      [accessibleLabel]="'login.italian' | translate"
+      [disabled]="currentLanguage() === 'it'"
+      (clicked)="changeLanguage('it')"
+    >
+      IT
+    </sb-button>
+    <sb-button
+      appearance="secondary"
+      [accessibleLabel]="'login.english' | translate"
+      [disabled]="currentLanguage() === 'en'"
+      (clicked)="changeLanguage('en')"
+    >
+      EN
+    </sb-button>
+  </nav>
+
+  <section class="login-panel" aria-labelledby="login-title">
+    <p class="product-name">{{ 'app.name' | translate }}</p>
+    <h1 id="login-title">{{ 'login.title' | translate }}</h1>
+    <p class="description">{{ 'login.description' | translate }}</p>
+    <sb-button [disabled]="true">{{ 'login.action' | translate }}</sb-button>
+  </section>
+</main>
