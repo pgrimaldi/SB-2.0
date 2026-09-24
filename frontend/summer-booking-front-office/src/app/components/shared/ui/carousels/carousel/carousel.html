@@ -1,0 +1,71 @@
+<div
+  class="app__carousel"
+  role="region"
+  aria-roledescription="carousel"
+  [attr.aria-label]="accessibleLabel()"
+>
+  <div
+    #viewport
+    class="app__carousel__viewport"
+    [class.app__carousel__viewport__dragging]="dragging()"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointercancel)="onPointerUp()"
+  >
+    <ul class="app__carousel__track" [style.transform]="transform()">
+      @for (slide of slides(); track $index) {
+        <li
+          class="app__carousel__slide"
+          role="group"
+          aria-roledescription="slide"
+          [attr.aria-label]="
+            'carousel.slide' | translate: { index: $index + 1, total: slides().length }
+          "
+          [attr.aria-hidden]="isVisible($index) ? null : 'true'"
+          [attr.inert]="isVisible($index) ? null : ''"
+        >
+          <div class="app__carousel__slide__content">
+            <ng-container [ngTemplateOutlet]="slide" />
+          </div>
+        </li>
+      }
+    </ul>
+
+    @if (index() > 0) {
+      <button
+        class="app__carousel__arrow app__carousel__arrow__previous"
+        type="button"
+        [attr.aria-label]="'carousel.previous' | translate"
+        (click)="previous()"
+      >
+        <svg viewBox="0 0 12 16" aria-hidden="true"><path d="M9.5 1.5 3 8l6.5 6.5" /></svg>
+      </button>
+    }
+    @if (index() < maxIndex()) {
+      <button
+        class="app__carousel__arrow app__carousel__arrow__next"
+        type="button"
+        [attr.aria-label]="'carousel.next' | translate"
+        (click)="next()"
+      >
+        <svg viewBox="0 0 12 16" aria-hidden="true"><path d="M2.5 1.5 9 8l-6.5 6.5" /></svg>
+      </button>
+    }
+  </div>
+
+  @if (maxIndex() > 0) {
+    <div class="app__carousel__dots">
+      @for (position of positions(); track position) {
+        <button
+          class="app__carousel__dot"
+          type="button"
+          [class.app__carousel__dot__active]="position === index()"
+          [attr.aria-current]="position === index() ? 'true' : null"
+          [attr.aria-label]="'carousel.position' | translate: { position: position + 1 }"
+          (click)="goTo(position)"
+        ></button>
+      }
+    </div>
+  }
+</div>

@@ -1,27 +1,27 @@
-<main class="login-page">
-  <nav class="language-switcher" [attr.aria-label]="'login.languageSelector' | translate">
-    <sb-button
+<main class="login__page">
+  <nav class="language__switcher" [attr.aria-label]="'login.language.selector' | translate">
+    <app-button
       appearance="secondary"
-      [accessibleLabel]="'login.italian' | translate"
+      [accessibleLabel]="'login.language.italian' | translate"
       [disabled]="currentLanguage() === 'it'"
       (clicked)="changeLanguage('it')"
     >
       IT
-    </sb-button>
-    <sb-button
+    </app-button>
+    <app-button
       appearance="secondary"
-      [accessibleLabel]="'login.english' | translate"
+      [accessibleLabel]="'login.language.english' | translate"
       [disabled]="currentLanguage() === 'en'"
       (clicked)="changeLanguage('en')"
     >
       EN
-    </sb-button>
+    </app-button>
   </nav>
 
-  <section class="login-panel" aria-labelledby="login-title">
-    <p class="product-name">{{ 'app.name' | translate }}</p>
+  <section class="login__panel" aria-labelledby="login-title">
+    <p class="product__name">{{ 'app.name' | translate }}</p>
     <h1 id="login-title">{{ 'login.title' | translate }}</h1>
     <p class="description">{{ 'login.description' | translate }}</p>
-    <sb-button [disabled]="true">{{ 'login.action' | translate }}</sb-button>
+    <app-button [disabled]="true">{{ 'login.action' | translate }}</app-button>
   </section>
 </main>

@@ -1,4 +1,6 @@
-@if (appearance() === 'primary') {
+<ng-template #label><ng-content /></ng-template>
+
+@if (appearance() !== 'secondary') {
   <button
     mat-flat-button
     [attr.aria-label]="accessibleLabel() ?? null"
@@ -6,7 +8,7 @@
     [disabled]="disabled()"
     (click)="clicked.emit()"
   >
-    <ng-content />
+    <ng-container [ngTemplateOutlet]="label" />
   </button>
 } @else {
   <button
@@ -16,6 +18,6 @@
     [disabled]="disabled()"
     (click)="clicked.emit()"
   >
-    <ng-content />
+    <ng-container [ngTemplateOutlet]="label" />
   </button>
 }

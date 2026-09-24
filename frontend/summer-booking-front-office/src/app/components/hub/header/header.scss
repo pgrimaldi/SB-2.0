@@ -1,0 +1,484 @@
+:host {
+  display: contents;
+}
+
+// Every scroll-driven change shares one timing, so size, position and colours move together.
+$motion-duration: 450ms;
+$motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
+$motion: $motion-duration $motion-easing;
+
+.hub__header {
+  position: fixed;
+  z-index: 100;
+  top: 1rem;
+  right: 0;
+  left: 0;
+  height: 7rem;
+  background: transparent;
+  backdrop-filter: blur(0);
+  transition:
+    top $motion,
+    height $motion,
+    background-color $motion,
+    box-shadow $motion,
+    backdrop-filter $motion;
+}
+
+.hub__header__compact {
+  top: 0;
+  height: 5rem;
+  background-color: rgb(255 255 255 / 95%);
+  box-shadow: 0 0.75rem 2rem rgb(18 45 87 / 14%);
+  backdrop-filter: blur(0.75rem);
+}
+
+.hub__header__content {
+  display: flex;
+  width: min(100%, 80rem);
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+.hub__header__brand {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  transition: flex-grow $motion;
+}
+
+.hub__header__logo {
+  position: relative;
+  width: 16.6rem;
+  margin-top: 3rem;
+  aspect-ratio: 944 / 342;
+  transition:
+    width $motion,
+    margin-top $motion;
+}
+
+.hub__header__compact .hub__header__logo {
+  width: 9.5rem;
+  margin-top: 0;
+}
+
+.hub__header__logo__image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+// The blue logo fades in over the white one, which disappears only once it is fully covered:
+// no half-transparent logo while the colours swap.
+.hub__header__logo__image__white {
+  transition: opacity 0s linear;
+}
+
+.hub__header__logo__image__blue {
+  opacity: 0;
+  transition: opacity $motion;
+}
+
+.hub__header__compact .hub__header__logo__image__white {
+  opacity: 0;
+  transition-delay: $motion-duration;
+}
+
+.hub__header__compact .hub__header__logo__image__blue {
+  opacity: 1;
+}
+
+// Desktop and tablet navigation
+
+.hub__header__nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 3rem;
+  transition: margin-top $motion;
+}
+
+.hub__header__compact .hub__header__nav {
+  margin-top: 0;
+}
+
+.hub__header__links {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hub__header__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: color $motion;
+
+  &:hover {
+    color: #bfdbfe;
+  }
+}
+
+.hub__header__compact .hub__header__link {
+  color: #1e3a8a;
+
+  &:hover {
+    color: #1d4ed8;
+  }
+}
+
+.hub__header__link:focus-visible,
+.hub__header__toggle:focus-visible,
+.hub__header__menu__link:focus-visible {
+  outline: 0.125rem solid currentColor;
+  outline-offset: 0.25rem;
+}
+
+// Language selector
+
+.hub__header__language {
+  color: #ffffff;
+  transition: color $motion;
+}
+
+.hub__header__compact .hub__header__language {
+  color: #1e3a8a;
+}
+
+.hub__header__language__trigger {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+}
+
+.hub__header__language__flag {
+  display: block;
+  width: 1.875rem;
+  height: 1.875rem;
+  margin-right: 0.3125rem;
+  border-radius: 50%;
+}
+
+.hub__header__language__caret {
+  width: 0;
+  height: 0;
+  margin-left: 0.25rem;
+  border-top: 0.25rem solid currentColor;
+  border-inline: 0.25rem solid transparent;
+}
+
+.hub__header__menu__language {
+  display: flex;
+  justify-content: center;
+
+  .hub__header__language {
+    color: #233c7e;
+  }
+}
+
+// Mobile toggle
+
+.hub__header__toggle {
+  display: none;
+  flex: none;
+  padding: 1rem;
+  border: 0.0625rem solid rgb(255 255 255 / 20%);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  backdrop-filter: blur(0.25rem);
+  transition:
+    color $motion,
+    border-color $motion,
+    background-color 300ms $motion-easing,
+    transform 300ms $motion-easing;
+
+  &:hover {
+    border-color: rgb(147 197 253 / 50%);
+    background: rgb(255 255 255 / 10%);
+    color: #bfdbfe;
+    transform: scale(1.1);
+  }
+}
+
+.hub__header__compact .hub__header__toggle {
+  border-color: rgb(229 231 235 / 50%);
+  color: #1e3a8a;
+
+  &:hover {
+    border-color: rgb(147 197 253 / 50%);
+    color: #1d4ed8;
+  }
+}
+
+.hub__header__toggle__icon {
+  position: relative;
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.hub__header__toggle__bar {
+  position: absolute;
+  left: 0;
+  width: 1.5rem;
+  height: 0.125rem;
+  background: currentColor;
+  transition:
+    transform 300ms ease-in-out,
+    opacity 300ms ease-in-out;
+
+  &:nth-child(1) {
+    top: 0.25rem;
+  }
+
+  &:nth-child(2) {
+    top: 0.75rem;
+  }
+
+  &:nth-child(3) {
+    top: 1.25rem;
+  }
+}
+
+.hub__header__menu__open .hub__header__toggle__bar {
+  &:nth-child(1) {
+    transform: translateY(0.5rem) rotate(45deg);
+  }
+
+  &:nth-child(2) {
+    opacity: 0;
+  }
+
+  &:nth-child(3) {
+    transform: translateY(-0.5rem) rotate(-45deg);
+  }
+}
+
+// Mobile menu panel
+
+.hub__header__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  display: none;
+  max-height: calc(100svh - 100% - 2rem);
+  overflow-y: auto;
+  border-top: 0.0625rem solid rgb(229 231 235 / 50%);
+  background: rgb(255 255 255 / 95%);
+  box-shadow: 0 1.5625rem 3.125rem -0.75rem rgb(0 0 0 / 25%);
+  backdrop-filter: blur(0.75rem);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-1rem);
+  transition:
+    opacity 300ms ease-in-out,
+    transform 300ms ease-in-out,
+    visibility 300ms ease-in-out;
+
+  &::before,
+  &::after {
+    display: block;
+    height: 0.25rem;
+    background: linear-gradient(to right, transparent, #93c5fd, transparent);
+    content: '';
+  }
+}
+
+.hub__header__menu__open .hub__header__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0.5rem);
+}
+
+.hub__header__menu__body {
+  padding: 2rem 1.5rem;
+}
+
+.hub__header__menu__links {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hub__header__menu__link {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: 0;
+  border-left: 0.25rem solid transparent;
+  border-radius: 0.75rem;
+  background: none;
+  color: #233c7e;
+  font: inherit;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.75rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    color: #2563eb;
+    transform: translateX(0.5rem) scale(1.05);
+  }
+}
+
+.hub__header__menu__divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-block: 1.5rem;
+}
+
+.hub__header__menu__divider__line {
+  flex: 1;
+  height: 0.0625rem;
+  background: linear-gradient(to right, transparent, #bfdbfe, transparent);
+}
+
+.hub__header__menu__divider__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #60a5fa;
+  animation: hub-header-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.hub__header__menu__actions {
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+}
+
+@keyframes hub-header-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Tablet
+
+@media (width < 64rem) {
+  .hub__header {
+    height: 6rem;
+  }
+
+  .hub__header__compact {
+    height: 4rem;
+  }
+
+  // The brand area shrinks to the logo (animatable flex-grow), so the logo glides left when compact.
+  .hub__header__brand {
+    flex: 1 1 0;
+  }
+
+  .hub__header__compact .hub__header__brand {
+    flex-grow: 0;
+  }
+
+  .hub__header__logo {
+    width: 13.8rem;
+    margin-top: 1.5rem;
+  }
+
+  .hub__header__compact .hub__header__logo {
+    width: 8.3rem;
+  }
+
+  .hub__header__nav {
+    gap: 1rem;
+    margin-top: 0;
+  }
+
+  .hub__header__links {
+    gap: 1rem;
+  }
+
+  .hub__header__link {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
+
+// Mobile
+
+@media (width < 48rem) {
+  .hub__header {
+    height: 6.5rem;
+  }
+
+  .hub__header__compact {
+    height: 4rem;
+  }
+
+  .hub__header__nav {
+    display: none;
+  }
+
+  .hub__header__toggle {
+    display: block;
+  }
+
+  .hub__header__menu {
+    display: block;
+  }
+}
+
+@media (width < 64rem) and (height < 32rem) and (orientation: landscape) {
+  .hub__header__brand {
+    justify-content: flex-start;
+  }
+
+  .hub__header__logo {
+    width: 10rem;
+    margin-top: 0;
+  }
+
+  // The lighthouse sits behind the links on short landscape screens.
+  .hub__header:not(.hub__header__compact) .hub__header__link {
+    text-shadow: 0 0.0625rem 0.25rem rgb(0 0 0 / 45%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub__header,
+  .hub__header__brand,
+  .hub__header__logo,
+  .hub__header__logo__image,
+  .hub__header__nav,
+  .hub__header__link,
+  .hub__header__language,
+  .hub__header__toggle,
+  .hub__header__toggle__bar,
+  .hub__header__menu,
+  .hub__header__menu__link {
+    transition: none;
+  }
+
+  .hub__header__toggle:hover,
+  .hub__header__menu__link:hover {
+    transform: none;
+  }
+
+  .hub__header__menu__divider__dot {
+    animation: none;
+  }
+}

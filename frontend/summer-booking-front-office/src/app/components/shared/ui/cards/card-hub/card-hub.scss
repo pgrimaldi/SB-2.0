@@ -1,0 +1,36 @@
+@use '../card-surface' as card;
+
+:host {
+  display: block;
+}
+
+.card__hub {
+  @include card.card-surface;
+
+  padding: 2.5rem;
+}
+
+.card__hub__icon {
+  display: block;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1.5rem;
+  object-fit: contain;
+}
+
+.card__hub__heading {
+  margin: 0 0 1.5rem;
+  color: #2a437f;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+
+.card__hub__content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  color: #777777;
+  font-size: 0.875rem;
+  line-height: 1.625;
+}

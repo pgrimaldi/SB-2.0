@@ -1,7 +1,113 @@
+@use '@angular/material' as mat;
+
 :host {
   display: inline-flex;
+
+  @include mat.button-overrides(
+    (
+      filled-container-color: #233c7d,
+      filled-label-text-color: #ffffff,
+      filled-container-shape: 0.3rem,
+      filled-state-layer-color: #000000,
+      filled-hover-state-layer-opacity: 0.14,
+      filled-focus-state-layer-opacity: 0.14,
+      filled-pressed-state-layer-opacity: 0.2,
+      text-container-shape: 0.3rem,
+    )
+  );
 }
 
 button {
   min-width: 6rem;
+}
+
+:host(.app__button__light) {
+  @include mat.button-overrides(
+    (
+      filled-container-color: #ffffff,
+      filled-label-text-color: #233c7d,
+      filled-state-layer-color: #233c7d,
+      filled-hover-state-layer-opacity: 0.08,
+      filled-focus-state-layer-opacity: 0.12,
+      filled-pressed-state-layer-opacity: 0.16,
+    )
+  );
+
+  button {
+    border: 0.0625rem solid #dee2e6;
+  }
+}
+
+// The light border adds to the size instead of eating into it.
+:host(.app__button__light.app__button__small) {
+  @include mat.button-overrides(
+    (
+      filled-container-height: 1.875rem,
+    )
+  );
+}
+
+:host(.app__button__light.app__button__large) {
+  @include mat.button-overrides(
+    (
+      filled-container-height: 3.875rem,
+    )
+  );
+}
+
+:host(.app__button__small),
+:host(.app__button__medium),
+:host(.app__button__large) {
+  @include mat.button-overrides(
+    (
+      filled-label-text-size: 0.9375rem,
+      filled-label-text-weight: 500,
+      filled-label-text-tracking: normal,
+      text-label-text-size: 0.9375rem,
+      text-label-text-weight: 500,
+      text-label-text-tracking: normal,
+    )
+  );
+}
+
+:host(.app__button__small) {
+  @include mat.button-overrides(
+    (
+      filled-container-height: 1.75rem,
+      filled-horizontal-padding: 2.5rem,
+      text-container-height: 1.75rem,
+      text-horizontal-padding: 2.5rem,
+    )
+  );
+}
+
+:host(.app__button__medium) {
+  @include mat.button-overrides(
+    (
+      filled-container-height: 2rem,
+      filled-horizontal-padding: 2.5rem,
+      text-container-height: 2rem,
+      text-horizontal-padding: 2.5rem,
+    )
+  );
+}
+
+:host(.app__button__large) {
+  @include mat.button-overrides(
+    (
+      filled-container-height: 3.75rem,
+      filled-horizontal-padding: 3rem,
+      text-container-height: 3.75rem,
+      text-horizontal-padding: 3rem,
+    )
+  );
+}
+
+:host(.app__button__full__width) {
+  display: flex;
+  width: 100%;
+
+  button {
+    width: 100%;
+  }
 }

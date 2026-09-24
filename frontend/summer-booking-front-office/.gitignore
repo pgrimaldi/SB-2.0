@@ -58,7 +58,9 @@ credentials
 # Miscellaneous local files
 /connect.lock
 /typings/
+# Local working documents: only README_DEPLOY.md is versioned
 /README.md
+/FRONTEND_WORKING_RULES.md
 /docs/*.docx
 
 # Operating system files

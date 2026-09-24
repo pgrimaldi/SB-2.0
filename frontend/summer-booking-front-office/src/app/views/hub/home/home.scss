@@ -1,0 +1,363 @@
+// Card grids reuse the carousel geometry (see carousel.scss: per-view, peek, 1.5rem slide padding),
+// so every hub card has the same size and grid columns line up with the carousel cards.
+@mixin carousel-columns($per-view, $peek) {
+  grid-template-columns: repeat(
+    #{$per-view},
+    calc((100% + 1.5rem - #{$peek}) / #{$per-view} - 3rem)
+  );
+}
+
+:host {
+  display: block;
+  // The whole page is white, gaps between sections (and around the footer) included.
+  background: #ffffff;
+}
+
+// Hero
+
+.hero {
+  position: relative;
+  display: grid;
+  min-height: 100svh;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  color: #ffffff;
+  background: #109bc7;
+}
+
+.hero__media {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  display: block;
+}
+
+.hero__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero__content {
+  width: min(100%, 76.25rem);
+  margin-inline: auto;
+  padding: 5rem 1.5rem;
+  transform: translateY(-1.8125rem);
+}
+
+.hero__content h1,
+.hero__content p {
+  max-width: calc((100% - 1.25rem) / 2);
+  line-height: 1.25;
+}
+
+.hero__content h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.hero__content p {
+  margin: 1.25rem 0 0;
+  padding-right: 2rem;
+  color: rgb(255 255 255 / 95%);
+  font-size: 1.24rem;
+}
+
+// Card sections: title, optional description, then a card grid or a carousel
+
+.home__information__content {
+  width: min(100%, 80rem);
+  margin-inline: auto;
+  padding: 5rem 1.5rem;
+}
+
+// Two card sections in a row keep the same section-to-section distance as the intermezzi.
+.home__information + .home__information .home__information__content {
+  padding-top: 2.5rem;
+}
+
+.home__information__header {
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.home__information__header h2 {
+  margin: 0 0 1.5rem;
+  color: #2a437f;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 2.5rem;
+}
+
+.home__information__header p {
+  max-width: 48rem;
+  margin: 0 auto;
+  color: #777777;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.home__information__cards {
+  @include carousel-columns(3, 3.75rem);
+
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 2rem 3rem;
+  padding-left: 1.5rem;
+}
+
+.home__information__cards p {
+  margin: 0;
+}
+
+.home__information__cards p + p {
+  margin-top: 1.625em;
+}
+
+// Highlighted closing line, pushed to the bottom so it lines up across cards.
+.home__information__cards p + p.home__information__detail {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  color: #0e99c6;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+// Pulled up by the carousel slide padding, so the title-to-cards distance matches the grids.
+.home__information__carousel {
+  margin-top: -1.5rem;
+}
+
+// Every hub card on the page takes the height of the tallest one (measured by appEqualHeight),
+// never less than the reference height.
+.home__page app-card-hub {
+  min-height: var(--app-equal-height, 23.75rem);
+}
+
+.about__us__quote {
+  margin: 0;
+}
+
+.about__us__quote ::ng-deep em {
+  color: #0e99c6;
+  font-style: normal;
+}
+
+// Intermezzi: gradient panels between the card sections
+
+.home__intermezzo {
+  margin: 2.5rem 1.5rem;
+}
+
+.home__intermezzo__panel {
+  max-width: 75rem;
+  margin-inline: auto;
+  border-radius: 0.3rem;
+  background: linear-gradient(to right, #224180, #2377a3, #a4d5e7);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 17.6%);
+}
+
+.home__intermezzo__content {
+  display: grid;
+  max-width: 71.875rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 1.5rem;
+  margin-inline: auto;
+  padding: 1.5rem;
+}
+
+.home__intermezzo h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 2.25rem;
+  font-weight: 600;
+}
+
+// Responsive button pair: compact button on desktop, full-width one below 64rem.
+.home__page .home__action__mobile {
+  display: none;
+}
+
+.booster__text {
+  color: #ffffff;
+}
+
+.booster__text h2 {
+  margin-bottom: 1.5rem;
+  line-height: 2.5rem;
+}
+
+.booster__description {
+  max-width: 18.75rem;
+}
+
+.booster__description p {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  white-space: pre-line;
+}
+
+.booster__action {
+  margin-top: 1.5rem;
+}
+
+.booster__media {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.booster__image {
+  display: block;
+  width: auto;
+  height: 20rem;
+  filter: drop-shadow(0 1.5625rem 1.5625rem rgb(0 0 0 / 15%));
+}
+
+.growth .home__intermezzo__panel {
+  padding-block: 1.5rem;
+}
+
+.growth h2 {
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  white-space: pre-line;
+}
+
+.growth__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (width < 64rem) {
+  .hero {
+    display: block;
+    min-height: auto;
+    background: #ffffff;
+  }
+
+  .hero__media {
+    position: relative;
+    z-index: auto;
+    height: 70svh;
+    background: #109bc7;
+  }
+
+  .hero__content {
+    width: auto;
+    margin: 0;
+    padding: 1.5rem;
+    transform: none;
+  }
+
+  .hero__content h1,
+  .hero__content p {
+    max-width: none;
+  }
+
+  .hero__content h1 {
+    color: #233c7d;
+    font-size: 2.25rem;
+    font-weight: 600;
+  }
+
+  .hero__content p {
+    margin-top: 0;
+    padding-right: 0;
+    color: #777777;
+    font-size: 1.25rem;
+  }
+
+  .home__information__content {
+    padding-block: 0.5rem;
+  }
+
+  .home__information__header {
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .home__information__header h2 {
+    color: #233c7d;
+    line-height: 1.25;
+  }
+
+  .home__information__header p {
+    max-width: none;
+    font-size: 1.25rem;
+  }
+
+  .home__information__cards {
+    @include carousel-columns(2, 2.5rem);
+  }
+
+  .home__intermezzo__content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home__intermezzo__panel {
+    background: linear-gradient(to bottom, #a4d5e7, #2377a3, #224180);
+  }
+
+  .home__page .home__action__desktop {
+    display: none;
+  }
+
+  .home__page .home__action__mobile {
+    display: flex;
+  }
+
+  .booster__media {
+    order: -1;
+    justify-content: center;
+  }
+
+  .booster__image {
+    height: 16rem;
+  }
+
+  .booster__text h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .booster__description p {
+    padding-top: 0.25rem;
+  }
+
+  // Block-level here, so its margin would collapse with the paragraph one.
+  .booster__action.home__action__mobile {
+    margin-top: 2.5rem;
+  }
+
+  .growth .home__intermezzo__panel {
+    background: linear-gradient(to bottom, #224180, #2377a3, #a4d5e7);
+  }
+
+  .growth h2 {
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    line-height: 2.5rem;
+    white-space: normal;
+  }
+}
+
+@media (width < 64rem) and (orientation: portrait) {
+  .hero__media img {
+    object-position: center top;
+  }
+}
+
+@media (width < 48rem) {
+  .hero__media {
+    height: min(25rem, 70svh);
+  }
+
+  .home__information__cards {
+    @include carousel-columns(1, 1.25rem);
+  }
+}

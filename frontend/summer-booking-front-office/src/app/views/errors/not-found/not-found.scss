@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.not__found {
+  display: grid;
+  min-height: 100dvh;
+  place-content: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #173d78;
+}
+
+.not__found h1,
+.not__found p {
+  margin: 0;
+}
+
+.not__found a {
+  color: #109bc7;
+}

@@ -1,0 +1,22 @@
+@use '../card-surface' as card;
+
+:host {
+  display: block;
+}
+
+.card__logo {
+  @include card.card-surface;
+
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+// Every logo fits the same box, whatever its proportions.
+.card__logo__image {
+  display: block;
+  width: 100%;
+  max-width: 15.625rem;
+  height: 3.125rem;
+  object-fit: contain;
+}

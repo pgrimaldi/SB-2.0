@@ -1,0 +1,54 @@
+<footer class="hub__footer">
+  <div class="hub__footer__content">
+    <div class="hub__footer__brand">
+      <img
+        class="hub__footer__logo"
+        src="/assets/images/hub/logo-text-blue.png"
+        width="944"
+        height="342"
+        loading="lazy"
+        [alt]="'hub.header.logo.alt' | translate"
+      />
+
+      <ul class="hub__footer__social">
+        @for (social of socials; track social) {
+          <li>
+            <button
+              class="hub__footer__social__link"
+              type="button"
+              [attr.aria-label]="'hub.footer.social.' + social | translate"
+            >
+              <img
+                [src]="'/assets/images/hub/footer-' + social + '.svg'"
+                width="24"
+                height="24"
+                alt=""
+              />
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+    @for (column of columns; track $index) {
+      <ul class="hub__footer__links">
+        @for (link of column; track link.key) {
+          <li [class.hub__footer__links__highlight]="link.highlight">
+            <button
+              class="hub__footer__link"
+              type="button"
+              [appI18nText]="'hub.footer.links.' + link.key"
+            ></button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="hub__footer__bottom">
+    <div class="hub__footer__bottom__content">
+      <p appI18nText="hub.footer.legal.group"></p>
+      <p appI18nText="hub.footer.legal.company" [params]="year"></p>
+    </div>
+  </div>
+</footer>

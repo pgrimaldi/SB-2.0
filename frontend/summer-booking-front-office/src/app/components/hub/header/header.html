@@ -1,0 +1,131 @@
+<header
+  class="hub__header"
+  [class.hub__header__compact]="isCompact()"
+  [class.hub__header__menu__open]="isMenuOpen()"
+>
+  <div class="hub__header__content">
+    <div class="hub__header__brand">
+      <div class="hub__header__logo">
+        <img
+          class="hub__header__logo__image hub__header__logo__image__white"
+          src="/assets/images/hub/logo-text-white.png"
+          width="944"
+          height="342"
+          [alt]="'hub.header.logo.alt' | translate"
+        />
+        <img
+          class="hub__header__logo__image hub__header__logo__image__blue"
+          src="/assets/images/hub/logo-text-blue.png"
+          width="944"
+          height="342"
+          alt=""
+          aria-hidden="true"
+        />
+      </div>
+    </div>
+
+    <div class="hub__header__nav">
+      <nav [attr.aria-label]="'hub.header.nav.label' | translate">
+        <ul class="hub__header__links">
+          @for (item of navItems; track item) {
+            <li>
+              <button
+                class="hub__header__link"
+                type="button"
+                [appI18nText]="'hub.header.nav.' + item"
+              ></button>
+            </li>
+          }
+        </ul>
+      </nav>
+
+      <app-dropdown-menu
+        class="hub__header__language"
+        [items]="languageItems()"
+        [selectedValue]="currentLanguage().code"
+        [iconOnly]="true"
+        [accessibleLabel]="'language.selector' | translate"
+        (selected)="changeLanguage($event)"
+      >
+        <span class="hub__header__language__trigger">
+          <img
+            class="hub__header__language__flag"
+            [src]="currentLanguage().flagSrc"
+            width="30"
+            height="30"
+            alt=""
+          />
+          <span class="hub__header__language__caret"></span>
+        </span>
+      </app-dropdown-menu>
+
+      <app-button size="small"><span appI18nText="hub.header.login"></span></app-button>
+    </div>
+
+    <button
+      class="hub__header__toggle"
+      type="button"
+      aria-controls="hub-header-menu"
+      [attr.aria-expanded]="isMenuOpen()"
+      [attr.aria-label]="
+        (isMenuOpen() ? 'hub.header.menu.close' : 'hub.header.menu.open') | translate
+      "
+      (click)="toggleMenu()"
+    >
+      <span class="hub__header__toggle__icon" aria-hidden="true">
+        <span class="hub__header__toggle__bar"></span>
+        <span class="hub__header__toggle__bar"></span>
+        <span class="hub__header__toggle__bar"></span>
+      </span>
+    </button>
+  </div>
+
+  <div id="hub-header-menu" class="hub__header__menu">
+    <div class="hub__header__menu__body">
+      <nav [attr.aria-label]="'hub.header.nav.label' | translate">
+        <ul class="hub__header__menu__links">
+          @for (item of navItems; track item) {
+            <li>
+              <button class="hub__header__menu__link" type="button">
+                {{ 'hub.header.nav.' + item | translate }}
+              </button>
+            </li>
+          }
+          <li class="hub__header__menu__language">
+            <app-dropdown-menu
+              class="hub__header__language"
+              [items]="languageItems()"
+              [selectedValue]="currentLanguage().code"
+              [iconOnly]="true"
+              [accessibleLabel]="'language.selector' | translate"
+              (selected)="changeLanguage($event)"
+            >
+              <span class="hub__header__language__trigger">
+                <img
+                  class="hub__header__language__flag"
+                  [src]="currentLanguage().flagSrc"
+                  width="30"
+                  height="30"
+                  alt=""
+                />
+                <span class="hub__header__language__caret"></span>
+              </span>
+            </app-dropdown-menu>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="hub__header__menu__divider" aria-hidden="true">
+        <span class="hub__header__menu__divider__line"></span>
+        <span class="hub__header__menu__divider__dot"></span>
+        <span class="hub__header__menu__divider__line"></span>
+      </div>
+
+      <div class="hub__header__menu__actions">
+        <app-button size="large" [fullWidth]="true">
+          <span appI18nText="hub.header.login"></span>
+        </app-button>
+      </div>
+    </div>
+  </div>
+</header>

@@ -5,15 +5,26 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
+@font-face {
+  font-family: 'Outfit';
+  src: url('/assets/fonts/outfit/Outfit-VariableFont_wght.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 html {
   height: 100%;
+  // Fluid scale for large screens: 1rem stays at the user's default size up to 1920px wide
+  // (1080p, identical to the reference), then grows linearly up to 2x at 3840px (2160p).
+  font-size: clamp(100%, 0.8333vw, 200%);
   @include mat.theme(
     (
       color: (
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Arial,
+      typography: Outfit,
       density: 0,
     )
   );
@@ -31,6 +42,7 @@ body {
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
+  font-family: 'Outfit', sans-serif;
 
   // Reset the user agent margin.
   margin: 0;

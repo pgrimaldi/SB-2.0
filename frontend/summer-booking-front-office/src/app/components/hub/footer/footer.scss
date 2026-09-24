@@ -1,0 +1,144 @@
+:host {
+  display: block;
+  // Same section-to-section distance used across the hub pages.
+  margin-top: 2.5rem;
+}
+
+.hub__footer {
+  border-top: 0.0625rem solid rgb(229 231 235 / 60%);
+  background: #ffffff;
+  color: #2a437f;
+}
+
+.hub__footer__content,
+.hub__footer__bottom__content {
+  width: min(100%, 80rem);
+  margin-inline: auto;
+}
+
+.hub__footer__content {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2rem;
+  padding: 2rem 1.5rem 1rem;
+}
+
+.hub__footer__logo {
+  display: block;
+  width: auto;
+  height: 3.5rem;
+  margin-bottom: 2.125rem;
+}
+
+.hub__footer__social,
+.hub__footer__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hub__footer__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hub__footer__social__link,
+.hub__footer__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 0.125rem solid currentColor;
+    outline-offset: 0.125rem;
+  }
+}
+
+.hub__footer__social__link {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+
+  img {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+.hub__footer__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hub__footer__link {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.hub__footer__links__highlight {
+  margin-top: 2.5rem;
+
+  .hub__footer__link {
+    font-weight: 600;
+    text-decoration: underline;
+  }
+}
+
+.hub__footer__bottom {
+  border-top: 0.0625rem solid #e5e7eb;
+}
+
+.hub__footer__bottom__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (width < 64rem) {
+  .hub__footer__content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    padding-bottom: 0;
+  }
+
+  .hub__footer__logo {
+    height: 3rem;
+  }
+}
+
+@media (width < 48rem) {
+  .hub__footer__content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hub__footer__logo {
+    height: 2rem;
+  }
+}
+
+@media (width < 40rem) {
+  .hub__footer__bottom__content {
+    flex-direction: column;
+    text-align: center;
+  }
+}

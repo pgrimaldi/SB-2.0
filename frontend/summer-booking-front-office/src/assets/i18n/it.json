@@ -2,15 +2,176 @@
   "app": {
     "name": "Summer Booking"
   },
+  "language": {
+    "selector": "Seleziona lingua",
+    "names": {
+      "it": "Italiano",
+      "en": "English"
+    }
+  },
+  "carousel": {
+    "previous": "Precedente",
+    "next": "Successivo",
+    "position": "Vai alla posizione {{position}}",
+    "slide": "{{index}} di {{total}}"
+  },
   "login": {
     "title": "Accesso",
     "description": "L'accesso sarà collegato al servizio di autenticazione quando il backend sarà disponibile.",
     "action": "Accedi",
-    "languageSelector": "Seleziona lingua",
-    "italian": "Italiano",
-    "english": "Inglese"
+    "language": {
+      "selector": "Seleziona lingua",
+      "italian": "Italiano",
+      "english": "Inglese"
+    }
+  },
+  "hub": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      },
+      "nav": {
+        "label": "Menu principale",
+        "advantages": "Vantaggi",
+        "features": "Funzionalità",
+        "booking": "Booking",
+        "pricing": "Prezzi"
+      },
+      "login": "Accedi",
+      "menu": {
+        "open": "Apri menu",
+        "close": "Chiudi menu"
+      }
+    },
+    "footer": {
+      "social": {
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "Email",
+        "youtube": "YouTube"
+      },
+      "links": {
+        "about": "Chi siamo",
+        "support": "Assistenza clienti",
+        "demo": "Richiedi la demo gratuita",
+        "contacts": "Contatti e sedi",
+        "legal": "Note legali",
+        "terms": "Termini & Condizioni",
+        "privacy": "Informativa su privacy e cookie",
+        "cookies": "Gestisci impostazioni cookie"
+      },
+      "legal": {
+        "group": "Summer Booking Hub fa parte di Qbitsoft srl - Tutti i diritti riservati",
+        "company": "©{{year}} Qbitsoft Srl - P. Iva 02375470503 - Rea Pi-202428"
+      }
+    }
+  },
+  "home": {
+    "page": {
+      "title": "Gestionale per Stabilimenti Balneari: Prova Summer Booking Hub"
+    },
+    "hero": {
+      "title": "Visione, visibilità, controllo.",
+      "description": "Con Summer Booking Hub, la piattaforma gestionale di nuova generazione, proietti il tuo stabilimento balneare verso nuovi orizzonti.",
+      "image": {
+        "alt": "Faro affacciato su una spiaggia attrezzata con ombrelloni"
+      }
+    },
+    "management": {
+      "title": "Beach Management System",
+      "description": "Non un semplice strumento, una piattaforma gestionale in cloud di nuova generazione che semplifica il lavoro, libera tempo e risorse aiutandoti a crescere e migliorare.",
+      "cards": {
+        "all": {
+          "title": "Tutto in uno",
+          "intro": "Prenotazioni online e offline, mappa interattiva, listini, pacchetti e servizi extra: gestisci tutto da un unico punto.",
+          "detail": "Scheda cliente, preventivi personalizzati e marketing su misura."
+        },
+        "agility": {
+          "title": "Massima agilità operativa",
+          "intro": "Accedi ovunque, da qualsiasi dispositivo, anche con la connessione più essenziale. Cloud sicuro, backup e aggiornamenti automatici.",
+          "detail": "Il Set-up è rapido, la formazione veloce: sei subito operativo a 360°."
+        },
+        "control": {
+          "title": "Controllo mirato",
+          "intro": "Report e statistiche in tempo reale per monitorare vendite, costi, ricavi e l'andamento della stagione.",
+          "detail": "Gestisci prezzi, ruoli, magazzino e staff con la massima efficienza."
+        }
+      }
+    },
+    "shift": {
+      "title": "Cambia passo",
+      "cards": {
+        "reserve": {
+          "title": "+30% prenotazioni",
+          "intro": "Dall'online alla spiaggia. Grazie alla facilità di prenotare e di proporre offerte e sconti mirati i nostri clienti hanno aumentato le prenotazioni fino al 30% all'anno.",
+          "detail": "Vuoi crescere anche tu a doppia cifra?"
+        },
+        "explode": {
+          "title": "+30.000 prenotazioni online",
+          "intro": "Presidi tutti i canali online: dal portale all'app Summer Booking, dal tuo sito a Instagram e Facebook.",
+          "detail": "Il trend è chiaro, i numeri sono già importanti e destinati a crescere sempre di più."
+        },
+        "services": {
+          "title": "+50% vendite servizi extra",
+          "intro": "Dal sup, al parcheggio, dalla bicicletta al drink sotto l'ombrellone. È tutto più facile da proporre, è tutto più facile da acquistare.",
+          "detail": "Aumenti revenue e fatturato con il minimo sforzo."
+        }
+      }
+    },
+    "booster": {
+      "title": "Sell booster",
+      "channels": "Vendi ovunque senza pensieri: dal sito,\ndal portale e dall'app Summer Booking,\nal telefono o sotto l'ombrellone.",
+      "offers": "Pacchetti, offerte e servizi extra sono semplici da proporre e facili da acquistare",
+      "action": "Richiedi la demo gratuita",
+      "image": {
+        "alt": "App Summer Booking su due smartphone"
+      }
+    },
+    "growth": {
+      "title": "Scopri come far crescere\nil tuo stabilimento con\nSummer Booking Hub",
+      "action": "Richiedi la demo gratuita"
+    },
+    "about-us": {
+      "title": "Dicono di noi",
+      "carousel": "Recensioni dei clienti",
+      "reviews": {
+        "anna": {
+          "author": "Anna, Bagno Alba",
+          "quote": "\"La gestione del nostro stabilimento balneare è diventata molto più semplice ed efficiente, <em>i nostri clienti sono felici di poter prenotare attraverso l'app</em> e abbiamo azzerato errori e incomprensioni. Felice!\""
+        },
+        "carla": {
+          "author": "Carla, imprenditrice Lazio",
+          "quote": "\"Sono riuscita a gestire il mio stabilimento balneare in maniera molto più semplice. <em>Non ho dimestichezza con la tecnologia ma ci sono riuscita senza problemi.</em>\""
+        },
+        "franco": {
+          "author": "Franco, imprenditore Calabria",
+          "quote": "\"Finalmente posso <em>controllare la situazione della mia spiaggia anche da casa.</em> Prima non potevo muovermi dal mio stabilimento.\""
+        },
+        "marco": {
+          "author": "Marco, imprenditore Calabria",
+          "quote": "\"Grazie allo sharing quest'estate ho fatto il fatturato più alto degli ultimi anni: clienti <em>soddisfatti, lido sempre pieno!</em>\""
+        },
+        "paolo": {
+          "author": "Paolo, imprenditore Toscana",
+          "quote": "\"Ho provato diversi gestionali, Summer Booking Hub è <em>il migliore in assoluto.</em> Inoltre l'assistenza è fantastica, sono sempre super gentili e disponibili.\""
+        }
+      }
+    },
+    "media": {
+      "title": "Parlano di noi",
+      "carousel": "Testate che parlano di noi",
+      "logo": "Logo {{name}}"
+    }
   },
   "bookings": {
     "title": "Prenotazioni"
+  },
+  "not-found": {
+    "page": {
+      "title": "Pagina non trovata | Summer Booking"
+    },
+    "title": "Pagina non trovata",
+    "description": "La pagina che stai cercando non esiste o è stata spostata.",
+    "link": "Torna alla home"
   }
 }

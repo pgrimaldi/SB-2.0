@@ -1,0 +1,7 @@
+<mat-card class="card__hub" appearance="raised">
+  <img class="card__hub__icon" [src]="iconSrc()" width="64" height="64" loading="lazy" alt="" />
+  <h3 class="card__hub__heading"><ng-content select="[cardHubHeading]" /></h3>
+  <div class="card__hub__content">
+    <ng-content />
+  </div>
+</mat-card>

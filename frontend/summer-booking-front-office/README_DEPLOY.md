@@ -49,7 +49,40 @@ aws cloudfront create-invalidation \
   --paths "/*"
 ```
 
-Per il routing SPA, configurare CloudFront affinché le risposte 403 e 404 usino `/index.html` con codice HTTP 200. Le route Angular continueranno così a funzionare anche dopo un refresh diretto.
+Per il routing SPA non configurare un fallback globale che trasformi ogni risposta 403 o 404 in `/index.html`: nasconderebbe errori reali di asset, permessi o route inesistenti.
+
+Per le sole route previste come ingressi diretti, associare al comportamento predefinito una CloudFront Function sull'evento **Viewer request** che riscriva esclusivamente queste URL verso `/index.html`:
+
+- `/` e `/home`, che reindirizzano alla home nella lingua preferita;
+- `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate;
+- `/login`.
+
+Qualsiasi altra risposta 403 o 404 deve rimanere visibile e mantenere il proprio status. Codice della funzione:
+
+```js
+// Route SPA servite da index.html. Aggiornare questo elenco quando si aggiunge una route raggiungibile da URL diretto.
+var SPA_ROUTES = {
+    '/': true,
+    '/login': true,
+    '/home': true,
+    '/it': true,
+    '/it/home': true,
+    '/en': true,
+    '/en/home': true
+};
+
+function handler(event) {
+    var request = event.request;
+
+    if (SPA_ROUTES[request.uri] === true) {
+        request.uri = '/index.html';
+    }
+
+    return request;
+}
+```
+
+Dopo aver modificato la funzione, pubblicarla dalla scheda **Publish** della console CloudFront: la versione in sviluppo non viene usata dalla distribuzione. La modifica della funzione non richiede invalidazione della cache.
 
 ## Valori diversi tra DEV e PROD
 

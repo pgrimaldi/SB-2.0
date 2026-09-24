@@ -1,7 +1,28 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './services/auth/auth.guard';
+import {
+  languageActivateGuard,
+  languageMatchGuard,
+  redirectToPreferredLanguage,
+} from './services/i18n/language.guards';
 
 export const routes: Routes = [
+  {
+    path: ':lang',
+    canMatch: [languageMatchGuard],
+    canActivate: [languageActivateGuard],
+    children: [
+      {
+        path: 'home',
+        loadComponent: () => import('./views/hub/home/home').then((component) => component.Home),
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'home',
+      },
+    ],
+  },
   {
     path: 'login',
     loadComponent: () =>
@@ -18,12 +39,18 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'home',
+    pathMatch: 'full',
+    redirectTo: redirectToPreferredLanguage('home'),
+  },
+  {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login',
+    redirectTo: redirectToPreferredLanguage('home'),
   },
   {
     path: '**',
-    redirectTo: 'login',
+    loadComponent: () =>
+      import('./views/errors/not-found/not-found').then((component) => component.NotFound),
   },
 ];

@@ -1,0 +1,26 @@
+<button
+  class="app__dropdown__menu__trigger"
+  type="button"
+  [matMenuTriggerFor]="menu"
+  [attr.aria-label]="accessibleLabel()"
+>
+  <ng-content />
+</button>
+
+<mat-menu #menu [class]="panelClass()">
+  @for (item of items(); track item.value) {
+    <button
+      mat-menu-item
+      [attr.aria-label]="iconOnly() ? item.label : null"
+      [attr.aria-current]="item.value === selectedValue() ? 'true' : null"
+      (click)="selected.emit(item.value)"
+    >
+      @if (item.iconSrc) {
+        <img class="app__dropdown__menu__icon" [src]="item.iconSrc" width="20" height="20" alt="" />
+      }
+      @if (!iconOnly()) {
+        <span>{{ item.label }}</span>
+      }
+    </button>
+  }
+</mat-menu>

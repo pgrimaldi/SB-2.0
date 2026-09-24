@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonComponent } from '../../components/shared/ui/buttons/button/button.component';
-
-type SupportedLanguage = 'it' | 'en';
+import { Language, LanguageService } from '../../services/i18n/language.service';
 
 @Component({
   selector: 'app-login-view',
@@ -12,13 +11,11 @@ type SupportedLanguage = 'it' | 'en';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginViewComponent {
-  protected readonly currentLanguage = signal<SupportedLanguage>('it');
+  private readonly languageService = inject(LanguageService);
 
-  constructor(private readonly translateService: TranslateService) {}
+  protected readonly currentLanguage = this.languageService.current;
 
-  protected changeLanguage(language: SupportedLanguage): void {
-    this.currentLanguage.set(language);
-    this.translateService.use(language);
-    document.documentElement.lang = language;
+  protected changeLanguage(language: Language): void {
+    this.languageService.switchTo(language);
   }
 }

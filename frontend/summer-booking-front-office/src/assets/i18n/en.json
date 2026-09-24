@@ -2,15 +2,176 @@
   "app": {
     "name": "Summer Booking"
   },
+  "language": {
+    "selector": "Select language",
+    "names": {
+      "it": "Italiano",
+      "en": "English"
+    }
+  },
+  "carousel": {
+    "previous": "Previous",
+    "next": "Next",
+    "position": "Go to position {{position}}",
+    "slide": "{{index}} of {{total}}"
+  },
   "login": {
     "title": "Sign in",
     "description": "Sign-in will be connected to the authentication service when the backend is available.",
     "action": "Sign in",
-    "languageSelector": "Select language",
-    "italian": "Italian",
-    "english": "English"
+    "language": {
+      "selector": "Select language",
+      "italian": "Italian",
+      "english": "English"
+    }
+  },
+  "hub": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      },
+      "nav": {
+        "label": "Main menu",
+        "advantages": "Advantages",
+        "features": "Features",
+        "booking": "Booking",
+        "pricing": "Pricing"
+      },
+      "login": "Sign in",
+      "menu": {
+        "open": "Open menu",
+        "close": "Close menu"
+      }
+    },
+    "footer": {
+      "social": {
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "Email",
+        "youtube": "YouTube"
+      },
+      "links": {
+        "about": "About us",
+        "support": "Customer support",
+        "demo": "Request a free demo",
+        "contacts": "Contacts and offices",
+        "legal": "Legal notice",
+        "terms": "Terms & Conditions",
+        "privacy": "Privacy and cookie policy",
+        "cookies": "Manage cookie settings"
+      },
+      "legal": {
+        "group": "Summer Booking Hub is part of Qbitsoft srl - All rights reserved",
+        "company": "©{{year}} Qbitsoft Srl - VAT no. 02375470503 - REA Pi-202428"
+      }
+    }
+  },
+  "home": {
+    "page": {
+      "title": "Beach Resort Management Software: Try Summer Booking Hub"
+    },
+    "hero": {
+      "title": "Vision, visibility, control.",
+      "description": "Summer Booking Hub is the next-generation management platform that opens new horizons for your beach resort.",
+      "image": {
+        "alt": "Lighthouse overlooking a beach equipped with umbrellas"
+      }
+    },
+    "management": {
+      "title": "Beach Management System",
+      "description": "Not just a tool, but a next-generation cloud management platform that simplifies your work and frees up time and resources, helping you grow and improve.",
+      "cards": {
+        "all": {
+          "title": "All in one",
+          "intro": "Online and offline bookings, interactive map, price lists, packages and extra services: manage everything from a single place.",
+          "detail": "Customer records, personalised quotes and tailored marketing."
+        },
+        "agility": {
+          "title": "Maximum operational agility",
+          "intro": "Access from anywhere, on any device, even with the most basic connection. Secure cloud, automatic backups and updates.",
+          "detail": "Set-up is quick and training is fast: you are fully operational right away."
+        },
+        "control": {
+          "title": "Targeted control",
+          "intro": "Real-time reports and statistics to monitor sales, costs, revenue and how the season is going.",
+          "detail": "Manage prices, roles, inventory and staff with maximum efficiency."
+        }
+      }
+    },
+    "shift": {
+      "title": "Change gear",
+      "cards": {
+        "reserve": {
+          "title": "+30% bookings",
+          "intro": "From online to the beach. Thanks to how easy it is to book and to offer targeted deals and discounts, our customers have grown their bookings by up to 30% a year.",
+          "detail": "Do you want double-digit growth too?"
+        },
+        "explode": {
+          "title": "+30,000 online bookings",
+          "intro": "Cover every online channel: from the Summer Booking portal and app to your website, Instagram and Facebook.",
+          "detail": "The trend is clear: the numbers are already significant and set to keep growing."
+        },
+        "services": {
+          "title": "+50% extra service sales",
+          "intro": "From SUP to parking, from bikes to drinks under the umbrella. Everything is easier to offer and easier to buy.",
+          "detail": "Increase revenue and turnover with minimal effort."
+        }
+      }
+    },
+    "booster": {
+      "title": "Sell booster",
+      "channels": "Sell anywhere, worry-free: on the web,\nthe Summer Booking portal and app,\nby phone or under the umbrella.",
+      "offers": "Packages, offers and extra services are simple to propose and easy to buy",
+      "action": "Request a free demo",
+      "image": {
+        "alt": "Summer Booking app on two smartphones"
+      }
+    },
+    "growth": {
+      "title": "Discover how to grow\nyour beach resort with\nSummer Booking Hub",
+      "action": "Request a free demo"
+    },
+    "about-us": {
+      "title": "What they say about us",
+      "carousel": "Customer reviews",
+      "reviews": {
+        "anna": {
+          "author": "Anna, Bagno Alba",
+          "quote": "\"Managing our beach resort has become much simpler and more efficient, <em>our customers are happy to book through the app</em> and we have eliminated errors and misunderstandings. Delighted!\""
+        },
+        "carla": {
+          "author": "Carla, entrepreneur in Lazio",
+          "quote": "\"I have managed to run my beach resort far more easily. <em>I am not tech-savvy, but I managed without any problems.</em>\""
+        },
+        "franco": {
+          "author": "Franco, entrepreneur in Calabria",
+          "quote": "\"At last I can <em>check on my beach even from home.</em> Before, I could never leave my resort.\""
+        },
+        "marco": {
+          "author": "Marco, entrepreneur in Calabria",
+          "quote": "\"Thanks to sharing, this summer I had my highest turnover in years: customers <em>satisfied, beach always full!</em>\""
+        },
+        "paolo": {
+          "author": "Paolo, entrepreneur in Tuscany",
+          "quote": "\"I have tried several management systems: Summer Booking Hub is <em>by far the best.</em> Plus the support is fantastic, always super kind and helpful.\""
+        }
+      }
+    },
+    "media": {
+      "title": "In the press",
+      "carousel": "Press coverage",
+      "logo": "{{name}} logo"
+    }
   },
   "bookings": {
     "title": "Bookings"
+  },
+  "not-found": {
+    "page": {
+      "title": "Page not found | Summer Booking"
+    },
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "link": "Back to home"
   }
 }

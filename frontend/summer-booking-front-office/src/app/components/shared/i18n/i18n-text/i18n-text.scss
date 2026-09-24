@@ -1,0 +1,23 @@
+:host {
+  display: grid;
+}
+
+.app__i18n__text__value,
+:host::before,
+:host::after {
+  grid-area: 1 / 1;
+}
+
+:host::before,
+:host::after {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+:host::before {
+  content: attr(data-i18n-reserve-1);
+}
+
+:host::after {
+  content: attr(data-i18n-reserve-2);
+}
