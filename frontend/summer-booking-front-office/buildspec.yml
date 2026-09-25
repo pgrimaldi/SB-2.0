@@ -5,6 +5,8 @@ phases:
     runtime-versions:
       nodejs: 22
     commands:
+      # Exact Node version of the project, read from .nvmrc (same as local development).
+      - n "$(cat frontend/summer-booking-front-office/.nvmrc)"
       - npm ci --prefix frontend/summer-booking-front-office
   pre_build:
     commands:
@@ -15,6 +17,8 @@ phases:
       - npm run build:prod --prefix frontend/summer-booking-front-office
   post_build:
     commands:
+      # CodeBuild runs post_build even when the build fails: never publish a broken or partial build.
+      - test "$CODEBUILD_BUILD_SUCCEEDING" = "1"
       - DIST=frontend/summer-booking-front-office/dist/summer-booking-front-office/browser
       # Bundles with a hash in the file name: they never change, cached for one year.
       - aws s3 cp "$DIST" "s3://$S3_BUCKET" --recursive --exclude "*" --include "main-*.js" --include "chunk-*.js" --include "polyfills-*.js" --include "styles-*.css" --cache-control "public, max-age=31536000, immutable"

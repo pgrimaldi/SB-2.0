@@ -107,11 +107,22 @@ La build production sostituisce `src/environments/environment.ts` con `src/envir
 
 ## CI CD con CodePipeline e CodeBuild
 
-Il file `buildspec.yml` esegue `npm ci`, la build production, il sync S3 e l'invalidazione CloudFront. Configurare il progetto CodeBuild con:
+Tutte le istruzioni di build e deploy stanno nel file versionato `buildspec.yml`: installazione delle dipendenze, build production, caricamento su S3 con le intestazioni di cache e invalidazione CloudFront. La pipeline AWS non deve contenere comandi propri: si limita a prendere il codice e ad avviare CodeBuild.
 
-- percorso buildspec `frontend/summer-booking-front-office/buildspec.yml`;
+La pipeline ha due stage:
+
+1. **Source**: GitHub tramite CodeConnections, branch dell'ambiente (es. `dev`), con trigger sul push.
+2. **Build**: azione di tipo **AWS CodeBuild** (non "Comandi") collegata al progetto CodeBuild dell'ambiente, con artefatto di input `SourceArtifact`.
+
+Configurare il progetto CodeBuild con:
+
+- origine: AWS CodePipeline;
+- ambiente: immagine gestita Amazon Linux standard più recente, compatibile con `nodejs: 22` (il `buildspec.yml` installa poi con `n` la versione esatta indicata in `.nvmrc`);
+- buildspec: "Usa un file buildspec", percorso `frontend/summer-booking-front-office/buildspec.yml`;
 - variabile `S3_BUCKET` con il bucket dell'ambiente;
 - variabile `CLOUDFRONT_DISTRIBUTION_ID` con la distribuzione dell'ambiente;
-- ruolo IAM autorizzato a scrivere solo nel bucket e a invalidare solo la distribuzione previsti.
+- ruolo IAM autorizzato solo su bucket e distribuzione dell'ambiente: `s3:ListBucket` sul bucket, `s3:PutObject` e `s3:DeleteObject` sui suoi oggetti, `cloudfront:CreateInvalidation` sulla distribuzione, oltre ai permessi di log di CodeBuild.
+
+Se la build fallisce, il `buildspec.yml` interrompe la pubblicazione prima di toccare il bucket.
 
 Per PROD creare valori e ruoli separati da DEV. Le variabili sensibili devono essere archiviate nei servizi AWS dedicati o nelle impostazioni protette della pipeline, mai nel repository.
