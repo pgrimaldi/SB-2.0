@@ -11,6 +11,9 @@
     />
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="manifest" href="manifest.webmanifest" />
+    <!-- Translations: the first render waits for both languages, so they are requested together with the scripts. -->
+    <link rel="preload" href="/assets/i18n/it.json" as="fetch" crossorigin="anonymous" />
+    <link rel="preload" href="/assets/i18n/en.json" as="fetch" crossorigin="anonymous" />
     <!-- Home hero (LCP image): the same sources as its <picture>, requested before Angular renders it. -->
     <link
       rel="preload"

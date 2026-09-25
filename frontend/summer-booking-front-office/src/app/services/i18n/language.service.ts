@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom, forkJoin } from 'rxjs';
 
 export type Language = 'it' | 'en';
 
@@ -54,13 +55,19 @@ export class LanguageService {
     }
   }
 
-  /** Loads every other language up front, so texts can reserve the space of their longest translation. */
-  preloadOtherLanguages(active: Language): void {
-    for (const { code } of this.languages) {
-      if (code !== active) {
-        this.translateService.reloadLang(code).subscribe({ error: () => undefined });
-      }
-    }
+  /**
+   * Loads the active language and every other one. The first render waits for it: texts reserve the space
+   * of their longest translation, so nothing moves when a language file arrives after the page is drawn.
+   */
+  loadAll(active: Language): Promise<void> {
+    const loads = this.languages.map(({ code }) =>
+      code === active ? this.translateService.use(code) : this.translateService.reloadLang(code),
+    );
+    // A missing file must not block the app: the texts fall back to the available language.
+    return firstValueFrom(forkJoin(loads)).then(
+      () => undefined,
+      () => undefined,
+    );
   }
 
   option(code: Language): LanguageOption {

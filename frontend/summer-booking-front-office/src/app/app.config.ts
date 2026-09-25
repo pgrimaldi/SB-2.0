@@ -33,7 +33,7 @@ export const appConfig: ApplicationConfig = {
       const languageService = inject(LanguageService);
       const preferred = languageService.preferred();
       languageService.use(preferred);
-      languageService.preloadOtherLanguages(preferred);
+      return languageService.loadAll(preferred);
     }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
