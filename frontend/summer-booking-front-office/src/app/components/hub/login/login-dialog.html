@@ -12,27 +12,33 @@
 
     <h2 id="login-dialog-title" class="login__dialog__title" appI18nText="hub.login.title"></h2>
 
-    <form class="login__dialog__form" (submit)="$event.preventDefault()">
+    <form class="login__dialog__form" (submit)="signIn($event)">
       <app-text-field
         type="email"
         name="email"
         autocomplete="email"
         [label]="'hub.login.email' | translate"
+        [(value)]="email"
       />
       <app-password-field
         name="password"
         autocomplete="current-password"
         [label]="'hub.login.password' | translate"
+        [(value)]="password"
       />
 
       <div class="login__dialog__options">
-        <app-checkbox name="remember">
+        <app-checkbox name="remember" [(checked)]="remember">
           <span appI18nText="hub.login.remember"></span>
         </app-checkbox>
         <button class="login__dialog__link" type="button" appI18nText="hub.login.forgot"></button>
       </div>
 
-      <app-button size="large" buttonType="submit" [fullWidth]="true">
+      @if (error(); as error) {
+        <p class="login__dialog__error" role="alert" [appI18nText]="'hub.login.error.' + error"></p>
+      }
+
+      <app-button size="large" buttonType="submit" [fullWidth]="true" [disabled]="pending()">
         <span appI18nText="hub.login.submit"></span>
       </app-button>
     </form>

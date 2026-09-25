@@ -1,10 +1,13 @@
 <label class="text__field__label" [for]="id">{{ label() }}</label>
 <mat-form-field appearance="outline" subscriptSizing="dynamic">
   <input
+    #field
     matInput
     [id]="id"
+    [value]="value()"
     [type]="type()"
     [attr.name]="name() ?? null"
     [attr.autocomplete]="autocomplete() ?? null"
+    (input)="value.set(field.value)"
   />
 </mat-form-field>

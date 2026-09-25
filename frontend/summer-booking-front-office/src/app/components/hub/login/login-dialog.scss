@@ -77,6 +77,13 @@ app-login-dialog {
   }
 }
 
+.login__dialog__error {
+  margin: 0;
+  color: #dc3545;
+  font-size: 0.875rem;
+  line-height: 1.3125rem;
+}
+
 // Links rendered as buttons: they do nothing for now.
 .login__dialog__link {
   padding: 0;

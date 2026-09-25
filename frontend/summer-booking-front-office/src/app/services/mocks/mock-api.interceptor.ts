@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { delay, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { signInMock } from './auth/auth.mock';
 import { BOOKING_MOCKS } from './bookings/booking.mock';
 
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
@@ -11,6 +12,10 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   const bookingsEndpoint = `${environment.apiBaseUrl}/bookings`;
   if (request.method === 'GET' && request.url === bookingsEndpoint) {
     return of(new HttpResponse({ status: 200, body: BOOKING_MOCKS })).pipe(delay(150));
+  }
+
+  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/auth/signin`) {
+    return signInMock(request);
   }
 
   return next(request);

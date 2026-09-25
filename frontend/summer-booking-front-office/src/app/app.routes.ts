@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './services/auth/auth.guard';
+import { authGuard } from './behaviours/auth/auth.guard';
 import {
   languageActivateGuard,
   languageMatchGuard,
   redirectToPreferredLanguage,
-} from './services/i18n/language.guards';
+} from './behaviours/i18n/language.guards';
 
 export const routes: Routes = [
   {
@@ -22,6 +22,12 @@ export const routes: Routes = [
         redirectTo: 'home',
       },
     ],
+  },
+  {
+    path: 'beachmap',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./views/beachmap/beachmap').then((component) => component.Beachmap),
   },
   {
     path: 'bookings',

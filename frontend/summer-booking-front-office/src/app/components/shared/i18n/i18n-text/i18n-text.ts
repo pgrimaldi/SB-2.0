@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { combineLatest, switchMap } from 'rxjs';
-import { LanguageService } from '../../../../services/i18n/language.service';
+import { LanguageBehaviour } from '../../../../behaviours/i18n/language.behaviour';
 
 /**
  * Renders a translated text and reserves the space of its longest translation,
@@ -35,7 +35,7 @@ export class I18nText {
   readonly params = input<Record<string, unknown>>();
 
   private readonly translateService = inject(TranslateService);
-  private readonly languageService = inject(LanguageService);
+  private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly request$ = toObservable(
     computed(() => ({ key: this.key(), params: this.params() })),
   );
@@ -49,7 +49,7 @@ export class I18nText {
     this.request$.pipe(
       switchMap(({ key, params }) =>
         combineLatest(
-          this.languageService.languages.map(({ code }) =>
+          this.languageBehaviour.languages.map(({ code }) =>
             this.translateService.stream(key, params, code),
           ),
         ),

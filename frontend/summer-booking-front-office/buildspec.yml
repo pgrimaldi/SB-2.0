@@ -10,11 +10,13 @@ phases:
       - npm ci --prefix frontend/summer-booking-front-office
   pre_build:
     commands:
+      # Angular build configuration of the environment: dev (mock API on) or production.
+      - test "$BUILD_CONFIGURATION" = "dev" -o "$BUILD_CONFIGURATION" = "production"
       - test -n "$S3_BUCKET"
       - test -n "$CLOUDFRONT_DISTRIBUTION_ID"
   build:
     commands:
-      - npm run build:prod --prefix frontend/summer-booking-front-office
+      - npm run build --prefix frontend/summer-booking-front-office -- --configuration "$BUILD_CONFIGURATION"
   post_build:
     commands:
       # CodeBuild runs post_build even when the build fails: never publish a broken or partial build.

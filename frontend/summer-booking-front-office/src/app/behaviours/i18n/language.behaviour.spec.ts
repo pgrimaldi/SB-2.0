@@ -3,11 +3,11 @@ import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { routes } from '../../app.routes';
-import { LanguageService } from './language.service';
+import { LanguageBehaviour } from './language.behaviour';
 
 const STORAGE_KEY = 'sb.language';
 
-describe('LanguageService', () => {
+describe('LanguageBehaviour', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
@@ -18,7 +18,7 @@ describe('LanguageService', () => {
   afterEach(() => localStorage.clear());
 
   it('should prefer Italian when nothing valid is stored', () => {
-    const service = TestBed.inject(LanguageService);
+    const service = TestBed.inject(LanguageBehaviour);
 
     expect(service.preferred()).toBe('it');
     localStorage.setItem(STORAGE_KEY, 'fr');
@@ -34,7 +34,7 @@ describe('LanguageService', () => {
     await harness.navigateByUrl('/');
 
     expect(TestBed.inject(Router).url).toBe('/en/home');
-    expect(TestBed.inject(LanguageService).current()).toBe('en');
+    expect(TestBed.inject(LanguageBehaviour).current()).toBe('en');
     expect(document.documentElement.lang).toBe('en');
   });
 
@@ -42,7 +42,7 @@ describe('LanguageService', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/it/home');
 
-    TestBed.inject(LanguageService).switchTo('en');
+    TestBed.inject(LanguageBehaviour).switchTo('en');
     await harness.fixture.whenStable();
 
     expect(TestBed.inject(Router).url).toBe('/en/home');

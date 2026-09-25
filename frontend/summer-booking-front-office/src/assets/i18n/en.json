@@ -69,6 +69,10 @@
       "register": {
         "question": "Not registered yet?",
         "action": "Register your property"
+      },
+      "error": {
+        "invalid": "Invalid credentials",
+        "unexpected": "Something went wrong. Please try again."
       }
     }
   },

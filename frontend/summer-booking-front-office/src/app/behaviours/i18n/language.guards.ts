@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, CanMatchFn, RedirectFunction } from '@angular/router';
-import { Language, LanguageService } from './language.service';
+import { Language, LanguageBehaviour } from './language.behaviour';
 
 /** Matches the `:lang` segment only for supported languages; anything else falls through to 404. */
 export const languageMatchGuard: CanMatchFn = (_route, segments) =>
-  inject(LanguageService).isSupported(segments[0]?.path);
+  inject(LanguageBehaviour).isSupported(segments[0]?.path);
 
 /** Applies the language carried by the URL. */
 export const languageActivateGuard: CanActivateFn = (route) => {
-  inject(LanguageService).use(route.paramMap.get('lang') as Language);
+  inject(LanguageBehaviour).use(route.paramMap.get('lang') as Language);
   return true;
 };
 
@@ -16,4 +16,4 @@ export const languageActivateGuard: CanActivateFn = (route) => {
 export const redirectToPreferredLanguage =
   (path: string): RedirectFunction =>
   () =>
-    `/${inject(LanguageService).preferred()}/${path}`;
+    `/${inject(LanguageBehaviour).preferred()}/${path}`;

@@ -16,7 +16,7 @@ const STORAGE_KEY = 'sb.language';
 const LANGUAGE_PREFIX = /^\/(it|en)(?=[/?#]|$)/;
 
 @Injectable({ providedIn: 'root' })
-export class LanguageService {
+export class LanguageBehaviour {
   readonly languages: readonly LanguageOption[] = [
     { code: 'it', flagSrc: '/assets/images/flag-it.svg' },
     { code: 'en', flagSrc: '/assets/images/flag-gb.svg' },

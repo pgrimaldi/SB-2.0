@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 /** Checkbox with its label projected as content (Angular Material checkbox). */
@@ -11,4 +11,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 })
 export class Checkbox {
   readonly name = input<string>();
+  /** Two-way: `[(checked)]="remember"`. */
+  readonly checked = model(false);
 }

@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { LanguageService } from '../../../services/i18n/language.service';
+import { LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
 
 @Component({
   selector: 'app-not-found',
@@ -13,9 +13,9 @@ import { LanguageService } from '../../../services/i18n/language.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotFound {
-  private readonly languageService = inject(LanguageService);
+  private readonly languageBehaviour = inject(LanguageBehaviour);
 
-  protected readonly homeLink = computed(() => `/${this.languageService.current()}/home`);
+  protected readonly homeLink = computed(() => `/${this.languageBehaviour.current()}/home`);
 
   constructor() {
     const title = inject(Title);

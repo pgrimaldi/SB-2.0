@@ -69,6 +69,10 @@
       "register": {
         "question": "Non sei registrato?",
         "action": "Registra la tua struttura"
+      },
+      "error": {
+        "invalid": "Credenziali non valide",
+        "unexpected": "Si è verificato un errore. Riprova."
       }
     }
   },

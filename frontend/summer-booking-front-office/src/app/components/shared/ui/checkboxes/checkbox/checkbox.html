@@ -1,1 +1,7 @@
-<mat-checkbox class="checkbox" [name]="name() ?? null"><ng-content /></mat-checkbox>
+<mat-checkbox
+  class="checkbox"
+  [name]="name() ?? null"
+  [checked]="checked()"
+  (change)="checked.set($event.checked)"
+  ><ng-content
+/></mat-checkbox>

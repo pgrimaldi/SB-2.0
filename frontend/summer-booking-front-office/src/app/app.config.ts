@@ -11,7 +11,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
-import { LanguageService } from './services/i18n/language.service';
+import { LanguageBehaviour } from './behaviours/i18n/language.behaviour';
 import { mockApiInterceptor } from './services/mocks/mock-api.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -30,10 +30,10 @@ export const appConfig: ApplicationConfig = {
     }),
     // Pages without a language in the URL (private area) use the saved preference.
     provideAppInitializer(() => {
-      const languageService = inject(LanguageService);
-      const preferred = languageService.preferred();
-      languageService.use(preferred);
-      return languageService.loadAll(preferred);
+      const languageBehaviour = inject(LanguageBehaviour);
+      const preferred = languageBehaviour.preferred();
+      languageBehaviour.use(preferred);
+      return languageBehaviour.loadAll(preferred);
     }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

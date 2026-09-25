@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
@@ -14,6 +14,8 @@ let nextId = 0;
 })
 export class TextField {
   readonly label = input.required<string>();
+  /** Typed text, two-way: `[(value)]="email"`. */
+  readonly value = model('');
   readonly type = input<'text' | 'email'>('text');
   readonly name = input<string>();
   readonly autocomplete = input<string>();

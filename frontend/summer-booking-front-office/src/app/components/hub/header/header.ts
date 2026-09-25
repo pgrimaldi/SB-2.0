@@ -11,7 +11,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { Language, LanguageService } from '../../../services/i18n/language.service';
+import { Language, LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
 import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
 import { ButtonComponent } from '../../shared/ui/buttons/button/button.component';
 import { LoginDialog } from '../login/login-dialog';
@@ -31,17 +31,17 @@ export class Header {
   protected readonly navItems = ['advantages', 'features', 'booking', 'pricing'] as const;
 
   private readonly document = inject(DOCUMENT);
-  private readonly languageService = inject(LanguageService);
+  private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly languageNames = toSignal(
     inject(TranslateService).stream('language.names') as Observable<Record<string, string>>,
     { initialValue: {} as Record<string, string> },
   );
 
   protected readonly currentLanguage = computed(() =>
-    this.languageService.option(this.languageService.current()),
+    this.languageBehaviour.option(this.languageBehaviour.current()),
   );
   protected readonly languageItems = computed<DropdownMenuItem[]>(() =>
-    this.languageService.languages.map((language) => ({
+    this.languageBehaviour.languages.map((language) => ({
       value: language.code,
       label: this.languageNames()[language.code] ?? language.code,
       iconSrc: language.flagSrc,
@@ -63,7 +63,7 @@ export class Header {
   }
 
   protected changeLanguage(code: string): void {
-    this.languageService.switchTo(code as Language);
+    this.languageBehaviour.switchTo(code as Language);
   }
 
   protected openLogin(): void {

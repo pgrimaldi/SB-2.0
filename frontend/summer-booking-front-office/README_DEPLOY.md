@@ -10,7 +10,7 @@ Credenziali, chiavi AWS e secret non devono mai essere salvati nel repository o 
 push su GitHub (branch dell'ambiente)
   → CodePipeline: stage Source (CodeConnections)
   → CodePipeline: stage Build (azione AWS CodeBuild)
-      → CodeBuild esegue buildspec.yml: npm ci, build production,
+      → CodeBuild esegue buildspec.yml: npm ci, build dell'ambiente (dev o production),
         caricamento su S3 con intestazioni di cache, invalidazione CloudFront
   → bucket S3 privato ← CloudFront (Origin Access Control) ← browser
 ```
@@ -75,7 +75,8 @@ var SPA_ROUTES = {
     '/it': true,
     '/it/home': true,
     '/en': true,
-    '/en/home': true
+    '/en/home': true,
+    '/beachmap': true
 };
 
 function handler(event) {
@@ -92,7 +93,8 @@ function handler(event) {
 Route servite:
 
 - `/` e `/home`, che reindirizzano alla home nella lingua preferita;
-- `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate.
+- `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate;
+- `/beachmap`, area privata: senza sessione l'app rimanda alla home, con una sessione salvata il refresh resta sulla pagina.
 
 Ogni nuova route pubblica dell'app va aggiunta sia qui sia nella funzione pubblicata. La modifica della funzione non richiede invalidazione della cache.
 
@@ -147,6 +149,7 @@ Non aggiungere uno stage Deploy: il caricamento su S3 lo fa già la build.
 - versione immagine: **usa sempre l'immagine più recente per questa versione di runtime**. Il `buildspec.yml` installa poi con `n` la versione esatta di Node indicata in `.nvmrc`;
 - ruolo di servizio: **Nuovo ruolo di servizio**;
 - **Configurazione aggiuntiva** → **Variabili d'ambiente**, tipo **Testo normale**:
+  - `BUILD_CONFIGURATION`: configurazione Angular dell'ambiente, `dev` per DEV (API mock attive) o `production` per PROD (mock spenti). Qualsiasi altro valore ferma la build prima di toccare il bucket;
   - `S3_BUCKET`: nome del bucket;
   - `CLOUDFRONT_DISTRIBUTION_ID`: ID della distribuzione.
 
@@ -221,8 +224,8 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
 ## 7. Cosa fa il deploy (`buildspec.yml`)
 
 1. **install**: installa la versione di Node indicata in `.nvmrc` ed esegue `npm ci`.
-2. **pre_build**: verifica che `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` siano impostate.
-3. **build**: `npm run build:prod`, configurazione production. Sostituisce `environment.ts` con `environment.prod.ts`, che disattiva i mock.
+2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` siano impostate.
+3. **build**: `ng build --configuration $BUILD_CONFIGURATION`. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` (API mock attive, es. login di test), `production` usa `environment.prod.ts` (mock spenti).
 4. **post_build**: se la build è fallita si ferma senza toccare il bucket e il sito online resta quello precedente. Altrimenti carica i file con intestazioni `Cache-Control` diverse, che CloudFront inoltra al browser:
    - bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
@@ -259,6 +262,7 @@ Verificare le prestazioni con Lighthouse in una finestra in incognito: le estens
 |---|---|---|
 | La pipeline non parte al push | Nessun trigger sullo stage Source | Aggiungere il trigger sul push del branch |
 | `not authorized to perform: codebuild:StartBuild` | Il ruolo della pipeline non può avviare la build | Policy del ruolo della pipeline (passo 6) |
+| `test "$BUILD_CONFIGURATION" = …` fallisce | Variabile `BUILD_CONFIGURATION` mancante o diversa da `dev`/`production` | Aggiungerla nel progetto CodeBuild |
 | `test -n "$S3_BUCKET"` fallisce | Variabili d'ambiente mancanti nel progetto CodeBuild | Progetto → Modifica → Ambiente → Configurazione aggiuntiva |
 | `AccessDenied` su `s3:PutObject` | Policy di deploy mancante sul ruolo della build | Policy del ruolo della build (passo 6) |
 | `access-analyzer:ValidatePolicy` … `service control policy` | SCP dell'organizzazione sull'editor IAM | Proseguire comunque, editor visivo o AWS CLI |
@@ -267,7 +271,7 @@ Verificare le prestazioni con Lighthouse in una finestra in incognito: le estens
 
 ## 10. Nuovo ambiente (es. PROD)
 
-Ripetere i passi da 1 a 6 con risorse separate: bucket, distribuzione, funzione CloudFront (stesso codice), pipeline sul branch dell'ambiente, progetto CodeBuild, ruoli e policy propri. Il `buildspec.yml` è lo stesso: cambiano solo le variabili `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` del progetto.
+Ripetere i passi da 1 a 6 con risorse separate: bucket, distribuzione, funzione CloudFront (stesso codice), pipeline sul branch dell'ambiente, progetto CodeBuild, ruoli e policy propri. Il `buildspec.yml` è lo stesso: cambiano solo le variabili `BUILD_CONFIGURATION` (`production`), `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` del progetto.
 
 Per un dominio personalizzato il certificato ACM usato da CloudFront deve stare in `us-east-1`. Le regole dell'organizzazione limitano alcune azioni in quella regione: verificare con l'amministratore AWS prima di configurarlo.
 
@@ -283,4 +287,4 @@ npm ci
 npm run build:prod
 ```
 
-Poi eseguire gli stessi comandi di caricamento e invalidazione del `post_build` in `buildspec.yml`, sostituendo `$DIST`, `$S3_BUCKET` e `$CLOUDFRONT_DISTRIBUTION_ID`. Un semplice `aws s3 sync` non imposta le intestazioni di cache. Verificare sempre il nome del bucket prima di eseguire comandi con `--delete`.
+Per DEV usare `npm run build:dev-env` (configurazione `dev`, API mock attive). Poi eseguire gli stessi comandi di caricamento e invalidazione del `post_build` in `buildspec.yml`, sostituendo `$DIST`, `$S3_BUCKET` e `$CLOUDFRONT_DISTRIBUTION_ID`. Un semplice `aws s3 sync` non imposta le intestazioni di cache. Verificare sempre il nome del bucket prima di eseguire comandi con `--delete`.
