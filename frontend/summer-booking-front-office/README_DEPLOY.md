@@ -39,6 +39,14 @@ aws s3 sync dist/summer-booking-front-office/browser/ s3://NOME_BUCKET --delete
 
 Il flag `--delete` rimuove dal bucket i file di una build precedente che non esistono più. Verificare sempre il nome del bucket prima di eseguire il comando.
 
+La pipeline (`buildspec.yml`) carica i file con intestazioni `Cache-Control` diverse, perché CloudFront le inoltra al browser:
+
+- bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
+- immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
+- `index.html`, traduzioni in `assets/i18n/`, file del service worker, manifest e favicon: `no-cache`.
+
+Il caricamento usa `aws s3 cp --recursive`, che riscrive sempre i metadati; un `aws s3 sync --delete` finale rimuove solo i file delle build precedenti. Per un caricamento manuale ripetere gli stessi comandi del `buildspec.yml`.
+
 ## Invalidazione CloudFront
 
 Dopo il caricamento creare un'invalidazione per la distribuzione dell'ambiente:

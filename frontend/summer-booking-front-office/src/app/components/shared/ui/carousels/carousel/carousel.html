@@ -17,15 +17,18 @@
       @for (slide of slides(); track $index) {
         <li
           class="carousel__slide"
-          role="group"
-          aria-roledescription="slide"
-          [attr.aria-label]="
-            'carousel.slide' | translate: { index: $index + 1, total: slides().length }
-          "
           [attr.aria-hidden]="isVisible($index) ? null : 'true'"
           [attr.inert]="isVisible($index) ? null : ''"
         >
-          <div class="carousel__slide__content">
+          <!-- The slide role lives on the inner element: a role on the <li> would break the list. -->
+          <div
+            class="carousel__slide__content"
+            role="group"
+            aria-roledescription="slide"
+            [attr.aria-label]="
+              'carousel.slide' | translate: { index: $index + 1, total: slides().length }
+            "
+          >
             <ng-container [ngTemplateOutlet]="slide" />
           </div>
         </li>

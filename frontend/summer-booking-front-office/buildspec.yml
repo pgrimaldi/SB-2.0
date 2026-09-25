@@ -15,7 +15,16 @@ phases:
       - npm run build:prod --prefix frontend/summer-booking-front-office
   post_build:
     commands:
-      - aws s3 sync frontend/summer-booking-front-office/dist/summer-booking-front-office/browser "s3://$S3_BUCKET" --delete
+      - DIST=frontend/summer-booking-front-office/dist/summer-booking-front-office/browser
+      # Bundles with a hash in the file name: they never change, cached for one year.
+      - aws s3 cp "$DIST" "s3://$S3_BUCKET" --recursive --exclude "*" --include "main-*.js" --include "chunk-*.js" --include "polyfills-*.js" --include "styles-*.css" --cache-control "public, max-age=31536000, immutable"
+      # Images and fonts keep the same name when replaced: cached for one day.
+      - aws s3 cp "$DIST/assets" "s3://$S3_BUCKET/assets" --recursive --exclude "i18n/*" --cache-control "public, max-age=86400"
+      # index.html, translations, service worker and the other files: revalidated on every visit. Uploaded last,
+      # so the new index.html only goes online once the bundles it references are in place.
+      - aws s3 cp "$DIST" "s3://$S3_BUCKET" --recursive --exclude "main-*.js" --exclude "chunk-*.js" --exclude "polyfills-*.js" --exclude "styles-*.css" --exclude "assets/*" --include "assets/i18n/*" --cache-control "no-cache"
+      # Removes the files of previous builds (everything else is already up to date).
+      - aws s3 sync "$DIST" "s3://$S3_BUCKET" --delete
       - aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*"
 
 artifacts:

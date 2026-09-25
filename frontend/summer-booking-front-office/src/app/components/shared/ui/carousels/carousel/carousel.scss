@@ -105,26 +105,39 @@
 .carousel__dots {
   display: flex;
   justify-content: center;
-  gap: 0.6875rem;
-  margin-top: 0.5rem;
+  // The 1.5rem buttons (minimum touch target) around the 0.75rem dots: the margins compensate
+  // for the larger hit area, so the dots keep their place and spacing.
+  margin: 0.125rem 0 -0.375rem;
 }
 
 .carousel__dot {
-  width: 0.75rem;
-  height: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
   padding: 0;
-  border: 0.125rem solid #808080;
-  border-radius: 50%;
-  background: #b2e6f7;
+  border: 0;
+  background: none;
   cursor: pointer;
 
+  &::before {
+    content: '';
+    width: 0.75rem;
+    height: 0.75rem;
+    box-sizing: border-box;
+    border: 0.125rem solid #808080;
+    border-radius: 50%;
+    background: #b2e6f7;
+  }
+
   &:focus-visible {
+    border-radius: 50%;
     outline: 0.125rem solid #0e99c6;
-    outline-offset: 0.125rem;
+    outline-offset: -0.125rem;
   }
 }
 
-.carousel__dot__active {
+.carousel__dot__active::before {
   background: #0e99c6;
 }
 

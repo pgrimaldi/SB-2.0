@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Title } from '@angular/platform-browser';
+import { Meta, Title } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Footer } from '../../../components/hub/footer/footer';
 import { Header } from '../../../components/hub/header/header';
@@ -63,10 +63,14 @@ export class Home {
 
   constructor() {
     const title = inject(Title);
+    const meta = inject(Meta);
 
     inject(TranslateService)
-      .stream('home.page.title')
+      .stream(['home.page.title', 'home.page.description'])
       .pipe(takeUntilDestroyed())
-      .subscribe((pageTitle: string) => title.setTitle(pageTitle));
+      .subscribe((page: Record<string, string>) => {
+        title.setTitle(page['home.page.title']);
+        meta.updateTag({ name: 'description', content: page['home.page.description'] });
+      });
   }
 }

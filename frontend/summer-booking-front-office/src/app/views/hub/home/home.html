@@ -41,7 +41,7 @@
 
       <div class="home__information__cards">
         @for (card of managementCards; track card.key) {
-          <app-card-hub [iconSrc]="'/assets/images/hub/' + card.icon + '.png'">
+          <app-card-hub [iconSrc]="'/assets/images/hub/' + card.icon + '.webp'">
             <span
               cardHubHeading
               [appI18nText]="'home.management.cards.' + card.key + '.title'"
@@ -83,7 +83,13 @@
         <div class="home__booster__media">
           <img
             class="home__booster__image"
-            src="/assets/images/hub/app-mockup.webp"
+            src="/assets/images/hub/app-mockup-1080.webp"
+            srcset="
+              /assets/images/hub/app-mockup-640.webp   640w,
+              /assets/images/hub/app-mockup-1080.webp 1080w,
+              /assets/images/hub/app-mockup-1692.webp 1692w
+            "
+            sizes="(width < 64rem) 17.4rem, max(21.7rem, 18.1vw)"
             width="1692"
             height="1560"
             loading="lazy"
@@ -177,7 +183,7 @@
         @for (outlet of mediaOutlets; track outlet.logo) {
           <app-card-logo
             *appCarouselSlide
-            [logoSrc]="'/assets/images/hub/media-' + outlet.logo + '.png'"
+            [logoSrc]="'/assets/images/hub/media-' + outlet.logo + '.webp'"
             [logoAlt]="'home.media.logo' | translate: { name: outlet.name }"
           />
         }

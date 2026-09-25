@@ -5,7 +5,35 @@
     <title>Summer Booking</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Software gestionale in cloud per stabilimenti balneari per aumentare vendite e margini senza costi nascosti."
+    />
+    <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="manifest" href="manifest.webmanifest" />
+    <!-- Home hero (LCP image): the same sources as its <picture>, requested before Angular renders it. -->
+    <link
+      rel="preload"
+      as="image"
+      media="(width < 64rem) and (orientation: portrait)"
+      imagesrcset="
+        /assets/images/hub/hero-beach-mobile-863.webp   863w,
+        /assets/images/hub/hero-beach-mobile-1290.webp 1290w
+      "
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      media="(width >= 64rem), (orientation: landscape)"
+      imagesrcset="
+        /assets/images/hub/hero-beach-1920.webp 1920w,
+        /assets/images/hub/hero-beach-3840.webp 3840w
+      "
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
   </head>
   <body>
     <app-root></app-root>
