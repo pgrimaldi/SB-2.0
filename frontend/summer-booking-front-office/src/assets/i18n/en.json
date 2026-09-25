@@ -12,6 +12,11 @@
     "position": "Go to position {{position}}",
     "slide": "{{index}} of {{total}}"
   },
+  "field": {
+    "password": {
+      "show": "Show password"
+    }
+  },
   "hub": {
     "header": {
       "logo": {
@@ -50,6 +55,20 @@
       "legal": {
         "group": "Summer Booking Hub is part of Qbitsoft srl - All rights reserved",
         "company": "©{{year}} Qbitsoft Srl - VAT no. 02375470503 - REA Pi-202428"
+      }
+    },
+    "login": {
+      "title": "Sign in",
+      "close": "Close",
+      "email": "Email",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "or": "Or",
+      "register": {
+        "question": "Not registered yet?",
+        "action": "Register your property"
       }
     }
   },

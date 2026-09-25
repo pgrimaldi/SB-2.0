@@ -30,6 +30,7 @@ import { CarouselSlide } from '../../../components/shared/ui/carousels/carousel/
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class Home {
   protected readonly managementCards = [
     { key: 'all', icon: 'all-in-one' },

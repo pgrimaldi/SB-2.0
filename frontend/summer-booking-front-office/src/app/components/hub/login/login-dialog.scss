@@ -1,6 +1,6 @@
 @use '@angular/material' as mat;
 
-// Panel of the hub login popup: white rounded surface, size driven only by the opener percentages.
+// Panel of the hub login popup: white rounded surface; width from the opener, height from the content.
 .login__dialog__panel {
   @include mat.dialog-overrides(
     (
@@ -10,4 +10,138 @@
       container-elevation-shadow: 0 0.5rem 2rem rgb(0 0 0 / 15%),
     )
   );
+}
+
+// The element in the page only holds the popup template: the popup itself is drawn by Material above the page.
+app-login-dialog {
+  display: contents;
+}
+
+.login__dialog {
+  position: relative;
+  display: block;
+  padding: 2rem;
+  color: #233c7d;
+}
+
+.login__dialog__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.login__dialog__title {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 2.25rem;
+  text-align: center;
+}
+
+.login__dialog__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login__dialog__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+
+  // Stays on the right even when a narrow popup wraps it below the checkbox.
+  .login__dialog__link {
+    margin-left: auto;
+  }
+}
+
+// Links rendered as buttons: they do nothing for now.
+.login__dialog__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.3125rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login__dialog__close,
+.login__dialog__link {
+  &:focus-visible {
+    outline: 0.125rem solid currentColor;
+    outline-offset: 0.125rem;
+  }
+}
+
+.login__dialog__divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 2rem 0 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-top: 0.0625rem solid currentColor;
+  }
+}
+
+.login__dialog__register {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.375rem;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.login__dialog__register__action {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5rem;
+  text-decoration: underline;
+}
+
+@media (width < 48rem) {
+  .login__dialog {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+
+  .login__dialog__register {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 }

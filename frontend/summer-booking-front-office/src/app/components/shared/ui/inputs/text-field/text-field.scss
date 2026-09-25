@@ -1,0 +1,3 @@
+@use '../field' as field;
+
+@include field.field(text__field);

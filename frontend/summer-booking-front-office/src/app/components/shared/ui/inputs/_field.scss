@@ -1,0 +1,36 @@
+@use '@angular/material' as mat;
+
+// Shared look of the form fields: label above a plain outlined input, 2.5rem high.
+// $block is the component name (e.g. text__field) used by the label class.
+@mixin field($block) {
+  :host {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    @include mat.form-field-overrides(
+      (
+        container-height: 2.5rem,
+        container-vertical-padding: 0.5rem,
+        container-text-size: 0.875rem,
+        container-text-line-height: 1.5rem,
+        container-text-tracking: normal,
+        outlined-container-shape: 0.25rem,
+        outlined-outline-width: 0.0625rem,
+        outlined-focus-outline-width: 0.125rem,
+        outlined-outline-color: #ababab,
+        outlined-hover-outline-color: #707070,
+        outlined-focus-outline-color: #233c7d,
+        outlined-input-text-color: #1c1c1c,
+        outlined-caret-color: #233c7d,
+      )
+    );
+  }
+
+  .#{$block}__label {
+    color: #1c1c1c;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4375rem;
+  }
+}

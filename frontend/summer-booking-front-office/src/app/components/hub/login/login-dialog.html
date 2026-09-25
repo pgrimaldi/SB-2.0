@@ -1,0 +1,53 @@
+<ng-template #content>
+  <div class="login__dialog">
+    <button
+      class="login__dialog__close"
+      type="button"
+      [attr.aria-label]="'hub.login.close' | translate"
+      (click)="close()"
+    >
+      <!-- Heroicons (MIT): x-mark. -->
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12" /></svg>
+    </button>
+
+    <h2 id="login-dialog-title" class="login__dialog__title" appI18nText="hub.login.title"></h2>
+
+    <form class="login__dialog__form" (submit)="$event.preventDefault()">
+      <app-text-field
+        type="email"
+        name="email"
+        autocomplete="email"
+        [label]="'hub.login.email' | translate"
+      />
+      <app-password-field
+        name="password"
+        autocomplete="current-password"
+        [label]="'hub.login.password' | translate"
+      />
+
+      <div class="login__dialog__options">
+        <app-checkbox name="remember">
+          <span appI18nText="hub.login.remember"></span>
+        </app-checkbox>
+        <button class="login__dialog__link" type="button" appI18nText="hub.login.forgot"></button>
+      </div>
+
+      <app-button size="large" buttonType="submit" [fullWidth]="true">
+        <span appI18nText="hub.login.submit"></span>
+      </app-button>
+    </form>
+
+    <div class="login__dialog__divider">
+      <span appI18nText="hub.login.or"></span>
+    </div>
+
+    <p class="login__dialog__register">
+      <span appI18nText="hub.login.register.question"></span>
+      <button
+        class="login__dialog__link login__dialog__register__action"
+        type="button"
+        appI18nText="hub.login.register.action"
+      ></button>
+    </p>
+  </div>
+</ng-template>

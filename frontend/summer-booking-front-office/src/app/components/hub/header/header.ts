@@ -14,12 +14,12 @@ import { Observable } from 'rxjs';
 import { Language, LanguageService } from '../../../services/i18n/language.service';
 import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
 import { ButtonComponent } from '../../shared/ui/buttons/button/button.component';
-import { LoginDialogService } from '../login/login-dialog.service';
+import { LoginDialog } from '../login/login-dialog';
 import { DropdownMenu, DropdownMenuItem } from '../../shared/ui/menus/dropdown-menu/dropdown-menu';
 
 @Component({
   selector: 'app-header',
-  imports: [ButtonComponent, DropdownMenu, I18nText, TranslatePipe],
+  imports: [ButtonComponent, DropdownMenu, I18nText, LoginDialog, TranslatePipe],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,11 +27,11 @@ import { DropdownMenu, DropdownMenuItem } from '../../shared/ui/menus/dropdown-m
 export class Header {
   protected readonly isCompact = signal(false);
   protected readonly isMenuOpen = signal(false);
+  protected readonly loginOpen = signal(false);
   protected readonly navItems = ['advantages', 'features', 'booking', 'pricing'] as const;
 
   private readonly document = inject(DOCUMENT);
   private readonly languageService = inject(LanguageService);
-  private readonly loginDialog = inject(LoginDialogService);
   private readonly languageNames = toSignal(
     inject(TranslateService).stream('language.names') as Observable<Record<string, string>>,
     { initialValue: {} as Record<string, string> },
@@ -68,7 +68,7 @@ export class Header {
 
   protected openLogin(): void {
     this.closeMenu();
-    this.loginDialog.open();
+    this.loginOpen.set(true);
   }
 
   protected toggleMenu(): void {

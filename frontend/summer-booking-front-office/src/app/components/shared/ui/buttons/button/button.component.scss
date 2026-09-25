@@ -50,6 +50,14 @@ button {
 :host(.button__light.button__large) {
   @include mat.button-overrides(
     (
+      filled-container-height: 3rem,
+    )
+  );
+}
+
+:host(.button__light.button__extralarge) {
+  @include mat.button-overrides(
+    (
       filled-container-height: 3.875rem,
     )
   );
@@ -57,7 +65,8 @@ button {
 
 :host(.button__small),
 :host(.button__medium),
-:host(.button__large) {
+:host(.button__large),
+:host(.button__extralarge) {
   @include mat.button-overrides(
     (
       filled-label-text-size: 0.9375rem,
@@ -93,6 +102,17 @@ button {
 }
 
 :host(.button__large) {
+  @include mat.button-overrides(
+    (
+      filled-container-height: 2.875rem,
+      filled-horizontal-padding: 3rem,
+      text-container-height: 2.875rem,
+      text-horizontal-padding: 3rem,
+    )
+  );
+}
+
+:host(.button__extralarge) {
   @include mat.button-overrides(
     (
       filled-container-height: 3.75rem,

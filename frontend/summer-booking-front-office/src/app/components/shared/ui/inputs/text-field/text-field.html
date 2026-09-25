@@ -1,0 +1,10 @@
+<label class="text__field__label" [for]="id">{{ label() }}</label>
+<mat-form-field appearance="outline" subscriptSizing="dynamic">
+  <input
+    matInput
+    [id]="id"
+    [type]="type()"
+    [attr.name]="name() ?? null"
+    [attr.autocomplete]="autocomplete() ?? null"
+  />
+</mat-form-field>

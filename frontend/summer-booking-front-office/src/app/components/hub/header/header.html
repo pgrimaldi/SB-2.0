@@ -124,10 +124,12 @@
       </div>
 
       <div class="header__menu__actions">
-        <app-button size="large" [fullWidth]="true" (clicked)="openLogin()">
+        <app-button size="extralarge" [fullWidth]="true" (clicked)="openLogin()">
           <span appI18nText="hub.header.login"></span>
         </app-button>
       </div>
     </div>
   </div>
 </header>
+
+<app-login-dialog [(open)]="loginOpen" />

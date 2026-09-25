@@ -3,7 +3,8 @@ import { NgTemplateOutlet } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 
 export type ButtonAppearance = 'primary' | 'secondary' | 'light';
-export type ButtonSize = 'small' | 'medium' | 'large';
+// The only four sizes: small 1.75rem, medium 2rem, large 2.875rem (forms), extralarge 3.75rem.
+export type ButtonSize = 'small' | 'medium' | 'large' | 'extralarge';
 
 @Component({
   selector: 'app-button',
@@ -16,6 +17,7 @@ export type ButtonSize = 'small' | 'medium' | 'large';
     '[class.button__small]': "size() === 'small'",
     '[class.button__medium]': "size() === 'medium'",
     '[class.button__large]': "size() === 'large'",
+    '[class.button__extralarge]': "size() === 'extralarge'",
     '[class.button__full__width]': 'fullWidth()',
   },
 })

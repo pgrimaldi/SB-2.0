@@ -1,0 +1,55 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: inline-flex;
+
+  @include mat.checkbox-overrides(
+    (
+      state-layer-size: 1.5rem,
+      touch-target-display: none,
+      label-text-color: #233c7d,
+      label-text-size: 0.875rem,
+      label-text-line-height: 1.3125rem,
+      label-text-tracking: normal,
+      label-text-weight: 400,
+      unselected-icon-color: #707070,
+      unselected-hover-icon-color: #233c7d,
+      unselected-focus-icon-color: #233c7d,
+      selected-icon-color: #233c7d,
+      selected-hover-icon-color: #233c7d,
+      selected-focus-icon-color: #233c7d,
+      selected-pressed-icon-color: #233c7d,
+      selected-checkmark-color: #ffffff,
+      selected-hover-state-layer-color: #233c7d,
+      selected-focus-state-layer-color: #233c7d,
+      selected-pressed-state-layer-color: #233c7d,
+      unselected-hover-state-layer-color: #233c7d,
+      unselected-focus-state-layer-color: #233c7d,
+      unselected-pressed-state-layer-color: #233c7d,
+    )
+  );
+}
+
+// The box starts on the content edge, like the other fields (the state layer overflows instead).
+.checkbox {
+  margin-left: -0.1875rem;
+}
+
+// Material draws the box at a fixed 18px: sized in rem so it grows with the page on large screens.
+:host ::ng-deep {
+  .mdc-checkbox {
+    flex-basis: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    padding: calc((var(--mat-checkbox-state-layer-size) - 1.125rem) / 2);
+  }
+
+  .mdc-checkbox__background {
+    top: calc((var(--mat-checkbox-state-layer-size) - 1.125rem) / 2);
+    left: calc((var(--mat-checkbox-state-layer-size) - 1.125rem) / 2);
+    width: 1.125rem;
+    height: 1.125rem;
+    border-width: 0.125rem;
+    border-radius: 0.125rem;
+  }
+}

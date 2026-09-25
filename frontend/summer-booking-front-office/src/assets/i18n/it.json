@@ -12,6 +12,11 @@
     "position": "Vai alla posizione {{position}}",
     "slide": "{{index}} di {{total}}"
   },
+  "field": {
+    "password": {
+      "show": "Mostra password"
+    }
+  },
   "hub": {
     "header": {
       "logo": {
@@ -50,6 +55,20 @@
       "legal": {
         "group": "Summer Booking Hub fa parte di Qbitsoft srl - Tutti i diritti riservati",
         "company": "©{{year}} Qbitsoft Srl - P. Iva 02375470503 - Rea Pi-202428"
+      }
+    },
+    "login": {
+      "title": "Accedi",
+      "close": "Chiudi",
+      "email": "Email",
+      "password": "Password",
+      "remember": "Ricorda le mie credenziali",
+      "forgot": "Password dimenticata?",
+      "submit": "Accedi",
+      "or": "Oppure",
+      "register": {
+        "question": "Non sei registrato?",
+        "action": "Registra la tua struttura"
       }
     }
   },
