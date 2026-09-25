@@ -16,9 +16,9 @@ import { LanguageService } from '../../../../services/i18n/language.service';
   selector: '[appI18nText]',
   template: `
     @if (html()) {
-      <span class="app__i18n__text__value" [innerHTML]="text()"></span>
+      <span class="i18n__text__value" [innerHTML]="text()"></span>
     } @else {
-      <span class="app__i18n__text__value">{{ text() }}</span>
+      <span class="i18n__text__value">{{ text() }}</span>
     }
   `,
   styleUrl: './i18n-text.scss',

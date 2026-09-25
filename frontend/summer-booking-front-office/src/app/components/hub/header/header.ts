@@ -14,22 +14,24 @@ import { Observable } from 'rxjs';
 import { Language, LanguageService } from '../../../services/i18n/language.service';
 import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
 import { ButtonComponent } from '../../shared/ui/buttons/button/button.component';
+import { LoginDialogService } from '../login/login-dialog.service';
 import { DropdownMenu, DropdownMenuItem } from '../../shared/ui/menus/dropdown-menu/dropdown-menu';
 
 @Component({
-  selector: 'app-hub-header',
+  selector: 'app-header',
   imports: [ButtonComponent, DropdownMenu, I18nText, TranslatePipe],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HubHeader {
+export class Header {
   protected readonly isCompact = signal(false);
   protected readonly isMenuOpen = signal(false);
   protected readonly navItems = ['advantages', 'features', 'booking', 'pricing'] as const;
 
   private readonly document = inject(DOCUMENT);
   private readonly languageService = inject(LanguageService);
+  private readonly loginDialog = inject(LoginDialogService);
   private readonly languageNames = toSignal(
     inject(TranslateService).stream('language.names') as Observable<Record<string, string>>,
     { initialValue: {} as Record<string, string> },
@@ -62,6 +64,11 @@ export class HubHeader {
 
   protected changeLanguage(code: string): void {
     this.languageService.switchTo(code as Language);
+  }
+
+  protected openLogin(): void {
+    this.closeMenu();
+    this.loginDialog.open();
   }
 
   protected toggleMenu(): void {

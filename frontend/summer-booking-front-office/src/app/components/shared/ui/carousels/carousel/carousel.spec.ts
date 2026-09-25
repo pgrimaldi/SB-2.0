@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Carousel, CarouselSlide } from './carousel';
+import { Carousel } from './carousel';
+import { CarouselSlide } from './carousel-slide';
 
 @Component({
   imports: [Carousel, CarouselSlide],
@@ -22,8 +23,8 @@ describe('Carousel', () => {
   let element: HTMLElement;
 
   const activeDot = () =>
-    [...element.querySelectorAll('.app__carousel__dot')].findIndex((dot) =>
-      dot.classList.contains('app__carousel__dot__active'),
+    [...element.querySelectorAll('.carousel__dot')].findIndex((dot) =>
+      dot.classList.contains('carousel__dot__active'),
     );
   const click = async (selector: string) => {
     element.querySelector<HTMLButtonElement>(selector)!.click();
@@ -39,22 +40,22 @@ describe('Carousel', () => {
 
   it('should render every slide and one dot per position', () => {
     // Without layout (jsdom) one slide is visible per view: five positions.
-    expect(element.querySelectorAll('.app__carousel__slide').length).toBe(5);
-    expect(element.querySelectorAll('.app__carousel__dot').length).toBe(5);
+    expect(element.querySelectorAll('.carousel__slide').length).toBe(5);
+    expect(element.querySelectorAll('.carousel__dot').length).toBe(5);
     expect(activeDot()).toBe(0);
   });
 
   it('should show only the arrows that lead somewhere', async () => {
-    expect(element.querySelector('.app__carousel__arrow__previous')).toBeNull();
-    expect(element.querySelector('.app__carousel__arrow__next')).toBeTruthy();
+    expect(element.querySelector('.carousel__arrow__previous')).toBeNull();
+    expect(element.querySelector('.carousel__arrow__next')).toBeTruthy();
 
-    await click('.app__carousel__arrow__next');
+    await click('.carousel__arrow__next');
     expect(activeDot()).toBe(1);
-    expect(element.querySelector('.app__carousel__arrow__previous')).toBeTruthy();
+    expect(element.querySelector('.carousel__arrow__previous')).toBeTruthy();
 
-    await click('.app__carousel__dot:last-child');
+    await click('.carousel__dot:last-child');
     expect(activeDot()).toBe(4);
-    expect(element.querySelector('.app__carousel__arrow__next')).toBeNull();
+    expect(element.querySelector('.carousel__arrow__next')).toBeNull();
   });
 
   it('should move with the keyboard arrows', async () => {

@@ -1,5 +1,5 @@
 <button
-  class="app__dropdown__menu__trigger"
+  class="dropdown__menu__trigger"
   type="button"
   [matMenuTriggerFor]="menu"
   [attr.aria-label]="accessibleLabel()"
@@ -16,7 +16,7 @@
       (click)="selected.emit(item.value)"
     >
       @if (item.iconSrc) {
-        <img class="app__dropdown__menu__icon" [src]="item.iconSrc" width="20" height="20" alt="" />
+        <img class="dropdown__menu__icon" [src]="item.iconSrc" width="20" height="20" alt="" />
       }
       @if (!iconOnly()) {
         <span>{{ item.label }}</span>

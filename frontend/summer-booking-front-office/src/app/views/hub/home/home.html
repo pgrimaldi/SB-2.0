@@ -1,8 +1,8 @@
-<app-hub-header />
+<app-header />
 
 <main class="home__page" appEqualHeight="app-card-hub">
-  <section class="hero" aria-labelledby="home-hero-title">
-    <picture class="hero__media">
+  <section class="home__hero" aria-labelledby="home-hero-title">
+    <picture class="home__hero__media">
       <source
         media="(width < 64rem) and (orientation: portrait)"
         srcset="
@@ -26,7 +26,7 @@
       />
     </picture>
 
-    <div class="hero__content">
+    <div class="home__hero__content">
       <h1 id="home-hero-title" appI18nText="home.hero.title"></h1>
       <p appI18nText="home.hero.description"></p>
     </div>
@@ -57,17 +57,21 @@
   <section class="home__intermezzo" aria-labelledby="home-booster-title">
     <div class="home__intermezzo__panel">
       <div class="home__intermezzo__content">
-        <div class="booster__text">
+        <div class="home__booster__text">
           <h2 id="home-booster-title" appI18nText="home.booster.title"></h2>
-          <div class="booster__description">
+          <div class="home__booster__description">
             <p appI18nText="home.booster.channels"></p>
             <p appI18nText="home.booster.offers"></p>
           </div>
-          <app-button class="booster__action home__action__desktop" appearance="light" size="small">
+          <app-button
+            class="home__booster__action home__action__desktop"
+            appearance="light"
+            size="small"
+          >
             <span appI18nText="home.booster.action"></span>
           </app-button>
           <app-button
-            class="booster__action home__action__mobile"
+            class="home__booster__action home__action__mobile"
             appearance="light"
             size="large"
             [fullWidth]="true"
@@ -76,9 +80,9 @@
           </app-button>
         </div>
 
-        <div class="booster__media">
+        <div class="home__booster__media">
           <img
-            class="booster__image"
+            class="home__booster__image"
             src="/assets/images/hub/app-mockup.webp"
             width="1692"
             height="1560"
@@ -112,12 +116,12 @@
     </div>
   </section>
 
-  <section class="home__intermezzo growth" aria-labelledby="home-growth-title">
+  <section class="home__intermezzo home__growth" aria-labelledby="home-growth-title">
     <div class="home__intermezzo__panel">
       <div class="home__intermezzo__content">
         <h2 id="home-growth-title" appI18nText="home.growth.title"></h2>
 
-        <div class="growth__actions">
+        <div class="home__growth__actions">
           <app-button class="home__action__desktop" size="medium">
             <span appI18nText="home.growth.action"></span>
           </app-button>
@@ -129,7 +133,11 @@
     </div>
   </section>
 
-  <section id="about-us" class="home__information about__us" aria-labelledby="home-about-us-title">
+  <section
+    id="about-us"
+    class="home__information home__about__us"
+    aria-labelledby="home-about-us-title"
+  >
     <div class="home__information__content">
       <div class="home__information__header">
         <h2 id="home-about-us-title" appI18nText="home.about-us.title"></h2>
@@ -146,7 +154,7 @@
               [appI18nText]="'home.about-us.reviews.' + review.key + '.author'"
             ></span>
             <p
-              class="about__us__quote"
+              class="home__about__us__quote"
               [appI18nText]="'home.about-us.reviews.' + review.key + '.quote'"
               [html]="true"
             ></p>
@@ -178,4 +186,4 @@
   </section>
 </main>
 
-<app-hub-footer />
+<app-footer />

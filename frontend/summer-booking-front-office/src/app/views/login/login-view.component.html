@@ -1,5 +1,8 @@
-<main class="login__page">
-  <nav class="language__switcher" [attr.aria-label]="'login.language.selector' | translate">
+<main class="login__view">
+  <nav
+    class="login__view__language__switcher"
+    [attr.aria-label]="'login.language.selector' | translate"
+  >
     <app-button
       appearance="secondary"
       [accessibleLabel]="'login.language.italian' | translate"
@@ -18,10 +21,10 @@
     </app-button>
   </nav>
 
-  <section class="login__panel" aria-labelledby="login-title">
-    <p class="product__name">{{ 'app.name' | translate }}</p>
+  <section class="login__view__panel" aria-labelledby="login-title">
+    <p class="login__view__product__name">{{ 'app.name' | translate }}</p>
     <h1 id="login-title">{{ 'login.title' | translate }}</h1>
-    <p class="description">{{ 'login.description' | translate }}</p>
+    <p class="login__view__description">{{ 'login.description' | translate }}</p>
     <app-button [disabled]="true">{{ 'login.action' | translate }}</app-button>
   </section>
 </main>

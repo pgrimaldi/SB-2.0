@@ -1,0 +1,13 @@
+@use '@angular/material' as mat;
+
+// Panel of the hub login popup: white rounded surface, size driven only by the opener percentages.
+.login__dialog__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: #ffffff,
+      container-shape: 0.5rem,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem rgb(0 0 0 / 15%),
+    )
+  );
+}

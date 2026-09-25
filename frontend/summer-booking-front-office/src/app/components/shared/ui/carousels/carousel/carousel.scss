@@ -21,18 +21,18 @@
   }
 }
 
-.app__carousel__viewport {
+.carousel__viewport {
   position: relative;
   overflow: hidden;
   touch-action: pan-y;
 }
 
-.app__carousel__viewport__dragging {
+.carousel__viewport__dragging {
   cursor: grabbing;
   user-select: none;
 }
 
-.app__carousel__track {
+.carousel__track {
   display: flex;
   margin: 0;
   padding: 0;
@@ -41,11 +41,11 @@
   will-change: transform;
 }
 
-.app__carousel__viewport__dragging .app__carousel__track {
+.carousel__viewport__dragging .carousel__track {
   transition: none;
 }
 
-.app__carousel__slide {
+.carousel__slide {
   display: flex;
   flex: none;
   width: calc((100% - var(--app-carousel-peek)) / var(--app-carousel-per-view));
@@ -53,13 +53,13 @@
 }
 
 // Grid cell stretching the projected slide to the full slide size, whatever its content.
-.app__carousel__slide__content {
+.carousel__slide__content {
   display: grid;
   flex: 1;
   min-width: 0;
 }
 
-.app__carousel__arrow {
+.carousel__arrow {
   position: absolute;
   z-index: 1;
   top: 50%;
@@ -94,22 +94,22 @@
   }
 }
 
-.app__carousel__arrow__previous {
+.carousel__arrow__previous {
   left: 0;
 }
 
-.app__carousel__arrow__next {
+.carousel__arrow__next {
   right: 0;
 }
 
-.app__carousel__dots {
+.carousel__dots {
   display: flex;
   justify-content: center;
   gap: 0.6875rem;
   margin-top: 0.5rem;
 }
 
-.app__carousel__dot {
+.carousel__dot {
   width: 0.75rem;
   height: 0.75rem;
   padding: 0;
@@ -124,12 +124,12 @@
   }
 }
 
-.app__carousel__dot__active {
+.carousel__dot__active {
   background: #0e99c6;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app__carousel__track {
+  .carousel__track {
     transition: none;
   }
 }

@@ -12,11 +12,11 @@ export type ButtonSize = 'small' | 'medium' | 'large';
   styleUrl: './button.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.app__button__light]': "appearance() === 'light'",
-    '[class.app__button__small]': "size() === 'small'",
-    '[class.app__button__medium]': "size() === 'medium'",
-    '[class.app__button__large]': "size() === 'large'",
-    '[class.app__button__full__width]': 'fullWidth()',
+    '[class.button__light]': "appearance() === 'light'",
+    '[class.button__small]': "size() === 'small'",
+    '[class.button__medium]': "size() === 'medium'",
+    '[class.button__large]': "size() === 'large'",
+    '[class.button__full__width]': 'fullWidth()',
   },
 })
 export class ButtonComponent {

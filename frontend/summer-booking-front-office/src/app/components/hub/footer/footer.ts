@@ -8,13 +8,13 @@ interface FooterLink {
 }
 
 @Component({
-  selector: 'app-hub-footer',
+  selector: 'app-footer',
   imports: [I18nText, TranslatePipe],
   templateUrl: './footer.html',
   styleUrl: './footer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HubFooter {
+export class Footer {
   protected readonly socials = ['instagram', 'facebook', 'email', 'youtube'] as const;
 
   protected readonly columns: readonly (readonly FooterLink[])[] = [

@@ -62,6 +62,7 @@ credentials
 /README.md
 /FRONTEND_WORKING_RULES.md
 /docs/*.docx
+/docs/*.md
 
 # Operating system files
 .DS_Store

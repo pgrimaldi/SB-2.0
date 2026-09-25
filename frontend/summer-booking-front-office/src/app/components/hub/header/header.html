@@ -1,20 +1,20 @@
 <header
-  class="hub__header"
-  [class.hub__header__compact]="isCompact()"
-  [class.hub__header__menu__open]="isMenuOpen()"
+  class="header"
+  [class.header__compact]="isCompact()"
+  [class.header__menu__open]="isMenuOpen()"
 >
-  <div class="hub__header__content">
-    <div class="hub__header__brand">
-      <div class="hub__header__logo">
+  <div class="header__content">
+    <div class="header__brand">
+      <div class="header__logo">
         <img
-          class="hub__header__logo__image hub__header__logo__image__white"
+          class="header__logo__image header__logo__image__white"
           src="/assets/images/hub/logo-text-white.png"
           width="944"
           height="342"
           [alt]="'hub.header.logo.alt' | translate"
         />
         <img
-          class="hub__header__logo__image hub__header__logo__image__blue"
+          class="header__logo__image header__logo__image__blue"
           src="/assets/images/hub/logo-text-blue.png"
           width="944"
           height="342"
@@ -24,13 +24,13 @@
       </div>
     </div>
 
-    <div class="hub__header__nav">
+    <div class="header__nav">
       <nav [attr.aria-label]="'hub.header.nav.label' | translate">
-        <ul class="hub__header__links">
+        <ul class="header__links">
           @for (item of navItems; track item) {
             <li>
               <button
-                class="hub__header__link"
+                class="header__link"
                 type="button"
                 [appI18nText]="'hub.header.nav.' + item"
               ></button>
@@ -40,30 +40,32 @@
       </nav>
 
       <app-dropdown-menu
-        class="hub__header__language"
+        class="header__language"
         [items]="languageItems()"
         [selectedValue]="currentLanguage().code"
         [iconOnly]="true"
         [accessibleLabel]="'language.selector' | translate"
         (selected)="changeLanguage($event)"
       >
-        <span class="hub__header__language__trigger">
+        <span class="header__language__trigger">
           <img
-            class="hub__header__language__flag"
+            class="header__language__flag"
             [src]="currentLanguage().flagSrc"
             width="30"
             height="30"
             alt=""
           />
-          <span class="hub__header__language__caret"></span>
+          <span class="header__language__caret"></span>
         </span>
       </app-dropdown-menu>
 
-      <app-button size="small"><span appI18nText="hub.header.login"></span></app-button>
+      <app-button size="small" (clicked)="openLogin()">
+        <span appI18nText="hub.header.login"></span>
+      </app-button>
     </div>
 
     <button
-      class="hub__header__toggle"
+      class="header__toggle"
       type="button"
       aria-controls="hub-header-menu"
       [attr.aria-expanded]="isMenuOpen()"
@@ -72,57 +74,57 @@
       "
       (click)="toggleMenu()"
     >
-      <span class="hub__header__toggle__icon" aria-hidden="true">
-        <span class="hub__header__toggle__bar"></span>
-        <span class="hub__header__toggle__bar"></span>
-        <span class="hub__header__toggle__bar"></span>
+      <span class="header__toggle__icon" aria-hidden="true">
+        <span class="header__toggle__bar"></span>
+        <span class="header__toggle__bar"></span>
+        <span class="header__toggle__bar"></span>
       </span>
     </button>
   </div>
 
-  <div id="hub-header-menu" class="hub__header__menu">
-    <div class="hub__header__menu__body">
+  <div id="hub-header-menu" class="header__menu">
+    <div class="header__menu__body">
       <nav [attr.aria-label]="'hub.header.nav.label' | translate">
-        <ul class="hub__header__menu__links">
+        <ul class="header__menu__links">
           @for (item of navItems; track item) {
             <li>
-              <button class="hub__header__menu__link" type="button">
+              <button class="header__menu__link" type="button">
                 {{ 'hub.header.nav.' + item | translate }}
               </button>
             </li>
           }
-          <li class="hub__header__menu__language">
+          <li class="header__menu__language">
             <app-dropdown-menu
-              class="hub__header__language"
+              class="header__language"
               [items]="languageItems()"
               [selectedValue]="currentLanguage().code"
               [iconOnly]="true"
               [accessibleLabel]="'language.selector' | translate"
               (selected)="changeLanguage($event)"
             >
-              <span class="hub__header__language__trigger">
+              <span class="header__language__trigger">
                 <img
-                  class="hub__header__language__flag"
+                  class="header__language__flag"
                   [src]="currentLanguage().flagSrc"
                   width="30"
                   height="30"
                   alt=""
                 />
-                <span class="hub__header__language__caret"></span>
+                <span class="header__language__caret"></span>
               </span>
             </app-dropdown-menu>
           </li>
         </ul>
       </nav>
 
-      <div class="hub__header__menu__divider" aria-hidden="true">
-        <span class="hub__header__menu__divider__line"></span>
-        <span class="hub__header__menu__divider__dot"></span>
-        <span class="hub__header__menu__divider__line"></span>
+      <div class="header__menu__divider" aria-hidden="true">
+        <span class="header__menu__divider__line"></span>
+        <span class="header__menu__divider__dot"></span>
+        <span class="header__menu__divider__line"></span>
       </div>
 
-      <div class="hub__header__menu__actions">
-        <app-button size="large" [fullWidth]="true">
+      <div class="header__menu__actions">
+        <app-button size="large" [fullWidth]="true" (clicked)="openLogin()">
           <span appI18nText="hub.header.login"></span>
         </app-button>
       </div>

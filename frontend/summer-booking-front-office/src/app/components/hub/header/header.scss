@@ -7,7 +7,7 @@ $motion-duration: 450ms;
 $motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
 $motion: $motion-duration $motion-easing;
 
-.hub__header {
+.header {
   position: fixed;
   z-index: 100;
   top: 1rem;
@@ -24,7 +24,7 @@ $motion: $motion-duration $motion-easing;
     backdrop-filter $motion;
 }
 
-.hub__header__compact {
+.header__compact {
   top: 0;
   height: 5rem;
   background-color: rgb(255 255 255 / 95%);
@@ -32,7 +32,7 @@ $motion: $motion-duration $motion-easing;
   backdrop-filter: blur(0.75rem);
 }
 
-.hub__header__content {
+.header__content {
   display: flex;
   width: min(100%, 80rem);
   height: 100%;
@@ -42,14 +42,14 @@ $motion: $motion-duration $motion-easing;
   padding-inline: 1.5rem;
 }
 
-.hub__header__brand {
+.header__brand {
   display: flex;
   flex: none;
   justify-content: center;
   transition: flex-grow $motion;
 }
 
-.hub__header__logo {
+.header__logo {
   position: relative;
   width: 16.6rem;
   margin-top: 3rem;
@@ -59,12 +59,12 @@ $motion: $motion-duration $motion-easing;
     margin-top $motion;
 }
 
-.hub__header__compact .hub__header__logo {
+.header__compact .header__logo {
   width: 9.5rem;
   margin-top: 0;
 }
 
-.hub__header__logo__image {
+.header__logo__image {
   position: absolute;
   inset: 0;
   display: block;
@@ -75,27 +75,27 @@ $motion: $motion-duration $motion-easing;
 
 // The blue logo fades in over the white one, which disappears only once it is fully covered:
 // no half-transparent logo while the colours swap.
-.hub__header__logo__image__white {
+.header__logo__image__white {
   transition: opacity 0s linear;
 }
 
-.hub__header__logo__image__blue {
+.header__logo__image__blue {
   opacity: 0;
   transition: opacity $motion;
 }
 
-.hub__header__compact .hub__header__logo__image__white {
+.header__compact .header__logo__image__white {
   opacity: 0;
   transition-delay: $motion-duration;
 }
 
-.hub__header__compact .hub__header__logo__image__blue {
+.header__compact .header__logo__image__blue {
   opacity: 1;
 }
 
 // Desktop and tablet navigation
 
-.hub__header__nav {
+.header__nav {
   display: flex;
   align-items: center;
   gap: 2rem;
@@ -103,11 +103,11 @@ $motion: $motion-duration $motion-easing;
   transition: margin-top $motion;
 }
 
-.hub__header__compact .hub__header__nav {
+.header__compact .header__nav {
   margin-top: 0;
 }
 
-.hub__header__links {
+.header__links {
   display: flex;
   gap: 1.25rem;
   margin: 0;
@@ -115,7 +115,7 @@ $motion: $motion-duration $motion-easing;
   list-style: none;
 }
 
-.hub__header__link {
+.header__link {
   padding: 0;
   border: 0;
   background: none;
@@ -132,7 +132,7 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__compact .hub__header__link {
+.header__compact .header__link {
   color: #1e3a8a;
 
   &:hover {
@@ -140,31 +140,31 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__link:focus-visible,
-.hub__header__toggle:focus-visible,
-.hub__header__menu__link:focus-visible {
+.header__link:focus-visible,
+.header__toggle:focus-visible,
+.header__menu__link:focus-visible {
   outline: 0.125rem solid currentColor;
   outline-offset: 0.25rem;
 }
 
 // Language selector
 
-.hub__header__language {
+.header__language {
   color: #ffffff;
   transition: color $motion;
 }
 
-.hub__header__compact .hub__header__language {
+.header__compact .header__language {
   color: #1e3a8a;
 }
 
-.hub__header__language__trigger {
+.header__language__trigger {
   display: flex;
   align-items: center;
   padding: 0.375rem 0.75rem;
 }
 
-.hub__header__language__flag {
+.header__language__flag {
   display: block;
   width: 1.875rem;
   height: 1.875rem;
@@ -172,7 +172,7 @@ $motion: $motion-duration $motion-easing;
   border-radius: 50%;
 }
 
-.hub__header__language__caret {
+.header__language__caret {
   width: 0;
   height: 0;
   margin-left: 0.25rem;
@@ -180,18 +180,18 @@ $motion: $motion-duration $motion-easing;
   border-inline: 0.25rem solid transparent;
 }
 
-.hub__header__menu__language {
+.header__menu__language {
   display: flex;
   justify-content: center;
 
-  .hub__header__language {
+  .header__language {
     color: #233c7e;
   }
 }
 
 // Mobile toggle
 
-.hub__header__toggle {
+.header__toggle {
   display: none;
   flex: none;
   padding: 1rem;
@@ -215,7 +215,7 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__compact .hub__header__toggle {
+.header__compact .header__toggle {
   border-color: rgb(229 231 235 / 50%);
   color: #1e3a8a;
 
@@ -225,14 +225,14 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__toggle__icon {
+.header__toggle__icon {
   position: relative;
   display: block;
   width: 1.5rem;
   height: 1.5rem;
 }
 
-.hub__header__toggle__bar {
+.header__toggle__bar {
   position: absolute;
   left: 0;
   width: 1.5rem;
@@ -255,7 +255,7 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__menu__open .hub__header__toggle__bar {
+.header__menu__open .header__toggle__bar {
   &:nth-child(1) {
     transform: translateY(0.5rem) rotate(45deg);
   }
@@ -271,7 +271,7 @@ $motion: $motion-duration $motion-easing;
 
 // Mobile menu panel
 
-.hub__header__menu {
+.header__menu {
   position: absolute;
   top: 100%;
   right: 0;
@@ -300,17 +300,17 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__menu__open .hub__header__menu {
+.header__menu__open .header__menu {
   opacity: 1;
   visibility: visible;
   transform: translateY(0.5rem);
 }
 
-.hub__header__menu__body {
+.header__menu__body {
   padding: 2rem 1.5rem;
 }
 
-.hub__header__menu__links {
+.header__menu__links {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -319,7 +319,7 @@ $motion: $motion-duration $motion-easing;
   list-style: none;
 }
 
-.hub__header__menu__link {
+.header__menu__link {
   width: 100%;
   padding: 1rem 1.5rem;
   border: 0;
@@ -341,7 +341,7 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.hub__header__menu__divider {
+.header__menu__divider {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -349,13 +349,13 @@ $motion: $motion-duration $motion-easing;
   padding-block: 1.5rem;
 }
 
-.hub__header__menu__divider__line {
+.header__menu__divider__line {
   flex: 1;
   height: 0.0625rem;
   background: linear-gradient(to right, transparent, #bfdbfe, transparent);
 }
 
-.hub__header__menu__divider__dot {
+.header__menu__divider__dot {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
@@ -363,7 +363,7 @@ $motion: $motion-duration $motion-easing;
   animation: hub-header-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.hub__header__menu__actions {
+.header__menu__actions {
   margin-top: 1.5rem;
   padding-top: 0.5rem;
 }
@@ -377,42 +377,42 @@ $motion: $motion-duration $motion-easing;
 // Tablet
 
 @media (width < 64rem) {
-  .hub__header {
+  .header {
     height: 6rem;
   }
 
-  .hub__header__compact {
+  .header__compact {
     height: 4rem;
   }
 
   // The brand area shrinks to the logo (animatable flex-grow), so the logo glides left when compact.
-  .hub__header__brand {
+  .header__brand {
     flex: 1 1 0;
   }
 
-  .hub__header__compact .hub__header__brand {
+  .header__compact .header__brand {
     flex-grow: 0;
   }
 
-  .hub__header__logo {
+  .header__logo {
     width: 13.8rem;
     margin-top: 1.5rem;
   }
 
-  .hub__header__compact .hub__header__logo {
+  .header__compact .header__logo {
     width: 8.3rem;
   }
 
-  .hub__header__nav {
+  .header__nav {
     gap: 1rem;
     margin-top: 0;
   }
 
-  .hub__header__links {
+  .header__links {
     gap: 1rem;
   }
 
-  .hub__header__link {
+  .header__link {
     font-size: 1rem;
     line-height: 1.5rem;
   }
@@ -421,64 +421,64 @@ $motion: $motion-duration $motion-easing;
 // Mobile
 
 @media (width < 48rem) {
-  .hub__header {
+  .header {
     height: 6.5rem;
   }
 
-  .hub__header__compact {
+  .header__compact {
     height: 4rem;
   }
 
-  .hub__header__nav {
+  .header__nav {
     display: none;
   }
 
-  .hub__header__toggle {
+  .header__toggle {
     display: block;
   }
 
-  .hub__header__menu {
+  .header__menu {
     display: block;
   }
 }
 
 @media (width < 64rem) and (height < 32rem) and (orientation: landscape) {
-  .hub__header__brand {
+  .header__brand {
     justify-content: flex-start;
   }
 
-  .hub__header__logo {
+  .header__logo {
     width: 10rem;
     margin-top: 0;
   }
 
   // The lighthouse sits behind the links on short landscape screens.
-  .hub__header:not(.hub__header__compact) .hub__header__link {
+  .header:not(.header__compact) .header__link {
     text-shadow: 0 0.0625rem 0.25rem rgb(0 0 0 / 45%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hub__header,
-  .hub__header__brand,
-  .hub__header__logo,
-  .hub__header__logo__image,
-  .hub__header__nav,
-  .hub__header__link,
-  .hub__header__language,
-  .hub__header__toggle,
-  .hub__header__toggle__bar,
-  .hub__header__menu,
-  .hub__header__menu__link {
+  .header,
+  .header__brand,
+  .header__logo,
+  .header__logo__image,
+  .header__nav,
+  .header__link,
+  .header__language,
+  .header__toggle,
+  .header__toggle__bar,
+  .header__menu,
+  .header__menu__link {
     transition: none;
   }
 
-  .hub__header__toggle:hover,
-  .hub__header__menu__link:hover {
+  .header__toggle:hover,
+  .header__menu__link:hover {
     transform: none;
   }
 
-  .hub__header__menu__divider__dot {
+  .header__menu__divider__dot {
     animation: none;
   }
 }

@@ -21,7 +21,7 @@ button {
   min-width: 6rem;
 }
 
-:host(.app__button__light) {
+:host(.button__light) {
   @include mat.button-overrides(
     (
       filled-container-color: #ffffff,
@@ -39,7 +39,7 @@ button {
 }
 
 // The light border adds to the size instead of eating into it.
-:host(.app__button__light.app__button__small) {
+:host(.button__light.button__small) {
   @include mat.button-overrides(
     (
       filled-container-height: 1.875rem,
@@ -47,7 +47,7 @@ button {
   );
 }
 
-:host(.app__button__light.app__button__large) {
+:host(.button__light.button__large) {
   @include mat.button-overrides(
     (
       filled-container-height: 3.875rem,
@@ -55,9 +55,9 @@ button {
   );
 }
 
-:host(.app__button__small),
-:host(.app__button__medium),
-:host(.app__button__large) {
+:host(.button__small),
+:host(.button__medium),
+:host(.button__large) {
   @include mat.button-overrides(
     (
       filled-label-text-size: 0.9375rem,
@@ -70,7 +70,7 @@ button {
   );
 }
 
-:host(.app__button__small) {
+:host(.button__small) {
   @include mat.button-overrides(
     (
       filled-container-height: 1.75rem,
@@ -81,7 +81,7 @@ button {
   );
 }
 
-:host(.app__button__medium) {
+:host(.button__medium) {
   @include mat.button-overrides(
     (
       filled-container-height: 2rem,
@@ -92,7 +92,7 @@ button {
   );
 }
 
-:host(.app__button__large) {
+:host(.button__large) {
   @include mat.button-overrides(
     (
       filled-container-height: 3.75rem,
@@ -103,7 +103,7 @@ button {
   );
 }
 
-:host(.app__button__full__width) {
+:host(.button__full__width) {
   display: flex;
   width: 100%;
 

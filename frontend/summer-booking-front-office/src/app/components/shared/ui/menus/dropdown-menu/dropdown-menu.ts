@@ -32,7 +32,7 @@ export class DropdownMenu {
 
   protected readonly panelClass = computed(() =>
     this.iconOnly()
-      ? 'app__dropdown__menu__panel app__dropdown__menu__panel__icon__only'
-      : 'app__dropdown__menu__panel',
+      ? 'dropdown__menu__panel dropdown__menu__panel__icon__only'
+      : 'dropdown__menu__panel',
   );
 }

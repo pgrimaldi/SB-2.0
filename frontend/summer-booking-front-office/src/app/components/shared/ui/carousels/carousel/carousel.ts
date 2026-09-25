@@ -3,9 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  Directive,
   ElementRef,
-  TemplateRef,
   afterNextRender,
   computed,
   contentChildren,
@@ -15,12 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-
-/** Marks each slide of an `app-carousel`: `<app-card-hub *appCarouselSlide />`. */
-@Directive({ selector: '[appCarouselSlide]' })
-export class CarouselSlide {
-  readonly template = inject(TemplateRef);
-}
+import { CarouselSlide } from './carousel-slide';
 
 /** Share of a slide the pointer must travel before a swipe changes position. */
 const SWIPE_THRESHOLD = 0.2;
@@ -153,7 +146,7 @@ export class Carousel {
 
   private measure(): void {
     const viewport = this.viewport().nativeElement;
-    const firstSlide = viewport.querySelector('.app__carousel__slide');
+    const firstSlide = viewport.querySelector('.carousel__slide');
     this.viewportWidth.set(viewport.clientWidth);
     this.slideWidth.set(firstSlide?.getBoundingClientRect().width ?? 0);
     this.goTo(this.index());

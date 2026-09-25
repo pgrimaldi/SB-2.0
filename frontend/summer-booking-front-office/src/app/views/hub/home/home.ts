@@ -2,14 +2,15 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { HubFooter } from '../../../components/hub/footer/footer';
-import { HubHeader } from '../../../components/hub/header/header';
+import { Footer } from '../../../components/hub/footer/footer';
+import { Header } from '../../../components/hub/header/header';
 import { I18nText } from '../../../components/shared/i18n/i18n-text/i18n-text';
 import { EqualHeight } from '../../../components/shared/layout/equal-height/equal-height';
 import { ButtonComponent } from '../../../components/shared/ui/buttons/button/button.component';
 import { CardHub } from '../../../components/shared/ui/cards/card-hub/card-hub';
 import { CardLogo } from '../../../components/shared/ui/cards/card-logo/card-logo';
-import { Carousel, CarouselSlide } from '../../../components/shared/ui/carousels/carousel/carousel';
+import { Carousel } from '../../../components/shared/ui/carousels/carousel/carousel';
+import { CarouselSlide } from '../../../components/shared/ui/carousels/carousel/carousel-slide';
 
 @Component({
   selector: 'app-home',
@@ -20,8 +21,8 @@ import { Carousel, CarouselSlide } from '../../../components/shared/ui/carousels
     Carousel,
     CarouselSlide,
     EqualHeight,
-    HubFooter,
-    HubHeader,
+    Footer,
+    Header,
     I18nText,
     TranslatePipe,
   ],
