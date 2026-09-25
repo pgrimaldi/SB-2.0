@@ -19,13 +19,14 @@ export class EqualHeight {
   constructor() {
     const destroyRef = inject(DestroyRef);
 
+    // Any size change of the observed elements (width, texts, fonts) triggers a new measure;
+    // it runs in the next frame, so it converges without resize-observer loops.
     afterNextRender(() => {
       this.equalize();
       if (typeof ResizeObserver === 'undefined') {
         return;
       }
-      // Any size change of the observed elements (width, texts, fonts) triggers a new measure;
-      // it runs in the next frame, so it converges without resize-observer loops.
+
       const observer = new ResizeObserver(() => this.schedule());
       this.elements().forEach((element) => observer.observe(element));
       destroyRef.onDestroy(() => {
