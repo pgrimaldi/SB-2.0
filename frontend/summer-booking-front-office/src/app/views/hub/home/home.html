@@ -5,12 +5,21 @@
     <picture class="hero__media">
       <source
         media="(width < 64rem) and (orientation: portrait)"
-        srcset="/assets/images/hub/hero-beach-mobile.png"
+        srcset="
+          /assets/images/hub/hero-beach-mobile-863.webp   863w,
+          /assets/images/hub/hero-beach-mobile-1290.webp 1290w
+        "
+        sizes="100vw"
       />
       <img
-        src="/assets/images/hub/hero-beach.webp"
-        width="1966"
-        height="1031"
+        src="/assets/images/hub/hero-beach-1920.webp"
+        srcset="
+          /assets/images/hub/hero-beach-1920.webp 1920w,
+          /assets/images/hub/hero-beach-3840.webp 3840w
+        "
+        sizes="100vw"
+        width="1920"
+        height="1080"
         fetchpriority="high"
         decoding="async"
         [alt]="'home.hero.image.alt' | translate"
