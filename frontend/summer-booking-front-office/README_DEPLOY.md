@@ -62,8 +62,7 @@ Per il routing SPA non configurare un fallback globale che trasformi ogni rispos
 Per le sole route previste come ingressi diretti, associare al comportamento predefinito una CloudFront Function sull'evento **Viewer request** che riscriva esclusivamente queste URL verso `/index.html`:
 
 - `/` e `/home`, che reindirizzano alla home nella lingua preferita;
-- `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate;
-- `/login`.
+- `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate.
 
 Qualsiasi altra risposta 403 o 404 deve rimanere visibile e mantenere il proprio status. Codice della funzione:
 
@@ -71,7 +70,6 @@ Qualsiasi altra risposta 403 o 404 deve rimanere visibile e mantenere il proprio
 // Route SPA servite da index.html. Aggiornare questo elenco quando si aggiunge una route raggiungibile da URL diretto.
 var SPA_ROUTES = {
     '/': true,
-    '/login': true,
     '/home': true,
     '/it': true,
     '/it/home': true,

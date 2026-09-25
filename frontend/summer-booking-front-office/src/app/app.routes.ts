@@ -24,13 +24,6 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'login',
-    loadComponent: () =>
-      import('./views/login/login-view.component').then(
-        (component) => component.LoginViewComponent,
-      ),
-  },
-  {
     path: 'bookings',
     canActivate: [authGuard],
     loadComponent: () =>

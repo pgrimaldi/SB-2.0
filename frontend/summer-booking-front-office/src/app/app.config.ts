@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
       fallbackLang: 'it',
       lang: 'it',
     }),
-    // Pages without a language in the URL (login, private area) use the saved preference.
+    // Pages without a language in the URL (private area) use the saved preference.
     provideAppInitializer(() => {
       const languageService = inject(LanguageService);
       const preferred = languageService.preferred();

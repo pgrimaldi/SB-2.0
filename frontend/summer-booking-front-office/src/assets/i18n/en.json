@@ -1,7 +1,4 @@
 {
-  "app": {
-    "name": "Summer Booking"
-  },
   "language": {
     "selector": "Select language",
     "names": {
@@ -14,16 +11,6 @@
     "next": "Next",
     "position": "Go to position {{position}}",
     "slide": "{{index}} of {{total}}"
-  },
-  "login": {
-    "title": "Sign in",
-    "description": "Sign-in will be connected to the authentication service when the backend is available.",
-    "action": "Sign in",
-    "language": {
-      "selector": "Select language",
-      "italian": "Italian",
-      "english": "English"
-    }
   },
   "hub": {
     "header": {
