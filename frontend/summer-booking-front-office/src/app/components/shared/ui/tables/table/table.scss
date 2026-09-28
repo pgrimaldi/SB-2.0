@@ -1,0 +1,87 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+
+  @include mat.table-overrides(
+    (
+      background-color: #ffffff,
+      header-container-height: 3.8125rem,
+      header-headline-color: #ffffff,
+      header-headline-size: 0.875rem,
+      header-headline-line-height: 1.3125rem,
+      header-headline-weight: 500,
+      header-headline-tracking: normal,
+      row-item-container-height: 3.8125rem,
+      row-item-label-text-color: #1c1c1c,
+      row-item-label-text-size: 0.875rem,
+      row-item-label-text-line-height: 1.3125rem,
+      row-item-label-text-weight: 500,
+      row-item-label-text-tracking: normal,
+      row-item-outline-width: 0,
+    )
+  );
+}
+
+// Rounded corners; wide tables scroll sideways instead of overflowing the page.
+.table {
+  overflow-x: auto;
+  border-radius: 1.875rem;
+}
+
+.table__header {
+  background: #233c7d;
+}
+
+.table__row:nth-child(even) {
+  background: #e9ecf3;
+}
+
+.table__cell {
+  padding-inline: 0.9375rem;
+  white-space: nowrap;
+
+  &:first-child {
+    padding-left: 1.875rem;
+  }
+}
+
+// Large screens (from 1920px): bigger text and cells, as in the reference.
+@media (width >= 120rem) {
+  :host {
+    @include mat.table-overrides(
+      (
+        header-container-height: 5.25rem,
+        header-headline-size: 1.125rem,
+        header-headline-line-height: 1.5rem,
+        row-item-container-height: 5.25rem,
+        row-item-label-text-size: 1.125rem,
+        row-item-label-text-line-height: 1.5rem,
+      )
+    );
+  }
+
+  .table__cell {
+    padding-inline: 3.125rem 1.875rem;
+
+    &:first-child {
+      padding-left: 1.875rem;
+    }
+  }
+}
+
+@media (width < 48rem) {
+  :host {
+    @include mat.table-overrides(
+      (
+        header-container-height: 2.8125rem,
+        row-item-container-height: 2.3125rem,
+      )
+    );
+  }
+
+  .table__cell,
+  .table__cell:first-child {
+    padding-inline: 0.5rem;
+  }
+}

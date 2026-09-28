@@ -76,6 +76,25 @@
       }
     }
   },
+  "management": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      }
+    },
+    "menu": {
+      "label": "Menu del gestionale",
+      "warehouse": "Magazzino",
+      "logout": "Disconnetti"
+    },
+    "warehouse": {
+      "table": {
+        "name": "Articoli",
+        "total": "Totale",
+        "available": "Disponibili"
+      }
+    }
+  },
   "home": {
     "page": {
       "title": "Gestionale per Stabilimenti Balneari: Prova Summer Booking Hub",
@@ -173,9 +192,6 @@
       "carousel": "Testate che parlano di noi",
       "logo": "Logo {{name}}"
     }
-  },
-  "bookings": {
-    "title": "Prenotazioni"
   },
   "not-found": {
     "page": {

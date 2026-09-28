@@ -1,0 +1,17 @@
+<div class="table">
+  <table mat-table [dataSource]="rows()">
+    @for (column of columns(); track column.field) {
+      <ng-container [matColumnDef]="column.field">
+        <th *matHeaderCellDef mat-header-cell class="table__cell" [style.text-align]="column.align">
+          <span [appI18nText]="column.header"></span>
+        </th>
+        <td *matCellDef="let row" mat-cell class="table__cell" [style.text-align]="column.align">
+          {{ row[column.field] }}
+        </td>
+      </ng-container>
+    }
+
+    <tr *matHeaderRowDef="fields()" mat-header-row class="table__header"></tr>
+    <tr *matRowDef="let row; columns: fields()" mat-row class="table__row"></tr>
+  </table>
+</div>

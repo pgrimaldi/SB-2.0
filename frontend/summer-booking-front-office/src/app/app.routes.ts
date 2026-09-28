@@ -24,20 +24,6 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'beachmap',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./views/beachmap/beachmap').then((component) => component.Beachmap),
-  },
-  {
-    path: 'bookings',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./views/bookings/bookings-view.component').then(
-        (component) => component.BookingsViewComponent,
-      ),
-  },
-  {
     path: 'home',
     pathMatch: 'full',
     redirectTo: redirectToPreferredLanguage('home'),
@@ -46,6 +32,26 @@ export const routes: Routes = [
     path: '',
     pathMatch: 'full',
     redirectTo: redirectToPreferredLanguage('home'),
+  },
+  // Private management area. After the redirects, so that "/" still goes to the home;
+  // the session is checked on entering the layout and on every page change inside it.
+  {
+    path: '',
+    canActivate: [authGuard],
+    canActivateChild: [authGuard],
+    loadComponent: () => import('./views/layout/layout').then((component) => component.Layout),
+    children: [
+      {
+        path: 'beachmap',
+        loadComponent: () =>
+          import('./views/beachmap/beachmap').then((component) => component.Beachmap),
+      },
+      {
+        path: 'warehouse',
+        loadComponent: () =>
+          import('./views/warehouse/warehouse').then((component) => component.Warehouse),
+      },
+    ],
   },
   {
     path: '**',

@@ -1,0 +1,26 @@
+<aside class="management__menu">
+  <nav class="management__menu__links" [attr.aria-label]="'management.menu.label' | translate">
+    @for (link of links; track link.route) {
+      <a
+        class="management__menu__item"
+        routerLinkActive="management__menu__item__active"
+        ariaCurrentWhenActive="page"
+        [routerLink]="link.route"
+      >
+        <img class="management__menu__icon" [src]="link.icon" width="80" height="80" alt="" />
+        <span class="management__menu__label" [appI18nText]="link.label"></span>
+      </a>
+    }
+  </nav>
+
+  <button class="management__menu__item" type="button" (click)="logout()">
+    <img
+      class="management__menu__icon"
+      src="/assets/images/logout.svg"
+      width="70"
+      height="70"
+      alt=""
+    />
+    <span class="management__menu__label" appI18nText="management.menu.logout"></span>
+  </button>
+</aside>

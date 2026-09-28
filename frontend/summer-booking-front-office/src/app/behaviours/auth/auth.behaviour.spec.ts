@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { AuthBehaviour } from './auth.behaviour';
 
 describe('AuthBehaviour', () => {
@@ -45,12 +46,16 @@ describe('AuthBehaviour', () => {
     expect(localStorage.getItem('sb.session')).toBeNull();
   });
 
-  it('should forget the session on sign out', () => {
+  it('should forget the session everywhere and go back to the home on logout', () => {
     const session = reload();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     session.start(response, true);
-    session.end();
+    session.logout();
 
     expect(session.isAuthenticated()).toBe(false);
+    expect(localStorage.getItem('sb.session')).toBeNull();
+    expect(sessionStorage.getItem('sb.session')).toBeNull();
+    expect(navigate).toHaveBeenCalledWith('/');
     expect(reload().isAuthenticated()).toBe(false);
   });
 });

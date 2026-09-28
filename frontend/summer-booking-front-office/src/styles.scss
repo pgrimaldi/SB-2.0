@@ -15,9 +15,9 @@
 
 html {
   height: 100%;
-  // Fluid scale for large screens: 1rem stays at the user's default size up to 1920px wide
-  // (1080p, identical to the reference), then grows linearly up to 2x at 3840px (2160p).
-  font-size: clamp(100%, 0.8333vw, 200%);
+  // Fluid scale for large screens: 1rem stays at the user's default size up to 2560px wide
+  // (identical to the reference up to 1440p), then grows linearly up to 1.5x at 3840px (2160p).
+  font-size: clamp(100%, 0.625vw, 150%);
   @include mat.theme(
     (
       color: (

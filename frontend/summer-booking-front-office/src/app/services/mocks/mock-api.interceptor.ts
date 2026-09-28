@@ -1,21 +1,19 @@
-import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
-import { delay, of } from 'rxjs';
+import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { signInMock } from './auth/auth.mock';
-import { BOOKING_MOCKS } from './bookings/booking.mock';
+import { warehouseMock } from './warehouse/warehouse.mock';
 
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   if (!environment.features.useMocks) {
     return next(request);
   }
 
-  const bookingsEndpoint = `${environment.apiBaseUrl}/bookings`;
-  if (request.method === 'GET' && request.url === bookingsEndpoint) {
-    return of(new HttpResponse({ status: 200, body: BOOKING_MOCKS })).pipe(delay(150));
-  }
-
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/auth/signin`) {
     return signInMock(request);
+  }
+
+  if (request.method === 'GET' && request.url === `${environment.apiBaseUrl}/warehouse/list`) {
+    return warehouseMock(request);
   }
 
   return next(request);

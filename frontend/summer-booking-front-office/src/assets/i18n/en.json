@@ -76,6 +76,25 @@
       }
     }
   },
+  "management": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      }
+    },
+    "menu": {
+      "label": "Management menu",
+      "warehouse": "Warehouse",
+      "logout": "Sign out"
+    },
+    "warehouse": {
+      "table": {
+        "name": "Items",
+        "total": "Total",
+        "available": "Available"
+      }
+    }
+  },
   "home": {
     "page": {
       "title": "Beach Resort Management Software: Try Summer Booking Hub",
@@ -173,9 +192,6 @@
       "carousel": "Press coverage",
       "logo": "{{name}} logo"
     }
-  },
-  "bookings": {
-    "title": "Bookings"
   },
   "not-found": {
     "page": {

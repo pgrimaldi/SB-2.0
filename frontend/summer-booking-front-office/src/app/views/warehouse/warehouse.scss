@@ -1,0 +1,13 @@
+// Centered table, at least 1rem from the edges: it shrinks when the page does (e.g. menu open).
+.warehouse {
+  width: min(100% - 2rem, 69.375rem);
+  margin-inline: auto;
+  padding-block: 4.125rem 4.5rem;
+}
+
+// Large screens (from 1920px): wider table, as in the reference.
+@media (width >= 120rem) {
+  .warehouse {
+    width: min(100% - 2rem, 95.125rem);
+  }
+}

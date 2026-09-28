@@ -76,7 +76,8 @@ var SPA_ROUTES = {
     '/it/home': true,
     '/en': true,
     '/en/home': true,
-    '/beachmap': true
+    '/beachmap': true,
+    '/warehouse': true
 };
 
 function handler(event) {
@@ -94,7 +95,7 @@ Route servite:
 
 - `/` e `/home`, che reindirizzano alla home nella lingua preferita;
 - `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate;
-- `/beachmap`, area privata: senza sessione l'app rimanda alla home, con una sessione salvata il refresh resta sulla pagina.
+- `/beachmap` e `/warehouse`, area privata: senza sessione l'app rimanda alla home, con una sessione salvata il refresh resta sulla pagina.
 
 Ogni nuova route pubblica dell'app va aggiunta sia qui sia nella funzione pubblicata. La modifica della funzione non richiede invalidazione della cache.
 

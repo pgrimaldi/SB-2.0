@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthUser, SignInResponse } from '../../entities/auth/credentials';
 
 interface StoredSession {
@@ -15,11 +16,12 @@ const REMEMBERED_SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;
 /**
  * Signed-in session answered by the server. Standard session: it survives page reloads and ends
  * when the tab or the browser is closed. With "remember me" it is kept for 30 days.
- * Either way it ends on sign out.
+ * Either way it ends on logout.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthBehaviour {
   private readonly window = inject(DOCUMENT).defaultView;
+  private readonly router = inject(Router);
   private readonly session = signal<StoredSession | null>(this.read());
 
   readonly user = () => this.current()?.user ?? null;
@@ -39,9 +41,14 @@ export class AuthBehaviour {
     this.session.set(session);
   }
 
-  end(): void {
+  /**
+   * Signs out: forgets token and user (memory, sessionStorage and localStorage) and goes back to the
+   * home. The session lives only there: the service worker caches app files, never API answers.
+   */
+  logout(): void {
     this.clear();
     this.session.set(null);
+    void this.router.navigateByUrl('/');
   }
 
   /** The session while it is still valid, otherwise null. */
