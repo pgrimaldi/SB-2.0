@@ -70,13 +70,14 @@ $motion: 525ms ease-in-out;
   transition: opacity 200ms;
 }
 
-// Expanded column (desktop only).
+// Expanded column (desktop only): while the mouse is over it, or while a menu item has keyboard
+// focus (:focus-visible), so a mouse click does not keep it open after the pointer leaves.
 @media (width >= 64rem) {
-  :host(:focus-within) {
+  :host(:has(:focus-visible)) {
     width: 9.375rem;
   }
 
-  :host(:focus-within) .management__menu__label {
+  :host(:has(:focus-visible)) .management__menu__label {
     opacity: 1;
   }
 
