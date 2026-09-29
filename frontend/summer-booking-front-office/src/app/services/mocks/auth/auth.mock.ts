@@ -1,13 +1,14 @@
 import { HttpErrorResponse, HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, from, of, switchMap, throwError } from 'rxjs';
 import { AuthSession, AuthUser, SignInRequest } from '../../../entities/auth/credentials';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 // Test account of the mock. Only the SHA-256 of the password is kept: the readable password
 // never appears in the repository nor in the published JavaScript.
 const MOCK_ACCOUNT = {
   username: 'summertest465@gmail.com',
-  /** `catalog.properties.public_id` of "La Capannina" (sample DB, property 10848). */
-  idProperty: '01a0cc35-02f7-7ef1-904e-fe147403481b',
+  /** The invented "Lido Demo" property. */
+  idProperty: DEMO_PROPERTY.publicId,
   roles: ['Manager'],
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
@@ -68,10 +69,13 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   return ok(request, newSession());
 };
 
-/** `POST /api/auth/logout`: revokes the session (refresh cookie and access token). */
+/** `POST /api/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
 export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  if (!readCookie()) {
+    return unauthorized(request, 'No valid session');
+  }
   removeCookie();
-  accessTokens.delete(bearer(request) ?? '');
+  accessTokens.clear(); // the one test account: its access tokens stop working with the session
   return of(new HttpResponse<void>({ status: 204, url: request.url })).pipe(delay(150));
 };
 

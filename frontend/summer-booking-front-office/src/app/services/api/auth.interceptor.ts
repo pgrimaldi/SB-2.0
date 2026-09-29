@@ -10,13 +10,15 @@ import { environment } from '../../../environments/environment';
 import { AuthBehaviour } from '../../behaviours/auth/auth.behaviour';
 import { isApiUrl } from './api-url';
 
-/** Requests that work with the refresh cookie, not with the access token. */
+/**
+ * Requests that work with the refresh cookie, not with the access token: they never carry it and a
+ * 401 there is never followed by a refresh (on logout it could reopen the session being closed).
+ */
 const COOKIE_ENDPOINTS = [
   `${environment.apiBaseUrl}/auth/signin`,
   `${environment.apiBaseUrl}/auth/refresh`,
+  `${environment.apiBaseUrl}/auth/logout`,
 ];
-/** Never repeated after a 401: a refresh there could reopen the session being closed. */
-const LOGOUT_ENDPOINT = `${environment.apiBaseUrl}/auth/logout`;
 
 /**
  * Sends the access token (`Authorization: Bearer`) to our API only, never to other hosts. When the
@@ -35,8 +37,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 
   return send(request, token, next).pipe(
     catchError((error: unknown) => {
-      const expired = error instanceof HttpErrorResponse && error.status === 401;
-      if (!expired || request.url === LOGOUT_ENDPOINT) {
+      if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
         return throwError(() => error);
       }
       return auth.refresh().pipe(

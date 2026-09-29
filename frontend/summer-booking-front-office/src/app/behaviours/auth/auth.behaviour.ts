@@ -1,7 +1,19 @@
 import { DOCUMENT } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, finalize, firstValueFrom, map, of, shareReplay } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  finalize,
+  firstValueFrom,
+  map,
+  of,
+  retry,
+  shareReplay,
+  throwError,
+  timer,
+} from 'rxjs';
 import { AuthSession, AuthUser } from '../../entities/auth/credentials';
 import { AuthService } from '../../services/api/auth/auth.service';
 
@@ -15,6 +27,8 @@ const SIGNED_IN_KEY = 'sb.signed-in';
 const LEGACY_SESSION_KEY = 'sb.session';
 /** Tells the other tabs of this browser that the user signed out. */
 const CHANNEL_NAME = 'sb-auth';
+/** Pause before trying the logout once more (network or server hiccups). */
+export const LOGOUT_RETRY_DELAY = 1000;
 
 interface Session {
   accessToken: string;
@@ -28,7 +42,8 @@ interface Session {
  *   rotation and revocation: scripts cannot read it;
  * - at start-up and when the access token expires, a new one comes from the cookie (`refresh`).
  * Standard session: it ends when the browser is closed; "remember me": it lasts as long as the server
- * says. Logout revokes it on the server and in every tab.
+ * says. Logout ends the session only once the server has revoked it (OWASP: server-side
+ * invalidation), then in every tab.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthBehaviour {
@@ -99,12 +114,29 @@ export class AuthBehaviour {
     return this.refreshing;
   }
 
-  /** Signs out: revokes the session on the server, forgets it here and in the other tabs, goes home. */
-  logout(): void {
-    // Sent before forgetting the token; whatever the answer, the session ends here.
-    this.authService.logout().subscribe({ error: () => undefined });
-    this.channel?.postMessage('logout');
-    this.expire();
+  /**
+   * Signs out: asks the server to revoke the session (one more try after a failure). Only when the
+   * server confirms, or answers that there is no session left (401), the session ends here and in the
+   * other tabs and the user goes home. Resolves false when the server could not be reached: the user
+   * is then still signed in, as the session is still valid on the server.
+   */
+  async logout(): Promise<boolean> {
+    const revoked = await firstValueFrom(
+      this.authService.logout().pipe(
+        retry({
+          count: 1,
+          delay: (error) =>
+            isSessionOver(error) ? throwError(() => error) : timer(LOGOUT_RETRY_DELAY),
+        }),
+        map(() => true),
+        catchError((error) => of(isSessionOver(error))),
+      ),
+    );
+    if (revoked) {
+      this.channel?.postMessage('logout');
+      this.expire();
+    }
+    return revoked;
   }
 
   /** The session is over (refused by the server, or ended in another tab): back to the home. */
@@ -131,4 +163,9 @@ export class AuthBehaviour {
       return undefined;
     }
   }
+}
+
+/** 401 from the logout: the server has no valid session for this browser any more. */
+function isSessionOver(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && error.status === 401;
 }

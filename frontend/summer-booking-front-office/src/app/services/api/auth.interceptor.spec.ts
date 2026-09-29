@@ -76,11 +76,13 @@ describe('authInterceptor', () => {
     expect(navigate).toHaveBeenCalledWith('/');
   });
 
-  it('should never renew the session while logging out', () => {
+  it('should log out with the cookie only, and never renew the session while logging out', () => {
     const { http, controller } = setup();
 
     http.post(`${api}/auth/logout`, null).subscribe({ error: () => undefined });
-    controller.expectOne(`${api}/auth/logout`).flush(null, unauthorized);
+    const logout = controller.expectOne(`${api}/auth/logout`);
+    expect(logout.request.headers.has('Authorization')).toBe(false);
+    logout.flush(null, unauthorized);
 
     controller.expectNone(`${api}/auth/refresh`);
   });

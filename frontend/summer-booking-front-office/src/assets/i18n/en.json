@@ -21,6 +21,9 @@
       "range": "{{start}} – {{end}} of {{total}}"
     }
   },
+  "alert": {
+    "close": "Got it"
+  },
   "field": {
     "password": {
       "show": "Show password"
@@ -131,6 +134,10 @@
       "label": "Management menu",
       "warehouse": "Warehouse",
       "logout": "Sign out"
+    },
+    "logout-failed": {
+      "title": "Sign-out failed",
+      "text": "We couldn't close your session on the server, so you are still signed in. Check your internet connection and press “Sign out” again."
     },
     "warehouse": {
       "table": {

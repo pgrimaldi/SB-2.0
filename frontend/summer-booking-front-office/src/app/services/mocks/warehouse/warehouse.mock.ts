@@ -5,107 +5,161 @@ import { ManagementRequest } from '../../../entities/management/management-reque
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { MOCK_PROPERTIES } from '../properties/properties.mock';
 
-/** `catalog.properties.public_id` of "La Capannina" (sample DB, property 10848), owner of the articles. */
-const PROPERTY_ID = '01a0cc35-02f7-7ef1-904e-fe147403481b';
-
-/** Rows of `catalog.inventory_items` (sample DB, property 10848 "La Capannina"). */
+/**
+ * Rows of `catalog.inventory_items`: same structure as the sample DB, invented values (no data of
+ * real properties). Each article belongs to one property (`propertyId` → `MOCK_PROPERTIES.id`):
+ * a request only ever sees the articles of its own property.
+ */
 const INVENTORY_ITEMS = [
   {
-    publicId: '01a0cc35-c471-74d6-bd87-130a7999659e',
+    id: 1,
+    publicId: '276a67d2-d0eb-47f5-8223-4804b9a9dcf9',
+    propertyId: 1,
     name: 'Ombrellone',
-    totalQuantity: 50,
-    lowStockThreshold: 2,
+    totalQuantity: 60,
+    lowStockThreshold: 3,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c471-7e2b-bc9e-f8d718b7ff0c',
+    id: 2,
+    publicId: 'c87770a7-74b6-4dc4-a5ad-e193e136bacb',
+    propertyId: 1,
     name: 'Lettino',
-    totalQuantity: 90,
-    lowStockThreshold: 2,
+    totalQuantity: 120,
+    lowStockThreshold: 5,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c471-7853-845b-20fc0e05889d',
+    id: 3,
+    publicId: '62fbf392-641d-4b01-9776-70e76c0cbaec',
+    propertyId: 1,
     name: 'Sdraio',
-    totalQuantity: 90,
+    totalQuantity: 80,
+    lowStockThreshold: 4,
+    isActive: true,
+    deletedAt: null,
+  },
+  {
+    id: 4,
+    publicId: 'f58474cb-a7b7-47c0-99ba-cd2cb30d28a0',
+    propertyId: 1,
+    name: 'Cabina',
+    totalQuantity: 24,
     lowStockThreshold: 2,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c472-7480-8c46-c2d87d3211ce',
-    name: 'Spogliatoio',
-    totalQuantity: 2,
+    id: 5,
+    publicId: '94072a53-679f-4293-bce5-f6b677722826',
+    propertyId: 1,
+    name: 'Doccia',
+    totalQuantity: 8,
     lowStockThreshold: 1,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c472-7623-a54a-0a809e2a51c4',
-    name: 'Doccia',
-    totalQuantity: 10,
-    lowStockThreshold: 2,
+    id: 6,
+    publicId: '9eb8eed7-189f-4931-84fa-8e9a8f9e2502',
+    propertyId: 1,
+    name: 'Spogliatoio',
+    totalQuantity: 4,
+    lowStockThreshold: 1,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c472-70db-9d72-452b5e61e402',
-    name: 'Cabina',
-    totalQuantity: 99,
-    lowStockThreshold: 2,
-    isActive: true,
-    deletedAt: null,
-  },
-  // Added to reach 12 rows and show the pagination: the first four are articles of other
-  // properties of the sample, the last two are invented.
-  {
-    publicId: '01a0cc35-c470-7946-9f38-91bea44b9813',
+    id: 7,
+    publicId: 'd1d37a6c-7fc5-42dc-ad1b-6b95289bc868',
+    propertyId: 1,
     name: 'Parcheggio',
-    totalQuantity: 50,
+    totalQuantity: 35,
+    lowStockThreshold: 3,
+    isActive: true,
+    deletedAt: null,
+  },
+  {
+    id: 8,
+    publicId: 'afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62',
+    propertyId: 1,
+    name: 'Lettino XL',
+    totalQuantity: 16,
     lowStockThreshold: 2,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c471-7889-9904-6f78f769ca81',
-    name: 'Lettino king size',
-    totalQuantity: 20,
-    lowStockThreshold: 2,
-    isActive: true,
-    deletedAt: null,
-  },
-  {
-    publicId: '01a0cc35-c471-7eb3-bd4b-66ea4660122f',
+    id: 9,
+    publicId: '98fe5970-0b1b-45bf-a889-36c9887dd0a6',
+    propertyId: 1,
     name: 'Sedia regista',
     totalQuantity: 30,
-    lowStockThreshold: 2,
+    lowStockThreshold: 3,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c473-7f04-80b2-7eb15997dbd2',
-    name: 'Ombrellone Speciale1',
-    totalQuantity: 100,
+    id: 10,
+    publicId: '2049d281-27d1-4e06-befa-ccb6ea8a245e',
+    propertyId: 1,
+    name: 'Ombrellone grande',
+    totalQuantity: 12,
     lowStockThreshold: 1,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c474-7a10-8d11-0b6c2f9e5a01',
+    id: 11,
+    publicId: '2ae86856-ad2a-4dcd-81c7-fc77a97ee053',
+    propertyId: 1,
     name: 'Tenda',
-    totalQuantity: 15,
+    totalQuantity: 10,
     lowStockThreshold: 1,
     isActive: true,
     deletedAt: null,
   },
   {
-    publicId: '01a0cc35-c474-7b22-9e33-1c7d3a0f6b02',
+    id: 12,
+    publicId: 'de7c776e-9353-42d6-8035-4839dc6e6f9f',
+    propertyId: 1,
     name: 'Tavolino',
-    totalQuantity: 40,
+    totalQuantity: 25,
     lowStockThreshold: 2,
+    isActive: true,
+    deletedAt: null,
+  },
+  {
+    id: 13,
+    publicId: 'ab6add1e-605e-4ff4-94fb-338bcf60240e',
+    propertyId: 1,
+    name: 'Ombrellone vecchio',
+    totalQuantity: 5,
+    lowStockThreshold: 1,
+    isActive: false,
+    deletedAt: null,
+  },
+  {
+    id: 14,
+    publicId: '62bf4a2c-db53-4140-b885-4f9c62ae40d4',
+    propertyId: 2,
+    name: 'Pedalò',
+    totalQuantity: 6,
+    lowStockThreshold: 1,
+    isActive: true,
+    deletedAt: null,
+  },
+  {
+    id: 15,
+    publicId: '43fb6129-4be6-46e0-905e-f42e14425c43',
+    propertyId: 2,
+    name: 'Canoa',
+    totalQuantity: 4,
+    lowStockThreshold: 1,
     isActive: true,
     deletedAt: null,
   },
@@ -113,15 +167,16 @@ const INVENTORY_ITEMS = [
 
 type ConsumptionState = 'held' | 'confirmed' | 'released';
 
-/** Invented rows of `booking.resource_consumptions` for today (the sample has none for the warehouse). */
+/** Rows of `booking.resource_consumptions` for today: same structure as the sample DB, invented values. */
 const TODAY_CONSUMPTIONS: { resourceId: string; quantity: number; state: ConsumptionState }[] = [
-  { resourceId: '01a0cc35-c471-74d6-bd87-130a7999659e', quantity: 12, state: 'confirmed' },
-  { resourceId: '01a0cc35-c471-7e2b-bc9e-f8d718b7ff0c', quantity: 20, state: 'confirmed' },
-  { resourceId: '01a0cc35-c471-7e2b-bc9e-f8d718b7ff0c', quantity: 4, state: 'held' },
-  { resourceId: '01a0cc35-c471-7853-845b-20fc0e05889d', quantity: 7, state: 'confirmed' },
-  { resourceId: '01a0cc35-c472-70db-9d72-452b5e61e402', quantity: 3, state: 'released' },
-  { resourceId: '01a0cc35-c470-7946-9f38-91bea44b9813', quantity: 9, state: 'confirmed' },
-  { resourceId: '01a0cc35-c474-7a10-8d11-0b6c2f9e5a01', quantity: 2, state: 'held' },
+  { resourceId: '276a67d2-d0eb-47f5-8223-4804b9a9dcf9', quantity: 15, state: 'confirmed' },
+  { resourceId: 'c87770a7-74b6-4dc4-a5ad-e193e136bacb', quantity: 30, state: 'confirmed' },
+  { resourceId: 'c87770a7-74b6-4dc4-a5ad-e193e136bacb', quantity: 6, state: 'held' },
+  { resourceId: '62fbf392-641d-4b01-9776-70e76c0cbaec', quantity: 10, state: 'confirmed' },
+  { resourceId: 'f58474cb-a7b7-47c0-99ba-cd2cb30d28a0', quantity: 5, state: 'released' },
+  { resourceId: 'd1d37a6c-7fc5-42dc-ad1b-6b95289bc868', quantity: 7, state: 'confirmed' },
+  { resourceId: '2ae86856-ad2a-4dcd-81c7-fc77a97ee053', quantity: 3, state: 'held' },
+  { resourceId: '62bf4a2c-db53-4140-b885-4f9c62ae40d4', quantity: 2, state: 'confirmed' },
 ];
 
 /** Largest page the mock serves, as a real server would cap it. */
@@ -129,7 +184,7 @@ const MAX_PAGE_SIZE = 100;
 
 /**
  * `POST /api/warehouse/list` with `ManagementRequest & PageRequest` in the body: one page of the
- * property's active articles with today's availability (released consumptions free the stock);
+ * active articles of the requested property (never of other properties) with today's availability (released consumptions free the stock);
  * `search` is looked for in the name. The period is validated but the invented consumptions are
  * all for today. 401 without a valid access token; 400 when dates or part of the day are missing or invalid.
  */
@@ -153,11 +208,12 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = (body.search ?? '').trim().toLowerCase();
-  const ownProperty = body.idProperty === PROPERTY_ID;
+  // The property of the request, by its public id; an unknown one has no articles.
+  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
 
   const items: WarehouseItem[] = INVENTORY_ITEMS.filter(
     (item) =>
-      ownProperty &&
+      item.propertyId === property?.id &&
       item.isActive &&
       item.deletedAt === null &&
       item.name.toLowerCase().includes(search),

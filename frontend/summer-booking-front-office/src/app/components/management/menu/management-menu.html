@@ -13,7 +13,13 @@
     }
   </nav>
 
-  <button class="management__menu__item" type="button" (click)="logout()">
+  <button
+    class="management__menu__item"
+    type="button"
+    [disabled]="loggingOut()"
+    [attr.aria-busy]="loggingOut()"
+    (click)="logout()"
+  >
     <img
       class="management__menu__icon"
       src="/assets/images/logout.svg"
@@ -24,3 +30,9 @@
     <span class="management__menu__label" appI18nText="management.menu.logout"></span>
   </button>
 </aside>
+
+<app-alert-popup
+  title="management.logout-failed.title"
+  text="management.logout-failed.text"
+  [(open)]="logoutFailed"
+/>

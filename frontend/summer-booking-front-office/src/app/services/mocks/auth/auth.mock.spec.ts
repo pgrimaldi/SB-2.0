@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../api/auth/auth.service';
 import { mockApiInterceptor } from '../mock-api.interceptor';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 describe('auth mock', () => {
   const TEST_PASSWORD_SHA256 = '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5';
@@ -47,7 +48,7 @@ describe('auth mock', () => {
 
     expect(session.user).toEqual({
       email: USERNAME,
-      idProperty: '01a0cc35-02f7-7ef1-904e-fe147403481b',
+      idProperty: DEMO_PROPERTY.publicId,
       roles: ['Manager'],
     });
     expect(session.accessToken).toBeTruthy();
@@ -76,7 +77,10 @@ describe('auth mock', () => {
     expect(await status(auth.refresh())).toBe(401);
   });
 
-  it('should refuse the refresh without a sign-in', async () => {
-    expect(await status(service().refresh())).toBe(401);
+  it('should refuse refresh and logout without a sign-in', async () => {
+    const auth = service();
+
+    expect(await status(auth.refresh())).toBe(401);
+    expect(await status(auth.logout())).toBe(401);
   });
 });

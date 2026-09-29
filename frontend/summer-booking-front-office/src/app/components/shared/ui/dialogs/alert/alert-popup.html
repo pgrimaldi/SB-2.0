@@ -1,0 +1,14 @@
+<ng-template #content>
+  <div class="alert__popup">
+    <img
+      class="alert__popup__icon"
+      src="/assets/images/warning.svg"
+      width="48"
+      height="48"
+      alt=""
+    />
+    <h2 class="alert__popup__title" [id]="id + '-title'">{{ title() | translate }}</h2>
+    <p class="alert__popup__text" [id]="id + '-text'">{{ text() | translate }}</p>
+    <app-button (clicked)="close()">{{ 'alert.close' | translate }}</app-button>
+  </div>
+</ng-template>

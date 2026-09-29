@@ -83,3 +83,12 @@ Aggiornato al 29/09/2026.
   https://owasp.org/www-project-secure-headers/
 - **IETF – OAuth 2.0 for Browser-Based Applications**: il documento di riferimento per la gestione dei token nelle app nel browser (contesto della scelta memoria + cookie HttpOnly).
   https://datatracker.ietf.org/doc/draft-ietf-oauth-browser-based-apps/
+
+## Mock: credenziali e sessione (da fare quando avremo il backend)
+
+Rischi accettati finché l'ambiente DEV usa i mock (dati finti, ambiente da dismettere). La build di produzione non contiene nulla dei mock.
+
+- **Hash della password di test nel codice**: `services/mocks/auth/auth.mock.ts` e due test (`auth.mock.spec.ts`, `warehouse.mock.spec.ts`) contengono l'hash SHA-256 (senza sale) della password dell'account di test, che finisce anche nella build DEV. È nella cronologia Git dal commit `6cb15e5` (già su GitHub).
+  - Già deciso: la password reale va cambiata ovunque fosse usata (sito di riferimento, repository, casella email); dopo, l'hash non apre più nulla di reale.
+  - Da fare: togliere l'hash dai file facendo accettare al mock solo l'username di test con qualunque password (il 401 si prova con un username diverso). Non riscrivere la cronologia Git: non serve dopo il cambio password.
+- **Refresh del mock aggirabile**: il "cookie" simulato del mock è in `sessionStorage`/`localStorage` e il mock non verifica il `refreshToken`; chi apre DEV può crearlo a mano e ottenere una sessione. Non è un problema del prodotto: con il backend il refresh token è in un cookie `HttpOnly` validato dal server (hash in `identity.access_refresh_tokens`). Se DEV deve restare pubblico a lungo, l'unica protezione reale è limitarne l'accesso (login davanti al sito su CloudFront o IP ammessi).

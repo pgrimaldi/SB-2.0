@@ -21,6 +21,9 @@
       "range": "{{start}} – {{end}} di {{total}}"
     }
   },
+  "alert": {
+    "close": "Ho capito"
+  },
   "field": {
     "password": {
       "show": "Mostra password"
@@ -131,6 +134,10 @@
       "label": "Menu del gestionale",
       "warehouse": "Magazzino",
       "logout": "Disconnetti"
+    },
+    "logout-failed": {
+      "title": "Disconnessione Fallita",
+      "text": "Non siamo riusciti a chiudere la tua sessione sul server, quindi sei ancora connesso. Controlla la connessione a internet e premi di nuovo «Disconnetti»."
     },
     "warehouse": {
       "table": {

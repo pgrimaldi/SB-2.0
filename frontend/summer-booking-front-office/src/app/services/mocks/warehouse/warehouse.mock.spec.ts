@@ -8,10 +8,11 @@ import { AuthService } from '../../api/auth/auth.service';
 import { authInterceptor } from '../../api/auth.interceptor';
 import { WarehouseService } from '../../api/warehouse/warehouse.service';
 import { mockApiInterceptor } from '../mock-api.interceptor';
+import { DEMO_PROPERTY, MOCK_PROPERTIES } from '../properties/properties.mock';
 
-/** "La Capannina", 29/09/2026, full day. */
+/** The invented "Lido Demo" property, 29/09/2026, full day. */
 const MANAGEMENT: ManagementRequest = {
-  idProperty: '01a0cc35-02f7-7ef1-904e-fe147403481b',
+  idProperty: DEMO_PROPERTY.publicId,
   datetimeFrom: '2026-09-29T00:00:00.000Z',
   datetimeTo: '2026-09-29T23:59:59.999Z',
   bookingDayType: BookingDayType.FullDay,
@@ -59,12 +60,12 @@ describe('warehouseMock', () => {
     );
     const byName = Object.fromEntries(rows.map((item) => [item.name, item]));
 
-    expect(total).toBe(12);
+    expect(total).toBe(12); // the inactive article is left out
     expect(rows.length).toBe(10);
-    expect(byName['Lettino']).toEqual(expect.objectContaining({ total: 90, available: 66 }));
-    expect(byName['Cabina']).toEqual(expect.objectContaining({ total: 99, available: 99 }));
-    expect(byName['Ombrellone'].idArticle).toBe('01a0cc35-c471-74d6-bd87-130a7999659e');
-    expect(byName['Ombrellone'].thresholdNumber).toBe(2);
+    expect(byName['Lettino']).toEqual(expect.objectContaining({ total: 120, available: 84 }));
+    expect(byName['Cabina']).toEqual(expect.objectContaining({ total: 24, available: 24 })); // released
+    expect(byName['Ombrellone'].idArticle).toBe('276a67d2-d0eb-47f5-8223-4804b9a9dcf9');
+    expect(byName['Ombrellone'].thresholdNumber).toBe(3);
   });
 
   it('should answer only the requested page, with the total of all pages', async () => {
@@ -75,9 +76,9 @@ describe('warehouseMock', () => {
     expect(page.total).toBe(12);
     expect(page.rows.map((item) => item.name)).toEqual([
       'Doccia',
-      'Cabina',
+      'Spogliatoio',
       'Parcheggio',
-      'Lettino king size',
+      'Lettino XL',
     ]);
   });
 
@@ -87,15 +88,25 @@ describe('warehouseMock', () => {
     );
 
     expect(page.total).toBe(2);
-    expect(page.rows.map((item) => item.name)).toEqual(['Lettino', 'Lettino king size']);
+    expect(page.rows.map((item) => item.name)).toEqual(['Lettino', 'Lettino XL']);
   });
 
-  it('should answer no articles for another property', async () => {
-    const page = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, idProperty: 'another', page: 1, pageSize: 10 }),
+  it('should answer only the articles of the requested property, none for an unknown one', async () => {
+    const warehouse = await service();
+    const other = await firstValueFrom(
+      warehouse.list({
+        ...MANAGEMENT,
+        idProperty: MOCK_PROPERTIES[1].publicId,
+        page: 1,
+        pageSize: 10,
+      }),
+    );
+    const unknown = await firstValueFrom(
+      warehouse.list({ ...MANAGEMENT, idProperty: 'unknown', page: 1, pageSize: 10 }),
     );
 
-    expect(page).toEqual({ total: 0, rows: [] });
+    expect(other.rows.map((item) => item.name)).toEqual(['Pedalò', 'Canoa']);
+    expect(unknown).toEqual({ total: 0, rows: [] });
   });
 
   it('should refuse a period whose end comes before its start', async () => {

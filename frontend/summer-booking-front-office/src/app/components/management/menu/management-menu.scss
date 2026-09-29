@@ -45,6 +45,11 @@ $motion: 525ms ease-in-out;
   text-decoration: none;
   cursor: pointer;
 
+  // Logout waiting for the server.
+  &:disabled {
+    cursor: wait;
+  }
+
   &:focus-visible {
     outline: 0.125rem solid #233c7d;
     outline-offset: -0.125rem;

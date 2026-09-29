@@ -226,7 +226,7 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
 
 1. **install**: installa la versione di Node indicata in `.nvmrc` ed esegue `npm ci`.
 2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` siano impostate.
-3. **build**: `ng build --configuration $BUILD_CONFIGURATION`. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` (API mock attive, es. login di test), `production` usa `environment.prod.ts` (mock spenti).
+3. **build**: `ng build --configuration $BUILD_CONFIGURATION`. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
 4. **post_build**: se la build è fallita si ferma senza toccare il bucket e il sito online resta quello precedente. Altrimenti carica i file con intestazioni `Cache-Control` diverse, che CloudFront inoltra al browser:
    - bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;

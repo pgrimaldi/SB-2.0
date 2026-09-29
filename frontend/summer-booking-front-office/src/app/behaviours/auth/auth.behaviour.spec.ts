@@ -1,9 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { Subject, of, throwError } from 'rxjs';
+import { Subject, defer, of, throwError } from 'rxjs';
 import { AuthSession } from '../../entities/auth/credentials';
 import { AuthService } from '../../services/api/auth/auth.service';
-import { AuthBehaviour } from './auth.behaviour';
+import { AuthBehaviour, LOGOUT_RETRY_DELAY } from './auth.behaviour';
 
 describe('AuthBehaviour', () => {
   const session = (accessToken: string): AuthSession => ({
@@ -97,17 +98,71 @@ describe('AuthBehaviour', () => {
     expect(tokens).toEqual(['fresh', 'fresh']);
   });
 
-  it('should revoke the session on the server, forget it here and go back to the home on logout', () => {
+  it('should end the session here and go back to the home once the server has revoked it', async () => {
     const auth = load();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     auth.start(session('first'), true);
 
-    auth.logout();
+    expect(await auth.logout()).toBe(true);
 
-    expect(server.logout).toHaveBeenCalled();
+    expect(server.logout).toHaveBeenCalledTimes(1);
     expect(auth.isAuthenticated()).toBe(false);
     expect(storedValues()).toBe('');
     expect(navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('should consider the logout done when the server has no session left (401)', async () => {
+    const auth = load();
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('first'), true);
+    server.logout.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
+
+    expect(await auth.logout()).toBe(true);
+    expect(auth.isAuthenticated()).toBe(false);
+  });
+
+  it('should keep the user signed in when the server cannot revoke the session, after one more try', async () => {
+    vi.useFakeTimers();
+    const auth = load();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('first'), true);
+    let attempts = 0; // each try is a new subscription to the same request, as with HttpClient
+    server.logout.mockReturnValue(
+      defer(() => {
+        attempts++;
+        return throwError(() => new HttpErrorResponse({ status: 0 }));
+      }),
+    );
+
+    const result = auth.logout();
+    await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY);
+
+    expect(await result).toBe(false);
+    expect(attempts).toBe(2);
+    expect(auth.token()).toBe('first');
+    expect(storedValues()).toContain('true'); // still marked as signed in
+    expect(navigate).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('should succeed when the second try reaches the server', async () => {
+    vi.useFakeTimers();
+    const auth = load();
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('first'), true);
+    let attempts = 0;
+    server.logout.mockReturnValue(
+      defer(() =>
+        ++attempts === 1 ? throwError(() => new HttpErrorResponse({ status: 503 })) : of(undefined),
+      ),
+    );
+
+    const result = auth.logout();
+    await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY);
+
+    expect(await result).toBe(true);
+    expect(auth.isAuthenticated()).toBe(false);
+    vi.useRealTimers();
   });
 
   it('should remove the token that older versions kept in storage', () => {

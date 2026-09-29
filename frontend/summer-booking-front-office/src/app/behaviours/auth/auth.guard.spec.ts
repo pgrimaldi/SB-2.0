@@ -61,7 +61,7 @@ describe('authGuard', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/beachmap');
 
-    TestBed.inject(AuthBehaviour).logout();
+    await TestBed.inject(AuthBehaviour).logout();
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe('/it/home');
 
