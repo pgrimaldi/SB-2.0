@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { isApiUrl } from './api-url';
 
 /** Header with the user's IANA time zone (e.g. `Europe/Rome`), as expected by our API. */
 export const TIME_ZONE_HEADER = 'X-Time-Zone';
@@ -9,8 +9,7 @@ export const TIME_ZONE_HEADER = 'X-Time-Zone';
  * UTC and the server uses the zone to find the user's days (daylight saving time included).
  */
 export const timeZoneInterceptor: HttpInterceptorFn = (request, next) => {
-  const base = environment.apiBaseUrl;
-  if (request.url !== base && !request.url.startsWith(`${base}/`)) {
+  if (!isApiUrl(request.url)) {
     return next(request);
   }
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

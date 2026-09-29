@@ -1,3 +1,4 @@
+<!-- Dates are not typed by hand: a click (or Enter) on a date opens its calendar. -->
 <div class="datepicker">
   <img class="datepicker__icon" src="/assets/images/calendar.svg" width="22" height="22" alt="" />
 
@@ -12,9 +13,11 @@
   <input
     class="datepicker__input"
     [attr.aria-label]="'management.header.datepicker.start.label' | translate"
+    readonly
     [matDatepicker]="startCalendar"
     [value]="start()"
     (click)="startCalendar.open()"
+    (keydown.enter)="startCalendar.open()"
     (dateChange)="setStart($event.value)"
   />
   <button
@@ -39,9 +42,11 @@
   <input
     class="datepicker__input"
     [attr.aria-label]="'management.header.datepicker.end.label' | translate"
+    readonly
     [matDatepicker]="endCalendar"
     [value]="end()"
     (click)="endCalendar.open()"
+    (keydown.enter)="endCalendar.open()"
     (dateChange)="setEnd($event.value)"
   />
   <button

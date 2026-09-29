@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { startOfToday } from 'date-fns';
+import { DateAdapter } from '@angular/material/core';
 import { debounceTime } from 'rxjs';
 import { BookingDayType } from '../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../entities/management/management-request';
@@ -21,10 +21,11 @@ interface Dates {
 @Injectable()
 export class ManagementFiltersBehaviour {
   private readonly auth = inject(AuthBehaviour);
+  private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
   /** Days the management pages refer to (calendar days); today by default. */
-  readonly startDate = signal(startOfToday());
-  readonly endDate = signal(startOfToday());
+  readonly startDate = signal(this.dateAdapter.today());
+  readonly endDate = signal(this.dateAdapter.today());
   /** Part of the day the management pages refer to; full day by default. */
   readonly period = signal(BookingDayType.FullDay);
   /** Text searched in the page's table (empty: no filter). */

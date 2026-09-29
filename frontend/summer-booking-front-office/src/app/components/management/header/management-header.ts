@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { DateAdapter } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { isToday, startOfToday } from 'date-fns';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
@@ -21,6 +21,7 @@ export class ManagementHeader {
   /** Dates, period and search live in the filters behaviour, read by the management pages. */
   protected readonly filters = inject(ManagementFiltersBehaviour);
   private readonly auth = inject(AuthBehaviour);
+  private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
   protected readonly periods: readonly SelectOption<BookingDayType>[] = [
     { key: BookingDayType.FullDay, value: 'management.header.period.full-day' },
@@ -33,12 +34,16 @@ export class ManagementHeader {
     () => this.auth.user()?.email.charAt(0).toUpperCase() ?? '',
   );
 
-  protected readonly showsToday = computed(
-    () => isToday(this.filters.startDate()) && isToday(this.filters.endDate()),
-  );
+  protected readonly showsToday = computed(() => {
+    const today = this.dateAdapter.today();
+    return (
+      this.dateAdapter.sameDate(this.filters.startDate(), today) &&
+      this.dateAdapter.sameDate(this.filters.endDate(), today)
+    );
+  });
 
   protected resetToToday(): void {
-    this.filters.startDate.set(startOfToday());
-    this.filters.endDate.set(startOfToday());
+    this.filters.startDate.set(this.dateAdapter.today());
+    this.filters.endDate.set(this.dateAdapter.today());
   }
 }

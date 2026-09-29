@@ -1,6 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
+import { DATE_FORMATS } from '../../../../behaviours/i18n/date-language.behaviour';
 import { Datepicker } from './datepicker';
 
 @Component({
@@ -14,7 +16,9 @@ class DatepickerHost {
 
 describe('Datepicker', () => {
   const setup = async () => {
-    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
+    TestBed.configureTestingModule({
+      providers: [provideTranslateService(), provideNativeDateAdapter(DATE_FORMATS)],
+    });
     const fixture = TestBed.createComponent(DatepickerHost);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
@@ -30,7 +34,7 @@ describe('Datepicker', () => {
     return { element, click, days };
   };
 
-  it('should show both dates as dd/mm/yyyy', async () => {
+  it('should show both dates as the current language writes them (Italian: dd/mm/yyyy)', async () => {
     const { element } = await setup();
 
     const values = [...element.querySelectorAll('input')].map((input) => input.value);
@@ -54,20 +58,9 @@ describe('Datepicker', () => {
     expect(days()).toEqual([28, 29]);
   });
 
-  it('should accept a typed date and bring back the current one when the text is not a date', async () => {
-    const { element, days } = await setup();
-    const input = element.querySelector('input')!;
-    const type = async (text: string) => {
-      input.value = text;
-      input.dispatchEvent(new Event('input'));
-      input.dispatchEvent(new Event('change'));
-      await Promise.resolve();
-    };
+  it('should not accept typed dates: the calendar opens instead', async () => {
+    const { element } = await setup();
 
-    await type('25/09/2026');
-    expect(days()).toEqual([25, 29]);
-
-    await type('40/99/2026');
-    expect(days()).toEqual([25, 29]);
+    element.querySelectorAll('input').forEach((input) => expect(input.readOnly).toBe(true));
   });
 });

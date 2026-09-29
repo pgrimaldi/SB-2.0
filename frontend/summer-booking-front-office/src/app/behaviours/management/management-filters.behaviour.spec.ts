@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { BookingDayType } from '../../entities/enums/booking-day-type';
 import { AuthBehaviour } from '../auth/auth.behaviour';
 import { DATES_DEBOUNCE, ManagementFiltersBehaviour } from './management-filters.behaviour';
@@ -12,9 +13,15 @@ describe('ManagementFiltersBehaviour', () => {
   });
 
   const signedIn = () => {
-    TestBed.configureTestingModule({ providers: [ManagementFiltersBehaviour] });
+    TestBed.configureTestingModule({
+      providers: [ManagementFiltersBehaviour, provideNativeDateAdapter()],
+    });
     TestBed.inject(AuthBehaviour).start(
-      { token: 'token', user: { email: 'u@e.it', idProperty: 'property-1' } },
+      {
+        accessToken: 'token',
+        expiresIn: 900,
+        user: { email: 'u@e.it', idProperty: 'property-1', roles: [] },
+      },
       false,
     );
     return TestBed.inject(ManagementFiltersBehaviour);
@@ -56,7 +63,9 @@ describe('ManagementFiltersBehaviour', () => {
   });
 
   it('should send nothing once the user has signed out', () => {
-    TestBed.configureTestingModule({ providers: [ManagementFiltersBehaviour] });
+    TestBed.configureTestingModule({
+      providers: [ManagementFiltersBehaviour, provideNativeDateAdapter()],
+    });
 
     expect(TestBed.inject(ManagementFiltersBehaviour).request()).toBeNull();
   });

@@ -99,7 +99,11 @@ export class LoginDialog {
     this.pending.set(true);
     this.error.set(null);
     this.authService
-      .signIn({ username: this.email().trim(), password: this.password() })
+      .signIn({
+        username: this.email().trim(),
+        password: this.password(),
+        remember: this.remember(),
+      })
       .subscribe({
         next: (response) => {
           this.authBehaviour.start(response, this.remember());

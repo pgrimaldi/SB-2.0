@@ -2,7 +2,4 @@
 export const environment = {
   production: true,
   apiBaseUrl: '/api',
-  features: {
-    useMocks: true,
-  },
 } as const;

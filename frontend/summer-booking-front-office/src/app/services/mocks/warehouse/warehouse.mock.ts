@@ -4,6 +4,7 @@ import { BookingDayType } from '../../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
+import { isAuthorized, unauthorized } from '../auth/auth.mock';
 
 /** `catalog.properties.public_id` of "La Capannina" (sample DB, property 10848), owner of the articles. */
 const PROPERTY_ID = '01a0cc35-02f7-7ef1-904e-fe147403481b';
@@ -130,9 +131,12 @@ const MAX_PAGE_SIZE = 100;
  * `POST /api/warehouse/list` with `ManagementRequest & PageRequest` in the body: one page of the
  * property's active articles with today's availability (released consumptions free the stock);
  * `search` is looked for in the name. The period is validated but the invented consumptions are
- * all for today. 400 when dates or part of the day are missing or invalid.
+ * all for today. 401 without a valid access token; 400 when dates or part of the day are missing or invalid.
  */
 export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
   const body = (request.body ?? {}) as Partial<ManagementRequest & PageRequest>;
   if (!isValidPeriod(body)) {
     return throwError(

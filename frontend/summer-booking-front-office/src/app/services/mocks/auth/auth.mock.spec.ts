@@ -1,36 +1,82 @@
 import { HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from '../../api/auth/auth.service';
 import { mockApiInterceptor } from '../mock-api.interceptor';
 
-describe('signInMock', () => {
+describe('auth mock', () => {
   const TEST_PASSWORD_SHA256 = '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5';
+  const USERNAME = 'summertest465@gmail.com';
 
-  const signIn = (username: string, password: string) => {
+  const service = () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(withInterceptors([mockApiInterceptor]))],
     });
-    return firstValueFrom(TestBed.inject(AuthService).signIn({ username, password }));
+    return TestBed.inject(AuthService);
   };
 
-  afterEach(() => vi.restoreAllMocks());
-
-  it('should sign in the test account', async () => {
-    // The readable password is not in the code: the hash of the typed one is made to match.
+  /** The readable password is not in the code: the hash of the typed one is made to match. */
+  const acceptAnyPassword = () => {
     const bytes = TEST_PASSWORD_SHA256.match(/../g)!.map((hex) => parseInt(hex, 16));
     vi.spyOn(crypto.subtle, 'digest').mockResolvedValue(new Uint8Array(bytes).buffer);
+  };
 
-    const response = await signIn(' SummerTest465@gmail.com ', 'typed password');
+  /** Status of the error answer, or 0 when the request succeeded. */
+  const status = (request: Observable<unknown>) =>
+    firstValueFrom(request).then(
+      () => 0,
+      (error: HttpErrorResponse) => error.status,
+    );
 
-    expect(response.user.email).toBe('summertest465@gmail.com');
-    expect(response.token).toBeTruthy();
+  afterEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+
+  it('should sign in the test account with user data and a short-lived access token', async () => {
+    acceptAnyPassword();
+
+    const session = await firstValueFrom(
+      service().signIn({
+        username: ' SummerTest465@gmail.com ',
+        password: 'typed',
+        remember: false,
+      }),
+    );
+
+    expect(session.user).toEqual({
+      email: USERNAME,
+      idProperty: '01a0cc35-02f7-7ef1-904e-fe147403481b',
+      roles: ['Manager'],
+    });
+    expect(session.accessToken).toBeTruthy();
+    expect(session.expiresIn).toBe(900);
   });
 
   it('should refuse wrong credentials with 401', async () => {
-    const error = await signIn('summertest465@gmail.com', 'wrong').catch((e: unknown) => e);
+    const auth = service();
 
-    expect(error).toBeInstanceOf(HttpErrorResponse);
-    expect((error as HttpErrorResponse).status).toBe(401);
+    expect(
+      await status(auth.signIn({ username: USERNAME, password: 'wrong', remember: false })),
+    ).toBe(401);
+  });
+
+  it('should renew the access token from the (simulated) refresh cookie until logout', async () => {
+    acceptAnyPassword();
+    const auth = service();
+    const first = await firstValueFrom(
+      auth.signIn({ username: USERNAME, password: 'typed', remember: true }),
+    );
+
+    const second = await firstValueFrom(auth.refresh());
+    expect(second.accessToken).not.toBe(first.accessToken);
+
+    await firstValueFrom(auth.logout());
+    expect(await status(auth.refresh())).toBe(401);
+  });
+
+  it('should refuse the refresh without a sign-in', async () => {
+    expect(await status(service().refresh())).toBe(401);
   });
 });

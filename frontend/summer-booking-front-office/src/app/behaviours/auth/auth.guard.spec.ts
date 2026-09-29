@@ -1,14 +1,21 @@
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { routes } from '../../app.routes';
+import { mockApiInterceptor } from '../../services/mocks/mock-api.interceptor';
 import { AuthBehaviour } from './auth.behaviour';
 
 describe('authGuard', () => {
   const signIn = () =>
     TestBed.inject(AuthBehaviour).start(
-      { token: 'token', user: { email: 'u@e.it', idProperty: 'property-1' } },
+      {
+        accessToken: 'token',
+        expiresIn: 900,
+        user: { email: 'u@e.it', idProperty: 'property-1', roles: [] },
+      },
       false,
     );
 
@@ -16,7 +23,12 @@ describe('authGuard', () => {
     localStorage.clear();
     sessionStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideRouter(routes), provideTranslateService({ fallbackLang: 'it' })],
+      providers: [
+        provideRouter(routes),
+        provideTranslateService({ fallbackLang: 'it' }),
+        provideNativeDateAdapter(),
+        provideHttpClient(withInterceptors([mockApiInterceptor])),
+      ],
     });
   });
 

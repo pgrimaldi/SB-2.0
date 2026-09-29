@@ -1,64 +1,120 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { Subject, of, throwError } from 'rxjs';
+import { AuthSession } from '../../entities/auth/credentials';
+import { AuthService } from '../../services/api/auth/auth.service';
 import { AuthBehaviour } from './auth.behaviour';
 
 describe('AuthBehaviour', () => {
-  const DAY = 24 * 60 * 60 * 1000;
-  const response = {
-    token: 'token',
-    user: { email: 'user@example.com', idProperty: 'property-1' },
-  };
+  const session = (accessToken: string): AuthSession => ({
+    accessToken,
+    expiresIn: 900,
+    user: { email: 'user@example.com', idProperty: 'property-1', roles: ['Manager'] },
+  });
+  let server: { refresh: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-09-25T10:00:00Z'));
+    server = { refresh: vi.fn(), logout: vi.fn().mockReturnValue(of(undefined)) };
   });
 
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
 
   /** A new page load of the app. */
-  const reload = () => {
+  const load = () => {
     TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: server }] });
     return TestBed.inject(AuthBehaviour);
   };
 
-  it('should keep a standard session across reloads, only for the open tab', () => {
-    reload().start(response, false);
+  const storedValues = () =>
+    [...Object.values(localStorage), ...Object.values(sessionStorage)].join(' ');
 
-    vi.advanceTimersByTime(40 * DAY);
-    expect(reload().token()).toBe('token');
-    expect(sessionStorage.getItem('sb.session')).not.toBeNull();
-    expect(localStorage.getItem('sb.session')).toBeNull();
+  it('should keep the access token only in memory, never in browser storage', () => {
+    load().start(session('secret-access-token'), true);
 
-    // Closing the tab or the browser empties sessionStorage.
-    sessionStorage.clear();
-    expect(reload().isAuthenticated()).toBe(false);
+    expect(storedValues()).not.toContain('secret-access-token');
   });
 
-  it('should keep a remembered session for 30 days, also after closing the browser', () => {
-    reload().start(response, true);
-    sessionStorage.clear();
+  it('should get the session back from the refresh cookie on the next page load', async () => {
+    load().start(session('first'), false);
+    server.refresh.mockReturnValue(of(session('second')));
 
-    vi.advanceTimersByTime(29 * DAY);
-    expect(reload().isAuthenticated()).toBe(true);
+    const auth = load();
+    await auth.restore();
 
-    vi.advanceTimersByTime(2 * DAY);
-    expect(reload().isAuthenticated()).toBe(false);
-    expect(localStorage.getItem('sb.session')).toBeNull();
+    expect(auth.token()).toBe('second');
+    expect(auth.user()?.idProperty).toBe('property-1');
   });
 
-  it('should forget the session everywhere and go back to the home on logout', () => {
-    const session = reload();
+  it('should ask the server nothing at start-up when nobody signed in in this browser', async () => {
+    await load().restore();
+
+    expect(server.refresh).not.toHaveBeenCalled();
+  });
+
+  it('should end a standard session with the browser, keep a remembered one', async () => {
+    load().start(session('first'), false);
+    sessionStorage.clear(); // browser closed
+    await load().restore();
+    expect(server.refresh).not.toHaveBeenCalled();
+
+    load().start(session('first'), true);
+    sessionStorage.clear();
+    server.refresh.mockReturnValue(of(session('second')));
+    const auth = load();
+    await auth.restore();
+    expect(auth.isAuthenticated()).toBe(true);
+  });
+
+  it('should sign out when the server refuses the refresh cookie (expired or revoked)', async () => {
+    load().start(session('first'), true);
+    server.refresh.mockReturnValue(throwError(() => new Error('401')));
+
+    const auth = load();
+    await auth.restore();
+
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(storedValues()).toBe('');
+  });
+
+  it('should ask for one new token even when several requests need it at once', () => {
+    const auth = load();
+    const answer = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(answer);
+    const tokens: (string | null)[] = [];
+
+    auth.refresh().subscribe((token) => tokens.push(token));
+    auth.refresh().subscribe((token) => tokens.push(token));
+    answer.next(session('fresh'));
+    answer.complete();
+
+    expect(server.refresh).toHaveBeenCalledTimes(1);
+    expect(tokens).toEqual(['fresh', 'fresh']);
+  });
+
+  it('should revoke the session on the server, forget it here and go back to the home on logout', () => {
+    const auth = load();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
-    session.start(response, true);
-    session.logout();
+    auth.start(session('first'), true);
 
-    expect(session.isAuthenticated()).toBe(false);
-    expect(localStorage.getItem('sb.session')).toBeNull();
-    expect(sessionStorage.getItem('sb.session')).toBeNull();
+    auth.logout();
+
+    expect(server.logout).toHaveBeenCalled();
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(storedValues()).toBe('');
     expect(navigate).toHaveBeenCalledWith('/');
-    expect(reload().isAuthenticated()).toBe(false);
+  });
+
+  it('should remove the token that older versions kept in storage', () => {
+    localStorage.setItem('sb.session', '{"token":"old"}');
+
+    load();
+
+    expect(localStorage.getItem('sb.session')).toBeNull();
   });
 });
