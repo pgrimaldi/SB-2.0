@@ -1,8 +1,14 @@
 <div class="table">
-  <table mat-table [dataSource]="rows()">
+  <table mat-table class="table__grid" [dataSource]="rows()">
     @for (column of columns(); track column.field) {
       <ng-container [matColumnDef]="column.field">
-        <th *matHeaderCellDef mat-header-cell class="table__cell" [style.text-align]="column.align">
+        <th
+          *matHeaderCellDef
+          mat-header-cell
+          class="table__cell"
+          [style.text-align]="column.align"
+          [style.width.%]="column.width"
+        >
           <span [appI18nText]="column.header"></span>
         </th>
         <td *matCellDef="let row" mat-cell class="table__cell" [style.text-align]="column.align">

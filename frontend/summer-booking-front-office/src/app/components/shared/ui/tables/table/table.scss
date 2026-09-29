@@ -55,6 +55,13 @@
   border-radius: 1.875rem;
 }
 
+// Column widths come only from the columns (`width`, or equal shares), never from the rows shown:
+// they stay the same on every page.
+.table__grid {
+  width: 100%;
+  table-layout: fixed;
+}
+
 .table__header {
   background: #233c7d;
 }
@@ -64,7 +71,9 @@
 }
 
 .table__cell {
+  overflow: hidden;
   padding-inline: 0.9375rem;
+  text-overflow: ellipsis; // a text longer than its column ends with "…" instead of widening it
   white-space: nowrap;
 
   &:first-child {

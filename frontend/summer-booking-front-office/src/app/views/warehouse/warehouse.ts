@@ -50,7 +50,7 @@ export class Warehouse {
   );
 
   protected readonly columns: readonly TableColumn<WarehouseItem>[] = [
-    { field: 'name', header: 'management.warehouse.table.name' },
+    { field: 'name', header: 'management.warehouse.table.name', width: 50 },
     { field: 'total', header: 'management.warehouse.table.total', align: 'center' },
     { field: 'available', header: 'management.warehouse.table.available', align: 'center' },
   ];

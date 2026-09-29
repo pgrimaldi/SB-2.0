@@ -12,6 +12,11 @@ export interface TableColumn<T> {
   header: string;
   /** Horizontal alignment of header and cells; start by default. */
   align?: 'start' | 'center' | 'end';
+  /**
+   * Share of the table width, in percent (e.g. 40). Columns without it split the rest equally; with
+   * no widths at all every column is the same. Widths never depend on the rows shown.
+   */
+  width?: number;
 }
 
 /**

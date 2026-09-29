@@ -43,6 +43,18 @@ describe('Table', () => {
       'center',
     );
   });
+
+  it('should size the columns only from their widths, whatever the rows shown', async () => {
+    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
+    const fixture = TestBed.createComponent(TableHost);
+    fixture.componentInstance.columns[0].width = 40;
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const headers = [...element.querySelectorAll<HTMLElement>('thead th')];
+
+    expect(headers.map((header) => header.style.width)).toEqual(['40%', '']); // the rest shares 60%
+    expect(element.querySelector('table')?.classList).toContain('table__grid'); // fixed layout
+  });
 });
 
 @Component({
