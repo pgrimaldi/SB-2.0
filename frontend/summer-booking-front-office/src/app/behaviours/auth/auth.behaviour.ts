@@ -61,7 +61,16 @@ export class AuthBehaviour {
     return session.expiresAt !== undefined && session.expiresAt <= Date.now();
   }
 
-  /** Session saved by a previous page load; an expired one is removed. */
+  /** A stored value with all the fields of a session (older or altered values are not). */
+  private isComplete(session: Partial<StoredSession> | null): session is StoredSession {
+    return (
+      typeof session?.token === 'string' &&
+      typeof session.user?.email === 'string' &&
+      typeof session.user.idProperty === 'string'
+    );
+  }
+
+  /** Session saved by a previous page load; an expired or incomplete one is removed. */
   private read(): StoredSession | null {
     for (const kind of ['session', 'local'] as const) {
       const stored = this.storage(kind)?.getItem(STORAGE_KEY);
@@ -70,7 +79,7 @@ export class AuthBehaviour {
       }
       try {
         const session = JSON.parse(stored) as StoredSession;
-        if (!this.isExpired(session)) {
+        if (this.isComplete(session) && !this.isExpired(session)) {
           return session;
         }
       } catch {

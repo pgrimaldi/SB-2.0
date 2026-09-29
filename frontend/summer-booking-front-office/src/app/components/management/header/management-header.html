@@ -6,4 +6,56 @@
     height="342"
     [alt]="'management.header.logo.alt' | translate"
   />
+
+  <div class="management__header__filters">
+    <app-datepicker [(start)]="filters.startDate" [(end)]="filters.endDate" />
+
+    <!-- "Oggi" while the dates are today; otherwise "Non oggi", which brings both dates back to today. -->
+    <button
+      class="management__header__today"
+      type="button"
+      [class.management__header__today__other]="!showsToday()"
+      [disabled]="showsToday()"
+      (click)="resetToToday()"
+    >
+      @if (showsToday()) {
+        <img src="/assets/images/today.svg" width="19" height="20" alt="" />
+        <span appI18nText="management.header.today.today"></span>
+      } @else {
+        <img src="/assets/images/not-today.svg" width="18" height="20" alt="" />
+        <span appI18nText="management.header.today.other"></span>
+      }
+    </button>
+
+    <app-select
+      label="management.header.period.label"
+      [options]="periods"
+      [(selected)]="filters.period"
+    />
+
+    <app-search-field
+      placeholder="management.header.search.placeholder"
+      (search)="filters.search.set($event)"
+    />
+  </div>
+
+  <div class="management__header__actions">
+    <app-icon-button
+      label="management.header.actions.configuration"
+      icon="/assets/images/configuration.svg"
+    />
+    <app-icon-button
+      label="management.header.actions.settings"
+      icon="/assets/images/settings.svg"
+    />
+    <app-icon-button
+      label="management.header.actions.assistant"
+      icon="/assets/images/assistant.svg"
+    />
+    <app-icon-button
+      label="management.header.actions.notifications"
+      icon="/assets/images/notifications.svg"
+    />
+    <app-icon-button label="management.header.actions.account">{{ initial() }}</app-icon-button>
+  </div>
 </header>

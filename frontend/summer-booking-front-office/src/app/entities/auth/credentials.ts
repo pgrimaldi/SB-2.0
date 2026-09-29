@@ -6,6 +6,8 @@ export interface SignInRequest {
 
 export interface AuthUser {
   email: string;
+  /** Public id (UUID) of the property the user manages. */
+  idProperty: string;
 }
 
 /** Successful answer of `POST /api/auth/signin`. */

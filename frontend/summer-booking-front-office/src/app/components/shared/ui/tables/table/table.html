@@ -15,3 +15,14 @@
     <tr *matRowDef="let row; columns: fields()" mat-row class="table__row"></tr>
   </table>
 </div>
+
+@if (total() > pageSize()) {
+  <mat-paginator
+    class="table__paginator"
+    hidePageSize
+    [length]="total()"
+    [pageSize]="pageSize()"
+    [pageIndex]="page() - 1"
+    (page)="page.set($event.pageIndex + 1)"
+  />
+}

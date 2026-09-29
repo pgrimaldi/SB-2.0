@@ -12,9 +12,22 @@
     "position": "Vai alla posizione {{position}}",
     "slide": "{{index}} di {{total}}"
   },
+  "table": {
+    "paginator": {
+      "first": "Prima pagina",
+      "previous": "Pagina precedente",
+      "next": "Pagina successiva",
+      "last": "Ultima pagina",
+      "range": "{{start}} – {{end}} di {{total}}"
+    }
+  },
   "field": {
     "password": {
       "show": "Mostra password"
+    },
+    "search": {
+      "submit": "Cerca",
+      "clear": "Cancella ricerca"
     }
   },
   "hub": {
@@ -80,6 +93,38 @@
     "header": {
       "logo": {
         "alt": "Summer Booking Hub"
+      },
+      "datepicker": {
+        "start": {
+          "label": "Data di inizio",
+          "previous": "Giorno precedente (data di inizio)",
+          "next": "Giorno successivo (data di inizio)"
+        },
+        "end": {
+          "label": "Data di fine",
+          "previous": "Giorno precedente (data di fine)",
+          "next": "Giorno successivo (data di fine)"
+        }
+      },
+      "today": {
+        "today": "Oggi",
+        "other": "Non oggi"
+      },
+      "period": {
+        "label": "Periodo della giornata",
+        "full-day": "Giornata intera",
+        "morning": "Mattina",
+        "afternoon": "Pomeriggio"
+      },
+      "search": {
+        "placeholder": "Cerca per nome"
+      },
+      "actions": {
+        "configuration": "Configurazione",
+        "settings": "Impostazioni",
+        "assistant": "Assistente virtuale",
+        "notifications": "Notifiche",
+        "account": "Account"
       }
     },
     "menu": {

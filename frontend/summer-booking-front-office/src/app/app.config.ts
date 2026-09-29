@@ -12,13 +12,14 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import { LanguageBehaviour } from './behaviours/i18n/language.behaviour';
+import { timeZoneInterceptor } from './services/api/time-zone.interceptor';
 import { mockApiInterceptor } from './services/mocks/mock-api.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([mockApiInterceptor])),
+    provideHttpClient(withInterceptors([timeZoneInterceptor, mockApiInterceptor])),
     provideTranslateService({
       loader: provideTranslateHttpLoader({
         prefix: '/assets/i18n/',

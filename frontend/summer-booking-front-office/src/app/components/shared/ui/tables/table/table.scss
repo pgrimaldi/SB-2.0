@@ -1,18 +1,30 @@
 @use '@angular/material' as mat;
 
+// Rows 3rem high: 10 rows and the paginator fit in one screen from 1280×720.
+// The host always has room for a full page (`--table-page-size` rows, set from `pageSize`): the
+// paginator, at its bottom, stays at the same height on every page, even the last shorter one.
 :host {
-  display: block;
+  --table-header-height: 3rem;
+  --table-row-height: 3rem;
+  --table-paginator-height: 3.5rem;
+
+  display: flex;
+  min-height: calc(
+    var(--table-header-height) + var(--table-page-size) * var(--table-row-height) +
+      var(--table-paginator-height)
+  );
+  flex-direction: column;
 
   @include mat.table-overrides(
     (
       background-color: #ffffff,
-      header-container-height: 3.8125rem,
+      header-container-height: var(--table-header-height),
       header-headline-color: #ffffff,
       header-headline-size: 0.875rem,
       header-headline-line-height: 1.3125rem,
       header-headline-weight: 500,
       header-headline-tracking: normal,
-      row-item-container-height: 3.8125rem,
+      row-item-container-height: var(--table-row-height),
       row-item-label-text-color: #1c1c1c,
       row-item-label-text-size: 0.875rem,
       row-item-label-text-line-height: 1.3125rem,
@@ -21,6 +33,20 @@
       row-item-outline-width: 0,
     )
   );
+  @include mat.paginator-overrides(
+    (
+      container-size: var(--table-paginator-height),
+      container-background-color: transparent,
+      container-text-color: #233c7d,
+      container-text-size: 0.875rem,
+      enabled-icon-color: #233c7d,
+      disabled-icon-color: #aaaaaa,
+    )
+  );
+}
+
+.table__paginator {
+  margin-top: auto;
 }
 
 // Rounded corners; wide tables scroll sideways instead of overflowing the page.
@@ -46,15 +72,17 @@
   }
 }
 
-// Large screens (from 1920px): bigger text and cells, as in the reference.
+// Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
+// (4rem instead of 5.25rem) so that 10 rows and the paginator fit in a 1080p screen without scroll.
 @media (width >= 120rem) {
   :host {
+    --table-header-height: 4rem;
+    --table-row-height: 4rem;
+
     @include mat.table-overrides(
       (
-        header-container-height: 5.25rem,
         header-headline-size: 1.125rem,
         header-headline-line-height: 1.5rem,
-        row-item-container-height: 5.25rem,
         row-item-label-text-size: 1.125rem,
         row-item-label-text-line-height: 1.5rem,
       )
@@ -72,12 +100,8 @@
 
 @media (width < 48rem) {
   :host {
-    @include mat.table-overrides(
-      (
-        header-container-height: 2.8125rem,
-        row-item-container-height: 2.3125rem,
-      )
-    );
+    --table-header-height: 2.8125rem;
+    --table-row-height: 2.3125rem;
   }
 
   .table__cell,

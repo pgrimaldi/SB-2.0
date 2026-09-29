@@ -5,9 +5,18 @@
   padding-block: 4.125rem 4.5rem;
 }
 
-// Large screens (from 1920px): wider table, as in the reference.
+// Desktop: small margins so that the page (10 rows and the paginator) fits in one screen from 1280×720.
+@media (width >= 64rem) {
+  .warehouse {
+    padding-block: 2rem 0.5rem;
+  }
+}
+
+// Large screens (from 1920px): wider table, as in the reference; smaller margins so that the page
+// (10 rows and the paginator) fits in a 1080p screen without scroll.
 @media (width >= 120rem) {
   .warehouse {
     width: min(100% - 2rem, 95.125rem);
+    padding-block: 3rem 1rem;
   }
 }

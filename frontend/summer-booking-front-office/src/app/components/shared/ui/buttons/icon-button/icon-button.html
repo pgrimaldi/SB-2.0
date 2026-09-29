@@ -1,0 +1,14 @@
+<button
+  mat-icon-button
+  class="icon__button"
+  type="button"
+  [class.icon__button__text]="!icon()"
+  [attr.aria-label]="label() | translate"
+  [matTooltip]="label() | translate"
+>
+  @if (icon(); as icon) {
+    <img [src]="icon" width="16" height="16" alt="" />
+  } @else {
+    <ng-content />
+  }
+</button>

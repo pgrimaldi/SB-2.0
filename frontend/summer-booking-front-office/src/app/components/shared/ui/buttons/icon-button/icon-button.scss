@@ -1,0 +1,36 @@
+@use '@angular/material' as mat;
+
+// 30 px grey circle drawn by the button, 16 px icon in the middle.
+:host {
+  display: inline-flex;
+
+  @include mat.icon-button-overrides(
+    (
+      state-layer-size: 1.875rem,
+      icon-size: 1rem,
+      icon-color: #233c7d,
+      state-layer-color: #233c7d,
+      touch-target-display: none,
+    )
+  );
+}
+
+.icon__button {
+  background: #ebebeb;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid #233c7d;
+    outline-offset: 0.125rem;
+  }
+}
+
+.icon__button__text {
+  font: inherit;
+  font-size: 0.875rem;
+}

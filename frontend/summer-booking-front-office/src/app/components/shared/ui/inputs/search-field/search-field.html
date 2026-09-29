@@ -1,0 +1,36 @@
+<mat-form-field class="search__field" appearance="fill" subscriptSizing="dynamic">
+  <input
+    #field
+    matInput
+    type="search"
+    [placeholder]="placeholder() | translate"
+    [attr.aria-label]="placeholder() | translate"
+    [value]="value()"
+    (input)="value.set(field.value)"
+    (keydown.enter)="submit()"
+  />
+  <!-- With some text the magnifier becomes an X that clears it (and searches everything again). -->
+  @if (value()) {
+    <button
+      matSuffix
+      mat-icon-button
+      class="search__field__button"
+      type="button"
+      [attr.aria-label]="'field.search.clear' | translate"
+      (click)="clear(field)"
+    >
+      <img src="/assets/images/clear.svg" width="18" height="18" alt="" />
+    </button>
+  } @else {
+    <button
+      matSuffix
+      mat-icon-button
+      class="search__field__button"
+      type="button"
+      [attr.aria-label]="'field.search.submit' | translate"
+      (click)="submit()"
+    >
+      <img src="/assets/images/search.svg" width="18" height="18" alt="" />
+    </button>
+  }
+</mat-form-field>

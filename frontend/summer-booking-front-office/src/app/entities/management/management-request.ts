@@ -1,0 +1,15 @@
+import { BookingDayType } from '../enums/booking-day-type';
+
+/**
+ * Fields every management API request sends: the property and the period chosen in the header.
+ * Dates are ISO 8601 in UTC, and the chosen days are UTC days, with no time zone conversion:
+ * 29/09 → `2026-09-29T00:00:00.000Z` … `2026-09-29T23:59:59.999Z`.
+ */
+export interface ManagementRequest {
+  idProperty: string;
+  /** Start of the first chosen day (UTC midnight). */
+  datetimeFrom: string;
+  /** Last instant of the last chosen day (UTC 23:59:59.999). */
+  datetimeTo: string;
+  bookingDayType: BookingDayType;
+}

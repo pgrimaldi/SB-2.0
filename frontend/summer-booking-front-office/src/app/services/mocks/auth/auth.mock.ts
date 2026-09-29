@@ -6,6 +6,8 @@ import { SignInRequest, SignInResponse } from '../../../entities/auth/credential
 // never appears in the repository nor in the published JavaScript.
 const MOCK_ACCOUNT = {
   username: 'summertest465@gmail.com',
+  /** `catalog.properties.public_id` of "La Capannina" (sample DB, property 10848). */
+  idProperty: '01a0cc35-02f7-7ef1-904e-fe147403481b',
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
 
@@ -34,7 +36,10 @@ export const signInMock = (request: HttpRequest<unknown>): Observable<HttpEvent<
         );
       }
 
-      const body: SignInResponse = { token: MOCK_TOKEN, user: { email: MOCK_ACCOUNT.username } };
+      const body: SignInResponse = {
+        token: MOCK_TOKEN,
+        user: { email: MOCK_ACCOUNT.username, idProperty: MOCK_ACCOUNT.idProperty },
+      };
       return of(new HttpResponse({ status: 200, url: request.url, body }));
     }),
   );

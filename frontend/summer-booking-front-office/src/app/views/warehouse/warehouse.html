@@ -1,3 +1,9 @@
 <main class="warehouse">
-  <app-table [rows]="items()" [columns]="columns" />
+  <app-table
+    [rows]="items().rows"
+    [total]="items().total"
+    [columns]="columns"
+    [pageSize]="pageSize"
+    [(page)]="page"
+  />
 </main>

@@ -7,7 +7,10 @@ import { AuthBehaviour } from './auth.behaviour';
 
 describe('authGuard', () => {
   const signIn = () =>
-    TestBed.inject(AuthBehaviour).start({ token: 'token', user: { email: 'u@e.it' } }, false);
+    TestBed.inject(AuthBehaviour).start(
+      { token: 'token', user: { email: 'u@e.it', idProperty: 'property-1' } },
+      false,
+    );
 
   beforeEach(() => {
     localStorage.clear();

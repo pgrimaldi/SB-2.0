@@ -1,0 +1,12 @@
+<mat-select
+  class="select__control"
+  panelClass="select__panel"
+  hideSingleSelectionIndicator
+  [aria-label]="label() | translate"
+  [value]="selected()"
+  (valueChange)="selected.set($event)"
+>
+  @for (option of options(); track option.key) {
+    <mat-option [value]="option.key">{{ option.value | translate }}</mat-option>
+  }
+</mat-select>

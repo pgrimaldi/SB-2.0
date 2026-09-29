@@ -1,0 +1,41 @@
+@use '@angular/material' as mat;
+
+// Fixed width, the same in every language.
+.select {
+  display: inline-block;
+  width: 8.0625rem;
+}
+
+.select__control {
+  height: 1.625rem;
+  padding-inline: 0.875rem;
+  border-radius: 0.375rem;
+  background: #f3f3f3;
+
+  @include mat.select-overrides(
+    (
+      trigger-text-size: 0.75rem,
+      trigger-text-line-height: 1.625rem,
+      trigger-text-tracking: normal,
+      enabled-trigger-text-color: #233c7d,
+      enabled-arrow-color: #233c7d,
+      focused-arrow-color: #233c7d,
+    )
+  );
+}
+
+.select__panel {
+  @include mat.select-overrides(
+    (
+      panel-background-color: #ffffff,
+    )
+  );
+  @include mat.option-overrides(
+    (
+      label-text-size: 0.75rem,
+      label-text-tracking: normal,
+      label-text-color: #233c7d,
+      selected-state-label-text-color: #233c7d,
+    )
+  );
+}

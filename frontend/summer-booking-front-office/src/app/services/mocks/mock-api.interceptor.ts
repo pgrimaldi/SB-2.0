@@ -12,7 +12,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return signInMock(request);
   }
 
-  if (request.method === 'GET' && request.url === `${environment.apiBaseUrl}/warehouse/list`) {
+  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/warehouse/list`) {
     return warehouseMock(request);
   }
 

@@ -4,7 +4,10 @@ import { AuthBehaviour } from './auth.behaviour';
 
 describe('AuthBehaviour', () => {
   const DAY = 24 * 60 * 60 * 1000;
-  const response = { token: 'token', user: { email: 'user@example.com' } };
+  const response = {
+    token: 'token',
+    user: { email: 'user@example.com', idProperty: 'property-1' },
+  };
 
   beforeEach(() => {
     localStorage.clear();
