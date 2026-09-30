@@ -25,6 +25,9 @@
       "placeholder": "Cerca nella tabella",
       "submit": "Cerca",
       "clear": "Cancella ricerca"
+    },
+    "sort": {
+      "action": "Ordina per {{column}}"
     }
   },
   "alert": {

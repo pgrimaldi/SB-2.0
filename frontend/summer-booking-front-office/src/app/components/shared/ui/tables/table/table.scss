@@ -1,52 +1,14 @@
 @use '@angular/material' as mat;
 
-// Rows 3rem high: 10 rows and the paginator fit in one screen from 1280×720.
-// The host always has room for the smallest page (`--table-page-size` rows): the paginator, at its
-// bottom, stays at the same height on every page, even the last shorter one.
+// Layout common to both looks; sizes and colours come from table-app-theme.scss and
+// table-default-theme.scss (`--table-header-height`, `--table-row-height`, `--table-paginator-height`).
 :host {
-  --table-header-height: 3rem;
-  --table-row-height: 3rem;
-  --table-paginator-height: 3.5rem;
-
   display: flex;
-  min-height: calc(
-    var(--table-header-height) + var(--table-page-size) * var(--table-row-height) +
-      var(--table-paginator-height)
-  );
   flex-direction: column;
 
-  @include mat.table-overrides(
-    (
-      background-color: var(--color__layout__surface),
-      header-container-height: var(--table-header-height),
-      header-headline-color: var(--color__layout__on__main),
-      header-headline-size: 0.875rem,
-      header-headline-line-height: 1.3125rem,
-      header-headline-weight: 500,
-      header-headline-tracking: normal,
-      row-item-container-height: var(--table-row-height),
-      row-item-label-text-color: var(--color__main__theme__two),
-      row-item-label-text-size: 0.875rem,
-      row-item-label-text-line-height: 1.3125rem,
-      row-item-label-text-weight: 500,
-      row-item-label-text-tracking: normal,
-      row-item-outline-width: 0,
-    )
-  );
-  @include mat.paginator-overrides(
-    (
-      container-size: var(--table-paginator-height),
-      container-background-color: var(--color__layout__surface),
-      container-text-color: var(--color__main__theme__one),
-      container-text-size: 0.875rem,
-      enabled-icon-color: var(--color__main__theme__one),
-      disabled-icon-color: var(--color__layout__muted),
-      select-trigger-text-size: 0.875rem,
-    )
-  );
+  // Page size selector of the paginator: blue in both looks.
   @include mat.form-field-overrides(
     (
-      outlined-outline-color: var(--color__layout__border),
       outlined-hover-outline-color: var(--color__main__theme__one),
       outlined-focus-outline-color: var(--color__main__theme__one),
       outlined-input-text-color: var(--color__main__theme__one),
@@ -70,10 +32,12 @@
   margin-top: auto;
 }
 
-// Rounded corners; wide tables scroll sideways instead of overflowing the page.
+// Wide tables scroll sideways instead of overflowing the page. The rows always have room for the
+// smallest page (`--table-page-size` rows): the paginator, right under them, stays at the same height
+// on every page, even the last shorter one, whatever is above the rows (e.g. the search bar).
 .table {
+  min-height: calc(var(--table-header-height) + var(--table-page-size) * var(--table-row-height));
   overflow-x: auto;
-  border-radius: 1.875rem;
 }
 
 // Column widths come only from the columns (`width`, or equal shares), never from the rows shown:
@@ -83,59 +47,8 @@
   table-layout: fixed;
 }
 
-.table__header {
-  background: var(--color__main__theme__one);
-}
-
-.table__row:nth-child(even) {
-  background: var(--color__layout__highlight);
-}
-
 .table__cell {
   overflow: hidden;
-  padding-inline: 0.9375rem;
   text-overflow: ellipsis; // a text longer than its column ends with "…" instead of widening it
   white-space: nowrap;
-
-  &:first-child {
-    padding-left: 1.875rem;
-  }
-}
-
-// Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
-// (4rem instead of 5.25rem) so that 10 rows and the paginator fit in a 1080p screen without scroll.
-@media (width >= 120rem) {
-  :host {
-    --table-header-height: 4rem;
-    --table-row-height: 4rem;
-
-    @include mat.table-overrides(
-      (
-        header-headline-size: 1.125rem,
-        header-headline-line-height: 1.5rem,
-        row-item-label-text-size: 1.125rem,
-        row-item-label-text-line-height: 1.5rem,
-      )
-    );
-  }
-
-  .table__cell {
-    padding-inline: 3.125rem 1.875rem;
-
-    &:first-child {
-      padding-left: 1.875rem;
-    }
-  }
-}
-
-@media (width < 48rem) {
-  :host {
-    --table-header-height: 2.8125rem;
-    --table-row-height: 2.3125rem;
-  }
-
-  .table__cell,
-  .table__cell:first-child {
-    padding-inline: 0.5rem;
-  }
 }

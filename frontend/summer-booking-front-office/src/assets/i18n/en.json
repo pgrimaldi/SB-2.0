@@ -25,6 +25,9 @@
       "placeholder": "Search the table",
       "submit": "Search",
       "clear": "Clear search"
+    },
+    "sort": {
+      "action": "Sort by {{column}}"
     }
   },
   "alert": {

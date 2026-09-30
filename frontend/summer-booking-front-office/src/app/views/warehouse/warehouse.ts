@@ -30,8 +30,8 @@ export class Warehouse {
   );
   /** Columns with translated headers (they follow the language). */
   protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
-    { field: 'name', header: this.headers()['name'], width: 50 },
-    { field: 'total', header: this.headers()['total'], align: 'center' },
-    { field: 'available', header: this.headers()['available'], align: 'center' },
+    { field: 'name', header: this.headers()['name'], width: 50, sortable: true },
+    { field: 'total', header: this.headers()['total'], align: 'center', sortable: true },
+    { field: 'available', header: this.headers()['available'], align: 'center', sortable: true },
   ]);
 }

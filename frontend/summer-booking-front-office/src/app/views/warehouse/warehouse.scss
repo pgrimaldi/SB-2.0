@@ -14,11 +14,12 @@
   }
 }
 
-// Large screens (from 1920px): wider table, as in the reference; smaller margins so that the page
-// (10 rows and the paginator) fits in a 1080p screen without scroll.
+// Large screens (from 1920px): wider table, as in the reference; a small margin on top so that the
+// page (search, 10 rows and the paginator) fits without scroll in a 1080p screen, where the browser
+// and the taskbar leave about 880-930px: the page ends at 884px.
 @media (width >= 120rem) {
   .warehouse {
     width: min(100% - 2rem, 95.125rem);
-    padding-top: 3rem;
+    padding-top: 1rem;
   }
 }

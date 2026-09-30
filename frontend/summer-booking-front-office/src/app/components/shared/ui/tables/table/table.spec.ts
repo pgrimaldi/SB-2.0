@@ -31,6 +31,7 @@ const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
     [load]="load"
     [(pageSize)]="pageSize"
     [texts]="texts"
+    [useAppTheme]="true"
     (loadError)="errors.push($event)"
   />`,
 })
@@ -38,10 +39,11 @@ class TableHost {
   readonly params = signal<Filters | null>({ day: '2026-09-30' });
   readonly pageSize = signal(10);
   readonly columns: TableColumn<Row>[] = [
-    { field: 'name', header: 'Nome' },
+    { field: 'name', header: 'Nome', sortable: true },
     { field: 'total', header: 'Totale', align: 'center' },
   ];
   readonly texts = {
+    sort: { action: 'Ordina per {{column}}' },
     paginator: {
       previous: 'Pagina precedente',
       next: 'Pagina successiva',
@@ -83,7 +85,16 @@ describe('Table', () => {
   it('should load the first page with the params and show only the chosen columns', async () => {
     const { host, element, names } = await setup();
 
-    expect(host.requests).toEqual([{ day: '2026-09-30', page: 1, pageSize: 10, search: '' }]);
+    expect(host.requests).toEqual([
+      {
+        day: '2026-09-30',
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
+      },
+    ]);
     expect(element.querySelectorAll('thead th').length).toBe(2);
     expect(names()).toEqual(ALL.slice(0, 10).map((row) => row.name));
     expect(element.querySelector<HTMLElement>('tbody td:last-child')?.style.textAlign).toBe(
@@ -124,7 +135,14 @@ describe('Table', () => {
     options[1].click(); // 20
     await fixture.whenStable();
     expect(host.pageSize()).toBe(20); // two-way
-    expect(host.requests.at(-1)).toEqual({ day: '2026-09-30', page: 2, pageSize: 20, search: '' });
+    expect(host.requests.at(-1)).toEqual({
+      day: '2026-09-30',
+      page: 2,
+      pageSize: 20,
+      search: '',
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
     expect(names()[0]).toBe('Row 21'); // rows 21-40: row 21 still on screen
   });
 
@@ -134,7 +152,14 @@ describe('Table', () => {
     next().click();
     await fixture.whenStable();
 
-    expect(host.requests.at(-1)).toEqual({ day: '2026-09-30', page: 2, pageSize: 10, search: '' });
+    expect(host.requests.at(-1)).toEqual({
+      day: '2026-09-30',
+      page: 2,
+      pageSize: 10,
+      search: '',
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
     expect(names()[0]).toBe('Row 11');
   });
 
@@ -146,7 +171,14 @@ describe('Table', () => {
     host.params.set({ day: '2026-10-01' });
     await fixture.whenStable();
 
-    expect(host.requests.at(-1)).toEqual({ day: '2026-10-01', page: 1, pageSize: 10, search: '' });
+    expect(host.requests.at(-1)).toEqual({
+      day: '2026-10-01',
+      page: 1,
+      pageSize: 10,
+      search: '',
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
   });
 
   it('should load nothing while the params are null', async () => {
@@ -200,6 +232,30 @@ describe('Table', () => {
     host.params.set({ day: '2026-10-01' });
     await fixture.whenStable();
     expect(element.querySelector('mat-paginator')).toBeNull();
+  });
+
+  it('should sort by a sortable column: ascending, descending, then none, back to page 1', async () => {
+    const { fixture, host, element, next } = await setup();
+    next().click();
+    await fixture.whenStable();
+    const [name, total] = [...element.querySelectorAll<HTMLElement>('thead th')];
+    const sortName = async () => {
+      name.querySelector<HTMLElement>('.mat-sort-header-container')!.click();
+      await fixture.whenStable();
+      return host.requests.at(-1);
+    };
+
+    const base = { day: '2026-09-30', page: 1, pageSize: 10, search: '' };
+    expect(await sortName()).toEqual({ ...base, sortField: 'name', sortDirection: 'Ascending' });
+    expect(name.getAttribute('aria-sort')).toBe('ascending');
+    expect(await sortName()).toEqual({ ...base, sortField: 'name', sortDirection: 'Descending' });
+    expect(await sortName()).toEqual({ ...base, sortField: '', sortDirection: 'Ascending' });
+
+    total.querySelector<HTMLElement>('.mat-sort-header-container')?.click(); // not sortable
+    await fixture.whenStable();
+    expect(host.requests.at(-1)?.sortField).toBe('');
+    const description = name.querySelector('[aria-describedby]')?.getAttribute('aria-describedby');
+    expect(document.getElementById(description!)?.textContent).toBe('Ordina per Nome');
   });
 
   it('should show no bar above the rows when nothing is put in it', async () => {
@@ -282,7 +338,14 @@ describe('Table bar', () => {
     const { fixture, host, element } = setup();
     element.querySelector<HTMLButtonElement>('.mat-mdc-paginator-navigation-next')!.click();
     fixture.detectChanges();
-    expect(host.requests.at(-1)).toEqual({ day: '2026-09-30', page: 2, pageSize: 10, search: '' });
+    expect(host.requests.at(-1)).toEqual({
+      day: '2026-09-30',
+      page: 2,
+      pageSize: 10,
+      search: '',
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
 
     const input = element.querySelector<HTMLInputElement>('.table__bar__search input')!;
     input.value = 'Row 2';
@@ -296,8 +359,41 @@ describe('Table bar', () => {
       page: 1,
       pageSize: 10,
       search: 'Row 2',
+      sortField: '',
+      sortDirection: 'Ascending',
     });
     const names = [...element.querySelectorAll('tbody td')].map((cell) => cell.textContent?.trim());
     expect(names).toEqual(['Row 2', 'Row 20', 'Row 21', 'Row 22', 'Row 23', 'Row 24', 'Row 25']);
   });
 });
+
+describe('Table default look', () => {
+  it('should put everything on the left and show only the page number in the paginator', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
+    });
+    const fixture = TestBed.createComponent(TableDefaultHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector('app-table')?.className).toContain('table__theme__default');
+    const cells = [...element.querySelectorAll<HTMLElement>('thead th, tbody tr:first-child td')];
+    expect(cells.map((cell) => cell.style.textAlign)).toEqual(['', '', '', '']); // `align` ignored
+    expect(element.querySelector('.mat-mdc-paginator-range-label')?.textContent?.trim()).toBe('1');
+  });
+});
+
+@Component({
+  imports: [Table],
+  template: `<app-table [columns]="columns" [params]="params" [load]="load" [texts]="texts" />`,
+})
+class TableDefaultHost {
+  readonly params = { day: '2026-09-30' };
+  readonly columns: TableColumn<Row>[] = [
+    { field: 'name', header: 'Nome' },
+    { field: 'total', header: 'Totale', align: 'center' },
+  ];
+  readonly texts = { paginator: { range: '{{start}} – {{end}} di {{total}}' } };
+  readonly load = (request: Filters & PageRequest) =>
+    of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
+}

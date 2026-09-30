@@ -229,6 +229,12 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   // The server decides where to search: the mock looks in the article name, ignoring case.
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
   const found = search ? items.filter((item) => item.name.toLowerCase().includes(search)) : items;
+  // Sorting by a field of the article; without one, the order of the inventory.
+  const field = SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
 
   const answer: Page<WarehouseItem> = {
     total: found.length,
@@ -236,6 +242,16 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
+
+/** Fields of an article the list can be sorted by. */
+const SORT_FIELDS = ['name', 'total', 'available'] as const;
+
+/** Numbers by value, texts alphabetically (Italian rules, ignoring case). */
+function compare(first: string | number, second: string | number): number {
+  return typeof first === 'number' && typeof second === 'number'
+    ? first - second
+    : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
+}
 
 /** Whole number from 1 up, or the fallback for missing or invalid values. */
 function positiveInteger(value: unknown, fallback: number): number {

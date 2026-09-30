@@ -48,7 +48,7 @@ describe('warehouseMock', () => {
 
   it('should refuse the list without a valid access token (401)', async () => {
     const error = await firstValueFrom(
-      (await service(false)).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: '' }),
+      (await service(false)).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: '', sortField: '', sortDirection: 'Ascending' }),
     ).catch((failure: HttpErrorResponse) => failure);
 
     expect((error as HttpErrorResponse).status).toBe(401);
@@ -56,7 +56,7 @@ describe('warehouseMock', () => {
 
   it("should answer the articles with total minus today's held and confirmed consumptions", async () => {
     const { total, rows } = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: '' }),
+      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: '', sortField: '', sortDirection: 'Ascending' }),
     );
     const byName = Object.fromEntries(rows.map((item) => [item.name, item]));
 
@@ -70,7 +70,7 @@ describe('warehouseMock', () => {
 
   it('should answer only the requested page, with the total of all pages', async () => {
     const page = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 2, pageSize: 4, search: '' }),
+      (await service()).list({ ...MANAGEMENT, page: 2, pageSize: 4, search: '', sortField: '', sortDirection: 'Ascending' }),
     );
 
     expect(page.total).toBe(12);
@@ -84,11 +84,26 @@ describe('warehouseMock', () => {
 
   it('should answer only the articles whose name contains the search, ignoring case', async () => {
     const page = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: ' LETTINO ' }),
+      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: ' LETTINO ', sortField: '', sortDirection: 'Ascending' }),
     );
 
     expect(page.total).toBe(2);
     expect(page.rows.map((item) => item.name)).toEqual(['Lettino', 'Lettino XL']);
+  });
+
+  it('should sort by the requested field, numbers by value and texts alphabetically', async () => {
+    const warehouse = await service();
+    const request = { ...MANAGEMENT, page: 1, pageSize: 3, search: '' };
+    const byName = await firstValueFrom(
+      warehouse.list({ ...request, sortField: 'name', sortDirection: 'Ascending' }),
+    );
+    const byTotal = await firstValueFrom(
+      warehouse.list({ ...request, sortField: 'total', sortDirection: 'Descending' }),
+    );
+
+    expect(byName.rows.map((item) => item.name)).toEqual(['Cabina', 'Doccia', 'Lettino']);
+    expect(byTotal.rows.map((item) => item.total)).toEqual([120, 80, 60]);
+    expect(byTotal.total).toBe(12);
   });
 
   it('should answer only the articles of the requested property, none for an unknown one', async () => {
@@ -100,10 +115,12 @@ describe('warehouseMock', () => {
         page: 1,
         pageSize: 10,
         search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
       }),
     );
     const unknown = await firstValueFrom(
-      warehouse.list({ ...MANAGEMENT, idProperty: 'unknown', page: 1, pageSize: 10, search: '' }),
+      warehouse.list({ ...MANAGEMENT, idProperty: 'unknown', page: 1, pageSize: 10, search: '', sortField: '', sortDirection: 'Ascending' }),
     );
 
     expect(other.rows.map((item) => item.name)).toEqual(['Pedalò', 'Canoa']);
@@ -118,6 +135,8 @@ describe('warehouseMock', () => {
         page: 1,
         pageSize: 10,
         search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
       }),
     ).catch((failure: HttpErrorResponse) => failure);
 

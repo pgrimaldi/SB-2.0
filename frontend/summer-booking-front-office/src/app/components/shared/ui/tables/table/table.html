@@ -20,19 +20,35 @@
 }
 
 <div class="table">
-  <table mat-table class="table__grid" [dataSource]="rows()">
+  <table
+    mat-table
+    matSort
+    class="table__grid"
+    [dataSource]="rows()"
+    (matSortChange)="changeSort($event)"
+  >
     @for (column of columns(); track column.field) {
+      <!-- The default look puts everything on the left; the app's look follows `align`. -->
+      @let align = useAppTheme() ? column.align : undefined;
       <ng-container [matColumnDef]="column.field">
         <th
           *matHeaderCellDef
           mat-header-cell
+          mat-sort-header
           class="table__cell"
-          [style.text-align]="column.align"
+          [class.table__cell__center]="align === 'center'"
+          [class.table__cell__end]="align === 'end'"
+          [disabled]="!column.sortable"
+          [arrowPosition]="useAppTheme() ? 'after' : 'before'"
+          [sortActionDescription]="
+            (texts()?.sort?.action | formatText: { column: column.header }) ?? ''
+          "
+          [style.text-align]="align"
           [style.width.%]="column.width"
         >
           {{ column.header }}
         </th>
-        <td *matCellDef="let row" mat-cell class="table__cell" [style.text-align]="column.align">
+        <td *matCellDef="let row" mat-cell class="table__cell" [style.text-align]="align">
           {{ row[column.field] }}
         </td>
       </ng-container>

@@ -1,0 +1,93 @@
+@use '@angular/material' as mat;
+
+// The default look (the designer's proposal of 30/09/2026): clean and minimal. Blue texts on white,
+// a thin line under the header, no stripes and no rounded corners, everything on the left, the sort
+// arrow before the header label and, in the paginator, only the page size selector and the page number
+// between the arrows.
+:host(.table__theme__default) {
+  --table-header-height: 2.5rem;
+  --table-row-height: 2.125rem;
+  --table-paginator-height: 3rem;
+
+  @include mat.table-overrides(
+    (
+      background-color: var(--color__layout__surface),
+      header-container-height: var(--table-header-height),
+      header-headline-color: var(--color__main__theme__one),
+      header-headline-size: 0.875rem,
+      header-headline-line-height: 1.25rem,
+      header-headline-weight: 400,
+      header-headline-tracking: normal,
+      row-item-container-height: var(--table-row-height),
+      row-item-label-text-color: var(--color__layout__text__soft),
+      row-item-label-text-size: 0.8125rem,
+      row-item-label-text-line-height: 1.25rem,
+      row-item-label-text-weight: 400,
+      row-item-label-text-tracking: normal,
+      row-item-outline-width: 0,
+    )
+  );
+  @include mat.paginator-overrides(
+    (
+      container-size: var(--table-paginator-height),
+      container-background-color: var(--color__layout__surface),
+      container-text-color: var(--color__main__theme__one),
+      container-text-size: 0.875rem,
+      enabled-icon-color: var(--color__layout__text__soft),
+      disabled-icon-color: var(--color__layout__muted),
+      select-trigger-text-size: 0.875rem,
+      form-field-container-height: 1.75rem,
+      form-field-container-vertical-padding: 0.25rem,
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: var(--color__main__theme__one),
+      outlined-container-shape: 0.375rem,
+    )
+  );
+  @include mat.sort-overrides(
+    (
+      arrow-color: var(--color__main__theme__one),
+    )
+  );
+
+  .table__header .table__cell {
+    border-bottom: 0.0625rem solid var(--color__layout__divider);
+  }
+
+  .table__cell {
+    padding-inline: 0.125rem 1rem;
+  }
+
+  // Arrow before the label: Material then lays the header out right to left (row-reverse), so
+  // `flex-end` is what keeps it on the left, above its cells.
+  ::ng-deep .mat-sort-header-container {
+    justify-content: flex-end;
+  }
+
+  // The sort arrow is always shown (lighter until the column is sorted), as a hint that the column
+  // sorts; Material shows it only on hover.
+  ::ng-deep .mat-sort-header-arrow {
+    opacity: 0.54;
+  }
+
+  ::ng-deep .mat-sort-header-sorted .mat-sort-header-arrow {
+    opacity: 1;
+  }
+
+  // Paginator: no "items per page" label; the page number between the two arrows.
+  ::ng-deep .mat-mdc-paginator-page-size-label {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-paginator-range-label {
+    order: 1;
+    margin: 0 0.5rem;
+  }
+
+  ::ng-deep .mat-mdc-paginator-navigation-next,
+  ::ng-deep .mat-mdc-paginator-navigation-last {
+    order: 2;
+  }
+}

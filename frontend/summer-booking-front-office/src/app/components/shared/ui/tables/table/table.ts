@@ -18,9 +18,11 @@ import {
   MatPaginatorSelectConfig,
   PageEvent,
 } from '@angular/material/paginator';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { Observable, catchError, of, switchMap } from 'rxjs';
 import { SearchField, SearchFieldTexts } from '../../inputs/search-field/search-field';
+import { FormatTextPipe } from '../../texts/format-text';
 import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
 import { TableTextAction } from './table-text-action';
@@ -37,6 +39,8 @@ export interface TableColumn<T> {
    * no widths at all every column is the same. Widths never depend on the rows shown.
    */
   width?: number;
+  /** A click on the header sorts by this column (done by the server, see `TablePageRequest`). */
+  sortable?: boolean;
 }
 
 /** Texts of the `app-table` paginator, already translated; a missing one is left out. */
@@ -57,13 +61,20 @@ export interface TableSearchTexts extends SearchFieldTexts {
   placeholder?: string;
 }
 
+/** Texts of the `app-table` sorting. */
+export interface TableSortTexts {
+  /** Description of a sortable header for screen readers, with `{{column}}` (e.g. "Ordina per {{column}}"). */
+  action?: string;
+}
+
 /**
- * Texts of `app-table`, already translated, in two groups: `{ paginator: { … }, search: { … } }`.
+ * Texts of `app-table`, already translated, in groups: `{ paginator: { … }, search: { … }, sort: { … } }`.
  * With our translation file the group `table` has the same shape: `[texts]="'table' | translate"`.
  */
 export interface TableTexts {
   paginator?: TablePaginatorTexts;
   search?: TableSearchTexts;
+  sort?: TableSortTexts;
 }
 
 /** Rows in a page when `pageSize` is not given: the standard of every table. */
@@ -75,11 +86,20 @@ export const TABLE_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50, 100];
 /** The options of the page size selector open in the shared select panel (see the theme). */
 const SELECT_CONFIG: MatPaginatorSelectConfig = { panelClass: 'select__panel' };
 
-/** Page asked by the table: `page` starts from 1; `search` is the searched text ('' for none). */
+/** Direction of the sorting, as the API (.NET enum names) expects it. */
+export type TableSortDirection = 'Ascending' | 'Descending';
+
+/**
+ * Page asked by the table: `page` starts from 1; `search` is the searched text ('' for none);
+ * `sortField` is the `field` of the sorted column ('' for none: the server's own order) and
+ * `sortDirection` its direction (meaningful only with a `sortField`).
+ */
 export interface TablePageRequest {
   page: number;
   pageSize: number;
   search: string;
+  sortField: string;
+  sortDirection: TableSortDirection;
 }
 
 /** Page answered to the table: the rows of the page and how many rows there are in all pages. */
@@ -107,6 +127,8 @@ const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
  * Above the rows an optional bar: icon buttons marked `appTableIconAction`, the search (`searchable`,
  * sent to `load` as `search`) and text buttons marked `appTableTextAction`; each part shows only
  * when it is used. Icons (see `Icons`): [search magnifier, search X].
+ * Columns with `sortable` sort on a click of their header (sent to `load` as `sortField` and
+ * `sortDirection`). Two looks: the default one (clean, minimal) and, with `useAppTheme`, the app's one.
  * The paginator, under the rows, has a page size selector (`pageSizeOptions`, 10 by default): with
  * more rows the page scrolls and the paginator stays at the bottom of the screen.
  * Then it works on its own: it asks page 1, moves with its paginator, goes back to page 1 and loads
@@ -115,12 +137,21 @@ const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
  */
 @Component({
   selector: 'app-table',
-  imports: [MatPaginatorModule, MatTableModule, SearchField],
+  imports: [FormatTextPipe, MatPaginatorModule, MatSortModule, MatTableModule, SearchField],
   providers: [TablePaginatorIntl, { provide: MatPaginatorIntl, useExisting: TablePaginatorIntl }],
   templateUrl: './table.html',
-  styleUrls: ['./table.scss', './table-bar.scss'],
+  styleUrls: [
+    './table.scss',
+    './table-bar.scss',
+    './table-app-theme.scss',
+    './table-default-theme.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[style.--table-page-size]': 'reservedRows()' },
+  host: {
+    '[style.--table-page-size]': 'reservedRows()',
+    '[class.table__theme__app]': 'useAppTheme()',
+    '[class.table__theme__default]': '!useAppTheme()',
+  },
 })
 export class Table<T, P extends object> {
   readonly columns = input.required<readonly TableColumn<T>[]>();
@@ -132,6 +163,12 @@ export class Table<T, P extends object> {
   /** Choices of the page size selector. */
   readonly pageSizeOptions = input<readonly number[]>(TABLE_PAGE_SIZE_OPTIONS);
   readonly texts = input<TableTexts | null>();
+  /**
+   * The app's look (blue header, striped rows, rounded corners, `align` of the columns) instead of the
+   * default one (clean and minimal: blue texts on white, a line under the header, everything on the
+   * left, only the page number between the arrows).
+   */
+  readonly useAppTheme = input(false);
   /** Shows the search in the bar above the rows. */
   readonly searchable = input(false);
   /** Icons as Material icon names (Material Symbols font): [search magnifier, search X]. */
@@ -152,16 +189,29 @@ export class Table<T, P extends object> {
   /** Searched text, from the search field (0.5 s after the last key, '' under 3 characters). */
   protected readonly search = signal('');
 
-  /** Current page, from 1; back to the first one whenever `params` or the search change. */
+  /** Sorted column, from the headers; `null` for none (the server's own order). */
+  protected readonly sort = signal<Sort | null>(null);
+
+  /** Current page, from 1; back to the first one whenever `params`, the search or the sorting change. */
   protected readonly page = linkedSignal({
-    source: () => ({ params: this.params(), search: this.search() }),
+    source: () => ({ params: this.params(), search: this.search(), sort: this.sort() }),
     computation: () => 1,
   });
 
   private readonly request = computed(() => {
     const params = this.params();
+    const sort = this.sort();
     return params
-      ? { ...params, page: this.page(), pageSize: this.pageSize(), search: this.search() }
+      ? {
+          ...params,
+          page: this.page(),
+          pageSize: this.pageSize(),
+          search: this.search(),
+          sortField: sort?.active ?? '',
+          sortDirection: (sort?.direction === 'desc'
+            ? 'Descending'
+            : 'Ascending') as TableSortDirection,
+        }
       : null;
   });
 
@@ -199,7 +249,7 @@ export class Table<T, P extends object> {
 
   constructor() {
     const paginatorIntl = inject(TablePaginatorIntl);
-    effect(() => paginatorIntl.setTexts(this.texts()?.paginator));
+    effect(() => paginatorIntl.setTexts(this.texts()?.paginator, !this.useAppTheme()));
   }
 
   /**
@@ -209,5 +259,10 @@ export class Table<T, P extends object> {
   protected changePage(event: PageEvent): void {
     this.pageSize.set(event.pageSize);
     this.page.set(event.pageIndex + 1);
+  }
+
+  /** A click on a sortable header: ascending, then descending, then no sorting (Material's cycle). */
+  protected changeSort(sort: Sort): void {
+    this.sort.set(sort.direction ? sort : null);
   }
 }

@@ -1,0 +1,127 @@
+@use '@angular/material' as mat;
+
+// The app's look (`useAppTheme`): blue header, striped rows, rounded corners, columns aligned by
+// `align`. Rows 3rem high: 10 rows and the paginator fit in one screen from 1280×720.
+:host(.table__theme__app) {
+  --table-header-height: 3rem;
+  --table-row-height: 3rem;
+  --table-paginator-height: 3.5rem;
+
+  @include mat.table-overrides(
+    (
+      background-color: var(--color__layout__surface),
+      header-container-height: var(--table-header-height),
+      header-headline-color: var(--color__layout__on__main),
+      header-headline-size: 0.875rem,
+      header-headline-line-height: 1.3125rem,
+      header-headline-weight: 500,
+      header-headline-tracking: normal,
+      row-item-container-height: var(--table-row-height),
+      row-item-label-text-color: var(--color__main__theme__two),
+      row-item-label-text-size: 0.875rem,
+      row-item-label-text-line-height: 1.3125rem,
+      row-item-label-text-weight: 500,
+      row-item-label-text-tracking: normal,
+      row-item-outline-width: 0,
+    )
+  );
+  @include mat.paginator-overrides(
+    (
+      container-size: var(--table-paginator-height),
+      container-background-color: var(--color__layout__surface),
+      container-text-color: var(--color__main__theme__one),
+      container-text-size: 0.875rem,
+      enabled-icon-color: var(--color__main__theme__one),
+      disabled-icon-color: var(--color__layout__muted),
+      select-trigger-text-size: 0.875rem,
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: var(--color__layout__border),
+    )
+  );
+  @include mat.sort-overrides(
+    (
+      arrow-color: var(--color__layout__on__main),
+    )
+  );
+
+  .table {
+    border-radius: 1.875rem;
+  }
+
+  .table__header {
+    background: var(--color__main__theme__one);
+  }
+
+  .table__row:nth-child(even) {
+    background: var(--color__layout__highlight);
+  }
+
+  .table__cell {
+    padding-inline: 0.9375rem;
+
+    &:first-child {
+      padding-left: 1.875rem;
+    }
+  }
+
+  // Material lays the sortable header out as a row starting on the left: centred and end columns
+  // move their header (label and arrow) like their cells. Centred ones also get, on the left, a padding
+  // as wide as Material's arrow (12px plus 6px of margin, in px like Material): the label stays exactly
+  // in the middle, as without sorting, and the arrow appears beside it. (Not a ::before: Material draws
+  // the keyboard focus ring there.)
+  .table__cell__center ::ng-deep .mat-sort-header-container {
+    justify-content: center;
+    padding-left: 18px;
+  }
+
+  .table__cell__end ::ng-deep .mat-sort-header-container {
+    justify-content: flex-end;
+  }
+}
+
+// Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
+// (4rem instead of 5.25rem) so that 10 rows and the paginator fit in a 1080p screen without scroll.
+@media (width >= 120rem) {
+  :host(.table__theme__app) {
+    --table-header-height: 4rem;
+    --table-row-height: 4rem;
+
+    @include mat.table-overrides(
+      (
+        header-headline-size: 1.125rem,
+        header-headline-line-height: 1.5rem,
+        row-item-label-text-size: 1.125rem,
+        row-item-label-text-line-height: 1.5rem,
+      )
+    );
+
+    .table__cell {
+      padding-inline: 3.125rem 1.875rem;
+
+      &:first-child {
+        padding-left: 1.875rem;
+      }
+    }
+  }
+}
+
+@media (width < 48rem) {
+  :host(.table__theme__app) {
+    --table-header-height: 2.8125rem;
+    --table-row-height: 2.3125rem;
+
+    .table__cell,
+    .table__cell:first-child {
+      padding-inline: 0.5rem;
+    }
+
+    // Phone: without the "items per page" label the selector fits on the line of the arrows, away
+    // from the rows. The select stays named by the label (hidden, still read by screen readers).
+    ::ng-deep .mat-mdc-paginator-page-size-label {
+      display: none;
+    }
+  }
+}
