@@ -1,3 +1,24 @@
+@if (hasBar()) {
+  <div class="table__bar">
+    @if (hasIconActions()) {
+      <div class="table__bar__icons"><ng-content select="[appTableIconAction]" /></div>
+    }
+    @if (searchable()) {
+      <app-search-field
+        class="table__bar__search"
+        [placeholder]="texts()?.search?.placeholder"
+        [texts]="texts()?.search"
+        [matIcon]="matIcon()"
+        [pathIcon]="pathIcon()"
+        (search)="search.set($event)"
+      />
+    }
+    @if (hasTextActions()) {
+      <div class="table__bar__buttons"><ng-content select="[appTableTextAction]" /></div>
+    }
+  </div>
+}
+
 <div class="table">
   <table mat-table class="table__grid" [dataSource]="rows()">
     @for (column of columns(); track column.field) {
@@ -9,7 +30,7 @@
           [style.text-align]="column.align"
           [style.width.%]="column.width"
         >
-          <span [appI18nText]="column.header"></span>
+          {{ column.header }}
         </th>
         <td *matCellDef="let row" mat-cell class="table__cell" [style.text-align]="column.align">
           {{ row[column.field] }}
@@ -22,13 +43,14 @@
   </table>
 </div>
 
-@if (total() > pageSize()) {
+@if (paginated()) {
   <mat-paginator
     class="table__paginator"
-    hidePageSize
     [length]="total()"
     [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions()"
     [pageIndex]="page() - 1"
-    (page)="page.set($event.pageIndex + 1)"
+    [selectConfig]="selectConfig"
+    (page)="changePage($event)"
   />
 }

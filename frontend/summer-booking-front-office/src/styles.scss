@@ -4,6 +4,7 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use './app/components/shared/ui/theme/theme';
 
 @font-face {
   font-family: 'Outfit';
@@ -12,6 +13,14 @@
   font-weight: 100 900;
   font-display: swap;
 }
+
+// Colours of the shared components (default theme); an override goes after this rule.
+:root {
+  @include theme.default-theme;
+}
+
+// Overlay panels of the shared components (select options).
+@include theme.overlays;
 
 html {
   height: 100%;

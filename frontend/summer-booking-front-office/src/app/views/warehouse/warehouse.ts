@@ -1,55 +1,37 @@
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, catchError, of, switchMap } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 import { ManagementFiltersBehaviour } from '../../behaviours/management/management-filters.behaviour';
 import { Table, TableColumn } from '../../components/shared/ui/tables/table/table';
-import { DEFAULT_PAGE_SIZE, Page } from '../../entities/pagination/page';
 import { WarehouseItem } from '../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../services/api/warehouse/warehouse.service';
 
-const NO_ITEMS: Page<WarehouseItem> = { total: 0, rows: [] };
-
-/** Warehouse of the property: articles with total and today's available quantity, page by page. */
+/**
+ * Warehouse of the property: articles with total and available quantity, page by page. The table
+ * loads them by itself with the warehouse API and the header filters.
+ */
 @Component({
   selector: 'app-warehouse',
-  imports: [Table],
+  imports: [Table, TranslatePipe],
   templateUrl: './warehouse.html',
   styleUrl: './warehouse.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Warehouse {
-  private readonly filters = inject(ManagementFiltersBehaviour);
-  private readonly warehouseService = inject(WarehouseService);
+  protected readonly filters = inject(ManagementFiltersBehaviour);
+  protected readonly warehouse = inject(WarehouseService);
 
-  protected readonly pageSize = DEFAULT_PAGE_SIZE;
-  /** Current page; back to the first one whenever a filter of the header changes. */
-  protected readonly page = linkedSignal({
-    source: this.filters.request,
-    computation: () => 1,
-  });
-
-  /** Header filters plus page; null once the user has signed out (nothing is asked). */
-  private readonly request = computed(() => {
-    const management = this.filters.request();
-    return management ? { ...management, page: this.page(), pageSize: this.pageSize } : null;
-  });
-
-  /** The page answered by the API; the previous one stays on screen until the next arrives. */
-  protected readonly items = toSignal(
-    toObservable(this.request).pipe(
-      switchMap((request) =>
-        request
-          ? // A failed request shows an empty table and does not stop the next ones.
-            this.warehouseService.list(request).pipe(catchError(() => of(NO_ITEMS)))
-          : EMPTY,
-      ),
-    ),
-    { initialValue: NO_ITEMS },
+  private readonly headers = toSignal(
+    inject(TranslateService).stream('management.warehouse.table') as Observable<
+      Record<string, string>
+    >,
+    { initialValue: {} as Record<string, string> },
   );
-
-  protected readonly columns: readonly TableColumn<WarehouseItem>[] = [
-    { field: 'name', header: 'management.warehouse.table.name', width: 50 },
-    { field: 'total', header: 'management.warehouse.table.total', align: 'center' },
-    { field: 'available', header: 'management.warehouse.table.available', align: 'center' },
-  ];
+  /** Columns with translated headers (they follow the language). */
+  protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
+    { field: 'name', header: this.headers()['name'], width: 50 },
+    { field: 'total', header: this.headers()['total'], align: 'center' },
+    { field: 'available', header: this.headers()['available'], align: 'center' },
+  ]);
 }

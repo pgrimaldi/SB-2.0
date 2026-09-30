@@ -1,14 +1,34 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
-import { MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChildren,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  model,
+  output,
+  signal,
+} from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
+  MatPaginatorIntl,
+  MatPaginatorModule,
+  MatPaginatorSelectConfig,
+  PageEvent,
+} from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
-import { DEFAULT_PAGE_SIZE } from '../../../../../entities/pagination/page';
-import { I18nText } from '../../../i18n/i18n-text/i18n-text';
+import { Observable, catchError, of, switchMap } from 'rxjs';
+import { SearchField, SearchFieldTexts } from '../../inputs/search-field/search-field';
+import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
+import { TableTextAction } from './table-text-action';
 
 /** A column of `app-table`: which field of the row it shows and under which header. */
 export interface TableColumn<T> {
   field: keyof T & string;
-  /** Translation key of the header. */
+  /** Header text, already translated. */
   header: string;
   /** Horizontal alignment of header and cells; start by default. */
   align?: 'start' | 'center' | 'end';
@@ -19,31 +39,175 @@ export interface TableColumn<T> {
   width?: number;
 }
 
+/** Texts of the `app-table` paginator, already translated; a missing one is left out. */
+export interface TablePaginatorTexts {
+  /** Accessible names of the paginator buttons. */
+  first?: string;
+  previous?: string;
+  next?: string;
+  last?: string;
+  /** Label of the page size selector (e.g. "Elementi per pagina:"). */
+  size?: string;
+  /** Rows shown, with `{{start}}`, `{{end}}` and `{{total}}` (e.g. "{{start}} – {{end}} di {{total}}"). */
+  range?: string;
+}
+
+/** Texts of the `app-table` search: placeholder (also its accessible name) and its two buttons. */
+export interface TableSearchTexts extends SearchFieldTexts {
+  placeholder?: string;
+}
+
 /**
- * Generic table (Angular Material table) paginated by the server: rows of any shape, columns chosen
- * by the caller (`columns: TableColumn<Item>[]`).
- * `<app-table [rows]="result.rows" [total]="result.total" [columns]="columns" [(page)]="page" />`
- * `rows` are the rows of the current page, `total` the rows of all pages. The paginator appears only
- * with more than one page; moving with it changes `page` (from 1), which the caller asks the API for.
+ * Texts of `app-table`, already translated, in two groups: `{ paginator: { … }, search: { … } }`.
+ * With our translation file the group `table` has the same shape: `[texts]="'table' | translate"`.
+ */
+export interface TableTexts {
+  paginator?: TablePaginatorTexts;
+  search?: TableSearchTexts;
+}
+
+/** Rows in a page when `pageSize` is not given: the standard of every table. */
+export const TABLE_PAGE_SIZE = 10;
+
+/** Choices of the page size selector when `pageSizeOptions` is not given. */
+export const TABLE_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50, 100];
+
+/** The options of the page size selector open in the shared select panel (see the theme). */
+const SELECT_CONFIG: MatPaginatorSelectConfig = { panelClass: 'select__panel' };
+
+/** Page asked by the table: `page` starts from 1; `search` is the searched text ('' for none). */
+export interface TablePageRequest {
+  page: number;
+  pageSize: number;
+  search: string;
+}
+
+/** Page answered to the table: the rows of the page and how many rows there are in all pages. */
+export interface TablePage<T> {
+  total: number;
+  rows: readonly T[];
+}
+
+/**
+ * How the table gets a page: the caller's parameters plus page, page size and search → `{ total, rows }`.
+ * Any function (e.g. an API of a service) with this shape works: the table imports nothing else.
+ */
+export type TableLoad<P, T> = (request: P & TablePageRequest) => Observable<TablePage<T>>;
+
+const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
+
+/**
+ * Generic table (Angular Material table) that loads its rows page by page by itself:
+ * `<app-table [columns]="columns" [params]="filters" [load]="service.list" />`.
+ * It only needs:
+ * - `columns`: which fields of the rows it shows (`TableColumn<Item>[]`);
+ * - `load`: the function that asks a page, e.g. an API of a service;
+ * - `params`: what that function needs besides the page (e.g. filters); `null` loads nothing.
+ * Headers and texts (`texts`, see `TableTexts`) arrive already translated.
+ * Above the rows an optional bar: icon buttons marked `appTableIconAction`, the search (`searchable`,
+ * sent to `load` as `search`) and text buttons marked `appTableTextAction`; each part shows only
+ * when it is used. Icons (see `Icons`): [search magnifier, search X].
+ * The paginator, under the rows, has a page size selector (`pageSizeOptions`, 10 by default): with
+ * more rows the page scrolls and the paginator stays at the bottom of the screen.
+ * Then it works on its own: it asks page 1, moves with its paginator, goes back to page 1 and loads
+ * again whenever `params` or the search change, keeps the current rows on screen until the next page arrives and,
+ * when a request fails, shows no rows and emits `loadError` (the next requests still work).
  */
 @Component({
   selector: 'app-table',
-  imports: [I18nText, MatPaginatorModule, MatTableModule],
-  providers: [{ provide: MatPaginatorIntl, useClass: TablePaginatorIntl }],
+  imports: [MatPaginatorModule, MatTableModule, SearchField],
+  providers: [TablePaginatorIntl, { provide: MatPaginatorIntl, useExisting: TablePaginatorIntl }],
   templateUrl: './table.html',
-  styleUrl: './table.scss',
+  styleUrls: ['./table.scss', './table-bar.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[style.--table-page-size]': 'pageSize()' },
+  host: { '[style.--table-page-size]': 'reservedRows()' },
 })
-export class Table<T> {
-  readonly rows = input.required<readonly T[]>();
+export class Table<T, P extends object> {
   readonly columns = input.required<readonly TableColumn<T>[]>();
-  /** Rows on the server, in all pages. */
-  readonly total = input.required<number>();
-  /** Current page, from 1. */
-  readonly page = model(1);
-  /** Rows in a page. */
-  readonly pageSize = input(DEFAULT_PAGE_SIZE);
+  /** Parameters of every request besides the page; `null` loads nothing (e.g. signed out). */
+  readonly params = input.required<P | null>();
+  readonly load = input.required<TableLoad<P, T>>();
+  /** Rows in a page, two-way: the user changes it with the selector of the paginator. */
+  readonly pageSize = model(TABLE_PAGE_SIZE);
+  /** Choices of the page size selector. */
+  readonly pageSizeOptions = input<readonly number[]>(TABLE_PAGE_SIZE_OPTIONS);
+  readonly texts = input<TableTexts | null>();
+  /** Shows the search in the bar above the rows. */
+  readonly searchable = input(false);
+  /** Icons as Material icon names (Material Symbols font): [search magnifier, search X]. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: [search magnifier, search X]. */
+  readonly pathIcon = input<readonly string[] | null>();
+  /** A page could not be loaded; the table shows no rows meanwhile. */
+  readonly loadError = output<unknown>();
 
+  private readonly iconActions = contentChildren(TableIconAction);
+  private readonly textActions = contentChildren(TableTextAction);
+  protected readonly hasIconActions = computed(() => this.iconActions().length > 0);
+  protected readonly hasTextActions = computed(() => this.textActions().length > 0);
+  protected readonly hasBar = computed(
+    () => this.hasIconActions() || this.searchable() || this.hasTextActions(),
+  );
+
+  /** Searched text, from the search field (0.5 s after the last key, '' under 3 characters). */
+  protected readonly search = signal('');
+
+  /** Current page, from 1; back to the first one whenever `params` or the search change. */
+  protected readonly page = linkedSignal({
+    source: () => ({ params: this.params(), search: this.search() }),
+    computation: () => 1,
+  });
+
+  private readonly request = computed(() => {
+    const params = this.params();
+    return params
+      ? { ...params, page: this.page(), pageSize: this.pageSize(), search: this.search() }
+      : null;
+  });
+
+  /** The page answered by `load`; the previous one stays on screen until the next arrives. */
+  protected readonly result = toSignal(
+    toObservable(this.request).pipe(
+      switchMap((request) =>
+        request
+          ? this.load()(request).pipe(
+              catchError((error: unknown) => {
+                this.loadError.emit(error);
+                return of(NO_ROWS);
+              }),
+            )
+          : of(NO_ROWS),
+      ),
+    ),
+    { initialValue: NO_ROWS },
+  );
+
+  protected readonly rows = computed(() => this.result().rows);
+  protected readonly total = computed(() => this.result().total);
   protected readonly fields = computed(() => this.columns().map((column) => column.field));
+  protected readonly selectConfig = SELECT_CONFIG;
+
+  /**
+   * Rows of the smallest page: the table always keeps room for them, so the paginator never moves
+   * up on a shorter page; bigger pages simply make the table (and the page) longer.
+   */
+  protected readonly reservedRows = computed(() =>
+    Math.min(this.pageSize(), ...this.pageSizeOptions()),
+  );
+  /** The paginator (and its selector) only when rows do not fit in the smallest page. */
+  protected readonly paginated = computed(() => this.total() > this.reservedRows());
+
+  constructor() {
+    const paginatorIntl = inject(TablePaginatorIntl);
+    effect(() => paginatorIntl.setTexts(this.texts()?.paginator));
+  }
+
+  /**
+   * A new page or page size. With a new size Material keeps the first row on screen: rows 21-30 at
+   * 10 per page become page 2 (rows 21-40) at 20 per page.
+   */
+  protected changePage(event: PageEvent): void {
+    this.pageSize.set(event.pageSize);
+    this.page.set(event.pageIndex + 1);
+  }
 }

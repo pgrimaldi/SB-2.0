@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ButtonComponent } from './button.component';
+import { Button } from './button';
 
 @Component({
-  imports: [ButtonComponent],
+  imports: [Button],
   template: `
     <app-button class="primary">Accedi</app-button>
     <app-button class="secondary" appearance="secondary">Annulla</app-button>
@@ -11,7 +11,7 @@ import { ButtonComponent } from './button.component';
 })
 class ButtonHost {}
 
-describe('ButtonComponent', () => {
+describe('Button', () => {
   it('should project the label for every appearance', async () => {
     const fixture = TestBed.createComponent(ButtonHost);
     await fixture.whenStable();

@@ -13,7 +13,8 @@ let nextId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextField {
-  readonly label = input.required<string>();
+  /** Label above the field, already translated. */
+  readonly label = input<string>();
   /** Typed text, two-way: `[(value)]="email"`. */
   readonly value = model('');
   readonly type = input<'text' | 'email'>('text');

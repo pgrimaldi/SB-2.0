@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { DateLanguageBehaviour } from './date-language.behaviour';
 import { Language, LanguageBehaviour } from './language.behaviour';
@@ -12,7 +13,9 @@ describe('DateLanguageBehaviour', () => {
   };
 
   const setup = (language: Language = 'it') => {
-    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
+    TestBed.configureTestingModule({
+      providers: [provideTranslateService(), provideNativeDateAdapter()],
+    });
     const dates = TestBed.inject(DateLanguageBehaviour);
     TestBed.inject(LanguageBehaviour).use(language);
     return dates;
@@ -26,6 +29,21 @@ describe('DateLanguageBehaviour', () => {
     expect(dates.parse('03/10/2026')).toEqual(new Date(2026, 9, 3));
     expect(dates.parse('3-10-26')).toEqual(new Date(2026, 9, 3));
     expect(dates.parse(' 3.10.2026 ')).toEqual(new Date(2026, 9, 3));
+  });
+
+  it("should set the locale of Material's date adapter, following the language", () => {
+    browser(['it-IT', 'en-US']);
+    setup('it');
+    const adapter = TestBed.inject<DateAdapter<Date>>(DateAdapter);
+    const written = () =>
+      adapter.format(new Date(2026, 9, 3), { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    TestBed.tick();
+    expect(written()).toBe('03/10/2026');
+
+    TestBed.inject(LanguageBehaviour).use('en');
+    TestBed.tick();
+    expect(written()).toBe('10/03/2026'); // en-US: month first
   });
 
   it('should refuse texts that are not real dates', () => {

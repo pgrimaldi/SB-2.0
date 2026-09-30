@@ -1,29 +1,27 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { CardHub } from './card-hub';
+import { Card } from './card';
 
 @Component({
-  imports: [CardHub],
+  imports: [Card],
   template: `
-    <app-card-hub iconSrc="/icon.png">
-      <span cardHubHeading>Tutto in uno</span>
+    <app-card [pathIcon]="['/icon.png']">
+      <span cardHeading>Tutto in uno</span>
       Testo della card
-    </app-card-hub>
+    </app-card>
   `,
 })
-class CardHubHost {}
+class CardHost {}
 
-describe('CardHub', () => {
+describe('Card', () => {
   it('should render icon, heading and projected content', async () => {
-    const fixture = TestBed.createComponent(CardHubHost);
+    const fixture = TestBed.createComponent(CardHost);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
 
     expect(element.querySelector('mat-card')).toBeTruthy();
     expect(element.querySelector('img')?.getAttribute('src')).toBe('/icon.png');
     expect(element.querySelector('h3')?.textContent?.trim()).toBe('Tutto in uno');
-    expect(element.querySelector('.card__hub__content')?.textContent?.trim()).toBe(
-      'Testo della card',
-    );
+    expect(element.querySelector('.card__content')?.textContent?.trim()).toBe('Testo della card');
   });
 });

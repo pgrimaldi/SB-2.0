@@ -2,7 +2,7 @@
   class="dropdown__menu__trigger"
   type="button"
   [matMenuTriggerFor]="menu"
-  [attr.aria-label]="accessibleLabel()"
+  [attr.aria-label]="accessibleLabel() ?? null"
 >
   <ng-content />
 </button>
@@ -12,11 +12,15 @@
     <button
       mat-menu-item
       [attr.aria-label]="iconOnly() ? item.label : null"
-      [attr.aria-current]="item.value === selectedValue() ? 'true' : null"
-      (click)="selected.emit(item.value)"
+      [attr.aria-current]="item.value === selected() ? 'true' : null"
+      (click)="selected.set(item.value)"
     >
-      @if (item.iconSrc) {
-        <img class="dropdown__menu__icon" [src]="item.iconSrc" width="20" height="20" alt="" />
+      @if (icons().list[$index]; as icon) {
+        @if (icons().material) {
+          <mat-icon class="dropdown__menu__icon" aria-hidden="true">{{ icon }}</mat-icon>
+        } @else {
+          <img class="dropdown__menu__icon" [src]="icon" width="20" height="20" alt="" />
+        }
       }
       @if (!iconOnly()) {
         <span>{{ item.label }}</span>

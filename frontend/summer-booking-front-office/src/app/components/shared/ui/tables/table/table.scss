@@ -1,8 +1,8 @@
 @use '@angular/material' as mat;
 
 // Rows 3rem high: 10 rows and the paginator fit in one screen from 1280×720.
-// The host always has room for a full page (`--table-page-size` rows, set from `pageSize`): the
-// paginator, at its bottom, stays at the same height on every page, even the last shorter one.
+// The host always has room for the smallest page (`--table-page-size` rows): the paginator, at its
+// bottom, stays at the same height on every page, even the last shorter one.
 :host {
   --table-header-height: 3rem;
   --table-row-height: 3rem;
@@ -17,15 +17,15 @@
 
   @include mat.table-overrides(
     (
-      background-color: #ffffff,
+      background-color: var(--color__layout__surface),
       header-container-height: var(--table-header-height),
-      header-headline-color: #ffffff,
+      header-headline-color: var(--color__layout__on__main),
       header-headline-size: 0.875rem,
       header-headline-line-height: 1.3125rem,
       header-headline-weight: 500,
       header-headline-tracking: normal,
       row-item-container-height: var(--table-row-height),
-      row-item-label-text-color: #1c1c1c,
+      row-item-label-text-color: var(--color__main__theme__two),
       row-item-label-text-size: 0.875rem,
       row-item-label-text-line-height: 1.3125rem,
       row-item-label-text-weight: 500,
@@ -36,16 +36,37 @@
   @include mat.paginator-overrides(
     (
       container-size: var(--table-paginator-height),
-      container-background-color: transparent,
-      container-text-color: #233c7d,
+      container-background-color: var(--color__layout__surface),
+      container-text-color: var(--color__main__theme__one),
       container-text-size: 0.875rem,
-      enabled-icon-color: #233c7d,
-      disabled-icon-color: #aaaaaa,
+      enabled-icon-color: var(--color__main__theme__one),
+      disabled-icon-color: var(--color__layout__muted),
+      select-trigger-text-size: 0.875rem,
+    )
+  );
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: var(--color__layout__border),
+      outlined-hover-outline-color: var(--color__main__theme__one),
+      outlined-focus-outline-color: var(--color__main__theme__one),
+      outlined-input-text-color: var(--color__main__theme__one),
+    )
+  );
+  @include mat.select-overrides(
+    (
+      enabled-trigger-text-color: var(--color__main__theme__one),
+      enabled-arrow-color: var(--color__main__theme__one),
+      focused-arrow-color: var(--color__main__theme__one),
     )
   );
 }
 
+// With long pages (more rows than the screen) the paginator stays at the bottom of the screen and
+// stops in its place at the end of the table. `--table-paginator-offset` keeps it above anything
+// fixed at the bottom of the page (e.g. a menu bar).
 .table__paginator {
+  position: sticky;
+  bottom: var(--table-paginator-offset, 0);
   margin-top: auto;
 }
 
@@ -63,11 +84,11 @@
 }
 
 .table__header {
-  background: #233c7d;
+  background: var(--color__main__theme__one);
 }
 
 .table__row:nth-child(even) {
-  background: #e9ecf3;
+  background: var(--color__layout__highlight);
 }
 
 .table__cell {

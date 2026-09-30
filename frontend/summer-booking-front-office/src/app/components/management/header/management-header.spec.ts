@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { DATE_FORMATS } from '../../../behaviours/i18n/date-language.behaviour';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
@@ -11,6 +11,7 @@ describe('ManagementHeader', () => {
       providers: [
         provideTranslateService(),
         provideNativeDateAdapter(DATE_FORMATS),
+        { provide: MAT_DATE_LOCALE, useValue: 'it-IT' }, // set by DateLanguageBehaviour in the app
         ManagementFiltersBehaviour,
       ],
     });

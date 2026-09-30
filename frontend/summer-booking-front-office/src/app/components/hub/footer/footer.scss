@@ -6,8 +6,8 @@
 
 .footer {
   border-top: 0.0625rem solid rgb(229 231 235 / 60%);
-  background: #ffffff;
-  color: #2a437f;
+  background: var(--color__white);
+  color: var(--color__main__theme__one);
 }
 
 .footer__content,
@@ -97,7 +97,7 @@
 }
 
 .footer__bottom {
-  border-top: 0.0625rem solid #e5e7eb;
+  border-top: 0.0625rem solid var(--color__layout__border);
 }
 
 .footer__bottom__content {

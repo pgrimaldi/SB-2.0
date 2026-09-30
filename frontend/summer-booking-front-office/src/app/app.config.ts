@@ -12,7 +12,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
-import { DATE_FORMATS } from './behaviours/i18n/date-language.behaviour';
+import { DATE_FORMATS, DateLanguageBehaviour } from './behaviours/i18n/date-language.behaviour';
 import { AuthBehaviour } from './behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from './behaviours/i18n/language.behaviour';
 import { authInterceptor } from './services/api/auth.interceptor';
@@ -43,6 +43,10 @@ export const appConfig: ApplicationConfig = {
       const preferred = languageBehaviour.preferred();
       languageBehaviour.use(preferred);
       return languageBehaviour.loadAll(preferred);
+    }),
+    // Calendars and date fields follow the language (locale of the date adapter).
+    provideAppInitializer(() => {
+      inject(DateLanguageBehaviour);
     }),
     // A previous sign-in: new access token from the refresh cookie before the first navigation.
     provideAppInitializer(() => inject(AuthBehaviour).restore()),

@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideTranslateService } from '@ngx-translate/core';
 import { SearchField } from './search-field';
 
 @Component({
   imports: [SearchField],
-  template: `<app-search-field placeholder="Cerca" (search)="searches.push($event)" />`,
+  template: `<app-search-field
+    placeholder="Cerca per nome"
+    [texts]="{ submit: 'Cerca', clear: 'Svuota' }"
+    (search)="searches.push($event)"
+  />`,
 })
 class SearchFieldHost {
   readonly searches: string[] = [];
@@ -16,7 +19,6 @@ describe('SearchField', () => {
   afterEach(() => vi.useRealTimers());
 
   const setup = async () => {
-    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
     const fixture = TestBed.createComponent(SearchFieldHost);
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
@@ -50,24 +52,60 @@ describe('SearchField', () => {
   it('should keep the magnifier button, which searches nothing, and an X that empties the field', async () => {
     const { fixture, element, input, type, searches } = await setup();
     const button = () => element.querySelector<HTMLButtonElement>('.search__field__button')!;
+    expect(
+      element.querySelector('.search__field__button img, .search__field__button mat-icon'),
+    ).toBeNull(); // no icon given
 
-    expect(button().getAttribute('aria-label')).toBe('field.search.submit'); // empty: magnifier
+    expect(button().getAttribute('aria-label')).toBe('Cerca'); // empty: magnifier
     type('om');
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     vi.advanceTimersByTime(100);
     expect(searches).toEqual([]); // Enter starts no search
 
     type('lettino');
-    expect(button().getAttribute('aria-label')).toBe('field.search.clear');
+    expect(button().getAttribute('aria-label')).toBe('Svuota');
 
     button().click();
     fixture.detectChanges();
     expect(input.value).toBe('');
     expect(document.activeElement).toBe(input);
-    expect(button().getAttribute('aria-label')).toBe('field.search.submit');
+    expect(button().getAttribute('aria-label')).toBe('Cerca');
 
     button().click(); // the magnifier does nothing
     vi.advanceTimersByTime(500);
     expect(searches).toEqual([]);
   });
+
+  it('should show its icons in order [magnifier, X]: Material names if given, else images', async () => {
+    const fixture = TestBed.createComponent(CustomIconsHost);
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    const input = element.querySelector('input')!;
+    const icon = () =>
+      element.querySelector('.search__field__button img, .search__field__button mat-icon')!;
+    const type = (text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+
+    expect(icon().getAttribute('src')).toBe('/assets/images/lente.svg');
+    type('lettino');
+    expect(icon().getAttribute('src')).toBe('/assets/images/x.svg');
+
+    fixture.componentInstance.matIcon.set(['search', 'close']); // replaces all the images
+    fixture.detectChanges();
+    expect(icon().textContent?.trim()).toBe('close');
+    type('');
+    expect(icon().textContent?.trim()).toBe('search');
+  });
 });
+
+@Component({
+  imports: [SearchField],
+  template: `<app-search-field placeholder="Cerca" [matIcon]="matIcon()" [pathIcon]="pathIcon" />`,
+})
+class CustomIconsHost {
+  readonly matIcon = signal<string[] | null>(null);
+  readonly pathIcon = ['/assets/images/lente.svg', '/assets/images/x.svg'];
+}

@@ -2,7 +2,7 @@
   display: flex;
   min-height: 100svh;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--color__white);
 }
 
 .layout__body {
@@ -19,6 +19,9 @@
 // Tablet and phone: room for the menu bar fixed at the bottom.
 @media (width < 64rem) {
   .layout__content {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    // The table paginator, when it sticks to the bottom of the screen, stays above the menu bar.
+    --table-paginator-offset: calc(4.5rem + env(safe-area-inset-bottom));
+
+    padding-bottom: var(--table-paginator-offset);
   }
 }

@@ -1,20 +1,19 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, input, model } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
-import { TranslatePipe } from '@ngx-translate/core';
 
-/** An option of `app-select`: `key` is the value, `value` the translation key of the text shown. */
+/** An option of `app-select`: `value` is what gets selected, `label` the text shown (translated). */
 export interface SelectOption<K extends string = string> {
-  key: K;
-  value: string;
+  value: K;
+  label: string;
 }
 
 /**
  * Select (Angular Material select) styled as the grey pill of the reference:
- * `<app-select label="…" [options]="options" [(selected)]="key" />`.
+ * `<app-select accessibleLabel="…" [options]="options" [(selected)]="value" />`.
  */
 @Component({
   selector: 'app-select',
-  imports: [MatSelectModule, TranslatePipe],
+  imports: [MatSelectModule],
   templateUrl: './select.html',
   styleUrl: './select.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +24,6 @@ export interface SelectOption<K extends string = string> {
 export class Select<K extends string = string> {
   readonly options = input.required<readonly SelectOption<K>[]>();
   readonly selected = model.required<K>();
-  /** Translation key of the accessible name. */
-  readonly label = input.required<string>();
+  /** Accessible name, already translated. */
+  readonly accessibleLabel = input<string>();
 }

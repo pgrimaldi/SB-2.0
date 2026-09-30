@@ -29,6 +29,11 @@ export class LanguageBehaviour {
 
   readonly current = this.currentCode.asReadonly();
 
+  constructor() {
+    // Components (e.g. appI18nText) read the available languages from ngx-translate.
+    this.translateService.addLangs(this.languages.map(({ code }) => code));
+  }
+
   isSupported(value: string | null | undefined): value is Language {
     return this.languages.some((language) => language.code === value);
   }

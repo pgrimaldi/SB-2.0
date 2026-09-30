@@ -18,7 +18,13 @@
       "previous": "Previous page",
       "next": "Next page",
       "last": "Last page",
+      "size": "Items per page:",
       "range": "{{start}} – {{end}} of {{total}}"
+    },
+    "search": {
+      "placeholder": "Search the table",
+      "submit": "Search",
+      "clear": "Clear search"
     }
   },
   "alert": {

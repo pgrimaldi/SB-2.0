@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
-import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
+import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { IconButton } from '../../shared/ui/buttons/icon-button/icon-button';
+import { Datepicker } from '../../shared/ui/datepickers/datepicker/datepicker';
 import { SearchField } from '../../shared/ui/inputs/search-field/search-field';
 import { Select, SelectOption } from '../../shared/ui/selects/select/select';
-import { Datepicker } from './datepicker/datepicker';
 
 @Component({
   selector: 'app-management-header',
@@ -23,11 +25,18 @@ export class ManagementHeader {
   private readonly auth = inject(AuthBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
-  protected readonly periods: readonly SelectOption<BookingDayType>[] = [
-    { key: BookingDayType.FullDay, value: 'management.header.period.full-day' },
-    { key: BookingDayType.Morning, value: 'management.header.period.morning' },
-    { key: BookingDayType.Afternoon, value: 'management.header.period.afternoon' },
-  ];
+  private readonly periodTexts = toSignal(
+    inject(TranslateService).stream('management.header.period') as Observable<
+      Record<string, string>
+    >,
+    { initialValue: {} as Record<string, string> },
+  );
+  /** Options of the period select, translated (they follow the language). */
+  protected readonly periods = computed<readonly SelectOption<BookingDayType>[]>(() => [
+    { value: BookingDayType.FullDay, label: this.periodTexts()['full-day'] },
+    { value: BookingDayType.Morning, label: this.periodTexts()['morning'] },
+    { value: BookingDayType.Afternoon, label: this.periodTexts()['afternoon'] },
+  ]);
 
   /** Initial of the signed-in user, shown in the account button. */
   protected readonly initial = computed(

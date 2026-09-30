@@ -4,10 +4,10 @@
 .login__dialog__panel {
   @include mat.dialog-overrides(
     (
-      container-color: #ffffff,
+      container-color: var(--color__white),
       container-shape: 0.5rem,
       container-max-width: none,
-      container-elevation-shadow: 0 0.5rem 2rem rgb(0 0 0 / 15%),
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
     )
   );
 }
@@ -21,7 +21,7 @@ app-login-dialog {
   position: relative;
   display: block;
   padding: 2rem;
-  color: #233c7d;
+  color: var(--color__main__theme__one);
 }
 
 .login__dialog__close {

@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { Subject, defer, of, throwError } from 'rxjs';
+import { Subject, defer, firstValueFrom, of, throwError } from 'rxjs';
 import { AuthSession } from '../../entities/auth/credentials';
 import { AuthService } from '../../services/api/auth/auth.service';
 import { AuthBehaviour, LOGOUT_RETRY_DELAY } from './auth.behaviour';
@@ -12,12 +12,20 @@ describe('AuthBehaviour', () => {
     expiresIn: 900,
     user: { email: 'user@example.com', idProperty: 'property-1', roles: ['Manager'] },
   });
-  let server: { refresh: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
+  let server: {
+    signIn: ReturnType<typeof vi.fn>;
+    refresh: ReturnType<typeof vi.fn>;
+    logout: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    server = { refresh: vi.fn(), logout: vi.fn().mockReturnValue(of(undefined)) };
+    server = {
+      signIn: vi.fn(),
+      refresh: vi.fn(),
+      logout: vi.fn().mockReturnValue(of(undefined)),
+    };
   });
 
   afterEach(() => {
@@ -34,6 +42,30 @@ describe('AuthBehaviour', () => {
 
   const storedValues = () =>
     [...Object.values(localStorage), ...Object.values(sessionStorage)].join(' ');
+
+  it('should start the session when the server accepts the credentials', async () => {
+    const auth = load();
+    server.signIn.mockReturnValue(of(session('first')));
+    const credentials = { username: 'user@example.com', password: 'secret', remember: true };
+
+    await firstValueFrom(auth.signIn(credentials));
+
+    expect(server.signIn).toHaveBeenCalledWith(credentials);
+    expect(auth.token()).toBe('first');
+    expect(localStorage.getItem('sb.signed-in')).toBe('true'); // remembered
+  });
+
+  it('should fail like the server and start nothing with wrong credentials', async () => {
+    const auth = load();
+    server.signIn.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
+
+    const failure = await firstValueFrom(
+      auth.signIn({ username: 'user@example.com', password: 'wrong', remember: false }),
+    ).catch((error: HttpErrorResponse) => error);
+
+    expect((failure as HttpErrorResponse).status).toBe(401);
+    expect(auth.isAuthenticated()).toBe(false);
+  });
 
   it('should keep the access token only in memory, never in browser storage', () => {
     load().start(session('secret-access-token'), true);

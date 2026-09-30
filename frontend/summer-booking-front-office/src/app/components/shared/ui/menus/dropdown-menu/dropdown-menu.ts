@@ -4,19 +4,21 @@ import {
   ViewEncapsulation,
   computed,
   input,
-  output,
+  model,
 } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { resolveIcons } from '../../icons/icons';
 
 export interface DropdownMenuItem {
   value: string;
   label: string;
-  iconSrc?: string;
 }
 
+/** Menu opened by the projected trigger. Icons (see `Icons`): one per item, in the order of `items`. */
 @Component({
   selector: 'app-dropdown-menu',
-  imports: [MatMenuModule],
+  imports: [MatIconModule, MatMenuModule],
   templateUrl: './dropdown-menu.html',
   styleUrl: './dropdown-menu.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,10 +27,17 @@ export interface DropdownMenuItem {
 })
 export class DropdownMenu {
   readonly items = input.required<readonly DropdownMenuItem[]>();
-  readonly selectedValue = input<string>();
-  readonly accessibleLabel = input.required<string>();
+  /** Value of the current item, two-way: `[(selected)]` (marked with `aria-current`). */
+  readonly selected = model('');
+  /** Accessible name of the button that opens the menu, already translated. */
+  readonly accessibleLabel = input<string>();
   readonly iconOnly = input(false);
-  readonly selected = output<string>();
+  /** Icons as Material icon names (Material Symbols font): one per item, in the order of `items`. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: one per item, in the order of `items`. */
+  readonly pathIcon = input<readonly string[] | null>();
+
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
   protected readonly panelClass = computed(() =>
     this.iconOnly()

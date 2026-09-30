@@ -2,7 +2,7 @@
   class="carousel"
   role="region"
   aria-roledescription="carousel"
-  [attr.aria-label]="accessibleLabel()"
+  [attr.aria-label]="accessibleLabel() ?? null"
 >
   <div
     #viewport
@@ -26,7 +26,7 @@
             role="group"
             aria-roledescription="slide"
             [attr.aria-label]="
-              'carousel.slide' | translate: { index: $index + 1, total: slides().length }
+              texts()?.slide | formatText: { index: $index + 1, total: slides().length }
             "
           >
             <ng-container [ngTemplateOutlet]="slide" />
@@ -39,20 +39,32 @@
       <button
         class="carousel__arrow carousel__arrow__previous"
         type="button"
-        [attr.aria-label]="'carousel.previous' | translate"
+        [attr.aria-label]="texts()?.previous ?? null"
         (click)="previous()"
       >
-        <svg viewBox="0 0 12 16" aria-hidden="true"><path d="M9.5 1.5 3 8l6.5 6.5" /></svg>
+        @if (icons().list[0]; as icon) {
+          @if (icons().material) {
+            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          } @else {
+            <img [src]="icon" width="12" height="16" alt="" />
+          }
+        }
       </button>
     }
     @if (index() < maxIndex()) {
       <button
         class="carousel__arrow carousel__arrow__next"
         type="button"
-        [attr.aria-label]="'carousel.next' | translate"
+        [attr.aria-label]="texts()?.next ?? null"
         (click)="next()"
       >
-        <svg viewBox="0 0 12 16" aria-hidden="true"><path d="M2.5 1.5 9 8l-6.5 6.5" /></svg>
+        @if (icons().list[1]; as icon) {
+          @if (icons().material) {
+            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          } @else {
+            <img [src]="icon" width="12" height="16" alt="" />
+          }
+        }
       </button>
     }
   </div>
@@ -65,7 +77,7 @@
           type="button"
           [class.carousel__dot__active]="position === index()"
           [attr.aria-current]="position === index() ? 'true' : null"
-          [attr.aria-label]="'carousel.position' | translate: { position: position + 1 }"
+          [attr.aria-label]="texts()?.position | formatText: { position: position + 1 }"
           (click)="goTo(position)"
         ></button>
       }

@@ -1,13 +1,16 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService } from '@ngx-translate/core';
 import { Carousel } from './carousel';
 import { CarouselSlide } from './carousel-slide';
 
 @Component({
   imports: [Carousel, CarouselSlide],
   template: `
-    <app-carousel accessibleLabel="Recensioni">
+    <app-carousel
+      accessibleLabel="Recensioni"
+      [pathIcon]="['/previous.svg', '/next.svg']"
+      [texts]="texts"
+    >
       @for (slide of slides; track slide) {
         <p *appCarouselSlide>{{ slide }}</p>
       }
@@ -16,6 +19,12 @@ import { CarouselSlide } from './carousel-slide';
 })
 class CarouselHost {
   readonly slides = ['A', 'B', 'C', 'D', 'E'];
+  readonly texts = {
+    previous: 'Precedente',
+    next: 'Successivo',
+    slide: '{{index}} di {{total}}',
+    position: 'Vai alla posizione {{position}}',
+  };
 }
 
 describe('Carousel', () => {
@@ -32,7 +41,6 @@ describe('Carousel', () => {
   };
 
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
     fixture = TestBed.createComponent(CarouselHost);
     element = fixture.nativeElement;
     await fixture.whenStable();
@@ -52,10 +60,28 @@ describe('Carousel', () => {
     await click('.carousel__arrow__next');
     expect(activeDot()).toBe(1);
     expect(element.querySelector('.carousel__arrow__previous')).toBeTruthy();
+    // Icons: [previous arrow, next arrow].
+    expect(element.querySelector('.carousel__arrow__previous img')?.getAttribute('src')).toBe(
+      '/previous.svg',
+    );
+    expect(element.querySelector('.carousel__arrow__next img')?.getAttribute('src')).toBe(
+      '/next.svg',
+    );
 
     await click('.carousel__dot:last-child');
     expect(activeDot()).toBe(4);
     expect(element.querySelector('.carousel__arrow__next')).toBeNull();
+  });
+
+  it('should name region, slides, arrows and dots with the given texts', async () => {
+    const label = (selector: string) => element.querySelector(selector)?.getAttribute('aria-label');
+    expect(label('[role="region"]')).toBe('Recensioni');
+    expect(label('.carousel__slide__content')).toBe('1 di 5');
+    expect(label('.carousel__arrow__next')).toBe('Successivo');
+    expect(label('.carousel__dot')).toBe('Vai alla posizione 1');
+
+    await click('.carousel__arrow__next');
+    expect(label('.carousel__arrow__previous')).toBe('Precedente');
   });
 
   it('should move with the keyboard arrows', async () => {

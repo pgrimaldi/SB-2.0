@@ -9,9 +9,9 @@
 
   @include mat.card-overrides(
     (
-      elevated-container-color: #ffffff,
+      elevated-container-color: var(--color__layout__surface),
       elevated-container-shape: 0.3rem,
-      elevated-container-elevation: 0 0.25rem 1.25rem rgb(0 0 0 / 10%),
+      elevated-container-elevation: 0 0.25rem 1.25rem var(--color__layout__shadow__light),
     )
   );
 
@@ -20,7 +20,7 @@
 
     @include mat.card-overrides(
       (
-        elevated-container-elevation: 0 0.5rem 1.875rem rgb(0 0 0 / 15%),
+        elevated-container-elevation: 0 0.5rem 1.875rem var(--color__layout__shadow),
       )
     );
   }

@@ -226,9 +226,13 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
     };
   });
 
+  // The server decides where to search: the mock looks in the article name, ignoring case.
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = search ? items.filter((item) => item.name.toLowerCase().includes(search)) : items;
+
   const answer: Page<WarehouseItem> = {
-    total: items.length,
-    rows: items.slice((page - 1) * pageSize, page * pageSize),
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };

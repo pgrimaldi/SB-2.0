@@ -42,10 +42,11 @@
       <app-dropdown-menu
         class="header__language"
         [items]="languageItems()"
-        [selectedValue]="currentLanguage().code"
+        [pathIcon]="languageFlags"
+        [selected]="currentLanguage().code"
         [iconOnly]="true"
         [accessibleLabel]="'language.selector' | translate"
-        (selected)="changeLanguage($event)"
+        (selectedChange)="changeLanguage($event)"
       >
         <span class="header__language__trigger">
           <img
@@ -97,10 +98,11 @@
             <app-dropdown-menu
               class="header__language"
               [items]="languageItems()"
-              [selectedValue]="currentLanguage().code"
+              [pathIcon]="languageFlags"
+              [selected]="currentLanguage().code"
               [iconOnly]="true"
               [accessibleLabel]="'language.selector' | translate"
-              (selected)="changeLanguage($event)"
+              (selectedChange)="changeLanguage($event)"
             >
               <span class="header__language__trigger">
                 <img

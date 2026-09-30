@@ -14,7 +14,7 @@ import {
   throwError,
   timer,
 } from 'rxjs';
-import { AuthSession, AuthUser } from '../../entities/auth/credentials';
+import { AuthSession, AuthUser, SignInRequest } from '../../entities/auth/credentials';
 import { AuthService } from '../../services/api/auth/auth.service';
 
 /**
@@ -75,6 +75,16 @@ export class AuthBehaviour {
   /** Access token for our API requests (null when signed out). */
   token(): string | null {
     return this.session()?.accessToken ?? null;
+  }
+
+  /**
+   * Signs in: when the server accepts the credentials (and sets the refresh cookie) the session
+   * starts. Fails like the API: status 401 for wrong credentials.
+   */
+  signIn(request: SignInRequest): Observable<void> {
+    return this.authService
+      .signIn(request)
+      .pipe(map((session) => this.start(session, request.remember)));
   }
 
   /** After sign-in: the server has already set the refresh cookie. */

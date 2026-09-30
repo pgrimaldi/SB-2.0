@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { combineLatest, switchMap } from 'rxjs';
-import { LanguageBehaviour } from '../../../../behaviours/i18n/language.behaviour';
 
 /**
  * Renders a translated text and reserves the space of its longest translation,
@@ -11,6 +10,8 @@ import { LanguageBehaviour } from '../../../../behaviours/i18n/language.behaviou
  *
  * With `[html]="true"` the translation may contain simple inline markup (e.g. `<em>` for
  * highlighted words); Angular sanitizes it and the reserved space uses the plain text.
+ * The languages are the ones ngx-translate knows (`addLangs`, or loaded translations): the
+ * directive needs nothing else from the app.
  */
 @Component({
   selector: '[appI18nText]',
@@ -35,7 +36,6 @@ export class I18nText {
   readonly params = input<Record<string, unknown>>();
 
   private readonly translateService = inject(TranslateService);
-  private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly request$ = toObservable(
     computed(() => ({ key: this.key(), params: this.params() })),
   );
@@ -49,9 +49,9 @@ export class I18nText {
     this.request$.pipe(
       switchMap(({ key, params }) =>
         combineLatest(
-          this.languageBehaviour.languages.map(({ code }) =>
-            this.translateService.stream(key, params, code),
-          ),
+          this.translateService
+            .getLangs()
+            .map((language) => this.translateService.stream(key, params, language)),
         ),
       ),
     ),

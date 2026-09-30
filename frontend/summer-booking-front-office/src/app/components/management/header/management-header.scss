@@ -13,7 +13,7 @@
   align-items: center;
   column-gap: 1.5rem;
   padding-inline: 0.875rem;
-  background: #ffffff;
+  background: var(--color__white);
   box-shadow: 0 0.375rem 1.25rem rgb(18 45 87 / 18%);
 }
 
@@ -49,8 +49,8 @@
   padding: 0 0.875rem;
   border: 0;
   border-radius: 0.375rem;
-  background: #f3f3f3;
-  color: #233c7d;
+  background: var(--color__tertiary__theme);
+  color: var(--color__main__theme__one);
   font: inherit;
   font-size: 0.75rem;
   line-height: 1.125rem;
@@ -68,7 +68,7 @@
   }
 
   &:focus-visible {
-    outline: 0.125rem solid #233c7d;
+    outline: 0.125rem solid var(--color__main__theme__one);
     outline-offset: 0.125rem;
   }
 }
@@ -81,8 +81,8 @@
 }
 
 .management__header__today__other {
-  background: #233c7d;
-  color: #ffffff;
+  background: var(--color__main__theme__one);
+  color: var(--color__white);
 }
 
 // Tablet and phone: the filters go on a second row below the logo.

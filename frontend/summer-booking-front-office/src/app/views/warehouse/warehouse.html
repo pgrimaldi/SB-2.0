@@ -1,9 +1,10 @@
 <main class="warehouse">
   <app-table
-    [rows]="items().rows"
-    [total]="items().total"
-    [columns]="columns"
-    [pageSize]="pageSize"
-    [(page)]="page"
+    [columns]="columns()"
+    [params]="filters.request()"
+    [load]="warehouse.list"
+    [texts]="'table' | translate"
+    [searchable]="true"
+    [pathIcon]="['/assets/images/search.svg', '/assets/images/clear.svg']"
   />
 </main>

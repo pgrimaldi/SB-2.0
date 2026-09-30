@@ -2,24 +2,44 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
-  effect,
+  computed,
   inject,
+  input,
   model,
 } from '@angular/core';
 import { DateAdapter } from '@angular/material/core';
 import { MatCalendarCellClassFunction, MatDatepickerModule } from '@angular/material/datepicker';
-import { TranslatePipe } from '@ngx-translate/core';
-import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
+import { MatIconModule } from '@angular/material/icon';
+import { resolveIcons } from '../../icons/icons';
+
+/** Texts of one date of `app-datepicker`, already translated; a missing one is left out. */
+export interface DatepickerDateTexts {
+  /** Accessible name of the date field. */
+  label?: string;
+  /** Accessible name of the arrow that moves the date one day back. */
+  previous?: string;
+  /** Accessible name of the arrow that moves the date one day forward. */
+  next?: string;
+}
+
+/** Texts of `app-datepicker`: one group for the start date and one for the end date. */
+export interface DatepickerTexts {
+  start?: DatepickerDateTexts;
+  end?: DatepickerDateTexts;
+}
 
 /**
- * Start and end date of the management header (Angular Material datepickers, native date adapter):
+ * Start and end date (Angular Material datepickers) in a grey pill:
  * `<app-datepicker [(start)]="startDate" [(end)]="endDate" />`.
- * Dates are chosen with the calendar or the arrows (one day), never typed; they are written as the
- * current language writes them. The start never goes after the end (the other date follows).
+ * Dates are chosen with the calendar or the arrows (one day), never typed; they are written by the
+ * app's date adapter, whose locale and formats the app sets (e.g. `provideNativeDateAdapter`). The
+ * start never goes after the end (the other date follows).
+ * Icons (see `Icons`): [calendar, previous day, next day]; the arrows are the same for both dates.
+ * Texts: `DatepickerTexts`.
  */
 @Component({
   selector: 'app-datepicker',
-  imports: [MatDatepickerModule, TranslatePipe],
+  imports: [MatDatepickerModule, MatIconModule],
   templateUrl: './datepicker.html',
   styleUrl: './datepicker.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +49,13 @@ import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language
 export class Datepicker {
   readonly start = model.required<Date>();
   readonly end = model.required<Date>();
+  readonly texts = input<DatepickerTexts | null>();
+  /** Icons as Material icon names (Material Symbols font): [calendar, previous day, next day]. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: [calendar, previous day, next day]. */
+  readonly pathIcon = input<readonly string[] | null>();
+
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
@@ -39,11 +66,6 @@ export class Datepicker {
     this.dateAdapter.compareDate(date, this.end()) <= 0
       ? 'datepicker__calendar__range'
       : '';
-
-  constructor() {
-    const dateLanguage = inject(DateLanguageBehaviour);
-    effect(() => this.dateAdapter.setLocale(dateLanguage.locale()));
-  }
 
   protected setStart(date: Date | null): void {
     if (!date) {

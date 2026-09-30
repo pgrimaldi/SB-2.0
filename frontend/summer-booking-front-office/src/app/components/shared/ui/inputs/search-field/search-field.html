@@ -3,8 +3,8 @@
     #field
     matInput
     type="search"
-    [placeholder]="placeholder() | translate"
-    [attr.aria-label]="placeholder() | translate"
+    [placeholder]="placeholder() ?? ''"
+    [attr.aria-label]="placeholder() ?? null"
     [value]="text()"
     (input)="text.set(field.value)"
   />
@@ -15,10 +15,16 @@
       mat-icon-button
       class="search__field__button"
       type="button"
-      [attr.aria-label]="'field.search.clear' | translate"
+      [attr.aria-label]="texts()?.clear ?? null"
       (click)="clear(field)"
     >
-      <img src="/assets/images/clear.svg" width="18" height="18" alt="" />
+      @if (icons().list[1]; as icon) {
+        @if (icons().material) {
+          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="18" height="18" alt="" />
+        }
+      }
     </button>
   } @else {
     <!-- Same button as before; it starts no search for now. -->
@@ -27,9 +33,15 @@
       mat-icon-button
       class="search__field__button"
       type="button"
-      [attr.aria-label]="'field.search.submit' | translate"
+      [attr.aria-label]="texts()?.submit ?? null"
     >
-      <img src="/assets/images/search.svg" width="18" height="18" alt="" />
+      @if (icons().list[0]; as icon) {
+        @if (icons().material) {
+          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="18" height="18" alt="" />
+        }
+      }
     </button>
   }
 </mat-form-field>

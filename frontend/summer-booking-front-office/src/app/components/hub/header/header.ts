@@ -12,14 +12,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { Language, LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
-import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
-import { ButtonComponent } from '../../shared/ui/buttons/button/button.component';
+import { I18nText } from '../../i18n/i18n-text/i18n-text';
+import { Button } from '../../shared/ui/buttons/button/button';
 import { LoginDialog } from '../login/login-dialog';
 import { DropdownMenu, DropdownMenuItem } from '../../shared/ui/menus/dropdown-menu/dropdown-menu';
 
 @Component({
   selector: 'app-header',
-  imports: [ButtonComponent, DropdownMenu, I18nText, LoginDialog, TranslatePipe],
+  imports: [Button, DropdownMenu, I18nText, LoginDialog, TranslatePipe],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,8 +44,11 @@ export class Header {
     this.languageBehaviour.languages.map((language) => ({
       value: language.code,
       label: this.languageNames()[language.code] ?? language.code,
-      iconSrc: language.flagSrc,
     })),
+  );
+  /** Flags of the language menu, in the order of its items. */
+  protected readonly languageFlags = this.languageBehaviour.languages.map(
+    (language) => language.flagSrc,
   );
 
   constructor() {

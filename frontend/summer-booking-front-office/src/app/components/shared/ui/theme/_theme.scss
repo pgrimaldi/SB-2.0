@@ -1,0 +1,47 @@
+@use '@angular/material' as mat;
+
+// Default theme of the shared components: their colours as CSS custom properties. The app applies it
+// once (`:root { @include theme.default-theme; }` in styles.scss) and can override any colour after it,
+// globally or in a part of the page (e.g. `.dark-area { --color__main__theme__one: #0a2a66; }`).
+@mixin default-theme {
+  // Base colours
+  --color__white: #ffffff;
+  --color__black: #000000;
+
+  // Main colours
+  --color__main__theme__one: #233c7d; // blue: buttons, texts, icons, table header
+  --color__main__theme__two: #1c1c1c; // dark grey: body texts of fields, table and popup
+  --color__secondary__theme: #0e99c6; // light blue: focus outline and active dot of the carousel
+  --color__tertiary__theme: #f3f3f3; // light grey: background of the pills (dates, select, search)
+
+  // Layout colours
+  --color__layout__surface: var(--color__white); // cards, popups, menus, calendars, table
+  --color__layout__on__main: var(--color__white); // texts and icons over the main blue
+  --color__layout__highlight: #e9ecf3; // even table rows, dates in the chosen interval
+  --color__layout__border: #dee2e6; // thin borders (secondary button, carousel arrows)
+  --color__layout__muted: #aaaaaa; // disabled icons, borders of fields and search at rest
+  --color__layout__muted__strong: #707070; // placeholders, empty checkbox, field borders on hover
+  --color__layout__shadow: rgb(0 0 0 / 15%); // shadows of raised panels
+  --color__layout__shadow__light: rgb(0 0 0 / 10%); // lighter shadows (cards at rest, arrows)
+}
+
+// Panels that Material opens in an overlay, outside the components, so their styles are global:
+// the options of `app-select` and of the table page size selector (`panelClass: 'select__panel'`).
+// The app includes it once, next to the theme (`@include theme.overlays;` in styles.scss).
+@mixin overlays {
+  .select__panel {
+    @include mat.select-overrides(
+      (
+        panel-background-color: var(--color__layout__surface),
+      )
+    );
+    @include mat.option-overrides(
+      (
+        label-text-size: 0.75rem,
+        label-text-tracking: normal,
+        label-text-color: var(--color__main__theme__one),
+        selected-state-label-text-color: var(--color__main__theme__one),
+      )
+    );
+  }
+}

@@ -8,7 +8,16 @@
   />
 
   <div class="management__header__filters">
-    <app-datepicker [(start)]="filters.startDate" [(end)]="filters.endDate" />
+    <app-datepicker
+      [pathIcon]="[
+        '/assets/images/calendar.svg',
+        '/assets/images/arrow-left.svg',
+        '/assets/images/arrow-right.svg',
+      ]"
+      [texts]="'management.header.datepicker' | translate"
+      [(start)]="filters.startDate"
+      [(end)]="filters.endDate"
+    />
 
     <!-- "Oggi" while the dates are today; otherwise "Non oggi", which brings both dates back to today. -->
     <button
@@ -28,32 +37,38 @@
     </button>
 
     <app-select
-      label="management.header.period.label"
-      [options]="periods"
+      [accessibleLabel]="'management.header.period.label' | translate"
+      [options]="periods()"
       [(selected)]="filters.period"
     />
 
     <!-- Not wired for now: typing does not filter anything. -->
-    <app-search-field placeholder="management.header.search.placeholder" />
+    <app-search-field
+      [placeholder]="'management.header.search.placeholder' | translate"
+      [texts]="'field.search' | translate"
+      [pathIcon]="['/assets/images/search.svg', '/assets/images/clear.svg']"
+    />
   </div>
 
   <div class="management__header__actions">
     <app-icon-button
-      label="management.header.actions.configuration"
-      icon="/assets/images/configuration.svg"
+      [label]="'management.header.actions.configuration' | translate"
+      [pathIcon]="['/assets/images/configuration.svg']"
     />
     <app-icon-button
-      label="management.header.actions.settings"
-      icon="/assets/images/settings.svg"
+      [label]="'management.header.actions.settings' | translate"
+      [pathIcon]="['/assets/images/settings.svg']"
     />
     <app-icon-button
-      label="management.header.actions.assistant"
-      icon="/assets/images/assistant.svg"
+      [label]="'management.header.actions.assistant' | translate"
+      [pathIcon]="['/assets/images/assistant.svg']"
     />
     <app-icon-button
-      label="management.header.actions.notifications"
-      icon="/assets/images/notifications.svg"
+      [label]="'management.header.actions.notifications' | translate"
+      [pathIcon]="['/assets/images/notifications.svg']"
     />
-    <app-icon-button label="management.header.actions.account">{{ initial() }}</app-icon-button>
+    <app-icon-button [label]="'management.header.actions.account' | translate">
+      {{ initial() }}
+    </app-icon-button>
   </div>
 </header>

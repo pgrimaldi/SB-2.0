@@ -18,17 +18,17 @@
         outlined-container-shape: 0.25rem,
         outlined-outline-width: 0.0625rem,
         outlined-focus-outline-width: 0.125rem,
-        outlined-outline-color: #ababab,
-        outlined-hover-outline-color: #707070,
-        outlined-focus-outline-color: #233c7d,
-        outlined-input-text-color: #1c1c1c,
-        outlined-caret-color: #233c7d,
+        outlined-outline-color: var(--color__layout__muted),
+        outlined-hover-outline-color: var(--color__layout__muted__strong),
+        outlined-focus-outline-color: var(--color__main__theme__one),
+        outlined-input-text-color: var(--color__main__theme__two),
+        outlined-caret-color: var(--color__main__theme__one),
       )
     );
   }
 
   .#{$block}__label {
-    color: #1c1c1c;
+    color: var(--color__main__theme__two);
     font-size: 0.9375rem;
     font-weight: 500;
     line-height: 1.4375rem;

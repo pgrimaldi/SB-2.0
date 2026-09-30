@@ -4,6 +4,7 @@ import {
   DestroyRef,
   TemplateRef,
   ViewEncapsulation,
+  computed,
   effect,
   inject,
   input,
@@ -12,19 +13,27 @@ import {
   viewChild,
 } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
-import { ButtonComponent } from '../../buttons/button/button.component';
+import { MatIconModule } from '@angular/material/icon';
+import { Button } from '../../buttons/button/button';
+import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
 
+/** Texts of `app-alert-popup`, already translated; a missing one is left out. */
+export interface AlertPopupTexts {
+  /** Text of the button that closes the popup (e.g. "Ho capito"). */
+  close?: string;
+}
+
 /**
  * Generic alert popup (Angular Material dialog): warning icon, title, text and a button that closes it.
- * `<app-alert-popup title="…" text="…" [(open)]="failed" />`, with translation keys for title and text.
+ * `<app-alert-popup [title]="…" [text]="…" [texts]="…" [(open)]="failed" />`, all already translated.
  * Screen readers announce it as an alert; Esc, a click outside or the button close it.
+ * Icons (see `Icons`): [icon above the title]; without them, no icon. Texts: `AlertPopupTexts`.
  */
 @Component({
   selector: 'app-alert-popup',
-  imports: [ButtonComponent, TranslatePipe],
+  imports: [Button, MatIconModule],
   templateUrl: './alert-popup.html',
   styleUrl: './alert-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,11 +43,17 @@ let nextId = 0;
 export class AlertPopup {
   /** Shows the popup when true; goes back to false when it is closed. */
   readonly open = model(false);
-  /** Translation key of the title. */
-  readonly title = input.required<string>();
-  /** Translation key of the text. */
-  readonly text = input.required<string>();
+  /** Title, already translated. */
+  readonly title = input<string>();
+  /** Text, already translated. */
+  readonly text = input<string>();
+  readonly texts = input<AlertPopupTexts | null>();
+  /** Icons as Material icon names (Material Symbols font): [icon above the title]. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: [icon above the title]. */
+  readonly pathIcon = input<readonly string[] | null>();
 
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly id = `alert-popup-${nextId++}`;
 
   private readonly dialog = inject(MatDialog);

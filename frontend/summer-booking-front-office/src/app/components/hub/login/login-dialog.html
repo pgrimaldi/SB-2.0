@@ -23,7 +23,9 @@
       <app-password-field
         name="password"
         autocomplete="current-password"
+        [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
         [label]="'hub.login.password' | translate"
+        [texts]="'field.password' | translate"
         [(value)]="password"
       />
 

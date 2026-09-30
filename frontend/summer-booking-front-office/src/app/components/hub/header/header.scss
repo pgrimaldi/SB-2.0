@@ -119,7 +119,7 @@ $motion: $motion-duration $motion-easing;
   padding: 0;
   border: 0;
   background: none;
-  color: #ffffff;
+  color: var(--color__white);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
@@ -150,7 +150,7 @@ $motion: $motion-duration $motion-easing;
 // Language selector
 
 .header__language {
-  color: #ffffff;
+  color: var(--color__white);
   transition: color $motion;
 }
 
@@ -185,7 +185,7 @@ $motion: $motion-duration $motion-easing;
   justify-content: center;
 
   .header__language {
-    color: #233c7e;
+    color: var(--color__main__theme__one);
   }
 }
 
@@ -198,7 +198,7 @@ $motion: $motion-duration $motion-easing;
   border: 0.0625rem solid rgb(255 255 255 / 20%);
   border-radius: 0.75rem;
   background: transparent;
-  color: #ffffff;
+  color: var(--color__white);
   cursor: pointer;
   backdrop-filter: blur(0.25rem);
   transition:
@@ -326,7 +326,7 @@ $motion: $motion-duration $motion-easing;
   border-left: 0.25rem solid transparent;
   border-radius: 0.75rem;
   background: none;
-  color: #233c7e;
+  color: var(--color__main__theme__one);
   font: inherit;
   font-size: 1.125rem;
   font-weight: 500;

@@ -1,6 +1,6 @@
 <app-header />
 
-<main class="home__page" appEqualHeight="app-card-hub">
+<main class="home__page" appEqualHeight="app-card">
   <section class="home__hero" aria-labelledby="home-hero-title">
     <picture class="home__hero__media">
       <source
@@ -41,14 +41,11 @@
 
       <div class="home__information__cards">
         @for (card of managementCards; track card.key) {
-          <app-card-hub [iconSrc]="'/assets/images/hub/' + card.icon + '.webp'">
-            <span
-              cardHubHeading
-              [appI18nText]="'home.management.cards.' + card.key + '.title'"
-            ></span>
+          <app-card [pathIcon]="['/assets/images/hub/' + card.icon + '.webp']">
+            <span cardHeading [appI18nText]="'home.management.cards.' + card.key + '.title'"></span>
             <p [appI18nText]="'home.management.cards.' + card.key + '.intro'"></p>
             <p [appI18nText]="'home.management.cards.' + card.key + '.detail'"></p>
-          </app-card-hub>
+          </app-card>
         }
       </div>
     </div>
@@ -109,14 +106,14 @@
 
       <div class="home__information__cards">
         @for (card of shiftCards; track card.key) {
-          <app-card-hub [iconSrc]="'/assets/images/hub/' + card.icon + '.svg'">
-            <span cardHubHeading [appI18nText]="'home.shift.cards.' + card.key + '.title'"></span>
+          <app-card [pathIcon]="['/assets/images/hub/' + card.icon + '.svg']">
+            <span cardHeading [appI18nText]="'home.shift.cards.' + card.key + '.title'"></span>
             <p [appI18nText]="'home.shift.cards.' + card.key + '.intro'"></p>
             <p
               class="home__information__detail"
               [appI18nText]="'home.shift.cards.' + card.key + '.detail'"
             ></p>
-          </app-card-hub>
+          </app-card>
         }
       </div>
     </div>
@@ -151,12 +148,14 @@
 
       <app-carousel
         class="home__information__carousel"
+        [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
         [accessibleLabel]="'home.about-us.carousel' | translate"
+        [texts]="'carousel' | translate"
       >
         @for (review of aboutUsReviews; track review.key) {
-          <app-card-hub *appCarouselSlide [iconSrc]="'/assets/images/hub/' + review.icon + '.svg'">
+          <app-card *appCarouselSlide [pathIcon]="['/assets/images/hub/' + review.icon + '.svg']">
             <span
-              cardHubHeading
+              cardHeading
               [appI18nText]="'home.about-us.reviews.' + review.key + '.author'"
             ></span>
             <p
@@ -164,7 +163,7 @@
               [appI18nText]="'home.about-us.reviews.' + review.key + '.quote'"
               [html]="true"
             ></p>
-          </app-card-hub>
+          </app-card>
         }
       </app-carousel>
     </div>
@@ -178,7 +177,9 @@
 
       <app-carousel
         class="home__information__carousel"
+        [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
         [accessibleLabel]="'home.media.carousel' | translate"
+        [texts]="'carousel' | translate"
       >
         @for (outlet of mediaOutlets; track outlet.logo) {
           <app-card-logo

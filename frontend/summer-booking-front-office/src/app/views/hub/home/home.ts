@@ -4,10 +4,10 @@ import { Meta, Title } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Footer } from '../../../components/hub/footer/footer';
 import { Header } from '../../../components/hub/header/header';
-import { I18nText } from '../../../components/shared/i18n/i18n-text/i18n-text';
+import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { EqualHeight } from '../../../components/shared/layout/equal-height/equal-height';
-import { ButtonComponent } from '../../../components/shared/ui/buttons/button/button.component';
-import { CardHub } from '../../../components/shared/ui/cards/card-hub/card-hub';
+import { Button } from '../../../components/shared/ui/buttons/button/button';
+import { Card } from '../../../components/shared/ui/cards/card/card';
 import { CardLogo } from '../../../components/shared/ui/cards/card-logo/card-logo';
 import { Carousel } from '../../../components/shared/ui/carousels/carousel/carousel';
 import { CarouselSlide } from '../../../components/shared/ui/carousels/carousel/carousel-slide';
@@ -15,8 +15,8 @@ import { CarouselSlide } from '../../../components/shared/ui/carousels/carousel/
 @Component({
   selector: 'app-home',
   imports: [
-    ButtonComponent,
-    CardHub,
+    Button,
+    Card,
     CardLogo,
     Carousel,
     CarouselSlide,
@@ -30,7 +30,6 @@ import { CarouselSlide } from '../../../components/shared/ui/carousels/carousel/
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class Home {
   protected readonly managementCards = [
     { key: 'all', icon: 'all-in-one' },

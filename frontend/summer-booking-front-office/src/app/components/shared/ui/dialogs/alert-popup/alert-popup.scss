@@ -3,10 +3,10 @@
 .alert__popup__panel {
   @include mat.dialog-overrides(
     (
-      container-color: #ffffff,
+      container-color: var(--color__layout__surface),
       container-shape: 0.5rem,
       container-max-width: none,
-      container-elevation-shadow: 0 0.5rem 2rem rgb(0 0 0 / 15%),
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
     )
   );
 }
@@ -25,14 +25,17 @@ app-alert-popup {
   text-align: center;
 }
 
+// Same size for an image or a Material icon (orange, like the warning triangle the app passes).
 .alert__popup__icon {
   width: 3rem;
   height: 3rem;
+  color: #d97706;
+  font-size: 3rem;
 }
 
 .alert__popup__title {
   margin: 0;
-  color: #233c7d;
+  color: var(--color__main__theme__one);
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.75rem;
@@ -40,7 +43,7 @@ app-alert-popup {
 
 .alert__popup__text {
   margin: 0 0 0.5rem;
-  color: #1c1c1c;
+  color: var(--color__main__theme__two);
   font-size: 0.875rem;
   line-height: 1.375rem;
 }

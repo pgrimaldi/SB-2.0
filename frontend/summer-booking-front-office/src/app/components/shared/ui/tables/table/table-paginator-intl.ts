@@ -1,37 +1,29 @@
-import { Injectable, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Injectable } from '@angular/core';
 import { MatPaginatorIntl } from '@angular/material/paginator';
-import { TranslateService } from '@ngx-translate/core';
+import { formatText } from '../../texts/format-text';
+import type { TablePaginatorTexts } from './table';
 
-/** Texts of the Material paginator, from the translations; they follow the language change. */
+/** Texts of the Material paginator, from the table `texts`; a missing one stays empty. */
 @Injectable()
 export class TablePaginatorIntl extends MatPaginatorIntl {
-  private readonly translateService = inject(TranslateService);
+  private range?: string;
 
-  constructor() {
-    super();
-    this.translateService
-      .stream([
-        'table.paginator.first',
-        'table.paginator.previous',
-        'table.paginator.next',
-        'table.paginator.last',
-      ])
-      .pipe(takeUntilDestroyed())
-      .subscribe((texts: Record<string, string>) => {
-        this.firstPageLabel = texts['table.paginator.first'];
-        this.previousPageLabel = texts['table.paginator.previous'];
-        this.nextPageLabel = texts['table.paginator.next'];
-        this.lastPageLabel = texts['table.paginator.last'];
-        this.changes.next();
-      });
+  /** Applies the texts (again at every language change): the paginator redraws itself. */
+  setTexts(texts: TablePaginatorTexts | null | undefined): void {
+    this.firstPageLabel = texts?.first ?? '';
+    this.previousPageLabel = texts?.previous ?? '';
+    this.nextPageLabel = texts?.next ?? '';
+    this.lastPageLabel = texts?.last ?? '';
+    this.itemsPerPageLabel = texts?.size ?? '';
+    this.range = texts?.range;
+    this.changes.next();
   }
 
   /** "11 – 20 di 25". */
   override getRangeLabel = (page: number, pageSize: number, length: number): string =>
-    this.translateService.instant('table.paginator.range', {
+    formatText(this.range, {
       start: Math.min(page * pageSize + 1, length),
       end: Math.min((page + 1) * pageSize, length),
       total: length,
-    });
+    }) ?? '';
 }

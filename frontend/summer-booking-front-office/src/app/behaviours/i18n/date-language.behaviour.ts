@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, computed, inject } from '@angular/core';
-import { MatDateFormats } from '@angular/material/core';
+import { Injectable, computed, effect, inject } from '@angular/core';
+import { DateAdapter, MatDateFormats } from '@angular/material/core';
 import { Language, LanguageBehaviour } from './language.behaviour';
 
 /** Locale of the dates of each language when the browser does not name a region for it. */
@@ -24,8 +24,8 @@ export const DATE_FORMATS: MatDateFormats = {
 type DatePart = 'day' | 'month' | 'year';
 
 /**
- * Dates in the current language: the locale for Material's date adapter and the reading of dates
- * typed by hand. By default date fields are not writable (dates come from the calendar); a field
+ * Dates in the current language: sets the locale of Material's date adapter (all calendars and
+ * date fields follow the language; started with the app) and reads dates typed by hand. By default date fields are not writable (dates come from the calendar); a field
  * that accepts typed dates uses `parse`.
  */
 @Injectable({ providedIn: 'root' })
@@ -65,6 +65,11 @@ export class DateLanguageBehaviour {
         return false; // not a valid language tag
       }
     });
+  }
+
+  constructor() {
+    const dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+    effect(() => dateAdapter.setLocale(this.locale()));
   }
 
   /**

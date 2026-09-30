@@ -1,11 +1,11 @@
 import { DestroyRef, Directive, ElementRef, afterNextRender, inject, input } from '@angular/core';
 
 /**
- * Gives every element matching `appEqualHeight` (e.g. "app-card-hub") inside the host the height
+ * Gives every element matching `appEqualHeight` (e.g. "app-card") inside the host the height
  * of the tallest one, exposed as the `--app-equal-height` custom property:
  *
- *   <main appEqualHeight="app-card-hub">…</main>
- *   app-card-hub { min-height: var(--app-equal-height, 23.75rem); }
+ *   <main appEqualHeight="app-card">…</main>
+ *   app-card { min-height: var(--app-equal-height, 23.75rem); }
  *
  * The value is measured, never hard-coded, and follows resizes, late texts and language changes.
  */

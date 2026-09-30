@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
-import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
-import { AlertPopup } from '../../shared/ui/dialogs/alert/alert-popup';
+import { I18nText } from '../../i18n/i18n-text/i18n-text';
+import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
 
 @Component({
   selector: 'app-management-menu',

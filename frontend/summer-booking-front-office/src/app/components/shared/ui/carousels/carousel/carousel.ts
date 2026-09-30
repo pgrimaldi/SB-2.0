@@ -12,7 +12,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { resolveIcons } from '../../icons/icons';
+import { FormatTextPipe } from '../../texts/format-text';
 import { CarouselSlide } from './carousel-slide';
 
 /** Share of a slide the pointer must travel before a swipe changes position. */
@@ -20,13 +22,26 @@ const SWIPE_THRESHOLD = 0.2;
 /** Pointer movement below this distance is still treated as a click. */
 const DRAG_START_DISTANCE = 5;
 
+/** Texts of `app-carousel`, already translated; a missing one is left out. */
+export interface CarouselTexts {
+  /** Accessible name of the previous arrow. */
+  previous?: string;
+  /** Accessible name of the next arrow. */
+  next?: string;
+  /** Accessible name of a slide, with `{{index}}` and `{{total}}` (e.g. "{{index}} di {{total}}"). */
+  slide?: string;
+  /** Accessible name of a dot, with `{{position}}` (e.g. "Vai alla posizione {{position}}"). */
+  position?: string;
+}
+
 /**
  * Horizontal carousel with arrows, position dots, swipe and keyboard support.
  * Slides per view and the peek of the next slide are set in CSS (see carousel.scss).
+ * Icons (see `Icons`): [previous arrow, next arrow]. Texts: `CarouselTexts`.
  */
 @Component({
   selector: 'app-carousel',
-  imports: [NgTemplateOutlet, TranslatePipe],
+  imports: [FormatTextPipe, MatIconModule, NgTemplateOutlet],
   templateUrl: './carousel.html',
   styleUrl: './carousel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,7 +51,15 @@ const DRAG_START_DISTANCE = 5;
   },
 })
 export class Carousel {
-  readonly accessibleLabel = input.required<string>();
+  /** Accessible name of the carousel, already translated. */
+  readonly accessibleLabel = input<string>();
+  readonly texts = input<CarouselTexts | null>();
+  /** Icons as Material icon names (Material Symbols font): [previous arrow, next arrow]. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: [previous arrow, next arrow]. */
+  readonly pathIcon = input<readonly string[] | null>();
+
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
   private readonly slideDirectives = contentChildren(CarouselSlide);
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');

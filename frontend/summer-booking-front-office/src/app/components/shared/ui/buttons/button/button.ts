@@ -9,8 +9,8 @@ export type ButtonSize = 'small' | 'medium' | 'large' | 'extralarge';
 @Component({
   selector: 'app-button',
   imports: [MatButtonModule, NgTemplateOutlet],
-  templateUrl: './button.component.html',
-  styleUrl: './button.component.scss',
+  templateUrl: './button.html',
+  styleUrl: './button.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.button__light]': "appearance() === 'light'",
@@ -21,7 +21,7 @@ export type ButtonSize = 'small' | 'medium' | 'large' | 'extralarge';
     '[class.button__full__width]': 'fullWidth()',
   },
 })
-export class ButtonComponent {
+export class Button {
   readonly appearance = input<ButtonAppearance>('primary');
   readonly size = input<ButtonSize>('medium');
   readonly fullWidth = input(false);

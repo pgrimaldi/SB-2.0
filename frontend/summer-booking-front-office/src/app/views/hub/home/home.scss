@@ -10,7 +10,7 @@
 :host {
   display: block;
   // The whole page is white, gaps between sections (and around the footer) included.
-  background: #ffffff;
+  background: var(--color__white);
 }
 
 // Hero
@@ -22,8 +22,8 @@
   align-items: center;
   overflow: hidden;
   isolation: isolate;
-  color: #ffffff;
-  background: #109bc7;
+  color: var(--color__white);
+  background: var(--color__secondary__theme);
 }
 
 .home__hero__media {
@@ -87,7 +87,7 @@
 
 .home__information__header h2 {
   margin: 0 0 1.5rem;
-  color: #2a437f;
+  color: var(--color__main__theme__one);
   font-size: 2.25rem;
   font-weight: 600;
   line-height: 2.5rem;
@@ -134,7 +134,7 @@
 
 // Every hub card on the page takes the height of the tallest one (measured by appEqualHeight),
 // never less than the reference height.
-.home__page app-card-hub {
+.home__page app-card {
   min-height: var(--app-equal-height, 23.75rem);
 }
 
@@ -157,7 +157,7 @@
   max-width: 75rem;
   margin-inline: auto;
   border-radius: 0.3rem;
-  background: linear-gradient(to right, #224180, #2377a3, #a4d5e7);
+  background: linear-gradient(to right, var(--color__main__theme__one), #2377a3, #a4d5e7);
   box-shadow: 0 1rem 3rem rgb(0 0 0 / 17.6%);
 }
 
@@ -173,7 +173,7 @@
 
 .home__intermezzo h2 {
   margin: 0;
-  color: #ffffff;
+  color: var(--color__white);
   font-size: 2.25rem;
   font-weight: 600;
 }
@@ -184,7 +184,7 @@
 }
 
 .home__booster__text {
-  color: #ffffff;
+  color: var(--color__white);
 }
 
 .home__booster__text h2 {
@@ -216,7 +216,7 @@
   display: block;
   width: auto;
   height: 20rem;
-  filter: drop-shadow(0 1.5625rem 1.5625rem rgb(0 0 0 / 15%));
+  filter: drop-shadow(0 1.5625rem 1.5625rem var(--color__layout__shadow));
 }
 
 .home__growth .home__intermezzo__panel {
@@ -238,14 +238,14 @@
   .home__hero {
     display: block;
     min-height: auto;
-    background: #ffffff;
+    background: var(--color__white);
   }
 
   .home__hero__media {
     position: relative;
     z-index: auto;
     height: 70svh;
-    background: #109bc7;
+    background: var(--color__secondary__theme);
   }
 
   .home__hero__content {
@@ -261,7 +261,7 @@
   }
 
   .home__hero__content h1 {
-    color: #233c7d;
+    color: var(--color__main__theme__one);
     font-size: 2.25rem;
     font-weight: 600;
   }
@@ -283,7 +283,7 @@
   }
 
   .home__information__header h2 {
-    color: #233c7d;
+    color: var(--color__main__theme__one);
     line-height: 1.25;
   }
 
@@ -301,7 +301,7 @@
   }
 
   .home__intermezzo__panel {
-    background: linear-gradient(to bottom, #a4d5e7, #2377a3, #224180);
+    background: linear-gradient(to bottom, #a4d5e7, #2377a3, var(--color__main__theme__one));
   }
 
   .home__page .home__action__desktop {
@@ -335,7 +335,7 @@
   }
 
   .home__growth .home__intermezzo__panel {
-    background: linear-gradient(to bottom, #224180, #2377a3, #a4d5e7);
+    background: linear-gradient(to bottom, var(--color__main__theme__one), #2377a3, #a4d5e7);
   }
 
   .home__growth h2 {

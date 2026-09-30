@@ -11,5 +11,6 @@ import { MatCardModule } from '@angular/material/card';
 })
 export class CardLogo {
   readonly logoSrc = input.required<string>();
-  readonly logoAlt = input.required<string>();
+  /** Alternative text of the logo, already translated. */
+  readonly logoAlt = input<string>();
 }

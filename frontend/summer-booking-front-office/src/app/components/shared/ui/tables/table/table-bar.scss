@@ -1,0 +1,37 @@
+// Bar above the rows: icon actions on the left, then the search, text actions on the right.
+.table__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.table__bar__icons,
+.table__bar__buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table__bar__buttons {
+  margin-left: auto;
+}
+
+// Large screens (from 1920px): a bigger search, easier to notice above the wide table.
+@media (width >= 120rem) {
+  .table__bar__search {
+    --search-field-width: 25rem;
+    --search-field-text-size: 0.875rem;
+    --search-field-line-height: 1.25rem;
+    --search-field-padding: 0.5rem;
+    --search-field-icon-size: 1.25rem;
+  }
+}
+
+// Phone: the search takes a row of its own, as wide as the table.
+@media (width < 48rem) {
+  .table__bar__search {
+    width: 100%;
+  }
+}

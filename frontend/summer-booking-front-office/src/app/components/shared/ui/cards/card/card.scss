@@ -4,29 +4,30 @@
   display: block;
 }
 
-.card__hub {
+.card {
   @include card.card-surface;
 
   padding: 2.5rem;
 }
 
-.card__hub__icon {
+.card__icon {
   display: block;
   width: 4rem;
   height: 4rem;
   margin-bottom: 1.5rem;
+  font-size: 4rem;
   object-fit: contain;
 }
 
-.card__hub__heading {
+.card__heading {
   margin: 0 0 1.5rem;
-  color: #2a437f;
+  color: var(--color__main__theme__one);
   font-size: 1.25rem;
   font-weight: 600;
   line-height: 1.75rem;
 }
 
-.card__hub__content {
+.card__content {
   display: flex;
   flex-direction: column;
   flex-grow: 1;

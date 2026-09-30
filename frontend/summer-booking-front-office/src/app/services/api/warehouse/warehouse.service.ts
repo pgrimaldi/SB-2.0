@@ -11,8 +11,12 @@ export class WarehouseService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/warehouse`;
 
-  /** One page of the property's articles in the chosen period. */
-  list(request: ManagementRequest & PageRequest): Observable<Page<WarehouseItem>> {
-    return this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
-  }
+  /**
+   * One page of the property's articles in the chosen period.
+   * An arrow property, not a method, on purpose: pages hand it to `app-table` as its loader
+   * (`[load]="warehouse.list"`), and only an arrow function keeps `this` (this service) when it is
+   * passed around on its own; a method would lose it and fail on `this.httpClient`.
+   */
+  readonly list = (request: ManagementRequest & PageRequest): Observable<Page<WarehouseItem>> =>
+    this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
 }

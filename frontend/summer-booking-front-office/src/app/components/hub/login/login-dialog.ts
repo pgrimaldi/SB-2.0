@@ -17,10 +17,9 @@ import {
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '../../../services/api/auth/auth.service';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
-import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
-import { ButtonComponent } from '../../shared/ui/buttons/button/button.component';
+import { I18nText } from '../../i18n/i18n-text/i18n-text';
+import { Button } from '../../shared/ui/buttons/button/button';
 import { Checkbox } from '../../shared/ui/checkboxes/checkbox/checkbox';
 import { PasswordField } from '../../shared/ui/inputs/password-field/password-field';
 import { TextField } from '../../shared/ui/inputs/text-field/text-field';
@@ -53,7 +52,7 @@ const MOBILE_QUERY = '(width < 48rem)';
  */
 @Component({
   selector: 'app-login-dialog',
-  imports: [ButtonComponent, Checkbox, I18nText, PasswordField, TextField, TranslatePipe],
+  imports: [Button, Checkbox, I18nText, PasswordField, TextField, TranslatePipe],
   templateUrl: './login-dialog.html',
   styleUrl: './login-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,7 +69,6 @@ export class LoginDialog {
   protected readonly pending = signal(false);
   protected readonly error = signal<'invalid' | 'unexpected' | null>(null);
 
-  private readonly authService = inject(AuthService);
   private readonly authBehaviour = inject(AuthBehaviour);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
@@ -98,15 +96,14 @@ export class LoginDialog {
 
     this.pending.set(true);
     this.error.set(null);
-    this.authService
+    this.authBehaviour
       .signIn({
         username: this.email().trim(),
         password: this.password(),
         remember: this.remember(),
       })
       .subscribe({
-        next: (response) => {
-          this.authBehaviour.start(response, this.remember());
+        next: () => {
           this.close();
           void this.router.navigateByUrl('/beachmap');
         },

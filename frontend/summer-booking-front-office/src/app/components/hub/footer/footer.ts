@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { I18nText } from '../../shared/i18n/i18n-text/i18n-text';
+import { I18nText } from '../../i18n/i18n-text/i18n-text';
 
 interface FooterLink {
   key: string;

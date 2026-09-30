@@ -8,8 +8,8 @@
     (
       state-layer-size: 1.875rem,
       icon-size: 1rem,
-      icon-color: #233c7d,
-      state-layer-color: #233c7d,
+      icon-color: var(--color__main__theme__one),
+      state-layer-color: var(--color__main__theme__one),
       touch-target-display: none,
     )
   );
@@ -25,7 +25,7 @@
   }
 
   &:focus-visible {
-    outline: 0.125rem solid #233c7d;
+    outline: 0.125rem solid var(--color__main__theme__one);
     outline-offset: 0.125rem;
   }
 }

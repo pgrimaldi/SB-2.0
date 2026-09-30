@@ -18,7 +18,13 @@
       "previous": "Pagina precedente",
       "next": "Pagina successiva",
       "last": "Ultima pagina",
+      "size": "Elementi per pagina:",
       "range": "{{start}} – {{end}} di {{total}}"
+    },
+    "search": {
+      "placeholder": "Cerca nella tabella",
+      "submit": "Cerca",
+      "clear": "Cancella ricerca"
     }
   },
   "alert": {

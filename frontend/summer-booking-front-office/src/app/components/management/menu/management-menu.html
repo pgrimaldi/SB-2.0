@@ -32,7 +32,9 @@
 </aside>
 
 <app-alert-popup
-  title="management.logout-failed.title"
-  text="management.logout-failed.text"
+  [title]="'management.logout-failed.title' | translate"
+  [text]="'management.logout-failed.text' | translate"
+  [texts]="'alert' | translate"
+  [pathIcon]="['/assets/images/warning.svg']"
   [(open)]="logoutFailed"
 />

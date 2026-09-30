@@ -1,0 +1,94 @@
+<!-- Dates are not typed by hand: a click (or Enter) on a date opens its calendar. -->
+<div class="datepicker">
+  @if (icons().list[0]; as icon) {
+    @if (icons().material) {
+      <mat-icon class="datepicker__icon" aria-hidden="true">{{ icon }}</mat-icon>
+    } @else {
+      <img class="datepicker__icon" [src]="icon" width="22" height="22" alt="" />
+    }
+  }
+
+  <button
+    class="datepicker__arrow"
+    type="button"
+    [attr.aria-label]="texts()?.start?.previous ?? null"
+    (click)="moveStart(-1)"
+  >
+    @if (icons().list[1]; as icon) {
+      @if (icons().material) {
+        <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      } @else {
+        <img [src]="icon" width="4" height="9" alt="" />
+      }
+    }
+  </button>
+  <input
+    class="datepicker__input"
+    [attr.aria-label]="texts()?.start?.label ?? null"
+    readonly
+    [matDatepicker]="startCalendar"
+    [value]="start()"
+    (click)="startCalendar.open()"
+    (keydown.enter)="startCalendar.open()"
+    (dateChange)="setStart($event.value)"
+  />
+  <button
+    class="datepicker__arrow"
+    type="button"
+    [attr.aria-label]="texts()?.start?.next ?? null"
+    (click)="moveStart(1)"
+  >
+    @if (icons().list[2]; as icon) {
+      @if (icons().material) {
+        <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      } @else {
+        <img [src]="icon" width="4" height="9" alt="" />
+      }
+    }
+  </button>
+
+  <span class="datepicker__divider" aria-hidden="true"></span>
+
+  <button
+    class="datepicker__arrow"
+    type="button"
+    [attr.aria-label]="texts()?.end?.previous ?? null"
+    (click)="moveEnd(-1)"
+  >
+    @if (icons().list[1]; as icon) {
+      @if (icons().material) {
+        <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      } @else {
+        <img [src]="icon" width="4" height="9" alt="" />
+      }
+    }
+  </button>
+  <input
+    class="datepicker__input"
+    [attr.aria-label]="texts()?.end?.label ?? null"
+    readonly
+    [matDatepicker]="endCalendar"
+    [value]="end()"
+    (click)="endCalendar.open()"
+    (keydown.enter)="endCalendar.open()"
+    (dateChange)="setEnd($event.value)"
+  />
+  <button
+    class="datepicker__arrow"
+    type="button"
+    [attr.aria-label]="texts()?.end?.next ?? null"
+    (click)="moveEnd(1)"
+  >
+    @if (icons().list[2]; as icon) {
+      @if (icons().material) {
+        <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      } @else {
+        <img [src]="icon" width="4" height="9" alt="" />
+      }
+    }
+  </button>
+</div>
+
+<!-- Calendars open in an overlay; kept outside the pill so they take no place in its layout. -->
+<mat-datepicker #startCalendar panelClass="datepicker__calendar" [dateClass]="rangeClass" />
+<mat-datepicker #endCalendar panelClass="datepicker__calendar" [dateClass]="rangeClass" />
