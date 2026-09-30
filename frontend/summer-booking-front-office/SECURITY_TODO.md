@@ -2,7 +2,7 @@
 
 Attività di sicurezza ancora da fare. Le voci si decidono insieme prima di implementarle; una volta completate si rimuovono da questo file.
 
-Aggiornato al 29/09/2026.
+Aggiornato al 30/09/2026.
 
 ## Content Security Policy severa (difesa contro XSS)
 
@@ -14,7 +14,7 @@ Aggiornato al 29/09/2026.
 
 ### Cosa fare
 
-1. **Inviare la CSP come header HTTP** da CloudFront (*Response headers policy*), non con un tag `<meta>`: alcune direttive (`frame-ancestors`, report) nel `<meta>` non funzionano.
+1. **Inviare la CSP come header HTTP** da CloudFront, nella stessa *response headers policy* già usata per gli altri header (vedi sotto), non con un tag `<meta>`: alcune direttive (`frame-ancestors`, report) nel `<meta>` non funzionano.
 2. **Partire in sola osservazione**: prima `Content-Security-Policy-Report-Only` con un endpoint di report (`Reporting-Endpoints` + `report-to`), poi, dopo qualche giorno senza violazioni inattese, passare a `Content-Security-Policy`.
 3. **Policy di partenza** pensata per l'app di oggi. Tutto viene dal nostro dominio: script, stili, font (`@font-face` locale), immagini, traduzioni JSON, API `/api`, service worker e manifest.
 
@@ -49,13 +49,23 @@ Aggiornato al 29/09/2026.
 - **Endpoint dei report**: serve un indirizzo che raccolga le violazioni (backend nostro o servizio esterno).
 - **Servizi esterni futuri** (pagamenti Stripe, mappe, analytics, font esterni…): ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
 
-### Altri header di sicurezza da impostare nella stessa policy di CloudFront
+### Altri header di sicurezza (response headers policy di CloudFront)
 
-- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`, dopo aver verificato che tutti i sottodomini siano in HTTPS.
-- `X-Content-Type-Options: nosniff`.
-- `Referrer-Policy: strict-origin-when-cross-origin`.
-- `Permissions-Policy`: disattivare ciò che l'app non usa (es. `camera=(), microphone=(), geolocation=()`).
-- `Cross-Origin-Opener-Policy: same-origin`.
+Già configurati sull'ambiente DEV con la policy `summerbooking-dev-frontoffice-security-headers` (procedura e verifiche in `README_DEPLOY.md`, sezione "Response headers di sicurezza"):
+
+- `Strict-Transport-Security: max-age=31536000` (senza `includeSubDomains` né `preload`);
+- `X-Content-Type-Options: nosniff`;
+- `X-Frame-Options: DENY` (in futuro affiancato da `frame-ancestors 'none'` nella CSP);
+- `Referrer-Policy: strict-origin-when-cross-origin`;
+- `X-XSS-Protection` volutamente non attivo (header superato).
+
+Ancora da fare:
+
+- **PROD**: creare la policy equivalente per l'ambiente di produzione e associarla alla sua distribuzione.
+- **CSP**: aggiungerla alla stessa policy, prima in Report-Only (vedi sopra).
+- **HSTS più stretto**: `includeSubDomains`, `preload` e durata di 2 anni solo dopo aver verificato che tutti i sottodomini del dominio definitivo funzionino esclusivamente in HTTPS: un'impostazione errata resta memorizzata dai browser.
+- **`Permissions-Policy`**: disattivare ciò che l'app non usa (es. `camera=(), microphone=(), geolocation=()`); va aggiunto come header personalizzato della policy.
+- **`Cross-Origin-Opener-Policy: same-origin`**: anche questo come header personalizzato.
 
 ### Fonti
 

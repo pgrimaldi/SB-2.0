@@ -54,6 +54,36 @@ Console **CloudFront** → **Crea distribuzione**:
 - **Firewall (WAF)**: secondo le esigenze dell'ambiente;
 - **Risposte di errore personalizzate**: **nessuna** (vedi passo 3).
 
+### Response headers di sicurezza
+
+Creare una policy personalizzata da **CloudFront → Policies → Response headers → Create response headers policy**. Usare un nome specifico per ambiente, ad esempio `summerbooking-<ambiente>-frontoffice-security-headers`; la policy DEV corrente si chiama `summerbooking-dev-frontoffice-security-headers`.
+
+Lasciare **CORS disabilitato**: questa distribuzione serve il frontend statico e non deve aggiungere indiscriminatamente header CORS alle risposte. Nella sezione **Security headers** configurare:
+
+| Impostazione | Valore | Origin override |
+|---|---|---|
+| `Strict-Transport-Security` | `max-age=31536000` | attivo |
+| HSTS `includeSubDomains` | disattivato | — |
+| HSTS `preload` | disattivato | — |
+| `X-Content-Type-Options` | `nosniff` | attivo |
+| `X-Frame-Options` | `DENY` | attivo |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | attivo |
+| `X-XSS-Protection` | disattivato | — |
+| `Content-Security-Policy` | disattivato per ora | — |
+
+`X-XSS-Protection` è un header legacy e non viene abilitato. La CSP richiede invece un collaudo dedicato, inizialmente in modalità Report-Only: decisioni e policy proposta sono documentate in `SECURITY_TODO.md`.
+
+Non attivare `includeSubDomains` o `preload` e non aumentare la durata HSTS senza aver verificato che tutti i sottodomini interessati funzionino esclusivamente in HTTPS: un'impostazione errata resta memorizzata dai browser e può rendere irraggiungibili servizi ancora HTTP.
+
+Dopo aver creato la policy:
+
+1. aprire **Distribuzioni → distribuzione dell'ambiente → Comportamenti**;
+2. selezionare `Default (*)` e scegliere **Modifica**;
+3. in **Response headers policy** selezionare la policy dell'ambiente;
+4. salvare e attendere che la distribuzione torni nello stato **Deployed**.
+
+Non serve invalidare la cache per questa modifica: CloudFront applica la policy anche alle risposte servite dalla cache. Riferimenti ufficiali: [creazione e associazione della policy](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/creating-response-headers-policies.html) e [funzionamento delle response headers policy](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/modifying-response-headers.html).
+
 Poiché CloudFront non ha il permesso `s3:ListBucket`, un file inesistente restituisce **403** e non 404. È voluto: gli errori reali restano visibili.
 
 ## 3. CloudFront Function per le route dell'app
@@ -248,12 +278,23 @@ curl -sI https://DOMINIO/it/home
 curl -sI https://DOMINIO/assets/i18n/it.json
 ```
 
+```bash
+curl -sI http://DOMINIO/
+```
+
 Risultati attesi:
 
 - `/it/home` e `it.json`: `200` con `Cache-Control: no-cache`;
 - `main-*.js`: `Cache-Control: public, max-age=31536000, immutable`;
 - immagini in `assets/images/`: `Cache-Control: public, max-age=86400`;
 - una route non prevista (es. `/login`): `403`.
+- la richiesta HTTP: `301` con `Location: https://DOMINIO/`;
+- sulle risposte HTTPS:
+  - `Strict-Transport-Security: max-age=31536000`;
+  - `X-Content-Type-Options: nosniff`;
+  - `X-Frame-Options: DENY`;
+  - `Referrer-Policy: strict-origin-when-cross-origin`;
+- `Content-Security-Policy` e `X-XSS-Protection` assenti finché non vengono deliberatamente configurati.
 
 Verificare le prestazioni con Lighthouse in una finestra in incognito: le estensioni del browser falsano i risultati.
 
