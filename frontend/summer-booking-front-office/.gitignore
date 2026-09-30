@@ -58,13 +58,13 @@ credentials
 # Miscellaneous local files
 /connect.lock
 /typings/
-# Local working documents: only README_DEPLOY.md is versioned
+# Documents live in docs/: they are local working documents, except the versioned ones below
 /README.md
-/FRONTEND_WORKING_RULES.md
-/POSSIBLE_FUTURE_REFACTORING.md
-/WRAPPER_COMPONENTS.docx
 /docs/*.docx
 /docs/*.md
+!/docs/README_DEPLOY.md
+!/docs/SECURITY_TODO.md
+!/docs/SEO_OPTIMIZATION_TODO.md
 
 # Operating system files
 .DS_Store
