@@ -28,8 +28,6 @@ export class ManagementFiltersBehaviour {
   readonly endDate = signal(this.dateAdapter.today());
   /** Part of the day the management pages refer to; full day by default. */
   readonly period = signal(BookingDayType.FullDay);
-  /** Text searched in the page's table (empty: no filter). */
-  readonly search = signal('');
 
   /** The dates the user stopped on: they follow the header after `DATES_DEBOUNCE` ms of quiet. */
   private readonly settledDates = toSignal(

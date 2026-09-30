@@ -5,12 +5,11 @@
     type="search"
     [placeholder]="placeholder() | translate"
     [attr.aria-label]="placeholder() | translate"
-    [value]="value()"
-    (input)="value.set(field.value)"
-    (keydown.enter)="submit()"
+    [value]="text()"
+    (input)="text.set(field.value)"
   />
-  <!-- With some text the magnifier becomes an X that clears it (and searches everything again). -->
-  @if (value()) {
+  <!-- With some text the magnifier becomes an X that empties the field. -->
+  @if (text()) {
     <button
       matSuffix
       mat-icon-button
@@ -22,13 +21,13 @@
       <img src="/assets/images/clear.svg" width="18" height="18" alt="" />
     </button>
   } @else {
+    <!-- Same button as before; it starts no search for now. -->
     <button
       matSuffix
       mat-icon-button
       class="search__field__button"
       type="button"
       [attr.aria-label]="'field.search.submit' | translate"
-      (click)="submit()"
     >
       <img src="/assets/images/search.svg" width="18" height="18" alt="" />
     </button>

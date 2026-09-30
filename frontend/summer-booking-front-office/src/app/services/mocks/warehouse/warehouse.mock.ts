@@ -185,7 +185,7 @@ const MAX_PAGE_SIZE = 100;
 /**
  * `POST /api/warehouse/list` with `ManagementRequest & PageRequest` in the body: one page of the
  * active articles of the requested property (never of other properties) with today's availability (released consumptions free the stock);
- * `search` is looked for in the name. The period is validated but the invented consumptions are
+ * The period is validated but the invented consumptions are
  * all for today. 401 without a valid access token; 400 when dates or part of the day are missing or invalid.
  */
 export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
@@ -207,16 +207,11 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = (body.search ?? '').trim().toLowerCase();
   // The property of the request, by its public id; an unknown one has no articles.
   const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
 
   const items: WarehouseItem[] = INVENTORY_ITEMS.filter(
-    (item) =>
-      item.propertyId === property?.id &&
-      item.isActive &&
-      item.deletedAt === null &&
-      item.name.toLowerCase().includes(search),
+    (item) => item.propertyId === property?.id && item.isActive && item.deletedAt === null,
   ).map((item) => {
     const consumed = TODAY_CONSUMPTIONS.filter(
       (consumption) => consumption.resourceId === item.publicId && consumption.state !== 'released',

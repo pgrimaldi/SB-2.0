@@ -1,17 +1,21 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subject, debounce, distinctUntilChanged, map, merge, skip, startWith, timer } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip, startWith } from 'rxjs';
+
+/** Pause after the last key before `search` fires. */
+const SEARCH_DELAY = 500;
+/** Texts shorter than this search for '' (everything). */
+const MIN_LENGTH = 3;
 
 /**
- * Search field (Angular Material form field) with the magnifier button:
- * `<app-search-field placeholder="…" [(value)]="text" (search)="apply($event)" />`.
- * `search` fires while typing, `delay` ms after the last key, or at once on Enter / magnifier.
- * Texts shorter than `minLength` search for '' (everything). With some text the magnifier becomes
- * an X that empties the field and searches '' at once.
+ * Search field (Angular Material form field) with the magnifier: `<app-search-field placeholder="…" />`.
+ * With some text the magnifier becomes an X that empties the field. `search` fires 0.5 seconds after
+ * the last key with the typed text ('' under 3 characters), only when it changes. For now nothing
+ * listens to it: the search is not wired to any page.
  */
 @Component({
   selector: 'app-search-field',
@@ -23,22 +27,15 @@ import { Subject, debounce, distinctUntilChanged, map, merge, skip, startWith, t
 export class SearchField {
   /** Translation key of the placeholder, also used as accessible name. */
   readonly placeholder = input.required<string>();
-  readonly value = model('');
-  readonly minLength = input(3);
-  readonly delay = input(500);
 
-  private readonly submitted = new Subject<string>();
+  protected readonly text = signal('');
 
   readonly search = outputFromObservable(
-    merge(
-      toObservable(this.value).pipe(
-        skip(1),
-        debounce(() => timer(this.delay())),
-      ),
-      this.submitted,
-    ).pipe(
+    toObservable(this.text).pipe(
+      skip(1),
+      debounceTime(SEARCH_DELAY),
       map((text) => text.trim()),
-      map((text) => (text.length >= this.minLength() ? text : '')),
+      map((text) => (text.length >= MIN_LENGTH ? text : '')),
       // Starts from "no filter" and fires only when the searched text really changes.
       startWith(''),
       distinctUntilChanged(),
@@ -46,14 +43,9 @@ export class SearchField {
     ),
   );
 
-  protected submit(): void {
-    this.submitted.next(this.value());
-  }
-
-  /** Empties the field and searches everything at once; the cursor goes back into the field. */
+  /** Empties the field; the cursor goes back into it. */
   protected clear(field: HTMLInputElement): void {
-    this.value.set('');
-    this.submitted.next('');
+    this.text.set('');
     field.focus();
   }
 }

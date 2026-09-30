@@ -18,7 +18,7 @@ import { Datepicker } from './datepicker/datepicker';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManagementHeader {
-  /** Dates, period and search live in the filters behaviour, read by the management pages. */
+  /** Dates and period live in the filters behaviour, read by the management pages. */
   protected readonly filters = inject(ManagementFiltersBehaviour);
   private readonly auth = inject(AuthBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);

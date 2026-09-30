@@ -82,15 +82,6 @@ describe('warehouseMock', () => {
     ]);
   });
 
-  it('should search in the name, ignoring case', async () => {
-    const page = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: 'LETT' }),
-    );
-
-    expect(page.total).toBe(2);
-    expect(page.rows.map((item) => item.name)).toEqual(['Lettino', 'Lettino XL']);
-  });
-
   it('should answer only the articles of the requested property, none for an unknown one', async () => {
     const warehouse = await service();
     const other = await firstValueFrom(

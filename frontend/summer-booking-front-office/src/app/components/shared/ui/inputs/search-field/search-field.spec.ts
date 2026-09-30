@@ -19,16 +19,17 @@ describe('SearchField', () => {
     TestBed.configureTestingModule({ providers: [provideTranslateService()] });
     const fixture = TestBed.createComponent(SearchFieldHost);
     fixture.detectChanges();
-    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    const element: HTMLElement = fixture.nativeElement;
+    const input = element.querySelector('input')!;
     const type = (text: string) => {
       input.value = text;
       input.dispatchEvent(new Event('input'));
       fixture.detectChanges();
     };
-    return { fixture, input, type, searches: fixture.componentInstance.searches };
+    return { fixture, element, input, type, searches: fixture.componentInstance.searches };
   };
 
-  it('should search 0.5 seconds after the last key, from 3 characters', async () => {
+  it('should fire search 0.5 seconds after the last key, from 3 characters', async () => {
     const { type, searches } = await setup();
 
     type('om');
@@ -46,37 +47,27 @@ describe('SearchField', () => {
     expect(searches).toEqual(['omb', '']); // back under 3: no filter
   });
 
-  it('should search at once on Enter', async () => {
-    const { input, type, searches } = await setup();
-
-    type('lettino');
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
-    expect(searches).toEqual(['lettino']);
-
-    vi.advanceTimersByTime(500);
-    expect(searches).toEqual(['lettino']); // the same text is not searched twice
-  });
-
-  it('should show an X with some text that empties the field and searches everything at once', async () => {
-    const { fixture, input, type, searches } = await setup();
-    const button = () =>
-      fixture.nativeElement.querySelector('.search__field__button') as HTMLElement;
+  it('should keep the magnifier button, which searches nothing, and an X that empties the field', async () => {
+    const { fixture, element, input, type, searches } = await setup();
+    const button = () => element.querySelector<HTMLButtonElement>('.search__field__button')!;
 
     expect(button().getAttribute('aria-label')).toBe('field.search.submit'); // empty: magnifier
+    type('om');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    vi.advanceTimersByTime(100);
+    expect(searches).toEqual([]); // Enter starts no search
 
     type('lettino');
-    vi.advanceTimersByTime(500);
-    expect(searches).toEqual(['lettino']);
     expect(button().getAttribute('aria-label')).toBe('field.search.clear');
 
     button().click();
     fixture.detectChanges();
     expect(input.value).toBe('');
-    expect(searches).toEqual(['lettino', '']); // at once, without waiting
     expect(document.activeElement).toBe(input);
     expect(button().getAttribute('aria-label')).toBe('field.search.submit');
 
+    button().click(); // the magnifier does nothing
     vi.advanceTimersByTime(500);
-    expect(searches).toEqual(['lettino', '']); // the empty search is not repeated
+    expect(searches).toEqual([]);
   });
 });

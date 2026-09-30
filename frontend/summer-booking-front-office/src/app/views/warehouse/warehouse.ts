@@ -24,16 +24,14 @@ export class Warehouse {
   protected readonly pageSize = DEFAULT_PAGE_SIZE;
   /** Current page; back to the first one whenever a filter of the header changes. */
   protected readonly page = linkedSignal({
-    source: () => [this.filters.request(), this.filters.search()],
+    source: this.filters.request,
     computation: () => 1,
   });
 
-  /** Header filters plus page and search; null once the user has signed out (nothing is asked). */
+  /** Header filters plus page; null once the user has signed out (nothing is asked). */
   private readonly request = computed(() => {
     const management = this.filters.request();
-    return management
-      ? { ...management, page: this.page(), pageSize: this.pageSize, search: this.filters.search() }
-      : null;
+    return management ? { ...management, page: this.page(), pageSize: this.pageSize } : null;
   });
 
   /** The page answered by the API; the previous one stays on screen until the next arrives. */

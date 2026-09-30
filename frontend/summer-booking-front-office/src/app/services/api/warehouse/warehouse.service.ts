@@ -11,7 +11,7 @@ export class WarehouseService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/warehouse`;
 
-  /** One page of the property's articles in the chosen period; `search` is looked for in the name. */
+  /** One page of the property's articles in the chosen period. */
   list(request: ManagementRequest & PageRequest): Observable<Page<WarehouseItem>> {
     return this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
   }
