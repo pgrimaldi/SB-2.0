@@ -12,6 +12,14 @@ import { Datepicker } from '../../shared/ui/datepickers/datepicker/datepicker';
 import { SearchField } from '../../shared/ui/inputs/search-field/search-field';
 import { Select, SelectOption } from '../../shared/ui/selects/select/select';
 
+/** Group `management.header.period` of the translations: the select label and its options. */
+interface PeriodTexts {
+  label: string;
+  full_day: string;
+  morning: string;
+  afternoon: string;
+}
+
 @Component({
   selector: 'app-management-header',
   imports: [Datepicker, I18nText, IconButton, SearchField, Select, TranslatePipe],
@@ -26,16 +34,14 @@ export class ManagementHeader {
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
   private readonly periodTexts = toSignal(
-    inject(TranslateService).stream('management.header.period') as Observable<
-      Record<string, string>
-    >,
-    { initialValue: {} as Record<string, string> },
+    inject(TranslateService).stream('management.header.period') as Observable<PeriodTexts>,
+    { initialValue: { label: '', full_day: '', morning: '', afternoon: '' } },
   );
   /** Options of the period select, translated (they follow the language). */
   protected readonly periods = computed<readonly SelectOption<BookingDayType>[]>(() => [
-    { value: BookingDayType.FullDay, label: this.periodTexts()['full-day'] },
-    { value: BookingDayType.Morning, label: this.periodTexts()['morning'] },
-    { value: BookingDayType.Afternoon, label: this.periodTexts()['afternoon'] },
+    { value: BookingDayType.FullDay, label: this.periodTexts().full_day },
+    { value: BookingDayType.Morning, label: this.periodTexts().morning },
+    { value: BookingDayType.Afternoon, label: this.periodTexts().afternoon },
   ]);
 
   /** Initial of the signed-in user, shown in the account button. */

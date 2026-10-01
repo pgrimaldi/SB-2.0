@@ -1,5 +1,4 @@
 import { DOCUMENT } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,10 +13,15 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import { ApiProblem } from '../../../entities/errors/api-problem';
+import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { Button } from '../../shared/ui/buttons/button/button';
 import { Checkbox } from '../../shared/ui/checkboxes/checkbox/checkbox';
@@ -67,9 +71,18 @@ export class LoginDialog {
   protected readonly password = signal('');
   protected readonly remember = signal(false);
   protected readonly pending = signal(false);
-  protected readonly error = signal<'invalid' | 'unexpected' | null>(null);
+  /** Error of the last sign-in, as the API answered it. */
+  protected readonly error = signal<ApiProblem | null>(null);
 
   private readonly authBehaviour = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
+  /** Translation key of the error message (`error.<code>`, or `error.unknown`). */
+  protected readonly errorKey = toSignal(
+    toObservable(this.error).pipe(
+      switchMap((problem) => (problem ? this.errorText.key(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly window = inject(DOCUMENT).defaultView;
@@ -107,9 +120,10 @@ export class LoginDialog {
           this.close();
           void this.router.navigateByUrl('/beachmap');
         },
-        error: (error: HttpErrorResponse) => {
+        error: (error: unknown) => {
           this.pending.set(false);
-          this.error.set(error.status === 401 ? 'invalid' : 'unexpected');
+          // The message comes from the code of the error (e.g. wrong credentials, no connection).
+          this.error.set(toApiProblem(error));
         },
       });
   }

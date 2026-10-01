@@ -25,7 +25,7 @@ export class NotFound {
     inject(DestroyRef).onDestroy(() => meta.removeTag('name="robots"'));
 
     inject(TranslateService)
-      .stream('not-found.page.title')
+      .stream('not_found.page.title')
       .pipe(takeUntilDestroyed())
       .subscribe((pageTitle: string) => title.setTitle(pageTitle));
   }

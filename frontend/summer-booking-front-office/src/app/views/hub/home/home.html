@@ -143,24 +143,24 @@
   >
     <div class="home__information__content">
       <div class="home__information__header">
-        <h2 id="home-about-us-title" appI18nText="home.about-us.title"></h2>
+        <h2 id="home-about-us-title" appI18nText="home.about_us.title"></h2>
       </div>
 
       <app-carousel
         class="home__information__carousel"
         [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
-        [accessibleLabel]="'home.about-us.carousel' | translate"
+        [accessibleLabel]="'home.about_us.carousel' | translate"
         [texts]="'carousel' | translate"
       >
         @for (review of aboutUsReviews; track review.key) {
           <app-card *appCarouselSlide [pathIcon]="['/assets/images/hub/' + review.icon + '.svg']">
             <span
               cardHeading
-              [appI18nText]="'home.about-us.reviews.' + review.key + '.author'"
+              [appI18nText]="'home.about_us.reviews.' + review.key + '.author'"
             ></span>
             <p
               class="home__about__us__quote"
-              [appI18nText]="'home.about-us.reviews.' + review.key + '.quote'"
+              [appI18nText]="'home.about_us.reviews.' + review.key + '.quote'"
               [html]="true"
             ></p>
           </app-card>

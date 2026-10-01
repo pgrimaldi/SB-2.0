@@ -48,15 +48,32 @@ describe('warehouseMock', () => {
 
   it('should refuse the list without a valid access token (401)', async () => {
     const error = await firstValueFrom(
-      (await service(false)).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: '', sortField: '', sortDirection: 'Ascending' }),
+      (await service(false)).list({
+        ...MANAGEMENT,
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
+      }),
     ).catch((failure: HttpErrorResponse) => failure);
 
     expect((error as HttpErrorResponse).status).toBe(401);
+    expect((error as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({ code: 'auth.invalid_token' }),
+    );
   });
 
   it("should answer the articles with total minus today's held and confirmed consumptions", async () => {
     const { total, rows } = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: '', sortField: '', sortDirection: 'Ascending' }),
+      (await service()).list({
+        ...MANAGEMENT,
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
+      }),
     );
     const byName = Object.fromEntries(rows.map((item) => [item.name, item]));
 
@@ -70,7 +87,14 @@ describe('warehouseMock', () => {
 
   it('should answer only the requested page, with the total of all pages', async () => {
     const page = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 2, pageSize: 4, search: '', sortField: '', sortDirection: 'Ascending' }),
+      (await service()).list({
+        ...MANAGEMENT,
+        page: 2,
+        pageSize: 4,
+        search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
+      }),
     );
 
     expect(page.total).toBe(12);
@@ -84,7 +108,14 @@ describe('warehouseMock', () => {
 
   it('should answer only the articles whose name contains the search, ignoring case', async () => {
     const page = await firstValueFrom(
-      (await service()).list({ ...MANAGEMENT, page: 1, pageSize: 10, search: ' LETTINO ', sortField: '', sortDirection: 'Ascending' }),
+      (await service()).list({
+        ...MANAGEMENT,
+        page: 1,
+        pageSize: 10,
+        search: ' LETTINO ',
+        sortField: '',
+        sortDirection: 'Ascending',
+      }),
     );
 
     expect(page.total).toBe(2);
@@ -120,7 +151,15 @@ describe('warehouseMock', () => {
       }),
     );
     const unknown = await firstValueFrom(
-      warehouse.list({ ...MANAGEMENT, idProperty: 'unknown', page: 1, pageSize: 10, search: '', sortField: '', sortDirection: 'Ascending' }),
+      warehouse.list({
+        ...MANAGEMENT,
+        idProperty: 'unknown',
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortField: '',
+        sortDirection: 'Ascending',
+      }),
     );
 
     expect(other.rows.map((item) => item.name)).toEqual(['Pedalò', 'Canoa']);
@@ -141,5 +180,11 @@ describe('warehouseMock', () => {
     ).catch((failure: HttpErrorResponse) => failure);
 
     expect((error as HttpErrorResponse).status).toBe(400);
+    expect((error as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({
+        code: 'validation.invalid_request',
+        errors: [{ field: 'datetimeTo', code: 'validation.end_before_start' }],
+      }),
+    );
   });
 });

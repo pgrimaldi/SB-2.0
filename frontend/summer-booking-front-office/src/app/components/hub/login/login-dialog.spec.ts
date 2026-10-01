@@ -1,8 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
-import { provideTranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
+import { Observable, throwError } from 'rxjs';
+import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { LoginDialog } from './login-dialog';
 
 @Component({
@@ -35,6 +38,55 @@ describe('LoginDialog', () => {
   };
 
   afterEach(() => vi.restoreAllMocks());
+
+  /** Opens the popup, signs in with the given answer of the API and reads the error message. */
+  const signInError = async (answer: () => Observable<never>) => {
+    TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: answer } });
+    const { fixture } = await setup(false);
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('it', {
+      error: {
+        unknown: 'Si è verificato un errore. Riprova.',
+        network: { unavailable: 'Connessione assente. Controlla la rete e riprova.' },
+        auth: { invalid_credentials: 'Credenziali non valide' },
+      },
+    });
+    translate.use('it');
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+
+    document.querySelector<HTMLFormElement>('mat-dialog-container form')!.requestSubmit();
+    await fixture.whenStable();
+    return document.querySelector('.login__dialog__error')?.textContent?.trim();
+  };
+
+  it('should show the message of the error code the API answers', async () => {
+    const wrongCredentials = () =>
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            error: { status: 401, code: 'auth.invalid_credentials', title: 'Invalid credentials' },
+          }),
+      );
+
+    expect(await signInError(wrongCredentials)).toBe('Credenziali non valide');
+  });
+
+  it('should show its own message when there is no connection, and a generic one for unknown codes', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const offline = () => throwError(() => new HttpErrorResponse({ status: 0 }));
+
+    expect(await signInError(offline)).toBe('Connessione assente. Controlla la rete e riprova.');
+    TestBed.resetTestingModule();
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+
+    const brandNew = () =>
+      throwError(
+        () => new HttpErrorResponse({ status: 423, error: { code: 'auth.account_locked' } }),
+      );
+    expect(await signInError(brandNew)).toBe('Si è verificato un errore. Riprova.');
+  });
 
   it('should open only when open becomes true, at 30% width on regular screens', async () => {
     const { fixture, open } = await setup(false);

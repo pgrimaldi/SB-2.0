@@ -7,6 +7,13 @@ import { Table, TableColumn } from '../../components/shared/ui/tables/table/tabl
 import { WarehouseItem } from '../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../services/api/warehouse/warehouse.service';
 
+/** Group `management.warehouse.table` of the translations: the column headers. */
+interface WarehouseHeaders {
+  name: string;
+  total: string;
+  available: string;
+}
+
 /**
  * Warehouse of the property: articles with total and available quantity, page by page. The table
  * loads them by itself with the warehouse API and the header filters.
@@ -23,15 +30,13 @@ export class Warehouse {
   protected readonly warehouse = inject(WarehouseService);
 
   private readonly headers = toSignal(
-    inject(TranslateService).stream('management.warehouse.table') as Observable<
-      Record<string, string>
-    >,
-    { initialValue: {} as Record<string, string> },
+    inject(TranslateService).stream('management.warehouse.table') as Observable<WarehouseHeaders>,
+    { initialValue: { name: '', total: '', available: '' } },
   );
   /** Columns with translated headers (they follow the language). */
   protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
-    { field: 'name', header: this.headers()['name'], width: 50, sortable: true },
-    { field: 'total', header: this.headers()['total'], align: 'center', sortable: true },
-    { field: 'available', header: this.headers()['available'], align: 'center', sortable: true },
+    { field: 'name', header: this.headers().name, width: 50, sortable: true },
+    { field: 'total', header: this.headers().total, align: 'center', sortable: true },
+    { field: 'available', header: this.headers().available, align: 'center', sortable: true },
   ]);
 }

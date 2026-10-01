@@ -1,6 +1,7 @@
-import { HttpErrorResponse, HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, delay, from, of, switchMap, throwError } from 'rxjs';
+import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Observable, delay, from, of, switchMap } from 'rxjs';
 import { AuthSession, AuthUser, SignInRequest } from '../../../entities/auth/credentials';
+import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 // Test account of the mock. Only the SHA-256 of the password is kept: the readable password
@@ -50,7 +51,7 @@ export const signInMock = (request: HttpRequest<unknown>): Observable<HttpEvent<
         username.trim().toLowerCase() === MOCK_ACCOUNT.username &&
         passwordSha256 === MOCK_ACCOUNT.passwordSha256;
       if (!valid) {
-        return unauthorized(request, 'Invalid credentials');
+        return unauthorized(request, 'auth.invalid_credentials', 'Invalid credentials');
       }
       writeCookie(remember);
       return ok(request, newSession());
@@ -63,7 +64,7 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   const cookie = readCookie();
   if (!cookie || cookie.expiresAt <= Date.now()) {
     removeCookie();
-    return unauthorized(request, 'No valid session');
+    return unauthorized(request, 'auth.session_expired', 'No valid session');
   }
   writeCookie(cookie.remember);
   return ok(request, newSession());
@@ -72,7 +73,7 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
 /** `POST /api/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
 export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!readCookie()) {
-    return unauthorized(request, 'No valid session');
+    return unauthorized(request, 'auth.session_expired', 'No valid session');
   }
   removeCookie();
   accessTokens.clear(); // the one test account: its access tokens stop working with the session
@@ -85,21 +86,20 @@ export function isAuthorized(request: HttpRequest<unknown>): boolean {
   return expiresAt !== undefined && expiresAt > Date.now();
 }
 
-/** 401 answer of a protected endpoint called without a valid access token. */
+/**
+ * 401 answer in the backend's format: by default the one of a protected endpoint called without a
+ * valid access token (`auth.invalid_token`).
+ */
 export function unauthorized(
   request: HttpRequest<unknown>,
-  message = 'Invalid or expired access token',
+  code: UnauthorizedCode = 'auth.invalid_token',
+  title = 'Invalid or expired access token',
 ): Observable<never> {
-  return throwError(
-    () =>
-      new HttpErrorResponse({
-        status: 401,
-        statusText: 'Unauthorized',
-        url: request.url,
-        error: { message },
-      }),
-  );
+  return problem(request, 401, code, { title });
 }
+
+/** Codes of the 401 answers of the mock API. */
+type UnauthorizedCode = 'auth.invalid_credentials' | 'auth.invalid_token' | 'auth.session_expired';
 
 function newSession(): AuthSession {
   const accessToken = `mock-access-${randomToken()}`;

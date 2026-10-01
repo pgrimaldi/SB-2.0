@@ -29,6 +29,13 @@ describe('auth mock', () => {
       (error: HttpErrorResponse) => error.status,
     );
 
+  /** Body of the error answer (Problem Details), or null when the request succeeded. */
+  const problem = (request: Observable<unknown>) =>
+    firstValueFrom(request).then(
+      () => null,
+      (error: HttpErrorResponse) => error.error as Record<string, unknown>,
+    );
+
   afterEach(() => {
     vi.restoreAllMocks();
     localStorage.clear();
@@ -55,12 +62,23 @@ describe('auth mock', () => {
     expect(session.expiresIn).toBe(900);
   });
 
-  it('should refuse wrong credentials with 401', async () => {
+  it('should refuse wrong credentials with 401, in the backend format', async () => {
     const auth = service();
 
     expect(
       await status(auth.signIn({ username: USERNAME, password: 'wrong', remember: false })),
     ).toBe(401);
+    const body = await problem(
+      auth.signIn({ username: USERNAME, password: 'wrong', remember: false }),
+    );
+    expect(body).toEqual(
+      expect.objectContaining({
+        status: 401,
+        code: 'auth.invalid_credentials',
+        type: 'https://errors.summerbooking/auth/invalid-credentials',
+        traceId: expect.stringMatching(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/),
+      }),
+    );
   });
 
   it('should renew the access token from the (simulated) refresh cookie until logout', async () => {
@@ -82,5 +100,6 @@ describe('auth mock', () => {
 
     expect(await status(auth.refresh())).toBe(401);
     expect(await status(auth.logout())).toBe(401);
+    expect((await problem(auth.refresh()))?.['code']).toBe('auth.session_expired');
   });
 });

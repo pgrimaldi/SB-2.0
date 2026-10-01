@@ -1,10 +1,12 @@
-import { HttpErrorResponse, HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, delay, of, throwError } from 'rxjs';
+import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
+import { Observable, delay, of } from 'rxjs';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
+import { ApiFieldError } from '../../../entities/errors/api-problem';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { problem } from '../errors/problem.mock';
 import { MOCK_PROPERTIES } from '../properties/properties.mock';
 
 /**
@@ -193,16 +195,12 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<ManagementRequest & PageRequest>;
-  if (!isValidPeriod(body)) {
-    return throwError(
-      () =>
-        new HttpErrorResponse({
-          status: 400,
-          statusText: 'Bad Request',
-          url: request.url,
-          error: { message: 'Invalid period' },
-        }),
-    ).pipe(delay(150));
+  const errors = periodErrors(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
   }
 
   const page = positiveInteger(body.page, 1);
@@ -259,13 +257,25 @@ function positiveInteger(value: unknown, fallback: number): number {
 }
 
 /** UTC ISO dates in order and a known part of the day, as the server requires. */
-function isValidPeriod({ datetimeFrom, datetimeTo, bookingDayType }: Partial<ManagementRequest>) {
+/** Validation of the common fields, as the backend answers it: one error per wrong field. */
+function periodErrors({
+  datetimeFrom,
+  datetimeTo,
+  bookingDayType,
+}: Partial<ManagementRequest>): ApiFieldError[] {
   const from = Date.parse(datetimeFrom ?? '');
   const to = Date.parse(datetimeTo ?? '');
-  return (
-    !Number.isNaN(from) &&
-    !Number.isNaN(to) &&
-    from <= to &&
-    Object.values(BookingDayType).includes(bookingDayType as BookingDayType)
-  );
+  const errors: ApiFieldError[] = [];
+  if (Number.isNaN(from)) {
+    errors.push({ field: 'datetimeFrom', code: 'validation.invalid_date' });
+  }
+  if (Number.isNaN(to)) {
+    errors.push({ field: 'datetimeTo', code: 'validation.invalid_date' });
+  } else if (!Number.isNaN(from) && from > to) {
+    errors.push({ field: 'datetimeTo', code: 'validation.end_before_start' });
+  }
+  if (!Object.values(BookingDayType).includes(bookingDayType as BookingDayType)) {
+    errors.push({ field: 'bookingDayType', code: 'validation.invalid_value' });
+  }
+  return errors;
 }

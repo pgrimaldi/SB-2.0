@@ -30,6 +30,30 @@
       "action": "Ordina per {{column}}"
     }
   },
+  "error": {
+    "unknown": "Si è verificato un errore. Riprova.",
+    "network": {
+      "unavailable": "Connessione assente. Controlla la rete e riprova."
+    },
+    "server": {
+      "unavailable": "Il servizio non è disponibile in questo momento. Riprova tra poco.",
+      "unexpected": "Il servizio ha risposto in modo imprevisto. Riprova più tardi."
+    },
+    "client": {
+      "unexpected": "Si è verificato un errore nell'applicazione. Ricarica la pagina e riprova."
+    },
+    "auth": {
+      "invalid_credentials": "Credenziali non valide",
+      "invalid_token": "La sessione non è più valida. Accedi di nuovo.",
+      "session_expired": "La sessione è scaduta. Accedi di nuovo."
+    },
+    "validation": {
+      "invalid_request": "Alcuni dati non sono validi. Controlla e riprova.",
+      "invalid_date": "La data non è valida.",
+      "end_before_start": "La data di fine viene prima di quella di inizio.",
+      "invalid_value": "Il valore scelto non è valido."
+    }
+  },
   "alert": {
     "close": "Ho capito"
   },
@@ -94,10 +118,6 @@
       "register": {
         "question": "Non sei registrato?",
         "action": "Registra la tua struttura"
-      },
-      "error": {
-        "invalid": "Credenziali non valide",
-        "unexpected": "Si è verificato un errore. Riprova."
       }
     }
   },
@@ -124,7 +144,7 @@
       },
       "period": {
         "label": "Periodo della giornata",
-        "full-day": "Giornata intera",
+        "full_day": "Giornata intera",
         "morning": "Mattina",
         "afternoon": "Pomeriggio"
       },
@@ -144,7 +164,7 @@
       "warehouse": "Magazzino",
       "logout": "Disconnetti"
     },
-    "logout-failed": {
+    "logout_failed": {
       "title": "Disconnessione Fallita",
       "text": "Non siamo riusciti a chiudere la tua sessione sul server, quindi sei ancora connesso. Controlla la connessione a internet e premi di nuovo «Disconnetti»."
     },
@@ -222,7 +242,7 @@
       "title": "Scopri come far crescere\nil tuo stabilimento con\nSummer Booking Hub",
       "action": "Richiedi la demo gratuita"
     },
-    "about-us": {
+    "about_us": {
       "title": "Dicono di noi",
       "carousel": "Recensioni dei clienti",
       "reviews": {
@@ -254,7 +274,7 @@
       "logo": "Logo {{name}}"
     }
   },
-  "not-found": {
+  "not_found": {
     "page": {
       "title": "Pagina non trovata | Summer Booking"
     },

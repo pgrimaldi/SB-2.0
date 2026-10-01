@@ -36,8 +36,13 @@
         <button class="login__dialog__link" type="button" appI18nText="hub.login.forgot"></button>
       </div>
 
-      @if (error(); as error) {
-        <p class="login__dialog__error" role="alert" [appI18nText]="'hub.login.error.' + error"></p>
+      @if (errorKey(); as errorKey) {
+        <p
+          class="login__dialog__error"
+          role="alert"
+          [appI18nText]="errorKey"
+          [params]="error()?.args"
+        ></p>
       }
 
       <app-button size="large" buttonType="submit" [fullWidth]="true" [disabled]="pending()">

@@ -33,7 +33,7 @@ describe('ManagementMenu', () => {
     expect(logout).toHaveBeenCalledTimes(1);
     const dialog = document.querySelector('[role="alertdialog"]');
     expect(dialog?.querySelector('.alert__popup__title')?.textContent?.trim()).toBe(
-      'management.logout-failed.title',
+      'management.logout_failed.title',
     );
     expect(button.disabled).toBe(false); // it can be tried again
   });
