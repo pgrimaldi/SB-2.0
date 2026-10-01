@@ -51,6 +51,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./views/warehouse/warehouse').then((component) => component.Warehouse),
       },
+      // Settings: side panel and, next to it, the settings pages (views/settings/<page>), which
+      // will be its `children`.
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./views/settings/settings').then((component) => component.Settings),
+      },
     ],
   },
   {

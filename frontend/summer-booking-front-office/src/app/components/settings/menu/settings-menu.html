@@ -1,0 +1,13 @@
+<aside class="settings__menu">
+  <nav class="settings__menu__links">
+    @for (link of links; track link.route) {
+      <a
+        class="settings__menu__item"
+        routerLinkActive="settings__menu__item__active"
+        ariaCurrentWhenActive="page"
+        [routerLink]="link.route"
+        [appI18nText]="link.label"
+      ></a>
+    }
+  </nav>
+</aside>

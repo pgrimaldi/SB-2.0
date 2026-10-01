@@ -90,7 +90,7 @@ Poiché CloudFront non ha il permesso `s3:ListBucket`, un file inesistente resti
 
 Non configurare un fallback globale che trasformi ogni 403 o 404 in `/index.html`: nasconderebbe errori reali di asset, permessi o route inesistenti, e produrrebbe "soft 404" per i motori di ricerca.
 
-Le sole route raggiungibili da URL diretto vengono riscritte verso `/index.html` da una funzione:
+Le pagine dell'app aperte da URL diretto o ricaricate vengono riscritte verso `/index.html` da una funzione: le pagine pubbliche di un elenco esplicito e tutte le pagine dell'area riservata (ogni indirizzo senza estensione fuori da `/it` e `/en`). I file (con estensione) restano serviti così come sono da S3, anche quando mancano:
 
 1. Console **CloudFront** → **Funzioni** → **Crea funzione**, runtime più recente proposto.
 2. Scheda **Sviluppo**: incollare il codice seguente e **Salva modifiche**.
@@ -98,22 +98,26 @@ Le sole route raggiungibili da URL diretto vengono riscritte verso `/index.html`
 4. **Distribuzioni** → distribuzione dell'ambiente → **Comportamenti** → `Default (*)` → **Modifica** → **Associazioni di funzioni** → **Richiesta visualizzatore**: tipo **CloudFront Functions**, selezionare la funzione.
 
 ```js
-// Route SPA servite da index.html. Aggiornare questo elenco quando si aggiunge una route raggiungibile da URL diretto.
-var SPA_ROUTES = {
+// Pagine pubbliche servite da index.html: solo queste, così un indirizzo pubblico sbagliato resta un 404 vero.
+// Aggiornare questo elenco quando si aggiunge una pagina pubblica (/it/..., /en/...).
+var PUBLIC_ROUTES = {
     '/': true,
     '/home': true,
     '/it': true,
     '/it/home': true,
     '/en': true,
-    '/en/home': true,
-    '/beachmap': true,
-    '/warehouse': true
+    '/en/home': true
 };
 
 function handler(event) {
     var request = event.request;
+    var uri = request.uri;
+    // Un file ha un punto nell'ultimo pezzo dell'indirizzo (main.js, logo.svg): lo serve S3 così com'è.
+    var isFile = uri.substring(uri.lastIndexOf('/') + 1).indexOf('.') !== -1;
+    var isPublic = uri === '/it' || uri === '/en' || uri.indexOf('/it/') === 0 || uri.indexOf('/en/') === 0;
 
-    if (SPA_ROUTES[request.uri] === true) {
+    // Pagine pubbliche in elenco e tutte le pagine dell'area riservata (es. /warehouse, /settings/sharing).
+    if (PUBLIC_ROUTES[uri] === true || (!isFile && !isPublic)) {
         request.uri = '/index.html';
     }
 
@@ -125,9 +129,11 @@ Route servite:
 
 - `/` e `/home`, che reindirizzano alla home nella lingua preferita;
 - `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate;
-- `/beachmap` e `/warehouse`, area privata: senza sessione l'app rimanda alla home, con una sessione salvata il refresh resta sulla pagina.
+- tutte le pagine dell'area riservata (`/beachmap`, `/warehouse`, `/settings`, `/settings/…` e quelle future), senza elencarle: senza sessione l'app rimanda alla home, con una sessione salvata il refresh resta sulla pagina; un indirizzo riservato inesistente mostra la pagina 404 dell'app (con `noindex`).
 
-Ogni nuova route pubblica dell'app va aggiunta sia qui sia nella funzione pubblicata. La modifica della funzione non richiede invalidazione della cache.
+Un indirizzo pubblico sbagliato (es. `/it/pagina-sbagliata`) e un file mancante restano errori veri di S3. Le route dell'area riservata non devono iniziare con `/it` o `/en` né avere un punto nell'ultimo pezzo dell'indirizzo.
+
+Una nuova pagina pubblica va aggiunta a `PUBLIC_ROUTES` sia qui sia nella funzione pubblicata; una nuova pagina dell'area riservata non richiede modifiche. Il refresh si verifica sull'ambiente DEV dopo aver pubblicato la funzione (in locale `ng serve` serve sempre `index.html`). La modifica della funzione non richiede invalidazione della cache.
 
 ## 4. Connessione a GitHub
 
@@ -287,7 +293,8 @@ Risultati attesi:
 - `/it/home` e `it.json`: `200` con `Cache-Control: no-cache`;
 - `main-*.js`: `Cache-Control: public, max-age=31536000, immutable`;
 - immagini in `assets/images/`: `Cache-Control: public, max-age=86400`;
-- una route non prevista (es. `/login`): `403`.
+- una pagina dell'area riservata (es. `/settings`): `200` con l'HTML dell'app (`index.html`), anche ricaricandola;
+- un indirizzo pubblico inesistente (es. `/it/login`): `403`.
 - la richiesta HTTP: `301` con `Location: https://DOMINIO/`;
 - sulle risposte HTTPS:
   - `Strict-Transport-Security: max-age=31536000`;

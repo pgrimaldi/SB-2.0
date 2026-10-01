@@ -1,0 +1,16 @@
+// Side panel and, next to it, the settings page; on tablets and phones the panel goes above.
+:host {
+  display: flex;
+  min-height: 100%;
+}
+
+.settings__content {
+  min-width: 0;
+  flex: 1;
+}
+
+@media (width < 64rem) {
+  :host {
+    flex-direction: column;
+  }
+}

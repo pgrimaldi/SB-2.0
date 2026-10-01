@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
@@ -33,6 +34,7 @@ export class ManagementHeader {
   private readonly auth = inject(AuthBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly translateService = inject(TranslateService);
+  private readonly router = inject(Router);
 
   private readonly periodTexts = toSignal(
     this.translateService.stream('management.header.period') as Observable<PeriodTexts>,
@@ -61,5 +63,10 @@ export class ManagementHeader {
   protected resetToToday(): void {
     this.filters.startDate.set(this.dateAdapter.today());
     this.filters.endDate.set(this.dateAdapter.today());
+  }
+
+  /** The gear: to the settings pages. */
+  protected openSettings(): void {
+    void this.router.navigateByUrl('/settings');
   }
 }

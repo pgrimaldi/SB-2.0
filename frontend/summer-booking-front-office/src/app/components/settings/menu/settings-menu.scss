@@ -1,0 +1,62 @@
+// Desktop: column next to the management menu, below the header, as tall as the screen. Its rows
+// have the height of the management menu rows, so the two lists line up.
+:host {
+  display: block;
+  flex: none;
+  width: 8.375rem;
+}
+
+.settings__menu {
+  position: sticky;
+  top: 3.75rem;
+  height: calc(100svh - 3.75rem);
+  padding-block: 0.3125rem;
+  overflow-y: auto;
+  background: var(--color__white);
+  box-shadow: 0.25rem 0 0.75rem rgb(18 45 87 / 8%);
+}
+
+.settings__menu__links {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings__menu__item {
+  display: flex;
+  height: 2.375rem;
+  flex: none;
+  align-items: center;
+  padding: 0 0.875rem;
+  color: #365e96;
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  text-decoration: none;
+}
+
+.settings__menu__item__active {
+  background: var(--color__tertiary__theme);
+}
+
+// Tablet and phone: a strip above the page that scrolls sideways.
+@media (width < 64rem) {
+  :host {
+    width: auto;
+  }
+
+  .settings__menu {
+    position: static;
+    height: auto;
+    padding-block: 0;
+    overflow-x: auto;
+    border-bottom: 0.0625rem solid var(--color__layout__border);
+    box-shadow: none;
+  }
+
+  .settings__menu__links {
+    flex-direction: row;
+  }
+
+  .settings__menu__item {
+    white-space: nowrap;
+  }
+}
