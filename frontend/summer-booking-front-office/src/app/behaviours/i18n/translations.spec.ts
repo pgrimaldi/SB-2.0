@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
+import { Message, isMessage, parseMessage } from '../../components/shared/i18n/message-format';
 import { API_ERROR_CODES } from '../../entities/errors/api-error-codes';
 import { FRONTEND_ERROR_CODES } from '../../entities/errors/api-problem';
 import { LanguageBehaviour } from './language.behaviour';
@@ -27,6 +28,18 @@ function flatten(node: object, prefix = ''): Texts {
       ? { ...texts, ...flatten(value, `${path}.`) }
       : { ...texts, [path]: value };
   }, {});
+}
+
+/** Arguments of a message with their type (`count:plural`, `day:date`…), sorted and without repeats. */
+function messageArguments(message: Message): string[] {
+  const found = message.flatMap((part): string[] =>
+    typeof part === 'string' || part.kind === 'count'
+      ? []
+      : part.kind === 'plural'
+        ? [`${part.name}:plural`, ...Object.values(part.branches).flatMap(messageArguments)]
+        : [`${part.name}:${part.kind}`],
+  );
+  return [...new Set(found)].sort();
 }
 
 /** Names of the `{{placeholders}}` of a text, sorted. */
@@ -74,6 +87,27 @@ describe('translation files', () => {
     }));
 
     expect(problems).toEqual(others.map(([language]) => ({ language, different: [] })));
+  });
+
+  it('should write plurals, numbers and dates as valid messages, with the same arguments in every language', () => {
+    const [[, referenceTexts]] = [...translations];
+    const keys = Object.keys(referenceTexts).filter((key) =>
+      [...translations.values()].some((texts) => isMessage(String(texts[key]))),
+    );
+    const problems = keys.flatMap((key) => {
+      const signatures = [...translations].map(([language, texts]) => {
+        try {
+          return messageArguments(parseMessage(String(texts[key]))).join();
+        } catch (error) {
+          return `${language}: ${(error as Error).message}`;
+        }
+      });
+      return new Set(signatures).size === 1 && isMessage(String(referenceTexts[key]))
+        ? []
+        : [{ key, signatures }];
+    });
+
+    expect(problems).toEqual([]);
   });
 
   it('should translate every error code, and nothing else, under error.', () => {

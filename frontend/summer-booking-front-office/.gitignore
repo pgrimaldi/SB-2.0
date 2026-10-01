@@ -66,6 +66,7 @@ credentials
 !/docs/SECURITY_TODO.md
 !/docs/SEO_OPTIMIZATION_TODO.md
 !/docs/API_CONTRACTS.docx
+!/docs/MESSAGE_FORMAT.docx
 
 # Operating system files
 .DS_Store

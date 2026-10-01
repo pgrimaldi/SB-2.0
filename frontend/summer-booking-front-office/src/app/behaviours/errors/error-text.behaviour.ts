@@ -11,7 +11,8 @@ const UNKNOWN_ERROR = `${ERROR_GROUP}.unknown`;
 /**
  * The one place that turns an API error into text for the user. The backend `code` is the
  * translation key under `error.` as it is (`auth.invalid_credentials` → `error.auth.invalid_credentials`),
- * with `args` for its `{{placeholders}}`; a code with no translation yet shows `error.unknown`.
+ * with `args` for its placeholders (`{{name}}`, or typed ones such as `{date, date, long}` of the
+ * message-format library); a code with no translation yet shows `error.unknown`.
  * The texts follow the language. Show them as text, never as HTML: `args` come from the server.
  */
 @Injectable({ providedIn: 'root' })

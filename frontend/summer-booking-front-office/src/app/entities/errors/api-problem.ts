@@ -1,4 +1,7 @@
-/** Values for the placeholders of an error message, e.g. `{ umbrellaId: '42', date: '2026-08-01' }`. */
+/**
+ * Values for the placeholders of an error message, e.g. `{ umbrellaId: '42', date: '2026-08-01' }`:
+ * raw values (ISO 8601 dates, numbers, `currency` codes) that the translation formats.
+ */
 export type ApiProblemArgs = Readonly<Record<string, string | number>>;
 
 /** Validation error of one field of the request (e.g. `datetimeTo` before `datetimeFrom`). */

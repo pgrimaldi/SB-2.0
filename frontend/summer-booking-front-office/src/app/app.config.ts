@@ -9,13 +9,14 @@ import {
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideRouter } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateCompiler, provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import { DATE_FORMATS, DateLanguageBehaviour } from './behaviours/i18n/date-language.behaviour';
 import { AuthBehaviour } from './behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from './behaviours/i18n/language.behaviour';
 import { DATA_RELOAD } from './components/shared/data/data-reload';
+import { MessageFormatCompiler } from './components/shared/i18n/message-format';
 import { authInterceptor } from './services/api/auth.interceptor';
 import { languageInterceptor } from './services/api/language.interceptor';
 import { timeZoneInterceptor } from './services/api/time-zone.interceptor';
@@ -43,6 +44,8 @@ export const appConfig: ApplicationConfig = {
         suffix: '.json',
         failOnError: true,
       }),
+      // Plurals, numbers, currencies and dates in the translations (ICU MessageFormat syntax).
+      compiler: provideTranslateCompiler(MessageFormatCompiler),
       fallbackLang: 'it',
       lang: 'it',
     }),
