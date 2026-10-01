@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
 
 @Component({
@@ -12,21 +12,30 @@ import { LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
   styleUrl: './not-found.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NotFound {
+export class NotFound implements OnDestroy {
   private readonly languageBehaviour = inject(LanguageBehaviour);
+  private readonly translateService = inject(TranslateService);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
 
   protected readonly homeLink = computed(() => `/${this.languageBehaviour.current()}/home`);
+  private readonly titleSubscription: Subscription;
 
   constructor() {
-    const title = inject(Title);
-    const meta = inject(Meta);
-
-    meta.updateTag({ name: 'robots', content: 'noindex' });
-    inject(DestroyRef).onDestroy(() => meta.removeTag('name="robots"'));
-
-    inject(TranslateService)
+    // A missing page must not be indexed.
+    this.meta.updateTag({ name: 'robots', content: 'noindex' });
+    this.titleSubscription = this.translateService
       .stream('not_found.page.title')
-      .pipe(takeUntilDestroyed())
-      .subscribe((pageTitle: string) => title.setTitle(pageTitle));
+      .subscribe((pageTitle: string) => this.showTitle(pageTitle));
+  }
+
+  /** Subscription of the page title: it follows the language. */
+  private showTitle(pageTitle: string): void {
+    this.title.setTitle(pageTitle);
+  }
+
+  ngOnDestroy(): void {
+    this.titleSubscription.unsubscribe();
+    this.meta.removeTag('name="robots"');
   }
 }

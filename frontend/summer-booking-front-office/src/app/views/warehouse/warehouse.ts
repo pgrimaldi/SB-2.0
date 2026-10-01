@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ManagementFiltersBehaviour } from '../../behaviours/management/management-filters.behaviour';
+import { TableErrorPopup } from '../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import { Table, TableColumn } from '../../components/shared/ui/tables/table/table';
 import { WarehouseItem } from '../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../services/api/warehouse/warehouse.service';
@@ -20,7 +21,7 @@ interface WarehouseHeaders {
  */
 @Component({
   selector: 'app-warehouse',
-  imports: [Table, TranslatePipe],
+  imports: [Table, TableErrorPopup, TranslatePipe],
   templateUrl: './warehouse.html',
   styleUrl: './warehouse.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,9 +29,12 @@ interface WarehouseHeaders {
 export class Warehouse {
   protected readonly filters = inject(ManagementFiltersBehaviour);
   protected readonly warehouse = inject(WarehouseService);
+  private readonly translateService = inject(TranslateService);
 
+  /** A page of the table could not be loaded: shows the error popup. */
+  protected readonly loadFailed = signal(false);
   private readonly headers = toSignal(
-    inject(TranslateService).stream('management.warehouse.table') as Observable<WarehouseHeaders>,
+    this.translateService.stream('management.warehouse.table') as Observable<WarehouseHeaders>,
     { initialValue: { name: '', total: '', available: '' } },
   );
   /** Columns with translated headers (they follow the language). */

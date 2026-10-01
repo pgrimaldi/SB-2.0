@@ -100,14 +100,6 @@ app-login-dialog {
   }
 }
 
-.login__dialog__close,
-.login__dialog__link {
-  &:focus-visible {
-    outline: 0.125rem solid currentColor;
-    outline-offset: 0.125rem;
-  }
-}
-
 .login__dialog__divider {
   display: flex;
   align-items: center;

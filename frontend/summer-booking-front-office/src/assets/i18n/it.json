@@ -13,6 +13,7 @@
     "slide": "{{index}} di {{total}}"
   },
   "table": {
+    "empty": "La tabella non contiene elementi",
     "paginator": {
       "first": "Prima pagina",
       "previous": "Pagina precedente",
@@ -28,6 +29,12 @@
     },
     "sort": {
       "action": "Ordina per {{column}}"
+    },
+    "load_error": {
+      "title": "Errore",
+      "text": "In questo momento non riusciamo a fornire le informazioni richieste. Riprova e, se il problema persiste, contatta l'assistenza.",
+      "close": "Chiudi",
+      "retry": "Riprova"
     }
   },
   "error": {

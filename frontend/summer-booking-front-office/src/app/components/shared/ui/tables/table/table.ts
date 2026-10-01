@@ -73,6 +73,8 @@ export interface TableSortTexts {
  * With our translation file the group `table` has the same shape: `[texts]="'table' | translate"`.
  */
 export interface TableTexts {
+  /** Shown in place of the rows when the server answers with none (e.g. "La tabella non contiene elementi"). */
+  empty?: string;
   paginator?: TablePaginatorTexts;
   search?: TableSearchTexts;
   sort?: TableSortTexts;
@@ -179,6 +181,10 @@ export class Table<T, P extends object> {
   /** A page could not be loaded; the table shows no rows meanwhile. */
   readonly loadError = output<unknown>();
 
+  private readonly paginatorIntl = inject(TablePaginatorIntl);
+  /** When it changes (e.g. the language), the current page is loaded again, as it is. */
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+
   private readonly iconActions = contentChildren(TableIconAction);
   private readonly textActions = contentChildren(TableTextAction);
   protected readonly hasIconActions = computed(() => this.iconActions().length > 0);
@@ -199,11 +205,12 @@ export class Table<T, P extends object> {
     computation: () => 1,
   });
 
-  /** When it changes (e.g. the language), the current page is loaded again, as it is. */
-  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+  /** Counts the `reload()` calls: each one loads the current page again. */
+  private readonly reloads = signal(0);
 
   private readonly request = computed(() => {
     this.dataReload?.();
+    this.reloads();
     const params = this.params();
     const sort = this.sort();
     return params
@@ -238,6 +245,11 @@ export class Table<T, P extends object> {
   );
 
   protected readonly rows = computed(() => this.result().rows);
+  /**
+   * The server answered with no rows. `NO_ROWS` is never an answer (before the first one, after an
+   * error, without params), so nothing is said while loading or when the request failed.
+   */
+  protected readonly empty = computed(() => this.result() !== NO_ROWS && this.rows().length === 0);
   protected readonly total = computed(() => this.result().total);
   protected readonly fields = computed(() => this.columns().map((column) => column.field));
   protected readonly selectConfig = SELECT_CONFIG;
@@ -253,8 +265,16 @@ export class Table<T, P extends object> {
   protected readonly paginated = computed(() => this.total() > this.reservedRows());
 
   constructor() {
-    const paginatorIntl = inject(TablePaginatorIntl);
-    effect(() => paginatorIntl.setTexts(this.texts()?.paginator, !this.useAppTheme()));
+    // The paginator texts follow the given texts and the look.
+    effect(() => this.paginatorIntl.setTexts(this.texts()?.paginator, !this.useAppTheme()));
+  }
+
+  /**
+   * Loads the current page again, as it is (same page, search and sorting): e.g. "retry" after a
+   * `loadError`. With a template reference: `<app-table #table … />` and `table.reload()`.
+   */
+  reload(): void {
+    this.reloads.update((count) => count + 1);
   }
 
   /**

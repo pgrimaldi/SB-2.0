@@ -31,6 +31,7 @@ type DatePart = 'day' | 'month' | 'year';
 @Injectable({ providedIn: 'root' })
 export class DateLanguageBehaviour {
   private readonly languageBehaviour = inject(LanguageBehaviour);
+  private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
   /** Languages set in the browser, in order of preference (e.g. `['en-AU', 'en', 'it']`). */
   private readonly browserLanguages = inject(DOCUMENT).defaultView?.navigator.languages ?? [];
@@ -51,25 +52,9 @@ export class DateLanguageBehaviour {
       .filter((type): type is DatePart => type === 'day' || type === 'month' || type === 'year'),
   );
 
-  /** First browser language that is `language` with a region the browser can format dates in. */
-  private browserLocale(language: Language): string | undefined {
-    return this.browserLanguages.find((tag) => {
-      try {
-        const locale = new Intl.Locale(tag);
-        return (
-          locale.language === language &&
-          !!locale.region &&
-          Intl.DateTimeFormat.supportedLocalesOf(tag).length > 0
-        );
-      } catch {
-        return false; // not a valid language tag
-      }
-    });
-  }
-
   constructor() {
-    const dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
-    effect(() => dateAdapter.setLocale(this.locale()));
+    // Calendars and date fields follow the language.
+    effect(() => this.dateAdapter.setLocale(this.locale()));
   }
 
   /**
@@ -90,5 +75,21 @@ export class DateLanguageBehaviour {
     const isReal =
       date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
     return isReal ? date : null;
+  }
+
+  /** First browser language that is `language` with a region the browser can format dates in. */
+  private browserLocale(language: Language): string | undefined {
+    return this.browserLanguages.find((tag) => {
+      try {
+        const locale = new Intl.Locale(tag);
+        return (
+          locale.language === language &&
+          !!locale.region &&
+          Intl.DateTimeFormat.supportedLocalesOf(tag).length > 0
+        );
+      } catch {
+        return false; // not a valid language tag
+      }
+    });
   }
 }

@@ -47,6 +47,14 @@
   table-layout: fixed;
 }
 
+// No rows from the server: the message in place of the rows.
+.table__empty__cell {
+  padding: 1rem;
+  color: var(--color__layout__muted__strong);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
 .table__cell {
   overflow: hidden;
   text-overflow: ellipsis; // a text longer than its column ends with "…" instead of widening it

@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, OnDestroy, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   Observable,
@@ -46,10 +46,11 @@ interface Session {
  * invalidation), then in every tab.
  */
 @Injectable({ providedIn: 'root' })
-export class AuthBehaviour {
+export class AuthBehaviour implements OnDestroy {
   private readonly window = inject(DOCUMENT).defaultView;
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+
   private readonly session = signal<Session | null>(null);
   private readonly channel =
     typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(CHANNEL_NAME);
@@ -60,12 +61,7 @@ export class AuthBehaviour {
   constructor() {
     this.storage('session')?.removeItem(LEGACY_SESSION_KEY);
     this.storage('local')?.removeItem(LEGACY_SESSION_KEY);
-    this.channel?.addEventListener('message', ({ data }) => {
-      if (data === 'logout' && this.isAuthenticated()) {
-        this.expire();
-      }
-    });
-    inject(DestroyRef).onDestroy(() => this.channel?.close());
+    this.channel?.addEventListener('message', this.otherTabMessage);
   }
 
   isAuthenticated(): boolean {
@@ -172,6 +168,18 @@ export class AuthBehaviour {
     } catch {
       return undefined;
     }
+  }
+
+  /** Listener of the other tabs of this browser: a logout there ends the session here too. */
+  private readonly otherTabMessage = ({ data }: MessageEvent): void => {
+    if (data === 'logout' && this.isAuthenticated()) {
+      this.expire();
+    }
+  };
+
+  ngOnDestroy(): void {
+    this.channel?.removeEventListener('message', this.otherTabMessage);
+    this.channel?.close();
   }
 }
 

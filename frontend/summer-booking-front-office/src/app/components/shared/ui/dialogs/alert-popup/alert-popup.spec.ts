@@ -56,6 +56,20 @@ describe('AlertPopup', () => {
     expect(document.querySelector('[role="alertdialog"]')).toBeNull();
   });
 
+  it('should be closed at once by its button, so it can open again right away', async () => {
+    const fixture = await setup();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+
+    document.querySelector<HTMLButtonElement>('[role="alertdialog"] app-button button')!.click();
+    expect(fixture.componentInstance.open()).toBe(false); // not after the closing animation
+    await fixture.whenStable();
+
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    expect(document.querySelector('[role="alertdialog"]')).not.toBeNull();
+  });
+
   it('should show the Material icon, else the image', async () => {
     const fixture = await setup();
     const icon = async () => {

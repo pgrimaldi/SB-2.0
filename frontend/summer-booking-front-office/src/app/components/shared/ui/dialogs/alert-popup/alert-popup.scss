@@ -1,29 +1,6 @@
-@use '@angular/material' as mat;
+@use '../popup' as popup;
 
-.alert__popup__panel {
-  @include mat.dialog-overrides(
-    (
-      container-color: var(--color__layout__surface),
-      container-shape: 0.5rem,
-      container-max-width: none,
-      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
-    )
-  );
-}
-
-// The element in the page only holds the popup template: Material draws the popup above the page.
-app-alert-popup {
-  display: contents;
-}
-
-.alert__popup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 2rem 1.5rem 1.5rem;
-  text-align: center;
-}
+@include popup.popup(alert__popup, app-alert-popup);
 
 // Same size for an image or a Material icon (orange, like the warning triangle the app passes).
 .alert__popup__icon {
@@ -31,19 +8,4 @@ app-alert-popup {
   height: 3rem;
   color: #d97706;
   font-size: 3rem;
-}
-
-.alert__popup__title {
-  margin: 0;
-  color: var(--color__main__theme__one);
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.75rem;
-}
-
-.alert__popup__text {
-  margin: 0 0 0.5rem;
-  color: var(--color__main__theme__two);
-  font-size: 0.875rem;
-  line-height: 1.375rem;
 }

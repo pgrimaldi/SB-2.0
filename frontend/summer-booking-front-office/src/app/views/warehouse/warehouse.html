@@ -1,5 +1,6 @@
 <main class="warehouse">
   <app-table
+    #table
     [columns]="columns()"
     [params]="filters.request()"
     [load]="warehouse.list"
@@ -7,5 +8,14 @@
     [searchable]="true"
     [useAppTheme]="true"
     [pathIcon]="['/assets/images/search.svg', '/assets/images/clear.svg']"
+    (loadError)="loadFailed.set(true)"
   />
 </main>
+
+<app-table-error-popup
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

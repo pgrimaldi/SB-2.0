@@ -22,6 +22,9 @@
 // Overlay panels of the shared components (select options).
 @include theme.overlays;
 
+// Keyboard focus ring of the app's own elements.
+@include theme.focus-ring;
+
 html {
   height: 100%;
   // Fluid scale for large screens: 1rem stays at the user's default size up to 2560px wide

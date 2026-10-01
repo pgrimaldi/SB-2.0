@@ -39,26 +39,7 @@
         </ul>
       </nav>
 
-      <app-dropdown-menu
-        class="header__language"
-        [items]="languageItems()"
-        [pathIcon]="languageFlags"
-        [selected]="currentLanguage().code"
-        [iconOnly]="true"
-        [accessibleLabel]="'language.selector' | translate"
-        (selectedChange)="changeLanguage($event)"
-      >
-        <span class="header__language__trigger">
-          <img
-            class="header__language__flag"
-            [src]="currentLanguage().flagSrc"
-            width="30"
-            height="30"
-            alt=""
-          />
-          <span class="header__language__caret"></span>
-        </span>
-      </app-dropdown-menu>
+      <ng-container [ngTemplateOutlet]="languageMenu" />
 
       <app-button size="small" (clicked)="openLogin()">
         <span appI18nText="hub.header.login"></span>
@@ -95,26 +76,7 @@
             </li>
           }
           <li class="header__menu__language">
-            <app-dropdown-menu
-              class="header__language"
-              [items]="languageItems()"
-              [pathIcon]="languageFlags"
-              [selected]="currentLanguage().code"
-              [iconOnly]="true"
-              [accessibleLabel]="'language.selector' | translate"
-              (selectedChange)="changeLanguage($event)"
-            >
-              <span class="header__language__trigger">
-                <img
-                  class="header__language__flag"
-                  [src]="currentLanguage().flagSrc"
-                  width="30"
-                  height="30"
-                  alt=""
-                />
-                <span class="header__language__caret"></span>
-              </span>
-            </app-dropdown-menu>
+            <ng-container [ngTemplateOutlet]="languageMenu" />
           </li>
         </ul>
       </nav>
@@ -133,5 +95,29 @@
     </div>
   </div>
 </header>
+
+<!-- Language menu: one template, shown in the bar on desktop and in the menu on phones. -->
+<ng-template #languageMenu>
+  <app-dropdown-menu
+    class="header__language"
+    [items]="languageItems()"
+    [pathIcon]="languageFlags"
+    [selected]="currentLanguage().code"
+    [iconOnly]="true"
+    [accessibleLabel]="'language.selector' | translate"
+    (selectedChange)="changeLanguage($event)"
+  >
+    <span class="header__language__trigger">
+      <img
+        class="header__language__flag"
+        [src]="currentLanguage().flagSrc"
+        width="30"
+        height="30"
+        alt=""
+      />
+      <span class="header__language__caret"></span>
+    </span>
+  </app-dropdown-menu>
+</ng-template>
 
 <app-login-dialog [(open)]="loginOpen" />

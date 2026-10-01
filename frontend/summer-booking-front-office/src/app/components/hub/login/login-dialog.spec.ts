@@ -112,6 +112,22 @@ describe('LoginDialog', () => {
     );
   });
 
+  it('should stop following the screen size and close the popup when destroyed', async () => {
+    const { fixture } = await setup(false);
+    const query = window.matchMedia('');
+    const add = vi.spyOn(query, 'addEventListener');
+    const remove = vi.spyOn(query, 'removeEventListener');
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    const [, listener] = add.mock.calls[0];
+
+    fixture.destroy();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(remove).toHaveBeenCalledWith('change', listener);
+    expect(document.querySelector('mat-dialog-container')).toBeNull();
+  });
+
   it('should set open back to false when the popup is closed', async () => {
     const { fixture } = await setup(false);
     fixture.componentInstance.open.set(true);

@@ -13,11 +13,6 @@ app-dropdown-menu {
   color: inherit;
   font: inherit;
   cursor: pointer;
-
-  &:focus-visible {
-    outline: 0.125rem solid currentColor;
-    outline-offset: 0.125rem;
-  }
 }
 
 .dropdown__menu__panel {

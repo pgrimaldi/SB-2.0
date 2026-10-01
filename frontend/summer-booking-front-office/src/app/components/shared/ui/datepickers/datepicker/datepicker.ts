@@ -55,9 +55,9 @@ export class Datepicker {
   /** Icons as image paths, used when `matIcon` is not given: [calendar, previous day, next day]. */
   readonly pathIcon = input<readonly string[] | null>();
 
-  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
-
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
   /** Highlights the chosen interval in both calendars. */
   protected readonly rangeClass: MatCalendarCellClassFunction<Date> = (date, view) =>

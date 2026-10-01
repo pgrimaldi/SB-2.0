@@ -140,11 +140,11 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-.header__link:focus-visible,
-.header__toggle:focus-visible,
-.header__menu__link:focus-visible {
-  outline: 0.125rem solid currentColor;
-  outline-offset: 0.25rem;
+// Focus ring (theme) a little further away.
+.header__link,
+.header__toggle,
+.header__menu__link {
+  --focus-ring-offset: 0.25rem;
 }
 
 // Language selector

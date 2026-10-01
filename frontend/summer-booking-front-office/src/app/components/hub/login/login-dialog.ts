@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  OnDestroy,
   TemplateRef,
   ViewEncapsulation,
   effect,
@@ -62,10 +62,16 @@ const MOBILE_QUERY = '(width < 48rem)';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class LoginDialog {
+export class LoginDialog implements OnDestroy {
   /** Shows the popup when true; goes back to false when the popup is closed (X, Esc or click outside). */
   readonly open = model(false);
   readonly sizes = input<LoginDialogSizes>(DEFAULT_SIZES);
+
+  private readonly authBehaviour = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+  private readonly window = inject(DOCUMENT).defaultView;
 
   protected readonly email = signal('');
   protected readonly password = signal('');
@@ -73,9 +79,6 @@ export class LoginDialog {
   protected readonly pending = signal(false);
   /** Error of the last sign-in, as the API answered it. */
   protected readonly error = signal<ApiProblem | null>(null);
-
-  private readonly authBehaviour = inject(AuthBehaviour);
-  private readonly errorText = inject(ErrorTextBehaviour);
   /** Translation key of the error message (`error.<code>`, or `error.unknown`). */
   protected readonly errorKey = toSignal(
     toObservable(this.error).pipe(
@@ -83,22 +86,24 @@ export class LoginDialog {
     ),
     { initialValue: null },
   );
-  private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
-  private readonly window = inject(DOCUMENT).defaultView;
   private readonly content = viewChild.required<TemplateRef<unknown>>('content');
   private dialogRef?: MatDialogRef<unknown>;
+  /** Phone or desktop size, followed while the popup is open. */
+  private mobileQuery?: MediaQueryList;
 
   constructor() {
     effect(() => {
       const open = this.open();
       untracked(() => (open ? this.show() : this.close()));
     });
-    inject(DestroyRef).onDestroy(() => this.close());
   }
 
+  /** Closes at once, without waiting for the closing animation: a closed popup is closed. */
   protected close(): void {
-    this.dialogRef?.close();
+    const dialogRef = this.dialogRef;
+    this.dialogRef = undefined;
+    this.open.set(false);
+    dialogRef?.close();
   }
 
   protected signIn(event: Event): void {
@@ -132,15 +137,10 @@ export class LoginDialog {
     if (this.dialogRef) {
       return;
     }
-
-    const mobile = this.window?.matchMedia?.(MOBILE_QUERY);
-    const size = () => (mobile?.matches ? this.sizes().mobile : this.sizes().desktop);
-    const width = () => `${size().width}vw`;
-    const height = () => (size().height ? `${size().height}vh` : '');
-
+    this.followScreen();
     const dialogRef = this.dialog.open(this.content(), {
-      width: width(),
-      height: height(),
+      width: this.width(),
+      height: this.height(),
       minWidth: MIN_WIDTH,
       maxWidth: 'none',
       maxHeight: MAX_HEIGHT,
@@ -148,17 +148,32 @@ export class LoginDialog {
       ariaLabelledBy: 'login-dialog-title',
     });
     this.dialogRef = dialogRef;
+    dialogRef.afterClosed().subscribe(() => this.closed(dialogRef));
+  }
 
-    // Keep the right size if the phone is rotated or the window resized while the popup is open.
-    const resize = () => dialogRef.updateSize(width(), height());
-    mobile?.addEventListener('change', resize);
+  /** Keeps the right size if the phone is rotated or the window resized while the popup is open. */
+  private followScreen(): void {
+    this.stopFollowingScreen();
+    this.mobileQuery = this.window?.matchMedia?.(MOBILE_QUERY);
+    this.mobileQuery?.addEventListener('change', this.resize);
+  }
 
-    dialogRef.afterClosed().subscribe(() => {
-      mobile?.removeEventListener('change', resize);
-      this.dialogRef = undefined;
-      this.reset();
-      this.open.set(false);
-    });
+  private stopFollowingScreen(): void {
+    this.mobileQuery?.removeEventListener('change', this.resize);
+    this.mobileQuery = undefined;
+  }
+
+  private size(): LoginDialogSize {
+    return this.mobileQuery?.matches ? this.sizes().mobile : this.sizes().desktop;
+  }
+
+  private width(): string {
+    return `${this.size().width}vw`;
+  }
+
+  private height(): string {
+    const { height } = this.size();
+    return height ? `${height}vh` : '';
   }
 
   /** Every opening starts from an empty form. */
@@ -168,5 +183,30 @@ export class LoginDialog {
     this.remember.set(false);
     this.pending.set(false);
     this.error.set(null);
+  }
+
+  /** Listener of the screen size (`followScreen`): phone or desktop size of the open popup. */
+  private readonly resize = (): void => {
+    this.dialogRef?.updateSize(this.width(), this.height());
+  };
+
+  /** The popup finished closing: by its X or the sign-in, or by Esc or a click outside. */
+  private closed(dialogRef: MatDialogRef<unknown>): void {
+    if (this.dialogRef === dialogRef) {
+      // Esc or a click outside: still the current popup.
+      this.close();
+    }
+    if (!this.dialogRef) {
+      // No new popup opened meanwhile.
+      this.stopFollowingScreen();
+      this.reset();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.stopFollowingScreen();
+    const dialogRef = this.dialogRef;
+    this.dialogRef = undefined;
+    dialogRef?.close();
   }
 }

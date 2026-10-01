@@ -17,14 +17,14 @@ const LANGUAGE_PREFIX = /^\/(it|en)(?=[/?#]|$)/;
 
 @Injectable({ providedIn: 'root' })
 export class LanguageBehaviour {
+  private readonly translateService = inject(TranslateService);
+  private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+
   readonly languages: readonly LanguageOption[] = [
     { code: 'it', flagSrc: '/assets/images/flag-it.svg' },
     { code: 'en', flagSrc: '/assets/images/flag-gb.svg' },
   ];
-
-  private readonly translateService = inject(TranslateService);
-  private readonly router = inject(Router);
-  private readonly document = inject(DOCUMENT);
   private readonly currentCode = signal<Language>(DEFAULT_LANGUAGE);
 
   readonly current = this.currentCode.asReadonly();

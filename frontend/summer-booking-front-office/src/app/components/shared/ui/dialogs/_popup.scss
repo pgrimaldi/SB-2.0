@@ -1,0 +1,46 @@
+@use '@angular/material' as mat;
+
+// Shared look of the popups that extend BasePopup: panel, centred column, title and text.
+// $block is the component name (e.g. alert__popup) used by its classes, $host its selector.
+// The popups render in an overlay outside the component: their styles are global.
+@mixin popup($block, $host) {
+  .#{$block}__panel {
+    @include mat.dialog-overrides(
+      (
+        container-color: var(--color__layout__surface),
+        container-shape: 0.5rem,
+        container-max-width: none,
+        container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+      )
+    );
+  }
+
+  // The element in the page only holds the popup template: Material draws the popup above the page.
+  #{$host} {
+    display: contents;
+  }
+
+  .#{$block} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .#{$block}__title {
+    margin: 0;
+    color: var(--color__main__theme__one);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+  }
+
+  .#{$block}__text {
+    margin: 0 0 0.5rem;
+    color: var(--color__main__theme__two);
+    font-size: 0.875rem;
+    line-height: 1.375rem;
+  }
+}

@@ -44,6 +44,7 @@ class TableHost {
     { field: 'total', header: 'Totale', align: 'center' },
   ];
   readonly texts = {
+    empty: 'La tabella non contiene elementi',
     sort: { action: 'Ordina per {{column}}' },
     paginator: {
       previous: 'Pagina precedente',
@@ -75,7 +76,7 @@ describe('Table', () => {
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
     const names = () =>
-      [...element.querySelectorAll('tbody tr td:first-child')].map((cell) =>
+      [...element.querySelectorAll('tbody tr.table__row td:first-child')].map((cell) =>
         cell.textContent?.trim(),
       );
     const next = () =>
@@ -196,6 +197,37 @@ describe('Table', () => {
     expect(host.requests.length).toBe(loads + 1);
     expect(host.requests.at(-1)).toEqual(host.requests.at(-2)); // page 2, same search and sorting
     expect(host.requests.at(-1)?.page).toBe(2);
+  });
+
+  it('should load the current page again, as it is, with reload()', async () => {
+    const { fixture, host, next } = await setup();
+    next().click();
+    await fixture.whenStable();
+    const loads = host.requests.length;
+
+    fixture.debugElement
+      .query((node) => node.componentInstance instanceof Table)
+      .componentInstance.reload();
+    await fixture.whenStable();
+
+    expect(host.requests.length).toBe(loads + 1);
+    expect(host.requests.at(-1)).toEqual(host.requests.at(-2));
+  });
+
+  it('should say that the table has no items only when the server answers with none', async () => {
+    const pending = new Subject<Page<Row>>();
+    const { fixture, host, element } = await setup((host) => (host.answer = () => pending));
+    const message = () => element.querySelector('.table__empty__cell')?.textContent?.trim();
+    expect(message()).toBe(''); // still loading
+
+    pending.next({ total: 0, rows: [] });
+    await fixture.whenStable();
+    expect(message()).toBe('La tabella non contiene elementi');
+
+    host.answer = () => throwError(() => new Error('offline'));
+    host.params.set({ day: '2026-10-02' });
+    await fixture.whenStable();
+    expect(message()).toBe(''); // a failed request is not an empty table
   });
 
   it('should load nothing while the params are null', async () => {

@@ -2,12 +2,11 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ElementRef,
+  OnDestroy,
   afterNextRender,
   computed,
   contentChildren,
-  inject,
   input,
   signal,
   viewChild,
@@ -50,7 +49,7 @@ export interface CarouselTexts {
     '(keydown.arrowright)': 'next()',
   },
 })
-export class Carousel {
+export class Carousel implements OnDestroy {
   /** Accessible name of the carousel, already translated. */
   readonly accessibleLabel = input<string>();
   readonly texts = input<CarouselTexts | null>();
@@ -66,6 +65,7 @@ export class Carousel {
   private readonly viewportWidth = signal(0);
   private readonly slideWidth = signal(0);
   private dragStartX: number | null = null;
+  private observer?: ResizeObserver;
 
   protected readonly slides = computed(() => this.slideDirectives().map((slide) => slide.template));
   protected readonly index = signal(0);
@@ -91,16 +91,14 @@ export class Carousel {
   );
 
   constructor() {
-    const destroyRef = inject(DestroyRef);
-
+    // Slides and viewport are measured once drawn, and again whenever the viewport changes size.
     afterNextRender(() => {
       this.measure();
       if (typeof ResizeObserver === 'undefined') {
         return;
       }
-      const observer = new ResizeObserver(() => this.measure());
-      observer.observe(this.viewport().nativeElement);
-      destroyRef.onDestroy(() => observer.disconnect());
+      this.observer = new ResizeObserver(() => this.measure());
+      this.observer.observe(this.viewport().nativeElement);
     });
   }
 
@@ -173,5 +171,9 @@ export class Carousel {
     this.viewportWidth.set(viewport.clientWidth);
     this.slideWidth.set(firstSlide?.getBoundingClientRect().width ?? 0);
     this.goTo(this.index());
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
   }
 }

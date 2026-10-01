@@ -1,0 +1,16 @@
+<ng-template #content>
+  <div class="table__error__popup">
+    <h2 class="table__error__popup__title" [id]="id + '-title'">{{ title() }}</h2>
+    <p class="table__error__popup__text" [id]="id + '-text'">{{ text() }}</p>
+    @if (!hideCloseButton() || !hideRetryButton()) {
+      <div class="table__error__popup__actions">
+        @if (!hideCloseButton()) {
+          <app-button appearance="light" (clicked)="close()">{{ texts()?.close }}</app-button>
+        }
+        @if (!hideRetryButton()) {
+          <app-button (clicked)="retryLoad()">{{ texts()?.retry }}</app-button>
+        }
+      </div>
+    }
+  </div>
+</ng-template>

@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, ElementRef, afterNextRender, inject, input } from '@angular/core';
+import { Directive, ElementRef, OnDestroy, afterNextRender, inject, input } from '@angular/core';
 
 /**
  * Gives every element matching `appEqualHeight` (e.g. "app-card") inside the host the height
@@ -10,15 +10,16 @@ import { DestroyRef, Directive, ElementRef, afterNextRender, inject, input } fro
  * The value is measured, never hard-coded, and follows resizes, late texts and language changes.
  */
 @Directive({ selector: '[appEqualHeight]' })
-export class EqualHeight {
+export class EqualHeight implements OnDestroy {
   readonly selector = input.required<string>({ alias: 'appEqualHeight' });
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** Frame of the next measure; 0 when none is waiting. */
   private frame = 0;
+  private observer?: ResizeObserver;
 
   constructor() {
-    const destroyRef = inject(DestroyRef);
-
     // Any size change of the observed elements (width, texts, fonts) triggers a new measure;
     // it runs in the next frame, so it converges without resize-observer loops.
     afterNextRender(() => {
@@ -26,13 +27,8 @@ export class EqualHeight {
       if (typeof ResizeObserver === 'undefined') {
         return;
       }
-
-      const observer = new ResizeObserver(() => this.schedule());
-      this.elements().forEach((element) => observer.observe(element));
-      destroyRef.onDestroy(() => {
-        observer.disconnect();
-        cancelAnimationFrame(this.frame);
-      });
+      this.observer = new ResizeObserver(() => this.schedule());
+      this.elements().forEach((element) => this.observer?.observe(element));
     });
   }
 
@@ -57,5 +53,10 @@ export class EqualHeight {
 
   private elements(): HTMLElement[] {
     return [...this.host.nativeElement.querySelectorAll<HTMLElement>(this.selector())];
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+    cancelAnimationFrame(this.frame);
   }
 }

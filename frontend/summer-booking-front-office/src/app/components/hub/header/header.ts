@@ -1,8 +1,7 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  HostListener,
   afterNextRender,
   computed,
   inject,
@@ -19,21 +18,27 @@ import { DropdownMenu, DropdownMenuItem } from '../../shared/ui/menus/dropdown-m
 
 @Component({
   selector: 'app-header',
-  imports: [Button, DropdownMenu, I18nText, LoginDialog, TranslatePipe],
+  imports: [Button, DropdownMenu, I18nText, LoginDialog, NgTemplateOutlet, TranslatePipe],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:scroll)': 'updateHeaderState()',
+    '(document:keydown.escape)': 'closeMenu()',
+  },
 })
 export class Header {
+  private readonly document = inject(DOCUMENT);
+  private readonly languageBehaviour = inject(LanguageBehaviour);
+  private readonly translateService = inject(TranslateService);
+
   protected readonly isCompact = signal(false);
   protected readonly isMenuOpen = signal(false);
   protected readonly loginOpen = signal(false);
   protected readonly navItems = ['advantages', 'features', 'booking', 'pricing'] as const;
 
-  private readonly document = inject(DOCUMENT);
-  private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly languageNames = toSignal(
-    inject(TranslateService).stream('language.names') as Observable<Record<string, string>>,
+    this.translateService.stream('language.names') as Observable<Record<string, string>>,
     { initialValue: {} as Record<string, string> },
   );
 
@@ -55,12 +60,6 @@ export class Header {
     afterNextRender(() => this.updateHeaderState());
   }
 
-  @HostListener('window:scroll')
-  protected updateHeaderState(): void {
-    this.isCompact.set((this.document.defaultView?.scrollY ?? 0) >= 64);
-  }
-
-  @HostListener('document:keydown.escape')
   protected closeMenu(): void {
     this.isMenuOpen.set(false);
   }
@@ -76,5 +75,10 @@ export class Header {
 
   protected toggleMenu(): void {
     this.isMenuOpen.update((isOpen) => !isOpen);
+  }
+
+  /** Listener of the page scroll (`host`): compact header once the page is scrolled. */
+  protected updateHeaderState(): void {
+    this.isCompact.set((this.document.defaultView?.scrollY ?? 0) >= 64);
   }
 }

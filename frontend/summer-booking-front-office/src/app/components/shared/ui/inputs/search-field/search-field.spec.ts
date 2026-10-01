@@ -49,6 +49,16 @@ describe('SearchField', () => {
     expect(searches).toEqual(['omb', '']); // back under 3: no filter
   });
 
+  it('should stop searching once destroyed', async () => {
+    const { fixture, type, searches } = await setup();
+
+    type('omb');
+    fixture.destroy();
+    vi.advanceTimersByTime(500);
+
+    expect(searches).toEqual([]);
+  });
+
   it('should keep the magnifier button, which searches nothing, and an X that empties the field', async () => {
     const { fixture, element, input, type, searches } = await setup();
     const button = () => element.querySelector<HTMLButtonElement>('.search__field__button')!;

@@ -13,6 +13,7 @@
     "slide": "{{index}} of {{total}}"
   },
   "table": {
+    "empty": "The table contains no items",
     "paginator": {
       "first": "First page",
       "previous": "Previous page",
@@ -28,6 +29,12 @@
     },
     "sort": {
       "action": "Sort by {{column}}"
+    },
+    "load_error": {
+      "title": "Error",
+      "text": "We can't provide the requested information right now. Please try again and, if the problem persists, contact support.",
+      "close": "Close",
+      "retry": "Try again"
     }
   },
   "error": {

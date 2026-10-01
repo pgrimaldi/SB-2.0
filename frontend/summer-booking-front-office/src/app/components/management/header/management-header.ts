@@ -32,9 +32,10 @@ export class ManagementHeader {
   protected readonly filters = inject(ManagementFiltersBehaviour);
   private readonly auth = inject(AuthBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+  private readonly translateService = inject(TranslateService);
 
   private readonly periodTexts = toSignal(
-    inject(TranslateService).stream('management.header.period') as Observable<PeriodTexts>,
+    this.translateService.stream('management.header.period') as Observable<PeriodTexts>,
     { initialValue: { label: '', full_day: '', morning: '', afternoon: '' } },
   );
   /** Options of the period select, translated (they follow the language). */

@@ -13,6 +13,8 @@ import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManagementMenu {
+  private readonly authBehaviour = inject(AuthBehaviour);
+
   /** Pages of the management area; `label` is a translation key. */
   protected readonly links = [
     {
@@ -21,8 +23,6 @@ export class ManagementMenu {
       label: 'management.menu.warehouse',
     },
   ] as const;
-
-  private readonly authBehaviour = inject(AuthBehaviour);
 
   /** While the server revokes the session: "Disconnetti" cannot be pressed again. */
   protected readonly loggingOut = signal(false);

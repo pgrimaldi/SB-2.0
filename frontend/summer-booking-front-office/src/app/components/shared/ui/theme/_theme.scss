@@ -27,6 +27,17 @@
   --color__layout__shadow__light: rgb(0 0 0 / 10%); // lighter shadows (cards at rest, arrows)
 }
 
+// Keyboard focus ring of the app's own elements, one for the whole app: 0.125rem in the text colour,
+// 0.125rem away. A component changes only what differs, with --focus-ring-color and
+// --focus-ring-offset. Zero specificity: Material's own focus indicators and any rule of a component
+// win over it. The app includes it once (`@include theme.focus-ring;` in styles.scss).
+@mixin focus-ring {
+  :where(:focus-visible) {
+    outline: 0.125rem solid var(--focus-ring-color, currentColor);
+    outline-offset: var(--focus-ring-offset, 0.125rem);
+  }
+}
+
 // Panels that Material opens in an overlay, outside the components, so their styles are global:
 // the options of `app-select` and of the table page size selector (`panelClass: 'select__panel'`).
 // The app includes it once, next to the theme (`@include theme.overlays;` in styles.scss).

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { Footer } from '../../../components/hub/footer/footer';
 import { Header } from '../../../components/hub/header/header';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
@@ -30,7 +30,11 @@ import { CarouselSlide } from '../../../components/shared/ui/carousels/carousel/
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Home {
+export class Home implements OnDestroy {
+  private readonly translateService = inject(TranslateService);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
+
   protected readonly managementCards = [
     { key: 'all', icon: 'all-in-one' },
     { key: 'agility', icon: 'agility' },
@@ -61,16 +65,22 @@ export class Home {
     { logo: 'mondo-balneare', name: 'Mondo Balneare' },
   ] as const;
 
-  constructor() {
-    const title = inject(Title);
-    const meta = inject(Meta);
+  /** Title and description of the page, in the current language. */
+  private readonly pageSubscription: Subscription;
 
-    inject(TranslateService)
+  constructor() {
+    this.pageSubscription = this.translateService
       .stream(['home.page.title', 'home.page.description'])
-      .pipe(takeUntilDestroyed())
-      .subscribe((page: Record<string, string>) => {
-        title.setTitle(page['home.page.title']);
-        meta.updateTag({ name: 'description', content: page['home.page.description'] });
-      });
+      .subscribe((page: Record<string, string>) => this.showPageTexts(page));
+  }
+
+  /** Subscription of the page texts: title and description follow the language. */
+  private showPageTexts(page: Record<string, string>): void {
+    this.title.setTitle(page['home.page.title']);
+    this.meta.updateTag({ name: 'description', content: page['home.page.description'] });
+  }
+
+  ngOnDestroy(): void {
+    this.pageSubscription.unsubscribe();
   }
 }
