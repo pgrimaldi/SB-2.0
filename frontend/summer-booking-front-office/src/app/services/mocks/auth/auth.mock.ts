@@ -1,6 +1,7 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, from, of, switchMap } from 'rxjs';
 import { AuthSession, AuthUser, SignInRequest } from '../../../entities/auth/credentials';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
@@ -99,7 +100,7 @@ export function unauthorized(
 }
 
 /** Codes of the 401 answers of the mock API. */
-type UnauthorizedCode = 'auth.invalid_credentials' | 'auth.invalid_token' | 'auth.session_expired';
+type UnauthorizedCode = Extract<ApiErrorCode, `auth.${string}`>;
 
 function newSession(): AuthSession {
   const accessToken = `mock-access-${randomToken()}`;

@@ -21,6 +21,7 @@ import {
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { Observable, catchError, of, switchMap } from 'rxjs';
+import { DATA_RELOAD } from '../../../data/data-reload';
 import { SearchField, SearchFieldTexts } from '../../inputs/search-field/search-field';
 import { FormatTextPipe } from '../../texts/format-text';
 import { TableIconAction } from './table-icon-action';
@@ -198,7 +199,11 @@ export class Table<T, P extends object> {
     computation: () => 1,
   });
 
+  /** When it changes (e.g. the language), the current page is loaded again, as it is. */
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+
   private readonly request = computed(() => {
+    this.dataReload?.();
     const params = this.params();
     const sort = this.sort();
     return params

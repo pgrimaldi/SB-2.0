@@ -1,12 +1,11 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
-import { ApiFieldError } from '../../../entities/errors/api-problem';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { problem } from '../errors/problem.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
 import { MOCK_PROPERTIES } from '../properties/properties.mock';
 
 /**
@@ -262,10 +261,10 @@ function periodErrors({
   datetimeFrom,
   datetimeTo,
   bookingDayType,
-}: Partial<ManagementRequest>): ApiFieldError[] {
+}: Partial<ManagementRequest>): MockFieldError[] {
   const from = Date.parse(datetimeFrom ?? '');
   const to = Date.parse(datetimeTo ?? '');
-  const errors: ApiFieldError[] = [];
+  const errors: MockFieldError[] = [];
   if (Number.isNaN(from)) {
     errors.push({ field: 'datetimeFrom', code: 'validation.invalid_date' });
   }

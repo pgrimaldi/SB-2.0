@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { Observable, Subject, of, throwError } from 'rxjs';
+import { DATA_RELOAD } from '../../../data/data-reload';
 import { Table, TableColumn, TablePage as Page, TablePageRequest as PageRequest } from './table';
 import { TableIconAction } from './table-icon-action';
 import { TableTextAction } from './table-text-action';
@@ -179,6 +180,22 @@ describe('Table', () => {
       sortField: '',
       sortDirection: 'Ascending',
     });
+  });
+
+  it('should load the current page again, as it is, when the data context changes (e.g. the language)', async () => {
+    const language = signal('it');
+    TestBed.configureTestingModule({ providers: [{ provide: DATA_RELOAD, useValue: language }] });
+    const { fixture, host, next } = await setup();
+    next().click();
+    await fixture.whenStable();
+    const loads = host.requests.length;
+
+    language.set('en');
+    await fixture.whenStable();
+
+    expect(host.requests.length).toBe(loads + 1);
+    expect(host.requests.at(-1)).toEqual(host.requests.at(-2)); // page 2, same search and sorting
+    expect(host.requests.at(-1)?.page).toBe(2);
   });
 
   it('should load nothing while the params are null', async () => {

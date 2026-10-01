@@ -15,7 +15,9 @@ import { routes } from './app.routes';
 import { DATE_FORMATS, DateLanguageBehaviour } from './behaviours/i18n/date-language.behaviour';
 import { AuthBehaviour } from './behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from './behaviours/i18n/language.behaviour';
+import { DATA_RELOAD } from './components/shared/data/data-reload';
 import { authInterceptor } from './services/api/auth.interceptor';
+import { languageInterceptor } from './services/api/language.interceptor';
 import { timeZoneInterceptor } from './services/api/time-zone.interceptor';
 import { MOCK_INTERCEPTORS } from './services/mocks/mock-interceptors';
 
@@ -23,8 +25,15 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    // The server may answer with translated data (Accept-Language): a new language loads it again.
+    { provide: DATA_RELOAD, useFactory: () => inject(LanguageBehaviour).current },
     provideHttpClient(
-      withInterceptors([timeZoneInterceptor, authInterceptor, ...MOCK_INTERCEPTORS]),
+      withInterceptors([
+        timeZoneInterceptor,
+        languageInterceptor,
+        authInterceptor,
+        ...MOCK_INTERCEPTORS,
+      ]),
     ),
     // Dates through the browser (Intl), as each language writes them; no date library.
     provideNativeDateAdapter(DATE_FORMATS),

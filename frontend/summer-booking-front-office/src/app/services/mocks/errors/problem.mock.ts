@@ -1,5 +1,6 @@
 import { HttpErrorResponse, HttpRequest } from '@angular/common/http';
 import { Observable, delay, throwError } from 'rxjs';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiFieldError, ApiProblemArgs } from '../../../entities/errors/api-problem';
 
 const STATUS_TEXTS: Readonly<Record<number, string>> = {
@@ -12,12 +13,17 @@ const STATUS_TEXTS: Readonly<Record<number, string>> = {
   500: 'Internal Server Error',
 };
 
+/** Field error of the mock API: only codes of the shared catalog, which are all translated. */
+export interface MockFieldError extends ApiFieldError {
+  readonly code: ApiErrorCode;
+}
+
 /** What an error answer may carry besides status and code. */
 export interface MockProblemDetails {
   /** Short text for developers and logs (never shown to the user). */
   title: string;
   args?: ApiProblemArgs;
-  errors?: readonly ApiFieldError[];
+  errors?: readonly MockFieldError[];
 }
 
 /**
@@ -28,7 +34,7 @@ export interface MockProblemDetails {
 export function problem(
   request: HttpRequest<unknown>,
   status: number,
-  code: string,
+  code: ApiErrorCode,
   details: MockProblemDetails,
 ): Observable<never> {
   return throwError(
