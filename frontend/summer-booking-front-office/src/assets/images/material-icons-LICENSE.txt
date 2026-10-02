@@ -1,3 +1,0 @@
-Icon edit.svg: shape of the Material Icon "edit" by Google
-(https://github.com/google/material-design-icons), recoloured.
-Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0

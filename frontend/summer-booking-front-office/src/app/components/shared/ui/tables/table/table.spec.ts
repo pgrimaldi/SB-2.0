@@ -3,7 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { DATA_RELOAD } from '../../../data/data-reload';
-import { Table, TableColumn, TablePage as Page, TablePageRequest as PageRequest } from './table';
+import {
+  Table,
+  TableColumn,
+  TablePage as Page,
+  TablePageRequest as PageRequest,
+  TableRowId,
+} from './table';
 import { TableIconAction } from './table-icon-action';
 import { TableTextAction } from './table-text-action';
 
@@ -783,12 +789,86 @@ describe('Table title, create button and chosen rows', () => {
     expect(massive().length).toBe(0);
   });
 
-  it('should forget the chosen rows when another page arrives', async () => {
-    const { fixture, element, boxes, massive, click } = await setup(true);
+  it('should keep the chosen rows, by id, across pages', async () => {
+    const { fixture, host, element, boxes, all, massive, click } = await setup(true);
+    const page = async (button: 'next' | 'previous') => {
+      element.querySelector<HTMLButtonElement>(`.mat-mdc-paginator-navigation-${button}`)!.click();
+      await fixture.whenStable();
+    };
 
     await click(boxes()[0]);
     await click(boxes()[1]);
+    await page('next');
+    expect(boxes().some((box) => box.checked)).toBe(false); // nothing chosen on page 2
+    expect(all().checked || all().indeterminate).toBe(false); // the header speaks for this page
+    expect(massive().length).toBe(2); // two rows chosen in all
+
+    await click(boxes()[0]);
+    await page('previous');
+    expect(
+      boxes()
+        .map((box) => box.checked)
+        .slice(0, 3),
+    ).toEqual([true, true, false]);
+    expect(host.selection()).toEqual(['Row 1', 'Row 2', 'Row 11']);
+
+    massive()[1].click();
+    await fixture.whenStable();
+    expect(host.events).toEqual(['delete Row 1,Row 2,Row 11']);
+  });
+
+  it('should take away a chosen row when its checkbox is clicked again', async () => {
+    const { host, boxes, click } = await setup(true);
+
+    await click(boxes()[0]);
+    await click(boxes()[1]);
+    await click(boxes()[0]);
+
+    expect(host.selection()).toEqual(['Row 2']);
+  });
+
+  it('should add the rows of the page to the chosen ones from the header, keeping the others', async () => {
+    const { fixture, host, element, boxes, all, click } = await setup(true);
+
+    await click(boxes()[0]);
     element.querySelector<HTMLButtonElement>('.mat-mdc-paginator-navigation-next')!.click();
+    await fixture.whenStable();
+    await click(all());
+    expect(host.selection().length).toBe(11); // Row 1 and the 10 rows of page 2
+
+    await click(all());
+    expect(host.selection()).toEqual(['Row 1']);
+  });
+
+  it('should empty the chosen rows of every page with its clear button', async () => {
+    const { fixture, host, element, boxes, massive, click } = await setup(true);
+    const page = async (button: 'next' | 'previous') => {
+      element.querySelector<HTMLButtonElement>(`.mat-mdc-paginator-navigation-${button}`)!.click();
+      await fixture.whenStable();
+    };
+
+    await click(boxes()[0]);
+    await page('next');
+    await click(boxes()[0]);
+    const clear = element.querySelector<HTMLButtonElement>('.table__clear')!;
+    expect(clear.textContent?.trim()).toBe('Cancella selezioni');
+
+    clear.click();
+    await fixture.whenStable();
+    expect(host.selection()).toEqual([]);
+    expect(massive().length).toBe(0);
+    expect(element.querySelector('.table__clear')).toBeNull();
+    expect(boxes().some((box) => box.checked)).toBe(false);
+    await page('previous');
+    expect(boxes().some((box) => box.checked)).toBe(false);
+  });
+
+  it('should let the page empty the chosen rows', async () => {
+    const { fixture, host, boxes, massive, click } = await setup(true);
+
+    await click(boxes()[0]);
+    await click(boxes()[1]);
+    host.selection.set([]);
     await fixture.whenStable();
 
     expect(boxes().some((box) => box.checked)).toBe(false);
@@ -802,6 +882,8 @@ describe('Table title, create button and chosen rows', () => {
     [columns]="columns"
     [params]="params"
     [load]="load"
+    idField="name"
+    [(selection)]="selection"
     [texts]="texts"
     [title]="show() ? 'Impostazioni magazzino' : undefined"
     [createLabel]="'Aggiungi articolo'"
@@ -809,8 +891,8 @@ describe('Table title, create button and chosen rows', () => {
     [hideCreateButton]="!show()"
     [hideEditButtons]="true"
     [pathIcon]="icons()"
-    (duplicateSelected)="events.push('duplicate ' + names($event))"
-    (deleteSelected)="events.push('delete ' + names($event))"
+    (duplicateSelected)="events.push('duplicate ' + $event.join(','))"
+    (deleteSelected)="events.push('delete ' + $event.join(','))"
     (create)="events.push('create')"
   />`,
 })
@@ -838,13 +920,14 @@ class TableMassiveHost {
       row: 'Scegli la riga',
       duplicate: 'Duplica le righe scelte',
       delete: 'Elimina le righe scelte',
+      clear: 'Cancella selezioni',
     },
   };
   readonly events: string[] = [];
+  readonly selection = signal<readonly TableRowId[]>([]);
   readonly load = (request: Filters & PageRequest) =>
     of({
       total: ALL.length,
       rows: ALL.slice((request.page - 1) * request.pageSize, request.page * request.pageSize),
     });
-  readonly names = (rows: Row[]) => rows.map((row) => row.name).join(',');
 }

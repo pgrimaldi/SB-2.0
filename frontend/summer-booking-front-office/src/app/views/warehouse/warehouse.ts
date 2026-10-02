@@ -36,13 +36,19 @@ export class Warehouse {
   protected readonly loadFailed = signal(false);
   /** Icon of the page title: the warehouse of the menu, in the main blue. */
   protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
-  /** Icons of the table, in its order: [search magnifier, search X, delete, duplicate, edit]. */
+  /**
+   * Icons of the table, in its order: [search magnifier, search X, delete, duplicate, edit,
+   * duplicate chosen, delete chosen, create]. No title icon: the page has its own title.
+   */
   protected readonly tableIcons = [
     '/assets/images/search.svg',
     '/assets/images/clear.svg',
     '/assets/images/delete.svg',
     '/assets/images/duplicate.svg',
     '/assets/images/edit.svg',
+    '/assets/images/duplicate-selected.svg',
+    '/assets/images/delete-selected.svg',
+    '/assets/images/add.svg',
   ] as const;
   private readonly headers = toSignal(
     this.translateService.stream('management.warehouse.table') as Observable<WarehouseHeaders>,

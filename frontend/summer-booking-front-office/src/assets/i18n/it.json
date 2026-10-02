@@ -46,7 +46,8 @@
       "all": "Scegli tutte le righe della pagina",
       "row": "Scegli la riga",
       "duplicate": "Duplica le righe scelte",
-      "delete": "Elimina le righe scelte"
+      "delete": "Elimina le righe scelte",
+      "clear": "Cancella selezioni"
     }
   },
   "error": {

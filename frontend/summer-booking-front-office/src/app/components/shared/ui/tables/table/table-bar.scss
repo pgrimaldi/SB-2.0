@@ -75,20 +75,26 @@
   gap: 0.625rem;
 }
 
-// Square buttons with a thin border of the colour of their icon: soft blue, red for delete.
+// Square buttons of 1.75rem. The designer's images are the whole button (white square, thin border of
+// the colour of the symbol, the symbol): they fill it. A Material icon is only the symbol: the button
+// draws the square and the border around it (`table__massive__framed`).
 .table__massive {
   display: grid;
   width: 1.75rem;
   height: 1.75rem;
   place-items: center;
   padding: 0;
-  border: 0.0625rem solid currentColor;
+  border: 0;
   border-radius: 0.3125rem;
-  background: var(--color__layout__surface);
+  background: none;
   color: var(--color__layout__text__soft);
   cursor: pointer;
 
-  img,
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
   mat-icon {
     width: 0.9375rem;
     height: 0.9375rem;
@@ -96,8 +102,28 @@
   }
 }
 
+.table__massive__framed {
+  border: 0.0625rem solid currentColor;
+  background: var(--color__layout__surface);
+}
+
 .table__massive__delete {
   color: #fd6665; // red of the designer's delete button, used only here
+}
+
+// Before them, the text button that empties the chosen rows: same height, thin border, soft blue.
+.table__clear {
+  height: 1.75rem;
+  padding: 0 0.875rem;
+  border: 0.0625rem solid currentColor;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  color: var(--color__layout__text__soft);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 // Under the mouse, the button about to be pressed (only where there is a mouse).
@@ -107,6 +133,10 @@
   }
 
   .table__massive:hover {
+    filter: brightness(0.95); // the white of the image turns light grey
+  }
+
+  .table__clear:hover {
     background: var(--color__tertiary__theme);
   }
 }

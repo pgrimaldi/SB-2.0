@@ -43,34 +43,40 @@
     @if (hasIconZone()) {
       <div class="table__bar__icons">
         <!-- Buttons on the chosen rows, only with more than one row chosen. -->
-        @if (!hideMassiveActions() && selectedRows().length > 1) {
+        @if (!hideMassiveActions() && selection().length > 1) {
+          <!-- Empties the chosen rows, on every page: the buttons go away and no checkbox is ticked. -->
+          <button class="table__clear" type="button" (click)="selection.set([])">
+            {{ texts()?.selection?.clear }}
+          </button>
           <button
             class="table__massive"
             type="button"
+            [class.table__massive__framed]="icons().material"
             [attr.aria-label]="texts()?.selection?.duplicate ?? null"
             [matTooltip]="texts()?.selection?.duplicate ?? ''"
-            (click)="duplicateSelected.emit(selectedRows())"
+            (click)="duplicateSelected.emit([...selection()])"
           >
             @if (icons().list[5]; as icon) {
               @if (icons().material) {
                 <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
               } @else {
-                <img [src]="icon" width="15" height="15" alt="" />
+                <img [src]="icon" width="28" height="28" alt="" />
               }
             }
           </button>
           <button
             class="table__massive table__massive__delete"
             type="button"
+            [class.table__massive__framed]="icons().material"
             [attr.aria-label]="texts()?.selection?.delete ?? null"
             [matTooltip]="texts()?.selection?.delete ?? ''"
-            (click)="deleteSelected.emit(selectedRows())"
+            (click)="deleteSelected.emit([...selection()])"
           >
             @if (icons().list[6]; as icon) {
               @if (icons().material) {
                 <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
               } @else {
-                <img [src]="icon" width="15" height="15" alt="" />
+                <img [src]="icon" width="28" height="28" alt="" />
               }
             }
           </button>
@@ -107,8 +113,8 @@
       <td *matCellDef="let row" mat-cell class="table__cell table__select">
         <app-selection-checkbox
           [label]="texts()?.selection?.row"
-          [checked]="selected().has(row)"
-          (checkedChange)="selectRow(row, $event)"
+          [checked]="selected().has(idOf(row))"
+          (checkedChange)="selectRow(row)"
         />
       </td>
     </ng-container>

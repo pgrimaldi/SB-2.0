@@ -92,6 +92,8 @@ export interface TableSelectionTexts {
   row?: string;
   duplicate?: string;
   delete?: string;
+  /** Text of the button that empties the chosen rows (e.g. "Cancella selezioni"). */
+  clear?: string;
 }
 
 /** Texts of the `app-table` sorting. */
@@ -153,6 +155,9 @@ export interface TablePage<T> {
  */
 export type TableLoad<P, T> = (request: P & TablePageRequest) => Observable<TablePage<T>>;
 
+/** Id of a row (its `idField`), e.g. a guid: the chosen rows are kept by id across pages and searches. */
+export type TableRowId = string | number;
+
 const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
 /** Id of the last column, with the buttons of the row: not a field, so it never meets a column of the rows. */
 const ROW_ACTIONS_COLUMN = 'table__row__actions';
@@ -175,9 +180,11 @@ let nextTableId = 0;
  * search (`searchable`, sent to `load` as `search`) and, on the right, the create button
  * (`createLabel`, emits `create`).
  * Under it, above the rows, a bar: icon buttons marked `appTableIconAction` on the left and text
- * buttons marked `appTableTextAction` on the right; each part shows only when it is used. The first column has a checkbox on every row (and one in the header for the whole page) and,
+ * buttons marked `appTableTextAction` on the right; each part shows only when it is used.
+ * The first column has a checkbox on every row (and one in the header for the rows of the page) and,
  * when more than one row is chosen, the bar shows the buttons duplicate and delete of the chosen rows
- * (`duplicateSelected`, `deleteSelected`, with the rows). The last column has the buttons of every
+ * (`duplicateSelected`, `deleteSelected`, with their ids) and the button that empties the choice. The
+ * chosen rows are kept by id (`idField`) in `selection`, across pages, searches and sorting. The last column has the buttons of every
  * row: delete, duplicate and edit (`deleteRow`, `duplicateRow`, `editRow`, with the row).
  * Icons (see `Icons`): [search magnifier, search X, delete, duplicate, edit, duplicate chosen,
  * delete chosen, create, title].
@@ -221,8 +228,15 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Parameters of every request besides the page; `null` loads nothing (e.g. signed out). */
   readonly params = input.required<P | null>();
   readonly load = input.required<TableLoad<P, T>>();
+  /** Field with the id of a row (e.g. a guid): the chosen rows are kept by it. */
+  readonly idField = input<keyof T & string>('id' as keyof T & string);
   /** Rows in a page, two-way: the user changes it with the selector of the paginator. */
   readonly pageSize = model(TABLE_PAGE_SIZE);
+  /**
+   * Ids of the chosen rows, in the order they were chosen, two-way: they stay when the page, the
+   * search or the sorting change; the page can read them or empty them (e.g. after a delete).
+   */
+  readonly selection = model<readonly TableRowId[]>([]);
   /** Choices of the page size selector. */
   readonly pageSizeOptions = input<readonly number[]>(TABLE_PAGE_SIZE_OPTIONS);
   readonly texts = input<TableTexts | null>();
@@ -265,10 +279,10 @@ export class Table<T, P extends object> implements OnDestroy {
   readonly duplicateRow = output<T>();
   /** The edit button of a row was pressed: the row. */
   readonly editRow = output<T>();
-  /** The duplicate button of the chosen rows was pressed: the chosen rows, in page order. */
-  readonly duplicateSelected = output<T[]>();
-  /** The delete button of the chosen rows was pressed: the chosen rows, in page order. */
-  readonly deleteSelected = output<T[]>();
+  /** The duplicate button of the chosen rows was pressed: their ids, in the order they were chosen. */
+  readonly duplicateSelected = output<TableRowId[]>();
+  /** The delete button of the chosen rows was pressed: their ids, in the order they were chosen. */
+  readonly deleteSelected = output<TableRowId[]>();
   /** The create button was pressed. */
   readonly create = output<void>();
 
@@ -354,20 +368,17 @@ export class Table<T, P extends object> implements OnDestroy {
   );
 
   protected readonly rows = computed(() => this.result().rows);
-  /** Chosen rows of the page; none again whenever a page arrives (other page, search, sorting…). */
-  protected readonly selected = linkedSignal<readonly T[], ReadonlySet<T>>({
-    source: this.rows,
-    computation: () => new Set<T>(),
-  });
-  /** The chosen rows, in page order. */
-  protected readonly selectedRows = computed(() =>
-    this.rows().filter((row) => this.selected().has(row)),
+  /** The ids of `selection`, for a quick look-up of every row. */
+  protected readonly selected = computed(() => new Set(this.selection()));
+  /** How many rows of the page on screen are chosen: the checkbox of the header shows them. */
+  private readonly selectedOnPage = computed(
+    () => this.rows().filter((row) => this.selected().has(this.idOf(row))).length,
   );
   protected readonly allSelected = computed(
-    () => this.rows().length > 0 && this.selectedRows().length === this.rows().length,
+    () => this.rows().length > 0 && this.selectedOnPage() === this.rows().length,
   );
   protected readonly someSelected = computed(
-    () => this.selectedRows().length > 0 && !this.allSelected(),
+    () => this.selectedOnPage() > 0 && !this.allSelected(),
   );
   /**
    * The server answered with no rows. `NO_ROWS` is never an answer (before the first one, after an
@@ -444,20 +455,24 @@ export class Table<T, P extends object> implements OnDestroy {
     this.sort.set(sort.direction ? sort : null);
   }
 
-  /** The checkbox of the header: all the rows of the page, or none. */
-  protected selectAll(checked: boolean): void {
-    this.selected.set(new Set(checked ? this.rows() : []));
+  /** Id of a row, from its `idField`. */
+  protected idOf(row: T): TableRowId {
+    return row[this.idField()] as TableRowId;
   }
 
-  /** The checkbox of a row. */
-  protected selectRow(row: T, checked: boolean): void {
-    const selected = new Set(this.selected());
-    if (checked) {
-      selected.add(row);
-    } else {
-      selected.delete(row);
-    }
-    this.selected.set(selected);
+  /** The checkbox of the header: adds all the rows of the page to the chosen ones, or takes them away. */
+  protected selectAll(checked: boolean): void {
+    const page = this.rows().map((row) => this.idOf(row));
+    const others = this.selection().filter((id) => !page.includes(id));
+    this.selection.set(checked ? [...others, ...page] : others);
+  }
+
+  /** The checkbox of a row: an id already chosen is taken away, otherwise it is added. */
+  protected selectRow(row: T): void {
+    const id = this.idOf(row);
+    this.selection.update((ids) =>
+      ids.includes(id) ? ids.filter((chosen) => chosen !== id) : [...ids, id],
+    );
   }
 
   /**
