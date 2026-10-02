@@ -45,8 +45,8 @@
     "selection": {
       "all": "Select all rows of the page",
       "row": "Select the row",
-      "duplicate": "Duplicate the selected rows",
-      "delete": "Delete the selected rows",
+      "duplicate": "Duplicate selection",
+      "delete": "Delete selection",
       "clear": "Clear selection"
     }
   },
@@ -193,6 +193,7 @@
       "table": {
         "name": "Items",
         "total": "Total",
+        "threshold": "Threshold",
         "available": "Available"
       }
     },
@@ -214,6 +215,10 @@
         "email": "Email setup",
         "database": "Database",
         "help": "Help and guides"
+      },
+      "warehouse": {
+        "title": "Warehouse settings",
+        "create": "Add item"
       }
     }
   },

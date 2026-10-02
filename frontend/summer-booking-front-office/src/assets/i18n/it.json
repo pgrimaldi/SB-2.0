@@ -45,8 +45,8 @@
     "selection": {
       "all": "Scegli tutte le righe della pagina",
       "row": "Scegli la riga",
-      "duplicate": "Duplica le righe scelte",
-      "delete": "Elimina le righe scelte",
+      "duplicate": "Duplica selezione",
+      "delete": "Elimina selezione",
       "clear": "Cancella selezioni"
     }
   },
@@ -193,6 +193,7 @@
       "table": {
         "name": "Articoli",
         "total": "Totale",
+        "threshold": "Soglia",
         "available": "Disponibili"
       }
     },
@@ -214,6 +215,10 @@
         "email": "Configurazione email",
         "database": "Database",
         "help": "Assistenza e guide"
+      },
+      "warehouse": {
+        "title": "Impostazioni magazzino",
+        "create": "Aggiungi articolo"
       }
     }
   },

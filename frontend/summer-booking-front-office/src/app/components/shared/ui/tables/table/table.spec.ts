@@ -762,8 +762,8 @@ describe('Table title, create button and chosen rows', () => {
 
     await click(boxes()[2]);
     expect(massive().map((button) => button.getAttribute('aria-label'))).toEqual([
-      'Duplica le righe scelte',
-      'Elimina le righe scelte',
+      'Duplica selezione',
+      'Elimina selezione',
     ]);
     expect(massive().map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
       'duplicate-selected.svg',
@@ -918,8 +918,8 @@ class TableMassiveHost {
     selection: {
       all: 'Scegli tutte le righe della pagina',
       row: 'Scegli la riga',
-      duplicate: 'Duplica le righe scelte',
-      delete: 'Elimina le righe scelte',
+      duplicate: 'Duplica selezione',
+      delete: 'Elimina selezione',
       clear: 'Cancella selezioni',
     },
   };

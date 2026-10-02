@@ -1,0 +1,30 @@
+<main class="warehouse">
+  <app-page-title
+    class="warehouse__title"
+    [text]="'management.settings.warehouse.title' | translate"
+    [pathIcon]="titleIcon"
+  />
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="filters.request()"
+    [load]="warehouse.list"
+    idField="idArticle"
+    [texts]="'table' | translate"
+    [searchable]="true"
+    [useAppTheme]="false"
+    [hideMassiveActions]="false"
+    [hideCreateButton]="false"
+    [createLabel]="'management.settings.warehouse.create' | translate"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+  />
+</main>
+
+<app-table-error-popup
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>
