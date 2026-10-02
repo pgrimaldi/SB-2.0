@@ -21,6 +21,7 @@
 
 <div class="table">
   <table
+    #grid
     mat-table
     matSort
     class="table__grid"
@@ -44,7 +45,7 @@
             (texts()?.sort?.action | formatText: { column: column.header }) ?? ''
           "
           [style.text-align]="align"
-          [style.width.%]="column.width"
+          [style.width]="headerWidths()[$index]"
         >
           {{ column.header }}
         </th>
@@ -53,6 +54,62 @@
         </td>
       </ng-container>
     }
+
+    <!-- Buttons of every row (hideEditButtons false), always the last column: delete, duplicate, edit. -->
+    <ng-container [matColumnDef]="rowActionsColumn">
+      <th *matHeaderCellDef mat-header-cell class="table__cell table__actions">
+        {{ texts()?.actions?.header }}
+      </th>
+      <td *matCellDef="let row" mat-cell class="table__cell table__actions">
+        <span class="table__actions__buttons">
+          <button
+            class="table__action"
+            type="button"
+            [attr.aria-label]="texts()?.actions?.delete ?? null"
+            [matTooltip]="texts()?.actions?.delete ?? ''"
+            (click)="deleteRow.emit(row)"
+          >
+            @if (icons().list[2]; as icon) {
+              @if (icons().material) {
+                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+              } @else {
+                <img [src]="icon" width="24" height="24" alt="" />
+              }
+            }
+          </button>
+          <button
+            class="table__action"
+            type="button"
+            [attr.aria-label]="texts()?.actions?.duplicate ?? null"
+            [matTooltip]="texts()?.actions?.duplicate ?? ''"
+            (click)="duplicateRow.emit(row)"
+          >
+            @if (icons().list[3]; as icon) {
+              @if (icons().material) {
+                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+              } @else {
+                <img [src]="icon" width="24" height="24" alt="" />
+              }
+            }
+          </button>
+          <button
+            class="table__action"
+            type="button"
+            [attr.aria-label]="texts()?.actions?.edit ?? null"
+            [matTooltip]="texts()?.actions?.edit ?? ''"
+            (click)="editRow.emit(row)"
+          >
+            @if (icons().list[4]; as icon) {
+              @if (icons().material) {
+                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+              } @else {
+                <img [src]="icon" width="24" height="24" alt="" />
+              }
+            }
+          </button>
+        </span>
+      </td>
+    </ng-container>
 
     <tr *matHeaderRowDef="fields()" mat-header-row class="table__header"></tr>
     <tr *matRowDef="let row; columns: fields()" mat-row class="table__row"></tr>

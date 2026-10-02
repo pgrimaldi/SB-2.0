@@ -1,13 +1,17 @@
 <aside class="settings__menu">
-  <nav class="settings__menu__links">
-    @for (link of links; track link.route) {
+  <nav
+    class="settings__menu__links"
+    [attr.aria-label]="'management.settings.menu.label' | translate"
+  >
+    @for (link of links(); track link.route) {
       <a
         class="settings__menu__item"
         routerLinkActive="settings__menu__item__active"
         ariaCurrentWhenActive="page"
         [routerLink]="link.route"
-        [appI18nText]="link.label"
-      ></a>
+      >
+        <span [appI18nText]="link.label"></span>
+      </a>
     }
   </nav>
 </aside>

@@ -1,16 +1,17 @@
-// Desktop: column next to the management menu, below the header, as tall as the screen. Its rows
-// have the height of the management menu rows, so the two lists line up.
+// Desktop: column next to the management menu, below the header, as tall as the screen, as wide as
+// the management menu fully open (9.375rem, management-menu.scss). Rows, spaces and text as in the
+// designer's mockup: every page on one line, the 15 pages in a 1280×720 screen.
 :host {
   display: block;
   flex: none;
-  width: 8.375rem;
+  width: 9.375rem;
 }
 
 .settings__menu {
   position: sticky;
   top: 3.75rem;
   height: calc(100svh - 3.75rem);
-  padding-block: 0.3125rem;
+  padding-block: 0.5625rem 0.3125rem;
   overflow-y: auto;
   background: var(--color__white);
   box-shadow: 0.25rem 0 0.75rem rgb(18 45 87 / 8%);
@@ -19,22 +20,31 @@
 .settings__menu__links {
   display: flex;
   flex-direction: column;
+  gap: 0.4375rem;
 }
 
 .settings__menu__item {
   display: flex;
-  height: 2.375rem;
+  height: 2.25rem;
   flex: none;
   align-items: center;
-  padding: 0 0.875rem;
+  padding: 0 0.75rem;
   color: #365e96;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   line-height: 1.125rem;
   text-decoration: none;
 }
 
+// The current page, and the page under the mouse (only where there is a mouse: on touch screens the
+// colour would stay after the tap).
 .settings__menu__item__active {
   background: var(--color__tertiary__theme);
+}
+
+@media (hover: hover) {
+  .settings__menu__item:hover {
+    background: var(--color__tertiary__theme);
+  }
 }
 
 // Tablet and phone: a strip above the page that scrolls sideways.

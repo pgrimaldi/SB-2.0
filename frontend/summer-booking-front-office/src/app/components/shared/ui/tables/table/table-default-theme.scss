@@ -3,39 +3,22 @@
 // The default look (the designer's proposal of 30/09/2026): clean and minimal. Blue texts on white,
 // a thin line under the header, no stripes and no rounded corners, everything on the left, the sort
 // arrow before the header label and, in the paginator, only the page size selector and the page number
-// between the arrows.
+// between the arrows. Sizes are common to both looks (table.scss): the table takes the same room.
 :host(.table__theme__default) {
-  --table-header-height: 2.5rem;
-  --table-row-height: 2.125rem;
-  --table-paginator-height: 3rem;
+  // Side paddings of a cell, for the width of the column of the row buttons.
+  --table-actions-padding: 1.125rem;
 
   @include mat.table-overrides(
     (
-      background-color: var(--color__layout__surface),
-      header-container-height: var(--table-header-height),
       header-headline-color: var(--color__main__theme__one),
-      header-headline-size: 0.875rem,
-      header-headline-line-height: 1.25rem,
       header-headline-weight: 400,
-      header-headline-tracking: normal,
-      row-item-container-height: var(--table-row-height),
       row-item-label-text-color: var(--color__layout__text__soft),
-      row-item-label-text-size: 0.8125rem,
-      row-item-label-text-line-height: 1.25rem,
       row-item-label-text-weight: 400,
-      row-item-label-text-tracking: normal,
-      row-item-outline-width: 0,
     )
   );
   @include mat.paginator-overrides(
     (
-      container-size: var(--table-paginator-height),
-      container-background-color: var(--color__layout__surface),
-      container-text-color: var(--color__main__theme__one),
-      container-text-size: 0.875rem,
       enabled-icon-color: var(--color__layout__text__soft),
-      disabled-icon-color: var(--color__layout__muted),
-      select-trigger-text-size: 0.875rem,
       form-field-container-height: 1.75rem,
       form-field-container-vertical-padding: 0.25rem,
     )

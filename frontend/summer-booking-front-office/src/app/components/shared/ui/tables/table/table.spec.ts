@@ -353,6 +353,105 @@ class TableBarHost {
   };
 }
 
+describe('Table column room', () => {
+  /** Width the table has on screen, and the callback of its size watcher. */
+  let available = 0;
+  let resized: () => void = () => undefined;
+
+  const setup = async (columns: TableColumn<Row>[]) => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.classList.contains('table') ? available : 0;
+    });
+    // 10px for every character of a title.
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        getContext() {
+          return { font: '', measureText: (text: string) => ({ width: text.length * 10 }) };
+        }
+      },
+    );
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resized = callback;
+        }
+        observe() {
+          return undefined;
+        }
+        disconnect() {
+          return undefined;
+        }
+      },
+    );
+    TestBed.configureTestingModule({
+      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
+    });
+    const fixture = TestBed.createComponent(TableHost);
+    fixture.componentInstance.columns.splice(0, 2, ...columns);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const widths = () =>
+      [...element.querySelectorAll<HTMLElement>('thead th')].map((header) => header.style.width);
+    const resize = async (width: number) => {
+      available = width;
+      resized();
+      await fixture.whenStable();
+    };
+    return { widths, resize };
+  };
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('should keep the shares of the columns while every header has its room', async () => {
+    available = 1000;
+    const { widths } = await setup([
+      { field: 'name', header: 'Nome', sortable: true, width: 40 },
+      { field: 'total', header: 'Totale' },
+    ]);
+
+    expect(widths()).toEqual(['40%', '']);
+  });
+
+  it('should give a header its room and the rest to the others, without scrolling', async () => {
+    available = 1000;
+    const { widths, resize } = await setup([
+      { field: 'name', header: 'Nome', sortable: true, width: 40 },
+      { field: 'total', header: 'Totale disponibili' }, // 180px of title
+    ]);
+
+    await resize(330); // the shares would give 198px to "Totale disponibili", short of its paddings
+    const [name, total] = widths().map((width) => parseFloat(width));
+
+    expect(widths().every((width) => width.endsWith('px'))).toBe(true);
+    expect(total).toBeGreaterThanOrEqual(180);
+    expect(name).toBeGreaterThanOrEqual(40);
+    expect(name + total).toBeCloseTo(330); // the table stays as wide as the screen
+
+    await resize(1000); // room again: back to the shares
+    expect(widths()).toEqual(['40%', '']);
+  });
+
+  it('should make the table wider than the screen when the headers need it', async () => {
+    available = 100;
+    const { widths } = await setup([
+      { field: 'name', header: 'Nome', sortable: true, width: 40 },
+      { field: 'total', header: 'Totale disponibili' },
+    ]);
+    const [name, total] = widths().map((width) => parseFloat(width));
+
+    expect(name).toBeGreaterThanOrEqual(40);
+    expect(total).toBeGreaterThanOrEqual(180);
+    expect(name + total).toBeGreaterThan(100); // the rows scroll sideways inside the table
+  });
+});
+
 describe('Table bar', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
@@ -443,6 +542,90 @@ class TableDefaultHost {
     { field: 'total', header: 'Totale', align: 'center' },
   ];
   readonly texts = { paginator: { range: '{{start}} – {{end}} di {{total}}' } };
+  readonly load = (request: Filters & PageRequest) =>
+    of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
+}
+
+describe('Table row buttons', () => {
+  const setup = async (show: boolean) => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
+    });
+    const fixture = TestBed.createComponent(TableRowButtonsHost);
+    fixture.componentInstance.show.set(show);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const buttons = (row: number) => [
+      ...element.querySelectorAll<HTMLButtonElement>(
+        `tbody tr.table__row:nth-child(${row + 1}) .table__action`,
+      ),
+    ];
+    return { fixture, host: fixture.componentInstance, element, buttons };
+  };
+
+  it('should have no row buttons, and no column for them, unless asked', async () => {
+    const { element } = await setup(false);
+
+    expect(element.querySelectorAll('.table__action').length).toBe(0);
+    expect(element.querySelectorAll('thead th').length).toBe(2);
+  });
+
+  it('should put delete, duplicate and edit in the last column, with their names and icons', async () => {
+    const { element, buttons } = await setup(true);
+
+    const headers = [...element.querySelectorAll('thead th')];
+    expect(headers.length).toBe(3);
+    expect(headers[2].classList).toContain('table__actions');
+    expect(headers[2].textContent?.trim()).toBe('Azioni'); // header from texts.actions.header
+    expect(buttons(0).map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Elimina',
+      'Duplica',
+      'Modifica',
+    ]);
+    expect(buttons(0).map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
+      'delete.svg',
+      'duplicate.svg',
+      'edit.svg',
+    ]);
+  });
+
+  it('should tell the page which row each button is for', async () => {
+    const { fixture, host, buttons } = await setup(true);
+
+    buttons(0)[0].click();
+    buttons(1)[1].click();
+    buttons(2)[2].click();
+    await fixture.whenStable();
+
+    expect(host.events).toEqual(['delete Row 1', 'duplicate Row 2', 'edit Row 3']);
+  });
+});
+
+@Component({
+  imports: [Table],
+  template: `<app-table
+    [columns]="columns"
+    [params]="params"
+    [load]="load"
+    [texts]="texts"
+    [hideEditButtons]="!show()"
+    [pathIcon]="['search.svg', 'clear.svg', 'delete.svg', 'duplicate.svg', 'edit.svg']"
+    (deleteRow)="events.push('delete ' + $event.name)"
+    (duplicateRow)="events.push('duplicate ' + $event.name)"
+    (editRow)="events.push('edit ' + $event.name)"
+  />`,
+})
+class TableRowButtonsHost {
+  readonly show = signal(false);
+  readonly params = { day: '2026-09-30' };
+  readonly columns: TableColumn<Row>[] = [
+    { field: 'name', header: 'Nome' },
+    { field: 'total', header: 'Totale' },
+  ];
+  readonly texts = {
+    actions: { header: 'Azioni', delete: 'Elimina', duplicate: 'Duplica', edit: 'Modifica' },
+  };
+  readonly events: string[] = [];
   readonly load = (request: Filters & PageRequest) =>
     of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
 }

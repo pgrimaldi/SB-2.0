@@ -35,6 +35,12 @@
       "text": "In questo momento non riusciamo a fornire le informazioni richieste. Riprova e, se il problema persiste, contatta l'assistenza.",
       "close": "Chiudi",
       "retry": "Riprova"
+    },
+    "actions": {
+      "header": "Azioni",
+      "delete": "Elimina",
+      "duplicate": "Duplica",
+      "edit": "Modifica"
     }
   },
   "error": {
@@ -180,6 +186,26 @@
         "name": "Articoli",
         "total": "Totale",
         "available": "Disponibili"
+      }
+    },
+    "settings": {
+      "menu": {
+        "label": "Impostazioni",
+        "property": "Informazioni stabilimento",
+        "users": "Gestione utenti",
+        "seasons": "Stagioni e periodi",
+        "sectors": "Settori e file",
+        "map": "Configura mappa",
+        "warehouse": "Impostazioni magazzino",
+        "price_list": "Listino",
+        "services": "Servizi",
+        "discounts": "Sconti e voucher",
+        "sharing": "Sharing",
+        "online_bookings": "Prenotazioni online",
+        "fiscalization": "Fiscalizzazione",
+        "email": "Configurazione email",
+        "database": "Database",
+        "help": "Assistenza e guide"
       }
     }
   },

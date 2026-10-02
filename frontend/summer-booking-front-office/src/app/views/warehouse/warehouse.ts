@@ -33,6 +33,14 @@ export class Warehouse {
 
   /** A page of the table could not be loaded: shows the error popup. */
   protected readonly loadFailed = signal(false);
+  /** Icons of the table, in its order: [search magnifier, search X, delete, duplicate, edit]. */
+  protected readonly tableIcons = [
+    '/assets/images/search.svg',
+    '/assets/images/clear.svg',
+    '/assets/images/delete.svg',
+    '/assets/images/duplicate.svg',
+    '/assets/images/edit.svg',
+  ] as const;
   private readonly headers = toSignal(
     this.translateService.stream('management.warehouse.table') as Observable<WarehouseHeaders>,
     { initialValue: { name: '', total: '', available: '' } },

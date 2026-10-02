@@ -20,7 +20,9 @@ $motion: 525ms ease-in-out;
   padding-block: 0.3125rem 0.875rem;
   overflow: hidden;
   background: var(--color__white);
-  box-shadow: 0.375rem 0 1.25rem rgb(18 45 87 / 12%);
+  // The shadow of the management header, cast to the right: it marks the edge with the page or with
+  // the settings panel next to it.
+  box-shadow: 0.375rem 0 1.25rem rgb(18 45 87 / 18%);
 }
 
 // Page links at the top; the logout button is pushed to the bottom.

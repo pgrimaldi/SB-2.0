@@ -5,6 +5,7 @@ import {
   languageMatchGuard,
   redirectToPreferredLanguage,
 } from './behaviours/i18n/language.guards';
+import { SETTINGS_PAGES } from './views/settings/settings-pages';
 
 export const routes: Routes = [
   {
@@ -51,12 +52,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./views/warehouse/warehouse').then((component) => component.Warehouse),
       },
-      // Settings: side panel and, next to it, the settings pages (views/settings/<page>), which
-      // will be its `children`.
+      // Settings: side panel and, next to it, the settings pages (views/settings/<page>). Every page
+      // of the menu has its route already; it gets its `loadComponent` when the page is built.
       {
         path: 'settings',
         loadComponent: () =>
           import('./views/settings/settings').then((component) => component.Settings),
+        children: SETTINGS_PAGES.map(({ path }) => ({ path, children: [] })),
       },
     ],
   },

@@ -1,10 +1,40 @@
 @use '@angular/material' as mat;
 
-// Layout common to both looks; sizes and colours come from table-app-theme.scss and
-// table-default-theme.scss (`--table-header-height`, `--table-row-height`, `--table-paginator-height`).
+// Layout and sizes common to both looks, so that the table takes the same room in both; colours and
+// details of each look come from table-app-theme.scss and table-default-theme.scss. Rows 3rem high:
+// 10 rows and the paginator fit in one screen from 1280×720.
 :host {
+  --table-header-height: 3rem;
+  --table-row-height: 3rem;
+  --table-paginator-height: 3.5rem;
+
   display: flex;
   flex-direction: column;
+
+  @include mat.table-overrides(
+    (
+      background-color: var(--color__layout__surface),
+      header-container-height: var(--table-header-height),
+      header-headline-size: 0.875rem,
+      header-headline-line-height: 1.3125rem,
+      header-headline-tracking: normal,
+      row-item-container-height: var(--table-row-height),
+      row-item-label-text-size: 0.875rem,
+      row-item-label-text-line-height: 1.3125rem,
+      row-item-label-text-tracking: normal,
+      row-item-outline-width: 0,
+    )
+  );
+  @include mat.paginator-overrides(
+    (
+      container-size: var(--table-paginator-height),
+      container-background-color: var(--color__layout__surface),
+      container-text-color: var(--color__main__theme__one),
+      container-text-size: 0.875rem,
+      disabled-icon-color: var(--color__layout__muted),
+      select-trigger-text-size: 0.875rem,
+    )
+  );
 
   // Page size selector of the paginator: blue in both looks.
   @include mat.form-field-overrides(
@@ -41,10 +71,72 @@
 }
 
 // Column widths come only from the columns (`width`, or equal shares), never from the rows shown:
-// they stay the same on every page.
+// they stay the same on every page. A header never gets less than its room (the component fits the
+// columns): when the room of all of them is more than the screen, the rows scroll sideways inside
+// `.table`.
 .table__grid {
   width: 100%;
   table-layout: fixed;
+
+  // The sort arrow keeps its size in a narrow column (Material lets it shrink): the room of a header
+  // counts it whole.
+  ::ng-deep .mat-sort-header-arrow {
+    flex-shrink: 0;
+  }
+}
+
+// Buttons of every row, in the last column, on the right. Sizes follow the text of the rows (em), so
+// they grow with it on large screens; the soft blue of the icons is in the images (or the colour of
+// a Material icon). The column is as wide as the three buttons plus the side paddings of the cells,
+// which each look gives in `--table-actions-padding`.
+.table__actions {
+  width: calc(
+    6em + var(--table-actions-padding, 0rem)
+  ); // 3 buttons of 1.75em and 2 gaps of 0.375em
+  text-align: end;
+}
+
+// The header ("Azioni") centred over the buttons: the inside of the cell is as wide as the three buttons.
+.table__header .table__actions {
+  text-align: center;
+}
+
+.table__actions__buttons {
+  display: inline-flex;
+  vertical-align: middle;
+  gap: 0.375em;
+}
+
+.table__action {
+  display: grid;
+  width: 1.75em;
+  height: 1.75em;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color__layout__text__soft);
+  font: inherit; // the size of the row text, not the browser's size for buttons
+  cursor: pointer;
+
+  img {
+    width: 1.25em;
+    height: 1.25em;
+  }
+
+  mat-icon {
+    width: 1em;
+    height: 1em;
+    font-size: 1.25em;
+  }
+}
+
+// Under the mouse, the button about to be pressed (only where there is a mouse).
+@media (hover: hover) {
+  .table__action:hover {
+    background: var(--color__tertiary__theme);
+  }
 }
 
 // No rows from the server: the message in place of the rows.
@@ -59,4 +151,30 @@
   overflow: hidden;
   text-overflow: ellipsis; // a text longer than its column ends with "…" instead of widening it
   white-space: nowrap;
+}
+
+// Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
+// (4rem instead of 5.25rem) so that 10 rows and the paginator fit in a 1080p screen without scroll.
+@media (width >= 120rem) {
+  :host {
+    --table-header-height: 4rem;
+    --table-row-height: 4rem;
+
+    @include mat.table-overrides(
+      (
+        header-headline-size: 1.125rem,
+        header-headline-line-height: 1.5rem,
+        row-item-label-text-size: 1.125rem,
+        row-item-label-text-line-height: 1.5rem,
+      )
+    );
+  }
+}
+
+// Phone: lower rows.
+@media (width < 48rem) {
+  :host {
+    --table-header-height: 2.8125rem;
+    --table-row-height: 2.3125rem;
+  }
 }

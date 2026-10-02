@@ -1,39 +1,22 @@
 @use '@angular/material' as mat;
 
 // The app's look (`useAppTheme`): blue header, striped rows, rounded corners, columns aligned by
-// `align`. Rows 3rem high: 10 rows and the paginator fit in one screen from 1280×720.
+// `align`. Sizes are common to both looks (table.scss).
 :host(.table__theme__app) {
-  --table-header-height: 3rem;
-  --table-row-height: 3rem;
-  --table-paginator-height: 3.5rem;
+  // Side paddings of a cell, for the width of the column of the row buttons.
+  --table-actions-padding: 1.875rem;
 
   @include mat.table-overrides(
     (
-      background-color: var(--color__layout__surface),
-      header-container-height: var(--table-header-height),
       header-headline-color: var(--color__layout__on__main),
-      header-headline-size: 0.875rem,
-      header-headline-line-height: 1.3125rem,
       header-headline-weight: 500,
-      header-headline-tracking: normal,
-      row-item-container-height: var(--table-row-height),
       row-item-label-text-color: var(--color__main__theme__two),
-      row-item-label-text-size: 0.875rem,
-      row-item-label-text-line-height: 1.3125rem,
       row-item-label-text-weight: 500,
-      row-item-label-text-tracking: normal,
-      row-item-outline-width: 0,
     )
   );
   @include mat.paginator-overrides(
     (
-      container-size: var(--table-paginator-height),
-      container-background-color: var(--color__layout__surface),
-      container-text-color: var(--color__main__theme__one),
-      container-text-size: 0.875rem,
       enabled-icon-color: var(--color__main__theme__one),
-      disabled-icon-color: var(--color__layout__muted),
-      select-trigger-text-size: 0.875rem,
     )
   );
   @include mat.form-field-overrides(
@@ -82,21 +65,10 @@
   }
 }
 
-// Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
-// (4rem instead of 5.25rem) so that 10 rows and the paginator fit in a 1080p screen without scroll.
+// Large screens (from 1920px): wider spaces between the columns, as in the reference.
 @media (width >= 120rem) {
   :host(.table__theme__app) {
-    --table-header-height: 4rem;
-    --table-row-height: 4rem;
-
-    @include mat.table-overrides(
-      (
-        header-headline-size: 1.125rem,
-        header-headline-line-height: 1.5rem,
-        row-item-label-text-size: 1.125rem,
-        row-item-label-text-line-height: 1.5rem,
-      )
-    );
+    --table-actions-padding: 5rem;
 
     .table__cell {
       padding-inline: 3.125rem 1.875rem;
@@ -110,8 +82,7 @@
 
 @media (width < 48rem) {
   :host(.table__theme__app) {
-    --table-header-height: 2.8125rem;
-    --table-row-height: 2.3125rem;
+    --table-actions-padding: 1rem;
 
     .table__cell,
     .table__cell:first-child {

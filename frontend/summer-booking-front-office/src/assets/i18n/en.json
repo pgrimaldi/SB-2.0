@@ -35,6 +35,12 @@
       "text": "We can't provide the requested information right now. Please try again and, if the problem persists, contact support.",
       "close": "Close",
       "retry": "Try again"
+    },
+    "actions": {
+      "header": "Actions",
+      "delete": "Delete",
+      "duplicate": "Duplicate",
+      "edit": "Edit"
     }
   },
   "error": {
@@ -180,6 +186,26 @@
         "name": "Items",
         "total": "Total",
         "available": "Available"
+      }
+    },
+    "settings": {
+      "menu": {
+        "label": "Settings",
+        "property": "Property information",
+        "users": "User management",
+        "seasons": "Seasons and periods",
+        "sectors": "Sectors and rows",
+        "map": "Map setup",
+        "warehouse": "Warehouse settings",
+        "price_list": "Price list",
+        "services": "Services",
+        "discounts": "Discounts and vouchers",
+        "sharing": "Sharing",
+        "online_bookings": "Online bookings",
+        "fiscalization": "Fiscalization",
+        "email": "Email setup",
+        "database": "Database",
+        "help": "Help and guides"
       }
     }
   },
