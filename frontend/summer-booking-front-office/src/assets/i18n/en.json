@@ -218,7 +218,17 @@
       },
       "warehouse": {
         "title": "Warehouse settings",
-        "create": "Add item"
+        "create": "Add item",
+        "form": {
+          "title": "Add item",
+          "close": "Close",
+          "name": "Item",
+          "quantity": "Enter the quantity",
+          "threshold": "Threshold",
+          "threshold_alert": "Enable threshold alert",
+          "cancel": "Cancel",
+          "add": "Add"
+        }
       }
     }
   },

@@ -18,8 +18,11 @@
     [createLabel]="'management.settings.warehouse.create' | translate"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
+    (create)="adding.set(true)"
   />
 </main>
+
+<app-form-warehouse-item-popup [(open)]="adding" />
 
 <app-table-error-popup
   [title]="'table.load_error.title' | translate"

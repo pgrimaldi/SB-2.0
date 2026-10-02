@@ -1,0 +1,14 @@
+@use '../filled-field' as field;
+
+@include field.filled-field(filled__number__field);
+
+// No up and down arrows of the browser: the grey field of the mockup is plain.
+input {
+  appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+}

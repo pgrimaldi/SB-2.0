@@ -218,7 +218,17 @@
       },
       "warehouse": {
         "title": "Impostazioni magazzino",
-        "create": "Aggiungi articolo"
+        "create": "Aggiungi articolo",
+        "form": {
+          "title": "Aggiungi articolo",
+          "close": "Chiudi",
+          "name": "Articolo",
+          "quantity": "Immettere la quantità",
+          "threshold": "Soglia",
+          "threshold_alert": "Abilita avviso di soglia",
+          "cancel": "Annulla",
+          "add": "Aggiungi"
+        }
       }
     }
   },

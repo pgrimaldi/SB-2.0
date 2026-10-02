@@ -8,6 +8,7 @@ import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
+import { FormWarehouseItemPopup } from '../../../components/management/settings/warehouse-setting/form-warehouse-item-popup/form-warehouse-item-popup';
 
 /** Group `management.warehouse.table` of the translations: the column headers used here. */
 interface WarehouseSettingsHeaders {
@@ -22,7 +23,7 @@ interface WarehouseSettingsHeaders {
  */
 @Component({
   selector: 'app-warehouse-setting',
-  imports: [PageTitle, Table, TableErrorPopup, TranslatePipe],
+  imports: [FormWarehouseItemPopup, PageTitle, Table, TableErrorPopup, TranslatePipe],
   templateUrl: './warehouse-setting.html',
   styleUrl: './warehouse-setting.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +35,8 @@ export class WarehouseSetting {
 
   /** A page of the table could not be loaded: shows the error popup. */
   protected readonly loadFailed = signal(false);
+  /** The create button was pressed: shows the popup to add an article. */
+  protected readonly adding = signal(false);
   /** Icon of the page title: the warehouse of the menu, in the main blue. */
   protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
   /**

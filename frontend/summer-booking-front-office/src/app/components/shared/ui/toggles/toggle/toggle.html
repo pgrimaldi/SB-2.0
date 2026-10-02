@@ -1,0 +1,8 @@
+<mat-slide-toggle
+  class="toggle"
+  hideIcon
+  [name]="name() ?? null"
+  [checked]="checked()"
+  (change)="checked.set($event.checked)"
+  ><ng-content
+/></mat-slide-toggle>

@@ -1,0 +1,55 @@
+@use '@angular/material' as mat;
+
+// Small switch of the designer's mockup (02/10/2026): a pill 1.875rem × 0.875rem, grey when off with a
+// light knob on the left, blue when on with a white knob on the right; label in soft blue beside it.
+:host {
+  display: inline-flex;
+
+  @include mat.slide-toggle-overrides(
+    (
+      track-width: 1.875rem,
+      track-height: 0.875rem,
+      track-shape: 0.4375rem,
+      track-outline-width: 0,
+      selected-track-outline-width: 0,
+      handle-width: 0.875rem,
+      handle-height: 0.875rem,
+      unselected-handle-size: 0.875rem,
+      selected-handle-size: 0.875rem,
+      pressed-handle-size: 0.875rem,
+      unselected-handle-horizontal-margin: 0,
+      unselected-pressed-handle-horizontal-margin: 0,
+      selected-handle-horizontal-margin: 0,
+      selected-pressed-handle-horizontal-margin: 0,
+      handle-elevation-shadow: 0 0 0 0.0625rem rgb(0 0 0 / 12%),
+      unselected-track-color: #bcbcbc,
+      unselected-hover-track-color: #bcbcbc,
+      unselected-focus-track-color: #bcbcbc,
+      unselected-pressed-track-color: #bcbcbc,
+      unselected-handle-color: var(--color__tertiary__theme),
+      unselected-hover-handle-color: var(--color__tertiary__theme),
+      unselected-focus-handle-color: var(--color__tertiary__theme),
+      unselected-pressed-handle-color: var(--color__tertiary__theme),
+      selected-track-color: var(--color__main__theme__one),
+      selected-hover-track-color: var(--color__main__theme__one),
+      selected-focus-track-color: var(--color__main__theme__one),
+      selected-pressed-track-color: var(--color__main__theme__one),
+      selected-handle-color: var(--color__white),
+      selected-hover-handle-color: var(--color__white),
+      selected-focus-handle-color: var(--color__white),
+      selected-pressed-handle-color: var(--color__white),
+      state-layer-size: 1.5rem,
+      touch-target-display: none,
+      label-text-color: var(--color__layout__text__soft),
+      label-text-size: 0.75rem,
+      label-text-line-height: 1rem,
+      label-text-tracking: normal,
+      label-text-weight: 600,
+    )
+  );
+}
+
+// Space between the switch and its label.
+.toggle ::ng-deep label {
+  padding-left: 0.625rem;
+}

@@ -1,0 +1,43 @@
+<ng-template #content>
+  <div class="form__warehouse__item__popup">
+    <h2 class="form__warehouse__item__popup__title" [id]="id + '-title'">
+      {{ 'management.settings.warehouse.form.title' | translate }}
+    </h2>
+    <button
+      class="form__warehouse__item__popup__close"
+      type="button"
+      [attr.aria-label]="'management.settings.warehouse.form.close' | translate"
+      (click)="close()"
+    >
+      <img [src]="closeIcon" width="12" height="12" alt="" />
+    </button>
+
+    <div class="form__warehouse__item__popup__fields">
+      <app-filled-text-field
+        [label]="'management.settings.warehouse.form.name' | translate"
+        [maxLength]="500"
+        [(value)]="name"
+      />
+      <app-filled-number-field
+        [label]="'management.settings.warehouse.form.quantity' | translate"
+        [(value)]="quantity"
+      />
+      <app-filled-number-field
+        [label]="'management.settings.warehouse.form.threshold' | translate"
+        [(value)]="threshold"
+      />
+      <app-toggle [(checked)]="thresholdAlert">
+        {{ 'management.settings.warehouse.form.threshold_alert' | translate }}
+      </app-toggle>
+    </div>
+
+    <div class="form__warehouse__item__popup__buttons">
+      <app-button appearance="light" size="small" [fullWidth]="true" (clicked)="close()">
+        {{ 'management.settings.warehouse.form.cancel' | translate }}
+      </app-button>
+      <app-button size="small" [fullWidth]="true">
+        {{ 'management.settings.warehouse.form.add' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

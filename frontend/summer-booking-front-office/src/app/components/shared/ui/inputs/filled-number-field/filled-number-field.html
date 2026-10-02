@@ -1,0 +1,13 @@
+<label class="filled__number__field__label" [for]="id">{{ label() }}</label>
+<mat-form-field class="filled__number__field__control" appearance="fill" subscriptSizing="dynamic">
+  <input
+    #field
+    matInput
+    type="number"
+    inputmode="decimal"
+    [id]="id"
+    [value]="value() ?? ''"
+    [attr.name]="name() ?? null"
+    (input)="changeValue(field.value)"
+  />
+</mat-form-field>

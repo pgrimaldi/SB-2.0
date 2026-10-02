@@ -1,5 +1,9 @@
 @use '@angular/material' as mat;
 
+// Some things can be changed from outside with CSS variables, e.g. in a popup with smaller buttons:
+// --button-text-size (0.9375rem), --button-height (the height of the size, border included: it makes a
+// light button as high as a filled one) and, for the light appearance, --button-border-color (the
+// border grey of the theme).
 :host {
   display: inline-flex;
 
@@ -34,7 +38,7 @@ button {
   );
 
   button {
-    border: 0.0625rem solid var(--color__layout__border);
+    border: 0.0625rem solid var(--button-border-color, var(--color__layout__border));
   }
 }
 
@@ -42,7 +46,7 @@ button {
 :host(.button__light.button__small) {
   @include mat.button-overrides(
     (
-      filled-container-height: 1.875rem,
+      filled-container-height: var(--button-height, 1.875rem),
     )
   );
 }
@@ -50,7 +54,7 @@ button {
 :host(.button__light.button__large) {
   @include mat.button-overrides(
     (
-      filled-container-height: 3rem,
+      filled-container-height: var(--button-height, 3rem),
     )
   );
 }
@@ -58,7 +62,7 @@ button {
 :host(.button__light.button__extralarge) {
   @include mat.button-overrides(
     (
-      filled-container-height: 3.875rem,
+      filled-container-height: var(--button-height, 3.875rem),
     )
   );
 }
@@ -69,10 +73,10 @@ button {
 :host(.button__extralarge) {
   @include mat.button-overrides(
     (
-      filled-label-text-size: 0.9375rem,
+      filled-label-text-size: var(--button-text-size, 0.9375rem),
       filled-label-text-weight: 500,
       filled-label-text-tracking: normal,
-      text-label-text-size: 0.9375rem,
+      text-label-text-size: var(--button-text-size, 0.9375rem),
       text-label-text-weight: 500,
       text-label-text-tracking: normal,
     )
@@ -82,9 +86,9 @@ button {
 :host(.button__small) {
   @include mat.button-overrides(
     (
-      filled-container-height: 1.75rem,
+      filled-container-height: var(--button-height, 1.75rem),
       filled-horizontal-padding: 2.5rem,
-      text-container-height: 1.75rem,
+      text-container-height: var(--button-height, 1.75rem),
       text-horizontal-padding: 2.5rem,
     )
   );
@@ -93,9 +97,9 @@ button {
 :host(.button__medium) {
   @include mat.button-overrides(
     (
-      filled-container-height: 2rem,
+      filled-container-height: var(--button-height, 2rem),
       filled-horizontal-padding: 2.5rem,
-      text-container-height: 2rem,
+      text-container-height: var(--button-height, 2rem),
       text-horizontal-padding: 2.5rem,
     )
   );
@@ -104,9 +108,9 @@ button {
 :host(.button__large) {
   @include mat.button-overrides(
     (
-      filled-container-height: 2.875rem,
+      filled-container-height: var(--button-height, 2.875rem),
       filled-horizontal-padding: 3rem,
-      text-container-height: 2.875rem,
+      text-container-height: var(--button-height, 2.875rem),
       text-horizontal-padding: 3rem,
     )
   );
@@ -115,9 +119,9 @@ button {
 :host(.button__extralarge) {
   @include mat.button-overrides(
     (
-      filled-container-height: 3.75rem,
+      filled-container-height: var(--button-height, 3.75rem),
       filled-horizontal-padding: 3rem,
-      text-container-height: 3.75rem,
+      text-container-height: var(--button-height, 3.75rem),
       text-horizontal-padding: 3rem,
     )
   );
