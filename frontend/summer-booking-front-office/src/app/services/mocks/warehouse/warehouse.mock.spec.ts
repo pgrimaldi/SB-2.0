@@ -137,6 +137,29 @@ describe('warehouseMock', () => {
     expect(byTotal.total).toBe(12);
   });
 
+  it('should sort by threshold, with the thresholds not set first ascending and last descending', async () => {
+    const warehouse = await service();
+    const request = { ...MANAGEMENT, search: '', sortField: 'thresholdNumber' };
+    const ascending = await firstValueFrom(
+      warehouse.list({ ...request, page: 1, pageSize: 3, sortDirection: 'Ascending' }),
+    );
+    const descending = await firstValueFrom(
+      warehouse.list({ ...request, page: 1, pageSize: 12, sortDirection: 'Descending' }),
+    );
+
+    expect(ascending.rows.map((item) => [item.name, item.thresholdNumber])).toEqual([
+      ['Doccia', null],
+      ['Parcheggio', null],
+      ['Tavolino', null],
+    ]);
+    expect(descending.rows.slice(0, 2).map((item) => item.thresholdNumber)).toEqual([5, 4]);
+    expect(descending.rows.slice(-3).map((item) => item.thresholdNumber)).toEqual([
+      null,
+      null,
+      null,
+    ]);
+  });
+
   it('should answer only the articles of the requested property, none for an unknown one', async () => {
     const warehouse = await service();
     const other = await firstValueFrom(

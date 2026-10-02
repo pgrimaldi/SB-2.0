@@ -1,30 +1,4 @@
-// Centered table, at least 1rem from the edges: it shrinks when the page does (e.g. menu open).
-// No margin under the table: its paginator ends the page, so on long pages the place where it stops
-// at the end is the same where it stays while scrolling (bottom of the screen) and it never moves.
-.warehouse {
-  width: min(100% - 2rem, 69.375rem);
-  margin-inline: auto;
-  padding-top: 4.125rem;
-}
+@use '../../../styles/table-page' as page;
 
-// The page title, above the table.
-.warehouse__title {
-  margin-bottom: 1rem;
-}
-
-// Desktop: small margins so that the page (10 rows and the paginator) fits in one screen from 1280×720.
-@media (width >= 64rem) {
-  .warehouse {
-    padding-top: 2rem;
-  }
-}
-
-// Large screens (from 1920px): wider table, as in the reference; a small margin on top so that the
-// page (search, 10 rows and the paginator) fits without scroll in a 1080p screen, where the browser
-// and the taskbar leave about 880-930px: the page ends at 884px.
-@media (width >= 120rem) {
-  .warehouse {
-    width: min(100% - 2rem, 95.125rem);
-    padding-top: 1rem;
-  }
-}
+// Title and table: the layout shared by the pages with a table.
+@include page.table-page(warehouse__setting);

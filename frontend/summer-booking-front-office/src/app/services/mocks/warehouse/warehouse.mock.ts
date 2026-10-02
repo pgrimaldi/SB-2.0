@@ -60,7 +60,7 @@ const INVENTORY_ITEMS = [
     propertyId: 1,
     name: 'Doccia',
     totalQuantity: 8,
-    lowStockThreshold: 1,
+    lowStockThreshold: null,
     isActive: true,
     deletedAt: null,
   },
@@ -80,7 +80,7 @@ const INVENTORY_ITEMS = [
     propertyId: 1,
     name: 'Parcheggio',
     totalQuantity: 35,
-    lowStockThreshold: 3,
+    lowStockThreshold: null,
     isActive: true,
     deletedAt: null,
   },
@@ -130,7 +130,7 @@ const INVENTORY_ITEMS = [
     propertyId: 1,
     name: 'Tavolino',
     totalQuantity: 25,
-    lowStockThreshold: 2,
+    lowStockThreshold: null,
     isActive: true,
     deletedAt: null,
   },
@@ -241,10 +241,16 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 };
 
 /** Fields of an article the list can be sorted by. */
-const SORT_FIELDS = ['name', 'total', 'available'] as const;
+const SORT_FIELDS = ['name', 'total', 'available', 'thresholdNumber'] as const;
 
-/** Numbers by value, texts alphabetically (Italian rules, ignoring case). */
-function compare(first: string | number, second: string | number): number {
+/**
+ * Numbers by value, texts alphabetically (Italian rules, ignoring case). A missing value (a threshold
+ * not set) comes before the others, as in SQL Server: first ascending, last descending.
+ */
+function compare(first: string | number | null, second: string | number | null): number {
+  if (first === null || second === null) {
+    return first === second ? 0 : first === null ? -1 : 1;
+  }
   return typeof first === 'number' && typeof second === 'number'
     ? first - second
     : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });

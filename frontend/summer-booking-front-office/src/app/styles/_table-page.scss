@@ -1,0 +1,39 @@
+// Layout of the app pages made of a title and an `app-table` (e.g. Magazzino, Impostazioni magazzino):
+// how much room the page gives the table. It belongs to the app, not to the component library: the
+// spaces follow our header, our menu and the screens we fit (1280×720, 1080p).
+// Usage, in the page stylesheet: `@include page.table-page(warehouse);` for `.warehouse` (the
+// `<main>`) and `.warehouse__title` (its `app-page-title`).
+@mixin table-page($block) {
+  // Centered table, at least 1rem from the edges: it shrinks when the page does (e.g. menu open).
+  // No margin under the table: its paginator ends the page, so on long pages the place where it
+  // stops at the end is the same where it stays while scrolling (bottom of the screen) and it never
+  // moves.
+  .#{$block} {
+    width: min(100% - 2rem, 69.375rem);
+    margin-inline: auto;
+    padding-top: 4.125rem;
+  }
+
+  // The page title, above the table.
+  .#{$block}__title {
+    margin-bottom: 1rem;
+  }
+
+  // Desktop: small margins so that the page (10 rows and the paginator) fits in one screen from
+  // 1280×720.
+  @media (width >= 64rem) {
+    .#{$block} {
+      padding-top: 2rem;
+    }
+  }
+
+  // Large screens (from 1920px): wider table, as in the reference; a small margin on top so that the
+  // page fits without scroll in a 1080p screen, where the browser and the taskbar leave about
+  // 880-930px.
+  @media (width >= 120rem) {
+    .#{$block} {
+      width: min(100% - 2rem, 95.125rem);
+      padding-top: 1rem;
+    }
+  }
+}
