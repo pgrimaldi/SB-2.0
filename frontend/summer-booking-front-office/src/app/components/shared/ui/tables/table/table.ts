@@ -30,6 +30,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable, catchError, of, switchMap } from 'rxjs';
 import { DATA_RELOAD } from '../../../data/data-reload';
+import { SelectionCheckbox } from '../../checkboxes/selection-checkbox/selection-checkbox';
 import { resolveIcons } from '../../icons/icons';
 import { SearchField, SearchFieldTexts } from '../../inputs/search-field/search-field';
 import { FormatTextPipe } from '../../texts/format-text';
@@ -80,6 +81,19 @@ export interface TableRowActionTexts {
   edit?: string;
 }
 
+/**
+ * Names of the checkboxes of the rows and names (and tooltips) of the buttons acting on the chosen
+ * rows (unless `hideMassiveActions`).
+ */
+export interface TableSelectionTexts {
+  /** Checkbox of the header: all the rows of the page (e.g. "Scegli tutte le righe della pagina"). */
+  all?: string;
+  /** Checkbox of a row (e.g. "Scegli la riga"). */
+  row?: string;
+  duplicate?: string;
+  delete?: string;
+}
+
 /** Texts of the `app-table` sorting. */
 export interface TableSortTexts {
   /** Description of a sortable header for screen readers, with `{{column}}` (e.g. "Ordina per {{column}}"). */
@@ -96,8 +110,10 @@ export interface TableTexts {
   paginator?: TablePaginatorTexts;
   search?: TableSearchTexts;
   sort?: TableSortTexts;
-  /** The buttons on every row (`hideEditButtons` false). */
+  /** The buttons on every row (unless `hideEditButtons`). */
   actions?: TableRowActionTexts;
+  /** The checkboxes of the rows and the buttons on the chosen rows (unless `hideMassiveActions`). */
+  selection?: TableSelectionTexts;
 }
 
 /** Rows in a page when `pageSize` is not given: the standard of every table. */
@@ -140,6 +156,10 @@ export type TableLoad<P, T> = (request: P & TablePageRequest) => Observable<Tabl
 const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
 /** Id of the last column, with the buttons of the row: not a field, so it never meets a column of the rows. */
 const ROW_ACTIONS_COLUMN = 'table__row__actions';
+/** Id of the first column, with the checkboxes of the rows (not a field either). */
+const SELECT_COLUMN = 'table__row__select';
+/** Numbers the tables of the page, for the id of their title. */
+let nextTableId = 0;
 
 /**
  * Generic table (Angular Material table) that loads its rows page by page by itself:
@@ -149,11 +169,18 @@ const ROW_ACTIONS_COLUMN = 'table__row__actions';
  * - `load`: the function that asks a page, e.g. an API of a service;
  * - `params`: what that function needs besides the page (e.g. filters); `null` loads nothing.
  * Headers and texts (`texts`, see `TableTexts`) arrive already translated.
- * Above the rows an optional bar: icon buttons marked `appTableIconAction`, the search (`searchable`,
- * sent to `load` as `search`) and text buttons marked `appTableTextAction`; each part shows only
- * when it is used. With `hideEditButtons` false, the last column has the buttons of every row: delete,
- * duplicate and edit (`deleteRow`, `duplicateRow`, `editRow`, with the row).
- * Icons (see `Icons`): [search magnifier, search X, delete, duplicate, edit].
+ * The base table shows everything; each table hides what it does not need (`hideCreateButton`,
+ * `hideMassiveActions`, `hideEditButtons`).
+ * On top a row with, on the left, the `title` (and its icon, usually the one of the section) and the
+ * search (`searchable`, sent to `load` as `search`) and, on the right, the create button
+ * (`createLabel`, emits `create`).
+ * Under it, above the rows, a bar: icon buttons marked `appTableIconAction` on the left and text
+ * buttons marked `appTableTextAction` on the right; each part shows only when it is used. The first column has a checkbox on every row (and one in the header for the whole page) and,
+ * when more than one row is chosen, the bar shows the buttons duplicate and delete of the chosen rows
+ * (`duplicateSelected`, `deleteSelected`, with the rows). The last column has the buttons of every
+ * row: delete, duplicate and edit (`deleteRow`, `duplicateRow`, `editRow`, with the row).
+ * Icons (see `Icons`): [search magnifier, search X, delete, duplicate, edit, duplicate chosen,
+ * delete chosen, create, title].
  * Columns with `sortable` sort on a click of their header (sent to `load` as `sortField` and
  * `sortDirection`). Two looks: the default one (clean, minimal) and, with `useAppTheme`, the app's one.
  * The paginator, under the rows, has a page size selector (`pageSizeOptions`, 10 by default): with
@@ -172,6 +199,7 @@ const ROW_ACTIONS_COLUMN = 'table__row__actions';
     MatTableModule,
     MatTooltipModule,
     SearchField,
+    SelectionCheckbox,
   ],
   providers: [TablePaginatorIntl, { provide: MatPaginatorIntl, useExisting: TablePaginatorIntl }],
   templateUrl: './table.html',
@@ -198,24 +226,35 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Choices of the page size selector. */
   readonly pageSizeOptions = input<readonly number[]>(TABLE_PAGE_SIZE_OPTIONS);
   readonly texts = input<TableTexts | null>();
+  /** Title above the table, already translated (e.g. "Impostazioni magazzino"); without it, no title. */
+  readonly title = input<string>();
+  /** Text of the create button, already translated (e.g. "Aggiungi articolo"). */
+  readonly createLabel = input<string>();
   /**
    * The app's look (blue header, striped rows, rounded corners, `align` of the columns) instead of the
    * default one (clean and minimal: blue texts on white, a line under the header, everything on the
-   * left, only the page number between the arrows).
+   * left, the rows shown out of the total between the arrows of the paginator).
    */
   readonly useAppTheme = input(false);
-  /** Shows the search in the bar above the rows. */
+  /** Shows the search in the title row, on the left (after the title). */
   readonly searchable = input(false);
-  /** Hides the buttons of every row (delete, duplicate, edit): with `false` they are in the last column. */
-  readonly hideEditButtons = input(true);
+  /** Hides the buttons of every row (delete, duplicate, edit), shown by default in the last column. */
+  readonly hideEditButtons = input(false);
   /**
-   * Icons as Material icon names (Material Symbols font):
-   * [search magnifier, search X, delete, duplicate, edit].
+   * Hides the checkboxes of the rows and the buttons on the chosen rows (duplicate, delete), shown by
+   * default: the checkboxes in the first column, the buttons in the bar above the rows.
+   */
+  readonly hideMassiveActions = input(false);
+  /** Hides the create button, shown by default on the right of the title row. */
+  readonly hideCreateButton = input(false);
+  /**
+   * Icons as Material icon names (Material Symbols font): [search magnifier, search X, delete,
+   * duplicate, edit, duplicate chosen, delete chosen, create, title].
    */
   readonly matIcon = input<readonly string[] | null>();
   /**
-   * Icons as image paths, used when `matIcon` is not given:
-   * [search magnifier, search X, delete, duplicate, edit].
+   * Icons as image paths, used when `matIcon` is not given: [search magnifier, search X, delete,
+   * duplicate, edit, duplicate chosen, delete chosen, create, title].
    */
   readonly pathIcon = input<readonly string[] | null>();
   /** A page could not be loaded; the table shows no rows meanwhile. */
@@ -226,6 +265,12 @@ export class Table<T, P extends object> implements OnDestroy {
   readonly duplicateRow = output<T>();
   /** The edit button of a row was pressed: the row. */
   readonly editRow = output<T>();
+  /** The duplicate button of the chosen rows was pressed: the chosen rows, in page order. */
+  readonly duplicateSelected = output<T[]>();
+  /** The delete button of the chosen rows was pressed: the chosen rows, in page order. */
+  readonly deleteSelected = output<T[]>();
+  /** The create button was pressed. */
+  readonly create = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
@@ -240,9 +285,15 @@ export class Table<T, P extends object> implements OnDestroy {
   private readonly textActions = contentChildren(TableTextAction);
   protected readonly hasIconActions = computed(() => this.iconActions().length > 0);
   protected readonly hasTextActions = computed(() => this.textActions().length > 0);
-  protected readonly hasBar = computed(
-    () => this.hasIconActions() || this.searchable() || this.hasTextActions(),
+  /** Left part of the bar: the buttons on the chosen rows and the icon buttons of the page. */
+  protected readonly hasIconZone = computed(
+    () => !this.hideMassiveActions() || this.hasIconActions(),
   );
+  protected readonly hasBar = computed(() => this.hasIconZone() || this.hasTextActions());
+  protected readonly hasHeading = computed(
+    () => !!this.title() || this.searchable() || !this.hideCreateButton(),
+  );
+  protected readonly titleId = `table__title__${nextTableId++}`;
 
   /** Searched text, from the search field (0.5 s after the last key, '' under 3 characters). */
   protected readonly search = signal('');
@@ -303,18 +354,35 @@ export class Table<T, P extends object> implements OnDestroy {
   );
 
   protected readonly rows = computed(() => this.result().rows);
+  /** Chosen rows of the page; none again whenever a page arrives (other page, search, sorting…). */
+  protected readonly selected = linkedSignal<readonly T[], ReadonlySet<T>>({
+    source: this.rows,
+    computation: () => new Set<T>(),
+  });
+  /** The chosen rows, in page order. */
+  protected readonly selectedRows = computed(() =>
+    this.rows().filter((row) => this.selected().has(row)),
+  );
+  protected readonly allSelected = computed(
+    () => this.rows().length > 0 && this.selectedRows().length === this.rows().length,
+  );
+  protected readonly someSelected = computed(
+    () => this.selectedRows().length > 0 && !this.allSelected(),
+  );
   /**
    * The server answered with no rows. `NO_ROWS` is never an answer (before the first one, after an
    * error, without params), so nothing is said while loading or when the request failed.
    */
   protected readonly empty = computed(() => this.result() !== NO_ROWS && this.rows().length === 0);
   protected readonly total = computed(() => this.result().total);
-  /** Fields of the columns and, with the row buttons, their column at the end. */
+  /** Fields of the columns, with the checkboxes first and the row buttons at the end when shown. */
   protected readonly fields = computed(() => [
+    ...(this.hideMassiveActions() ? [] : [SELECT_COLUMN]),
     ...this.columns().map((column) => column.field),
     ...(this.hideEditButtons() ? [] : [ROW_ACTIONS_COLUMN]),
   ]);
   protected readonly rowActionsColumn = ROW_ACTIONS_COLUMN;
+  protected readonly selectColumn = SELECT_COLUMN;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   /** Width of every column header: the share of the column (`width`), or its fitted width. */
   protected readonly headerWidths = computed(() => {
@@ -336,8 +404,8 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly paginated = computed(() => this.total() > this.reservedRows());
 
   constructor() {
-    // The paginator texts follow the given texts and the look.
-    effect(() => this.paginatorIntl.setTexts(this.texts()?.paginator, !this.useAppTheme()));
+    // The paginator texts follow the given texts.
+    effect(() => this.paginatorIntl.setTexts(this.texts()?.paginator));
     // Every column has at least the room of its header (title and sort arrow): on small screens the
     // other columns give up room and, when there is none left, the rows scroll sideways inside the
     // table instead of overlapping.
@@ -376,42 +444,63 @@ export class Table<T, P extends object> implements OnDestroy {
     this.sort.set(sort.direction ? sort : null);
   }
 
+  /** The checkbox of the header: all the rows of the page, or none. */
+  protected selectAll(checked: boolean): void {
+    this.selected.set(new Set(checked ? this.rows() : []));
+  }
+
+  /** The checkbox of a row. */
+  protected selectRow(row: T, checked: boolean): void {
+    const selected = new Set(this.selected());
+    if (checked) {
+      selected.add(row);
+    } else {
+      selected.delete(row);
+    }
+    this.selected.set(selected);
+  }
+
   /**
    * Widths of the columns that give every header its room, or null when the shares already do:
    * `width` columns take their percentage of the table, the others share equally what is left after
-   * them and after the column of the row buttons. A column without room keeps just its room; the
-   * others share what is left by their shares, and the table grows (scrolling) when nothing is left.
+   * them and after the columns of the checkboxes and of the row buttons. A column without room keeps
+   * just its room; the others share what is left by their shares, and the table grows (scrolling)
+   * when nothing is left.
    */
   private fitColumns(): readonly number[] | null {
     this.layoutChanges();
     const columns = this.columns();
-    const showsButtons = !this.hideEditButtons();
+    const first = this.hideMassiveActions() ? 0 : 1; // the checkboxes come before the columns
+    const others = first + (this.hideEditButtons() ? 0 : 1);
     this.useAppTheme(); // paddings and font weight of the headers depend on the look
     const grid = this.grid().nativeElement;
     const headers = [...grid.querySelectorAll<HTMLElement>('thead th')];
     const available = grid.parentElement?.clientWidth ?? 0;
     // Not laid out (hidden, or no layout at all): nothing to fit yet.
-    if (!available || headers.length < columns.length + (showsButtons ? 1 : 0)) {
+    if (!available || headers.length < columns.length + others) {
       return null;
     }
-    const buttons = showsButtons ? headers[columns.length].getBoundingClientRect().width : 0;
+    // Columns of checkboxes and row buttons: their own fixed widths.
+    const fixed = headers
+      .filter((_, index) => index < first || index >= first + columns.length)
+      .reduce((sum, header) => sum + header.getBoundingClientRect().width, 0);
     const rooms = columns.map((column, index) =>
-      this.headerRoom(headers[index], column.header, !!column.sortable),
+      this.headerRoom(headers[first + index], column.header, !!column.sortable),
     );
     const shared = 1 - columns.reduce((sum, column) => sum + (column.width ?? 0), 0) / 100;
     const sharing = columns.filter((column) => !column.width).length;
     const shares = columns.map((column) => (column.width ? column.width / 100 : shared / sharing));
     const natural = columns.map((column) =>
-      column.width ? (available * column.width) / 100 : (available * shared - buttons) / sharing,
+      column.width ? (available * column.width) / 100 : (available * shared - fixed) / sharing,
     );
     if (natural.every((width, index) => width >= rooms[index])) {
       return null;
     }
-    const width = Math.max(available, buttons + rooms.reduce((sum, room) => sum + room, 0));
+    const width = Math.max(available, fixed + rooms.reduce((sum, room) => sum + room, 0));
     const kept = new Set<number>();
     for (;;) {
       const free = shares.map((_, index) => index).filter((index) => !kept.has(index));
-      const space = width - buttons - [...kept].reduce((sum, index) => sum + rooms[index], 0);
+      const space = width - fixed - [...kept].reduce((sum, index) => sum + rooms[index], 0);
       const weight = free.reduce((sum, index) => sum + shares[index], 0);
       const widths = rooms.map((room, index) =>
         kept.has(index)

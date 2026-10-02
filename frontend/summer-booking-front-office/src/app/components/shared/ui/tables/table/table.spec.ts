@@ -33,6 +33,9 @@ const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
     [(pageSize)]="pageSize"
     [texts]="texts"
     [useAppTheme]="true"
+    [hideCreateButton]="true"
+    [hideMassiveActions]="true"
+    [hideEditButtons]="true"
     (loadError)="errors.push($event)"
   />`,
 })
@@ -330,6 +333,9 @@ describe('Table', () => {
     [load]="load"
     [texts]="texts"
     [searchable]="true"
+    [hideCreateButton]="true"
+    [hideMassiveActions]="true"
+    [hideEditButtons]="true"
     [pathIcon]="['/search.svg', '/clear.svg']"
   >
     <button appTableIconAction type="button" class="delete">Elimina</button>
@@ -466,20 +472,18 @@ describe('Table bar', () => {
     return { fixture, host: fixture.componentInstance, element };
   };
 
-  it('should place icon actions, search and text actions in this order', () => {
+  it('should put the search in the title row and the actions in the bar under it', () => {
     const { element } = setup();
 
     const parts = [...element.querySelector('.table__bar')!.children].map((part) => part.className);
+    expect(parts.length).toBe(2);
     expect(parts[0]).toContain('table__bar__icons');
-    expect(parts[1]).toContain('table__bar__search');
-    expect(parts[2]).toContain('table__bar__buttons');
+    expect(parts[1]).toContain('table__bar__buttons');
     expect(element.querySelector('.table__bar__icons .delete')).not.toBeNull();
     expect(element.querySelector('.table__bar__buttons .export')).not.toBeNull();
-    const input = element.querySelector<HTMLInputElement>('.table__bar__search input')!;
+    const input = element.querySelector<HTMLInputElement>('.table__heading .table__search input')!;
     expect(input.placeholder).toBe('Cerca nella tabella');
-    expect(element.querySelector('.table__bar__search img')?.getAttribute('src')).toBe(
-      '/search.svg',
-    );
+    expect(element.querySelector('.table__search img')?.getAttribute('src')).toBe('/search.svg');
   });
 
   it('should send the search with the request and go back to page 1', () => {
@@ -495,7 +499,7 @@ describe('Table bar', () => {
       sortDirection: 'Ascending',
     });
 
-    const input = element.querySelector<HTMLInputElement>('.table__bar__search input')!;
+    const input = element.querySelector<HTMLInputElement>('.table__search input')!;
     input.value = 'Row 2';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -516,7 +520,7 @@ describe('Table bar', () => {
 });
 
 describe('Table default look', () => {
-  it('should put everything on the left and show only the page number in the paginator', async () => {
+  it('should put everything on the left and show the rows out of the total in the paginator', async () => {
     TestBed.configureTestingModule({
       providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
     });
@@ -527,13 +531,23 @@ describe('Table default look', () => {
     expect(element.querySelector('app-table')?.className).toContain('table__theme__default');
     const cells = [...element.querySelectorAll<HTMLElement>('thead th, tbody tr:first-child td')];
     expect(cells.map((cell) => cell.style.textAlign)).toEqual(['', '', '', '']); // `align` ignored
-    expect(element.querySelector('.mat-mdc-paginator-range-label')?.textContent?.trim()).toBe('1');
+    expect(element.querySelector('.mat-mdc-paginator-range-label')?.textContent?.trim()).toBe(
+      '1 – 10 di 25',
+    );
   });
 });
 
 @Component({
   imports: [Table],
-  template: `<app-table [columns]="columns" [params]="params" [load]="load" [texts]="texts" />`,
+  template: `<app-table
+    [columns]="columns"
+    [params]="params"
+    [load]="load"
+    [texts]="texts"
+    [hideCreateButton]="true"
+    [hideMassiveActions]="true"
+    [hideEditButtons]="true"
+  />`,
 })
 class TableDefaultHost {
   readonly params = { day: '2026-09-30' };
@@ -563,7 +577,7 @@ describe('Table row buttons', () => {
     return { fixture, host: fixture.componentInstance, element, buttons };
   };
 
-  it('should have no row buttons, and no column for them, unless asked', async () => {
+  it('should have no row buttons, and no column for them, when hidden', async () => {
     const { element } = await setup(false);
 
     expect(element.querySelectorAll('.table__action').length).toBe(0);
@@ -608,6 +622,8 @@ describe('Table row buttons', () => {
     [params]="params"
     [load]="load"
     [texts]="texts"
+    [hideCreateButton]="true"
+    [hideMassiveActions]="true"
     [hideEditButtons]="!show()"
     [pathIcon]="['search.svg', 'clear.svg', 'delete.svg', 'duplicate.svg', 'edit.svg']"
     (deleteRow)="events.push('delete ' + $event.name)"
@@ -628,4 +644,207 @@ class TableRowButtonsHost {
   readonly events: string[] = [];
   readonly load = (request: Filters & PageRequest) =>
     of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
+}
+
+describe('Table base', () => {
+  it('should show everything when nothing is hidden: checkboxes, row buttons, create button', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
+    });
+    const fixture = TestBed.createComponent(TableBaseHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const headers = [...element.querySelectorAll('thead th')];
+
+    expect(headers.length).toBe(4);
+    expect(headers[0].classList).toContain('table__select');
+    expect(headers[3].classList).toContain('table__actions');
+    expect(element.querySelector('.table__create')).not.toBeNull();
+    expect(element.querySelector('.table__bar__icons')).not.toBeNull(); // room of the buttons on chosen rows
+  });
+});
+
+@Component({
+  imports: [Table],
+  template: `<app-table [columns]="columns" [params]="params" [load]="load" />`,
+})
+class TableBaseHost {
+  readonly params = { day: '2026-09-30' };
+  readonly columns: TableColumn<Row>[] = [
+    { field: 'name', header: 'Nome' },
+    { field: 'total', header: 'Totale' },
+  ];
+  readonly load = (request: Filters & PageRequest) =>
+    of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
+}
+
+describe('Table title, create button and chosen rows', () => {
+  const setup = async (show: boolean) => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
+    });
+    const fixture = TestBed.createComponent(TableMassiveHost);
+    fixture.componentInstance.show.set(show);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const boxes = () => [
+      ...element.querySelectorAll<HTMLInputElement>('tbody app-selection-checkbox input'),
+    ];
+    const all = () =>
+      element.querySelector<HTMLInputElement>('thead app-selection-checkbox input')!;
+    const massive = () => [...element.querySelectorAll<HTMLButtonElement>('.table__massive')];
+    const click = async (input: HTMLInputElement) => {
+      input.click();
+      await fixture.whenStable();
+    };
+    return { fixture, host: fixture.componentInstance, element, boxes, all, massive, click };
+  };
+
+  it('should show no title row, no checkboxes and no buttons on chosen rows when hidden', async () => {
+    const { element } = await setup(false);
+
+    expect(element.querySelector('.table__heading')).toBeNull();
+    expect(element.querySelector('app-selection-checkbox')).toBeNull();
+    expect(element.querySelector('.table__bar')).toBeNull();
+    expect(element.querySelectorAll('thead th').length).toBe(2);
+  });
+
+  it('should show the title with its icon and the create button', async () => {
+    const { fixture, host, element } = await setup(true);
+    const title = element.querySelector('.table__title')!;
+    const create = element.querySelector<HTMLButtonElement>('.table__create')!;
+
+    expect(title.textContent?.trim()).toBe('Impostazioni magazzino');
+    expect(title.querySelector('img')?.getAttribute('src')).toBe('warehouse.svg');
+    expect(element.querySelector('table')?.getAttribute('aria-labelledby')).toBe(title.id);
+    expect(create.textContent?.trim()).toBe('Aggiungi articolo');
+    expect(create.querySelector('img')?.getAttribute('src')).toBe('add.svg');
+
+    create.click();
+    await fixture.whenStable();
+    expect(host.events).toEqual(['create']);
+  });
+
+  it('should show no icon next to the title when none is given', async () => {
+    const { fixture, host, element } = await setup(true);
+
+    host.icons.set(['search.svg', 'clear.svg', 'delete.svg', 'duplicate.svg', 'edit.svg']);
+    await fixture.whenStable();
+
+    expect(element.querySelector('.table__title')?.textContent?.trim()).toBe(
+      'Impostazioni magazzino',
+    );
+    expect(element.querySelector('.table__title img')).toBeNull();
+  });
+
+  it('should put a checkbox on every row, first, and one in the header for the whole page', async () => {
+    const { element, boxes, all } = await setup(true);
+
+    expect(element.querySelectorAll('thead th').length).toBe(3);
+    expect(element.querySelector('thead th')?.classList).toContain('table__select');
+    expect(boxes().length).toBe(10);
+    expect(all().getAttribute('aria-label')).toBe('Scegli tutte le righe della pagina');
+    expect(boxes()[0].getAttribute('aria-label')).toBe('Scegli la riga');
+  });
+
+  it('should show the buttons on the chosen rows only with more than one row chosen', async () => {
+    const { fixture, host, boxes, all, massive, click } = await setup(true);
+
+    await click(boxes()[0]);
+    expect(massive().length).toBe(0);
+    expect(all().indeterminate).toBe(true); // a dash: part of the page is chosen
+
+    await click(boxes()[2]);
+    expect(massive().map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Duplica le righe scelte',
+      'Elimina le righe scelte',
+    ]);
+    expect(massive().map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
+      'duplicate-selected.svg',
+      'delete-selected.svg',
+    ]);
+
+    massive()[0].click();
+    massive()[1].click();
+    await fixture.whenStable();
+    expect(host.events).toEqual(['duplicate Row 1,Row 3', 'delete Row 1,Row 3']);
+  });
+
+  it('should choose all the rows of the page, or none, from the header', async () => {
+    const { boxes, all, massive, click } = await setup(true);
+
+    await click(all());
+    expect(boxes().every((box) => box.checked)).toBe(true);
+    expect(all().checked).toBe(true);
+    expect(massive().length).toBe(2);
+
+    await click(all());
+    expect(boxes().some((box) => box.checked)).toBe(false);
+    expect(massive().length).toBe(0);
+  });
+
+  it('should forget the chosen rows when another page arrives', async () => {
+    const { fixture, element, boxes, massive, click } = await setup(true);
+
+    await click(boxes()[0]);
+    await click(boxes()[1]);
+    element.querySelector<HTMLButtonElement>('.mat-mdc-paginator-navigation-next')!.click();
+    await fixture.whenStable();
+
+    expect(boxes().some((box) => box.checked)).toBe(false);
+    expect(massive().length).toBe(0);
+  });
+});
+
+@Component({
+  imports: [Table],
+  template: `<app-table
+    [columns]="columns"
+    [params]="params"
+    [load]="load"
+    [texts]="texts"
+    [title]="show() ? 'Impostazioni magazzino' : undefined"
+    [createLabel]="'Aggiungi articolo'"
+    [hideMassiveActions]="!show()"
+    [hideCreateButton]="!show()"
+    [hideEditButtons]="true"
+    [pathIcon]="icons()"
+    (duplicateSelected)="events.push('duplicate ' + names($event))"
+    (deleteSelected)="events.push('delete ' + names($event))"
+    (create)="events.push('create')"
+  />`,
+})
+class TableMassiveHost {
+  readonly show = signal(false);
+  readonly icons = signal([
+    'search.svg',
+    'clear.svg',
+    'delete.svg',
+    'duplicate.svg',
+    'edit.svg',
+    'duplicate-selected.svg',
+    'delete-selected.svg',
+    'add.svg',
+    'warehouse.svg',
+  ]);
+  readonly params = { day: '2026-09-30' };
+  readonly columns: TableColumn<Row>[] = [
+    { field: 'name', header: 'Nome' },
+    { field: 'total', header: 'Totale' },
+  ];
+  readonly texts = {
+    selection: {
+      all: 'Scegli tutte le righe della pagina',
+      row: 'Scegli la riga',
+      duplicate: 'Duplica le righe scelte',
+      delete: 'Elimina le righe scelte',
+    },
+  };
+  readonly events: string[] = [];
+  readonly load = (request: Filters & PageRequest) =>
+    of({
+      total: ALL.length,
+      rows: ALL.slice((request.page - 1) * request.pageSize, request.page * request.pageSize),
+    });
+  readonly names = (rows: Row[]) => rows.map((row) => row.name).join(',');
 }

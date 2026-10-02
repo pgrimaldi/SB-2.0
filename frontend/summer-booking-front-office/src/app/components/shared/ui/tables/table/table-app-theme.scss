@@ -3,8 +3,10 @@
 // The app's look (`useAppTheme`): blue header, striped rows, rounded corners, columns aligned by
 // `align`. Sizes are common to both looks (table.scss).
 :host(.table__theme__app) {
-  // Side paddings of a cell, for the width of the column of the row buttons.
+  // Side paddings of a cell, for the width of the columns of the row buttons and of the checkboxes
+  // (the first column, with its wider left padding).
   --table-actions-padding: 1.875rem;
+  --table-select-padding: 2.8125rem;
 
   @include mat.table-overrides(
     (
@@ -38,6 +40,28 @@
     background: var(--color__main__theme__one);
   }
 
+  // The checkbox of the whole page, on the blue header: white box, blue tick (or dash).
+  .table__header app-selection-checkbox {
+    @include mat.checkbox-overrides(
+      (
+        unselected-icon-color: var(--color__layout__on__main),
+        unselected-hover-icon-color: var(--color__layout__on__main),
+        unselected-focus-icon-color: var(--color__layout__on__main),
+        selected-icon-color: var(--color__layout__on__main),
+        selected-hover-icon-color: var(--color__layout__on__main),
+        selected-focus-icon-color: var(--color__layout__on__main),
+        selected-pressed-icon-color: var(--color__layout__on__main),
+        selected-checkmark-color: var(--color__main__theme__one),
+        selected-hover-state-layer-color: var(--color__layout__on__main),
+        selected-focus-state-layer-color: var(--color__layout__on__main),
+        selected-pressed-state-layer-color: var(--color__layout__on__main),
+        unselected-hover-state-layer-color: var(--color__layout__on__main),
+        unselected-focus-state-layer-color: var(--color__layout__on__main),
+        unselected-pressed-state-layer-color: var(--color__layout__on__main),
+      )
+    );
+  }
+
   .table__row:nth-child(even) {
     background: var(--color__layout__highlight);
   }
@@ -69,6 +93,7 @@
 @media (width >= 120rem) {
   :host(.table__theme__app) {
     --table-actions-padding: 5rem;
+    --table-select-padding: 3.75rem;
 
     .table__cell {
       padding-inline: 3.125rem 1.875rem;
@@ -83,6 +108,7 @@
 @media (width < 48rem) {
   :host(.table__theme__app) {
     --table-actions-padding: 1rem;
+    --table-select-padding: 1rem;
 
     .table__cell,
     .table__cell:first-child {

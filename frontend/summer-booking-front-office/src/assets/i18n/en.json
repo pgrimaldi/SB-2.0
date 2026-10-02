@@ -41,6 +41,12 @@
       "delete": "Delete",
       "duplicate": "Duplicate",
       "edit": "Edit"
+    },
+    "selection": {
+      "all": "Select all rows of the page",
+      "row": "Select the row",
+      "duplicate": "Duplicate the selected rows",
+      "delete": "Delete the selected rows"
     }
   },
   "error": {

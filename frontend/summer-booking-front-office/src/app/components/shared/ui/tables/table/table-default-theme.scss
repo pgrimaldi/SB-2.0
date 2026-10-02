@@ -2,11 +2,13 @@
 
 // The default look (the designer's proposal of 30/09/2026): clean and minimal. Blue texts on white,
 // a thin line under the header, no stripes and no rounded corners, everything on the left, the sort
-// arrow before the header label and, in the paginator, only the page size selector and the page number
-// between the arrows. Sizes are common to both looks (table.scss): the table takes the same room.
+// arrow before the header label and, in the paginator, the page size selector and the rows shown out of
+// the total ("1 – 10 di 12") between the arrows. Sizes are common to both looks (table.scss): the table
+// takes the same room.
 :host(.table__theme__default) {
-  // Side paddings of a cell, for the width of the column of the row buttons.
+  // Side paddings of a cell, for the width of the columns of the row buttons and of the checkboxes.
   --table-actions-padding: 1.125rem;
+  --table-select-padding: 1.125rem;
 
   @include mat.table-overrides(
     (
@@ -59,7 +61,7 @@
     opacity: 1;
   }
 
-  // Paginator: no "items per page" label; the page number between the two arrows.
+  // Paginator: no "items per page" label; the rows shown out of the total between the two arrows.
   ::ng-deep .mat-mdc-paginator-page-size-label {
     display: none;
   }

@@ -1,0 +1,44 @@
+@use '@angular/material' as mat;
+
+// Shared look of the checkboxes: blue when chosen, grey when empty, the box sized in rem. Material
+// draws the box at a fixed 18px: in rem it grows with the page on large screens. Used inside `:host`.
+@mixin checkbox($box) {
+  @include mat.checkbox-overrides(
+    (
+      state-layer-size: 1.5rem,
+      touch-target-display: none,
+      unselected-icon-color: var(--color__layout__muted__strong),
+      unselected-hover-icon-color: var(--color__main__theme__one),
+      unselected-focus-icon-color: var(--color__main__theme__one),
+      selected-icon-color: var(--color__main__theme__one),
+      selected-hover-icon-color: var(--color__main__theme__one),
+      selected-focus-icon-color: var(--color__main__theme__one),
+      selected-pressed-icon-color: var(--color__main__theme__one),
+      selected-checkmark-color: var(--color__layout__on__main),
+      selected-hover-state-layer-color: var(--color__main__theme__one),
+      selected-focus-state-layer-color: var(--color__main__theme__one),
+      selected-pressed-state-layer-color: var(--color__main__theme__one),
+      unselected-hover-state-layer-color: var(--color__main__theme__one),
+      unselected-focus-state-layer-color: var(--color__main__theme__one),
+      unselected-pressed-state-layer-color: var(--color__main__theme__one),
+    )
+  );
+
+  ::ng-deep {
+    .mdc-checkbox {
+      flex-basis: $box;
+      width: $box;
+      height: $box;
+      padding: calc((var(--mat-checkbox-state-layer-size) - #{$box}) / 2);
+    }
+
+    .mdc-checkbox__background {
+      top: calc((var(--mat-checkbox-state-layer-size) - #{$box}) / 2);
+      left: calc((var(--mat-checkbox-state-layer-size) - #{$box}) / 2);
+      width: $box;
+      height: $box;
+      border-width: 0.125rem;
+      border-radius: 0.125rem;
+    }
+  }
+}

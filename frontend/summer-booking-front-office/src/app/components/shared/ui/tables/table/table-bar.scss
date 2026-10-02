@@ -1,4 +1,58 @@
-// Bar above the rows: icon actions on the left, then the search, text actions on the right.
+// Title row, as in the designer's mockup, all on the same line: the title with its icon and the search
+// on the left, the create button on the right (also when there is no title).
+.table__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.table__title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+
+  img,
+  mat-icon {
+    flex: none;
+    width: 1.1875rem;
+    height: 1.1875rem;
+    font-size: 1.1875rem;
+  }
+}
+
+.table__create {
+  display: inline-flex;
+  height: 1.75rem;
+  align-items: center;
+  gap: 0.625rem;
+  margin-left: auto; // the space between the search and the button: always on the right
+  padding: 0 0.875rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__text__soft);
+  color: var(--color__layout__on__main);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  img,
+  mat-icon {
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    font-size: 0.625rem;
+  }
+}
+
+// Bar under the title row, above the rows: icon actions on the left, text actions on the right.
 .table__bar {
   display: flex;
   flex-wrap: wrap;
@@ -14,13 +68,56 @@
   gap: 0.5rem;
 }
 
+// The buttons on the chosen rows show only with more than one row chosen: their room is kept, so the
+// rows do not move when they appear.
+.table__bar__icons {
+  min-height: 1.75rem;
+  gap: 0.625rem;
+}
+
+// Square buttons with a thin border of the colour of their icon: soft blue, red for delete.
+.table__massive {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  padding: 0;
+  border: 0.0625rem solid currentColor;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  color: var(--color__layout__text__soft);
+  cursor: pointer;
+
+  img,
+  mat-icon {
+    width: 0.9375rem;
+    height: 0.9375rem;
+    font-size: 0.9375rem;
+  }
+}
+
+.table__massive__delete {
+  color: #fd6665; // red of the designer's delete button, used only here
+}
+
+// Under the mouse, the button about to be pressed (only where there is a mouse).
+@media (hover: hover) {
+  .table__create:hover {
+    box-shadow: inset 0 0 0 100vmax rgb(0 0 0 / 14%);
+  }
+
+  .table__massive:hover {
+    background: var(--color__tertiary__theme);
+  }
+}
+
 .table__bar__buttons {
   margin-left: auto;
 }
 
 // Large screens (from 1920px): a bigger search, easier to notice above the wide table.
 @media (width >= 120rem) {
-  .table__bar__search {
+  .table__search {
     --search-field-width: 25rem;
     --search-field-text-size: 0.875rem;
     --search-field-line-height: 1.25rem;
@@ -29,9 +126,10 @@
   }
 }
 
-// Phone: the search takes a row of its own, as wide as the table.
+// Phone: the search gets shorter and fills the room beside the create button, on the same line (down
+// to its minimum width; with a title they both go under it).
 @media (width < 48rem) {
-  .table__bar__search {
-    width: 100%;
+  .table__search {
+    flex: 1;
   }
 }

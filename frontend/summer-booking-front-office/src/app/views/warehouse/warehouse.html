@@ -6,8 +6,9 @@
     [load]="warehouse.list"
     [texts]="'table' | translate"
     [searchable]="true"
-    [useAppTheme]="true"
-    [hideEditButtons]="false"
+    [useAppTheme]="false"
+    [hideMassiveActions]="true"
+    [hideCreateButton]="true"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
   />

@@ -1,17 +1,82 @@
-@if (hasBar()) {
-  <div class="table__bar">
-    @if (hasIconActions()) {
-      <div class="table__bar__icons"><ng-content select="[appTableIconAction]" /></div>
+<!-- Title row: the title with its icon and the search on the left, the create button on the right. -->
+@if (hasHeading()) {
+  <div class="table__heading">
+    @if (title()) {
+      <h2 class="table__title" [id]="titleId">
+        @if (icons().list[8]; as icon) {
+          @if (icons().material) {
+            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          } @else {
+            <img [src]="icon" width="19" height="19" alt="" />
+          }
+        }
+        {{ title() }}
+      </h2>
     }
     @if (searchable()) {
       <app-search-field
-        class="table__bar__search"
+        class="table__search"
         [placeholder]="texts()?.search?.placeholder"
         [texts]="texts()?.search"
         [matIcon]="matIcon()"
         [pathIcon]="pathIcon()"
         (search)="search.set($event)"
       />
+    }
+    @if (!hideCreateButton()) {
+      <button class="table__create" type="button" (click)="create.emit()">
+        @if (icons().list[7]; as icon) {
+          @if (icons().material) {
+            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          } @else {
+            <img [src]="icon" width="10" height="10" alt="" />
+          }
+        }
+        {{ createLabel() }}
+      </button>
+    }
+  </div>
+}
+
+@if (hasBar()) {
+  <div class="table__bar">
+    @if (hasIconZone()) {
+      <div class="table__bar__icons">
+        <!-- Buttons on the chosen rows, only with more than one row chosen. -->
+        @if (!hideMassiveActions() && selectedRows().length > 1) {
+          <button
+            class="table__massive"
+            type="button"
+            [attr.aria-label]="texts()?.selection?.duplicate ?? null"
+            [matTooltip]="texts()?.selection?.duplicate ?? ''"
+            (click)="duplicateSelected.emit(selectedRows())"
+          >
+            @if (icons().list[5]; as icon) {
+              @if (icons().material) {
+                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+              } @else {
+                <img [src]="icon" width="15" height="15" alt="" />
+              }
+            }
+          </button>
+          <button
+            class="table__massive table__massive__delete"
+            type="button"
+            [attr.aria-label]="texts()?.selection?.delete ?? null"
+            [matTooltip]="texts()?.selection?.delete ?? ''"
+            (click)="deleteSelected.emit(selectedRows())"
+          >
+            @if (icons().list[6]; as icon) {
+              @if (icons().material) {
+                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+              } @else {
+                <img [src]="icon" width="15" height="15" alt="" />
+              }
+            }
+          </button>
+        }
+        <ng-content select="[appTableIconAction]" />
+      </div>
     }
     @if (hasTextActions()) {
       <div class="table__bar__buttons"><ng-content select="[appTableTextAction]" /></div>
@@ -26,8 +91,28 @@
     matSort
     class="table__grid"
     [dataSource]="rows()"
+    [attr.aria-labelledby]="title() ? titleId : null"
     (matSortChange)="changeSort($event)"
   >
+    <!-- Checkboxes of the rows (unless hideMassiveActions), always the first column. -->
+    <ng-container [matColumnDef]="selectColumn">
+      <th *matHeaderCellDef mat-header-cell class="table__cell table__select">
+        <app-selection-checkbox
+          [label]="texts()?.selection?.all"
+          [checked]="allSelected()"
+          [indeterminate]="someSelected()"
+          (checkedChange)="selectAll($event)"
+        />
+      </th>
+      <td *matCellDef="let row" mat-cell class="table__cell table__select">
+        <app-selection-checkbox
+          [label]="texts()?.selection?.row"
+          [checked]="selected().has(row)"
+          (checkedChange)="selectRow(row, $event)"
+        />
+      </td>
+    </ng-container>
+
     @for (column of columns(); track column.field) {
       <!-- The default look puts everything on the left; the app's look follows `align`. -->
       @let align = useAppTheme() ? column.align : undefined;
@@ -55,7 +140,7 @@
       </ng-container>
     }
 
-    <!-- Buttons of every row (hideEditButtons false), always the last column: delete, duplicate, edit. -->
+    <!-- Buttons of every row (unless hideEditButtons), always the last column: delete, duplicate, edit. -->
     <ng-container [matColumnDef]="rowActionsColumn">
       <th *matHeaderCellDef mat-header-cell class="table__cell table__actions">
         {{ texts()?.actions?.header }}

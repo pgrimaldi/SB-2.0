@@ -1,0 +1,11 @@
+@use '../checkbox' as checkbox;
+
+// The box (15px, as in the designer's table) takes its own room only: the state layer around it
+// overflows instead of pushing what is beside it.
+:host {
+  display: inline-flex;
+  margin: calc((0.9375rem - var(--mat-checkbox-state-layer-size)) / 2);
+  vertical-align: middle;
+
+  @include checkbox.checkbox(0.9375rem);
+}

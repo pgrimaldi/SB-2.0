@@ -1,11 +1,12 @@
 @use '@angular/material' as mat;
 
 // Layout and sizes common to both looks, so that the table takes the same room in both; colours and
-// details of each look come from table-app-theme.scss and table-default-theme.scss. Rows 3rem high:
-// 10 rows and the paginator fit in one screen from 1280×720.
+// details of each look come from table-app-theme.scss and table-default-theme.scss. Header and rows
+// 2.75rem high: with everything shown (title row with search and create button, bar of the buttons on
+// the chosen rows), 10 rows and the paginator fit in one screen from 1280×720.
 :host {
-  --table-header-height: 3rem;
-  --table-row-height: 3rem;
+  --table-header-height: 2.75rem;
+  --table-row-height: 2.75rem;
   --table-paginator-height: 3.5rem;
 
   display: flex;
@@ -85,6 +86,12 @@
   }
 }
 
+// Checkboxes of the rows, in the first column: as wide as the box (15px) plus the side paddings of
+// the cell, which each look gives in `--table-select-padding`.
+.table__select {
+  width: calc(0.9375rem + var(--table-select-padding, 0rem));
+}
+
 // Buttons of every row, in the last column, on the right. Sizes follow the text of the rows (em), so
 // they grow with it on large screens; the soft blue of the icons is in the images (or the colour of
 // a Material icon). The column is as wide as the three buttons plus the side paddings of the cells,
@@ -154,11 +161,12 @@
 }
 
 // Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
-// (4rem instead of 5.25rem) so that 10 rows and the paginator fit in a 1080p screen without scroll.
+// (3.75rem instead of 5.25rem) so that, with everything shown, 10 rows and the paginator fit in a
+// 1080p screen without scroll.
 @media (width >= 120rem) {
   :host {
-    --table-header-height: 4rem;
-    --table-row-height: 4rem;
+    --table-header-height: 3.75rem;
+    --table-row-height: 3.75rem;
 
     @include mat.table-overrides(
       (
