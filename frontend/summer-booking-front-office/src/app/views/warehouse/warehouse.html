@@ -1,4 +1,9 @@
 <main class="warehouse">
+  <app-page-title
+    class="warehouse__title"
+    [text]="'management.warehouse.title' | translate"
+    [pathIcon]="titleIcon"
+  />
   <app-table
     #table
     [columns]="columns()"
@@ -7,8 +12,8 @@
     [texts]="'table' | translate"
     [searchable]="true"
     [useAppTheme]="false"
-    [hideMassiveActions]="true"
-    [hideCreateButton]="true"
+    [hideMassiveActions]="false"
+    [hideCreateButton]="false"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
   />

@@ -7,6 +7,11 @@
   padding-top: 4.125rem;
 }
 
+// The page title, above the table.
+.warehouse__title {
+  margin-bottom: 1rem;
+}
+
 // Desktop: small margins so that the page (10 rows and the paginator) fits in one screen from 1280×720.
 @media (width >= 64rem) {
   .warehouse {

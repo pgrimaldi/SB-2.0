@@ -160,19 +160,19 @@
   white-space: nowrap;
 }
 
-// Large screens (from 1920px): bigger text, as in the reference; rows lower than the reference
-// (3.75rem instead of 5.25rem) so that, with everything shown, 10 rows and the paginator fit in a
-// 1080p screen without scroll.
+// Large screens (from 1920px): bigger text and rows (1rem, 3.5rem), but not so big that they dwarf the
+// page title; rows lower than the reference (5.25rem) so that, with everything shown, 10 rows and the
+// paginator fit in a 1080p screen without scroll. Paginator, search and buttons keep their sizes.
 @media (width >= 120rem) {
   :host {
-    --table-header-height: 3.75rem;
-    --table-row-height: 3.75rem;
+    --table-header-height: 3.5rem;
+    --table-row-height: 3.5rem;
 
     @include mat.table-overrides(
       (
-        header-headline-size: 1.125rem,
+        header-headline-size: 1rem,
         header-headline-line-height: 1.5rem,
-        row-item-label-text-size: 1.125rem,
+        row-item-label-text-size: 1rem,
         row-item-label-text-line-height: 1.5rem,
       )
     );

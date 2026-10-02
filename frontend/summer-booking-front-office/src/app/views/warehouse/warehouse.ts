@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { ManagementFiltersBehaviour } from '../../behaviours/management/management-filters.behaviour';
 import { TableErrorPopup } from '../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import { Table, TableColumn } from '../../components/shared/ui/tables/table/table';
+import { PageTitle } from '../../components/shared/ui/titles/page-title/page-title';
 import { WarehouseItem } from '../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../services/api/warehouse/warehouse.service';
 
@@ -21,7 +22,7 @@ interface WarehouseHeaders {
  */
 @Component({
   selector: 'app-warehouse',
-  imports: [Table, TableErrorPopup, TranslatePipe],
+  imports: [PageTitle, Table, TableErrorPopup, TranslatePipe],
   templateUrl: './warehouse.html',
   styleUrl: './warehouse.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +34,8 @@ export class Warehouse {
 
   /** A page of the table could not be loaded: shows the error popup. */
   protected readonly loadFailed = signal(false);
+  /** Icon of the page title: the warehouse of the menu, in the main blue. */
+  protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
   /** Icons of the table, in its order: [search magnifier, search X, delete, duplicate, edit]. */
   protected readonly tableIcons = [
     '/assets/images/search.svg',

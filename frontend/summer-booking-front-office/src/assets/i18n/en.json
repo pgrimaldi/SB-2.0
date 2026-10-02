@@ -188,6 +188,7 @@
       "text": "We couldn't close your session on the server, so you are still signed in. Check your internet connection and press “Sign out” again."
     },
     "warehouse": {
+      "title": "Warehouse",
       "table": {
         "name": "Items",
         "total": "Total",

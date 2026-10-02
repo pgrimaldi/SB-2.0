@@ -1,0 +1,41 @@
+// Same look as the title of the designer's table mockup: 1rem semibold blue, icon of 19px on the left;
+// bigger from 1920px, where the table is wider.
+:host {
+  display: block;
+}
+
+.page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+
+  img,
+  mat-icon {
+    flex: none;
+    width: 1.1875rem;
+    height: 1.1875rem;
+    font-size: 1.1875rem;
+  }
+}
+
+// Large screens (from 1920px): about the 1280px sizes times the growth of the table (×1.37), so the
+// title keeps its weight above the wider table.
+@media (width >= 120rem) {
+  .page__title {
+    gap: 0.875rem;
+    font-size: 1.375rem;
+    line-height: 2rem;
+
+    img,
+    mat-icon {
+      width: 1.625rem;
+      height: 1.625rem;
+      font-size: 1.625rem;
+    }
+  }
+}

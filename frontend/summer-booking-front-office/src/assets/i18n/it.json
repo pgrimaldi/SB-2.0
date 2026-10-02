@@ -188,6 +188,7 @@
       "text": "Non siamo riusciti a chiudere la tua sessione sul server, quindi sei ancora connesso. Controlla la connessione a internet e premi di nuovo «Disconnetti»."
     },
     "warehouse": {
+      "title": "Magazzino",
       "table": {
         "name": "Articoli",
         "total": "Totale",
