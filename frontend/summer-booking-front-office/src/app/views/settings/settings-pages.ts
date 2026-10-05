@@ -31,5 +31,10 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
   { path: 'fiscalization', label: 'management.settings.menu.fiscalization' },
   { path: 'email', label: 'management.settings.menu.email' },
   { path: 'database', label: 'management.settings.menu.database' },
-  { path: 'help', label: 'management.settings.menu.help' },
+  {
+    path: 'contact-support',
+    label: 'management.settings.menu.help',
+    loadComponent: () =>
+      import('./contact-support/contact-support').then((component) => component.ContactSupport),
+  },
 ];
