@@ -12,9 +12,9 @@ import { FormWarehouseEditItemPopup } from './form-warehouse-edit-item-popup';
 const LETTINO: WarehouseItem = {
   idArticle: 'a1',
   name: 'Lettino',
-  total: 120,
-  available: 84,
-  thresholdNumber: 5,
+  totalQuantity: 120,
+  availableQuantity: 84,
+  thresholdQuantity: 5,
   isThresholdWarningActive: true,
 };
 
@@ -98,7 +98,7 @@ describe('FormWarehouseEditItemPopup', () => {
     const { fixture, host, toggle } = await setup();
 
     host.open.set(false);
-    host.item.set({ ...LETTINO, thresholdNumber: null });
+    host.item.set({ ...LETTINO, thresholdQuantity: null });
     await fixture.whenStable();
     host.open.set(true);
     await fixture.whenStable();

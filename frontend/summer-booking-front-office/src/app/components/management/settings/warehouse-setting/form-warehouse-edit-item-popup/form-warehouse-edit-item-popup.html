@@ -13,21 +13,20 @@
       <img [src]="closeIcon" width="12" height="12" alt="" />
     </button>
 
-    <!-- While the article is being saved the fields cannot be changed. -->
     <div class="form__warehouse__edit__item__popup__fields" [attr.inert]="isLoading() ? '' : null">
       <app-filled-select
         [label]="'management.settings.warehouse.form.name' | translate"
         [options]="articleOptions()"
-        [value]="article()"
+        [value]="idArticle()"
         [disabled]="true"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.quantity' | translate"
-        [(value)]="quantity"
+        [(value)]="articleQuantity"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.threshold' | translate"
-        [(value)]="threshold"
+        [(value)]="thresholdQuantity"
       />
       <app-toggle [disabled]="!canAlert()" [(checked)]="thresholdAlert">
         {{ 'management.settings.warehouse.form.threshold_alert' | translate }}

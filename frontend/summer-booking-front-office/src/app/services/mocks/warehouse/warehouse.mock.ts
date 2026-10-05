@@ -290,7 +290,7 @@ function itemErrors(
       row.isActive &&
       row.deletedAt === null,
   );
-  const threshold = body.thresholdQuantity;
+  const thresholdQuantity = body.thresholdQuantity;
   const errors: MockFieldError[] = [];
   if (!property) {
     errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
@@ -301,12 +301,13 @@ function itemErrors(
   if (!wholeNumber(body.articleQuantity) || body.articleQuantity === 0) {
     errors.push({ field: 'articleQuantity', code: 'validation.invalid_value' });
   }
-  if (threshold !== null && !wholeNumber(threshold)) {
+  if (thresholdQuantity !== null && !wholeNumber(thresholdQuantity)) {
     errors.push({ field: 'thresholdQuantity', code: 'validation.invalid_value' });
   }
   if (
     typeof body.isThresholdWarningActive !== 'boolean' ||
-    (body.isThresholdWarningActive && !(typeof threshold === 'number' && threshold > 0))
+    (body.isThresholdWarningActive &&
+      !(typeof thresholdQuantity === 'number' && thresholdQuantity > 0))
   ) {
     errors.push({ field: 'isThresholdWarningActive', code: 'validation.invalid_value' });
   }
@@ -349,16 +350,16 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   const items: WarehouseItem[] = INVENTORY_ITEMS.filter(
     (item) => item.propertyId === property?.id && item.isActive && item.deletedAt === null,
   ).map((item) => {
-    const consumed = TODAY_CONSUMPTIONS.filter(
+    const consumedQuantity = TODAY_CONSUMPTIONS.filter(
       (consumption) => consumption.resourceId === item.publicId && consumption.state !== 'released',
     ).reduce((sum, consumption) => sum + consumption.quantity, 0);
 
     return {
       idArticle: item.publicId,
       name: item.name,
-      total: item.totalQuantity,
-      available: item.totalQuantity - consumed,
-      thresholdNumber: item.lowStockThreshold,
+      totalQuantity: item.totalQuantity,
+      availableQuantity: item.totalQuantity - consumedQuantity,
+      thresholdQuantity: item.lowStockThreshold,
       isThresholdWarningActive: item.isThresholdWarningActive,
     };
   });
@@ -379,7 +380,7 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
-const SORT_FIELDS = ['name', 'total', 'available', 'thresholdNumber'] as const;
+const SORT_FIELDS = ['name', 'totalQuantity', 'availableQuantity', 'thresholdQuantity'] as const;
 
 /**
  * Numbers by value, texts alphabetically (Italian rules, ignoring case). A missing value (a threshold

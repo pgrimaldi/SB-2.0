@@ -31,16 +31,6 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 let nextId = 0;
 
-/**
- * Popup of the warehouse settings to change an article (pencil of its row), with the same size and
- * fields as the one to add it: the article, shown but locked, then total, threshold and the switch of
- * the threshold alert, filled with the values of the row, then Annulla or Salva:
- * `<app-form-warehouse-edit-item-popup [item]="editedItem()" [(open)]="editing" (saved)="table.reload()" />`.
- * The alert switch can be turned on only with a threshold above 0; Salva only works with a total above
- * 0. Salva calls `POST /api/warehouse/edit-warehouse-item`: meanwhile its spinner turns and the popup
- * cannot be changed or closed; then the popup closes and `saved` fires, or the error of the API is
- * shown above the buttons and the form stays as it was.
- */
 @Component({
   selector: 'app-form-warehouse-edit-item-popup',
   imports: [Button, FilledNumberField, FilledSelect, Toggle, TranslatePipe],
@@ -56,37 +46,29 @@ export class FormWarehouseEditItemPopup extends BasePopup {
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
 
-  /** The row to change, read when the popup opens. */
+  /** Read only when the popup opens. */
   readonly item = input<WarehouseItem | null>(null);
-  /** The article was saved: the page reloads its list. */
   readonly saved = output<void>();
 
-  /** The only choice of the locked select: the article of the row. */
   protected readonly articleOptions = computed<readonly SelectOption[]>(() => {
     const item = this.item();
     return item ? [{ value: item.idArticle, label: item.name }] : [];
   });
-  /** Id of the article of the row. */
-  protected readonly article = computed(() => this.item()?.idArticle ?? null);
-  protected readonly quantity = signal<number | null>(null);
-  /** Threshold of the article; empty is `null`. */
-  protected readonly threshold = signal<number | null>(null);
-  /** The threshold alert can be turned on only with a threshold above 0. */
-  protected readonly canAlert = computed(() => (this.threshold() ?? 0) > 0);
-  /** The threshold alert, on or off; it goes off by itself when the threshold is no longer above 0. */
+  protected readonly idArticle = computed(() => this.item()?.idArticle ?? null);
+  protected readonly articleQuantity = signal<number | null>(null);
+  protected readonly thresholdQuantity = signal<number | null>(null);
+  protected readonly canAlert = computed(() => (this.thresholdQuantity() ?? 0) > 0);
+  /** Goes off by itself when the threshold is no longer above 0. */
   protected readonly thresholdAlert = linkedSignal<boolean, boolean>({
     source: this.canAlert,
     computation: (canAlert, previous) => canAlert && (previous?.value ?? false),
   });
-  /** True while the API saves the article: spinner on Salva, popup blocked. */
   protected readonly isLoading = signal(false);
-  /** Salva works only with a total above 0 (the full checks will come later). */
+  /** Minimal check: the full validation will come later. */
   protected readonly canSave = computed(
-    () => this.article() !== null && (this.quantity() ?? 0) > 0,
+    () => this.idArticle() !== null && (this.articleQuantity() ?? 0) > 0,
   );
-  /** Error of the last try, as the API answered it. */
   private readonly error = signal<ApiProblem | null>(null);
-  /** Message of the error, in the language of the app. */
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -98,7 +80,6 @@ export class FormWarehouseEditItemPopup extends BasePopup {
 
   constructor() {
     super();
-    // Every opening starts from the values of the row.
     effect(() => {
       if (this.open()) {
         untracked(() => this.fill());
@@ -106,11 +87,10 @@ export class FormWarehouseEditItemPopup extends BasePopup {
     });
   }
 
-  /** Salva: sends the new values to the API; on success closes the popup and tells the page. */
   protected save(): void {
     const idProperty = this.auth.user()?.idProperty;
-    const idItem = this.article();
-    const articleQuantity = this.quantity();
+    const idItem = this.idArticle();
+    const articleQuantity = this.articleQuantity();
     if (this.isLoading() || !idProperty || idItem === null || articleQuantity === null) {
       return;
     }
@@ -121,7 +101,7 @@ export class FormWarehouseEditItemPopup extends BasePopup {
         idProperty,
         idItem,
         articleQuantity,
-        thresholdQuantity: this.threshold(),
+        thresholdQuantity: this.thresholdQuantity(),
         isThresholdWarningActive: this.thresholdAlert(),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -150,14 +130,15 @@ export class FormWarehouseEditItemPopup extends BasePopup {
     };
   }
 
-  /** Total, threshold and alert of the row (the alert stays off without a threshold above 0). */
   private fill(): void {
     const item = this.item();
-    const threshold = item?.thresholdNumber ?? null;
-    this.quantity.set(item?.total ?? null);
-    this.threshold.set(threshold);
+    const thresholdQuantity = item?.thresholdQuantity ?? null;
+    this.articleQuantity.set(item?.totalQuantity ?? null);
+    this.thresholdQuantity.set(thresholdQuantity);
     // Set by hand the alert would win over the threshold: checked here too.
-    this.thresholdAlert.set((item?.isThresholdWarningActive ?? false) && (threshold ?? 0) > 0);
+    this.thresholdAlert.set(
+      (item?.isThresholdWarningActive ?? false) && (thresholdQuantity ?? 0) > 0,
+    );
     this.error.set(null);
   }
 

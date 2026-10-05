@@ -30,16 +30,6 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 let nextId = 0;
 
-/**
- * Popup of the warehouse settings to add an article: the article (chosen among those of the property,
- * `POST /api/warehouse/combobox-list`, loaded at every opening), quantity, threshold and the switch of
- * the threshold alert, then Annulla or Aggiungi:
- * `<app-form-warehouse-add-item-popup [(open)]="adding" (added)="table.reload()" />`.
- * The alert switch can be turned on only with a threshold above 0; Aggiungi only works with an article
- * and a quantity above 0. Aggiungi calls `POST /api/warehouse/add-warehouse-item`: meanwhile its spinner turns
- * and the popup cannot be changed or closed; then the popup closes and `added` fires, or the error of
- * the API is shown above the buttons and the form stays as it was.
- */
 @Component({
   selector: 'app-form-warehouse-add-item-popup',
   imports: [Button, FilledNumberField, FilledSelect, Toggle, TranslatePipe],
@@ -55,33 +45,27 @@ export class FormWarehouseAddItemPopup extends BasePopup {
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
 
-  /** The article was added: the page reloads its list. */
   readonly added = output<void>();
 
-  /** The articles of the property, for the select; none until they arrive (or if they do not). */
   private readonly articles = signal<readonly ComboboxItem[]>([]);
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
     this.articles().map(({ id, value }) => ({ value: id, label: value })),
   );
-  /** Id of the chosen article; `null` while none is chosen. */
-  protected readonly article = signal<string | null>(null);
-  protected readonly quantity = signal<number | null>(null);
-  /** Threshold of the article; empty is `null`. */
-  protected readonly threshold = signal<number | null>(null);
-  /** The threshold alert can be turned on only with a threshold above 0. */
-  protected readonly canAlert = computed(() => (this.threshold() ?? 0) > 0);
-  /** The threshold alert, on or off; it goes off by itself when the threshold is no longer above 0. */
+  protected readonly idArticle = signal<string | null>(null);
+  protected readonly articleQuantity = signal<number | null>(null);
+  protected readonly thresholdQuantity = signal<number | null>(null);
+  protected readonly canAlert = computed(() => (this.thresholdQuantity() ?? 0) > 0);
+  /** Goes off by itself when the threshold is no longer above 0. */
   protected readonly thresholdAlert = linkedSignal<boolean, boolean>({
     source: this.canAlert,
     computation: (canAlert, previous) => canAlert && (previous?.value ?? false),
   });
-  /** True while the API adds the article: spinner on Aggiungi, popup blocked. */
   protected readonly isLoading = signal(false);
-  /** Aggiungi works only with an article and a quantity above 0 (the full checks will come later). */
-  protected readonly canAdd = computed(() => this.article() !== null && (this.quantity() ?? 0) > 0);
-  /** Error of the last try, as the API answered it. */
+  /** Minimal check: the full validation will come later. */
+  protected readonly canAdd = computed(
+    () => this.idArticle() !== null && (this.articleQuantity() ?? 0) > 0,
+  );
   private readonly error = signal<ApiProblem | null>(null);
-  /** Message of the error, in the language of the app. */
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -93,7 +77,6 @@ export class FormWarehouseAddItemPopup extends BasePopup {
 
   constructor() {
     super();
-    // Every opening starts from an empty form, with the articles of the property loaded again.
     effect(() => {
       if (this.open()) {
         untracked(() => {
@@ -104,11 +87,10 @@ export class FormWarehouseAddItemPopup extends BasePopup {
     });
   }
 
-  /** Aggiungi: sends the article to the API; on success closes the popup and tells the page. */
   protected add(): void {
     const idProperty = this.auth.user()?.idProperty;
-    const idArticle = this.article();
-    const articleQuantity = this.quantity();
+    const idArticle = this.idArticle();
+    const articleQuantity = this.articleQuantity();
     if (this.isLoading() || !idProperty || idArticle === null || articleQuantity === null) {
       return;
     }
@@ -119,7 +101,7 @@ export class FormWarehouseAddItemPopup extends BasePopup {
         idProperty,
         idArticle,
         articleQuantity,
-        thresholdQuantity: this.threshold(),
+        thresholdQuantity: this.thresholdQuantity(),
         isThresholdWarningActive: this.thresholdAlert(),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -149,9 +131,9 @@ export class FormWarehouseAddItemPopup extends BasePopup {
   }
 
   private reset(): void {
-    this.article.set(null);
-    this.quantity.set(null);
-    this.threshold.set(null);
+    this.idArticle.set(null);
+    this.articleQuantity.set(null);
+    this.thresholdQuantity.set(null);
     this.thresholdAlert.set(false);
     this.error.set(null);
   }

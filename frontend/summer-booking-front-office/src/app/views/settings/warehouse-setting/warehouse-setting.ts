@@ -61,8 +61,13 @@ export class WarehouseSetting {
   );
   protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
     { field: 'name', header: this.headers().name, width: 50, sortable: true },
-    { field: 'total', header: this.headers().total, align: 'center', sortable: true },
-    { field: 'thresholdNumber', header: this.headers().threshold, align: 'center', sortable: true },
+    { field: 'totalQuantity', header: this.headers().total, align: 'center', sortable: true },
+    {
+      field: 'thresholdQuantity',
+      header: this.headers().threshold,
+      align: 'center',
+      sortable: true,
+    },
   ]);
   protected readonly rowActions = standardRowActions<WarehouseItem>({
     delete: () => this.deleteItem(),

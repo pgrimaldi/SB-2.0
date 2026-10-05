@@ -79,10 +79,14 @@ describe('warehouseMock', () => {
 
     expect(total).toBe(12); // the inactive article is left out
     expect(rows.length).toBe(10);
-    expect(byName['Lettino']).toEqual(expect.objectContaining({ total: 120, available: 84 }));
-    expect(byName['Cabina']).toEqual(expect.objectContaining({ total: 24, available: 24 })); // released
+    expect(byName['Lettino']).toEqual(
+      expect.objectContaining({ totalQuantity: 120, availableQuantity: 84 }),
+    );
+    expect(byName['Cabina']).toEqual(
+      expect.objectContaining({ totalQuantity: 24, availableQuantity: 24 }),
+    ); // released
     expect(byName['Ombrellone'].idArticle).toBe('276a67d2-d0eb-47f5-8223-4804b9a9dcf9');
-    expect(byName['Ombrellone'].thresholdNumber).toBe(3);
+    expect(byName['Ombrellone'].thresholdQuantity).toBe(3);
   });
 
   it('should answer only the requested page, with the total of all pages', async () => {
@@ -129,17 +133,17 @@ describe('warehouseMock', () => {
       warehouse.list({ ...request, sortField: 'name', sortDirection: 'Ascending' }),
     );
     const byTotal = await firstValueFrom(
-      warehouse.list({ ...request, sortField: 'total', sortDirection: 'Descending' }),
+      warehouse.list({ ...request, sortField: 'totalQuantity', sortDirection: 'Descending' }),
     );
 
     expect(byName.rows.map((item) => item.name)).toEqual(['Cabina', 'Doccia', 'Lettino']);
-    expect(byTotal.rows.map((item) => item.total)).toEqual([120, 80, 60]);
+    expect(byTotal.rows.map((item) => item.totalQuantity)).toEqual([120, 80, 60]);
     expect(byTotal.total).toBe(12);
   });
 
   it('should sort by threshold, with the thresholds not set first ascending and last descending', async () => {
     const warehouse = await service();
-    const request = { ...MANAGEMENT, search: '', sortField: 'thresholdNumber' };
+    const request = { ...MANAGEMENT, search: '', sortField: 'thresholdQuantity' };
     const ascending = await firstValueFrom(
       warehouse.list({ ...request, page: 1, pageSize: 3, sortDirection: 'Ascending' }),
     );
@@ -147,13 +151,13 @@ describe('warehouseMock', () => {
       warehouse.list({ ...request, page: 1, pageSize: 12, sortDirection: 'Descending' }),
     );
 
-    expect(ascending.rows.map((item) => [item.name, item.thresholdNumber])).toEqual([
+    expect(ascending.rows.map((item) => [item.name, item.thresholdQuantity])).toEqual([
       ['Doccia', null],
       ['Parcheggio', null],
       ['Tavolino', null],
     ]);
-    expect(descending.rows.slice(0, 2).map((item) => item.thresholdNumber)).toEqual([5, 4]);
-    expect(descending.rows.slice(-3).map((item) => item.thresholdNumber)).toEqual([
+    expect(descending.rows.slice(0, 2).map((item) => item.thresholdQuantity)).toEqual([5, 4]);
+    expect(descending.rows.slice(-3).map((item) => item.thresholdQuantity)).toEqual([
       null,
       null,
       null,
@@ -258,7 +262,7 @@ describe('warehouseMock', () => {
 
     expect(answer).toBeNull();
     expect(await canoa()).toEqual(
-      expect.objectContaining({ total: before.total + 3, thresholdNumber: 2 }),
+      expect.objectContaining({ totalQuantity: before.totalQuantity + 3, thresholdQuantity: 2 }),
     );
   });
 
@@ -345,7 +349,11 @@ describe('warehouseMock', () => {
 
     expect(answer).toBeNull();
     expect(await pedalo()).toEqual(
-      expect.objectContaining({ total: 9, thresholdNumber: null, isThresholdWarningActive: false }),
+      expect.objectContaining({
+        totalQuantity: 9,
+        thresholdQuantity: null,
+        isThresholdWarningActive: false,
+      }),
     );
   });
 
