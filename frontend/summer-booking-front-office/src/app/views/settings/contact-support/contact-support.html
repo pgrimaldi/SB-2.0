@@ -1,0 +1,102 @@
+<main class="contact__support">
+  <section class="contact__support__panel" aria-labelledby="contact-support-help">
+    <h1 class="contact__support__title" id="contact-support-help">
+      {{ 'management.settings.contact_support.help.title' | translate }}
+    </h1>
+    <ul class="contact__support__boxes">
+      <li class="contact__support__box">
+        <h2 class="contact__support__box__title">
+          <img [src]="phoneIcon" width="14" height="14" alt="" />
+          {{ 'management.settings.contact_support.help.phone' | translate }}
+        </h2>
+        <a class="contact__support__box__value" [href]="supportPhoneLink">{{ supportPhone }}</a>
+      </li>
+      <li class="contact__support__box">
+        <h2 class="contact__support__box__title">
+          <img [src]="emailIcon" width="14" height="14" alt="" />
+          {{ 'management.settings.contact_support.help.email' | translate }}
+        </h2>
+        <a class="contact__support__box__value" [href]="'mailto:' + supportEmail">
+          {{ supportEmail }}
+        </a>
+      </li>
+      <li class="contact__support__box contact__support__box__hours">
+        <h2 class="contact__support__box__title">
+          <img [src]="clockIcon" width="14" height="14" alt="" />
+          {{ 'management.settings.contact_support.help.hours' | translate }}
+        </h2>
+        <p class="contact__support__box__value">
+          {{ 'management.settings.contact_support.help.summer_hours' | translate }}
+        </p>
+        <p class="contact__support__box__value">
+          {{ 'management.settings.contact_support.help.winter_hours' | translate }}
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="contact__support__panel" aria-labelledby="contact-support-form">
+    <h2
+      class="contact__support__title contact__support__title__underlined"
+      id="contact-support-form"
+    >
+      {{ 'management.settings.contact_support.form.title' | translate }}
+    </h2>
+    <form class="contact__support__form" novalidate (submit)="send($event)">
+      <app-filled-text-field
+        autocomplete="given-name"
+        [label]="'management.settings.contact_support.form.first_name' | translate"
+        [placeholder]="'management.settings.contact_support.form.examples.first_name' | translate"
+        [formField]="contactForm.firstName"
+        [error]="firstNameError()"
+      />
+      <app-filled-text-field
+        autocomplete="family-name"
+        [label]="'management.settings.contact_support.form.last_name' | translate"
+        [placeholder]="'management.settings.contact_support.form.examples.last_name' | translate"
+        [formField]="contactForm.lastName"
+        [error]="lastNameError()"
+      />
+      <app-filled-text-field
+        autocomplete="email"
+        [label]="'management.settings.contact_support.form.email' | translate"
+        [placeholder]="'management.settings.contact_support.form.examples.email' | translate"
+        [formField]="contactForm.email"
+        [error]="emailError()"
+      />
+      <app-filled-text-field
+        autocomplete="tel"
+        [label]="'management.settings.contact_support.form.mobile_phone' | translate"
+        [placeholder]="'management.settings.contact_support.form.examples.mobile_phone' | translate"
+        [formField]="contactForm.mobilePhone"
+      />
+      <app-filled-textarea
+        [label]="'management.settings.contact_support.form.message' | translate"
+        [formField]="contactForm.message"
+        [error]="messageError()"
+      />
+
+      @if (errorMessage(); as errorMessage) {
+        <p class="contact__support__error" role="alert">{{ errorMessage }}</p>
+      }
+      <div class="contact__support__send">
+        <app-button
+          size="small"
+          buttonType="submit"
+          [fullWidth]="true"
+          [disabled]="contactForm().invalid()"
+          [loading]="isLoading()"
+        >
+          {{ 'management.settings.contact_support.form.send' | translate }}
+        </app-button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<app-message-popup
+  [title]="'management.settings.contact_support.sent.title' | translate"
+  [text]="'management.settings.contact_support.sent.text' | translate"
+  [texts]="'management.settings.contact_support.sent' | translate"
+  [(open)]="sent"
+/>

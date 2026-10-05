@@ -259,6 +259,36 @@
             "text": "Vuoi duplicare i {{count}} articoli selezionati?"
           }
         }
+      },
+      "contact_support": {
+        "help": {
+          "title": "Hai bisogno di aiuto?",
+          "phone": "Telefono",
+          "email": "Email",
+          "hours": "Orari di assistenza",
+          "summer_hours": "1 maggio - 30 settembre, dal lunedì alla domenica: dalle 8:30 alle 20:00",
+          "winter_hours": "1 ottobre - 30 aprile, dal lunedì al venerdì: dalle 9:00 alle 18:00"
+        },
+        "form": {
+          "title": "Contattaci",
+          "first_name": "Nome",
+          "last_name": "Cognome",
+          "email": "Email",
+          "mobile_phone": "Cellulare",
+          "message": "Messaggio",
+          "send": "Invia messaggio",
+          "examples": {
+            "first_name": "Mario",
+            "last_name": "Rossi",
+            "email": "mario.rossi@gmail.com",
+            "mobile_phone": "3345678901"
+          }
+        },
+        "sent": {
+          "title": "Messaggio inviato con successo",
+          "text": "Grazie per averci contattato, ti risponderemo al più presto",
+          "close": "Chiudi"
+        }
       }
     }
   },
@@ -369,6 +399,7 @@
     "link": "Torna alla home"
   },
   "invalidate": {
-    "greater_than": "Il valore {{field}} deve essere superiore a {{limit}}"
+    "greater_than": "Il valore {{field}} deve essere superiore a {{limit}}",
+    "required": "Questo campo è obbligatorio"
   }
 }

@@ -1,0 +1,13 @@
+@use '../popup' as popup;
+
+@include popup.popup(message__popup, app-message-popup);
+
+// Unlike the other popups: text on the left and the button at the bottom right.
+.message__popup {
+  align-items: stretch;
+  text-align: left;
+}
+
+.message__popup__close {
+  align-self: flex-end;
+}

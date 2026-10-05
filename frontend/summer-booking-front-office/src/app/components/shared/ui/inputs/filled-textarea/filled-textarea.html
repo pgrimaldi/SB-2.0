@@ -1,26 +1,25 @@
-<label class="filled__text__field__label" [for]="id">{{ label() }}</label>
+<label class="filled__textarea__label" [for]="id">{{ label() }}</label>
 <mat-form-field
-  class="filled__text__field__control"
+  class="filled__textarea__control"
   appearance="fill"
   subscriptSizing="dynamic"
-  [class.filled__text__field__invalid]="!!error()"
+  [class.filled__textarea__invalid]="!!error()"
 >
-  <input
+  <textarea
     #field
     matInput
-    type="text"
     [id]="id"
+    [rows]="rows()"
     [value]="value()"
     [placeholder]="placeholder() ?? ''"
     [attr.maxlength]="maxLength() ?? null"
     [attr.name]="name() ?? null"
-    [attr.autocomplete]="autocomplete() ?? null"
     [attr.aria-invalid]="error() ? true : null"
     [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="value.set(field.value)"
     (blur)="touch.emit()"
-  />
+  ></textarea>
 </mat-form-field>
 @if (error(); as error) {
-  <p class="filled__text__field__error" [id]="id + '-error'">{{ error }}</p>
+  <p class="filled__textarea__error" [id]="id + '-error'">{{ error }}</p>
 }

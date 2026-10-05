@@ -1,0 +1,12 @@
+@use '../filled-field' as field;
+
+@include field.filled-field(filled__textarea);
+
+// The mixin sizes a one-line field: the text area grows with its rows and is resized only in height.
+.filled__textarea__control ::ng-deep .mat-mdc-text-field-wrapper {
+  height: auto;
+}
+
+textarea {
+  resize: vertical;
+}

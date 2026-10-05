@@ -3,20 +3,20 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
 import { TranslateService } from '@ngx-translate/core';
 
-/**
- * Message of the first error of a form field, from the generic translations `invalidate.<kind>`
- * (e.g. `invalidate.greater_than`): the error's own values and the translated field name fill the
- * placeholders. Nothing until the user has changed or left the field.
- */
 /** Properties of an error that are not values for the message. */
 const NOT_VALUES = new Set(['kind', 'message', 'fieldTree', 'formField']);
 
+/**
+ * Message of the first error of a form field, from the generic translations `invalidate.<kind>`
+ * (e.g. `invalidate.greater_than`): the error's own values and, when given, the translated field
+ * name fill the placeholders. Nothing until the user has changed or left the field.
+ */
 @Injectable({ providedIn: 'root' })
 export class ValidationTextBehaviour {
   private readonly translate = inject(TranslateService);
   private readonly language = toSignal(this.translate.onLangChange, { initialValue: null });
 
-  message(field: FieldTree<unknown>, fieldNameKey: string): Signal<string | null> {
+  message(field: FieldTree<unknown>, fieldNameKey?: string): Signal<string | null> {
     return computed(() => {
       const state = field();
       const [error] = state.errors();
@@ -29,7 +29,7 @@ export class ValidationTextBehaviour {
       );
       return this.translate.instant(`invalidate.${error.kind}`, {
         ...values,
-        field: this.translate.instant(fieldNameKey),
+        ...(fieldNameKey ? { field: this.translate.instant(fieldNameKey) } : {}),
       }) as string;
     });
   }

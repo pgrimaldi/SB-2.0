@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
+import { contactSupportMock } from './system/system.mock';
 import {
   warehouseAddMock,
   warehouseComboboxMock,
@@ -61,6 +62,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/warehouse/duplicate-warehouse-item`
   ) {
     return warehouseDuplicateMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/system/contact-support`
+  ) {
+    return contactSupportMock(request);
   }
 
   return next(request);
