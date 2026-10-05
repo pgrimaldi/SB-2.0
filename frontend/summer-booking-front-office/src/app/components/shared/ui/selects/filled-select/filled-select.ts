@@ -27,6 +27,8 @@ export class FilledSelect<K extends string = string> {
   readonly options = input<readonly SelectOption<K>[]>([]);
   /** Chosen value, two-way: `[(value)]="chosen"`; `null` while nothing is chosen. */
   readonly value = model<K | null>(null);
+  /** True to show the value without letting it change (e.g. the article of a form to edit). */
+  readonly disabled = input(false);
 
   protected readonly id = `filled-select-${nextId++}`;
 }

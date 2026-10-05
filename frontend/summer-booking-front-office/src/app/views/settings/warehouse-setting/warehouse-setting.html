@@ -23,7 +23,12 @@
   />
 </main>
 
-<app-form-warehouse-item-popup [(open)]="adding" />
+<app-form-warehouse-add-item-popup [(open)]="adding" (added)="table.reload()" />
+<app-form-warehouse-edit-item-popup
+  [item]="editedItem()"
+  [(open)]="editing"
+  (saved)="table.reload()"
+/>
 
 <app-table-error-popup
   [title]="'table.load_error.title' | translate"

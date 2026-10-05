@@ -4,10 +4,13 @@ import { Toggle } from './toggle';
 
 @Component({
   imports: [Toggle],
-  template: `<app-toggle [(checked)]="alert">Abilita avviso di soglia</app-toggle>`,
+  template: `<app-toggle [disabled]="disabled()" [(checked)]="alert"
+    >Abilita avviso di soglia</app-toggle
+  >`,
 })
 class ToggleHost {
   readonly alert = signal(false);
+  readonly disabled = signal(false);
 }
 
 describe('Toggle', () => {
@@ -24,5 +27,19 @@ describe('Toggle', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.alert()).toBe(true);
     expect(button.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('should not switch while disabled', async () => {
+    const fixture = TestBed.createComponent(ToggleHost);
+    fixture.componentInstance.disabled.set(true);
+    await fixture.whenStable();
+    const button = fixture.nativeElement.querySelector(
+      'button[role="switch"]',
+    ) as HTMLButtonElement;
+
+    expect(button.disabled).toBe(true);
+    button.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.alert()).toBe(false);
   });
 });

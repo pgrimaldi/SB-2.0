@@ -25,6 +25,24 @@ button {
   min-width: 6rem;
 }
 
+// Loading: the spinner, in the colour of the text, in the middle of the hidden label.
+.button__label__hidden {
+  opacity: 0;
+}
+
+.button__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  @include mat.progress-spinner-overrides(
+    (
+      active-indicator-color: currentColor,
+    )
+  );
+}
+
 :host(.button__light) {
   @include mat.button-overrides(
     (

@@ -16,4 +16,6 @@ export class Toggle {
   readonly name = input<string>();
   /** On or off, two-way: `[(checked)]="alert"`. */
   readonly checked = model(false);
+  /** True to block the switch: it cannot be turned on or off and looks faded. */
+  readonly disabled = input(false);
 }

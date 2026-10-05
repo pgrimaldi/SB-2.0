@@ -8,4 +8,6 @@ export interface WarehouseItem {
   available: number;
   /** Stock level below which the article is running out. */
   thresholdNumber: number | null;
+  /** The threshold alert is on; only with a threshold above 0. */
+  isThresholdWarningActive: boolean;
 }

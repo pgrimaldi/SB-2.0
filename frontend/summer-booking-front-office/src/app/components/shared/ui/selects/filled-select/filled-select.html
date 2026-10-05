@@ -5,6 +5,7 @@
     hideSingleSelectionIndicator
     [aria-labelledby]="id + '-label'"
     [placeholder]="placeholder() ?? ''"
+    [disabled]="disabled()"
     [value]="value()"
     (valueChange)="value.set($event)"
   >

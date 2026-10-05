@@ -9,7 +9,8 @@ import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
-import { FormWarehouseItemPopup } from '../../../components/management/settings/warehouse-setting/form-warehouse-item-popup/form-warehouse-item-popup';
+import { FormWarehouseAddItemPopup } from '../../../components/management/settings/warehouse-setting/form-warehouse-add-item-popup/form-warehouse-add-item-popup';
+import { FormWarehouseEditItemPopup } from '../../../components/management/settings/warehouse-setting/form-warehouse-edit-item-popup/form-warehouse-edit-item-popup';
 
 /** Group `management.warehouse.table` of the translations: the column headers used here. */
 interface WarehouseSettingsHeaders {
@@ -24,7 +25,14 @@ interface WarehouseSettingsHeaders {
  */
 @Component({
   selector: 'app-warehouse-setting',
-  imports: [FormWarehouseItemPopup, PageTitle, Table, TableErrorPopup, TranslatePipe],
+  imports: [
+    FormWarehouseAddItemPopup,
+    FormWarehouseEditItemPopup,
+    PageTitle,
+    Table,
+    TableErrorPopup,
+    TranslatePipe,
+  ],
   templateUrl: './warehouse-setting.html',
   styleUrl: './warehouse-setting.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,8 +44,12 @@ export class WarehouseSetting {
 
   /** A page of the table could not be loaded: shows the error popup. */
   protected readonly loadFailed = signal(false);
-  /** The create button was pressed: shows the popup to add an article. */
+  /** The create button was pressed: shows the popup to add an article (the table reloads after it). */
   protected readonly adding = signal(false);
+  /** The pencil of a row was pressed: shows the popup to change that article. */
+  protected readonly editing = signal(false);
+  /** The row whose pencil was pressed last. */
+  protected readonly editedItem = signal<WarehouseItem | null>(null);
   /** Icon of the page title: the warehouse of the menu, in the main blue. */
   protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
   /**
@@ -68,7 +80,7 @@ export class WarehouseSetting {
   protected readonly rowActions = standardRowActions<WarehouseItem>({
     delete: () => this.deleteItem(),
     duplicate: () => this.duplicateItem(),
-    edit: () => this.editItem(),
+    edit: (item) => this.editItem(item),
   });
 
   /** Delete button of a row. */
@@ -81,8 +93,9 @@ export class WarehouseSetting {
     // Not connected yet: it will call the duplicate API of the warehouse.
   }
 
-  /** Edit button of a row. */
-  private editItem(): void {
-    // Not connected yet: it will open the edit form of the article.
+  /** Edit button of a row: opens the popup to change it, filled with its values. */
+  private editItem(item: WarehouseItem): void {
+    this.editedItem.set(item);
+    this.editing.set(true);
   }
 }

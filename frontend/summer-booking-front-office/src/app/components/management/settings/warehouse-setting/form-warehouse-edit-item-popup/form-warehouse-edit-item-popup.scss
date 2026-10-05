@@ -1,0 +1,87 @@
+@use '@angular/material' as mat;
+
+// Same form popup as the one to add an article (designer's mockup, 02/10/2026): 25rem wide, title on the left with the X on the
+// right, grey fields one under the other, the two buttons side by side at the bottom.
+// The popup renders in an overlay outside the component: these styles are global.
+.form__warehouse__edit__item__popup__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0.25rem,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+}
+
+// The element in the page only holds the popup template: Material draws the popup above the page.
+app-form-warehouse-edit-item-popup {
+  display: contents;
+}
+
+.form__warehouse__edit__item__popup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5625rem 1.5rem 1.75rem;
+}
+
+.form__warehouse__edit__item__popup__title {
+  margin: 0 2rem 1.375rem 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.form__warehouse__edit__item__popup__close {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  img {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+}
+
+.form__warehouse__edit__item__popup__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+// Annulla (white, blue text, soft blue border) and Aggiungi (blue), half each, both 1.75rem high
+// (the border of Annulla inside); text as in the mockup.
+.form__warehouse__edit__item__popup__buttons {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.625rem;
+}
+
+// Error of the API, between the fields and the buttons.
+.form__warehouse__edit__item__popup__error {
+  margin: 1.125rem 0 -0.5rem;
+  color: #dc3545;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}

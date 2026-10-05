@@ -221,6 +221,7 @@
         "create": "Add item",
         "form": {
           "title": "Add item",
+          "edit_title": "Edit item",
           "close": "Close",
           "name": "Item",
           "choose": "Select",
@@ -228,7 +229,8 @@
           "threshold": "Threshold",
           "threshold_alert": "Enable threshold alert",
           "cancel": "Cancel",
-          "add": "Add"
+          "add": "Add",
+          "save": "Save"
         }
       }
     }

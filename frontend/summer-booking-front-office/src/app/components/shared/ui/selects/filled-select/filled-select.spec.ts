@@ -9,6 +9,7 @@ import { FilledSelect } from './filled-select';
     label="Articolo"
     placeholder="Seleziona"
     [options]="options"
+    [disabled]="disabled()"
     [(value)]="chosen"
   />`,
 })
@@ -18,6 +19,7 @@ class FilledSelectHost {
     { value: 'a2', label: 'Ombrellone' },
   ];
   readonly chosen = signal<string | null>(null);
+  readonly disabled = signal(false);
 }
 
 describe('FilledSelect', () => {
@@ -54,5 +56,20 @@ describe('FilledSelect', () => {
 
     expect(host.chosen()).toBe('a1');
     expect(element.querySelector('.mat-mdc-select-trigger')?.textContent?.trim()).toBe('Lettino');
+  });
+
+  it('should show the value without opening while disabled', async () => {
+    const { fixture, host, element } = await setup();
+    host.chosen.set('a2');
+    host.disabled.set(true);
+    await fixture.whenStable();
+
+    expect(element.querySelector('.mat-mdc-select-trigger')?.textContent?.trim()).toBe(
+      'Ombrellone',
+    );
+    expect(element.querySelector('mat-select')?.getAttribute('aria-disabled')).toBe('true');
+    element.querySelector<HTMLElement>('.mat-mdc-select-trigger')!.click();
+    await fixture.whenStable();
+    expect(document.querySelectorAll('mat-option').length).toBe(0);
   });
 });

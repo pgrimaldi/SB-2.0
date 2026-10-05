@@ -4,6 +4,8 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import { AddWarehouseItemRequest } from '../../../entities/warehouse/add-warehouse-item-request';
+import { EditWarehouseItemRequest } from '../../../entities/warehouse/edit-warehouse-item-request';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
@@ -12,7 +14,8 @@ import { MOCK_PROPERTIES } from '../properties/properties.mock';
 /**
  * Rows of `catalog.inventory_items`: same structure as the sample DB, invented values (no data of
  * real properties). Each article belongs to one property (`propertyId` → `MOCK_PROPERTIES.id`):
- * a request only ever sees the articles of its own property.
+ * a request only ever sees the articles of its own property. `isThresholdWarningActive` (the threshold
+ * alert) is not a column of the sample DB yet: it is the field the frontend asks for.
  */
 const INVENTORY_ITEMS = [
   {
@@ -22,6 +25,7 @@ const INVENTORY_ITEMS = [
     name: 'Ombrellone',
     totalQuantity: 60,
     lowStockThreshold: 3,
+    isThresholdWarningActive: true,
     isActive: true,
     deletedAt: null,
   },
@@ -32,6 +36,7 @@ const INVENTORY_ITEMS = [
     name: 'Lettino',
     totalQuantity: 120,
     lowStockThreshold: 5,
+    isThresholdWarningActive: true,
     isActive: true,
     deletedAt: null,
   },
@@ -42,6 +47,7 @@ const INVENTORY_ITEMS = [
     name: 'Sdraio',
     totalQuantity: 80,
     lowStockThreshold: 4,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -52,6 +58,7 @@ const INVENTORY_ITEMS = [
     name: 'Cabina',
     totalQuantity: 24,
     lowStockThreshold: 2,
+    isThresholdWarningActive: true,
     isActive: true,
     deletedAt: null,
   },
@@ -62,6 +69,7 @@ const INVENTORY_ITEMS = [
     name: 'Doccia',
     totalQuantity: 8,
     lowStockThreshold: null,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -72,6 +80,7 @@ const INVENTORY_ITEMS = [
     name: 'Spogliatoio',
     totalQuantity: 4,
     lowStockThreshold: 1,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -82,6 +91,7 @@ const INVENTORY_ITEMS = [
     name: 'Parcheggio',
     totalQuantity: 35,
     lowStockThreshold: null,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -92,6 +102,7 @@ const INVENTORY_ITEMS = [
     name: 'Lettino XL',
     totalQuantity: 16,
     lowStockThreshold: 2,
+    isThresholdWarningActive: true,
     isActive: true,
     deletedAt: null,
   },
@@ -102,6 +113,7 @@ const INVENTORY_ITEMS = [
     name: 'Sedia regista',
     totalQuantity: 30,
     lowStockThreshold: 3,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -112,6 +124,7 @@ const INVENTORY_ITEMS = [
     name: 'Ombrellone grande',
     totalQuantity: 12,
     lowStockThreshold: 1,
+    isThresholdWarningActive: true,
     isActive: true,
     deletedAt: null,
   },
@@ -122,6 +135,7 @@ const INVENTORY_ITEMS = [
     name: 'Tenda',
     totalQuantity: 10,
     lowStockThreshold: 1,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -132,6 +146,7 @@ const INVENTORY_ITEMS = [
     name: 'Tavolino',
     totalQuantity: 25,
     lowStockThreshold: null,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -142,6 +157,7 @@ const INVENTORY_ITEMS = [
     name: 'Ombrellone vecchio',
     totalQuantity: 5,
     lowStockThreshold: 1,
+    isThresholdWarningActive: false,
     isActive: false,
     deletedAt: null,
   },
@@ -152,6 +168,7 @@ const INVENTORY_ITEMS = [
     name: 'Pedalò',
     totalQuantity: 6,
     lowStockThreshold: 1,
+    isThresholdWarningActive: true,
     isActive: true,
     deletedAt: null,
   },
@@ -162,6 +179,7 @@ const INVENTORY_ITEMS = [
     name: 'Canoa',
     totalQuantity: 4,
     lowStockThreshold: 1,
+    isThresholdWarningActive: false,
     isActive: true,
     deletedAt: null,
   },
@@ -208,6 +226,106 @@ export const warehouseComboboxMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };
 
+/**
+ * `POST /api/warehouse/add-warehouse-item` with `AddWarehouseItemRequest`: adds the pieces to the total
+ * of the article and sets its threshold and threshold alert (until the page is reloaded); 204 without
+ * a body. 401 without a valid access token; 400 with one error per wrong field (see `itemErrors`).
+ */
+export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<AddWarehouseItemRequest>;
+  const { item, errors } = itemErrors(body, body.idArticle, 'idArticle');
+  if (errors.length || !item) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+
+  item.totalQuantity += body.articleQuantity as number;
+  setThreshold(item, body);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/warehouse/edit-warehouse-item` with `EditWarehouseItemRequest`: sets total, threshold and
+ * threshold alert of the article (until the page is reloaded); 204 without a body. 401 without a valid
+ * access token; 400 with one error per wrong field (see `itemErrors`).
+ */
+export const warehouseEditMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<EditWarehouseItemRequest>;
+  const { item, errors } = itemErrors(body, body.idItem, 'idItem');
+  if (errors.length || !item) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+
+  item.totalQuantity = body.articleQuantity as number;
+  setThreshold(item, body);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+type InventoryItem = (typeof INVENTORY_ITEMS)[number];
+
+/**
+ * Checks of an article to add or change, as the backend answers them, one error per wrong field: the
+ * article (`field`) must be an active one of the property, the quantity a whole number above 0, the
+ * threshold a whole number or `null`, the alert a boolean, on only with a threshold above 0.
+ */
+function itemErrors(
+  body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
+  id: unknown,
+  field: 'idArticle' | 'idItem',
+): { item?: InventoryItem; errors: MockFieldError[] } {
+  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
+  const item = INVENTORY_ITEMS.find(
+    (row) =>
+      row.publicId === id &&
+      row.propertyId === property?.id &&
+      row.isActive &&
+      row.deletedAt === null,
+  );
+  const threshold = body.thresholdQuantity;
+  const errors: MockFieldError[] = [];
+  if (!property) {
+    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
+  }
+  if (!item) {
+    errors.push({ field, code: 'validation.invalid_value' });
+  }
+  if (!wholeNumber(body.articleQuantity) || body.articleQuantity === 0) {
+    errors.push({ field: 'articleQuantity', code: 'validation.invalid_value' });
+  }
+  if (threshold !== null && !wholeNumber(threshold)) {
+    errors.push({ field: 'thresholdQuantity', code: 'validation.invalid_value' });
+  }
+  if (
+    typeof body.isThresholdWarningActive !== 'boolean' ||
+    (body.isThresholdWarningActive && !(typeof threshold === 'number' && threshold > 0))
+  ) {
+    errors.push({ field: 'isThresholdWarningActive', code: 'validation.invalid_value' });
+  }
+  return { item, errors };
+}
+
+/** Threshold and threshold alert of a checked request. */
+function setThreshold(
+  item: InventoryItem,
+  body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
+): void {
+  item.lowStockThreshold = body.thresholdQuantity as number | null;
+  item.isThresholdWarningActive = body.isThresholdWarningActive as boolean;
+}
+
 /** Largest page the mock serves, as a real server would cap it. */
 const MAX_PAGE_SIZE = 100;
 
@@ -248,6 +366,7 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
       total: item.totalQuantity,
       available: item.totalQuantity - consumed,
       thresholdNumber: item.lowStockThreshold,
+      isThresholdWarningActive: item.isThresholdWarningActive,
     };
   });
 
@@ -282,6 +401,11 @@ function compare(first: string | number | null, second: string | number | null):
   return typeof first === 'number' && typeof second === 'number'
     ? first - second
     : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
+}
+
+/** Whole number from 0 up. */
+function wholeNumber(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0;
 }
 
 /** Whole number from 1 up, or the fallback for missing or invalid values. */

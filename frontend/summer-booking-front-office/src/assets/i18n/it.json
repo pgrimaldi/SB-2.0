@@ -221,6 +221,7 @@
         "create": "Aggiungi articolo",
         "form": {
           "title": "Aggiungi articolo",
+          "edit_title": "Modifica articolo",
           "close": "Chiudi",
           "name": "Articolo",
           "choose": "Seleziona",
@@ -228,7 +229,8 @@
           "threshold": "Soglia",
           "threshold_alert": "Abilita avviso di soglia",
           "cancel": "Annulla",
-          "add": "Aggiungi"
+          "add": "Aggiungi",
+          "save": "Salva"
         }
       }
     }

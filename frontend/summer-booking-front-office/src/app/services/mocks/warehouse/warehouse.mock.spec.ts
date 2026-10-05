@@ -228,6 +228,70 @@ describe('warehouseMock', () => {
     );
   });
 
+  it('should add the pieces to the article and set its threshold (204)', async () => {
+    const warehouse = await service();
+    const other = { ...MANAGEMENT, idProperty: MOCK_PROPERTIES[1].publicId };
+    const canoa = async () =>
+      (
+        await firstValueFrom(
+          warehouse.list({
+            ...other,
+            page: 1,
+            pageSize: 10,
+            search: 'canoa',
+            sortField: '',
+            sortDirection: 'Ascending',
+          }),
+        )
+      ).rows[0];
+    const before = await canoa();
+
+    const answer = await firstValueFrom(
+      warehouse.addWarehouseItem({
+        idProperty: other.idProperty,
+        idArticle: before.idArticle,
+        articleQuantity: 3,
+        thresholdQuantity: 2,
+        isThresholdWarningActive: true,
+      }),
+    );
+
+    expect(answer).toBeNull();
+    expect(await canoa()).toEqual(
+      expect.objectContaining({ total: before.total + 3, thresholdNumber: 2 }),
+    );
+  });
+
+  it('should refuse an article to add without a valid access token (401) or with wrong fields (400)', async () => {
+    const request = {
+      idProperty: MANAGEMENT.idProperty,
+      idArticle: 'unknown',
+      articleQuantity: 0,
+      thresholdQuantity: null,
+      isThresholdWarningActive: true,
+    };
+    const unauthorized = await firstValueFrom(
+      (await service(false)).addWarehouseItem(request),
+    ).catch((failure: HttpErrorResponse) => failure);
+    TestBed.resetTestingModule();
+    const invalid = await firstValueFrom((await service()).addWarehouseItem(request)).catch(
+      (failure: HttpErrorResponse) => failure,
+    );
+
+    expect((unauthorized as HttpErrorResponse).status).toBe(401);
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({
+        code: 'validation.invalid_request',
+        errors: [
+          { field: 'idArticle', code: 'validation.invalid_value' },
+          { field: 'articleQuantity', code: 'validation.invalid_value' },
+          { field: 'isThresholdWarningActive', code: 'validation.invalid_value' },
+        ],
+      }),
+    );
+  });
+
   it('should refuse a period whose end comes before its start', async () => {
     const error = await firstValueFrom(
       (await service()).list({
@@ -246,6 +310,78 @@ describe('warehouseMock', () => {
       expect.objectContaining({
         code: 'validation.invalid_request',
         errors: [{ field: 'datetimeTo', code: 'validation.end_before_start' }],
+      }),
+    );
+  });
+
+  it('should set total, threshold and alert of the article to change (204)', async () => {
+    const warehouse = await service();
+    const other = { ...MANAGEMENT, idProperty: MOCK_PROPERTIES[1].publicId };
+    const pedalo = async () =>
+      (
+        await firstValueFrom(
+          warehouse.list({
+            ...other,
+            page: 1,
+            pageSize: 10,
+            search: 'pedal',
+            sortField: '',
+            sortDirection: 'Ascending',
+          }),
+        )
+      ).rows[0];
+    const before = await pedalo();
+    expect(before.isThresholdWarningActive).toBe(true);
+
+    const answer = await firstValueFrom(
+      warehouse.editWarehouseItem({
+        idProperty: other.idProperty,
+        idItem: before.idArticle,
+        articleQuantity: 9,
+        thresholdQuantity: null,
+        isThresholdWarningActive: false,
+      }),
+    );
+
+    expect(answer).toBeNull();
+    expect(await pedalo()).toEqual(
+      expect.objectContaining({ total: 9, thresholdNumber: null, isThresholdWarningActive: false }),
+    );
+  });
+
+  it('should refuse an article to change of another property or with wrong fields (400)', async () => {
+    const warehouse = await service();
+    const canoa = (
+      await firstValueFrom(
+        warehouse.list({
+          ...MANAGEMENT,
+          idProperty: MOCK_PROPERTIES[1].publicId,
+          page: 1,
+          pageSize: 10,
+          search: 'canoa',
+          sortField: '',
+          sortDirection: 'Ascending',
+        }),
+      )
+    ).rows[0];
+    const invalid = await firstValueFrom(
+      warehouse.editWarehouseItem({
+        idProperty: MANAGEMENT.idProperty,
+        idItem: canoa.idArticle,
+        articleQuantity: 0,
+        thresholdQuantity: 0,
+        isThresholdWarningActive: true,
+      }),
+    ).catch((failure: HttpErrorResponse) => failure);
+
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({
+        errors: [
+          { field: 'idItem', code: 'validation.invalid_value' },
+          { field: 'articleQuantity', code: 'validation.invalid_value' },
+          { field: 'isThresholdWarningActive', code: 'validation.invalid_value' },
+        ],
       }),
     );
   });

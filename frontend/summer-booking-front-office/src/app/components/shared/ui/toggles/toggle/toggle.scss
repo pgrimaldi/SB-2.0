@@ -45,6 +45,21 @@
       label-text-line-height: 1rem,
       label-text-tracking: normal,
       label-text-weight: 600,
+      // Disabled: the same colours, faded to half (Material would make it almost invisible).
+      disabled-track-opacity: 0.5,
+      disabled-unselected-track-color: #bcbcbc,
+      disabled-unselected-track-outline-width: 0,
+      disabled-selected-track-color: var(--color__main__theme__one),
+      disabled-unselected-handle-color: var(--color__tertiary__theme),
+      disabled-selected-handle-color: var(--color__white),
+      disabled-unselected-handle-opacity: 1,
+      disabled-selected-handle-opacity: 1,
+      disabled-handle-elevation-shadow: 0 0 0 0.0625rem rgb(0 0 0 / 6%),
+      disabled-label-text-color: color-mix(
+          in srgb,
+          var(--color__layout__text__soft) 50%,
+          transparent
+        ),
     )
   );
 }

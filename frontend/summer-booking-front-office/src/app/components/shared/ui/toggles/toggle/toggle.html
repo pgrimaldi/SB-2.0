@@ -3,6 +3,7 @@
   hideIcon
   [name]="name() ?? null"
   [checked]="checked()"
+  [disabled]="disabled()"
   (change)="checked.set($event.checked)"
   ><ng-content
 /></mat-slide-toggle>

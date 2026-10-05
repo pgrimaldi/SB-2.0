@@ -45,6 +45,16 @@ export abstract class BasePopup implements OnDestroy {
     dialogRef?.close();
   }
 
+  /**
+   * False while the popup must stay open (e.g. while saving): Esc and a click outside do nothing.
+   * The popup's own buttons are blocked by the popup itself.
+   */
+  protected setClosable(closable: boolean): void {
+    if (this.dialogRef) {
+      this.dialogRef.disableClose = !closable;
+    }
+  }
+
   private show(): void {
     if (this.dialogRef) {
       return;

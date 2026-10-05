@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AddWarehouseItemRequest } from '../../../entities/warehouse/add-warehouse-item-request';
+import { EditWarehouseItemRequest } from '../../../entities/warehouse/edit-warehouse-item-request';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { Page, PageRequest } from '../../../entities/pagination/page';
@@ -26,4 +28,12 @@ export class WarehouseService {
     request: Pick<ManagementRequest, 'idProperty'>,
   ): Observable<ComboboxItem[]> =>
     this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/combobox-list`, request);
+
+  /** Adds an article to the warehouse of the property; no answer body (204). */
+  readonly addWarehouseItem = (request: AddWarehouseItemRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/add-warehouse-item`, request);
+
+  /** Changes total, threshold and threshold alert of an article of the warehouse; no answer body (204). */
+  readonly editWarehouseItem = (request: EditWarehouseItemRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/edit-warehouse-item`, request);
 }

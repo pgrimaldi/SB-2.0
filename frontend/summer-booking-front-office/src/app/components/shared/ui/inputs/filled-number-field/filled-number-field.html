@@ -1,13 +1,25 @@
 <label class="filled__number__field__label" [for]="id">{{ label() }}</label>
 <mat-form-field class="filled__number__field__control" appearance="fill" subscriptSizing="dynamic">
+  <!-- One @if around the span alone, or Material would not place it before the number. -->
+  @if (currency() && icons().list[0]; as icon) {
+    <span matTextPrefix class="filled__number__field__currency">
+      @if (icons().material) {
+        <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      } @else {
+        <img [src]="icon" width="14" height="14" alt="" />
+      }
+    </span>
+  }
+  <!-- A text field, not type="number": that one accepts "e", signs and more than one separator. -->
   <input
     #field
     matInput
-    type="number"
-    inputmode="decimal"
+    type="text"
+    autocomplete="off"
+    [attr.inputmode]="decimal() ? 'decimal' : 'numeric'"
     [id]="id"
-    [value]="value() ?? ''"
+    [value]="text()"
     [attr.name]="name() ?? null"
-    (input)="changeValue(field.value)"
+    (input)="changeValue(field)"
   />
 </mat-form-field>
