@@ -1,5 +1,10 @@
 <label class="filled__number__field__label" [for]="id">{{ label() }}</label>
-<mat-form-field class="filled__number__field__control" appearance="fill" subscriptSizing="dynamic">
+<mat-form-field
+  class="filled__number__field__control"
+  appearance="fill"
+  subscriptSizing="dynamic"
+  [class.filled__number__field__invalid]="!!error()"
+>
   <!-- One @if around the span alone, or Material would not place it before the number. -->
   @if (currency() && icons().list[0]; as icon) {
     <span matTextPrefix class="filled__number__field__currency">
@@ -20,6 +25,12 @@
     [id]="id"
     [value]="text()"
     [attr.name]="name() ?? null"
+    [attr.aria-invalid]="error() ? true : null"
+    [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="changeValue(field)"
+    (blur)="touch.emit()"
   />
 </mat-form-field>
+@if (error(); as error) {
+  <p class="filled__number__field__error" [id]="id + '-error'">{{ error }}</p>
+}

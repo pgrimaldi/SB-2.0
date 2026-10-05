@@ -230,7 +230,34 @@
           "threshold_alert": "Enable threshold alert",
           "cancel": "Cancel",
           "add": "Add",
-          "save": "Save"
+          "save": "Save",
+          "field_names": {
+            "total": "total"
+          }
+        },
+        "delete": {
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "one": {
+            "title": "Delete item",
+            "text": "Do you want to delete the item {{name}}?"
+          },
+          "many": {
+            "title": "Delete items",
+            "text": "Do you want to delete the {{count}} selected items?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Cancel",
+          "confirm": "Duplicate",
+          "one": {
+            "title": "Duplicate item",
+            "text": "Do you want to duplicate the item {{name}}?"
+          },
+          "many": {
+            "title": "Duplicate items",
+            "text": "Do you want to duplicate the {{count}} selected items?"
+          }
         }
       }
     }
@@ -340,5 +367,8 @@
     "title": "Page not found",
     "description": "The page you are looking for does not exist or has been moved.",
     "link": "Back to home"
+  },
+  "invalidate": {
+    "greater_than": "The {{field}} value must be greater than {{limit}}"
   }
 }

@@ -13,15 +13,18 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormField, form } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
+import { greaterThan } from '../../../../shared/forms/validators';
 import { Button } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
@@ -31,9 +34,14 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 let nextId = 0;
 
+interface EditedQuantities {
+  articleQuantity: number | null;
+  thresholdQuantity: number | null;
+}
+
 @Component({
   selector: 'app-form-warehouse-edit-item-popup',
-  imports: [Button, FilledNumberField, FilledSelect, Toggle, TranslatePipe],
+  imports: [Button, FilledNumberField, FilledSelect, FormField, Toggle, TranslatePipe],
   templateUrl: './form-warehouse-edit-item-popup.html',
   styleUrl: './form-warehouse-edit-item-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +52,7 @@ export class FormWarehouseEditItemPopup extends BasePopup {
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly validationText = inject(ValidationTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Read only when the popup opens. */
@@ -55,18 +64,26 @@ export class FormWarehouseEditItemPopup extends BasePopup {
     return item ? [{ value: item.idArticle, label: item.name }] : [];
   });
   protected readonly idArticle = computed(() => this.item()?.idArticle ?? null);
-  protected readonly articleQuantity = signal<number | null>(null);
-  protected readonly thresholdQuantity = signal<number | null>(null);
-  protected readonly canAlert = computed(() => (this.thresholdQuantity() ?? 0) > 0);
+  private readonly quantities = signal<EditedQuantities>({
+    articleQuantity: null,
+    thresholdQuantity: null,
+  });
+  protected readonly quantitiesForm = form(this.quantities, (path) => {
+    greaterThan(path.articleQuantity, 0);
+  });
+  protected readonly articleQuantityError = this.validationText.message(
+    this.quantitiesForm.articleQuantity,
+    'management.settings.warehouse.form.field_names.total',
+  );
+  protected readonly canAlert = computed(() => (this.quantities().thresholdQuantity ?? 0) > 0);
   /** Goes off by itself when the threshold is no longer above 0. */
   protected readonly thresholdAlert = linkedSignal<boolean, boolean>({
     source: this.canAlert,
     computation: (canAlert, previous) => canAlert && (previous?.value ?? false),
   });
   protected readonly isLoading = signal(false);
-  /** Minimal check: the full validation will come later. */
   protected readonly canSave = computed(
-    () => this.idArticle() !== null && (this.articleQuantity() ?? 0) > 0,
+    () => this.idArticle() !== null && this.quantitiesForm().valid(),
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -90,7 +107,7 @@ export class FormWarehouseEditItemPopup extends BasePopup {
   protected save(): void {
     const idProperty = this.auth.user()?.idProperty;
     const idItem = this.idArticle();
-    const articleQuantity = this.articleQuantity();
+    const { articleQuantity, thresholdQuantity } = this.quantities();
     if (this.isLoading() || !idProperty || idItem === null || articleQuantity === null) {
       return;
     }
@@ -101,7 +118,7 @@ export class FormWarehouseEditItemPopup extends BasePopup {
         idProperty,
         idItem,
         articleQuantity,
-        thresholdQuantity: this.thresholdQuantity(),
+        thresholdQuantity,
         isThresholdWarningActive: this.thresholdAlert(),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -133,8 +150,8 @@ export class FormWarehouseEditItemPopup extends BasePopup {
   private fill(): void {
     const item = this.item();
     const thresholdQuantity = item?.thresholdQuantity ?? null;
-    this.articleQuantity.set(item?.totalQuantity ?? null);
-    this.thresholdQuantity.set(thresholdQuantity);
+    this.quantities.set({ articleQuantity: item?.totalQuantity ?? null, thresholdQuantity });
+    this.quantitiesForm().reset();
     // Set by hand the alert would win over the threshold: checked here too.
     this.thresholdAlert.set(
       (item?.isThresholdWarningActive ?? false) && (thresholdQuantity ?? 0) > 0,

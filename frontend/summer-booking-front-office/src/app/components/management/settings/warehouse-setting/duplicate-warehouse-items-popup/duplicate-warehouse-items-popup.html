@@ -1,0 +1,20 @@
+@let name = itemName();
+<app-confirm-popup
+  [title]="
+    (name
+      ? 'management.settings.warehouse.duplicate.one.title'
+      : 'management.settings.warehouse.duplicate.many.title'
+    ) | translate
+  "
+  [text]="
+    name
+      ? ('management.settings.warehouse.duplicate.one.text' | translate: { name })
+      : ('management.settings.warehouse.duplicate.many.text'
+        | translate: { count: idItems().length })
+  "
+  [texts]="'management.settings.warehouse.duplicate' | translate"
+  [loading]="isLoading()"
+  [error]="errorMessage()"
+  [(open)]="open"
+  (confirmed)="duplicateItems()"
+/>

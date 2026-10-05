@@ -9,6 +9,7 @@ import { FilledNumberField } from './filled-number-field';
     [decimal]="decimal()"
     [currency]="currency()"
     [pathIcon]="['/assets/images/euro.svg']"
+    [error]="error()"
     [(value)]="threshold"
   />`,
 })
@@ -16,6 +17,7 @@ class FilledNumberFieldHost {
   readonly threshold = signal<number | null>(3);
   readonly decimal = signal(false);
   readonly currency = signal(false);
+  readonly error = signal<string | null>(null);
 }
 
 describe('FilledNumberField', () => {
@@ -108,5 +110,17 @@ describe('FilledNumberField', () => {
     host.threshold.set(null);
     await fixture.whenStable();
     expect(input.value).toBe('');
+  });
+
+  it('should show the error under the field and link it for screen readers', async () => {
+    const { fixture, host, element, input } = await setup();
+    host.error.set('Il valore totale deve essere superiore a 0');
+    await fixture.whenStable();
+    const message = element.querySelector('.filled__number__field__error')!;
+
+    expect(message.textContent?.trim()).toBe('Il valore totale deve essere superiore a 0');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-describedby')).toBe(message.id);
+    expect(element.querySelector('.filled__number__field__invalid')).not.toBeNull();
   });
 });

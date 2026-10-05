@@ -5,6 +5,7 @@ import {
   input,
   linkedSignal,
   model,
+  output,
 } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,6 +37,9 @@ export class FilledNumberField {
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [currency]. */
   readonly pathIcon = input<readonly string[] | null>();
+  readonly error = input<string | null>();
+  /** The field was left: a Signal Forms `[formField]` marks it as touched. */
+  readonly touch = output<void>();
 
   protected readonly id = `filled-number-field-${nextId++}`;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));

@@ -5,6 +5,8 @@ import { BookingDayType } from '../../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { AddWarehouseItemRequest } from '../../../entities/warehouse/add-warehouse-item-request';
+import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-warehouse-items-request';
+import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
 import { EditWarehouseItemRequest } from '../../../entities/warehouse/edit-warehouse-item-request';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -17,7 +19,7 @@ import { MOCK_PROPERTIES } from '../properties/properties.mock';
  * a request only ever sees the articles of its own property. `isThresholdWarningActive` (the threshold
  * alert) is not a column of the sample DB yet: it is the field the frontend asks for.
  */
-const INVENTORY_ITEMS = [
+const INVENTORY_ITEMS: InventoryRow[] = [
   {
     id: 1,
     publicId: '276a67d2-d0eb-47f5-8223-4804b9a9dcf9',
@@ -274,14 +276,116 @@ export const warehouseEditMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
-type InventoryItem = (typeof INVENTORY_ITEMS)[number];
+/**
+ * `POST /api/warehouse/delete-warehouse-item` with `DeleteWarehouseItemsRequest`: all or nothing, as
+ * agreed with the backend. If one id is not an active article of the property nothing is deleted
+ * (400, error on `idItems`); otherwise the rows get `deletedAt`, like the soft delete of the DB.
+ * Repeated ids count once. 204 without a body; 401 without a valid access token.
+ */
+export const warehouseDeleteMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const { items, errors } = itemsOf((request.body ?? {}) as Partial<DeleteWarehouseItemsRequest>);
+  if (errors.length) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+
+  const deletedAt = new Date().toISOString();
+  for (const item of items) {
+    item.deletedAt = deletedAt;
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/warehouse/duplicate-warehouse-item` with `DuplicateWarehouseItemsRequest`: all or
+ * nothing, like the delete. Each copy keeps total, threshold and alert; the name is chosen by the
+ * backend: the mock invents "Lettino (copia)", then "Lettino (copia 2)" and so on.
+ * 204 without a body; 401 without a valid access token.
+ */
+export const warehouseDuplicateMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const { items, errors } = itemsOf(
+    (request.body ?? {}) as Partial<DuplicateWarehouseItemsRequest>,
+  );
+  if (errors.length) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+
+  for (const item of items) {
+    INVENTORY_ITEMS.push({
+      ...item,
+      id: Math.max(...INVENTORY_ITEMS.map((row) => row.id)) + 1,
+      publicId: crypto.randomUUID(),
+      name: copyName(item),
+    });
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * The active articles of the property for `idItems` (repeated ids once), with one error per wrong
+ * field: an id that is not one of them makes the whole request wrong.
+ */
+function itemsOf(body: Partial<DeleteWarehouseItemsRequest>): {
+  items: InventoryRow[];
+  errors: MockFieldError[];
+} {
+  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
+  const idItems = Array.isArray(body.idItems) ? [...new Set(body.idItems)] : [];
+  const items = idItems
+    .map((idItem) =>
+      INVENTORY_ITEMS.find(
+        (row) =>
+          row.publicId === idItem &&
+          row.propertyId === property?.id &&
+          row.isActive &&
+          row.deletedAt === null,
+      ),
+    )
+    .filter((item): item is InventoryRow => item !== undefined);
+  const errors: MockFieldError[] = [];
+  if (!property) {
+    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
+  }
+  if (!idItems.length || items.length < idItems.length) {
+    errors.push({ field: 'idItems', code: 'validation.invalid_value' });
+  }
+  return { items, errors };
+}
+
+function copyName(item: InventoryRow): string {
+  const taken = new Set(
+    INVENTORY_ITEMS.filter(
+      (row) => row.propertyId === item.propertyId && row.deletedAt === null,
+    ).map((row) => row.name),
+  );
+  let copy = `${item.name} (copia)`;
+  for (let number = 2; taken.has(copy); number++) {
+    copy = `${item.name} (copia ${number})`;
+  }
+  return copy;
+}
 
 /** Checks as the backend answers them: one error per wrong field. */
 function itemErrors(
   body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
   id: unknown,
   field: 'idArticle' | 'idItem',
-): { item?: InventoryItem; errors: MockFieldError[] } {
+): { item?: InventoryRow; errors: MockFieldError[] } {
   const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
   const item = INVENTORY_ITEMS.find(
     (row) =>
@@ -315,7 +419,7 @@ function itemErrors(
 }
 
 function setThreshold(
-  item: InventoryItem,
+  item: InventoryRow,
   body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
 ): void {
   item.lowStockThreshold = body.thresholdQuantity as number | null;
@@ -381,6 +485,18 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 };
 
 const SORT_FIELDS = ['name', 'totalQuantity', 'availableQuantity', 'thresholdQuantity'] as const;
+
+interface InventoryRow {
+  id: number;
+  publicId: string;
+  propertyId: number;
+  name: string;
+  totalQuantity: number;
+  lowStockThreshold: number | null;
+  isThresholdWarningActive: boolean;
+  isActive: boolean;
+  deletedAt: string | null;
+}
 
 /**
  * Numbers by value, texts alphabetically (Italian rules, ignoring case). A missing value (a threshold

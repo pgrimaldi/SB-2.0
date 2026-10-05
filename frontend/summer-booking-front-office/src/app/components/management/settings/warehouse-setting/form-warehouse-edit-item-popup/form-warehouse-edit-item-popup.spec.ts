@@ -169,4 +169,21 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(popup()!.querySelector('[role="alert"]')?.textContent?.trim()).toBe('error.unknown');
     expect(inputs()[0].value).toBe('90');
   });
+
+  it('should show the total in red with its message when it is emptied or 0', async () => {
+    const { popup, inputs, save, type } = await setup();
+    const message = () => popup()!.querySelector('.filled__number__field__error');
+
+    expect(message()).toBeNull();
+    await type(inputs()[0], '');
+    // The generic key (the test has no translations).
+    expect(message()?.textContent?.trim()).toBe('invalidate.greater_than');
+    expect(inputs()[0].getAttribute('aria-invalid')).toBe('true');
+    expect(save().disabled).toBe(true);
+
+    await type(inputs()[0], '0');
+    expect(message()).not.toBeNull();
+    await type(inputs()[0], '4');
+    expect(message()).toBeNull();
+  });
 });

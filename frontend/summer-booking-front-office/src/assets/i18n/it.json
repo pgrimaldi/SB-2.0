@@ -230,7 +230,34 @@
           "threshold_alert": "Abilita avviso di soglia",
           "cancel": "Annulla",
           "add": "Aggiungi",
-          "save": "Salva"
+          "save": "Salva",
+          "field_names": {
+            "total": "totale"
+          }
+        },
+        "delete": {
+          "cancel": "Annulla",
+          "confirm": "Elimina",
+          "one": {
+            "title": "Elimina articolo",
+            "text": "Vuoi eliminare l'articolo {{name}}?"
+          },
+          "many": {
+            "title": "Elimina articoli",
+            "text": "Vuoi eliminare i {{count}} articoli selezionati?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Annulla",
+          "confirm": "Duplica",
+          "one": {
+            "title": "Duplica articolo",
+            "text": "Vuoi duplicare l'articolo {{name}}?"
+          },
+          "many": {
+            "title": "Duplica articoli",
+            "text": "Vuoi duplicare i {{count}} articoli selezionati?"
+          }
         }
       }
     }
@@ -340,5 +367,8 @@
     "title": "Pagina non trovata",
     "description": "La pagina che stai cercando non esiste o è stata spostata.",
     "link": "Torna alla home"
+  },
+  "invalidate": {
+    "greater_than": "Il valore {{field}} deve essere superiore a {{limit}}"
   }
 }

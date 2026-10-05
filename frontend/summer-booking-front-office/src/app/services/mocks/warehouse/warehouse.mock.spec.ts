@@ -393,4 +393,132 @@ describe('warehouseMock', () => {
       }),
     );
   });
+
+  it('should delete nothing when one id is not an article of the property (400)', async () => {
+    const warehouse = await service();
+    const other = { ...MANAGEMENT, idProperty: MOCK_PROPERTIES[1].publicId };
+    const listOther = async () =>
+      (
+        await firstValueFrom(
+          warehouse.list({
+            ...other,
+            page: 1,
+            pageSize: 10,
+            search: '',
+            sortField: '',
+            sortDirection: 'Ascending',
+          }),
+        )
+      ).rows;
+    const [first] = await listOther();
+
+    const invalid = await firstValueFrom(
+      warehouse.deleteWarehouseItems({
+        idProperty: other.idProperty,
+        idItems: [first.idArticle, 'unknown'],
+      }),
+    ).catch((failure: HttpErrorResponse) => failure);
+    const empty = await firstValueFrom(
+      warehouse.deleteWarehouseItems({ idProperty: other.idProperty, idItems: [] }),
+    ).catch((failure: HttpErrorResponse) => failure);
+
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({ errors: [{ field: 'idItems', code: 'validation.invalid_value' }] }),
+    );
+    expect((empty as HttpErrorResponse).status).toBe(400);
+    expect((await listOther()).length).toBe(2);
+  });
+
+  it('should delete all the ids, repeated ones once, and leave them out of the lists (204)', async () => {
+    const warehouse = await service();
+    const other = { ...MANAGEMENT, idProperty: MOCK_PROPERTIES[1].publicId };
+    const request = {
+      ...other,
+      page: 1,
+      pageSize: 10,
+      search: '',
+      sortField: '',
+      sortDirection: 'Ascending' as const,
+    };
+    const idItems = (await firstValueFrom(warehouse.list(request))).rows.map(
+      (item) => item.idArticle,
+    );
+
+    const answer = await firstValueFrom(
+      warehouse.deleteWarehouseItems({
+        idProperty: other.idProperty,
+        idItems: [...idItems, idItems[0]],
+      }),
+    );
+
+    expect(answer).toBeNull();
+    expect(await firstValueFrom(warehouse.list(request))).toEqual({ total: 0, rows: [] });
+    expect(await firstValueFrom(warehouse.comboboxList({ idProperty: other.idProperty }))).toEqual(
+      [],
+    );
+  });
+
+  it('should copy the articles with a new id and a name chosen by the server (204)', async () => {
+    const warehouse = await service();
+    const lettini = async () =>
+      (
+        await firstValueFrom(
+          warehouse.list({
+            ...MANAGEMENT,
+            page: 1,
+            pageSize: 10,
+            search: 'lettino',
+            sortField: 'name',
+            sortDirection: 'Ascending',
+          }),
+        )
+      ).rows;
+    const lettino = (await lettini()).find((item) => item.name === 'Lettino')!;
+
+    const answer = await firstValueFrom(
+      warehouse.duplicateWarehouseItems({
+        idProperty: MANAGEMENT.idProperty,
+        idItems: [lettino.idArticle, lettino.idArticle],
+      }),
+    );
+    await firstValueFrom(
+      warehouse.duplicateWarehouseItems({
+        idProperty: MANAGEMENT.idProperty,
+        idItems: [lettino.idArticle],
+      }),
+    );
+    const rows = await lettini();
+    const copy = rows.find((item) => item.name === 'Lettino (copia)')!;
+
+    expect(answer).toBeNull();
+    expect([...rows.map((item) => item.name)].sort()).toEqual([
+      'Lettino',
+      'Lettino (copia 2)',
+      'Lettino (copia)',
+      'Lettino XL',
+    ]);
+    expect(copy.idArticle).not.toBe(lettino.idArticle);
+    expect(copy).toEqual(
+      expect.objectContaining({
+        totalQuantity: lettino.totalQuantity,
+        thresholdQuantity: lettino.thresholdQuantity,
+        isThresholdWarningActive: lettino.isThresholdWarningActive,
+      }),
+    );
+  });
+
+  it('should copy nothing when one id is not an article of the property (400)', async () => {
+    const invalid = await firstValueFrom(
+      (await service()).duplicateWarehouseItems({
+        idProperty: MANAGEMENT.idProperty,
+        idItems: ['unknown'],
+      }),
+    ).catch((failure: HttpErrorResponse) => failure);
+
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({ errors: [{ field: 'idItems', code: 'validation.invalid_value' }] }),
+    );
+  });
 });

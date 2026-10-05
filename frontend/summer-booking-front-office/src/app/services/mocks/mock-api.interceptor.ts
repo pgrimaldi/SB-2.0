@@ -4,6 +4,8 @@ import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
 import {
   warehouseAddMock,
   warehouseComboboxMock,
+  warehouseDeleteMock,
+  warehouseDuplicateMock,
   warehouseEditMock,
   warehouseMock,
 } from './warehouse/warehouse.mock';
@@ -45,6 +47,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/warehouse/edit-warehouse-item`
   ) {
     return warehouseEditMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/warehouse/delete-warehouse-item`
+  ) {
+    return warehouseDeleteMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/warehouse/duplicate-warehouse-item`
+  ) {
+    return warehouseDuplicateMock(request);
   }
 
   return next(request);

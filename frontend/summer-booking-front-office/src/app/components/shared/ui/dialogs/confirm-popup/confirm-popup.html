@@ -1,0 +1,21 @@
+<ng-template #content>
+  <div class="confirm__popup">
+    <h2 class="confirm__popup__title" [id]="id + '-title'">{{ title() }}</h2>
+    <p class="confirm__popup__text" [id]="id + '-text'">{{ text() }}</p>
+    @if (error(); as error) {
+      <p class="confirm__popup__error" role="alert">{{ error }}</p>
+    }
+    <div class="confirm__popup__actions">
+      <app-button appearance="light" [disabled]="loading()" (clicked)="close()">
+        {{ texts()?.cancel }}
+      </app-button>
+      <app-button
+        [class.confirm__popup__danger]="danger()"
+        [loading]="loading()"
+        (clicked)="confirmed.emit()"
+      >
+        {{ texts()?.confirm }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

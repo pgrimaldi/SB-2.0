@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AddWarehouseItemRequest } from '../../../entities/warehouse/add-warehouse-item-request';
+import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-warehouse-items-request';
+import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
 import { EditWarehouseItemRequest } from '../../../entities/warehouse/edit-warehouse-item-request';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ManagementRequest } from '../../../entities/management/management-request';
@@ -35,4 +37,14 @@ export class WarehouseService {
   /** Answers 204 with no body. */
   readonly editWarehouseItem = (request: EditWarehouseItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/edit-warehouse-item`, request);
+
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteWarehouseItems = (request: DeleteWarehouseItemsRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-warehouse-item`, request);
+
+  /**
+   * All or nothing, like the delete. The backend names the copies. Answers 204 with no body.
+   */
+  readonly duplicateWarehouseItems = (request: DuplicateWarehouseItemsRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-warehouse-item`, request);
 }

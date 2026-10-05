@@ -22,11 +22,12 @@
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.quantity' | translate"
-        [(value)]="articleQuantity"
+        [formField]="quantitiesForm.articleQuantity"
+        [error]="articleQuantityError()"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.threshold' | translate"
-        [(value)]="thresholdQuantity"
+        [formField]="quantitiesForm.thresholdQuantity"
       />
       <app-toggle [disabled]="!canAlert()" [(checked)]="thresholdAlert">
         {{ 'management.settings.warehouse.form.threshold_alert' | translate }}

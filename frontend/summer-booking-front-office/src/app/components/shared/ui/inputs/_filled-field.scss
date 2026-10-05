@@ -52,4 +52,30 @@
       padding-inline: 0.75rem;
     }
   }
+
+  // Invalid: a thicker red border and a reddish fill, so the field stands out from the others.
+  .#{$block}__invalid,
+  .#{$block}__invalid:focus-within {
+    outline-width: 0.125rem;
+    outline-offset: -0.125rem;
+    outline-color: var(--color__layout__error);
+
+    @include mat.form-field-overrides(
+      (
+        filled-container-color: color-mix(
+            in srgb,
+            var(--color__layout__error) 10%,
+            var(--color__layout__surface)
+          ),
+      )
+    );
+  }
+
+  // Closer to its field than the label above (the host gap is 0.625rem).
+  .#{$block}__error {
+    margin: -0.375rem 0 0;
+    color: var(--color__layout__error);
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
 }

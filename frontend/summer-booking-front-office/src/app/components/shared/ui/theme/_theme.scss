@@ -22,6 +22,7 @@
   --color__layout__divider: #8da1c6; // line under the header of the default table look
   --color__layout__shadow: rgb(0 0 0 / 15%); // shadows of raised panels
   --color__layout__shadow__light: rgb(0 0 0 / 10%); // lighter shadows (cards at rest, arrows)
+  --color__layout__error: #dc3545; // invalid fields and their messages
 }
 
 // Keyboard focus ring of the app's own elements, one for the whole app: 0.125rem in the text colour,

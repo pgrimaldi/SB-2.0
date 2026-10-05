@@ -17,9 +17,12 @@
     [hideCreateButton]="false"
     [createLabel]="'management.settings.warehouse.create' | translate"
     [rowActions]="rowActions()"
+    [(selection)]="idSelectedItems"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
     (create)="adding.set(true)"
+    (deleteSelected)="askDelete($event)"
+    (duplicateSelected)="askDuplicate($event)"
   />
 </main>
 
@@ -28,6 +31,18 @@
   [item]="editedItem()"
   [(open)]="editing"
   (saved)="table.reload()"
+/>
+<app-delete-warehouse-items-popup
+  [idItems]="idItemsToDelete()"
+  [itemName]="itemNameToDelete()"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-warehouse-items-popup
+  [idItems]="idItemsToDuplicate()"
+  [itemName]="itemNameToDuplicate()"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup
