@@ -223,6 +223,7 @@
           "title": "Add item",
           "close": "Close",
           "name": "Item",
+          "choose": "Select",
           "quantity": "Enter the quantity",
           "threshold": "Threshold",
           "threshold_alert": "Enable threshold alert",

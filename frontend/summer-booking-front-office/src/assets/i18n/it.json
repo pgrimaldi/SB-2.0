@@ -223,6 +223,7 @@
           "title": "Aggiungi articolo",
           "close": "Chiudi",
           "name": "Articolo",
+          "choose": "Seleziona",
           "quantity": "Immettere la quantità",
           "threshold": "Soglia",
           "threshold_alert": "Abilita avviso di soglia",

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
@@ -19,4 +20,10 @@ export class WarehouseService {
    */
   readonly list = (request: ManagementRequest & PageRequest): Observable<Page<WarehouseItem>> =>
     this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
+
+  /** All the articles of the property for a select: id and name only, by name. */
+  readonly comboboxList = (
+    request: Pick<ManagementRequest, 'idProperty'>,
+  ): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/combobox-list`, request);
 }

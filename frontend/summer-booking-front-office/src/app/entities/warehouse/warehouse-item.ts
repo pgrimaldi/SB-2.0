@@ -1,4 +1,4 @@
-/** Warehouse article of the property, as answered by `GET /api/warehouse/list`. */
+/** Warehouse article of the property, as answered by `POST /api/warehouse/list`. */
 export interface WarehouseItem {
   idArticle: string;
   name: string;

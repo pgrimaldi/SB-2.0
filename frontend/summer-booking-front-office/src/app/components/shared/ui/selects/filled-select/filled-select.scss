@@ -1,0 +1,28 @@
+@use '@angular/material' as mat;
+@use '../../inputs/filled-field' as field;
+
+// The grey field of the form popups (label, field, focus border: `inputs/_filled-field.scss`); here
+// the select: blue text and placeholder, blue arrow, as in the mockup. The options open in the shared
+// `select__panel` of the theme.
+@include field.filled-field(filled__select);
+
+:host {
+  @include mat.select-overrides(
+    (
+      trigger-text-size: 0.75rem,
+      trigger-text-line-height: 1.125rem,
+      trigger-text-tracking: normal,
+      trigger-text-weight: 500,
+      enabled-trigger-text-color: var(--color__main__theme__one),
+      placeholder-text-color: var(--color__main__theme__one),
+      enabled-arrow-color: var(--color__main__theme__one),
+      focused-arrow-color: var(--color__main__theme__one),
+    )
+  );
+}
+
+// Material gives the arrow a box 24px high, which would make the field taller than the other grey
+// fields: the box is as high as the text.
+.filled__select__control ::ng-deep .mat-mdc-select-arrow-wrapper {
+  height: 1.125rem;
+}

@@ -13,10 +13,11 @@
     </button>
 
     <div class="form__warehouse__item__popup__fields">
-      <app-filled-text-field
+      <app-filled-select
         [label]="'management.settings.warehouse.form.name' | translate"
-        [maxLength]="500"
-        [(value)]="name"
+        [placeholder]="'management.settings.warehouse.form.choose' | translate"
+        [options]="articleOptions()"
+        [(value)]="article"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.quantity' | translate"

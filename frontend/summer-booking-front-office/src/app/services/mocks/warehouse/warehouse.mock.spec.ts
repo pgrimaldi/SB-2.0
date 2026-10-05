@@ -189,6 +189,45 @@ describe('warehouseMock', () => {
     expect(unknown).toEqual({ total: 0, rows: [] });
   });
 
+  it('should answer the articles of the property for a select: id and name, by name', async () => {
+    const warehouse = await service();
+    const demo = await firstValueFrom(
+      warehouse.comboboxList({ idProperty: MANAGEMENT.idProperty }),
+    );
+    const other = await firstValueFrom(
+      warehouse.comboboxList({ idProperty: MOCK_PROPERTIES[1].publicId }),
+    );
+    const unknown = await firstValueFrom(warehouse.comboboxList({ idProperty: 'unknown' }));
+
+    expect(demo.length).toBe(12); // the inactive article is left out
+    expect(demo[0]).toEqual({ id: expect.any(String), value: 'Cabina' });
+    expect(Object.keys(demo[0])).toEqual(['id', 'value']);
+    expect(demo.map((item) => item.value)).toEqual(
+      [...demo.map((item) => item.value)].sort((a, b) => a.localeCompare(b, 'it')),
+    );
+    expect(other.map((item) => item.value)).toEqual(['Canoa', 'Pedalò']);
+    expect(unknown).toEqual([]);
+  });
+
+  it('should refuse the select list without a valid access token (401) or without the property (400)', async () => {
+    const unauthorized = await firstValueFrom(
+      (await service(false)).comboboxList({ idProperty: MANAGEMENT.idProperty }),
+    ).catch((failure: HttpErrorResponse) => failure);
+    TestBed.resetTestingModule();
+    const invalid = await firstValueFrom((await service()).comboboxList({ idProperty: '' })).catch(
+      (failure: HttpErrorResponse) => failure,
+    );
+
+    expect((unauthorized as HttpErrorResponse).status).toBe(401);
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({
+        code: 'validation.invalid_request',
+        errors: [{ field: 'idProperty', code: 'validation.invalid_value' }],
+      }),
+    );
+  });
+
   it('should refuse a period whose end comes before its start', async () => {
     const error = await firstValueFrom(
       (await service()).list({

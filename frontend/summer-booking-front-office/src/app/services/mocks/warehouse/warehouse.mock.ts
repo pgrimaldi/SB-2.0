@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
@@ -179,6 +180,33 @@ const TODAY_CONSUMPTIONS: { resourceId: string; quantity: number; state: Consump
   { resourceId: '2ae86856-ad2a-4dcd-81c7-fc77a97ee053', quantity: 3, state: 'held' },
   { resourceId: '62bf4a2c-db53-4140-b885-4f9c62ae40d4', quantity: 2, state: 'confirmed' },
 ];
+
+/**
+ * `POST /api/warehouse/combobox-list` with `{ idProperty }`: the active articles of the property
+ * (never of other properties), id and name only, by name; none for an unknown property. 401 without
+ * a valid access token; 400 without `idProperty`.
+ */
+export const warehouseComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<Pick<ManagementRequest, 'idProperty'>>;
+  if (typeof body.idProperty !== 'string' || !body.idProperty) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors: [{ field: 'idProperty', code: 'validation.invalid_value' }],
+    });
+  }
+  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
+  const items: ComboboxItem[] = INVENTORY_ITEMS.filter(
+    (item) => item.propertyId === property?.id && item.isActive && item.deletedAt === null,
+  )
+    .map((item) => ({ id: item.publicId, value: item.name }))
+    .sort((first, second) => compare(first.value, second.value));
+  return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
+};
 
 /** Largest page the mock serves, as a real server would cap it. */
 const MAX_PAGE_SIZE = 100;

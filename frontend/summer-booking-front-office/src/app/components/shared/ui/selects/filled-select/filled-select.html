@@ -1,0 +1,15 @@
+<label class="filled__select__label" [id]="id + '-label'">{{ label() }}</label>
+<mat-form-field class="filled__select__control" appearance="fill" subscriptSizing="dynamic">
+  <mat-select
+    panelClass="select__panel"
+    hideSingleSelectionIndicator
+    [aria-labelledby]="id + '-label'"
+    [placeholder]="placeholder() ?? ''"
+    [value]="value()"
+    (valueChange)="value.set($event)"
+  >
+    @for (option of options(); track option.value) {
+      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+    }
+  </mat-select>
+</mat-form-field>
