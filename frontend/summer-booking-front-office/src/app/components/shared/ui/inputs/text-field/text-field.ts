@@ -4,7 +4,6 @@ import { MatInputModule } from '@angular/material/input';
 
 let nextId = 0;
 
-/** Single-line input with its label above (Angular Material form field, outlined). */
 @Component({
   selector: 'app-text-field',
   imports: [MatFormFieldModule, MatInputModule],
@@ -13,9 +12,7 @@ let nextId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextField {
-  /** Label above the field, already translated. */
   readonly label = input<string>();
-  /** Typed text, two-way: `[(value)]="email"`. */
   readonly value = model('');
   readonly type = input<'text' | 'email'>('text');
   readonly name = input<string>();

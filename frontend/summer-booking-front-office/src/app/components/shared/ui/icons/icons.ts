@@ -4,7 +4,6 @@
  * Material Symbols font) or `[pathIcon]` (image paths), never mixed. A missing position means no icon.
  */
 export interface Icons {
-  /** True for Material icon names, false for image paths. */
   readonly material: boolean;
   readonly list: readonly string[];
 }

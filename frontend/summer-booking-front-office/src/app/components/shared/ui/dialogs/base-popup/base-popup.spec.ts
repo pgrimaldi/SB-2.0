@@ -4,7 +4,6 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { BasePopup } from './base-popup';
 
-/** The smallest popup: a text and a button that closes it. */
 @Component({
   selector: 'app-test-popup',
   template: `<ng-template #content>

@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { isApiUrl } from './api-url';
 
-/** Header with the user's IANA time zone (e.g. `Europe/Rome`), as expected by our API. */
+/** Carries an IANA time zone, e.g. `Europe/Rome`. */
 export const TIME_ZONE_HEADER = 'X-Time-Zone';
 
 /**

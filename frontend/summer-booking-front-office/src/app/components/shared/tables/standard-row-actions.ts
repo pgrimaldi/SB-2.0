@@ -4,21 +4,21 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { TableRowAction } from '../ui/tables/table/table';
 
-/** Group `table.actions` of the translations: the names of the standard row buttons. */
+/** Translation group `table.actions`. */
 interface StandardRowActionLabels {
   delete: string;
   duplicate: string;
   edit: string;
 }
 
-/** What the standard row buttons do, with the row they are on; a missing one is not shown. */
+/** A missing handler hides its button. */
 export interface StandardRowActionHandlers<T> {
   delete?: (row: T) => void;
   duplicate?: (row: T) => void;
   edit?: (row: T) => void;
 }
 
-/** The standard buttons, always in this order, with the app's icons. */
+/** Always shown in this order. */
 const STANDARD_ROW_ACTIONS = [
   { name: 'delete', icon: '/assets/images/delete.svg' },
   { name: 'duplicate', icon: '/assets/images/duplicate.svg' },
@@ -26,12 +26,9 @@ const STANDARD_ROW_ACTIONS = [
 ] as const;
 
 /**
- * The standard buttons of the table rows, ready for `[rowActions]`: delete, duplicate and edit, with
- * the app's icons and the names of `table.actions` (they follow the language). A page passes only
- * the functions of the buttons it wants: `standardRowActions({ edit: (item) => … })` gives the edit
- * button alone. Part of the app, not of the component library: it knows our translations and images
- * (images: the table must use `pathIcon`).
- * Call it where `inject` works, e.g. in a field: `protected readonly rowActions = standardRowActions<Item>({ … });`.
+ * A page passes only the handlers of the buttons it wants. Part of the app, not of the component
+ * library: it knows our translations and images (the table must use `pathIcon`).
+ * Call it in an injection context, e.g. a field: `protected readonly rowActions = standardRowActions<Item>({ … });`.
  */
 export function standardRowActions<T>(
   handlers: StandardRowActionHandlers<T>,

@@ -1,4 +1,3 @@
 @use '../../../styles/table-page' as page;
 
-// Title and table: the layout shared by the pages with a table.
 @include page.table-page(warehouse__setting);

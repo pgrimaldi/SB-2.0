@@ -29,7 +29,6 @@ export class NotFound implements OnDestroy {
       .subscribe((pageTitle: string) => this.showTitle(pageTitle));
   }
 
-  /** Subscription of the page title: it follows the language. */
   private showTitle(pageTitle: string): void {
     this.title.setTitle(pageTitle);
   }

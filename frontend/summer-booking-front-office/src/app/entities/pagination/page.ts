@@ -1,14 +1,12 @@
-/** Rows shown in a page when nothing else is chosen. */
 export const DEFAULT_PAGE_SIZE = 10;
 
-/** Direction of the sorting of a list; values as the API (.NET enum names) expects them. */
+/** Values are the .NET enum names the API expects. */
 export type SortDirection = 'Ascending' | 'Descending';
 
 /**
- * Query of a paginated API: `page` starts from 1; `search` is the text searched in the list ('' for
- * none: the server decides in which fields); `sortField` is the field to sort by ('' for none: the
- * server's own order) and `sortDirection` its direction. Same shape as the `TablePageRequest` of
- * `app-table`, so a list API can be given to the table as its `load`.
+ * `page` starts from 1. '' means none: in `search` the server decides which fields it searches, in
+ * `sortField` it uses its own order. Same shape as the `TablePageRequest` of `app-table`, so a list
+ * API can be given to the table as its `load`.
  */
 export interface PageRequest {
   page: number;
@@ -18,8 +16,7 @@ export interface PageRequest {
   sortDirection: SortDirection;
 }
 
-/** Answer of a paginated API: the rows of the requested page and how many rows there are in all. */
-// Same shape as the `TablePage` of `app-table`.
+/** Same shape as the `TablePage` of `app-table`; `total` counts the rows of all the pages. */
 export interface Page<T> {
   total: number;
   rows: T[];

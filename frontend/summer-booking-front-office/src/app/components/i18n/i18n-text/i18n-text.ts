@@ -32,7 +32,6 @@ import { combineLatest, switchMap } from 'rxjs';
 export class I18nText {
   readonly key = input.required<string>({ alias: 'appI18nText' });
   readonly html = input(false);
-  /** Interpolation parameters, e.g. `{ year: 2026 }` for `"©{{year}} …"`. */
   readonly params = input<Record<string, unknown>>();
 
   private readonly translateService = inject(TranslateService);

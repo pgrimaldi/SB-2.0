@@ -9,13 +9,12 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 // never appears in the repository nor in the published JavaScript.
 const MOCK_ACCOUNT = {
   username: 'summertest465@gmail.com',
-  /** The invented "Lido Demo" property. */
   idProperty: DEMO_PROPERTY.publicId,
   roles: ['Manager'],
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
 
-/** Token lifetimes of the backend configuration (`Auth:*`), in seconds / days. */
+/** As in the backend configuration (`Auth:*`). */
 const ACCESS_TOKEN_SECONDS = 15 * 60;
 const REFRESH_TOKEN_DAYS = 30;
 const REFRESH_TOKEN_REMEMBER_ME_DAYS = 90;
@@ -34,7 +33,7 @@ interface SimulatedCookie {
   expiresAt: number;
 }
 
-/** Access tokens issued by the mock and when they expire (the server validates the JWT instead). */
+/** Expiry of each issued access token; the real server validates the JWT instead. */
 const accessTokens = new Map<string, number>();
 
 /** `POST /api/auth/signin`: session and refresh cookie for the test account, 401 otherwise. */
@@ -81,16 +80,11 @@ export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<
   return of(new HttpResponse<void>({ status: 204, url: request.url })).pipe(delay(150));
 };
 
-/** True when the request carries a valid access token, as a protected API endpoint requires. */
 export function isAuthorized(request: HttpRequest<unknown>): boolean {
   const expiresAt = accessTokens.get(bearer(request) ?? '');
   return expiresAt !== undefined && expiresAt > Date.now();
 }
 
-/**
- * 401 answer in the backend's format: by default the one of a protected endpoint called without a
- * valid access token (`auth.invalid_token`).
- */
 export function unauthorized(
   request: HttpRequest<unknown>,
   code: UnauthorizedCode = 'auth.invalid_token',
@@ -99,7 +93,6 @@ export function unauthorized(
   return problem(request, 401, code, { title });
 }
 
-/** Codes of the 401 answers of the mock API. */
 type UnauthorizedCode = Extract<ApiErrorCode, `auth.${string}`>;
 
 function newSession(): AuthSession {
@@ -121,7 +114,7 @@ function bearer(request: HttpRequest<unknown>): string | null {
   return request.headers.get('Authorization')?.replace(/^Bearer /, '') ?? null;
 }
 
-/** Sets a new refresh token (rotation): the previous one is no longer valid. */
+/** Rotation: the previous refresh token is no longer valid. */
 function writeCookie(remember: boolean): void {
   removeCookie();
   const days = remember ? REFRESH_TOKEN_REMEMBER_ME_DAYS : REFRESH_TOKEN_DAYS;

@@ -1,6 +1,6 @@
 @use '@angular/material' as mat;
 
-// Panel of the hub login popup: white rounded surface; width from the opener, height from the content.
+// Width comes from the opener, height from the content.
 .login__dialog__panel {
   @include mat.dialog-overrides(
     (

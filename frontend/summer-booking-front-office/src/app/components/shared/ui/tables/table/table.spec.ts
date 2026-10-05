@@ -24,7 +24,6 @@ interface Filters {
   day: string;
 }
 
-/** 25 rows on the "server"; `load` answers the requested page. */
 const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
   name: `Row ${i + 1}`,
   total: i,
@@ -667,7 +666,6 @@ class TableRowButtonsHost {
   ];
   readonly texts = { actions: { header: 'Azioni' } };
   readonly events: string[] = [];
-  /** Delete, duplicate and edit, each telling which row it was pressed on. */
   readonly all: readonly TableRowAction<Row>[] = [
     {
       label: 'Elimina',

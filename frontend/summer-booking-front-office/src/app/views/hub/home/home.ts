@@ -65,7 +65,6 @@ export class Home implements OnDestroy {
     { logo: 'mondo-balneare', name: 'Mondo Balneare' },
   ] as const;
 
-  /** Title and description of the page, in the current language. */
   private readonly pageSubscription: Subscription;
 
   constructor() {
@@ -74,7 +73,6 @@ export class Home implements OnDestroy {
       .subscribe((page: Record<string, string>) => this.showPageTexts(page));
   }
 
-  /** Subscription of the page texts: title and description follow the language. */
   private showPageTexts(page: Record<string, string>): void {
     this.title.setTitle(page['home.page.title']);
     this.meta.updateTag({ name: 'description', content: page['home.page.description'] });

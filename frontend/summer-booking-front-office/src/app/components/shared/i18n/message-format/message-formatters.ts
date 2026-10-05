@@ -20,15 +20,15 @@ function cached<T extends Intl.NumberFormat | Intl.DateTimeFormat | Intl.PluralR
   return formatter;
 }
 
-/** The value as a number (`3` or `'3'`), or `null` when it is not one. */
+/** Accepts numeric strings too; `null` when not a finite number. */
 export function toNumber(value: unknown): number | null {
   const number = typeof value === 'string' && value.trim() ? Number(value) : value;
   return typeof number === 'number' && Number.isFinite(number) ? number : null;
 }
 
 /**
- * A number in the locale: `1234.5` → "1.234,5" (it) / "1,234.5" (en). With `currency` the code
- * comes from `currency` (ISO 4217), or from `defaultCurrency` when it is missing or not valid.
+ * With the `currency` style the code comes from `currency` (ISO 4217), or from `defaultCurrency`
+ * when it is missing or not valid.
  */
 export function formatNumber(
   value: number,
@@ -82,7 +82,6 @@ export function formatDate(
   return cached(key, () => new Intl.DateTimeFormat(locale, options)).format(date);
 }
 
-/** Plural category of a number in the locale: `one`, `other` (it, en), also `few`, `many`… */
 export function pluralCategory(value: number, locale: string | undefined): string {
   return cached(`plural|${locale}`, () => new Intl.PluralRules(locale)).select(value);
 }

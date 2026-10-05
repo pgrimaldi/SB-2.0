@@ -13,7 +13,7 @@ import { Datepicker } from '../../shared/ui/datepickers/datepicker/datepicker';
 import { SearchField } from '../../shared/ui/inputs/search-field/search-field';
 import { Select, SelectOption } from '../../shared/ui/selects/select/select';
 
-/** Group `management.header.period` of the translations: the select label and its options. */
+/** Translation group `management.header.period`. */
 interface PeriodTexts {
   label: string;
   full_day: string;
@@ -40,14 +40,12 @@ export class ManagementHeader {
     this.translateService.stream('management.header.period') as Observable<PeriodTexts>,
     { initialValue: { label: '', full_day: '', morning: '', afternoon: '' } },
   );
-  /** Options of the period select, translated (they follow the language). */
   protected readonly periods = computed<readonly SelectOption<BookingDayType>[]>(() => [
     { value: BookingDayType.FullDay, label: this.periodTexts().full_day },
     { value: BookingDayType.Morning, label: this.periodTexts().morning },
     { value: BookingDayType.Afternoon, label: this.periodTexts().afternoon },
   ]);
 
-  /** Initial of the signed-in user, shown in the account button. */
   protected readonly initial = computed(
     () => this.auth.user()?.email.charAt(0).toUpperCase() ?? '',
   );
@@ -65,7 +63,6 @@ export class ManagementHeader {
     this.filters.endDate.set(this.dateAdapter.today());
   }
 
-  /** The gear: to the settings pages. */
   protected openSettings(): void {
     void this.router.navigateByUrl('/settings');
   }

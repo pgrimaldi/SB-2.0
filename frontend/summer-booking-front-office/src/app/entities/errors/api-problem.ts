@@ -4,11 +4,9 @@
  */
 export type ApiProblemArgs = Readonly<Record<string, string | number>>;
 
-/** Validation error of one field of the request (e.g. `datetimeTo` before `datetimeFrom`). */
 export interface ApiFieldError {
-  /** Name of the field, as in the request body. */
   readonly field: string;
-  /** Stable code, also the translation key under `error.` (e.g. `validation.end_before_start`). */
+  /** Also the translation key under `error.`. */
   readonly code: string;
   readonly args?: ApiProblemArgs;
 }
@@ -21,13 +19,11 @@ export interface ApiFieldError {
  * `title` and `type` are for developers and logs only, never shown to the user.
  */
 export interface ApiProblem {
-  /** HTTP status of the answer; 0 when there was no answer (no connection). */
+  /** 0 when there was no answer (no connection). */
   readonly status: number;
   readonly code: string;
   readonly args?: ApiProblemArgs;
-  /** Validation errors, one per field (status 400). */
   readonly errors?: readonly ApiFieldError[];
-  /** Id that links the error to the server logs, for support. */
   readonly traceId?: string;
   readonly type?: string;
   readonly title?: string;

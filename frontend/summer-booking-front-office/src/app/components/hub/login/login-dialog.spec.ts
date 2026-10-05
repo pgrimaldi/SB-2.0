@@ -39,7 +39,6 @@ describe('LoginDialog', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  /** Opens the popup, signs in with the given answer of the API and reads the error message. */
   const signInError = async (answer: () => Observable<never>) => {
     TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: answer } });
     const { fixture } = await setup(false);

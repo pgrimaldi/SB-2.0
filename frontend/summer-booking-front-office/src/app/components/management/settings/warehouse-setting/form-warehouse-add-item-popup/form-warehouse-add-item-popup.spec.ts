@@ -147,7 +147,7 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(toggle().getAttribute('aria-checked')).toBe('false');
   });
 
-  /** Fills article (Ombrellone), quantity and threshold, turns the alert on; gives the Aggiungi button. */
+  /** Fills the whole form with the alert on; returns a getter of the Aggiungi button. */
   const fill = async ({ fixture, popup, openSelect }: Awaited<ReturnType<typeof setup>>) => {
     const add = () =>
       [...popup()!.querySelectorAll<HTMLButtonElement>('app-button button')].find((button) =>

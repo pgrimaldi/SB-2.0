@@ -1,15 +1,12 @@
-/** Body of `POST /api/auth/signin`. */
 export interface SignInRequest {
   username: string;
   password: string;
-  /** "Remember me": the server keeps the refresh cookie after the browser is closed. */
+  /** The server keeps the refresh cookie after the browser is closed. */
   remember: boolean;
 }
 
-/** The signed-in user, as the server describes it for the interface. */
 export interface AuthUser {
   email: string;
-  /** Public id (UUID) of the property the user manages. */
   idProperty: string;
   roles: string[];
 }

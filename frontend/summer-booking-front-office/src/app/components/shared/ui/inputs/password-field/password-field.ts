@@ -6,16 +6,10 @@ import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
 
-/** Texts of `app-password-field`, already translated; a missing one is left out. */
 export interface PasswordFieldTexts {
-  /** Accessible name of the button that shows the password. */
   show?: string;
 }
 
-/**
- * Password input with its label above and a button that shows or hides the typed text.
- * Icons (see `Icons`): [password shown, password hidden]. Texts: `PasswordFieldTexts`.
- */
 @Component({
   selector: 'app-password-field',
   imports: [MatFormFieldModule, MatIconModule, MatInputModule],
@@ -24,10 +18,8 @@ export interface PasswordFieldTexts {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PasswordField {
-  /** Label above the field, already translated. */
   readonly label = input<string>();
   readonly texts = input<PasswordFieldTexts | null>();
-  /** Typed password, two-way: `[(value)]="password"`. */
   readonly value = model('');
   readonly name = input<string>();
   readonly autocomplete = input<string>();

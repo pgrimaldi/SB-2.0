@@ -43,11 +43,11 @@ describe('AlertPopup', () => {
     const dialog = document.querySelector<HTMLElement>('[role="alertdialog"]')!;
     const title = dialog.querySelector('.alert__popup__title')!;
     const text = dialog.querySelector('.alert__popup__text')!;
-    expect(title.textContent?.trim()).toBe('Disconnessione fallita'); // shown as given
+    expect(title.textContent?.trim()).toBe('Disconnessione fallita');
     expect(text.textContent?.trim()).toBe('Riprova tra poco.');
     expect(dialog.getAttribute('aria-labelledby')).toBe(title.id);
     expect(dialog.getAttribute('aria-describedby')).toBe(text.id);
-    expect(dialog.querySelector('.alert__popup__icon')).toBeNull(); // no icon given: none
+    expect(dialog.querySelector('.alert__popup__icon')).toBeNull();
 
     expect(dialog.querySelector('app-button')?.textContent?.trim()).toBe('Ho capito');
     dialog.querySelector<HTMLButtonElement>('app-button button')!.click();

@@ -276,11 +276,7 @@ export const warehouseEditMock = (
 
 type InventoryItem = (typeof INVENTORY_ITEMS)[number];
 
-/**
- * Checks of an article to add or change, as the backend answers them, one error per wrong field: the
- * article (`field`) must be an active one of the property, the quantity a whole number above 0, the
- * threshold a whole number or `null`, the alert a boolean, on only with a threshold above 0.
- */
+/** Checks as the backend answers them: one error per wrong field. */
 function itemErrors(
   body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
   id: unknown,
@@ -317,7 +313,6 @@ function itemErrors(
   return { item, errors };
 }
 
-/** Threshold and threshold alert of a checked request. */
 function setThreshold(
   item: InventoryItem,
   body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
@@ -326,14 +321,13 @@ function setThreshold(
   item.isThresholdWarningActive = body.isThresholdWarningActive as boolean;
 }
 
-/** Largest page the mock serves, as a real server would cap it. */
 const MAX_PAGE_SIZE = 100;
 
 /**
- * `POST /api/warehouse/list` with `ManagementRequest & PageRequest` in the body: one page of the
- * active articles of the requested property (never of other properties) with today's availability (released consumptions free the stock);
- * The period is validated but the invented consumptions are
- * all for today. 401 without a valid access token; 400 when dates or part of the day are missing or invalid.
+ * `POST /api/warehouse/list`: one page of the active articles of the requested property (never of
+ * other properties) with today's availability; released consumptions free the stock. The period is
+ * validated but the invented consumptions are all for today. 401 without a valid access token; 400
+ * when dates or part of the day are missing or invalid.
  */
 export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -350,7 +344,6 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  // The property of the request, by its public id; an unknown one has no articles.
   const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
 
   const items: WarehouseItem[] = INVENTORY_ITEMS.filter(
@@ -373,7 +366,6 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   // The server decides where to search: the mock looks in the article name, ignoring case.
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
   const found = search ? items.filter((item) => item.name.toLowerCase().includes(search)) : items;
-  // Sorting by a field of the article; without one, the order of the inventory.
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -387,7 +379,6 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
-/** Fields of an article the list can be sorted by. */
 const SORT_FIELDS = ['name', 'total', 'available', 'thresholdNumber'] as const;
 
 /**
@@ -403,18 +394,15 @@ function compare(first: string | number | null, second: string | number | null):
     : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
 }
 
-/** Whole number from 0 up. */
 function wholeNumber(value: unknown): value is number {
   return Number.isInteger(value) && (value as number) >= 0;
 }
 
-/** Whole number from 1 up, or the fallback for missing or invalid values. */
 function positiveInteger(value: unknown, fallback: number): number {
   return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
 }
 
-/** UTC ISO dates in order and a known part of the day, as the server requires. */
-/** Validation of the common fields, as the backend answers it: one error per wrong field. */
+/** Checks as the backend answers them: one error per wrong field. */
 function periodErrors({
   datetimeFrom,
   datetimeTo,

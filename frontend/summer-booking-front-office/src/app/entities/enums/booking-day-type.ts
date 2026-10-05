@@ -1,4 +1,4 @@
-/** Part of the day a booking covers; values as the API (.NET enum names) sends and expects them. */
+/** Values are the .NET enum names the API sends and expects. */
 export enum BookingDayType {
   FullDay = 'FullDay',
   Morning = 'Morning',

@@ -15,7 +15,6 @@ export class WarehouseService {
   private readonly endpoint = `${environment.apiBaseUrl}/warehouse`;
 
   /**
-   * One page of the property's articles in the chosen period.
    * An arrow property, not a method, on purpose: pages hand it to `app-table` as its loader
    * (`[load]="warehouse.list"`), and only an arrow function keeps `this` (this service) when it is
    * passed around on its own; a method would lose it and fail on `this.httpClient`.
@@ -23,17 +22,17 @@ export class WarehouseService {
   readonly list = (request: ManagementRequest & PageRequest): Observable<Page<WarehouseItem>> =>
     this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
 
-  /** All the articles of the property for a select: id and name only, by name. */
+  /** All the articles of the property, not paged, sorted by name. */
   readonly comboboxList = (
     request: Pick<ManagementRequest, 'idProperty'>,
   ): Observable<ComboboxItem[]> =>
     this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/combobox-list`, request);
 
-  /** Adds an article to the warehouse of the property; no answer body (204). */
+  /** Answers 204 with no body. */
   readonly addWarehouseItem = (request: AddWarehouseItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/add-warehouse-item`, request);
 
-  /** Changes total, threshold and threshold alert of an article of the warehouse; no answer body (204). */
+  /** Answers 204 with no body. */
   readonly editWarehouseItem = (request: EditWarehouseItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/edit-warehouse-item`, request);
 }

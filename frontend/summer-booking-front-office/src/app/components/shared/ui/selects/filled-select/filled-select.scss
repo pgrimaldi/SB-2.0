@@ -1,9 +1,7 @@
 @use '@angular/material' as mat;
 @use '../../inputs/filled-field' as field;
 
-// The grey field of the form popups (label, field, focus border: `inputs/_filled-field.scss`); here
-// the select: blue text and placeholder, blue arrow, as in the mockup. The options open in the shared
-// `select__panel` of the theme.
+// The options open in the shared `select__panel` of the theme.
 @include field.filled-field(filled__select);
 
 :host {

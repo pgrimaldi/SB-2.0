@@ -1,6 +1,5 @@
 @use '@angular/material' as mat;
 
-// Grey pill of the reference: 📅 ◀ start ▶ | ◀ end ▶
 .datepicker {
   display: inline-flex;
   height: 1.625rem;
@@ -74,8 +73,7 @@
   background: currentColor;
 }
 
-// Calendars (overlay panels): brand colours and the chosen interval highlighted. Material puts
-// panelClass on the inner calendar, so the colours go on the popup that contains it.
+// Material puts panelClass on the inner calendar, so the colours go on the popup that contains it.
 .mat-datepicker-content:has(.datepicker__calendar) {
   @include mat.datepicker-overrides(
     (

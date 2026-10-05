@@ -52,8 +52,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./views/warehouse/warehouse').then((component) => component.Warehouse),
       },
-      // Settings: side panel and, next to it, the settings pages (views/settings/<page>). Every page
-      // of the menu has its route already; a built page has its `loadComponent` in SETTINGS_PAGES.
+      // Every menu page has its route already; a page not built yet (no `loadComponent` in
+      // SETTINGS_PAGES) gets an empty one.
       {
         path: 'settings',
         loadComponent: () =>

@@ -12,30 +12,20 @@ import { MatCalendarCellClassFunction, MatDatepickerModule } from '@angular/mate
 import { MatIconModule } from '@angular/material/icon';
 import { resolveIcons } from '../../icons/icons';
 
-/** Texts of one date of `app-datepicker`, already translated; a missing one is left out. */
 export interface DatepickerDateTexts {
-  /** Accessible name of the date field. */
   label?: string;
-  /** Accessible name of the arrow that moves the date one day back. */
   previous?: string;
-  /** Accessible name of the arrow that moves the date one day forward. */
   next?: string;
 }
 
-/** Texts of `app-datepicker`: one group for the start date and one for the end date. */
 export interface DatepickerTexts {
   start?: DatepickerDateTexts;
   end?: DatepickerDateTexts;
 }
 
 /**
- * Start and end date (Angular Material datepickers) in a grey pill:
- * `<app-datepicker [(start)]="startDate" [(end)]="endDate" />`.
- * Dates are chosen with the calendar or the arrows (one day), never typed; they are written by the
- * app's date adapter, whose locale and formats the app sets (e.g. `provideNativeDateAdapter`). The
- * start never goes after the end (the other date follows).
- * Icons (see `Icons`): [calendar, previous day, next day]; the arrows are the same for both dates.
- * Texts: `DatepickerTexts`.
+ * Dates are written by the app's date adapter, whose locale and formats the app sets (e.g.
+ * `provideNativeDateAdapter`). The arrow icons are the same for both dates.
  */
 @Component({
   selector: 'app-datepicker',
@@ -59,7 +49,6 @@ export class Datepicker {
 
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
-  /** Highlights the chosen interval in both calendars. */
   protected readonly rangeClass: MatCalendarCellClassFunction<Date> = (date, view) =>
     view === 'month' &&
     this.dateAdapter.compareDate(date, this.start()) >= 0 &&

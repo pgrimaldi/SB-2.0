@@ -1,7 +1,6 @@
 @use '@angular/material' as mat;
 
-// Small switch of the designer's mockup (02/10/2026): a pill 1.875rem × 0.875rem, grey when off with a
-// light knob on the left, blue when on with a white knob on the right; label in soft blue beside it.
+// Small switch of the designer's mockup (02/10/2026).
 :host {
   display: inline-flex;
 
@@ -64,7 +63,6 @@
   );
 }
 
-// Space between the switch and its label.
 .toggle ::ng-deep label {
   padding-left: 0.625rem;
 }

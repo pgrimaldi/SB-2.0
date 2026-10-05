@@ -25,9 +25,7 @@ import { AuthService } from '../../services/api/auth/auth.service';
 const SIGNED_IN_KEY = 'sb.signed-in';
 /** Where older versions kept the token (readable by scripts): removed at start-up. */
 const LEGACY_SESSION_KEY = 'sb.session';
-/** Tells the other tabs of this browser that the user signed out. */
 const CHANNEL_NAME = 'sb-auth';
-/** Pause before trying the logout once more (network or server hiccups). */
 export const LOGOUT_RETRY_DELAY = 1000;
 
 interface Session {
@@ -68,15 +66,10 @@ export class AuthBehaviour implements OnDestroy {
     return this.session() !== null;
   }
 
-  /** Access token for our API requests (null when signed out). */
   token(): string | null {
     return this.session()?.accessToken ?? null;
   }
 
-  /**
-   * Signs in: when the server accepts the credentials (and sets the refresh cookie) the session
-   * starts. Fails like the API: status 401 for wrong credentials.
-   */
   signIn(request: SignInRequest): Observable<void> {
     return this.authService
       .signIn(request)
@@ -90,7 +83,7 @@ export class AuthBehaviour implements OnDestroy {
     this.storage(remember ? 'local' : 'session')?.setItem(SIGNED_IN_KEY, 'true');
   }
 
-  /** At start-up: gets back the session from the refresh cookie, if a sign-in left one. */
+  /** Called at start-up. */
   async restore(): Promise<void> {
     if (
       this.storage('session')?.getItem(SIGNED_IN_KEY) ||
@@ -161,7 +154,7 @@ export class AuthBehaviour implements OnDestroy {
     this.storage('local')?.removeItem(SIGNED_IN_KEY);
   }
 
-  /** Browser storage, or undefined when it is not available (e.g. blocked in private mode). */
+  /** Undefined when storage is blocked (e.g. private mode). */
   private storage(kind: 'session' | 'local'): Storage | undefined {
     try {
       return kind === 'local' ? this.window?.localStorage : this.window?.sessionStorage;
@@ -170,7 +163,6 @@ export class AuthBehaviour implements OnDestroy {
     }
   }
 
-  /** Listener of the other tabs of this browser: a logout there ends the session here too. */
   private readonly otherTabMessage = ({ data }: MessageEvent): void => {
     if (data === 'logout' && this.isAuthenticated()) {
       this.expire();

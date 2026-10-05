@@ -7,7 +7,6 @@ import {
 } from '@ngx-translate/core';
 import { MessageFormatOptions, compileMessage, isMessage } from './message-format';
 
-/** Options of the compiler, e.g. `{ defaultCurrency: 'CHF' }`. */
 export const MESSAGE_FORMAT_OPTIONS = new InjectionToken<MessageFormatOptions>(
   'MESSAGE_FORMAT_OPTIONS',
 );
@@ -43,7 +42,6 @@ export class MessageFormatCompiler extends TranslateCompiler {
     return this.compileNode(translations, lang) as InterpolatableTranslationObject;
   }
 
-  /** Compiles the texts of a group of translations, at any depth. */
   private compileNode(node: unknown, lang: string): InterpolatableTranslation {
     if (typeof node === 'string') {
       return this.compile(node, lang);

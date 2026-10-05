@@ -38,109 +38,83 @@ import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
 import { TableTextAction } from './table-text-action';
 
-/** A column of `app-table`: which field of the row it shows and under which header. */
 export interface TableColumn<T> {
   field: keyof T & string;
-  /** Header text, already translated. */
   header: string;
-  /** Horizontal alignment of header and cells, in both looks; start by default. */
   align?: 'start' | 'center' | 'end';
   /**
-   * Share of the table width, in percent (e.g. 40). Columns without it split the rest equally; with
-   * no widths at all every column is the same. Widths never depend on the rows shown.
+   * Share of the table width, in percent (e.g. 40). Columns without it split the rest equally.
+   * Widths never depend on the rows shown.
    */
   width?: number;
-  /** A click on the header sorts by this column (done by the server, see `TablePageRequest`). */
+  /** Sorted by the server (see `TablePageRequest`). */
   sortable?: boolean;
 }
 
-/** Texts of the `app-table` paginator, already translated; a missing one is left out. */
 export interface TablePaginatorTexts {
-  /** Accessible names of the paginator buttons. */
   first?: string;
   previous?: string;
   next?: string;
   last?: string;
-  /** Label of the page size selector (e.g. "Elementi per pagina:"). */
+  /** Label of the page size selector. */
   size?: string;
-  /** Rows shown, with `{{start}}`, `{{end}}` and `{{total}}` (e.g. "{{start}} – {{end}} di {{total}}"). */
+  /** With `{{start}}`, `{{end}}` and `{{total}}` (e.g. "{{start}} – {{end}} di {{total}}"). */
   range?: string;
 }
 
-/** Texts of the `app-table` search: placeholder (also its accessible name) and its two buttons. */
+/** The placeholder is also the accessible name of the search. */
 export interface TableSearchTexts extends SearchFieldTexts {
   placeholder?: string;
 }
 
-/** Texts of the column of the row buttons (`rowActions`). */
 export interface TableRowActionTexts {
-  /** Header of the column (e.g. "Azioni"). */
   header?: string;
 }
 
-/**
- * A button of every row, in the last column (`rowActions`): the page decides which buttons a table
- * has, in which order, and what each one does.
- */
 export interface TableRowAction<T> {
-  /** Accessible name and tooltip of the button, already translated (e.g. "Elimina"). */
+  /** Accessible name and tooltip of the button. */
   label: string;
   /**
-   * Icon of the button, of the same kind as the icons of the table: a Material icon name when the
-   * table has `matIcon`, otherwise an image path.
+   * Of the same kind as the icons of the table: a Material icon name when the table has `matIcon`,
+   * otherwise an image path.
    */
   icon: string;
-  /** What the button does, with the row it is on. */
   action: (row: T) => void;
 }
 
-/**
- * Names of the checkboxes of the rows and names (and tooltips) of the buttons acting on the chosen
- * rows (unless `hideMassiveActions`).
- */
 export interface TableSelectionTexts {
-  /** Checkbox of the header: all the rows of the page (e.g. "Scegli tutte le righe della pagina"). */
+  /** Label of the header checkbox (all the rows of the page). */
   all?: string;
-  /** Checkbox of a row (e.g. "Scegli la riga"). */
+  /** Label of a row checkbox. */
   row?: string;
   duplicate?: string;
   delete?: string;
-  /** Text of the button that empties the chosen rows (e.g. "Cancella selezioni"). */
   clear?: string;
 }
 
-/** Texts of the `app-table` sorting. */
 export interface TableSortTexts {
-  /** Description of a sortable header for screen readers, with `{{column}}` (e.g. "Ordina per {{column}}"). */
+  /** Screen-reader description of a sortable header, with `{{column}}`. */
   action?: string;
 }
 
-/**
- * Texts of `app-table`, already translated, in groups: `{ paginator: { … }, search: { … }, sort: { … } }`.
- * With our translation file the group `table` has the same shape: `[texts]="'table' | translate"`.
- */
+/** The `table` group of our translation file has this shape: `[texts]="'table' | translate"`. */
 export interface TableTexts {
-  /** Shown in place of the rows when the server answers with none (e.g. "La tabella non contiene elementi"). */
   empty?: string;
   paginator?: TablePaginatorTexts;
   search?: TableSearchTexts;
   sort?: TableSortTexts;
-  /** The column of the buttons on every row (`rowActions`). */
   actions?: TableRowActionTexts;
-  /** The checkboxes of the rows and the buttons on the chosen rows (unless `hideMassiveActions`). */
   selection?: TableSelectionTexts;
 }
 
-/** Rows in a page when `pageSize` is not given: the standard of every table. */
 export const TABLE_PAGE_SIZE = 10;
 
-/** Choices of the page size selector when `pageSizeOptions` is not given. */
 export const TABLE_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50, 100];
 
 /** The options of the page size selector open in the shared select panel (see the theme). */
 const SELECT_CONFIG: MatPaginatorSelectConfig = { panelClass: 'select__panel' };
 
-/** Direction of the sorting, as the API (.NET enum names) expects it. */
+/** .NET enum names, as the API expects them. */
 export type TableSortDirection = 'Ascending' | 'Descending';
 
 /**
@@ -156,59 +130,27 @@ export interface TablePageRequest {
   sortDirection: TableSortDirection;
 }
 
-/** Page answered to the table: the rows of the page and how many rows there are in all pages. */
 export interface TablePage<T> {
+  /** Rows of all the pages. */
   total: number;
   rows: readonly T[];
 }
 
-/**
- * How the table gets a page: the caller's parameters plus page, page size and search → `{ total, rows }`.
- * Any function (e.g. an API of a service) with this shape works: the table imports nothing else.
- */
 export type TableLoad<P, T> = (request: P & TablePageRequest) => Observable<TablePage<T>>;
 
-/** Id of a row (its `idField`), e.g. a guid: the chosen rows are kept by id across pages and searches. */
 export type TableRowId = string | number;
 
 const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
-/** Id of the last column, with the buttons of the row: not a field, so it never meets a column of the rows. */
+/** Column ids that are not field names, so they never clash with a column of the rows. */
 const ROW_ACTIONS_COLUMN = 'table__row__actions';
-/** Id of the first column, with the checkboxes of the rows (not a field either). */
 const SELECT_COLUMN = 'table__row__select';
-/** Numbers the tables of the page, for the id of their title. */
 let nextTableId = 0;
 
 /**
- * Generic table (Angular Material table) that loads its rows page by page by itself:
+ * Material table that loads its own rows page by page:
  * `<app-table [columns]="columns" [params]="filters" [load]="service.list" />`.
- * It only needs:
- * - `columns`: which fields of the rows it shows (`TableColumn<Item>[]`);
- * - `load`: the function that asks a page, e.g. an API of a service;
- * - `params`: what that function needs besides the page (e.g. filters); `null` loads nothing.
- * Headers and texts (`texts`, see `TableTexts`) arrive already translated.
- * The base table shows everything; each table hides what it does not need (`hideCreateButton`,
- * `hideMassiveActions`). The buttons of every row are the page's: `rowActions`.
- * On top a row with, on the left, the `title` (and its icon, usually the one of the section) and the
- * search (`searchable`, sent to `load` as `search`) and, on the right, the create button
- * (`createLabel`, emits `create`).
- * Under it, above the rows, a bar: icon buttons marked `appTableIconAction` on the left and text
- * buttons marked `appTableTextAction` on the right; each part shows only when it is used.
- * The first column has a checkbox on every row (and one in the header for the rows of the page) and,
- * when more than one row is chosen, the bar shows the buttons duplicate and delete of the chosen rows
- * (`duplicateSelected`, `deleteSelected`, with their ids) and the button that empties the choice. The
- * chosen rows are kept by id (`idField`) in `selection`, across pages, searches and sorting.
- * With `rowActions` (none by default), the last column ("Azioni") has those buttons on every row, in
- * their order, each calling its function with the row.
- * Icons (see `Icons`): [search magnifier, search X, duplicate chosen, delete chosen, create, title];
- * the icons of the row buttons are in `rowActions`.
- * Columns with `sortable` sort on a click of their header (sent to `load` as `sortField` and
- * `sortDirection`). Two looks: the default one (clean, minimal) and, with `useAppTheme`, the app's one.
- * The paginator, under the rows, has a page size selector (`pageSizeOptions`, 10 by default): with
- * more rows the page scrolls and the paginator stays at the bottom of the screen.
- * Then it works on its own: it asks page 1, moves with its paginator, goes back to page 1 and loads
- * again whenever `params` or the search change, keeps the current rows on screen until the next page arrives and,
- * when a request fails, shows no rows and emits `loadError` (the next requests still work).
+ * Buttons marked `appTableIconAction` go on the left of the bar above the rows, those marked
+ * `appTableTextAction` on the right.
  */
 @Component({
   selector: 'app-table',
@@ -240,44 +182,24 @@ let nextTableId = 0;
 })
 export class Table<T, P extends object> implements OnDestroy {
   readonly columns = input.required<readonly TableColumn<T>[]>();
-  /** Parameters of every request besides the page; `null` loads nothing (e.g. signed out). */
+  /** `null` loads nothing (e.g. signed out). */
   readonly params = input.required<P | null>();
   readonly load = input.required<TableLoad<P, T>>();
-  /** Field with the id of a row (e.g. a guid): the chosen rows are kept by it. */
   readonly idField = input<keyof T & string>('id' as keyof T & string);
-  /** Rows in a page, two-way: the user changes it with the selector of the paginator. */
   readonly pageSize = model(TABLE_PAGE_SIZE);
-  /**
-   * Ids of the chosen rows, in the order they were chosen, two-way: they stay when the page, the
-   * search or the sorting change; the page can read them or empty them (e.g. after a delete).
-   */
+  /** Ids in the order they were chosen, kept across pages, searches and sorting. */
   readonly selection = model<readonly TableRowId[]>([]);
-  /** Choices of the page size selector. */
   readonly pageSizeOptions = input<readonly number[]>(TABLE_PAGE_SIZE_OPTIONS);
   readonly texts = input<TableTexts | null>();
-  /** Title above the table, already translated (e.g. "Impostazioni magazzino"); without it, no title. */
   readonly title = input<string>();
-  /** Text of the create button, already translated (e.g. "Aggiungi articolo"). */
   readonly createLabel = input<string>();
-  /**
-   * The app's look (blue header, striped rows, rounded corners) instead of the default one (clean and
-   * minimal: blue texts on white, a line under the header, the rows shown out of the total between the
-   * arrows of the paginator). Both follow the `align` of the columns.
-   */
+  /** Blue header, striped rows, rounded corners; otherwise the clean, minimal default look. */
   readonly useAppTheme = input(false);
-  /** Shows the search in the title row, on the left (after the title). */
   readonly searchable = input(false);
-  /**
-   * Buttons of every row, in the last column, in this order: each with its name, icon and function
-   * (see `TableRowAction`). None (empty or `null`, the default): no column of buttons.
-   */
+  /** Buttons of every row, in the last column; empty or `null`: no such column. */
   readonly rowActions = input<readonly TableRowAction<T>[] | null>([]);
-  /**
-   * Hides the checkboxes of the rows and the buttons on the chosen rows (duplicate, delete), shown by
-   * default: the checkboxes in the first column, the buttons in the bar above the rows.
-   */
+  /** Hides the row checkboxes and the buttons on the chosen rows (duplicate, delete). */
   readonly hideMassiveActions = input(false);
-  /** Hides the create button, shown by default on the right of the title row. */
   readonly hideCreateButton = input(false);
   /**
    * Icons as Material icon names (Material Symbols font): [search magnifier, search X, duplicate
@@ -289,19 +211,15 @@ export class Table<T, P extends object> implements OnDestroy {
    * chosen, delete chosen, create, title].
    */
   readonly pathIcon = input<readonly string[] | null>();
-  /** A page could not be loaded; the table shows no rows meanwhile. */
   readonly loadError = output<unknown>();
-  /** The duplicate button of the chosen rows was pressed: their ids, in the order they were chosen. */
   readonly duplicateSelected = output<TableRowId[]>();
-  /** The delete button of the chosen rows was pressed: their ids, in the order they were chosen. */
   readonly deleteSelected = output<TableRowId[]>();
-  /** The create button was pressed. */
   readonly create = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly paginatorIntl = inject(TablePaginatorIntl);
-  /** When it changes (e.g. the language), the current page is loaded again, as it is. */
+  /** Its changes (e.g. the language) load the current page again, as it is. */
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
 
   private readonly grid = viewChild.required<string, ElementRef<HTMLTableElement>>('grid', {
@@ -311,7 +229,6 @@ export class Table<T, P extends object> implements OnDestroy {
   private readonly textActions = contentChildren(TableTextAction);
   protected readonly hasIconActions = computed(() => this.iconActions().length > 0);
   protected readonly hasTextActions = computed(() => this.textActions().length > 0);
-  /** Left part of the bar: the buttons on the chosen rows and the icon buttons of the page. */
   protected readonly hasIconZone = computed(
     () => !this.hideMassiveActions() || this.hasIconActions(),
   );
@@ -321,26 +238,26 @@ export class Table<T, P extends object> implements OnDestroy {
   );
   protected readonly titleId = `table__title__${nextTableId++}`;
 
-  /** Searched text, from the search field (0.5 s after the last key, '' under 3 characters). */
+  /** From the search field: 0.5 s after the last key, '' under 3 characters. */
   protected readonly search = signal('');
 
-  /** Sorted column, from the headers; `null` for none (the server's own order). */
+  /** `null`: the server's own order. */
   protected readonly sort = signal<Sort | null>(null);
 
-  /** Current page, from 1; back to the first one whenever `params`, the search or the sorting change. */
+  /** From 1, unlike Material's page index. */
   protected readonly page = linkedSignal({
     source: () => ({ params: this.params(), search: this.search(), sort: this.sort() }),
     computation: () => 1,
   });
 
-  /** Counts the `reload()` calls: each one loads the current page again. */
+  /** Bumped by `reload()` to load the current page again. */
   private readonly reloads = signal(0);
-  /** Counts the changes of the table width (window, breakpoints) and the fonts arriving: the headers are measured again. */
+  /** Bumped when the table width changes or the fonts arrive: the headers are measured again. */
   private readonly layoutChanges = signal(0);
   /** Widths in px of the columns when their shares would leave a header without room; null: the shares. */
   private readonly fittedWidths = signal<readonly number[] | null>(null);
   private resizeObserver?: ResizeObserver;
-  /** Measures the header titles; created on the first measure, null where there is no canvas. */
+  /** `undefined`: not created yet; `null`: no canvas in this browser. */
   private textMeasurer?: OffscreenCanvasRenderingContext2D | null;
 
   private readonly request = computed(() => {
@@ -362,7 +279,7 @@ export class Table<T, P extends object> implements OnDestroy {
       : null;
   });
 
-  /** The page answered by `load`; the previous one stays on screen until the next arrives. */
+  /** The previous page stays on screen until the next one arrives. */
   protected readonly result = toSignal(
     toObservable(this.request).pipe(
       switchMap((request) =>
@@ -380,9 +297,7 @@ export class Table<T, P extends object> implements OnDestroy {
   );
 
   protected readonly rows = computed(() => this.result().rows);
-  /** The ids of `selection`, for a quick look-up of every row. */
   protected readonly selected = computed(() => new Set(this.selection()));
-  /** How many rows of the page on screen are chosen: the checkbox of the header shows them. */
   private readonly selectedOnPage = computed(
     () => this.rows().filter((row) => this.selected().has(this.idOf(row))).length,
   );
@@ -398,7 +313,6 @@ export class Table<T, P extends object> implements OnDestroy {
    */
   protected readonly empty = computed(() => this.result() !== NO_ROWS && this.rows().length === 0);
   protected readonly total = computed(() => this.result().total);
-  /** Fields of the columns, with the checkboxes first and the row buttons at the end when shown. */
   protected readonly fields = computed(() => [
     ...(this.hideMassiveActions() ? [] : [SELECT_COLUMN]),
     ...this.columns().map((column) => column.field),
@@ -408,7 +322,6 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly hasRowActions = computed(() => (this.rowActions()?.length ?? 0) > 0);
   protected readonly selectColumn = SELECT_COLUMN;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
-  /** Width of every column header: the share of the column (`width`), or its fitted width. */
   protected readonly headerWidths = computed(() => {
     const fitted = this.fittedWidths();
     return this.columns().map((column, index) =>
@@ -424,11 +337,9 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly reservedRows = computed(() =>
     Math.min(this.pageSize(), ...this.pageSizeOptions()),
   );
-  /** The paginator (and its selector) only when rows do not fit in the smallest page. */
   protected readonly paginated = computed(() => this.total() > this.reservedRows());
 
   constructor() {
-    // The paginator texts follow the given texts.
     effect(() => this.paginatorIntl.setTexts(this.texts()?.paginator));
     // Every column has at least the room of its header (title and sort arrow): on small screens the
     // other columns give up room and, when there is none left, the rows scroll sideways inside the
@@ -446,41 +357,35 @@ export class Table<T, P extends object> implements OnDestroy {
     });
   }
 
-  /**
-   * Loads the current page again, as it is (same page, search and sorting): e.g. "retry" after a
-   * `loadError`. With a template reference: `<app-table #table … />` and `table.reload()`.
-   */
+  /** Same page, search and sorting: e.g. "retry" after a `loadError`. */
   reload(): void {
     this.reloads.update((count) => count + 1);
   }
 
   /**
-   * A new page or page size. With a new size Material keeps the first row on screen: rows 21-30 at
-   * 10 per page become page 2 (rows 21-40) at 20 per page.
+   * With a new size Material keeps the first row on screen: rows 21-30 at 10 per page become page 2
+   * (rows 21-40) at 20 per page.
    */
   protected changePage(event: PageEvent): void {
     this.pageSize.set(event.pageSize);
     this.page.set(event.pageIndex + 1);
   }
 
-  /** A click on a sortable header: ascending, then descending, then no sorting (Material's cycle). */
+  /** Material cycles ascending, descending, then no direction (no sorting). */
   protected changeSort(sort: Sort): void {
     this.sort.set(sort.direction ? sort : null);
   }
 
-  /** Id of a row, from its `idField`. */
   protected idOf(row: T): TableRowId {
     return row[this.idField()] as TableRowId;
   }
 
-  /** The checkbox of the header: adds all the rows of the page to the chosen ones, or takes them away. */
   protected selectAll(checked: boolean): void {
     const page = this.rows().map((row) => this.idOf(row));
     const others = this.selection().filter((id) => !page.includes(id));
     this.selection.set(checked ? [...others, ...page] : others);
   }
 
-  /** The checkbox of a row: an id already chosen is taken away, otherwise it is added. */
   protected selectRow(row: T): void {
     const id = this.idOf(row);
     this.selection.update((ids) =>
@@ -545,7 +450,6 @@ export class Table<T, P extends object> implements OnDestroy {
     }
   }
 
-  /** Room a header needs: its title in its font, the sort arrow (when sortable) and the paddings. */
   private headerRoom(header: HTMLElement, title: string, sortable: boolean): number {
     const style = getComputedStyle(header);
     const container = header.querySelector<HTMLElement>('.mat-sort-header-container');
@@ -569,7 +473,6 @@ export class Table<T, P extends object> implements OnDestroy {
     );
   }
 
-  /** Width of a text in the font of an element; 0 where the browser cannot measure it. */
   private textWidth(text: string, style: CSSStyleDeclaration): number {
     if (this.textMeasurer === undefined) {
       this.textMeasurer =
@@ -582,7 +485,7 @@ export class Table<T, P extends object> implements OnDestroy {
     return this.textMeasurer.measureText(text).width;
   }
 
-  /** Listener of the table size and of the fonts: measure the headers again. */
+  /** Arrow function: passed as callback to the ResizeObserver and to `fonts.ready`. */
   private readonly layoutChanged = (): void => {
     this.layoutChanges.update((count) => count + 1);
   };

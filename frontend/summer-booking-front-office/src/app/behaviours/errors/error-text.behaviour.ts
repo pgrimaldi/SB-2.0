@@ -3,9 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable, combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { ApiFieldError, ApiProblem, ApiProblemArgs } from '../../entities/errors/api-problem';
 
-/** Macro group of the translations of the errors that come from the backend. */
 const ERROR_GROUP = 'error';
-/** Message for a code with no translation yet. */
 const UNKNOWN_ERROR = `${ERROR_GROUP}.unknown`;
 
 /**
@@ -19,7 +17,6 @@ const UNKNOWN_ERROR = `${ERROR_GROUP}.unknown`;
 export class ErrorTextBehaviour {
   private readonly translateService = inject(TranslateService);
 
-  /** Message of the error, e.g. "Credenziali non valide". */
   text(problem: ApiProblem): Observable<string> {
     return this.translate(problem.code, problem.args);
   }
@@ -33,7 +30,7 @@ export class ErrorTextBehaviour {
     return this.keyOf(problem.code);
   }
 
-  /** Messages of the field errors, by field (the first one when a field has more). */
+  /** Only the first error of each field. */
   fieldTexts(problem: ApiProblem): Observable<Readonly<Record<string, string>>> {
     const errors = (problem.errors ?? []).filter(
       (error, index, all) => all.findIndex(({ field }) => field === error.field) === index,
@@ -63,7 +60,6 @@ export class ErrorTextBehaviour {
           return key;
         }
         if (isDevMode()) {
-          // A code the backend sends but we do not translate yet: to add to the translations.
           console.warn(`Missing translation for the error code "${code}" (${key}).`);
         }
         return UNKNOWN_ERROR;

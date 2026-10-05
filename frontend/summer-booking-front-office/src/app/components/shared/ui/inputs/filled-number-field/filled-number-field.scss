@@ -2,8 +2,8 @@
 
 @include field.filled-field(filled__number__field);
 
-// Currency icon before the number, as high as the text, blue like it. Material lines the prefix up
-// on the text baseline, which puts an icon too high: it is centred in the field instead.
+// Material lines the prefix up on the text baseline, which puts an icon too high: it is centred in
+// the field instead.
 .filled__number__field__control ::ng-deep .mat-mdc-form-field-text-prefix {
   align-self: center;
 }

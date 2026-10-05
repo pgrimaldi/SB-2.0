@@ -1,7 +1,6 @@
 @use '@angular/material' as mat;
 
-// Grey pill of the reference: placeholder inside, magnifier on the right. 20rem wide; in a row
-// without room it shrinks down to 8rem (placeholder still readable).
+// In a row without room it shrinks down to 8rem (placeholder still readable).
 // Sizes can be changed from outside with CSS variables (defaults: the header size), e.g. the table
 // makes it bigger on large screens: --search-field-width, --search-field-text-size,
 // --search-field-line-height, --search-field-padding (above and below the text), --search-field-icon-size.
@@ -42,10 +41,8 @@
   );
 }
 
-// Full width of the host; Material rounds only the top of a filled field, the pill is round all around.
-// Raised from the page, so that the search is noticed: a light shadow (stronger below) and a thin
-// border drawn inside the pill (neither moves anything). On hover and while typing the border turns
-// blue and the shadow grows a little.
+// Material rounds only the top of a filled field: the pill is round all around. Shadow and inner
+// border (neither moves anything) raise it from the page, so that the search is noticed.
 .search__field {
   width: 100%;
   overflow: hidden;

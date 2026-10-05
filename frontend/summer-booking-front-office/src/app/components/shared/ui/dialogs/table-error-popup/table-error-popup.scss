@@ -2,7 +2,6 @@
 
 @include popup.popup(table__error__popup, app-table-error-popup);
 
-// Close on the left, retry on the right.
 .table__error__popup__actions {
   display: flex;
   justify-content: center;

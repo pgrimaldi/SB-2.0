@@ -6,7 +6,7 @@ import { BookingDayType } from '../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../entities/management/management-request';
 import { AuthBehaviour } from '../auth/auth.behaviour';
 
-/** Pause after the last date change before the pages ask the API (arrows can be clicked quickly). */
+/** The date arrows can be clicked quickly: the pages ask the API only after this pause. */
 export const DATES_DEBOUNCE = 500;
 
 interface Dates {
@@ -14,19 +14,14 @@ interface Dates {
   end: Date;
 }
 
-/**
- * Filters chosen in the management header and read by the management pages.
- * Provided by the management layout: it lives, and starts again from today, with it.
- */
+/** Provided by the management layout: it lives, and starts again from today, with it. */
 @Injectable()
 export class ManagementFiltersBehaviour {
   private readonly auth = inject(AuthBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
-  /** Days the management pages refer to (calendar days); today by default. */
   readonly startDate = signal(this.dateAdapter.today());
   readonly endDate = signal(this.dateAdapter.today());
-  /** Part of the day the management pages refer to; full day by default. */
   readonly period = signal(BookingDayType.FullDay);
 
   /** The dates the user stopped on: they follow the header after `DATES_DEBOUNCE` ms of quiet. */
@@ -59,12 +54,11 @@ export class ManagementFiltersBehaviour {
   });
 }
 
-/** The chosen calendar day as a UTC day, without time zone conversion: 29/09 → `2026-09-29T00:00:00.000Z`. */
+/** The calendar day as a UTC day, no time zone conversion: 29/09 → `2026-09-29T00:00:00.000Z`. */
 function utcDayStart(day: Date): string {
   return new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate())).toISOString();
 }
 
-/** Last instant of the chosen calendar day as a UTC day: 29/09 → `2026-09-29T23:59:59.999Z`. */
 function utcDayEnd(day: Date): string {
   return new Date(
     Date.UTC(day.getFullYear(), day.getMonth(), day.getDate(), 23, 59, 59, 999),

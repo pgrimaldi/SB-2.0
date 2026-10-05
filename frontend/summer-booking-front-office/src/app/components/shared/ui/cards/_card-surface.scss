@@ -1,6 +1,5 @@
 @use '@angular/material' as mat;
 
-// Shared look of the hub cards: white raised surface that lifts on hover.
 @mixin card-surface {
   height: 100%;
   transition:

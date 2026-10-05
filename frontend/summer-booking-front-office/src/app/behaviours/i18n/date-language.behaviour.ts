@@ -3,13 +3,10 @@ import { Injectable, computed, effect, inject } from '@angular/core';
 import { DateAdapter, MatDateFormats } from '@angular/material/core';
 import { Language, LanguageBehaviour } from './language.behaviour';
 
-/** Locale of the dates of each language when the browser does not name a region for it. */
+/** Used when the browser does not name a region for the language. */
 const DATE_LOCALES: Record<Language, string> = { it: 'it-IT', en: 'en-GB' };
 
-/**
- * Formats of Material's native date adapter (`provideNativeDateAdapter`): dates written as each
- * language writes them, by the browser (Intl), with 2-digit day and month (it: 03/10/2026).
- */
+/** For Material's native date adapter: the browser (Intl) writes dates as each language does. */
 export const DATE_FORMATS: MatDateFormats = {
   parse: { dateInput: null },
   display: {
@@ -24,27 +21,26 @@ export const DATE_FORMATS: MatDateFormats = {
 type DatePart = 'day' | 'month' | 'year';
 
 /**
- * Dates in the current language: sets the locale of Material's date adapter (all calendars and
- * date fields follow the language; started with the app) and reads dates typed by hand. By default date fields are not writable (dates come from the calendar); a field
- * that accepts typed dates uses `parse`.
+ * Sets the locale of Material's date adapter, so all calendars and date fields follow the language
+ * (started with the app). Date fields are read-only by default (dates come from the calendar); a
+ * field that accepts typed dates uses `parse`.
  */
 @Injectable({ providedIn: 'root' })
 export class DateLanguageBehaviour {
   private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
-  /** Languages set in the browser, in order of preference (e.g. `['en-AU', 'en', 'it']`). */
+  /** In order of preference, e.g. `['en-AU', 'en', 'it']`. */
   private readonly browserLanguages = inject(DOCUMENT).defaultView?.navigator.languages ?? [];
   /**
-   * Locale of the current language: the browser's own region for that language when it names one
-   * (`en-US`, `en-AU`, `it-CH`…), otherwise `DATE_LOCALES` (English: `en-GB`).
+   * The browser's own region for the current language when it names one (`en-US`, `en-AU`,
+   * `it-CH`…), otherwise `DATE_LOCALES` (English: `en-GB`).
    */
   readonly locale = computed(() => {
     const language = this.languageBehaviour.current();
     return this.browserLocale(language) ?? DATE_LOCALES[language];
   });
 
-  /** Order of day, month and year in the current language, asked to the browser (Intl). */
   private readonly order = computed(() =>
     new Intl.DateTimeFormat(this.locale(), DATE_FORMATS.display.dateInput)
       .formatToParts(new Date(2000, 0, 2))
@@ -53,7 +49,6 @@ export class DateLanguageBehaviour {
   );
 
   constructor() {
-    // Calendars and date fields follow the language.
     effect(() => this.dateAdapter.setLocale(this.locale()));
   }
 
@@ -77,7 +72,6 @@ export class DateLanguageBehaviour {
     return isReal ? date : null;
   }
 
-  /** First browser language that is `language` with a region the browser can format dates in. */
   private browserLocale(language: Language): string | undefined {
     return this.browserLanguages.find((tag) => {
       try {

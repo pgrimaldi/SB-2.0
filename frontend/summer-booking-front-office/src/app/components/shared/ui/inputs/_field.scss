@@ -1,6 +1,5 @@
 @use '@angular/material' as mat;
 
-// Shared look of the form fields: label above a plain outlined input, 2.5rem high.
 // $block is the component name (e.g. text__field) used by the label class.
 @mixin field($block) {
   :host {

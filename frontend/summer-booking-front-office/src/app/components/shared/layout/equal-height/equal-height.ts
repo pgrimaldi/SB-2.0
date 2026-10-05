@@ -15,7 +15,6 @@ export class EqualHeight implements OnDestroy {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  /** Frame of the next measure; 0 when none is waiting. */
   private frame = 0;
   private observer?: ResizeObserver;
 

@@ -1,7 +1,5 @@
-// Desktop: column next to the management menu, below the header, as tall as the screen (less the
-// menu bar at the bottom, when there is one: `--layout-bottom-bar-height`), as wide as the management
-// menu fully open (9.375rem, management-menu.scss). Rows, spaces and text as in the
-// designer's mockup: every page on one line, the 15 pages in a 1280×720 screen.
+// As wide as the management menu fully open (9.375rem, management-menu.scss). Rows, spaces and text
+// from the designer's mockup: every page on one line, the 15 pages in a 1280×720 screen.
 :host {
   display: block;
   flex: none;
@@ -36,8 +34,7 @@
   text-decoration: none;
 }
 
-// The current page, and the page under the mouse (only where there is a mouse: on touch screens the
-// colour would stay after the tap).
+// Hover only where there is a mouse: on touch screens the colour would stay after the tap.
 .settings__menu__item__active {
   background: var(--color__tertiary__theme);
 }

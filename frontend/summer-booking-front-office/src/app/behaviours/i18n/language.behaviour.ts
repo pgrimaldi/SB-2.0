@@ -38,7 +38,6 @@ export class LanguageBehaviour {
     return this.languages.some((language) => language.code === value);
   }
 
-  /** Language saved by the user, or Italian when nothing valid is stored. */
   preferred(): Language {
     const stored = this.readStoredLanguage();
     return this.isSupported(stored) ? stored : DEFAULT_LANGUAGE;

@@ -1,9 +1,7 @@
 @use '@angular/material' as mat;
 
-// Layout and sizes common to both looks, so that the table takes the same room in both; colours and
-// details of each look come from table-app-theme.scss and table-default-theme.scss. Header and rows
-// 2.75rem high: with everything shown (title row with search and create button, bar of the buttons on
-// the chosen rows), 10 rows and the paginator fit in one screen from 1280×720.
+// Sizes common to both looks, so that the table takes the same room in both. Header and rows 2.75rem
+// high: with everything shown, 10 rows and the paginator fit in one screen from 1280×720.
 :host {
   --table-header-height: 2.75rem;
   --table-row-height: 2.75rem;
@@ -37,7 +35,7 @@
     )
   );
 
-  // Page size selector of the paginator: blue in both looks.
+  // The page size selector of the paginator.
   @include mat.form-field-overrides(
     (
       outlined-hover-outline-color: var(--color__main__theme__one),
@@ -54,27 +52,23 @@
   );
 }
 
-// With long pages (more rows than the screen) the paginator stays at the bottom of the screen and
-// stops in its place at the end of the table. `--table-paginator-offset` keeps it above anything
-// fixed at the bottom of the page (e.g. a menu bar).
+// `--table-paginator-offset` keeps the sticky paginator above anything fixed at the bottom of the
+// page (e.g. a menu bar).
 .table__paginator {
   position: sticky;
   bottom: var(--table-paginator-offset, 0);
   margin-top: auto;
 }
 
-// Wide tables scroll sideways instead of overflowing the page. The rows always have room for the
-// smallest page (`--table-page-size` rows): the paginator, right under them, stays at the same height
-// on every page, even the last shorter one, whatever is above the rows (e.g. the search bar).
+// The rows always have room for the smallest page (`--table-page-size` rows): the paginator, right
+// under them, stays at the same height on every page, even the last shorter one.
 .table {
   min-height: calc(var(--table-header-height) + var(--table-page-size) * var(--table-row-height));
   overflow-x: auto;
 }
 
-// Column widths come only from the columns (`width`, or equal shares), never from the rows shown:
-// they stay the same on every page. A header never gets less than its room (the component fits the
-// columns): when the room of all of them is more than the screen, the rows scroll sideways inside
-// `.table`.
+// Fixed layout: column widths never depend on the rows shown. The component gives every header its
+// room (`fitColumns`); when that is more than the screen, the rows scroll sideways inside `.table`.
 .table__grid {
   width: 100%;
   table-layout: fixed;
@@ -86,17 +80,15 @@
   }
 }
 
-// Checkboxes of the rows, in the first column: as wide as the box (15px) plus the side paddings of
-// the cell, which each look gives in `--table-select-padding`.
+// As wide as the box (15px) plus the side paddings of the cell, which each look gives in
+// `--table-select-padding`.
 .table__select {
   width: calc(0.9375rem + var(--table-select-padding, 0rem));
 }
 
-// Buttons of every row, in the last column, on the right. Sizes follow the text of the rows (em), so
-// they grow with it on large screens; the soft blue of the icons is in the images (or the colour of
-// a Material icon). The column is as wide as its buttons (`--table-actions-count`, from `rowActions`:
-// 1.75em each, 0.375em between them), never less than its header ("Azioni", 4em), plus the side
-// paddings of the cells, which each look gives in `--table-actions-padding`.
+// Sizes in em follow the text of the rows, so they grow with it on large screens. The column is as
+// wide as its buttons (`--table-actions-count`: 1.75em each, 0.375em between them), never less than
+// its header ("Azioni", 4em), plus the side paddings each look gives in `--table-actions-padding`.
 .table__actions {
   width: calc(
     max(var(--table-actions-count) * 1.75em + (var(--table-actions-count) - 1) * 0.375em, 4em) +
@@ -105,7 +97,7 @@
   text-align: end;
 }
 
-// The header ("Azioni") centred over the buttons: the inside of the cell is as wide as the buttons.
+// The inside of the cell is as wide as the buttons: centred, the header sits over them.
 .table__header .table__actions {
   text-align: center;
 }
@@ -141,14 +133,12 @@
   }
 }
 
-// Under the mouse, the button about to be pressed (only where there is a mouse).
 @media (hover: hover) {
   .table__action:hover {
     background: var(--color__tertiary__theme);
   }
 }
 
-// No rows from the server: the message in place of the rows.
 .table__empty__cell {
   padding: 1rem;
   color: var(--color__layout__muted__strong);
@@ -158,13 +148,12 @@
 
 .table__cell {
   overflow: hidden;
-  text-overflow: ellipsis; // a text longer than its column ends with "…" instead of widening it
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-// Large screens (from 1920px): bigger text and rows (1rem, 3.5rem), but not so big that they dwarf the
-// page title; rows lower than the reference (5.25rem) so that, with everything shown, 10 rows and the
-// paginator fit in a 1080p screen without scroll. Paginator, search and buttons keep their sizes.
+// From 1920px: rows lower than the reference (5.25rem) so that, with everything shown, 10 rows and the
+// paginator fit in a 1080p screen without scroll.
 @media (width >= 120rem) {
   :host {
     --table-header-height: 3.5rem;
@@ -181,7 +170,6 @@
   }
 }
 
-// Phone: lower rows.
 @media (width < 48rem) {
   :host {
     --table-header-height: 2.8125rem;

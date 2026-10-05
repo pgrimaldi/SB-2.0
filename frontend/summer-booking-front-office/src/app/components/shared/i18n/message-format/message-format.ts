@@ -7,14 +7,12 @@ import {
 } from './message-formatters';
 import { Message, MessagePart, parseMessage } from './message-parser';
 
-/** Values of the arguments of a message, e.g. `{ count: 3, date: '2026-08-01' }`. */
 export type MessageArgs = Readonly<Record<string, unknown>>;
 
-/** A compiled message: gives the text for the arguments. */
 export type CompiledMessage = (args?: MessageArgs) => string;
 
 export interface MessageFormatOptions {
-  /** Currency (ISO 4217) of `{x, number, currency}` when the arguments have no `currency`. EUR by default. */
+  /** Used when the arguments have no `currency`. EUR by default. */
   readonly defaultCurrency?: string;
 }
 
@@ -23,7 +21,6 @@ const DEFAULT_CURRENCY = 'EUR';
 /** Typed arguments make a text a message of this library; any other text is left as it is. */
 const TYPED_ARGUMENT = /\{\s*[A-Za-z_]\w*\s*,\s*(?:number|date|time|plural)\s*[,}]/;
 
-/** True when the text uses typed arguments (`{n, number}`, `{d, date}`, `{n, plural, …}`). */
 export function isMessage(text: string): boolean {
   return TYPED_ARGUMENT.test(text);
 }
@@ -54,7 +51,7 @@ interface Context {
   readonly defaultCurrency: string;
 }
 
-/** The text of a message; `count` is the number of the plural branch being written (for `#`). */
+/** `count` fills `#` inside a plural branch. */
 function render(
   message: Message,
   args: MessageArgs,

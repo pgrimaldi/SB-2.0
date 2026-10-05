@@ -93,8 +93,6 @@ $motion: $motion-duration $motion-easing;
   opacity: 1;
 }
 
-// Desktop and tablet navigation
-
 .header__nav {
   display: flex;
   align-items: center;
@@ -140,14 +138,11 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-// Focus ring (theme) a little further away.
 .header__link,
 .header__toggle,
 .header__menu__link {
   --focus-ring-offset: 0.25rem;
 }
-
-// Language selector
 
 .header__language {
   color: var(--color__white);
@@ -188,8 +183,6 @@ $motion: $motion-duration $motion-easing;
     color: var(--color__main__theme__one);
   }
 }
-
-// Mobile toggle
 
 .header__toggle {
   display: none;
@@ -268,8 +261,6 @@ $motion: $motion-duration $motion-easing;
     transform: translateY(-0.5rem) rotate(-45deg);
   }
 }
-
-// Mobile menu panel
 
 .header__menu {
   position: absolute;
@@ -374,8 +365,6 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-// Tablet
-
 @media (width < 64rem) {
   .header {
     height: 6rem;
@@ -417,8 +406,6 @@ $motion: $motion-duration $motion-easing;
     line-height: 1.5rem;
   }
 }
-
-// Mobile
 
 @media (width < 48rem) {
   .header {

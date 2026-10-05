@@ -51,7 +51,7 @@ export class Header {
       label: this.languageNames()[language.code] ?? language.code,
     })),
   );
-  /** Flags of the language menu, in the order of its items. */
+  /** In the order of the menu items. */
   protected readonly languageFlags = this.languageBehaviour.languages.map(
     (language) => language.flagSrc,
   );
@@ -77,7 +77,7 @@ export class Header {
     this.isMenuOpen.update((isOpen) => !isOpen);
   }
 
-  /** Listener of the page scroll (`host`): compact header once the page is scrolled. */
+  /** Called by the `host` scroll listener. */
   protected updateHeaderState(): void {
     this.isCompact.set((this.document.defaultView?.scrollY ?? 0) >= 64);
   }

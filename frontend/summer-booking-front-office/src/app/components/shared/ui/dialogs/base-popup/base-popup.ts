@@ -11,15 +11,11 @@ import {
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 /**
- * Base of the app's popups (Angular Material dialog), used declaratively: `[(open)]="…"`.
- * It opens and closes the dialog, and closes it when the page goes away. A popup extends it, puts its
- * content in an `<ng-template #content>` of its template and gives the dialog options (`dialogConfig`).
- * A closed popup is closed at once, without waiting for the closing animation: a new `open` right
- * after (e.g. an error again after "retry") opens it again.
+ * A popup extends it, puts its content in an `<ng-template #content>` of its template and gives the
+ * dialog options (`dialogConfig`).
  */
 @Directive()
 export abstract class BasePopup implements OnDestroy {
-  /** Shows the popup when true; goes back to false as soon as it is closed. */
   readonly open = model(false);
 
   private readonly dialog = inject(MatDialog);
@@ -34,10 +30,12 @@ export abstract class BasePopup implements OnDestroy {
     });
   }
 
-  /** Options of the Material dialog: role, accessible name and description, size, panel class. */
   protected abstract dialogConfig(): MatDialogConfig;
 
-  /** Closes at once, without waiting for the closing animation. */
+  /**
+   * Closes at once, without waiting for the closing animation: a new `open` right after (e.g. an
+   * error again after "retry") opens it again.
+   */
   protected close(): void {
     const dialogRef = this.dialogRef;
     this.dialogRef = undefined;
@@ -45,10 +43,7 @@ export abstract class BasePopup implements OnDestroy {
     dialogRef?.close();
   }
 
-  /**
-   * False while the popup must stay open (e.g. while saving): Esc and a click outside do nothing.
-   * The popup's own buttons are blocked by the popup itself.
-   */
+  /** Blocks only Esc and a click outside (e.g. while saving): the popup blocks its own buttons. */
   protected setClosable(closable: boolean): void {
     if (this.dialogRef) {
       this.dialogRef.disableClose = !closable;

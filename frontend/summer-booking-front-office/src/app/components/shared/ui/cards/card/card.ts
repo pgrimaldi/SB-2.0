@@ -3,7 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { resolveIcons } from '../../icons/icons';
 
-/** Card with an icon on top, a heading (`cardHeading`) and a text. Icons (see `Icons`): [icon]. */
+/** The heading is projected with the `cardHeading` attribute. */
 @Component({
   selector: 'app-card',
   imports: [MatCardModule, MatIconModule],

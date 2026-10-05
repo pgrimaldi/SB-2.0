@@ -1,7 +1,6 @@
 @use '@angular/material' as mat;
 
-// The app's look (`useAppTheme`): blue header, striped rows, rounded corners, columns aligned by
-// `align`. Sizes are common to both looks (table.scss).
+// The app's look (`useAppTheme`); sizes are common to both looks (table.scss).
 :host(.table__theme__app) {
   // Side paddings of a cell, for the width of the columns of the row buttons and of the checkboxes
   // (the first column, with its wider left padding).
@@ -89,7 +88,7 @@
   }
 }
 
-// Large screens (from 1920px): wider spaces between the columns, as in the reference.
+// From 1920px: wider spaces between the columns, as in the reference.
 @media (width >= 120rem) {
   :host(.table__theme__app) {
     --table-actions-padding: 5rem;

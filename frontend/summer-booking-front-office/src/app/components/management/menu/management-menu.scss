@@ -27,7 +27,7 @@ $motion: 525ms ease-in-out;
   box-shadow: 0.375rem 0 1.25rem rgb(18 45 87 / 18%);
 }
 
-// Page links at the top; the logout button is pushed to the bottom.
+// Pushes the logout button to the bottom.
 .management__menu__links {
   display: flex;
   flex: 1;
@@ -48,7 +48,6 @@ $motion: 525ms ease-in-out;
   font: inherit;
   text-decoration: none;
   cursor: pointer;
-  // Focus ring (theme) inside the item.
   --focus-ring-color: var(--color__main__theme__one);
   --focus-ring-offset: -0.125rem;
 

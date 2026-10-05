@@ -13,16 +13,11 @@ import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
 
-/** Most digits after the separator of an amount (cents). */
 const CURRENCY_DECIMALS = 2;
 
 /**
- * Grey number field with its label above (Angular Material form field, fill), as in the form popups:
- * `<app-filled-number-field [label]="…" [(value)]="quantity" />`. An empty field is `null`.
  * Only digits 0-9 can be typed (no signs, no exponent); with `decimal` also one separator, comma or
- * dot. With `currency` the value is an amount: at most 2 digits after the separator and the currency
- * icon before the number.
- * Icons (see `Icons`): [currency], shown only with `currency`.
+ * dot.
  */
 @Component({
   selector: 'app-filled-number-field',
@@ -32,14 +27,10 @@ const CURRENCY_DECIMALS = 2;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilledNumberField {
-  /** Label above the field, already translated. */
   readonly label = input<string>();
-  /** Typed number, two-way: `[(value)]="quantity"`; `null` when the field is empty. */
   readonly value = model<number | null>(null);
   readonly name = input<string>();
-  /** True to accept a number with a decimal part (comma or dot); otherwise whole numbers only. */
   readonly decimal = input(false);
-  /** True when the number is an amount of money: currency icon, at most 2 decimal digits. */
   readonly currency = input(false);
   /** Icons as Material icon names (Material Symbols font): [currency]. */
   readonly matIcon = input<readonly string[] | null>();
@@ -48,7 +39,6 @@ export class FilledNumberField {
 
   protected readonly id = `filled-number-field-${nextId++}`;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
-  /** Digits allowed after the separator: none, 2 for an amount, otherwise any. */
   protected readonly decimals = computed(() =>
     !this.decimal() ? 0 : this.currency() ? CURRENCY_DECIMALS : Infinity,
   );
@@ -62,7 +52,7 @@ export class FilledNumberField {
       previous && toNumber(previous.value) === value ? previous.value : (value?.toString() ?? ''),
   });
 
-  /** Drops what is not allowed (letters, signs, extra separators), keeps the cursor, sets the value. */
+  /** Drops what is not allowed without moving the cursor. */
   protected changeValue(field: HTMLInputElement): void {
     const decimals = this.decimals();
     const text = keepNumber(field.value, decimals);
@@ -76,7 +66,6 @@ export class FilledNumberField {
   }
 }
 
-/** Only digits, and with decimals one separator (comma or dot) followed by at most `decimals` digits. */
 function keepNumber(text: string, decimals: number): string {
   let kept = '';
   let separator = false;
@@ -95,7 +84,7 @@ function keepNumber(text: string, decimals: number): string {
   return kept;
 }
 
-/** The kept text as a number; empty (or a lone separator) is `null`. */
+/** Empty text or a lone separator is `null`. */
 function toNumber(text: string): number | null {
   const number = text === '' ? NaN : Number(text.replace(',', '.'));
   return Number.isFinite(number) ? number : null;

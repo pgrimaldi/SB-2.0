@@ -13,14 +13,13 @@ const STATUS_TEXTS: Readonly<Record<number, string>> = {
   500: 'Internal Server Error',
 };
 
-/** Field error of the mock API: only codes of the shared catalog, which are all translated. */
+/** Only codes of the shared catalog, which are all translated. */
 export interface MockFieldError extends ApiFieldError {
   readonly code: ApiErrorCode;
 }
 
-/** What an error answer may carry besides status and code. */
 export interface MockProblemDetails {
-  /** Short text for developers and logs (never shown to the user). */
+  /** For developers and logs, never shown to the user. */
   title: string;
   args?: ApiProblemArgs;
   errors?: readonly MockFieldError[];

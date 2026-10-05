@@ -52,7 +52,7 @@ describe('TableErrorPopup', () => {
 
     const title = dialog()!.querySelector('.table__error__popup__title')!;
     const text = dialog()!.querySelector('.table__error__popup__text')!;
-    expect(title.textContent?.trim()).toBe('Errore'); // shown as given
+    expect(title.textContent?.trim()).toBe('Errore');
     expect(text.textContent?.trim()).toBe(
       'In questo momento non riusciamo a fornire le informazioni richieste.',
     );

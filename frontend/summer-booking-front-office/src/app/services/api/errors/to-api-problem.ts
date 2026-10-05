@@ -6,13 +6,10 @@ import {
   FRONTEND_ERROR_CODES,
 } from '../../../entities/errors/api-problem';
 
-/** Stable code: lowercase dotted words, e.g. `auth.invalid_credentials`. */
 const CODE = /^[a-z0-9_]+(\.[a-z0-9_]+)+$/;
 const MAX_CODE_LENGTH = 100;
-/** Name of a placeholder of the message, e.g. `umbrellaId`. */
 const ARG_NAME = /^[A-Za-z0-9_]{1,50}$/;
 const MAX_ARG_LENGTH = 200;
-/** Trace id of the server logs (e.g. W3C `00-…-…-01`). */
 const TRACE_ID = /^[A-Za-z0-9._:-]{1,128}$/;
 const MAX_TEXT_LENGTH = 300;
 const MAX_FIELD_ERRORS = 50;
@@ -67,7 +64,6 @@ function isCode(value: unknown): value is string {
   return typeof value === 'string' && value.length <= MAX_CODE_LENGTH && CODE.test(value);
 }
 
-/** Only short texts and finite numbers with well-formed names; nothing when none is left. */
 function readArgs(value: unknown): ApiProblemArgs | undefined {
   if (!isRecord(value)) {
     return undefined;
@@ -81,7 +77,6 @@ function readArgs(value: unknown): ApiProblemArgs | undefined {
   return entries.length ? (Object.fromEntries(entries) as ApiProblemArgs) : undefined;
 }
 
-/** The well-formed field errors (at most `MAX_FIELD_ERRORS`); nothing when none is left. */
 function readFieldErrors(value: unknown): readonly ApiFieldError[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;

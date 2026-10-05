@@ -1,10 +1,7 @@
-/** Style of a `number` argument: plain, integer, percent or currency. */
 export type NumberStyle = 'number' | 'integer' | 'percent' | 'currency';
 
-/** Style of a `date` or `time` argument, as in `Intl.DateTimeFormat`. */
 export type DateStyle = 'short' | 'medium' | 'long' | 'full';
 
-/** A piece of a parsed message: plain text or an argument to fill. */
 export type MessagePart =
   | string
   | { readonly kind: 'value'; readonly name: string; readonly source: string }
@@ -23,7 +20,7 @@ export type MessagePart =
   | {
       readonly kind: 'plural';
       readonly name: string;
-      /** Branches by selector: `=0`, `one`, `other`... (`other` is always there). */
+      /** `other` is always present. */
       readonly branches: Readonly<Record<string, Message>>;
       readonly source: string;
     }
@@ -32,7 +29,6 @@ export type MessagePart =
 
 export type Message = readonly MessagePart[];
 
-/** A text that is not a valid message; the position helps to find the mistake. */
 export class MessageSyntaxError extends Error {
   constructor(
     reason: string,
@@ -95,7 +91,6 @@ class MessageParser {
     return parts;
   }
 
-  /** Fails with the reason and the current position. */
   fail(reason: string): never {
     throw new MessageSyntaxError(reason, this.text, this.position);
   }
@@ -158,7 +153,7 @@ class MessageParser {
     return branches;
   }
 
-  /** Reads a token (after optional spaces) with a sticky regular expression. */
+  /** Skips spaces first; `pattern` must be sticky (`y`). */
   private token(pattern: RegExp, reason: string): string {
     this.spaces();
     pattern.lastIndex = this.position;
@@ -176,7 +171,7 @@ class MessageParser {
     }
   }
 
-  /** Moves past `char` (after optional spaces) when it is the next one. */
+  /** Skips spaces first. */
   private skip(char: string): boolean {
     if (!this.peek(char)) {
       return false;

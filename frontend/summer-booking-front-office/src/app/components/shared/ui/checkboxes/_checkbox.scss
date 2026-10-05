@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 
-// Shared look of the checkboxes: blue when chosen, grey when empty, the box sized in rem. Material
-// draws the box at a fixed 18px: in rem it grows with the page on large screens. Used inside `:host`.
+// Used inside `:host`. Material draws the box at a fixed 18px: $box sizes it in rem, so it grows with
+// the page on large screens.
 @mixin checkbox($box) {
   @include mat.checkbox-overrides(
     (

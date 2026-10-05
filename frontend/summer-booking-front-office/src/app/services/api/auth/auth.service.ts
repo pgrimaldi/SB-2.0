@@ -13,7 +13,6 @@ export class AuthService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/auth`;
 
-  /** Fails with status 401 when the credentials are not valid. */
   signIn(request: SignInRequest): Observable<AuthSession> {
     return this.httpClient.post<AuthSession>(`${this.endpoint}/signin`, request);
   }

@@ -15,7 +15,7 @@ import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
 export class ManagementMenu {
   private readonly authBehaviour = inject(AuthBehaviour);
 
-  /** Pages of the management area; `label` is a translation key. */
+  /** `label` is a translation key. */
   protected readonly links = [
     {
       route: '/warehouse',
@@ -24,9 +24,7 @@ export class ManagementMenu {
     },
   ] as const;
 
-  /** While the server revokes the session: "Disconnetti" cannot be pressed again. */
   protected readonly loggingOut = signal(false);
-  /** The server could not revoke the session: the user is still signed in and is told so. */
   protected readonly logoutFailed = signal(false);
 
   protected async logout(): Promise<void> {

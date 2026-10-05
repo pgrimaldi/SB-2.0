@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-/**
- * On/off switch with its label projected as content (Angular Material slide toggle), small as in
- * the form popups: `<app-toggle [(checked)]="alert">{{ '…' | translate }}</app-toggle>`.
- */
 @Component({
   selector: 'app-toggle',
   imports: [MatSlideToggleModule],
@@ -14,8 +10,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 })
 export class Toggle {
   readonly name = input<string>();
-  /** On or off, two-way: `[(checked)]="alert"`. */
   readonly checked = model(false);
-  /** True to block the switch: it cannot be turned on or off and looks faded. */
   readonly disabled = input(false);
 }

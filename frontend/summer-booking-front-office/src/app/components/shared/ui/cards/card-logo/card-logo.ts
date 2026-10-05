@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 
-/** Hub card showing a single centred logo (e.g. a press outlet). */
 @Component({
   selector: 'app-card-logo',
   imports: [MatCardModule],
@@ -11,6 +10,5 @@ import { MatCardModule } from '@angular/material/card';
 })
 export class CardLogo {
   readonly logoSrc = input.required<string>();
-  /** Alternative text of the logo, already translated. */
   readonly logoAlt = input<string>();
 }

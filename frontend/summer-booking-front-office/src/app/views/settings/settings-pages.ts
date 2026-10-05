@@ -1,17 +1,14 @@
 import { Route } from '@angular/router';
 
-/** A settings page: its path under `/settings`, the translation key of its name and, once built, its component. */
 export interface SettingsPage {
   path: string;
+  /** Translation key of the page name. */
   label: string;
-  /** The page (`views/settings/<page>/`), loaded when opened; without it the route shows nothing. */
+  /** Set once the page is built; without it the route shows nothing. */
   loadComponent?: Route['loadComponent'];
 }
 
-/**
- * Pages of the settings, in menu order. The only list of them: the routes (app.routes.ts) and the
- * side panel both come from here.
- */
+/** In menu order. The single source of both the routes (app.routes.ts) and the side panel. */
 export const SETTINGS_PAGES: readonly SettingsPage[] = [
   { path: 'property', label: 'management.settings.menu.property' },
   { path: 'users', label: 'management.settings.menu.users' },

@@ -5,10 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { resolveIcons } from '../../icons/icons';
 
 /**
- * Round icon button (Angular Material icon button) with a tooltip:
- * `<app-icon-button label="…" [pathIcon]="['/assets/images/settings.svg']" />` (or `[matIcon]="['settings']"`
- * for a Material icon), or a short text in place of the icon: `<app-icon-button label="…">S</app-icon-button>`.
- * Icons (see `Icons`): [icon].
+ * A short text can take the place of the icon: `<app-icon-button label="…">S</app-icon-button>`.
  * The button draws the grey circle; icons are just the drawing, without a background.
  */
 @Component({
@@ -19,7 +16,6 @@ import { resolveIcons } from '../../icons/icons';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IconButton {
-  /** Accessible name and tooltip, already translated. */
   readonly label = input<string>();
   /** Icons as Material icon names (Material Symbols font): [icon]. */
   readonly matIcon = input<readonly string[] | null>();

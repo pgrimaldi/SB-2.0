@@ -7,9 +7,7 @@ import { BookingDayType } from '../enums/booking-day-type';
  */
 export interface ManagementRequest {
   idProperty: string;
-  /** Start of the first chosen day (UTC midnight). */
   datetimeFrom: string;
-  /** Last instant of the last chosen day (UTC 23:59:59.999). */
   datetimeTo: string;
   bookingDayType: BookingDayType;
 }

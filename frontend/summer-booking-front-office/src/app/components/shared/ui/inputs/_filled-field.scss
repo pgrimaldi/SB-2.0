@@ -1,9 +1,7 @@
 @use '@angular/material' as mat;
 
-// Shared look of the grey form fields (designer's mockup of the form popups, 02/10/2026): label above
-// in soft blue, a grey field 1.625rem high without lines, blue text. When the field has the keyboard
-// (or is being typed in) a thin blue border shows where it is. $block is the component name (e.g.
-// filled__text__field) used by its classes.
+// Grey form fields of the designer's mockup of the form popups (02/10/2026). $block is the component
+// name (e.g. filled__text__field) used by its classes.
 @mixin filled-field($block) {
   :host {
     display: flex;

@@ -64,7 +64,7 @@ describe('SearchField', () => {
     const button = () => element.querySelector<HTMLButtonElement>('.search__field__button')!;
     expect(
       element.querySelector('.search__field__button img, .search__field__button mat-icon'),
-    ).toBeNull(); // no icon given
+    ).toBeNull();
 
     expect(button().getAttribute('aria-label')).toBe('Cerca'); // empty: magnifier
     type('om');

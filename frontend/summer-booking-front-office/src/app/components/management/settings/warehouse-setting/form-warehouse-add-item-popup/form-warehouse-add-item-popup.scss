@@ -1,7 +1,6 @@
 @use '@angular/material' as mat;
 
-// Form popup of the designer's mockup (02/10/2026): 25rem wide, title on the left with the X on the
-// right, grey fields one under the other, the two buttons side by side at the bottom.
+// Measures from the designer's mockup (02/10/2026).
 // The popup renders in an overlay outside the component: these styles are global.
 .form__warehouse__add__item__popup__panel {
   @include mat.dialog-overrides(
@@ -65,8 +64,7 @@ app-form-warehouse-add-item-popup {
   gap: 1.125rem;
 }
 
-// Annulla (white, blue text, soft blue border) and Aggiungi (blue), half each, both 1.75rem high
-// (the border of Annulla inside); text as in the mockup.
+// The border of Annulla stays inside the 1.75rem height.
 .form__warehouse__add__item__popup__buttons {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
@@ -78,7 +76,6 @@ app-form-warehouse-add-item-popup {
   margin-top: 1.625rem;
 }
 
-// Error of the API, between the fields and the buttons.
 .form__warehouse__add__item__popup__error {
   margin: 1.125rem 0 -0.5rem;
   color: #dc3545;

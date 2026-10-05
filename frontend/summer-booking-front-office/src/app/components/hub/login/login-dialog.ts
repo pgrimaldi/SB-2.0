@@ -34,7 +34,6 @@ export interface LoginDialogSize {
   height?: number;
 }
 
-/** Sizes for regular screens and for phones (below the 48rem mobile breakpoint). */
 export interface LoginDialogSizes {
   desktop: LoginDialogSize;
   mobile: LoginDialogSize;
@@ -50,10 +49,7 @@ const MIN_WIDTH = 'min(26rem, 90vw)';
 const MAX_HEIGHT = '90svh';
 const MOBILE_QUERY = '(width < 48rem)';
 
-/**
- * Hub login popup (wrapper around the Angular Material dialog): `<app-login-dialog [(open)]="loginOpen" />`.
- * Password recovery and registration are not wired yet.
- */
+/** Password recovery and registration are not wired yet. */
 @Component({
   selector: 'app-login-dialog',
   imports: [Button, Checkbox, I18nText, PasswordField, TextField, TranslatePipe],
@@ -63,7 +59,7 @@ const MOBILE_QUERY = '(width < 48rem)';
   encapsulation: ViewEncapsulation.None,
 })
 export class LoginDialog implements OnDestroy {
-  /** Shows the popup when true; goes back to false when the popup is closed (X, Esc or click outside). */
+  /** Goes back to false when the popup is closed (X, Esc or click outside). */
   readonly open = model(false);
   readonly sizes = input<LoginDialogSizes>(DEFAULT_SIZES);
 
@@ -77,9 +73,7 @@ export class LoginDialog implements OnDestroy {
   protected readonly password = signal('');
   protected readonly remember = signal(false);
   protected readonly pending = signal(false);
-  /** Error of the last sign-in, as the API answered it. */
   protected readonly error = signal<ApiProblem | null>(null);
-  /** Translation key of the error message (`error.<code>`, or `error.unknown`). */
   protected readonly errorKey = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.key(problem) : of(null))),
@@ -88,7 +82,6 @@ export class LoginDialog implements OnDestroy {
   );
   private readonly content = viewChild.required<TemplateRef<unknown>>('content');
   private dialogRef?: MatDialogRef<unknown>;
-  /** Phone or desktop size, followed while the popup is open. */
   private mobileQuery?: MediaQueryList;
 
   constructor() {
@@ -98,7 +91,7 @@ export class LoginDialog implements OnDestroy {
     });
   }
 
-  /** Closes at once, without waiting for the closing animation: a closed popup is closed. */
+  /** Closes at once, without waiting for the closing animation. */
   protected close(): void {
     const dialogRef = this.dialogRef;
     this.dialogRef = undefined;
@@ -127,7 +120,6 @@ export class LoginDialog implements OnDestroy {
         },
         error: (error: unknown) => {
           this.pending.set(false);
-          // The message comes from the code of the error (e.g. wrong credentials, no connection).
           this.error.set(toApiProblem(error));
         },
       });
@@ -176,7 +168,6 @@ export class LoginDialog implements OnDestroy {
     return height ? `${height}vh` : '';
   }
 
-  /** Every opening starts from an empty form. */
   private reset(): void {
     this.email.set('');
     this.password.set('');
@@ -185,12 +176,10 @@ export class LoginDialog implements OnDestroy {
     this.error.set(null);
   }
 
-  /** Listener of the screen size (`followScreen`): phone or desktop size of the open popup. */
   private readonly resize = (): void => {
     this.dialogRef?.updateSize(this.width(), this.height());
   };
 
-  /** The popup finished closing: by its X or the sign-in, or by Esc or a click outside. */
   private closed(dialogRef: MatDialogRef<unknown>): void {
     if (this.dialogRef === dialogRef) {
       // Esc or a click outside: still the current popup.

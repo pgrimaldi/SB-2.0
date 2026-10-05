@@ -15,7 +15,6 @@ export interface DropdownMenuItem {
   label: string;
 }
 
-/** Menu opened by the projected trigger. Icons (see `Icons`): one per item, in the order of `items`. */
 @Component({
   selector: 'app-dropdown-menu',
   imports: [MatIconModule, MatMenuModule],
@@ -27,9 +26,7 @@ export interface DropdownMenuItem {
 })
 export class DropdownMenu {
   readonly items = input.required<readonly DropdownMenuItem[]>();
-  /** Value of the current item, two-way: `[(selected)]` (marked with `aria-current`). */
   readonly selected = model('');
-  /** Accessible name of the button that opens the menu, already translated. */
   readonly accessibleLabel = input<string>();
   readonly iconOnly = input(false);
   /** Icons as Material icon names (Material Symbols font): one per item, in the order of `items`. */

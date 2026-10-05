@@ -4,17 +4,14 @@
 // once (`:root { @include theme.default-theme; }` in styles.scss) and can override any colour after it,
 // globally or in a part of the page (e.g. `.dark-area { --color__main__theme__one: #0a2a66; }`).
 @mixin default-theme {
-  // Base colours
   --color__white: #ffffff;
   --color__black: #000000;
 
-  // Main colours
   --color__main__theme__one: #233c7d; // blue: buttons, texts, icons, table header
   --color__main__theme__two: #1c1c1c; // dark grey: body texts of fields, table and popup
   --color__secondary__theme: #0e99c6; // light blue: focus outline and active dot of the carousel
   --color__tertiary__theme: #f3f3f3; // light grey: background of the pills (dates, select, search)
 
-  // Layout colours
   --color__layout__surface: var(--color__white); // cards, popups, menus, calendars, table
   --color__layout__on__main: var(--color__white); // texts and icons over the main blue
   --color__layout__highlight: #e9ecf3; // even table rows, dates in the chosen interval
