@@ -32,4 +32,10 @@
     font-weight: 500;
     line-height: 1.4375rem;
   }
+
+  // Asterisk of a required field, after the label.
+  .#{$block}__mandatory {
+    margin-left: 0.125rem;
+    color: var(--color__layout__error);
+  }
 }

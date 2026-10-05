@@ -1,8 +1,14 @@
-<label class="filled__select__label" [id]="id + '-label'">{{ label() }}</label>
+<label class="filled__select__label" [id]="id + '-label'"
+  >{{ label() }}
+  @if (isMandatory()) {
+    <span class="filled__select__mandatory" aria-hidden="true">*</span>
+  }
+</label>
 <mat-form-field class="filled__select__control" appearance="fill" subscriptSizing="dynamic">
   <mat-select
     panelClass="select__panel"
     hideSingleSelectionIndicator
+    [required]="isMandatory()"
     [aria-labelledby]="id + '-label'"
     [placeholder]="placeholder() ?? ''"
     [disabled]="disabled()"

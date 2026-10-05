@@ -23,6 +23,7 @@
         filled-input-text-color: var(--color__main__theme__one),
         filled-input-text-placeholder-color: var(--color__layout__muted__strong),
         filled-caret-color: var(--color__main__theme__one),
+        filled-error-caret-color: var(--color__layout__error),
         hover-state-layer-opacity: 0,
         focus-state-layer-opacity: 0,
       )
@@ -34,6 +35,12 @@
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1rem;
+  }
+
+  // Asterisk of a required field, after the label.
+  .#{$block}__mandatory {
+    margin-left: 0.125rem;
+    color: var(--color__layout__error);
   }
 
   // Material rounds only the top of a filled field: the grey field is round all around.

@@ -14,6 +14,8 @@ let nextId = 0;
 })
 export class FilledSelect<K extends string = string> {
   readonly label = input<string>();
+  /** Asterisk after the label; screen readers announce the field as required. */
+  readonly isMandatory = input(false);
   readonly placeholder = input<string>();
   readonly options = input<readonly SelectOption<K>[]>([]);
   readonly value = model<K | null>(null);

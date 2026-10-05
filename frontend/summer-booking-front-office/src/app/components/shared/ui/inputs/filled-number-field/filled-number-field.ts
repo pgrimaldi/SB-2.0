@@ -2,14 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   linkedSignal,
   model,
   output,
+  viewChild,
 } from '@angular/core';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
@@ -29,6 +32,8 @@ const CURRENCY_DECIMALS = 2;
 })
 export class FilledNumberField {
   readonly label = input<string>();
+  /** Asterisk after the label; screen readers announce the field as required. */
+  readonly isMandatory = input(false);
   readonly value = model<number | null>(null);
   readonly name = input<string>();
   readonly decimal = input(false);
@@ -41,7 +46,13 @@ export class FilledNumberField {
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */
   readonly touch = output<void>();
 
+  /**
+   * Material sets `aria-invalid` itself from its error state, which it updates only with a classic
+   * form control: it follows our `error` instead.
+   */
+  protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };
   protected readonly id = `filled-number-field-${nextId++}`;
+  private readonly matInput = viewChild.required(MatInput);
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly decimals = computed(() =>
     !this.decimal() ? 0 : this.currency() ? CURRENCY_DECIMALS : Infinity,
@@ -57,6 +68,13 @@ export class FilledNumberField {
   });
 
   /** Drops what is not allowed without moving the cursor. */
+  constructor() {
+    effect(() => {
+      this.error();
+      this.matInput().updateErrorState();
+    });
+  }
+
   protected changeValue(field: HTMLInputElement): void {
     const decimals = this.decimals();
     const text = keepNumber(field.value, decimals);

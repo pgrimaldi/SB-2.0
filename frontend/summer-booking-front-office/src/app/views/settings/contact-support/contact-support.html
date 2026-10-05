@@ -46,6 +46,7 @@
       <app-filled-text-field
         autocomplete="given-name"
         [label]="'management.settings.contact_support.form.first_name' | translate"
+        [isMandatory]="true"
         [placeholder]="'management.settings.contact_support.form.examples.first_name' | translate"
         [formField]="contactForm.firstName"
         [error]="firstNameError()"
@@ -53,6 +54,7 @@
       <app-filled-text-field
         autocomplete="family-name"
         [label]="'management.settings.contact_support.form.last_name' | translate"
+        [isMandatory]="true"
         [placeholder]="'management.settings.contact_support.form.examples.last_name' | translate"
         [formField]="contactForm.lastName"
         [error]="lastNameError()"
@@ -60,6 +62,7 @@
       <app-filled-text-field
         autocomplete="email"
         [label]="'management.settings.contact_support.form.email' | translate"
+        [isMandatory]="true"
         [placeholder]="'management.settings.contact_support.form.examples.email' | translate"
         [formField]="contactForm.email"
         [error]="emailError()"
@@ -72,6 +75,7 @@
       />
       <app-filled-textarea
         [label]="'management.settings.contact_support.form.message' | translate"
+        [isMandatory]="true"
         [formField]="contactForm.message"
         [error]="messageError()"
       />

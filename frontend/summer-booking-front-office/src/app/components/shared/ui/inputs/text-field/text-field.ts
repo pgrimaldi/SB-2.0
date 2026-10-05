@@ -13,6 +13,8 @@ let nextId = 0;
 })
 export class TextField {
   readonly label = input<string>();
+  /** Asterisk after the label; screen readers announce the field as required. */
+  readonly isMandatory = input(false);
   readonly value = model('');
   readonly type = input<'text' | 'email'>('text');
   readonly name = input<string>();

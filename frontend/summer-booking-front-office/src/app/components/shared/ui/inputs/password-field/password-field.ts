@@ -19,6 +19,8 @@ export interface PasswordFieldTexts {
 })
 export class PasswordField {
   readonly label = input<string>();
+  /** Asterisk after the label; screen readers announce the field as required. */
+  readonly isMandatory = input(false);
   readonly texts = input<PasswordFieldTexts | null>();
   readonly value = model('');
   readonly name = input<string>();

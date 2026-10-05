@@ -1,4 +1,9 @@
-<label class="filled__text__field__label" [for]="id">{{ label() }}</label>
+<label class="filled__text__field__label" [for]="id"
+  >{{ label() }}
+  @if (isMandatory()) {
+    <span class="filled__text__field__mandatory" aria-hidden="true">*</span>
+  }
+</label>
 <mat-form-field
   class="filled__text__field__control"
   appearance="fill"
@@ -8,6 +13,7 @@
   <input
     #field
     matInput
+    [required]="isMandatory()"
     type="text"
     [id]="id"
     [value]="value()"
@@ -15,7 +21,7 @@
     [attr.maxlength]="maxLength() ?? null"
     [attr.name]="name() ?? null"
     [attr.autocomplete]="autocomplete() ?? null"
-    [attr.aria-invalid]="error() ? true : null"
+    [errorStateMatcher]="errorMatcher"
     [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="value.set(field.value)"
     (blur)="touch.emit()"

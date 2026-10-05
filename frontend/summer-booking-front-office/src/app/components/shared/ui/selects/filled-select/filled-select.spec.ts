@@ -10,6 +10,7 @@ import { FilledSelect } from './filled-select';
     placeholder="Seleziona"
     [options]="options"
     [disabled]="disabled()"
+    [isMandatory]="mandatory()"
     [(value)]="chosen"
   />`,
 })
@@ -20,6 +21,7 @@ class FilledSelectHost {
   ];
   readonly chosen = signal<string | null>(null);
   readonly disabled = signal(false);
+  readonly mandatory = signal(false);
 }
 
 describe('FilledSelect', () => {
@@ -71,5 +73,14 @@ describe('FilledSelect', () => {
     element.querySelector<HTMLElement>('.mat-mdc-select-trigger')!.click();
     await fixture.whenStable();
     expect(document.querySelectorAll('mat-option').length).toBe(0);
+  });
+
+  it('should mark a mandatory select with an asterisk and as required', async () => {
+    const { fixture, host, element } = await setup();
+    host.mandatory.set(true);
+    await fixture.whenStable();
+
+    expect(element.querySelector('label .filled__select__mandatory')?.textContent).toBe('*');
+    expect(element.querySelector('mat-select')?.getAttribute('aria-required')).toBe('true');
   });
 });

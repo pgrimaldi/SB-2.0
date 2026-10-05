@@ -178,11 +178,13 @@ describe('FormWarehouseEditItemPopup', () => {
     await type(inputs()[0], '');
     // The generic key (the test has no translations).
     expect(message()?.textContent?.trim()).toBe('invalidate.greater_than');
-    expect(inputs()[0].getAttribute('aria-invalid')).toBe('true');
+    expect(inputs()[0].getAttribute('aria-describedby')).toContain(message()!.id);
     expect(save().disabled).toBe(true);
 
+    // Empty, Material announces it as required rather than invalid; with a value, invalid.
     await type(inputs()[0], '0');
     expect(message()).not.toBeNull();
+    expect(inputs()[0].getAttribute('aria-invalid')).toBe('true');
     await type(inputs()[0], '4');
     expect(message()).toBeNull();
   });

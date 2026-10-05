@@ -7,6 +7,7 @@ import { FilledTextField } from './filled-text-field';
   template: `<app-filled-text-field
     label="Articolo"
     placeholder="Mario"
+    [isMandatory]="mandatory()"
     [maxLength]="500"
     [error]="error()"
     [(value)]="name"
@@ -15,6 +16,7 @@ import { FilledTextField } from './filled-text-field';
 class FilledTextFieldHost {
   readonly name = signal('Lettino');
   readonly error = signal<string | null>(null);
+  readonly mandatory = signal(false);
 }
 
 describe('FilledTextField', () => {
@@ -54,5 +56,21 @@ describe('FilledTextField', () => {
     expect(message.textContent?.trim()).toBe('Questo campo è obbligatorio');
     expect(input.getAttribute('aria-describedby')).toBe(message.id);
     expect(element.querySelector('.filled__text__field__invalid')).not.toBeNull();
+  });
+
+  it('should mark a mandatory field with an asterisk and as required', async () => {
+    const fixture = TestBed.createComponent(FilledTextFieldHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('.filled__text__field__mandatory')).toBeNull();
+    expect(element.querySelector('input')!.required).toBe(false);
+
+    fixture.componentInstance.mandatory.set(true);
+    await fixture.whenStable();
+    const asterisk = element.querySelector('label .filled__text__field__mandatory')!;
+    expect(asterisk.textContent).toBe('*');
+    expect(asterisk.getAttribute('aria-hidden')).toBe('true');
+    expect(element.querySelector('input')!.required).toBe(true);
+    expect(element.querySelector('input')!.getAttribute('aria-required')).toBe('true');
   });
 });
