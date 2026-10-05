@@ -8,6 +8,7 @@ import {
   TableColumn,
   TablePage as Page,
   TablePageRequest as PageRequest,
+  TableRowAction,
   TableRowId,
 } from './table';
 import { TableIconAction } from './table-icon-action';
@@ -41,7 +42,6 @@ const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
     [useAppTheme]="true"
     [hideCreateButton]="true"
     [hideMassiveActions]="true"
-    [hideEditButtons]="true"
     (loadError)="errors.push($event)"
   />`,
 })
@@ -341,7 +341,6 @@ describe('Table', () => {
     [searchable]="true"
     [hideCreateButton]="true"
     [hideMassiveActions]="true"
-    [hideEditButtons]="true"
     [pathIcon]="['/search.svg', '/clear.svg']"
   >
     <button appTableIconAction type="button" class="delete">Elimina</button>
@@ -526,7 +525,7 @@ describe('Table bar', () => {
 });
 
 describe('Table default look', () => {
-  it('should put everything on the left and show the rows out of the total in the paginator', async () => {
+  it('should align the columns by their align and show the rows out of the total in the paginator', async () => {
     TestBed.configureTestingModule({
       providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
     });
@@ -536,7 +535,8 @@ describe('Table default look', () => {
 
     expect(element.querySelector('app-table')?.className).toContain('table__theme__default');
     const cells = [...element.querySelectorAll<HTMLElement>('thead th, tbody tr:first-child td')];
-    expect(cells.map((cell) => cell.style.textAlign)).toEqual(['', '', '', '']); // `align` ignored
+    expect(cells.map((cell) => cell.style.textAlign)).toEqual(['', 'center', '', 'center']);
+    expect(element.querySelectorAll('thead th')[1].classList).toContain('table__cell__center');
     expect(element.querySelector('.mat-mdc-paginator-range-label')?.textContent?.trim()).toBe(
       '1 – 10 di 25',
     );
@@ -552,7 +552,6 @@ describe('Table default look', () => {
     [texts]="texts"
     [hideCreateButton]="true"
     [hideMassiveActions]="true"
-    [hideEditButtons]="true"
   />`,
 })
 class TableDefaultHost {
@@ -567,12 +566,13 @@ class TableDefaultHost {
 }
 
 describe('Table row buttons', () => {
-  const setup = async (show: boolean) => {
+  const setup = async (actions: readonly TableRowAction<Row>[] | null, material = false) => {
     TestBed.configureTestingModule({
       providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
     });
     const fixture = TestBed.createComponent(TableRowButtonsHost);
-    fixture.componentInstance.show.set(show);
+    fixture.componentInstance.actions.set(actions);
+    fixture.componentInstance.material.set(material);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
     const buttons = (row: number) => [
@@ -583,15 +583,20 @@ describe('Table row buttons', () => {
     return { fixture, host: fixture.componentInstance, element, buttons };
   };
 
-  it('should have no row buttons, and no column for them, when hidden', async () => {
-    const { element } = await setup(false);
+  it('should have no row buttons, and no column for them, without rowActions', async () => {
+    for (const actions of [null, []]) {
+      const { element } = await setup(actions);
 
-    expect(element.querySelectorAll('.table__action').length).toBe(0);
-    expect(element.querySelectorAll('thead th').length).toBe(2);
+      expect(element.querySelectorAll('.table__action').length).toBe(0);
+      expect(element.querySelectorAll('thead th').length).toBe(2);
+      TestBed.resetTestingModule();
+    }
   });
 
-  it('should put delete, duplicate and edit in the last column, with their names and icons', async () => {
-    const { element, buttons } = await setup(true);
+  it('should put the given buttons in the last column, in their order, with names and icons', async () => {
+    const { host, element, buttons } = await setup(null);
+    host.actions.set(host.all);
+    TestBed.tick();
 
     const headers = [...element.querySelectorAll('thead th')];
     expect(headers.length).toBe(3);
@@ -609,15 +614,32 @@ describe('Table row buttons', () => {
     ]);
   });
 
-  it('should tell the page which row each button is for', async () => {
-    const { fixture, host, buttons } = await setup(true);
+  it('should show only the buttons a table needs', async () => {
+    const edit: TableRowAction<Row> = { label: 'Modifica', icon: 'edit.svg', action: () => {} };
+    const { element, buttons } = await setup([edit]);
+
+    expect(element.querySelectorAll('thead th').length).toBe(3);
+    expect(buttons(0).map((button) => button.getAttribute('aria-label'))).toEqual(['Modifica']);
+  });
+
+  it('should call the function of the button with the row it is on', async () => {
+    const { fixture, host, buttons } = await setup(null);
+    host.actions.set(host.all);
+    await fixture.whenStable();
 
     buttons(0)[0].click();
     buttons(1)[1].click();
     buttons(2)[2].click();
-    await fixture.whenStable();
 
     expect(host.events).toEqual(['delete Row 1', 'duplicate Row 2', 'edit Row 3']);
+  });
+
+  it('should take the icons as Material icon names when the table uses matIcon', async () => {
+    const edit: TableRowAction<Row> = { label: 'Modifica', icon: 'edit', action: () => {} };
+    const { buttons } = await setup([edit], true);
+
+    expect(buttons(0)[0].querySelector('mat-icon')?.textContent?.trim()).toBe('edit');
+    expect(buttons(0)[0].querySelector('img')).toBeNull();
   });
 });
 
@@ -630,30 +652,41 @@ describe('Table row buttons', () => {
     [texts]="texts"
     [hideCreateButton]="true"
     [hideMassiveActions]="true"
-    [hideEditButtons]="!show()"
-    [pathIcon]="['search.svg', 'clear.svg', 'delete.svg', 'duplicate.svg', 'edit.svg']"
-    (deleteRow)="events.push('delete ' + $event.name)"
-    (duplicateRow)="events.push('duplicate ' + $event.name)"
-    (editRow)="events.push('edit ' + $event.name)"
+    [rowActions]="actions()"
+    [matIcon]="material() ? ['search', 'close'] : null"
+    [pathIcon]="['search.svg', 'clear.svg']"
   />`,
 })
 class TableRowButtonsHost {
-  readonly show = signal(false);
+  readonly actions = signal<readonly TableRowAction<Row>[] | null>(null);
+  readonly material = signal(false);
   readonly params = { day: '2026-09-30' };
   readonly columns: TableColumn<Row>[] = [
     { field: 'name', header: 'Nome' },
     { field: 'total', header: 'Totale' },
   ];
-  readonly texts = {
-    actions: { header: 'Azioni', delete: 'Elimina', duplicate: 'Duplica', edit: 'Modifica' },
-  };
+  readonly texts = { actions: { header: 'Azioni' } };
   readonly events: string[] = [];
+  /** Delete, duplicate and edit, each telling which row it was pressed on. */
+  readonly all: readonly TableRowAction<Row>[] = [
+    {
+      label: 'Elimina',
+      icon: 'delete.svg',
+      action: (row) => this.events.push('delete ' + row.name),
+    },
+    {
+      label: 'Duplica',
+      icon: 'duplicate.svg',
+      action: (row) => this.events.push('duplicate ' + row.name),
+    },
+    { label: 'Modifica', icon: 'edit.svg', action: (row) => this.events.push('edit ' + row.name) },
+  ];
   readonly load = (request: Filters & PageRequest) =>
     of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
 }
 
 describe('Table base', () => {
-  it('should show everything when nothing is hidden: checkboxes, row buttons, create button', async () => {
+  it('should show the checkboxes and the create button when nothing is hidden, no row buttons without rowActions', async () => {
     TestBed.configureTestingModule({
       providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
     });
@@ -662,9 +695,9 @@ describe('Table base', () => {
     const element: HTMLElement = fixture.nativeElement;
     const headers = [...element.querySelectorAll('thead th')];
 
-    expect(headers.length).toBe(4);
+    expect(headers.length).toBe(3);
     expect(headers[0].classList).toContain('table__select');
-    expect(headers[3].classList).toContain('table__actions');
+    expect(element.querySelector('.table__actions')).toBeNull();
     expect(element.querySelector('.table__create')).not.toBeNull();
     expect(element.querySelector('.table__bar__icons')).not.toBeNull(); // room of the buttons on chosen rows
   });
@@ -734,7 +767,7 @@ describe('Table title, create button and chosen rows', () => {
   it('should show no icon next to the title when none is given', async () => {
     const { fixture, host, element } = await setup(true);
 
-    host.icons.set(['search.svg', 'clear.svg', 'delete.svg', 'duplicate.svg', 'edit.svg']);
+    host.icons.set(['search.svg', 'clear.svg', 'duplicate-selected.svg', 'delete-selected.svg']);
     await fixture.whenStable();
 
     expect(element.querySelector('.table__title')?.textContent?.trim()).toBe(
@@ -889,7 +922,6 @@ describe('Table title, create button and chosen rows', () => {
     [createLabel]="'Aggiungi articolo'"
     [hideMassiveActions]="!show()"
     [hideCreateButton]="!show()"
-    [hideEditButtons]="true"
     [pathIcon]="icons()"
     (duplicateSelected)="events.push('duplicate ' + $event.join(','))"
     (deleteSelected)="events.push('delete ' + $event.join(','))"
@@ -901,9 +933,6 @@ class TableMassiveHost {
   readonly icons = signal([
     'search.svg',
     'clear.svg',
-    'delete.svg',
-    'duplicate.svg',
-    'edit.svg',
     'duplicate-selected.svg',
     'delete-selected.svg',
     'add.svg',

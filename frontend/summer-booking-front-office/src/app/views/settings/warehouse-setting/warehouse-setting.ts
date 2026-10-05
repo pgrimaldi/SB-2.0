@@ -4,6 +4,7 @@ import { WarehouseService } from '../../../services/api/warehouse/warehouse.serv
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { Table, TableColumn } from '../../../components/shared/ui/tables/table/table';
+import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
@@ -40,15 +41,13 @@ export class WarehouseSetting {
   /** Icon of the page title: the warehouse of the menu, in the main blue. */
   protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
   /**
-   * Icons of the table, in its order: [search magnifier, search X, delete, duplicate, edit,
-   * duplicate chosen, delete chosen, create]. No title icon: the page has its own title.
+   * Icons of the table, in its order: [search magnifier, search X, duplicate chosen, delete chosen,
+   * create]. No title icon: the page has its own title. The icons of the row buttons are in
+   * `rowActions`.
    */
   protected readonly tableIcons = [
     '/assets/images/search.svg',
     '/assets/images/clear.svg',
-    '/assets/images/delete.svg',
-    '/assets/images/duplicate.svg',
-    '/assets/images/edit.svg',
     '/assets/images/duplicate-selected.svg',
     '/assets/images/delete-selected.svg',
     '/assets/images/add.svg',
@@ -65,4 +64,25 @@ export class WarehouseSetting {
     { field: 'total', header: this.headers().total, align: 'center', sortable: true },
     { field: 'thresholdNumber', header: this.headers().threshold, align: 'center', sortable: true },
   ]);
+  /** Buttons of every row: the standard delete, duplicate and edit. */
+  protected readonly rowActions = standardRowActions<WarehouseItem>({
+    delete: () => this.deleteItem(),
+    duplicate: () => this.duplicateItem(),
+    edit: () => this.editItem(),
+  });
+
+  /** Delete button of a row. */
+  private deleteItem(): void {
+    // Not connected yet: it will call the delete API of the warehouse.
+  }
+
+  /** Duplicate button of a row. */
+  private duplicateItem(): void {
+    // Not connected yet: it will call the duplicate API of the warehouse.
+  }
+
+  /** Edit button of a row. */
+  private editItem(): void {
+    // Not connected yet: it will open the edit form of the article.
+  }
 }

@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as breakpoints;
+
 $motion: 525ms ease-in-out;
 
 // Desktop: narrow column of icons on the left, below the header. On hover (or keyboard focus)
@@ -75,9 +77,9 @@ $motion: 525ms ease-in-out;
   transition: opacity 200ms;
 }
 
-// Expanded column (desktop only): while the mouse is over it, or while a menu item has keyboard
+// Expanded column (wide screens only): while the mouse is over it, or while a menu item has keyboard
 // focus (:focus-visible), so a mouse click does not keep it open after the pointer leaves.
-@media (width >= 64rem) {
+@media (width >= #{breakpoints.$menu-bar}) {
   :host(:has(:focus-visible)) {
     width: 9.375rem;
   }
@@ -97,8 +99,9 @@ $motion: 525ms ease-in-out;
   }
 }
 
-// Tablet and phone: the menu becomes a bar fixed at the bottom, icon above an always visible label.
-@media (width < 64rem) {
+// 720p screens and smaller (tablet, phone): the menu becomes a bar fixed at the bottom, icon above an
+// always visible label.
+@media (width < #{breakpoints.$menu-bar}) {
   :host {
     position: fixed;
     inset: auto 0 0;

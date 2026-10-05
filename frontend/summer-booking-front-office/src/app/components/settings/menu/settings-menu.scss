@@ -1,5 +1,6 @@
-// Desktop: column next to the management menu, below the header, as tall as the screen, as wide as
-// the management menu fully open (9.375rem, management-menu.scss). Rows, spaces and text as in the
+// Desktop: column next to the management menu, below the header, as tall as the screen (less the
+// menu bar at the bottom, when there is one: `--layout-bottom-bar-height`), as wide as the management
+// menu fully open (9.375rem, management-menu.scss). Rows, spaces and text as in the
 // designer's mockup: every page on one line, the 15 pages in a 1280×720 screen.
 :host {
   display: block;
@@ -10,7 +11,7 @@
 .settings__menu {
   position: sticky;
   top: 3.75rem;
-  height: calc(100svh - 3.75rem);
+  height: calc(100svh - 3.75rem - var(--layout-bottom-bar-height, 0rem));
   padding-block: 0.5625rem 0.3125rem;
   overflow-y: auto;
   background: var(--color__white);

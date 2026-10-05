@@ -1,0 +1,6 @@
+// Breakpoints of the app's layout shared by more than one file.
+
+// Below this width the management menu is the bar fixed at the bottom of the screen (icon and name of
+// every page); from it, the column of icons on the left. 86rem (1376px) takes in the "720p" screens
+// and similar, 1280×720 and 1366×768, besides tablets and phones.
+$menu-bar: 86rem;

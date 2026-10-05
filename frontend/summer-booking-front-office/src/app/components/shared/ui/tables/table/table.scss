@@ -94,16 +94,18 @@
 
 // Buttons of every row, in the last column, on the right. Sizes follow the text of the rows (em), so
 // they grow with it on large screens; the soft blue of the icons is in the images (or the colour of
-// a Material icon). The column is as wide as the three buttons plus the side paddings of the cells,
-// which each look gives in `--table-actions-padding`.
+// a Material icon). The column is as wide as its buttons (`--table-actions-count`, from `rowActions`:
+// 1.75em each, 0.375em between them), never less than its header ("Azioni", 4em), plus the side
+// paddings of the cells, which each look gives in `--table-actions-padding`.
 .table__actions {
   width: calc(
-    6em + var(--table-actions-padding, 0rem)
-  ); // 3 buttons of 1.75em and 2 gaps of 0.375em
+    max(var(--table-actions-count) * 1.75em + (var(--table-actions-count) - 1) * 0.375em, 4em) +
+      var(--table-actions-padding, 0rem)
+  );
   text-align: end;
 }
 
-// The header ("Azioni") centred over the buttons: the inside of the cell is as wide as the three buttons.
+// The header ("Azioni") centred over the buttons: the inside of the cell is as wide as the buttons.
 .table__header .table__actions {
   text-align: center;
 }

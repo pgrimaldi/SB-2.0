@@ -16,6 +16,7 @@
     [hideMassiveActions]="false"
     [hideCreateButton]="false"
     [createLabel]="'management.settings.warehouse.create' | translate"
+    [rowActions]="rowActions()"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
     (create)="adding.set(true)"

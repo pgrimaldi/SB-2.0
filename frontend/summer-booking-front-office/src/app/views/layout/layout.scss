@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as breakpoints;
+
 :host {
   display: flex;
   min-height: 100svh;
@@ -16,12 +18,14 @@
   flex: 1;
 }
 
-// Tablet and phone: room for the menu bar fixed at the bottom.
-@media (width < 64rem) {
+// 720p screens and smaller (tablet, phone): room for the menu bar fixed at the bottom. Its height is
+// given to the pages in `--layout-bottom-bar-height`: the table paginator, when it sticks to the bottom
+// of the screen, stays above the bar, and so does the end of the settings panel.
+@media (width < #{breakpoints.$menu-bar}) {
   .layout__content {
-    // The table paginator, when it sticks to the bottom of the screen, stays above the menu bar.
-    --table-paginator-offset: calc(4.5rem + env(safe-area-inset-bottom));
+    --layout-bottom-bar-height: calc(4.5rem + env(safe-area-inset-bottom));
+    --table-paginator-offset: var(--layout-bottom-bar-height);
 
-    padding-bottom: var(--table-paginator-offset);
+    padding-bottom: var(--layout-bottom-bar-height);
   }
 }

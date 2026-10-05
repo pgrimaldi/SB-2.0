@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 
 // The default look (the designer's proposal of 30/09/2026): clean and minimal. Blue texts on white,
-// a thin line under the header, no stripes and no rounded corners, everything on the left, the sort
+// a thin line under the header, no stripes and no rounded corners, columns aligned by `align`, the sort
 // arrow before the header label and, in the paginator, the page size selector and the rows shown out of
 // the total ("1 – 10 di 12") between the arrows. Sizes are common to both looks (table.scss): the table
 // takes the same room.
@@ -49,6 +49,19 @@
   // `flex-end` is what keeps it on the left, above its cells.
   ::ng-deep .mat-sort-header-container {
     justify-content: flex-end;
+  }
+
+  // Centred and end columns (`align`) move their header like their cells; in the right-to-left
+  // layout `flex-start` is the right end. Centred ones also get, on the right, a padding as wide as
+  // Material's arrow (12px plus 6px of margin, in px like Material), which is on the left: the label
+  // stays exactly in the middle, as in the app's look.
+  .table__cell__center ::ng-deep .mat-sort-header-container {
+    justify-content: center;
+    padding-right: 18px;
+  }
+
+  .table__cell__end ::ng-deep .mat-sort-header-container {
+    justify-content: flex-start;
   }
 
   // The sort arrow is always shown (lighter until the column is sorted), as a hint that the column

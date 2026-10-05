@@ -43,7 +43,7 @@ export interface TableColumn<T> {
   field: keyof T & string;
   /** Header text, already translated. */
   header: string;
-  /** Horizontal alignment of header and cells; start by default. */
+  /** Horizontal alignment of header and cells, in both looks; start by default. */
   align?: 'start' | 'center' | 'end';
   /**
    * Share of the table width, in percent (e.g. 40). Columns without it split the rest equally; with
@@ -72,13 +72,26 @@ export interface TableSearchTexts extends SearchFieldTexts {
   placeholder?: string;
 }
 
-/** Header of the column of the row buttons, and names (and tooltips) of the buttons: delete, duplicate, edit. */
+/** Texts of the column of the row buttons (`rowActions`). */
 export interface TableRowActionTexts {
   /** Header of the column (e.g. "Azioni"). */
   header?: string;
-  delete?: string;
-  duplicate?: string;
-  edit?: string;
+}
+
+/**
+ * A button of every row, in the last column (`rowActions`): the page decides which buttons a table
+ * has, in which order, and what each one does.
+ */
+export interface TableRowAction<T> {
+  /** Accessible name and tooltip of the button, already translated (e.g. "Elimina"). */
+  label: string;
+  /**
+   * Icon of the button, of the same kind as the icons of the table: a Material icon name when the
+   * table has `matIcon`, otherwise an image path.
+   */
+  icon: string;
+  /** What the button does, with the row it is on. */
+  action: (row: T) => void;
 }
 
 /**
@@ -112,7 +125,7 @@ export interface TableTexts {
   paginator?: TablePaginatorTexts;
   search?: TableSearchTexts;
   sort?: TableSortTexts;
-  /** The buttons on every row (unless `hideEditButtons`). */
+  /** The column of the buttons on every row (`rowActions`). */
   actions?: TableRowActionTexts;
   /** The checkboxes of the rows and the buttons on the chosen rows (unless `hideMassiveActions`). */
   selection?: TableSelectionTexts;
@@ -175,7 +188,7 @@ let nextTableId = 0;
  * - `params`: what that function needs besides the page (e.g. filters); `null` loads nothing.
  * Headers and texts (`texts`, see `TableTexts`) arrive already translated.
  * The base table shows everything; each table hides what it does not need (`hideCreateButton`,
- * `hideMassiveActions`, `hideEditButtons`).
+ * `hideMassiveActions`). The buttons of every row are the page's: `rowActions`.
  * On top a row with, on the left, the `title` (and its icon, usually the one of the section) and the
  * search (`searchable`, sent to `load` as `search`) and, on the right, the create button
  * (`createLabel`, emits `create`).
@@ -184,10 +197,11 @@ let nextTableId = 0;
  * The first column has a checkbox on every row (and one in the header for the rows of the page) and,
  * when more than one row is chosen, the bar shows the buttons duplicate and delete of the chosen rows
  * (`duplicateSelected`, `deleteSelected`, with their ids) and the button that empties the choice. The
- * chosen rows are kept by id (`idField`) in `selection`, across pages, searches and sorting. The last column has the buttons of every
- * row: delete, duplicate and edit (`deleteRow`, `duplicateRow`, `editRow`, with the row).
- * Icons (see `Icons`): [search magnifier, search X, delete, duplicate, edit, duplicate chosen,
- * delete chosen, create, title].
+ * chosen rows are kept by id (`idField`) in `selection`, across pages, searches and sorting.
+ * With `rowActions` (none by default), the last column ("Azioni") has those buttons on every row, in
+ * their order, each calling its function with the row.
+ * Icons (see `Icons`): [search magnifier, search X, duplicate chosen, delete chosen, create, title];
+ * the icons of the row buttons are in `rowActions`.
  * Columns with `sortable` sort on a click of their header (sent to `load` as `sortField` and
  * `sortDirection`). Two looks: the default one (clean, minimal) and, with `useAppTheme`, the app's one.
  * The paginator, under the rows, has a page size selector (`pageSizeOptions`, 10 by default): with
@@ -219,6 +233,7 @@ let nextTableId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[style.--table-page-size]': 'reservedRows()',
+    '[style.--table-actions-count]': 'rowActions()?.length ?? 0',
     '[class.table__theme__app]': 'useAppTheme()',
     '[class.table__theme__default]': '!useAppTheme()',
   },
@@ -245,15 +260,18 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Text of the create button, already translated (e.g. "Aggiungi articolo"). */
   readonly createLabel = input<string>();
   /**
-   * The app's look (blue header, striped rows, rounded corners, `align` of the columns) instead of the
-   * default one (clean and minimal: blue texts on white, a line under the header, everything on the
-   * left, the rows shown out of the total between the arrows of the paginator).
+   * The app's look (blue header, striped rows, rounded corners) instead of the default one (clean and
+   * minimal: blue texts on white, a line under the header, the rows shown out of the total between the
+   * arrows of the paginator). Both follow the `align` of the columns.
    */
   readonly useAppTheme = input(false);
   /** Shows the search in the title row, on the left (after the title). */
   readonly searchable = input(false);
-  /** Hides the buttons of every row (delete, duplicate, edit), shown by default in the last column. */
-  readonly hideEditButtons = input(false);
+  /**
+   * Buttons of every row, in the last column, in this order: each with its name, icon and function
+   * (see `TableRowAction`). None (empty or `null`, the default): no column of buttons.
+   */
+  readonly rowActions = input<readonly TableRowAction<T>[] | null>([]);
   /**
    * Hides the checkboxes of the rows and the buttons on the chosen rows (duplicate, delete), shown by
    * default: the checkboxes in the first column, the buttons in the bar above the rows.
@@ -262,23 +280,17 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Hides the create button, shown by default on the right of the title row. */
   readonly hideCreateButton = input(false);
   /**
-   * Icons as Material icon names (Material Symbols font): [search magnifier, search X, delete,
-   * duplicate, edit, duplicate chosen, delete chosen, create, title].
+   * Icons as Material icon names (Material Symbols font): [search magnifier, search X, duplicate
+   * chosen, delete chosen, create, title].
    */
   readonly matIcon = input<readonly string[] | null>();
   /**
-   * Icons as image paths, used when `matIcon` is not given: [search magnifier, search X, delete,
-   * duplicate, edit, duplicate chosen, delete chosen, create, title].
+   * Icons as image paths, used when `matIcon` is not given: [search magnifier, search X, duplicate
+   * chosen, delete chosen, create, title].
    */
   readonly pathIcon = input<readonly string[] | null>();
   /** A page could not be loaded; the table shows no rows meanwhile. */
   readonly loadError = output<unknown>();
-  /** The delete button of a row was pressed: the row. */
-  readonly deleteRow = output<T>();
-  /** The duplicate button of a row was pressed: the row. */
-  readonly duplicateRow = output<T>();
-  /** The edit button of a row was pressed: the row. */
-  readonly editRow = output<T>();
   /** The duplicate button of the chosen rows was pressed: their ids, in the order they were chosen. */
   readonly duplicateSelected = output<TableRowId[]>();
   /** The delete button of the chosen rows was pressed: their ids, in the order they were chosen. */
@@ -390,9 +402,10 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly fields = computed(() => [
     ...(this.hideMassiveActions() ? [] : [SELECT_COLUMN]),
     ...this.columns().map((column) => column.field),
-    ...(this.hideEditButtons() ? [] : [ROW_ACTIONS_COLUMN]),
+    ...(this.hasRowActions() ? [ROW_ACTIONS_COLUMN] : []),
   ]);
   protected readonly rowActionsColumn = ROW_ACTIONS_COLUMN;
+  protected readonly hasRowActions = computed(() => (this.rowActions()?.length ?? 0) > 0);
   protected readonly selectColumn = SELECT_COLUMN;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   /** Width of every column header: the share of the column (`width`), or its fitted width. */
@@ -486,7 +499,7 @@ export class Table<T, P extends object> implements OnDestroy {
     this.layoutChanges();
     const columns = this.columns();
     const first = this.hideMassiveActions() ? 0 : 1; // the checkboxes come before the columns
-    const others = first + (this.hideEditButtons() ? 0 : 1);
+    const others = first + (this.hasRowActions() ? 1 : 0);
     this.useAppTheme(); // paddings and font weight of the headers depend on the look
     const grid = this.grid().nativeElement;
     const headers = [...grid.querySelectorAll<HTMLElement>('thead th')];
