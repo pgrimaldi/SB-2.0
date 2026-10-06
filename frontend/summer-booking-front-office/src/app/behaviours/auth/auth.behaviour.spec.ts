@@ -339,6 +339,66 @@ describe('AuthBehaviour', () => {
     expect(localStorage.getItem('sb.signed-in')).toBe('true');
   });
 
+  it('should keep a sign-in waiting until both tries of a logout are over', async () => {
+    vi.useFakeTimers();
+    const auth = load();
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('anna-token', 'anna@example.com'), true);
+    const order: string[] = [];
+    let attempts = 0;
+    server.logout.mockReturnValue(
+      defer(() => {
+        order.push('logout');
+        return ++attempts === 1
+          ? throwError(() => new HttpErrorResponse({ status: 503 }))
+          : of(undefined);
+      }),
+    );
+    server.signIn.mockReturnValue(
+      defer(() => {
+        order.push('signin');
+        return of(session('bea-token', 'bea@example.com'));
+      }),
+    );
+
+    const loggedOut = auth.logout();
+    await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY / 2);
+    const signedIn = firstValueFrom(
+      auth.signIn({ username: 'bea@example.com', password: 'secret', remember: true }),
+    );
+    await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY);
+
+    expect(await loggedOut).toBe(true);
+    await signedIn;
+    expect(order).toEqual(['logout', 'logout', 'signin']);
+    expect(auth.user()?.email).toBe('bea@example.com');
+  });
+
+  it('should ignore a logout message of another tab about an older session', async () => {
+    const { firstTab } = twoTabs();
+    const otherTab = new BroadcastChannel('sb-auth');
+    onTestFinished(() => otherTab.close());
+    otherTab.postMessage({ type: 'logout', session: 'an-older-session' });
+    firstTab.start(session('bea-token', 'bea@example.com'), true);
+
+    await settle();
+
+    expect(firstTab.user()?.email).toBe('bea@example.com');
+  });
+
+  it('should send no logout once another tab has signed in, as the cookie is no longer ours', async () => {
+    const { firstTab, secondTab } = twoTabs();
+    firstTab.start(session('anna-token', 'anna@example.com'), true);
+    secondTab.start(session('bea-token', 'bea@example.com'), true);
+
+    expect(await firstTab.logout()).toBe(true); // before the message of the other tab arrives
+
+    expect(server.logout).not.toHaveBeenCalled();
+    expect(firstTab.isAuthenticated()).toBe(false);
+    expect(secondTab.user()?.email).toBe('bea@example.com');
+    expect(localStorage.getItem('sb.signed-in')).toBe('true');
+  });
+
   it('should end the session here and go back to the home once the server has revoked it', async () => {
     const auth = load();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);

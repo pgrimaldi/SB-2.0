@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import {
   Observable,
   catchError,
+  defer,
   finalize,
   firstValueFrom,
   map,
@@ -25,6 +26,13 @@ import { AUTH_LOCK } from './auth-lock';
  * "remember me": sessionStorage (ends with the browser) or localStorage.
  */
 const SIGNED_IN_KEY = 'sb.signed-in';
+/**
+ * Random, non-secret name of the session that owns the refresh cookie of this browser, written by
+ * the tab that signed in. Shared by every tab (localStorage) whatever "remember me" says, as the
+ * cookie is: the tabs of that session take it at start-up, and a tab that finds another name there
+ * knows the cookie is no longer its own.
+ */
+const SESSION_NAME_KEY = 'sb.session-name';
 /** Where older versions kept the token (readable by scripts): removed at start-up. */
 const LEGACY_SESSION_KEY = 'sb.session';
 const CHANNEL_NAME = 'sb-auth';
@@ -36,6 +44,14 @@ interface Session {
   accessToken: string;
   user: AuthUser;
 }
+
+/** Between the tabs: always for one session, so an old message cannot reach a newer one. */
+interface TabMessage {
+  type: 'signin' | 'logout';
+  session: string;
+}
+
+type LogoutOutcome = 'revoked' | 'failed' | 'gone';
 
 /**
  * Signed-in session (OWASP guidance for single-page apps):
@@ -63,6 +79,8 @@ export class AuthBehaviour implements OnDestroy {
    * not with a normal refresh: an answer that arrives later for an older generation is ignored.
    */
   private generation = 0;
+  /** See SESSION_NAME_KEY; null while this tab has no session. */
+  private sessionName: string | null = null;
 
   readonly user = computed(() => this.session()?.user ?? null);
 
@@ -100,7 +118,9 @@ export class AuthBehaviour implements OnDestroy {
     this.session.set({ accessToken, user });
     this.forgetSignIn();
     this.storage(remember ? 'local' : 'session')?.setItem(SIGNED_IN_KEY, 'true');
-    this.channel?.postMessage('signin');
+    this.sessionName = crypto.randomUUID();
+    this.storage('local')?.setItem(SESSION_NAME_KEY, this.sessionName);
+    this.tell('signin');
   }
 
   /** Called at start-up. */
@@ -120,13 +140,21 @@ export class AuthBehaviour implements OnDestroy {
    * now belongs to another user or property: this tab leaves (see `leaveHere`). Null also when
    * the session changed hands meanwhile: the answer belongs to the old one and changes nothing, so a
    * late answer can neither reopen a closed session nor replace or close the next one. A refresh
-   * that waited for a sign-in or a logout asks the server nothing once the session has changed hands.
+   * that waited for a sign-in or a logout asks the server nothing once the session has changed hands,
+   * nor when the cookie now belongs to another session (this tab leaves).
    */
   refresh(): Observable<string | null> {
     const generation = this.generation;
-    const refreshing = (this.refreshing ??= this.oneAtATime(() =>
-      generation === this.generation ? this.authService.refresh() : of(null),
-    ).pipe(
+    const refreshing = (this.refreshing ??= this.oneAtATime(() => {
+      if (generation !== this.generation) {
+        return of(null);
+      }
+      if (!this.ownsCookie()) {
+        this.leaveHere();
+        return of(null);
+      }
+      return this.authService.refresh();
+    }).pipe(
       map((answer) => {
         if (!answer || generation !== this.generation) {
           return null;
@@ -138,6 +166,12 @@ export class AuthBehaviour implements OnDestroy {
           return null;
         }
         this.session.set({ accessToken, user });
+        if (!this.sessionName) {
+          // A tab that opens on a session started elsewhere (or by an older version, without a name).
+          this.sessionName =
+            this.storage('local')?.getItem(SESSION_NAME_KEY) ?? crypto.randomUUID();
+          this.storage('local')?.setItem(SESSION_NAME_KEY, this.sessionName);
+        }
         return accessToken;
       }),
       catchError(() => {
@@ -165,24 +199,37 @@ export class AuthBehaviour implements OnDestroy {
    * server confirms, or answers that there is no session left (401), the session ends here and in the
    * other tabs and the user goes home. Resolves false when the server could not be reached: the user
    * is then still signed in, as the session is still valid on the server.
+   * Both tries run in one turn of the lock and only for the session that asked: once it has changed
+   * hands, or the cookie belongs to another session, nothing more is sent (the cookie could be that
+   * of the new session) and the result changes nothing.
    */
   async logout(): Promise<boolean> {
-    const revoked = await firstValueFrom(
-      this.oneAtATime(() => this.authService.logout()).pipe(
-        retry({
-          count: 1,
-          delay: (error) =>
-            isSessionOver(error) ? throwError(() => error) : timer(LOGOUT_RETRY_DELAY),
-        }),
-        map(() => true),
-        catchError((error) => of(isSessionOver(error))),
-      ),
+    const generation = this.generation;
+    const name = this.sessionName;
+    const stillOurs = () => generation === this.generation && this.ownsCookie();
+    const outcome = await firstValueFrom(
+      this.oneAtATime(() =>
+        defer(() => (stillOurs() ? this.authService.logout() : of(undefined))).pipe(
+          retry({
+            count: 1,
+            delay: (error) =>
+              isSessionOver(error) ? throwError(() => error) : timer(LOGOUT_RETRY_DELAY),
+          }),
+          map((): LogoutOutcome => (stillOurs() ? 'revoked' : 'gone')),
+          catchError((error) => of<LogoutOutcome>(isSessionOver(error) ? 'revoked' : 'failed')),
+        ),
+      ).pipe(catchError(() => of<LogoutOutcome>('failed'))),
     );
-    if (revoked) {
-      this.channel?.postMessage('logout');
-      this.expire();
+    if (outcome === 'failed') {
+      return false;
     }
-    return revoked;
+    if (outcome === 'revoked' && generation === this.generation) {
+      this.tell('logout', name);
+      this.expire();
+    } else if (generation === this.generation) {
+      this.leaveHere();
+    }
+    return true;
   }
 
   /** The session is over (refused by the server, or ended in another tab): back to the home. */
@@ -194,7 +241,26 @@ export class AuthBehaviour implements OnDestroy {
   private clear(): void {
     this.changeHands();
     this.session.set(null);
+    if (this.ownsCookie()) {
+      this.storage('local')?.removeItem(SESSION_NAME_KEY);
+    }
+    this.sessionName = null;
     this.forgetSignIn();
+  }
+
+  /**
+   * False when another tab has signed in since: the cookie is then that session's. True without a
+   * name to compare (start-up, storage blocked): nothing says otherwise.
+   */
+  private ownsCookie(): boolean {
+    const owner = this.storage('local')?.getItem(SESSION_NAME_KEY);
+    return !this.sessionName || !owner || owner === this.sessionName;
+  }
+
+  private tell(type: TabMessage['type'], session = this.sessionName): void {
+    if (session) {
+      this.channel?.postMessage({ type, session } satisfies TabMessage);
+    }
   }
 
   /**
@@ -236,6 +302,7 @@ export class AuthBehaviour implements OnDestroy {
   private leaveHere(): void {
     this.changeHands();
     this.session.set(null);
+    this.sessionName = null;
     void this.router.navigateByUrl('/');
   }
 
@@ -259,13 +326,13 @@ export class AuthBehaviour implements OnDestroy {
     }
   }
 
-  private readonly otherTabMessage = ({ data }: MessageEvent): void => {
-    if (!this.isAuthenticated()) {
+  private readonly otherTabMessage = ({ data }: MessageEvent<Partial<TabMessage>>): void => {
+    if (!this.isAuthenticated() || !data.session) {
       return;
     }
-    if (data === 'logout') {
+    if (data.type === 'logout' && data.session === this.sessionName) {
       this.expire();
-    } else if (data === 'signin') {
+    } else if (data.type === 'signin' && data.session !== this.sessionName) {
       this.leaveHere();
     }
   };
