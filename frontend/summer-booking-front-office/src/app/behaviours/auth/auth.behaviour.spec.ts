@@ -131,7 +131,7 @@ describe('AuthBehaviour', () => {
 
   it('should sign out when the server refuses the refresh cookie (expired or revoked)', async () => {
     load().start(session('first'), true);
-    server.refresh.mockReturnValue(throwError(() => new Error('401')));
+    server.refresh.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
 
     const auth = load();
     await auth.restore();
@@ -276,14 +276,16 @@ describe('AuthBehaviour', () => {
     const auth = load();
     server.refresh.mockReturnValue(new Subject<AuthSession>()); // never answers
     server.signIn.mockReturnValue(of(session('bea-token', 'bea@example.com')));
-    const refreshed = firstValueFrom(auth.refresh());
+    const refreshed = firstValueFrom(auth.refresh()).catch(
+      (error: unknown) => (error as Error).name,
+    );
     const signedIn = firstValueFrom(
       auth.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
     );
 
     await vi.advanceTimersByTimeAsync(COOKIE_CALL_TIMEOUT);
 
-    expect(await refreshed).toBeNull();
+    expect(await refreshed).toBe('TimeoutError');
     await signedIn;
     expect(auth.user()?.email).toBe('bea@example.com');
   });
@@ -445,6 +447,64 @@ describe('AuthBehaviour', () => {
     expect(firstTab.isAuthenticated()).toBe(false);
     expect(secondTab.user()?.email).toBe('bea@example.com');
     expect(localStorage.getItem('sb.signed-in')).toBe('true');
+  });
+
+  it('should end the session in every tab when the server refuses the refresh', async () => {
+    const { firstTab, secondTab } = twoTabs();
+    firstTab.start(session('first'), true);
+    server.refresh.mockReturnValueOnce(of(session('first'))); // the second tab opens
+    await secondTab.restore();
+    server.refresh.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
+
+    await firstValueFrom(firstTab.refresh());
+    await settle();
+
+    expect(firstTab.isAuthenticated()).toBe(false);
+    expect(secondTab.isAuthenticated()).toBe(false);
+  });
+
+  it('should keep the session and the remembered sign-in when the refresh cannot reach the server', async () => {
+    const auth = load();
+    auth.start(session('first'), true);
+    server.refresh.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+
+    const failure = await firstValueFrom(auth.refresh()).catch((error: unknown) => error);
+
+    expect((failure as HttpErrorResponse).status).toBe(0);
+    expect(auth.token()).toBe('first');
+    expect(localStorage.getItem('sb.signed-in')).toBe('true');
+  });
+
+  it('should start without a session when offline, and keep the remembered sign-in for later', async () => {
+    load().start(session('first'), true);
+    server.refresh.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503 })));
+
+    const auth = load();
+    await auth.restore();
+
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(localStorage.getItem('sb.signed-in')).toBe('true');
+  });
+
+  it('should not open, at start-up, a session signed in meanwhile in another tab', async () => {
+    const { firstTab, secondTab } = twoTabs();
+    localStorage.setItem('sb.signed-in', 'true'); // Anna, remembered, from an earlier visit
+    localStorage.setItem('sb.session-name', 'anna-session');
+    const signIn = new Subject<AuthSession>();
+    server.signIn.mockReturnValue(signIn);
+    const signedIn = firstValueFrom(
+      firstTab.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
+    );
+    await settle();
+
+    const opened = secondTab.restore(); // a tab opening while Bea signs in
+    signIn.next(session('bea-token', 'bea@example.com'));
+    signIn.complete();
+    await signedIn;
+    await opened;
+
+    expect(server.refresh).not.toHaveBeenCalled();
+    expect(secondTab.isAuthenticated()).toBe(false);
   });
 
   it('should end the session here and go back to the home once the server has revoked it', async () => {

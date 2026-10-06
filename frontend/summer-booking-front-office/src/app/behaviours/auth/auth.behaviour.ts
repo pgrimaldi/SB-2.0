@@ -123,30 +123,42 @@ export class AuthBehaviour implements OnDestroy {
     this.tell('signin');
   }
 
-  /** Called at start-up. */
+  /**
+   * Called at start-up. When the server cannot be reached the app opens without a session and keeps
+   * the marks: the next visit tries again.
+   */
   async restore(): Promise<void> {
     if (
       this.storage('session')?.getItem(SIGNED_IN_KEY) ||
       this.storage('local')?.getItem(SIGNED_IN_KEY)
     ) {
-      await firstValueFrom(this.refresh());
+      await firstValueFrom(this.refresh()).catch(() => undefined);
     }
   }
 
   /**
    * New access token from the refresh cookie; concurrent callers share one request. Null when the
-   * server refuses (session expired or revoked): the user is then signed out here too, and goes back
-   * to the home if a session was in use (at start-up nobody was signed in yet). Null when the cookie
+   * server refuses (session expired or revoked): the user is then signed out here and in the other
+   * tabs of the session, and goes back to the home if a session was in use (at start-up nobody was
+   * signed in yet). Null when the cookie
    * now belongs to another user or property: this tab leaves (see `leaveHere`). Null also when
    * the session changed hands meanwhile: the answer belongs to the old one and changes nothing, so a
    * late answer can neither reopen a closed session nor replace or close the next one. A refresh
    * that waited for a sign-in or a logout asks the server nothing once the session has changed hands,
-   * nor when the cookie now belongs to another session (this tab leaves).
+   * nor when the cookie now belongs to another session (this tab leaves), nor, at start-up, when
+   * someone signed in in another tab while this one was opening (not the session it was opening).
+   * Fails, changing nothing, when the server cannot be reached (offline, server down, time limit):
+   * only the server's refusal ends a session.
    */
   refresh(): Observable<string | null> {
     const generation = this.generation;
+    const ownerAtStart = this.cookieOwner();
     const refreshing = (this.refreshing ??= this.oneAtATime(() => {
       if (generation !== this.generation) {
+        return of(null);
+      }
+      if (!this.isAuthenticated() && this.cookieOwner() !== ownerAtStart) {
+        this.storage('session')?.removeItem(SIGNED_IN_KEY);
         return of(null);
       }
       if (!this.ownsCookie()) {
@@ -168,15 +180,18 @@ export class AuthBehaviour implements OnDestroy {
         this.session.set({ accessToken, user });
         if (!this.sessionName) {
           // A tab that opens on a session started elsewhere (or by an older version, without a name).
-          this.sessionName =
-            this.storage('local')?.getItem(SESSION_NAME_KEY) ?? crypto.randomUUID();
+          this.sessionName = this.cookieOwner() ?? crypto.randomUUID();
           this.storage('local')?.setItem(SESSION_NAME_KEY, this.sessionName);
         }
         return accessToken;
       }),
-      catchError(() => {
+      catchError((error: unknown) => {
+        if (!isSessionOver(error)) {
+          return throwError(() => error);
+        }
         if (generation === this.generation) {
           if (this.isAuthenticated()) {
+            this.tell('logout');
             this.expire();
           } else {
             this.clear();
@@ -260,8 +275,12 @@ export class AuthBehaviour implements OnDestroy {
    * name to compare (start-up, storage blocked): nothing says otherwise.
    */
   private ownsCookie(): boolean {
-    const owner = this.storage('local')?.getItem(SESSION_NAME_KEY);
+    const owner = this.cookieOwner();
     return !this.sessionName || !owner || owner === this.sessionName;
+  }
+
+  private cookieOwner(): string | null {
+    return this.storage('local')?.getItem(SESSION_NAME_KEY) ?? null;
   }
 
   private tell(type: TabMessage['type'], session = this.sessionName): void {
@@ -342,7 +361,7 @@ export class AuthBehaviour implements OnDestroy {
     }
     // Messages arrive later than the calls on the cookie: a sign-in counts only while its session
     // still owns the cookie, or an older one could make a newer session leave.
-    const owner = this.storage('local')?.getItem(SESSION_NAME_KEY);
+    const owner = this.cookieOwner();
     if (data.type === 'logout' && data.session === this.sessionName) {
       this.expire();
     } else if (
@@ -360,7 +379,7 @@ export class AuthBehaviour implements OnDestroy {
   }
 }
 
-/** 401 from the logout: the server has no valid session for this browser any more. */
+/** 401 from refresh or logout: the server has no valid session for this browser any more. */
 function isSessionOver(error: unknown): boolean {
   return error instanceof HttpErrorResponse && error.status === 401;
 }

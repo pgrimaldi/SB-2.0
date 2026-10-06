@@ -23,7 +23,8 @@ const COOKIE_ENDPOINTS = [
 /**
  * Sends the access token (`Authorization: Bearer`) to our API only, never to other hosts. When the
  * API answers 401 (token expired), gets a new one from the refresh cookie and repeats the request
- * once; if the session is over, `refresh` signs the user out. A request of a session that has changed hands
+ * once; if the session is over, `refresh` signs the user out, and if the server cannot be reached the
+ * request fails with that error, the user still signed in. A request of a session that has changed hands
  * since it was sent (sign-out, another user) is never renewed nor repeated: it would run under a
  * session that did not ask for it.
  */
