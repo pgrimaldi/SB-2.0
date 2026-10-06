@@ -113,8 +113,11 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   });
   /** "Sì" of "Vuoi sovrascrivere le impostazioni predefinite?": until then every field is read-only. */
   protected readonly editable = signal(false);
+  /** The last reading arrived: nothing can be changed before the values of the server are there. */
+  private readonly loaded = signal(false);
   protected readonly configurationForm = form(this.configuration, (path) => {
-    readonly(path, { when: () => !this.editable() });
+    // Read-only also while a reading runs: its answer would overwrite what is being typed.
+    readonly(path, { when: () => !this.editable() || this.isReloading() });
     required(path.smtpPort);
     min(path.smtpPort, 1);
     max(path.smtpPort, MAX_TCP_PORT);
@@ -139,6 +142,9 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly testSent = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly saved = signal(false);
+  protected readonly canOverride = computed(
+    () => !this.editable() && this.loaded() && !this.isReloading(),
+  );
   protected readonly isBusy = computed(
     () => this.isReloading() || this.isSendingTest() || this.isSaving(),
   );
@@ -173,9 +179,11 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
             this.isReloading.set(false);
             this.configuration.set(data);
             this.configurationForm().reset();
+            this.loaded.set(true);
           },
           error: (error: unknown) => {
             this.isReloading.set(false);
+            this.loaded.set(false);
             this.error.set(toApiProblem(error));
           },
         });

@@ -6,7 +6,7 @@
     <app-button
       size="small"
       [fullWidth]="true"
-      [disabled]="editable()"
+      [disabled]="!canOverride()"
       (clicked)="editable.set(true)"
     >
       {{ 'management.settings.email_configuration.override.confirm' | translate }}

@@ -135,7 +135,10 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     );
   }
 
-  /** X and Annulla, Esc and a click outside: not while saving; after asking with unsaved changes. */
+  /**
+   * X, Esc and a click outside: not while saving; after asking with unsaved changes. Annulla closes
+   * at once: whoever presses it wants to drop what was typed (user, 06/10/2026).
+   */
   protected async leave(): Promise<void> {
     if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
       this.close();

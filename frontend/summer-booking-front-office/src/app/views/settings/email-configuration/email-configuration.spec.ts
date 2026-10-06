@@ -131,6 +131,10 @@ describe('EmailConfiguration', () => {
     );
 
     expect(element.querySelector('.email__configuration__error')?.textContent?.trim()).not.toBe('');
+    // Without the values of the server nothing can be changed: Reset reads them again.
+    expect(
+      element.querySelector<HTMLButtonElement>('.email__configuration__override button')!.disabled,
+    ).toBe(true);
   });
 
   it('should ask the configuration again with Reset, losing what was typed', async () => {
@@ -260,6 +264,20 @@ describe('EmailConfiguration', () => {
     );
     expect(buttons()[0].disabled).toBe(false);
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+  });
+
+  it('should let the settings be changed only once they have arrived from the server', async () => {
+    const answer = new Subject<typeof CONFIGURATION>();
+    const { fixture, element, inputs } = await setup(vi.fn(() => answer));
+    const yes = element.querySelector<HTMLButtonElement>('.email__configuration__override button')!;
+
+    expect(yes.disabled).toBe(true);
+    expect(inputs().every((input) => input.readOnly)).toBe(true);
+
+    answer.next(CONFIGURATION);
+    answer.complete();
+    await fixture.whenStable();
+    expect(yes.disabled).toBe(false);
   });
 
   it('should keep every field read-only until Sì of the question is pressed', async () => {

@@ -77,25 +77,31 @@ describe('FormWarehouseAddItemPopup', () => {
     ]);
   });
 
-  it('should close at once when empty, and ask first when something is typed', async () => {
+  it('should ask before the X drops what is typed, while Annulla drops it at once', async () => {
     const { fixture, host, popup } = await setup();
     const unsaved = TestBed.inject(UnsavedChangesBehaviour);
+    const closeX = () =>
+      popup()!.querySelector<HTMLButtonElement>('.form__warehouse__add__item__popup__close')!;
     const cancel = () =>
       popup()!.querySelector<HTMLButtonElement>(
         '.form__warehouse__add__item__popup__buttons app-button button',
       )!;
+    const typeQuantity = async () => {
+      const quantity = popup()!.querySelectorAll('input')[0];
+      quantity.value = '5';
+      quantity.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
 
-    cancel().click();
+    closeX().click(); // nothing typed
     await fixture.whenStable();
+    expect(unsaved.asking()).toBe(false);
     expect(host.open()).toBe(false);
 
     host.open.set(true);
     await fixture.whenStable();
-    const quantity = popup()!.querySelectorAll('input')[0];
-    quantity.value = '5';
-    quantity.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
-    cancel().click();
+    await typeQuantity();
+    closeX().click();
     await fixture.whenStable();
     expect(unsaved.asking()).toBe(true);
     unsaved.answer(false); // Resta
@@ -104,8 +110,7 @@ describe('FormWarehouseAddItemPopup', () => {
 
     cancel().click();
     await fixture.whenStable();
-    unsaved.answer(true); // Esci senza salvare
-    await fixture.whenStable();
+    expect(unsaved.asking()).toBe(false);
     expect(host.open()).toBe(false);
   });
 
