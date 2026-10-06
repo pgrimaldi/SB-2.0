@@ -267,7 +267,7 @@ describe('Table', () => {
     expect(names()).toEqual([]);
     expect(host.errors.length).toBe(1);
 
-    host.answer = (request) => of({ total: 1, rows: [ALL[0]] });
+    host.answer = () => of({ total: 1, rows: [ALL[0]] });
     host.params.set({ day: '2026-10-01' });
     await fixture.whenStable();
     expect(names()).toEqual(['Row 1']);
