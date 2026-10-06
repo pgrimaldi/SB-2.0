@@ -16,8 +16,6 @@ class SearchFieldHost {
 
 describe('SearchField', () => {
   beforeEach(() => vi.useFakeTimers());
-  afterEach(() => vi.useRealTimers());
-
   const setup = async () => {
     const fixture = TestBed.createComponent(SearchFieldHost);
     fixture.detectChanges();

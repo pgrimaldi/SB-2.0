@@ -5,8 +5,6 @@ import { ApiProblem } from '../../entities/errors/api-problem';
 import { ErrorTextBehaviour } from './error-text.behaviour';
 
 describe('ErrorTextBehaviour', () => {
-  afterEach(() => vi.restoreAllMocks());
-
   const setup = () => {
     TestBed.configureTestingModule({ providers: [provideTranslateService()] });
     const translate = TestBed.inject(TranslateService);

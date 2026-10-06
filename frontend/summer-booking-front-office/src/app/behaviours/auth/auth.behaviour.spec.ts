@@ -7,10 +7,10 @@ import { AuthService } from '../../services/api/auth/auth.service';
 import { AuthBehaviour, LOGOUT_RETRY_DELAY } from './auth.behaviour';
 
 describe('AuthBehaviour', () => {
-  const session = (accessToken: string): AuthSession => ({
+  const session = (accessToken: string, email = 'user@example.com'): AuthSession => ({
     accessToken,
     expiresIn: 900,
-    user: { email: 'user@example.com', idProperty: 'property-1', roles: ['Manager'] },
+    user: { email, idProperty: `property-of-${email}`, roles: ['Manager'] },
   });
   let server: {
     signIn: ReturnType<typeof vi.fn>;
@@ -81,7 +81,7 @@ describe('AuthBehaviour', () => {
     await auth.restore();
 
     expect(auth.token()).toBe('second');
-    expect(auth.user()?.idProperty).toBe('property-1');
+    expect(auth.user()?.idProperty).toBe('property-of-user@example.com');
   });
 
   it('should ask the server nothing at start-up when nobody signed in in this browser', async () => {
@@ -130,6 +130,68 @@ describe('AuthBehaviour', () => {
     expect(tokens).toEqual(['fresh', 'fresh']);
   });
 
+  it('should not sign in again with a refresh answer that arrives after the logout', async () => {
+    const auth = load();
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('first'), true);
+    const late = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(late);
+    const tokens: (string | null)[] = [];
+    auth.refresh().subscribe((token) => tokens.push(token));
+
+    await auth.logout();
+    late.next(session('late'));
+    late.complete();
+
+    expect(tokens).toEqual([null]);
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(storedValues()).toBe('');
+  });
+
+  it('should keep the new user when a refresh of the previous session answers late', () => {
+    const auth = load();
+    auth.start(session('first', 'anna@example.com'), false);
+    const late = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(late);
+    auth.refresh().subscribe();
+
+    auth.start(session('bea-token', 'bea@example.com'), false);
+    late.next(session('anna-late', 'anna@example.com'));
+    late.complete();
+
+    expect(auth.token()).toBe('bea-token');
+    expect(auth.user()?.email).toBe('bea@example.com');
+  });
+
+  it('should keep the new session when a refresh of the previous one fails late', () => {
+    const auth = load();
+    auth.start(session('first', 'anna@example.com'), true);
+    const late = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(late);
+    auth.refresh().subscribe();
+
+    auth.start(session('bea-token', 'bea@example.com'), true);
+    late.error(new HttpErrorResponse({ status: 401 }));
+
+    expect(auth.token()).toBe('bea-token');
+    expect(localStorage.getItem('sb.signed-in')).toBe('true');
+  });
+
+  it('should ask the server again for a new session, not share the refresh of the previous one', () => {
+    const auth = load();
+    auth.start(session('first', 'anna@example.com'), false);
+    server.refresh.mockReturnValueOnce(new Subject<AuthSession>());
+    auth.refresh().subscribe();
+
+    auth.start(session('bea-token', 'bea@example.com'), false);
+    server.refresh.mockReturnValueOnce(of(session('bea-fresh', 'bea@example.com')));
+    let token: string | null = null;
+    auth.refresh().subscribe((fresh) => (token = fresh));
+
+    expect(server.refresh).toHaveBeenCalledTimes(2);
+    expect(token).toBe('bea-fresh');
+  });
+
   it('should end the session here and go back to the home once the server has revoked it', async () => {
     const auth = load();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
@@ -174,7 +236,6 @@ describe('AuthBehaviour', () => {
     expect(auth.token()).toBe('first');
     expect(storedValues()).toContain('true'); // still marked as signed in
     expect(navigate).not.toHaveBeenCalled();
-    vi.useRealTimers();
   });
 
   it('should succeed when the second try reaches the server', async () => {
@@ -194,7 +255,6 @@ describe('AuthBehaviour', () => {
 
     expect(await result).toBe(true);
     expect(auth.isAuthenticated()).toBe(false);
-    vi.useRealTimers();
   });
 
   it('should remove the token that older versions kept in storage', () => {

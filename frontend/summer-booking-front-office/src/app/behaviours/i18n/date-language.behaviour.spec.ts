@@ -5,8 +5,6 @@ import { DateLanguageBehaviour } from './date-language.behaviour';
 import { Language, LanguageBehaviour } from './language.behaviour';
 
 describe('DateLanguageBehaviour', () => {
-  afterEach(() => vi.restoreAllMocks());
-
   /** Pretends the browser has these languages set. */
   const browser = (languages: string[]) => {
     vi.spyOn(navigator, 'languages', 'get').mockReturnValue(languages);

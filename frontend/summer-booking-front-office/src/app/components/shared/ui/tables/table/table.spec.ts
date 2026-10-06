@@ -414,11 +414,6 @@ describe('Table column room', () => {
     return { widths, resize };
   };
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
-
   it('should keep the shares of the columns while every header has its room', async () => {
     available = 1000;
     const { widths } = await setup([
@@ -464,8 +459,6 @@ describe('Table column room', () => {
 
 describe('Table bar', () => {
   beforeEach(() => vi.useFakeTimers());
-  afterEach(() => vi.useRealTimers());
-
   const setup = () => {
     TestBed.configureTestingModule({
       providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],

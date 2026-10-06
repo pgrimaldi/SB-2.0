@@ -23,7 +23,9 @@ const COOKIE_ENDPOINTS = [
 /**
  * Sends the access token (`Authorization: Bearer`) to our API only, never to other hosts. When the
  * API answers 401 (token expired), gets a new one from the refresh cookie and repeats the request
- * once; if the session is over, the user is signed out.
+ * once; if the session is over, the user is signed out. A request of a session that has changed hands
+ * since it was sent (sign-out, another user) is never renewed nor repeated: it would run under a
+ * session that did not ask for it.
  */
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   if (!isApiUrl(request.url) || COOKIE_ENDPOINTS.includes(request.url)) {
@@ -34,16 +36,24 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   if (!token) {
     return next(request);
   }
+  const generation = auth.sessionGeneration();
 
   return send(request, token, next).pipe(
     catchError((error: unknown) => {
-      if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
+      if (
+        !(error instanceof HttpErrorResponse) ||
+        error.status !== 401 ||
+        auth.sessionGeneration() !== generation
+      ) {
         return throwError(() => error);
       }
       return auth.refresh().pipe(
         switchMap((fresh) => {
           if (!fresh) {
-            auth.expire();
+            // Signed out only when no session is left: an old answer must not close a newer one.
+            if (!auth.isAuthenticated()) {
+              auth.expire();
+            }
             return throwError(() => error);
           }
           return send(request, fresh, next);

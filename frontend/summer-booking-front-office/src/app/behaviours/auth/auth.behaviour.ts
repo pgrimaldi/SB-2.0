@@ -53,6 +53,11 @@ export class AuthBehaviour implements OnDestroy {
   private readonly channel =
     typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel(CHANNEL_NAME);
   private refreshing: Observable<string | null> | null = null;
+  /**
+   * Goes up whenever the session changes hands (sign-in, sign-out, expiry, sign-out in another tab),
+   * not with a normal refresh: an answer that arrives later for an older generation is ignored.
+   */
+  private generation = 0;
 
   readonly user = computed(() => this.session()?.user ?? null);
 
@@ -70,6 +75,11 @@ export class AuthBehaviour implements OnDestroy {
     return this.session()?.accessToken ?? null;
   }
 
+  /** For whoever sends a request with the token: is the answer still about the same session? */
+  sessionGeneration(): number {
+    return this.generation;
+  }
+
   signIn(request: SignInRequest): Observable<void> {
     return this.authService
       .signIn(request)
@@ -78,6 +88,7 @@ export class AuthBehaviour implements OnDestroy {
 
   /** After sign-in: the server has already set the refresh cookie. */
   start({ accessToken, user }: AuthSession, remember: boolean): void {
+    this.changeHands();
     this.session.set({ accessToken, user });
     this.forgetSignIn();
     this.storage(remember ? 'local' : 'session')?.setItem(SIGNED_IN_KEY, 'true');
@@ -95,22 +106,34 @@ export class AuthBehaviour implements OnDestroy {
 
   /**
    * New access token from the refresh cookie; concurrent callers share one request. Null when the
-   * server refuses (session expired or revoked): the user is then signed out here too.
+   * server refuses (session expired or revoked): the user is then signed out here too. Null also when
+   * the session changed hands meanwhile: the answer belongs to the old one and changes nothing, so a
+   * late answer can neither reopen a closed session nor replace or close the next one.
    */
   refresh(): Observable<string | null> {
-    this.refreshing ??= this.authService.refresh().pipe(
+    const generation = this.generation;
+    const refreshing = (this.refreshing ??= this.authService.refresh().pipe(
       map(({ accessToken, user }) => {
+        if (generation !== this.generation) {
+          return null;
+        }
         this.session.set({ accessToken, user });
         return accessToken;
       }),
       catchError(() => {
-        this.clear();
+        if (generation === this.generation) {
+          this.clear();
+        }
         return of(null);
       }),
-      finalize(() => (this.refreshing = null)),
+      finalize(() => {
+        if (this.refreshing === refreshing) {
+          this.refreshing = null;
+        }
+      }),
       shareReplay(1),
-    );
-    return this.refreshing;
+    ));
+    return refreshing;
   }
 
   /**
@@ -145,8 +168,15 @@ export class AuthBehaviour implements OnDestroy {
   }
 
   private clear(): void {
+    this.changeHands();
     this.session.set(null);
     this.forgetSignIn();
+  }
+
+  /** A refresh still running belongs to the session before: the next one asks again. */
+  private changeHands(): void {
+    this.generation++;
+    this.refreshing = null;
   }
 
   private forgetSignIn(): void {

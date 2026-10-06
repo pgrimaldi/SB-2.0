@@ -7,7 +7,6 @@ import { DATES_DEBOUNCE, ManagementFiltersBehaviour } from './management-filters
 describe('ManagementFiltersBehaviour', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => {
-    vi.useRealTimers();
     sessionStorage.clear();
     localStorage.clear();
   });

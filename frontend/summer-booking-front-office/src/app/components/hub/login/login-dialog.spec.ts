@@ -18,12 +18,18 @@ class LoginDialogHost {
 
 describe('LoginDialog', () => {
   const setup = async (mobile: boolean) => {
-    // jsdom has no matchMedia: provide one answering the phone breakpoint.
-    window.matchMedia = vi.fn().mockReturnValue({
-      matches: mobile,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-    } as unknown as MediaQueryList);
+    // jsdom has no matchMedia: one answering the phone breakpoint, removed after each test by
+    // src/test-setup.ts. Complete, old listener methods included: Material uses them too.
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches: mobile,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+      } as unknown as MediaQueryList),
+    );
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -36,8 +42,6 @@ describe('LoginDialog', () => {
     await fixture.whenStable();
     return { fixture, open };
   };
-
-  afterEach(() => vi.restoreAllMocks());
 
   const signInError = async (answer: () => Observable<never>) => {
     TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: answer } });

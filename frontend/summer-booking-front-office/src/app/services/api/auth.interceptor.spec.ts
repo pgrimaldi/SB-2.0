@@ -10,10 +10,10 @@ import { authInterceptor } from './auth.interceptor';
 describe('authInterceptor', () => {
   const api = environment.apiBaseUrl;
   const unauthorized = { status: 401, statusText: 'Unauthorized' };
-  const session = (accessToken: string): AuthSession => ({
+  const session = (accessToken: string, email = 'anna@example.com'): AuthSession => ({
     accessToken,
     expiresIn: 900,
-    user: { email: 'u@e.it', idProperty: 'property-1', roles: [] },
+    user: { email, idProperty: `property-of-${email}`, roles: [] },
   });
 
   const setup = () => {
@@ -74,6 +74,39 @@ describe('authInterceptor', () => {
     expect(status).toBe(401);
     expect(auth.isAuthenticated()).toBe(false);
     expect(navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('should not renew nor repeat for the new user a request sent by the previous one', () => {
+    const { auth, http, controller } = setup();
+    let status = 0;
+
+    http.post(`${api}/warehouse/delete-warehouse-item`, {}).subscribe({
+      error: (error) => (status = error.status),
+    });
+    auth.start(session('bea-token', 'bea@example.com'), false);
+    controller.expectOne(`${api}/warehouse/delete-warehouse-item`).flush(null, unauthorized);
+
+    expect(status).toBe(401);
+    controller.expectNone(`${api}/auth/refresh`);
+    controller.expectNone(`${api}/warehouse/delete-warehouse-item`);
+    expect(auth.token()).toBe('bea-token');
+  });
+
+  it('should not repeat the request nor sign out the new user when the session changes during the refresh', () => {
+    const { auth, http, controller } = setup();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    let status = 0;
+
+    http.get(`${api}/warehouse/list`).subscribe({ error: (error) => (status = error.status) });
+    controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
+    const refresh = controller.expectOne(`${api}/auth/refresh`);
+    auth.start(session('bea-token', 'bea@example.com'), false);
+    refresh.flush(session('anna-late'));
+
+    expect(status).toBe(401);
+    controller.expectNone(`${api}/warehouse/list`);
+    expect(auth.token()).toBe('bea-token');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('should log out with the cookie only, and never renew the session while logging out', () => {
