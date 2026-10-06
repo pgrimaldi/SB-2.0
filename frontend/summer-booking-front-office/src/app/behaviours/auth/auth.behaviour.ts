@@ -238,14 +238,21 @@ export class AuthBehaviour implements OnDestroy {
     void this.router.navigateByUrl('/');
   }
 
+  /**
+   * The mark of this tab always goes. What the whole browser shares (the remembered mark, the session
+   * name) goes only while the cookie is still this session's: another tab may have signed in since,
+   * and that session must still open on the next visit.
+   */
   private clear(): void {
+    const ownsCookie = this.ownsCookie();
     this.changeHands();
     this.session.set(null);
-    if (this.ownsCookie()) {
+    this.sessionName = null;
+    this.storage('session')?.removeItem(SIGNED_IN_KEY);
+    if (ownsCookie) {
+      this.storage('local')?.removeItem(SIGNED_IN_KEY);
       this.storage('local')?.removeItem(SESSION_NAME_KEY);
     }
-    this.sessionName = null;
-    this.forgetSignIn();
   }
 
   /**

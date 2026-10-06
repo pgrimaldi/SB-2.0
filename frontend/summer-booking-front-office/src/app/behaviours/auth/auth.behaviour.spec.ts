@@ -415,6 +415,25 @@ describe('AuthBehaviour', () => {
     expect(reloaded.isAuthenticated()).toBe(false);
   });
 
+  it('should keep the remembered sign-in of a new session when a late logout closes an old tab', async () => {
+    const { firstTab, secondTab } = twoTabs();
+    firstTab.start(session('anna-token', 'anna@example.com'), true);
+    const annaSession = localStorage.getItem('sb.session-name');
+    // Another tab of Anna logs out; Bea signs in, remembered, before that message arrives here:
+    const annaOtherTab = new BroadcastChannel('sb-auth');
+    onTestFinished(() => annaOtherTab.close());
+    annaOtherTab.postMessage({ type: 'logout', session: annaSession });
+    secondTab.start(session('bea-token', 'bea@example.com'), true);
+    await settle();
+    expect(firstTab.isAuthenticated()).toBe(false);
+
+    server.refresh.mockReturnValue(of(session('bea-fresh', 'bea@example.com')));
+    const reloaded = load();
+    await reloaded.restore();
+
+    expect(reloaded.user()?.email).toBe('bea@example.com');
+  });
+
   it('should send no logout once another tab has signed in, as the cookie is no longer ours', async () => {
     const { firstTab, secondTab } = twoTabs();
     firstTab.start(session('anna-token', 'anna@example.com'), true);
