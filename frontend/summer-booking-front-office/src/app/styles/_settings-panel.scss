@@ -1,0 +1,8 @@
+// White panel of the settings pages (designer's mockups: Assistenza e guide, Configurazione email).
+// App layout, not part of the component library.
+@mixin settings-panel {
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  box-shadow: 0 0.25rem 1.25rem var(--color__layout__shadow__light);
+}

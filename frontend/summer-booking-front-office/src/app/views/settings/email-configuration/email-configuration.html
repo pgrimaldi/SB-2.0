@@ -1,0 +1,64 @@
+<main class="email__configuration">
+  <section class="email__configuration__panel">
+    @for (field of maskedFields; track field.name) {
+      @let id = 'email-configuration-' + field.key;
+      <div class="email__configuration__row">
+        <div>
+          <p class="email__configuration__title" [id]="id">
+            {{
+              'management.settings.email_configuration.fields.' + field.key + '.title' | translate
+            }}
+          </p>
+          <p class="email__configuration__description" [id]="id + '-description'">
+            {{
+              'management.settings.email_configuration.fields.' + field.key + '.description'
+                | translate
+            }}
+          </p>
+        </div>
+        <!-- new-password: the browser must not fill in the saved sign-in of the user here. -->
+        <app-filled-text-field
+          type="password"
+          autocomplete="new-password"
+          [labelledBy]="id + ' ' + id + '-description'"
+          [formField]="configurationForm[field.name]"
+        />
+      </div>
+    }
+    <div class="email__configuration__row">
+      <div>
+        <p class="email__configuration__title" id="email-configuration-smtp_security">
+          {{ 'management.settings.email_configuration.fields.smtp_security.title' | translate }}
+        </p>
+        <p
+          class="email__configuration__description"
+          id="email-configuration-smtp_security-description"
+        >
+          {{
+            'management.settings.email_configuration.fields.smtp_security.description' | translate
+          }}
+        </p>
+      </div>
+      <app-filled-select
+        labelledBy="email-configuration-smtp_security email-configuration-smtp_security-description"
+        [options]="securityOptions()"
+        [formField]="configurationForm.smtpSecurity"
+      />
+    </div>
+  </section>
+
+  @if (loadErrorMessage(); as loadErrorMessage) {
+    <p class="email__configuration__error" role="alert">{{ loadErrorMessage }}</p>
+  }
+  <div class="email__configuration__actions">
+    <app-button appearance="soft" size="small" [fullWidth]="true" [pathIcon]="sendTestIcon">
+      {{ 'management.settings.email_configuration.send_test' | translate }}
+    </app-button>
+    <app-button appearance="soft" size="small" [fullWidth]="true" [pathIcon]="resetIcon">
+      {{ 'management.settings.email_configuration.reset' | translate }}
+    </app-button>
+    <app-button size="small" [fullWidth]="true">
+      {{ 'management.settings.email_configuration.save' | translate }}
+    </app-button>
+  </div>
+</main>

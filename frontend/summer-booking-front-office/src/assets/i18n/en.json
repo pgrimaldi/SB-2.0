@@ -265,9 +265,7 @@
           "title": "Do you need help?",
           "phone": "Phone",
           "email": "Email",
-          "hours": "Support hours",
-          "summer_hours": "May 1 - September 30, Monday to Sunday: 8:30 am to 8:00 pm",
-          "winter_hours": "October 1 - April 30, Monday to Friday: 9:00 am to 6:00 pm"
+          "hours": "Support hours"
         },
         "form": {
           "title": "Contact us",
@@ -289,6 +287,46 @@
           "text": "Thank you for contacting us, we will get back to you as soon as possible",
           "close": "Close"
         }
+      },
+      "email_configuration": {
+        "fields": {
+          "from_email": {
+            "title": "Sender email address (from_email):",
+            "description": "The email address used as the sender."
+          },
+          "from_name": {
+            "title": "Sender name (from_name):",
+            "description": "The name shown as the sender of the email."
+          },
+          "smtp_server": {
+            "title": "SMTP server (smtp_server):",
+            "description": "The address of the SMTP server used to send the emails (for example, smtp.gmail.com for Gmail)."
+          },
+          "smtp_port": {
+            "title": "SMTP port (smtp_port):",
+            "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (TLS) SMTP authentication:"
+          },
+          "smtp_username": {
+            "title": "Username (smtp_username):",
+            "description": "The username to sign in to the SMTP server, often the same as the email address."
+          },
+          "smtp_password": {
+            "title": "Password (smtp_password):",
+            "description": "The password of the username."
+          },
+          "smtp_security": {
+            "title": "Security type (smtp_security):",
+            "description": "The security type used (None, SSL, TLS)."
+          }
+        },
+        "security": {
+          "none": "None",
+          "ssl": "SSL",
+          "tls": "TLS"
+        },
+        "send_test": "Send test email",
+        "reset": "Reset",
+        "save": "Save"
       }
     }
   },

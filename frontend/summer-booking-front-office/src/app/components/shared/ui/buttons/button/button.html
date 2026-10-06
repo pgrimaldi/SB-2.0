@@ -1,7 +1,16 @@
 <!-- While loading the label stays (it keeps the size and the name of the button) but cannot be seen:
 the spinner is drawn over it. -->
 <ng-template #label>
-  <span class="button__label" [class.button__label__hidden]="loading()"><ng-content /></span>
+  <span class="button__label" [class.button__label__hidden]="loading()">
+    @if (icons().list[0]; as icon) {
+      @if (icons().material) {
+        <mat-icon class="button__icon" aria-hidden="true">{{ icon }}</mat-icon>
+      } @else {
+        <img class="button__icon" [src]="icon" width="14" height="14" alt="" />
+      }
+    }
+    <ng-content />
+  </span>
   @if (loading()) {
     <mat-progress-spinner
       class="button__spinner"

@@ -265,9 +265,7 @@
           "title": "Hai bisogno di aiuto?",
           "phone": "Telefono",
           "email": "Email",
-          "hours": "Orari di assistenza",
-          "summer_hours": "1 maggio - 30 settembre, dal lunedì alla domenica: dalle 8:30 alle 20:00",
-          "winter_hours": "1 ottobre - 30 aprile, dal lunedì al venerdì: dalle 9:00 alle 18:00"
+          "hours": "Orari di assistenza"
         },
         "form": {
           "title": "Contattaci",
@@ -289,6 +287,46 @@
           "text": "Grazie per averci contattato, ti risponderemo al più presto",
           "close": "Chiudi"
         }
+      },
+      "email_configuration": {
+        "fields": {
+          "from_email": {
+            "title": "Indirizzo email mittente (from_email):",
+            "description": "L'indirizzo email che verrà utilizzato come mittente."
+          },
+          "from_name": {
+            "title": "Nome Mittente (from_name):",
+            "description": "Il nome che verrà visualizzato come mittente dell'email."
+          },
+          "smtp_server": {
+            "title": "Server SMTP (smtp_server):",
+            "description": "L'indirizzo del server SMTP utilizzato per l'invio delle email (ad esempio, smtp.gmail.com per Gmail)."
+          },
+          "smtp_port": {
+            "title": "Porta SMTP (smtp_port):",
+            "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (TLS) Autenticazione SMTP:"
+          },
+          "smtp_username": {
+            "title": "Nome utente (smtp_username):",
+            "description": "Il nome utente per autenticarsi al server SMTP, spesso è lo stesso dell'indirizzo email."
+          },
+          "smtp_password": {
+            "title": "Password (smtp_password):",
+            "description": "La password associata al nome utente."
+          },
+          "smtp_security": {
+            "title": "Tipo di Sicurezza (smtp_security):",
+            "description": "Il tipo di sicurezza utilizzata (Nessuna, SSL, TLS)."
+          }
+        },
+        "security": {
+          "none": "Nessuna",
+          "ssl": "SSL",
+          "tls": "TLS"
+        },
+        "send_test": "Invia email test",
+        "reset": "Reset",
+        "save": "Salva"
       }
     }
   },

@@ -1,7 +1,8 @@
 @use '@angular/material' as mat;
 
 // Grey form fields of the designer's mockup of the form popups (02/10/2026). $block is the component
-// name (e.g. filled__text__field) used by its classes.
+// name (e.g. filled__text__field) used by its classes. A page can make the fields bigger with
+// --filled-field-height, --filled-field-text-size and --filled-field-line-height (defaults: the popups).
 @mixin filled-field($block) {
   :host {
     display: flex;
@@ -10,10 +11,12 @@
 
     @include mat.form-field-overrides(
       (
-        container-height: 1.625rem,
-        container-vertical-padding: 0.25rem,
-        container-text-size: 0.75rem,
-        container-text-line-height: 1.125rem,
+        container-height: var(--filled-field-height, 1.625rem),
+        container-vertical-padding: calc(
+            (var(--filled-field-height, 1.625rem) - var(--filled-field-line-height, 1.125rem)) / 2
+          ),
+        container-text-size: var(--filled-field-text-size, 0.75rem),
+        container-text-line-height: var(--filled-field-line-height, 1.125rem),
         container-text-tracking: normal,
         container-text-weight: 500,
         filled-container-color: var(--color__tertiary__theme),

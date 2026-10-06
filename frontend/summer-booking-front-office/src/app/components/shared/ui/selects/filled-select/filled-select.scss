@@ -7,8 +7,8 @@
 :host {
   @include mat.select-overrides(
     (
-      trigger-text-size: 0.75rem,
-      trigger-text-line-height: 1.125rem,
+      trigger-text-size: var(--filled-field-text-size, 0.75rem),
+      trigger-text-line-height: var(--filled-field-line-height, 1.125rem),
       trigger-text-tracking: normal,
       trigger-text-weight: 500,
       enabled-trigger-text-color: var(--color__main__theme__one),
@@ -30,5 +30,5 @@
 // Material gives the arrow a box 24px high, which would make the field taller than the other grey
 // fields: the box is as high as the text.
 .filled__select__control ::ng-deep .mat-mdc-select-arrow-wrapper {
-  height: 1.125rem;
+  height: var(--filled-field-line-height, 1.125rem);
 }

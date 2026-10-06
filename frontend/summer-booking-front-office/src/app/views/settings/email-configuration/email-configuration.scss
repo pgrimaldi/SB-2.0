@@ -1,0 +1,80 @@
+@use '../../../styles/settings-panel' as panel;
+
+// Designer's mockup (06/10/2026): one white panel, on each row the name and the explanation of the
+// setting on the left and its field on the right; the three buttons under the panel, on the right.
+// Bigger than the mockup (user): wider page, texts and fields; the buttons as in the mockup.
+.email__configuration {
+  --filled-field-height: 2.25rem;
+  --filled-field-text-size: 0.875rem;
+  --filled-field-line-height: 1.25rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: min(100% - 2rem, 64rem);
+  margin-inline: auto;
+  padding-block: 1.5rem 2rem;
+}
+
+.email__configuration__panel {
+  @include panel.settings-panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 2rem;
+}
+
+.email__configuration__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 3rem;
+}
+
+.email__configuration__title,
+.email__configuration__description {
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.email__configuration__title {
+  margin-bottom: 0.125rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.email__configuration__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.email__configuration__actions {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 0.5rem;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  app-button {
+    width: 8rem;
+  }
+}
+
+@media (width < 48rem) {
+  .email__configuration__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .email__configuration__actions app-button {
+    flex: 1;
+    width: auto;
+  }
+}

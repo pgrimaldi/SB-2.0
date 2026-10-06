@@ -72,4 +72,50 @@ describe('contactSupportMock', () => {
     );
     expect((unauthorized as HttpErrorResponse).status).toBe(401);
   });
+
+  it('should answer the support contacts, the hours in Italian without an English Accept-Language', async () => {
+    const system = await service();
+
+    expect(
+      await firstValueFrom(system.supportInfo({ idProperty: DEMO_PROPERTY.publicId })),
+    ).toEqual({
+      phoneNumber: '050 7916620',
+      mailAddress: 'info@summerbooking.it',
+      supportHour: [expect.stringContaining('1 maggio'), expect.stringContaining('1 ottobre')],
+    });
+  });
+
+  it('should refuse the support contacts of an unknown property (400)', async () => {
+    const invalid = await firstValueFrom(
+      (await service()).supportInfo({ idProperty: 'unknown' }),
+    ).catch((failure: HttpErrorResponse) => failure);
+
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+  });
+
+  it('should answer the email configuration of the property through GET (query string)', async () => {
+    const configuration = await firstValueFrom(
+      (await service()).emailConfiguration({ idProperty: DEMO_PROPERTY.publicId }),
+    );
+
+    expect(Object.keys(configuration)).toEqual([
+      'senderMailAddress',
+      'senderName',
+      'smtpServerAddress',
+      'smtpPort',
+      'smtpUsername',
+      'smtpPassword',
+      'smtpSecurity',
+    ]);
+    expect(configuration.smtpPort).toBe(587);
+    expect(configuration.smtpSecurity).toBe('Tls');
+  });
+
+  it('should refuse the email configuration of an unknown property (400)', async () => {
+    const invalid = await firstValueFrom(
+      (await service()).emailConfiguration({ idProperty: 'unknown' }),
+    ).catch((failure: HttpErrorResponse) => failure);
+
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+  });
 });

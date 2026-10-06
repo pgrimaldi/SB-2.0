@@ -1,21 +1,30 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
+import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Subject, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { SystemService } from '../../../services/api/system/system.service';
 import { ContactSupport } from './contact-support';
 
 describe('ContactSupport', () => {
-  const setup = async () => {
+  const SUPPORT_INFO = {
+    phoneNumber: '050 7916620',
+    mailAddress: 'info@summerbooking.it',
+    supportHour: ['1 maggio - 30 settembre', '1 ottobre - 30 aprile'],
+  };
+
+  const setup = async (supportInfo = vi.fn(() => of(SUPPORT_INFO))) => {
     const contactSupport = vi.fn();
+    const language = signal('it');
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: SystemService, useValue: { contactSupport } },
+        { provide: SystemService, useValue: { contactSupport, supportInfo } },
+        { provide: DATA_RELOAD, useValue: language },
         { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
       ],
     });
@@ -39,20 +48,26 @@ describe('ContactSupport', () => {
       await type(2, 'anna.bianchi@example.com');
       await type(4, 'Vorrei informazioni.');
     };
-    return { fixture, element, fields, send, type, fill, contactSupport };
+    return { fixture, element, fields, send, type, fill, contactSupport, supportInfo, language };
   };
 
   afterEach(() =>
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should show the support contacts and the five fields with their examples', async () => {
-    const { element, fields } = await setup();
+  it('should show the support contacts of the API and the five fields with their examples', async () => {
+    const { element, fields, supportInfo } = await setup();
 
-    expect(element.querySelector('a[href="tel:+390507916620"]')?.textContent?.trim()).toBe(
+    expect(supportInfo).toHaveBeenCalledWith({ idProperty: 'p1' });
+    expect(element.querySelector('a[href="tel:0507916620"]')?.textContent?.trim()).toBe(
       '050 7916620',
     );
     expect(element.querySelector('a[href="mailto:info@summerbooking.it"]')).not.toBeNull();
+    expect(
+      [...element.querySelectorAll('.contact__support__box__hours p')].map((line) =>
+        line.textContent?.trim(),
+      ),
+    ).toEqual(['1 maggio - 30 settembre', '1 ottobre - 30 aprile']);
     expect(fields().map((field) => field.placeholder)).toEqual([
       'management.settings.contact_support.form.examples.first_name',
       'management.settings.contact_support.form.examples.last_name',
@@ -114,5 +129,25 @@ describe('ContactSupport', () => {
     expect(element.querySelector('.contact__support__error')?.textContent?.trim()).not.toBe('');
     expect(fields()[1].value).toBe('Bianchi');
     expect(document.querySelector('.message__popup')).toBeNull();
+  });
+
+  it('should ask the support contacts again when the language changes', async () => {
+    const { fixture, supportInfo, language } = await setup();
+
+    language.set('en');
+    await fixture.whenStable();
+    expect(supportInfo).toHaveBeenCalledTimes(2);
+  });
+
+  it('should keep the boxes and show the error when the support contacts do not arrive', async () => {
+    const { element } = await setup(
+      vi.fn(() => throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown' }))),
+    );
+
+    expect(element.querySelectorAll('.contact__support__box').length).toBe(3);
+    expect(element.querySelector('.contact__support__box a')).toBeNull();
+    expect(element.querySelector('.contact__support__info__error')?.textContent?.trim()).not.toBe(
+      '',
+    );
   });
 });

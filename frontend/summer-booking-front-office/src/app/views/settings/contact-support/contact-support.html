@@ -3,36 +3,45 @@
     <h1 class="contact__support__title" id="contact-support-help">
       {{ 'management.settings.contact_support.help.title' | translate }}
     </h1>
+    @let info = supportInfo();
     <ul class="contact__support__boxes">
       <li class="contact__support__box">
         <h2 class="contact__support__box__title">
           <img [src]="phoneIcon" width="14" height="14" alt="" />
           {{ 'management.settings.contact_support.help.phone' | translate }}
         </h2>
-        <a class="contact__support__box__value" [href]="supportPhoneLink">{{ supportPhone }}</a>
+        @if (info) {
+          <a class="contact__support__box__value" [href]="supportPhoneLink()">{{
+            info.phoneNumber
+          }}</a>
+        }
       </li>
       <li class="contact__support__box">
         <h2 class="contact__support__box__title">
           <img [src]="emailIcon" width="14" height="14" alt="" />
           {{ 'management.settings.contact_support.help.email' | translate }}
         </h2>
-        <a class="contact__support__box__value" [href]="'mailto:' + supportEmail">
-          {{ supportEmail }}
-        </a>
+        @if (info) {
+          <a class="contact__support__box__value" [href]="'mailto:' + info.mailAddress">{{
+            info.mailAddress
+          }}</a>
+        }
       </li>
       <li class="contact__support__box contact__support__box__hours">
         <h2 class="contact__support__box__title">
           <img [src]="clockIcon" width="14" height="14" alt="" />
           {{ 'management.settings.contact_support.help.hours' | translate }}
         </h2>
-        <p class="contact__support__box__value">
-          {{ 'management.settings.contact_support.help.summer_hours' | translate }}
-        </p>
-        <p class="contact__support__box__value">
-          {{ 'management.settings.contact_support.help.winter_hours' | translate }}
-        </p>
+        @for (line of info?.supportHour ?? []; track $index) {
+          <p class="contact__support__box__value">{{ line }}</p>
+        }
       </li>
     </ul>
+    @if (supportInfoErrorMessage(); as supportInfoErrorMessage) {
+      <p class="contact__support__error contact__support__info__error" role="alert">
+        {{ supportInfoErrorMessage }}
+      </p>
+    }
   </section>
 
   <section class="contact__support__panel" aria-labelledby="contact-support-form">

@@ -29,7 +29,14 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
   { path: 'sharing', label: 'management.settings.menu.sharing' },
   { path: 'online-bookings', label: 'management.settings.menu.online_bookings' },
   { path: 'fiscalization', label: 'management.settings.menu.fiscalization' },
-  { path: 'email', label: 'management.settings.menu.email' },
+  {
+    path: 'email-configuration',
+    label: 'management.settings.menu.email',
+    loadComponent: () =>
+      import('./email-configuration/email-configuration').then(
+        (component) => component.EmailConfiguration,
+      ),
+  },
   { path: 'database', label: 'management.settings.menu.database' },
   {
     path: 'contact-support',

@@ -1,3 +1,5 @@
+@use '../../../styles/settings-panel' as panel;
+
 // Designer's mockup (05/10/2026): two white panels in a centred column, the help boxes side by side
 // (one per row on the phone), then the contact form with the button at the bottom right.
 .contact__support {
@@ -11,11 +13,9 @@
 }
 
 .contact__support__panel {
+  @include panel.settings-panel;
+
   padding: 1.5rem 1.25rem 1.25rem;
-  border: 0.0625rem solid var(--color__layout__border);
-  border-radius: 0.3125rem;
-  background: var(--color__layout__surface);
-  box-shadow: 0 0.25rem 1.25rem var(--color__layout__shadow__light);
 }
 
 .contact__support__title {
@@ -92,6 +92,11 @@
   color: var(--color__layout__error);
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.contact__support__info__error {
+  margin-top: 1rem;
+  text-align: center;
 }
 
 .contact__support__send {

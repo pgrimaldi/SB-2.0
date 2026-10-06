@@ -20,6 +20,8 @@ export class FilledSelect<K extends string = string> {
   readonly options = input<readonly SelectOption<K>[]>([]);
   readonly value = model<K | null>(null);
   readonly disabled = input(false);
+  /** Ids of the page elements that name the select, when its label is not above it. */
+  readonly labelledBy = input<string>();
 
   protected readonly id = `filled-select-${nextId++}`;
 }

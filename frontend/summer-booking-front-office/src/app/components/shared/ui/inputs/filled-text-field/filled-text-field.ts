@@ -26,6 +26,9 @@ export class FilledTextField {
   readonly isMandatory = input(false);
   readonly value = model('');
   readonly maxLength = input<number>();
+  readonly type = input<'text' | 'password'>('text');
+  /** Ids of the page elements that name the field, when its label is not above it. */
+  readonly labelledBy = input<string>();
   readonly name = input<string>();
   readonly placeholder = input<string>();
   /** Browser autofill hint, e.g. `given-name`, `email`, `tel`. */

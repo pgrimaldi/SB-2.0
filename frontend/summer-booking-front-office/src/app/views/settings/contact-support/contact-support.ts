@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, form, required } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -6,11 +15,13 @@ import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
+import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
 import { ApiProblem } from '../../../entities/errors/api-problem';
+import { SupportInfo } from '../../../entities/system/support-info';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { SystemService } from '../../../services/api/system/system.service';
 
@@ -43,10 +54,21 @@ export class ContactSupport {
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
 
-  protected readonly supportPhone = '050 7916620';
-  protected readonly supportPhoneLink = 'tel:+390507916620';
-  protected readonly supportEmail = 'info@summerbooking.it';
+  protected readonly supportInfo = signal<SupportInfo | null>(null);
+  /** Only digits (and a leading +) in a `tel:` link. */
+  protected readonly supportPhoneLink = computed(() => {
+    const phoneNumber = this.supportInfo()?.phoneNumber;
+    return phoneNumber ? `tel:${phoneNumber.replace(/[^\d+]/g, '')}` : null;
+  });
+  private readonly supportInfoError = signal<ApiProblem | null>(null);
+  protected readonly supportInfoErrorMessage = toSignal(
+    toObservable(this.supportInfoError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly phoneIcon = '/assets/images/phone.svg';
   protected readonly emailIcon = '/assets/images/email.svg';
   protected readonly clockIcon = '/assets/images/clock.svg';
@@ -71,6 +93,30 @@ export class ContactSupport {
     ),
     { initialValue: null },
   );
+
+  constructor() {
+    // Loaded again when the language changes: the support hours come translated by the server.
+    effect((onCleanup) => {
+      this.dataReload?.();
+      const idProperty = this.auth.user()?.idProperty;
+      if (!idProperty) {
+        return;
+      }
+      const subscription = untracked(() =>
+        this.system.supportInfo({ idProperty }).subscribe({
+          next: (supportInfo) => {
+            this.supportInfo.set(supportInfo);
+            this.supportInfoError.set(null);
+          },
+          error: (error: unknown) => {
+            this.supportInfo.set(null);
+            this.supportInfoError.set(toApiProblem(error));
+          },
+        }),
+      );
+      onCleanup(() => subscription.unsubscribe());
+    });
+  }
 
   protected send(event: Event): void {
     event.preventDefault();
