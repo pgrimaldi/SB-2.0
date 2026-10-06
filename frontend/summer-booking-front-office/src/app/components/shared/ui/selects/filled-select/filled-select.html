@@ -10,6 +10,7 @@
   class="filled__select__control"
   appearance="fill"
   subscriptSizing="dynamic"
+  [class.filled__select__invalid]="!!error()"
   [class.filled__select__locked]="readonly() || disabled()"
 >
   <mat-select
@@ -17,13 +18,19 @@
     hideSingleSelectionIndicator
     [required]="isMandatory()"
     [aria-labelledby]="labelledBy() ?? id + '-label'"
+    [aria-describedby]="error() ? id + '-error' : ''"
+    [errorStateMatcher]="errorMatcher"
     [placeholder]="placeholder() ?? ''"
     [disabled]="disabled() || readonly()"
     [value]="value()"
     (valueChange)="value.set($event)"
+    (closed)="touch.emit()"
   >
     @for (option of options(); track option.value) {
       <mat-option [value]="option.value">{{ option.label }}</mat-option>
     }
   </mat-select>
 </mat-form-field>
+@if (error(); as error) {
+  <p class="filled__select__error" [id]="id + '-error'">{{ error }}</p>
+}

@@ -56,12 +56,23 @@ describe('EmailConfiguration', () => {
       inputs()[index].dispatchEvent(new Event('input'));
       await fixture.whenStable();
     };
+    // submit() of Signal Forms awaits the answer in a promise that Angular does not wait for.
+    const settle = async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+    const allowChanges = async () => {
+      element.querySelector<HTMLButtonElement>('.email__configuration__override button')!.click();
+      await fixture.whenStable();
+    };
     return {
       fixture,
       element,
       inputs,
       buttons,
       type,
+      settle,
+      allowChanges,
       emailConfiguration,
       sendTestEmail,
       saveEmailConfiguration,
@@ -134,7 +145,7 @@ describe('EmailConfiguration', () => {
   });
 
   it('should send the values in the fields as the test email, then say it was sent', async () => {
-    const { fixture, element, buttons, type, sendTestEmail } = await setup();
+    const { fixture, element, buttons, type, settle, sendTestEmail } = await setup();
     const answer = new Subject<void>();
     sendTestEmail.mockReturnValue(answer);
     await type(1, 'Lido Prova');
@@ -150,34 +161,83 @@ describe('EmailConfiguration', () => {
 
     answer.next();
     answer.complete();
-    await fixture.whenStable();
+    await settle();
     expect(document.querySelector('.message__popup h2')?.textContent?.trim()).toBe(
       'management.settings.email_configuration.test_sent.title',
     );
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 
-  it('should send a port that is not a whole number as null and show the error of the API', async () => {
-    const { fixture, element, buttons, type, sendTestEmail } = await setup();
-    sendTestEmail.mockReturnValue(
+  it('should show under the port what is wrong, keep Salva off and send nothing until it is right', async () => {
+    const { fixture, element, buttons, type, allowChanges, sendTestEmail } = await setup();
+    const portError = () =>
+      element.querySelector('app-filled-number-field .filled__number__field__error');
+    await allowChanges();
+
+    await type(3, '');
+    expect(portError()?.textContent?.trim()).toBe('invalidate.required');
+    expect(buttons()[2].disabled).toBe(true);
+
+    await type(3, '70000');
+    expect(portError()?.textContent?.trim()).toBe('invalidate.max');
+    buttons()[0].click();
+    await fixture.whenStable();
+    expect(sendTestEmail).not.toHaveBeenCalled();
+
+    await type(3, '0');
+    expect(portError()?.textContent?.trim()).toBe('invalidate.min');
+
+    await type(3, '465');
+    expect(portError()).toBeNull();
+    expect(buttons()[2].disabled).toBe(false);
+  });
+
+  it('should keep only digits in the port, shown as dots until the eye is pressed', async () => {
+    const { fixture, element, inputs, type } = await setup();
+
+    await type(3, '58a7');
+    expect(inputs()[3].value).toBe('587');
+    expect(inputs()[3].type).toBe('password');
+    element.querySelector<HTMLButtonElement>('.filled__number__field__toggle')!.click();
+    await fixture.whenStable();
+    expect(inputs()[3].type).toBe('text');
+  });
+
+  it('should show an error of the API on a field under that field, until the field changes', async () => {
+    const { element, buttons, type, settle, allowChanges, saveEmailConfiguration } = await setup();
+    await allowChanges();
+    saveEmailConfiguration.mockReturnValue(
       throwError(
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+            error: {
+              status: 400,
+              code: 'validation.invalid_request',
+              title: 'Invalid request',
+              errors: [{ field: 'senderName', code: 'validation.invalid_value' }],
+            },
           }),
       ),
     );
-    await type(3, '58a');
+    const nameError = () =>
+      element
+        .querySelectorAll('app-filled-text-field')[1]
+        .querySelector('.filled__text__field__error');
 
-    buttons()[0].click();
-    await fixture.whenStable();
-    expect(sendTestEmail).toHaveBeenCalledWith(expect.objectContaining({ smtpPort: null }));
-    expect(element.querySelector('.email__configuration__error')).not.toBeNull();
+    buttons()[2].click();
+    await settle();
+    expect(nameError()?.textContent?.trim()).toBe('error.unknown');
+    expect(element.querySelector('.email__configuration__error')).toBeNull();
+    expect(buttons()[2].disabled).toBe(true);
+
+    await type(1, 'Lido Demo 2');
+    expect(nameError()).toBeNull();
+    expect(buttons()[2].disabled).toBe(false);
   });
 
   it('should save the values in the fields, blocking the other buttons meanwhile, then say it', async () => {
-    const { fixture, buttons, type, saveEmailConfiguration } = await setup();
+    const { fixture, buttons, type, settle, saveEmailConfiguration } = await setup();
     const answer = new Subject<void>();
     saveEmailConfiguration.mockReturnValue(answer);
     await type(4, 'nuovo-utente@lido-demo.example');
@@ -194,7 +254,7 @@ describe('EmailConfiguration', () => {
 
     answer.next();
     answer.complete();
-    await fixture.whenStable();
+    await settle();
     expect(document.querySelector('.message__popup h2')?.textContent?.trim()).toBe(
       'management.settings.email_configuration.saved.title',
     );
@@ -218,5 +278,21 @@ describe('EmailConfiguration', () => {
     expect(inputs().some((input) => input.readOnly)).toBe(false);
     expect(select().getAttribute('aria-disabled')).toBe('false');
     expect(yes.disabled).toBe(true);
+  });
+
+  it('should make every field read-only again and Sì usable with Reset', async () => {
+    const { fixture, element, inputs, buttons, type } = await setup();
+    const yes = element.querySelector<HTMLButtonElement>('.email__configuration__override button')!;
+    yes.click();
+    await fixture.whenStable();
+    await type(1, 'Nome modificato');
+
+    buttons()[1].click();
+    await fixture.whenStable();
+
+    expect(inputs()[1].value).toBe('Lido Demo');
+    expect(inputs().every((input) => input.readOnly)).toBe(true);
+    expect(element.querySelector('mat-select')?.getAttribute('aria-disabled')).toBe('true');
+    expect(yes.disabled).toBe(false);
   });
 });

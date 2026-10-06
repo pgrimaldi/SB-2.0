@@ -20,6 +20,19 @@ class FilledNumberFieldHost {
   readonly error = signal<string | null>(null);
 }
 
+@Component({
+  imports: [FilledNumberField],
+  template: `<app-filled-number-field
+    labelledBy="port-title"
+    autocomplete="new-password"
+    [masked]="true"
+    [pathIcon]="['', '/assets/images/eye-close.svg', '/assets/images/eye-start.svg']"
+    [texts]="{ show: 'Mostra il contenuto' }"
+    [value]="587"
+  />`,
+})
+class MaskedNumberFieldHost {}
+
 describe('FilledNumberField', () => {
   const setup = async (decimal = false, currency = false) => {
     const fixture = TestBed.createComponent(FilledNumberFieldHost);
@@ -122,5 +135,27 @@ describe('FilledNumberField', () => {
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(input.getAttribute('aria-describedby')).toBe(message.id);
     expect(element.querySelector('.filled__number__field__invalid')).not.toBeNull();
+  });
+
+  it('should show the digits as dots when masked, and the eye shows and hides them', async () => {
+    const fixture = TestBed.createComponent(MaskedNumberFieldHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const input = element.querySelector('input')!;
+    const eye = element.querySelector<HTMLButtonElement>('.filled__number__field__toggle')!;
+
+    expect(element.querySelector('label')).toBeNull();
+    expect(input.getAttribute('aria-labelledby')).toBe('port-title');
+    expect(input.type).toBe('password');
+    expect(input.getAttribute('autocomplete')).toBe('new-password');
+    expect(eye.getAttribute('aria-label')).toBe('Mostra il contenuto');
+    expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye-start.svg');
+
+    eye.click();
+    await fixture.whenStable();
+    expect(input.type).toBe('text');
+    expect(input.value).toBe('587');
+    expect(eye.getAttribute('aria-pressed')).toBe('true');
+    expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye-close.svg');
   });
 });

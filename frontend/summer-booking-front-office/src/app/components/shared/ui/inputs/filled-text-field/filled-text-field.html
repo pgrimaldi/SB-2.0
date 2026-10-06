@@ -19,7 +19,7 @@
     [required]="isMandatory()"
     [readonly]="readonly()"
     [disabled]="disabled()"
-    [type]="type()"
+    [type]="inputType()"
     [id]="id"
     [value]="value()"
     [placeholder]="placeholder() ?? ''"
@@ -32,6 +32,25 @@
     (input)="value.set(field.value)"
     (blur)="touch.emit()"
   />
+  @if (type() === 'password') {
+    <button
+      matSuffix
+      class="filled__text__field__toggle"
+      type="button"
+      [attr.aria-label]="texts()?.show ?? null"
+      [attr.aria-pressed]="visible()"
+      [attr.aria-controls]="id"
+      (click)="toggleVisible()"
+    >
+      @if (icons().list[visible() ? 0 : 1]; as icon) {
+        @if (icons().material) {
+          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="18" height="18" alt="" />
+        }
+      }
+    </button>
+  }
 </mat-form-field>
 @if (error(); as error) {
   <p class="filled__text__field__error" [id]="id + '-error'">{{ error }}</p>

@@ -1,20 +1,33 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  Signal,
+  WritableSignal,
   computed,
   effect,
   inject,
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, readonly } from '@angular/forms/signals';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
+  FormField,
+  TreeValidationResult,
+  form,
+  max,
+  min,
+  readonly,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import { apiFieldErrors } from '../../../behaviours/validation/api-field-errors';
+import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
+import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { FilledSelect } from '../../../components/shared/ui/selects/filled-select/filled-select';
@@ -25,18 +38,14 @@ import { SmtpSecurity } from '../../../entities/system/email-configuration-data'
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { SystemService } from '../../../services/api/system/system.service';
 
-/** The answer of the API, with the port as text for the field. */
-interface EmailConfigurationFields {
-  senderMailAddress: string;
-  senderName: string;
-  smtpServerAddress: string;
-  smtpPort: string;
-  smtpUsername: string;
-  smtpPassword: string;
-  smtpSecurity: SmtpSecurity | null;
-}
+type EmailConfigurationFields = Omit<EmailConfigurationRequest, 'idProperty'>;
 
-type MaskedField = Exclude<keyof EmailConfigurationFields, 'smtpSecurity'>;
+type TextFieldName = Exclude<keyof EmailConfigurationFields, 'smtpPort' | 'smtpSecurity'>;
+
+/** A masked field of the page; `key` is its translation group under `fields`. */
+type MaskedField = { name: TextFieldName; key: string } | { name: 'smtpPort'; key: string };
+
+const MAX_TCP_PORT = 65535;
 
 interface SecurityTexts {
   none: string;
@@ -46,7 +55,15 @@ interface SecurityTexts {
 
 @Component({
   selector: 'app-email-configuration',
-  imports: [Button, FilledSelect, FilledTextField, FormField, MessagePopup, TranslatePipe],
+  imports: [
+    Button,
+    FilledNumberField,
+    FilledSelect,
+    FilledTextField,
+    FormField,
+    MessagePopup,
+    TranslatePipe,
+  ],
   templateUrl: './email-configuration.html',
   styleUrl: './email-configuration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,10 +73,10 @@ export class EmailConfiguration {
   private readonly system = inject(SystemService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly validationText = inject(ValidationTextBehaviour);
 
-  /** In page order; `key` is the translation group under `fields`. */
-  protected readonly maskedFields: readonly { name: MaskedField; key: string }[] = [
+  /** In page order. */
+  protected readonly maskedFields: readonly MaskedField[] = [
     { name: 'senderMailAddress', key: 'from_email' },
     { name: 'senderName', key: 'from_name' },
     { name: 'smtpServerAddress', key: 'smtp_server' },
@@ -69,12 +86,19 @@ export class EmailConfiguration {
   ];
   protected readonly sendTestIcon = ['/assets/images/mail-send-white.svg'] as const;
   protected readonly resetIcon = ['/assets/images/trash-white.svg'] as const;
+  /** [content shown, content hidden]: the designer's eyes (Eye_close once open, Eye_start at first). */
+  protected readonly eyeIcons = [
+    '/assets/images/eye-close.svg',
+    '/assets/images/eye-start.svg',
+  ] as const;
+  /** No currency: only the eye. */
+  protected readonly portIcons = ['', ...this.eyeIcons] as const;
 
   private readonly configuration = signal<EmailConfigurationFields>({
     senderMailAddress: '',
     senderName: '',
     smtpServerAddress: '',
-    smtpPort: '',
+    smtpPort: null,
     smtpUsername: '',
     smtpPassword: '',
     smtpSecurity: null,
@@ -83,7 +107,17 @@ export class EmailConfiguration {
   protected readonly editable = signal(false);
   protected readonly configurationForm = form(this.configuration, (path) => {
     readonly(path, { when: () => !this.editable() });
+    required(path.smtpPort);
+    min(path.smtpPort, 1);
+    max(path.smtpPort, MAX_TCP_PORT);
   });
+  /** Under each field: what is wrong in it, found here or by the backend. */
+  protected readonly fieldErrors = Object.fromEntries(
+    (Object.keys(this.configuration()) as (keyof EmailConfigurationFields)[]).map((name) => [
+      name,
+      this.validationText.message(this.configurationForm[name]),
+    ]),
+  ) as Readonly<Record<keyof EmailConfigurationFields, Signal<string | null>>>;
   private readonly securityTexts = toSignal(
     this.translateService.stream(
       'management.settings.email_configuration.security',
@@ -124,9 +158,9 @@ export class EmailConfiguration {
         this.isReloading.set(true);
         this.error.set(null);
         return this.system.emailConfiguration({ idProperty }).subscribe({
-          next: ({ smtpPort, ...data }) => {
+          next: (data) => {
             this.isReloading.set(false);
-            this.configuration.set({ ...data, smtpPort: String(smtpPort) });
+            this.configuration.set(data);
             this.configurationForm().reset();
           },
           error: (error: unknown) => {
@@ -139,68 +173,68 @@ export class EmailConfiguration {
     });
   }
 
-  /** Reset: the values of the server again, what was typed is lost. */
+  /** Reset: the values of the server again (what was typed is lost), read-only until "Sì" again. */
   protected reset(): void {
+    this.editable.set(false);
     this.reloads.update((reloads) => reloads + 1);
   }
 
   protected sendTestEmail(): void {
-    const request = this.request();
-    if (this.isBusy() || !request) {
-      return;
-    }
-    this.isSendingTest.set(true);
-    this.error.set(null);
-    this.system
-      .sendTestEmail(request)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isSendingTest.set(false);
-          this.testSent.set(true);
-        },
-        error: (error: unknown) => {
-          this.isSendingTest.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    this.submitWith(
+      this.isSendingTest,
+      (request) => this.system.sendTestEmail(request),
+      () => this.testSent.set(true),
+    );
   }
 
   protected save(): void {
-    const request = this.request();
-    if (this.isBusy() || !request) {
-      return;
-    }
-    this.isSaving.set(true);
-    this.error.set(null);
-    this.system
-      .saveEmailConfiguration(request)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isSaving.set(false);
-          this.configurationForm().reset();
-          this.saved.set(true);
-        },
-        error: (error: unknown) => {
-          this.isSaving.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    this.submitWith(
+      this.isSaving,
+      (request) => this.system.saveEmailConfiguration(request),
+      () => {
+        this.configurationForm().reset();
+        this.saved.set(true);
+      },
+    );
   }
 
-  /** The values in the fields; the port as a number, `null` when it is not a whole number. */
-  private request(): EmailConfigurationRequest | null {
+  /**
+   * Through Signal Forms `submit()`: nothing is sent while a field is wrong (every field becomes
+   * touched, so each shows its error), and an error of the backend on a field goes under that field.
+   */
+  private submitWith(
+    isRunning: WritableSignal<boolean>,
+    call: (request: EmailConfigurationRequest) => Observable<void>,
+    done: () => void,
+  ): void {
     const idProperty = this.auth.user()?.idProperty;
-    if (!idProperty) {
-      return null;
+    if (this.isBusy() || !idProperty) {
+      return;
     }
-    const { smtpPort, ...fields } = this.configuration();
-    const port = Number(smtpPort.trim());
-    return {
-      idProperty,
-      ...fields,
-      smtpPort: smtpPort.trim() && Number.isInteger(port) ? port : null,
-    };
+    void submit(this.configurationForm, async (): Promise<TreeValidationResult> => {
+      isRunning.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(call({ idProperty, ...this.configuration() }));
+        done();
+        return undefined;
+      } catch (error: unknown) {
+        return this.failed(toApiProblem(error));
+      } finally {
+        isRunning.set(false);
+      }
+    });
+  }
+
+  /**
+   * The errors on a field go under it; any other error under the panel. Read-only fields show no
+   * error (Signal Forms does not validate them): then the message goes under the panel too.
+   */
+  private failed(problem: ApiProblem): TreeValidationResult {
+    const errors = apiFieldErrors(problem, this.configurationForm);
+    if (!this.editable() || !errors.length || errors.length < (problem.errors?.length ?? 0)) {
+      this.error.set(problem);
+    }
+    return errors;
   }
 }

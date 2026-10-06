@@ -88,4 +88,42 @@ describe('FilledTextField', () => {
     expect(control().classList).toContain('filled__text__field__locked');
     expect(element.querySelector('input')!.readOnly).toBe(true);
   });
+
+  it('should show and hide a password field content with its eye', async () => {
+    @Component({
+      imports: [FilledTextField],
+      template: `<app-filled-text-field
+        type="password"
+        [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
+        [texts]="{ show: 'Mostra il contenuto' }"
+        [(value)]="secret"
+      />`,
+    })
+    class PasswordHost {
+      readonly secret = signal('password-di-esempio');
+    }
+    const fixture = TestBed.createComponent(PasswordHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const input = element.querySelector('input')!;
+    const eye = element.querySelector<HTMLButtonElement>('.filled__text__field__toggle')!;
+
+    expect(input.type).toBe('password');
+    expect(eye.getAttribute('aria-label')).toBe('Mostra il contenuto');
+    expect(eye.getAttribute('aria-pressed')).toBe('false');
+    expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye-slash.svg');
+
+    eye.click();
+    await fixture.whenStable();
+    expect(input.type).toBe('text');
+    expect(eye.getAttribute('aria-pressed')).toBe('true');
+    expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye.svg');
+  });
+
+  it('should have no eye on a text field', async () => {
+    const fixture = TestBed.createComponent(FilledTextFieldHost);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.filled__text__field__toggle')).toBeNull();
+  });
 });

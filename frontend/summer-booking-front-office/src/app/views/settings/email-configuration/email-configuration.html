@@ -31,12 +31,27 @@
           </p>
         </div>
         <!-- new-password: the browser must not fill in the saved sign-in of the user here. -->
-        <app-filled-text-field
-          type="password"
-          autocomplete="new-password"
-          [labelledBy]="id + ' ' + id + '-description'"
-          [formField]="configurationForm[field.name]"
-        />
+        @if (field.name === 'smtpPort') {
+          <app-filled-number-field
+            autocomplete="new-password"
+            [masked]="true"
+            [pathIcon]="portIcons"
+            [texts]="'field.masked' | translate"
+            [labelledBy]="id + ' ' + id + '-description'"
+            [error]="fieldErrors.smtpPort()"
+            [formField]="configurationForm.smtpPort"
+          />
+        } @else {
+          <app-filled-text-field
+            type="password"
+            autocomplete="new-password"
+            [pathIcon]="eyeIcons"
+            [texts]="'field.masked' | translate"
+            [labelledBy]="id + ' ' + id + '-description'"
+            [error]="fieldErrors[field.name]()"
+            [formField]="configurationForm[field.name]"
+          />
+        }
       </div>
     }
     <div class="email__configuration__row">
@@ -56,6 +71,7 @@
       <app-filled-select
         labelledBy="email-configuration-smtp_security email-configuration-smtp_security-description"
         [options]="securityOptions()"
+        [error]="fieldErrors.smtpSecurity()"
         [formField]="configurationForm.smtpSecurity"
       />
     </div>
@@ -88,7 +104,7 @@
     <app-button
       size="small"
       [fullWidth]="true"
-      [disabled]="isBusy() && !isSaving()"
+      [disabled]="(isBusy() && !isSaving()) || configurationForm().invalid()"
       [loading]="isSaving()"
       (clicked)="save()"
     >

@@ -1,21 +1,30 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   input,
   model,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInput, MatInputModule } from '@angular/material/input';
+import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
 
+export interface FilledTextFieldTexts {
+  /** Name of the eye of a password field, e.g. "Mostra il contenuto". */
+  show?: string;
+}
+
 @Component({
   selector: 'app-filled-text-field',
-  imports: [MatFormFieldModule, MatInputModule],
+  imports: [MatFormFieldModule, MatIconModule, MatInputModule],
   templateUrl: './filled-text-field.html',
   styleUrl: './filled-text-field.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +46,11 @@ export class FilledTextField {
   /** Browser autofill hint, e.g. `given-name`, `email`, `tel`. */
   readonly autocomplete = input<string>();
   readonly error = input<string | null>();
+  readonly texts = input<FilledTextFieldTexts | null>();
+  /** With `type="password"`, the eye after the text: [content shown, content hidden]. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Image paths, used when `matIcon` is not given: [content shown, content hidden]. */
+  readonly pathIcon = input<readonly string[] | null>();
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */
   readonly touch = output<void>();
 
@@ -46,6 +60,11 @@ export class FilledTextField {
    */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };
   protected readonly id = `filled-text-field-${nextId++}`;
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
+  protected readonly visible = signal(false);
+  protected readonly inputType = computed(() =>
+    this.type() === 'password' && !this.visible() ? 'password' : 'text',
+  );
   private readonly matInput = viewChild.required(MatInput);
 
   constructor() {
@@ -53,5 +72,9 @@ export class FilledTextField {
       this.error();
       this.matInput().updateErrorState();
     });
+  }
+
+  protected toggleVisible(): void {
+    this.visible.update((visible) => !visible);
   }
 }

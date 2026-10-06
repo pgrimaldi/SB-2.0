@@ -1,6 +1,15 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  input,
+  model,
+  output,
+  viewChild,
+} from '@angular/core';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { SelectOption } from '../select/select';
 
 let nextId = 0;
@@ -24,6 +33,19 @@ export class FilledSelect<K extends string = string> {
   readonly readonly = input(false);
   /** Ids of the page elements that name the select, when its label is not above it. */
   readonly labelledBy = input<string>();
+  readonly error = input<string | null>();
+  /** The panel was closed: a Signal Forms `[formField]` marks the select as touched. */
+  readonly touch = output<void>();
 
+  /** As in the filled text field: `aria-invalid` follows our `error`, not a classic form control. */
+  protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };
   protected readonly id = `filled-select-${nextId++}`;
+  private readonly matSelect = viewChild.required(MatSelect);
+
+  constructor() {
+    effect(() => {
+      this.error();
+      this.matSelect().updateErrorState();
+    });
+  }
 }

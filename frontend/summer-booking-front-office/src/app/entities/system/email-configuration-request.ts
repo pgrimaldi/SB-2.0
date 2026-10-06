@@ -6,7 +6,7 @@ export interface EmailConfigurationRequest {
   senderMailAddress: string;
   senderName: string;
   smtpServerAddress: string;
-  /** `null` when the field does not hold a whole number. */
+  /** The page sends only 1-65535 (it validates the field); `null` is the empty field. */
   smtpPort: number | null;
   smtpUsername: string;
   smtpPassword: string;

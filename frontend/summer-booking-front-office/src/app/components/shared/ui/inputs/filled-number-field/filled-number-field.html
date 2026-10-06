@@ -1,9 +1,11 @@
-<label class="filled__number__field__label" [for]="id"
-  >{{ label() }}
-  @if (isMandatory()) {
-    <span class="filled__number__field__mandatory" aria-hidden="true">*</span>
-  }
-</label>
+@if (label()) {
+  <label class="filled__number__field__label" [for]="id"
+    >{{ label() }}
+    @if (isMandatory()) {
+      <span class="filled__number__field__mandatory" aria-hidden="true">*</span>
+    }
+  </label>
+}
 <mat-form-field
   class="filled__number__field__control"
   appearance="fill"
@@ -28,17 +30,37 @@
     [required]="isMandatory()"
     [readonly]="readonly()"
     [disabled]="disabled()"
-    type="text"
-    autocomplete="off"
+    [type]="inputType()"
+    [attr.autocomplete]="autocomplete() ?? 'off'"
     [attr.inputmode]="decimal() ? 'decimal' : 'numeric'"
     [id]="id"
     [value]="text()"
     [attr.name]="name() ?? null"
+    [attr.aria-labelledby]="labelledBy() ?? null"
     [errorStateMatcher]="errorMatcher"
     [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="changeValue(field)"
     (blur)="touch.emit()"
   />
+  @if (masked()) {
+    <button
+      matSuffix
+      class="filled__number__field__toggle"
+      type="button"
+      [attr.aria-label]="texts()?.show ?? null"
+      [attr.aria-pressed]="visible()"
+      [attr.aria-controls]="id"
+      (click)="toggleVisible()"
+    >
+      @if (icons().list[visible() ? 1 : 2]; as icon) {
+        @if (icons().material) {
+          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="18" height="18" alt="" />
+        }
+      }
+    </button>
+  }
 </mat-form-field>
 @if (error(); as error) {
   <p class="filled__number__field__error" [id]="id + '-error'">{{ error }}</p>

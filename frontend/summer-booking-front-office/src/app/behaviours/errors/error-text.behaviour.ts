@@ -30,6 +30,14 @@ export class ErrorTextBehaviour {
     return this.keyOf(problem.code);
   }
 
+  /** The text now, for a `computed` that follows the language by itself (e.g. form field errors). */
+  instant(code: string, args?: ApiProblemArgs): string {
+    const key = `${ERROR_GROUP}.${code}`;
+    const text = this.translateService.instant(key, args) as string;
+    // ngx-translate answers the key itself when it has no translation.
+    return text === key ? (this.translateService.instant(UNKNOWN_ERROR) as string) : text;
+  }
+
   /** Only the first error of each field. */
   fieldTexts(problem: ApiProblem): Observable<Readonly<Record<string, string>>> {
     const errors = (problem.errors ?? []).filter(

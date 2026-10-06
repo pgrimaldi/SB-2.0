@@ -7,6 +7,7 @@ import {
   linkedSignal,
   model,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { ErrorStateMatcher } from '@angular/material/core';
@@ -18,6 +19,11 @@ import { resolveIcons } from '../../icons/icons';
 let nextId = 0;
 
 const CURRENCY_DECIMALS = 2;
+
+export interface FilledNumberFieldTexts {
+  /** Name of the eye of a masked field, e.g. "Mostra il contenuto". */
+  show?: string;
+}
 
 /**
  * Only digits 0-9 can be typed (no signs, no exponent); with `decimal` also one separator, comma or
@@ -38,14 +44,21 @@ export class FilledNumberField {
   readonly readonly = input(false);
   readonly disabled = input(false);
   readonly value = model<number | null>(null);
+  /** Ids of the page elements that name the field, when its label is not above it. */
+  readonly labelledBy = input<string>();
   readonly name = input<string>();
+  /** Browser autofill hint; `off` when not given. */
+  readonly autocomplete = input<string>();
   readonly decimal = input(false);
   readonly currency = input(false);
-  /** Icons as Material icon names (Material Symbols font): [currency]. */
+  /** The digits are dots, as in a password field, with the eye after them to show them. */
+  readonly masked = input(false);
+  /** Icons as Material icon names (Material Symbols font): [currency, content shown, content hidden]. */
   readonly matIcon = input<readonly string[] | null>();
-  /** Icons as image paths, used when `matIcon` is not given: [currency]. */
+  /** Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly error = input<string | null>();
+  readonly texts = input<FilledNumberFieldTexts | null>();
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */
   readonly touch = output<void>();
 
@@ -57,6 +70,10 @@ export class FilledNumberField {
   protected readonly id = `filled-number-field-${nextId++}`;
   private readonly matInput = viewChild.required(MatInput);
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
+  protected readonly visible = signal(false);
+  protected readonly inputType = computed(() =>
+    this.masked() && !this.visible() ? 'password' : 'text',
+  );
   protected readonly decimals = computed(() =>
     !this.decimal() ? 0 : this.currency() ? CURRENCY_DECIMALS : Infinity,
   );
@@ -88,6 +105,10 @@ export class FilledNumberField {
     }
     this.text.set(text);
     this.value.set(toNumber(text));
+  }
+
+  protected toggleVisible(): void {
+    this.visible.update((visible) => !visible);
   }
 }
 

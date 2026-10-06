@@ -84,6 +84,9 @@
     "search": {
       "submit": "Search",
       "clear": "Clear search"
+    },
+    "masked": {
+      "show": "Show the content"
     }
   },
   "hub": {
@@ -452,6 +455,8 @@
   },
   "invalidate": {
     "greater_than": "The {{field}} value must be greater than {{limit}}",
+    "max": "The highest value is {{max}}",
+    "min": "The lowest value is {{min}}",
     "required": "This field is required"
   }
 }
