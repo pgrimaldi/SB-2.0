@@ -296,13 +296,16 @@ export class AuthBehaviour implements OnDestroy {
   /**
    * Someone signed in in another tab, or the cookie now belongs to someone else: this tab must not go
    * on with an identity the user did not choose here. It drops its session and goes back to the home,
-   * where signing in is needed again. Without asking the server to log out and without removing the
-   * signed-in mark: both belong to the session of the other tab, shared by the whole browser.
+   * where signing in is needed again, unless the browser remembers the new session ("remember me"),
+   * as for any new tab. Without asking the server to log out and without removing what is shared by
+   * the whole browser (the remembered mark, the session name): they belong to the other session.
+   * Only the mark of this tab goes, so that reloading it does not open the other session.
    */
   private leaveHere(): void {
     this.changeHands();
     this.session.set(null);
     this.sessionName = null;
+    this.storage('session')?.removeItem(SIGNED_IN_KEY);
     void this.router.navigateByUrl('/');
   }
 
@@ -330,9 +333,16 @@ export class AuthBehaviour implements OnDestroy {
     if (!this.isAuthenticated() || !data.session) {
       return;
     }
+    // Messages arrive later than the calls on the cookie: a sign-in counts only while its session
+    // still owns the cookie, or an older one could make a newer session leave.
+    const owner = this.storage('local')?.getItem(SESSION_NAME_KEY);
     if (data.type === 'logout' && data.session === this.sessionName) {
       this.expire();
-    } else if (data.type === 'signin' && data.session !== this.sessionName) {
+    } else if (
+      data.type === 'signin' &&
+      data.session !== this.sessionName &&
+      (!owner || owner === data.session)
+    ) {
       this.leaveHere();
     }
   };

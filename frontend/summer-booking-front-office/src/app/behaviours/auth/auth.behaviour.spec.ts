@@ -386,6 +386,35 @@ describe('AuthBehaviour', () => {
     expect(firstTab.user()?.email).toBe('bea@example.com');
   });
 
+  it('should keep a session when the sign-in message of an earlier one arrives after it', async () => {
+    const { firstTab, secondTab } = twoTabs();
+    firstTab.start(session('anna-token', 'anna@example.com'), true);
+    secondTab.start(session('bea-token', 'bea@example.com'), true); // before Anna's message arrives
+
+    await settle();
+
+    expect(secondTab.user()?.email).toBe('bea@example.com');
+    expect(firstTab.isAuthenticated()).toBe(false); // Bea's message reached Anna's tab
+  });
+
+  it('should not open the new session on reload after leaving, unless the browser remembers it', async () => {
+    const { firstTab } = twoTabs();
+    firstTab.start(session('anna-token', 'anna@example.com'), false); // mark of this tab only
+    // Bea signs in, not remembered, in a tab of her own:
+    localStorage.setItem('sb.session-name', 'bea-session');
+    const beaTab = new BroadcastChannel('sb-auth');
+    onTestFinished(() => beaTab.close());
+    beaTab.postMessage({ type: 'signin', session: 'bea-session' });
+    await settle();
+    expect(firstTab.isAuthenticated()).toBe(false);
+
+    const reloaded = load();
+    await reloaded.restore();
+
+    expect(server.refresh).not.toHaveBeenCalled();
+    expect(reloaded.isAuthenticated()).toBe(false);
+  });
+
   it('should send no logout once another tab has signed in, as the cookie is no longer ours', async () => {
     const { firstTab, secondTab } = twoTabs();
     firstTab.start(session('anna-token', 'anna@example.com'), true);
