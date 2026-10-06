@@ -458,5 +458,11 @@
     "max": "Il valore massimo è {{max}}",
     "min": "Il valore minimo è {{min}}",
     "required": "Questo campo è obbligatorio"
+  },
+  "unsaved_changes": {
+    "title": "Modifiche non salvate",
+    "text": "Hai modifiche non salvate: se esci andranno perse.",
+    "cancel": "Resta",
+    "confirm": "Esci senza salvare"
   }
 }

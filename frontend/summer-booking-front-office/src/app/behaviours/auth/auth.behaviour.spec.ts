@@ -140,6 +140,18 @@ describe('AuthBehaviour', () => {
     expect(storedValues()).toBe('');
   });
 
+  it('should give the pages the same user after a refresh of the same person and property', async () => {
+    const auth = load();
+    auth.start(session('first'), false);
+    const before = auth.user();
+    server.refresh.mockReturnValue(of(session('second')));
+
+    await firstValueFrom(auth.refresh());
+
+    expect(auth.token()).toBe('second');
+    expect(auth.user()).toBe(before); // nothing to load again, no draft lost, no table back to page 1
+  });
+
   it('should ask for one new token even when several requests need it at once', async () => {
     const auth = load();
     const answer = new Subject<AuthSession>();

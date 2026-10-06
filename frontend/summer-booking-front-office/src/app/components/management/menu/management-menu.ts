@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { UnsavedChangesBehaviour } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
 
@@ -14,6 +15,7 @@ import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
 })
 export class ManagementMenu {
   private readonly authBehaviour = inject(AuthBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   /** `label` is a translation key. */
   protected readonly links = [
@@ -32,6 +34,10 @@ export class ManagementMenu {
       return;
     }
     this.loggingOut.set(true);
+    if (!(await this.unsaved.confirmLeave())) {
+      this.loggingOut.set(false);
+      return;
+    }
     const revoked = await this.authBehaviour.logout();
     this.loggingOut.set(false);
     this.logoutFailed.set(!revoked);

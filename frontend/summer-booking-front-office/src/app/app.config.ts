@@ -7,7 +7,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withRouterConfig } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideTranslateCompiler, provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -25,7 +25,9 @@ import { MOCK_INTERCEPTORS } from './services/mocks/mock-interceptors';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    // "Resta" on the unsaved changes question after the browser's back button: the address goes back
+    // to the page the user stays on (Angular's advice with canDeactivate).
+    provideRouter(routes, withRouterConfig({ canceledNavigationResolution: 'computed' })),
     // The server may answer with translated data (Accept-Language): a new language loads it again.
     { provide: DATA_RELOAD, useFactory: () => inject(LanguageBehaviour).current },
     provideHttpClient(

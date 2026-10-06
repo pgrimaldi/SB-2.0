@@ -82,7 +82,12 @@ export class AuthBehaviour implements OnDestroy {
   /** See SESSION_NAME_KEY; null while this tab has no session. */
   private sessionName: string | null = null;
 
-  readonly user = computed(() => this.session()?.user ?? null);
+  /**
+   * The same while the same person works on the same property: a refresh of the token gives a new
+   * object with the same values, which must change nothing in the pages (what is typed stays, tables
+   * keep their page).
+   */
+  readonly user = computed(() => this.session()?.user ?? null, { equal: sameUser });
 
   constructor() {
     this.storage('session')?.removeItem(LEGACY_SESSION_KEY);
@@ -377,6 +382,18 @@ export class AuthBehaviour implements OnDestroy {
     this.channel?.removeEventListener('message', this.otherTabMessage);
     this.channel?.close();
   }
+}
+
+function sameUser(a: AuthUser | null, b: AuthUser | null): boolean {
+  return (
+    a === b ||
+    (!!a &&
+      !!b &&
+      a.email === b.email &&
+      a.idProperty === b.idProperty &&
+      a.roles.length === b.roles.length &&
+      a.roles.every((role, index) => role === b.roles[index]))
+  );
 }
 
 /** 401 from refresh or logout: the server has no valid session for this browser any more. */

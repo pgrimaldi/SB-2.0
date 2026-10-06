@@ -5,6 +5,7 @@ import {
   languageMatchGuard,
   redirectToPreferredLanguage,
 } from './behaviours/i18n/language.guards';
+import { unsavedChangesGuard } from './behaviours/forms/unsaved-changes.guard';
 import { SETTINGS_PAGES } from './views/settings/settings-pages';
 
 export const routes: Routes = [
@@ -44,11 +45,13 @@ export const routes: Routes = [
     children: [
       {
         path: 'beachmap',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./views/beachmap/beachmap').then((component) => component.Beachmap),
       },
       {
         path: 'warehouse',
+        canDeactivate: [unsavedChangesGuard],
         loadComponent: () =>
           import('./views/warehouse/warehouse').then((component) => component.Warehouse),
       },
@@ -59,7 +62,9 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./views/settings/settings').then((component) => component.Settings),
         children: SETTINGS_PAGES.map(({ path, loadComponent }) =>
-          loadComponent ? { path, loadComponent } : { path, children: [] },
+          loadComponent
+            ? { path, loadComponent, canDeactivate: [unsavedChangesGuard] }
+            : { path, children: [] },
         ),
       },
     ],

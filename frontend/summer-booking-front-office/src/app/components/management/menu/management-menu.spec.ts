@@ -3,6 +3,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { UnsavedChangesBehaviour } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { ManagementMenu } from './management-menu';
 
 describe('ManagementMenu', () => {
@@ -36,6 +37,30 @@ describe('ManagementMenu', () => {
       'management.logout_failed.title',
     );
     expect(button.disabled).toBe(false); // it can be tried again
+  });
+
+  it('should ask before logging out with unsaved changes, and stay signed in on Resta', async () => {
+    const { fixture, logout, button } = await setup(true);
+    const unsaved = TestBed.inject(UnsavedChangesBehaviour);
+    unsaved.watch({ hasUnsavedChanges: () => true });
+    // The answer reaches the menu after the current task.
+    const settle = async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+
+    button.click();
+    await fixture.whenStable();
+    expect(unsaved.asking()).toBe(true);
+    unsaved.answer(false);
+    await settle();
+    expect(logout).not.toHaveBeenCalled();
+
+    button.click();
+    await fixture.whenStable();
+    unsaved.answer(true);
+    await settle();
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 
   it('should show nothing when the logout succeeds', async () => {

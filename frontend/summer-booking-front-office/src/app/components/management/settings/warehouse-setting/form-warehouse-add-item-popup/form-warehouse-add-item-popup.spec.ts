@@ -5,6 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseAddItemPopup } from './form-warehouse-add-item-popup';
 
@@ -74,6 +75,38 @@ describe('FormWarehouseAddItemPopup', () => {
       'management.settings.warehouse.form.cancel',
       'management.settings.warehouse.form.add',
     ]);
+  });
+
+  it('should close at once when empty, and ask first when something is typed', async () => {
+    const { fixture, host, popup } = await setup();
+    const unsaved = TestBed.inject(UnsavedChangesBehaviour);
+    const cancel = () =>
+      popup()!.querySelector<HTMLButtonElement>(
+        '.form__warehouse__add__item__popup__buttons app-button button',
+      )!;
+
+    cancel().click();
+    await fixture.whenStable();
+    expect(host.open()).toBe(false);
+
+    host.open.set(true);
+    await fixture.whenStable();
+    const quantity = popup()!.querySelectorAll('input')[0];
+    quantity.value = '5';
+    quantity.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    cancel().click();
+    await fixture.whenStable();
+    expect(unsaved.asking()).toBe(true);
+    unsaved.answer(false); // Resta
+    await fixture.whenStable();
+    expect(host.open()).toBe(true);
+
+    cancel().click();
+    await fixture.whenStable();
+    unsaved.answer(true); // Esci senza salvare
+    await fixture.whenStable();
+    expect(host.open()).toBe(false);
   });
 
   it('should offer the articles of the property in the select', async () => {

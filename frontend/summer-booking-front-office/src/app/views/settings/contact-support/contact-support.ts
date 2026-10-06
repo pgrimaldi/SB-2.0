@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  OnDestroy,
   computed,
   effect,
   inject,
@@ -14,6 +15,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
@@ -48,10 +53,11 @@ const NO_CONTACT: ContactFields = {
   styleUrl: './contact-support.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContactSupport {
+export class ContactSupport implements UnsavedChanges, OnDestroy {
   private readonly system = inject(SystemService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
@@ -95,6 +101,7 @@ export class ContactSupport {
   );
 
   constructor() {
+    this.unsaved.watch(this);
     // Loaded again when the language changes: the support hours come translated by the server.
     effect((onCleanup) => {
       this.dataReload?.();
@@ -149,5 +156,13 @@ export class ContactSupport {
           this.error.set(toApiProblem(error));
         },
       });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.contactForm().dirty();
+  }
+
+  ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
   }
 }

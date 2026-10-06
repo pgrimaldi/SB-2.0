@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  OnDestroy,
   ViewEncapsulation,
   computed,
   effect,
@@ -19,6 +20,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
@@ -48,10 +53,11 @@ interface EditedQuantities {
   // The popup is rendered by Material in an overlay outside this component.
   encapsulation: ViewEncapsulation.None,
 })
-export class FormWarehouseEditItemPopup extends BasePopup {
+export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -82,6 +88,12 @@ export class FormWarehouseEditItemPopup extends BasePopup {
     computation: (canAlert, previous) => canAlert && (previous?.value ?? false),
   });
   protected readonly isLoading = signal(false);
+  /** The values the popup opened with: changed ones are unsaved. */
+  private opened = {
+    articleQuantity: null as number | null,
+    thresholdQuantity: null as number | null,
+    thresholdAlert: false,
+  };
   protected readonly canSave = computed(
     () => this.idArticle() !== null && this.quantitiesForm().valid(),
   );
@@ -97,6 +109,7 @@ export class FormWarehouseEditItemPopup extends BasePopup {
 
   constructor() {
     super();
+    this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => this.fill());
@@ -111,7 +124,7 @@ export class FormWarehouseEditItemPopup extends BasePopup {
     if (this.isLoading() || !idProperty || idItem === null || articleQuantity === null) {
       return;
     }
-    this.setLoading(true);
+    this.isLoading.set(true);
     this.error.set(null);
     this.warehouse
       .editWarehouseItem({
@@ -124,15 +137,36 @@ export class FormWarehouseEditItemPopup extends BasePopup {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.setLoading(false);
+          this.isLoading.set(false);
           this.close();
           this.saved.emit();
         },
         error: (error: unknown) => {
-          this.setLoading(false);
+          this.isLoading.set(false);
           this.error.set(toApiProblem(error));
         },
       });
+  }
+
+  hasUnsavedChanges(): boolean {
+    const quantities = this.quantities();
+    return (
+      this.open() &&
+      (quantities.articleQuantity !== this.opened.articleQuantity ||
+        quantities.thresholdQuantity !== this.opened.thresholdQuantity ||
+        this.thresholdAlert() !== this.opened.thresholdAlert)
+    );
+  }
+
+  /** X and Annulla, Esc and a click outside: not while saving; after asking with unsaved changes. */
+  protected async leave(): Promise<void> {
+    if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
+      this.close();
+    }
+  }
+
+  protected override closeRequested(): void {
+    void this.leave();
   }
 
   protected dialogConfig(): MatDialogConfig {
@@ -142,6 +176,8 @@ export class FormWarehouseEditItemPopup extends BasePopup {
       width: 'min(25rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'form__warehouse__edit__item__popup__panel',
+      // Esc and a click outside go through closeRequested: they ask first with unsaved changes.
+      disableClose: true,
       // The keyboard starts in the total (the article is locked), not on the X.
       autoFocus: 'input',
     };
@@ -156,11 +192,12 @@ export class FormWarehouseEditItemPopup extends BasePopup {
     this.thresholdAlert.set(
       (item?.isThresholdWarningActive ?? false) && (thresholdQuantity ?? 0) > 0,
     );
+    this.opened = { ...this.quantities(), thresholdAlert: this.thresholdAlert() };
     this.error.set(null);
   }
 
-  private setLoading(loading: boolean): void {
-    this.isLoading.set(loading);
-    this.setClosable(!loading);
+  override ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
+    super.ngOnDestroy();
   }
 }

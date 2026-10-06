@@ -43,6 +43,14 @@ export abstract class BasePopup implements OnDestroy {
     dialogRef?.close();
   }
 
+  /**
+   * Esc or a click outside while they do not close the popup (`disableClose`, `setClosable(false)`):
+   * the popup may close after asking (e.g. unsaved changes). Nothing by default.
+   */
+  protected closeRequested(): void {
+    // Blocked: e.g. while saving.
+  }
+
   /** Blocks only Esc and a click outside (e.g. while saving): the popup blocks its own buttons. */
   protected setClosable(closable: boolean): void {
     if (this.dialogRef) {
@@ -57,6 +65,19 @@ export abstract class BasePopup implements OnDestroy {
     const dialogRef = this.dialog.open(this.content(), this.dialogConfig());
     this.dialogRef = dialogRef;
     dialogRef.afterClosed().subscribe(() => this.closed(dialogRef));
+    // Both end when the popup closes.
+    dialogRef.backdropClick().subscribe(() => this.blockedClose(dialogRef));
+    dialogRef.keydownEvents().subscribe((event) => {
+      if (event.key === 'Escape') {
+        this.blockedClose(dialogRef);
+      }
+    });
+  }
+
+  private blockedClose(dialogRef: MatDialogRef<unknown>): void {
+    if (dialogRef.disableClose && this.dialogRef === dialogRef) {
+      this.closeRequested();
+    }
   }
 
   /** The popup finished closing: by Esc or a click outside it is still the current one. */

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   Signal,
   WritableSignal,
   computed,
@@ -24,6 +25,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../behaviours/forms/unsaved-changes.behaviour';
+import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
 import { apiFieldErrors } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
@@ -68,12 +74,14 @@ interface SecurityTexts {
   styleUrl: './email-configuration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EmailConfiguration {
+export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   private readonly translateService = inject(TranslateService);
   private readonly system = inject(SystemService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
 
   /** In page order. */
   protected readonly maskedFields: readonly MaskedField[] = [
@@ -148,8 +156,11 @@ export class EmailConfiguration {
   ]);
 
   constructor() {
+    this.unsaved.watch(this);
+    // Loaded again with Reset and when the language changes (what was typed is lost: user's choice).
     effect((onCleanup) => {
       this.reloads();
+      this.dataReload?.();
       const idProperty = this.auth.user()?.idProperty;
       if (!idProperty) {
         return;
@@ -236,5 +247,13 @@ export class EmailConfiguration {
       this.error.set(problem);
     }
     return errors;
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.configurationForm().dirty();
+  }
+
+  ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
   }
 }

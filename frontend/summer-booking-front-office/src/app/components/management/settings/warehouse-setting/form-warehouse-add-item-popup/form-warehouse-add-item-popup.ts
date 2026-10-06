@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  OnDestroy,
   ViewEncapsulation,
   computed,
   effect,
@@ -17,6 +18,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
@@ -39,10 +44,11 @@ let nextId = 0;
   // The popup is rendered by Material in an overlay outside this component.
   encapsulation: ViewEncapsulation.None,
 })
-export class FormWarehouseAddItemPopup extends BasePopup {
+export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly added = output<void>();
@@ -77,6 +83,7 @@ export class FormWarehouseAddItemPopup extends BasePopup {
 
   constructor() {
     super();
+    this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => {
@@ -94,7 +101,7 @@ export class FormWarehouseAddItemPopup extends BasePopup {
     if (this.isLoading() || !idProperty || idArticle === null || articleQuantity === null) {
       return;
     }
-    this.setLoading(true);
+    this.isLoading.set(true);
     this.error.set(null);
     this.warehouse
       .addWarehouseItem({
@@ -107,15 +114,36 @@ export class FormWarehouseAddItemPopup extends BasePopup {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.setLoading(false);
+          this.isLoading.set(false);
           this.close();
           this.added.emit();
         },
         error: (error: unknown) => {
-          this.setLoading(false);
+          this.isLoading.set(false);
           this.error.set(toApiProblem(error));
         },
       });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return (
+      this.open() &&
+      (this.idArticle() !== null ||
+        this.articleQuantity() !== null ||
+        this.thresholdQuantity() !== null ||
+        this.thresholdAlert())
+    );
+  }
+
+  /** X and Annulla, Esc and a click outside: not while saving; after asking with unsaved changes. */
+  protected async leave(): Promise<void> {
+    if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
+      this.close();
+    }
+  }
+
+  protected override closeRequested(): void {
+    void this.leave();
   }
 
   protected dialogConfig(): MatDialogConfig {
@@ -125,6 +153,8 @@ export class FormWarehouseAddItemPopup extends BasePopup {
       width: 'min(25rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'form__warehouse__add__item__popup__panel',
+      // Esc and a click outside go through closeRequested: they ask first with unsaved changes.
+      disableClose: true,
       // The keyboard starts in the first field, not on the X.
       autoFocus: 'input',
     };
@@ -136,11 +166,6 @@ export class FormWarehouseAddItemPopup extends BasePopup {
     this.thresholdQuantity.set(null);
     this.thresholdAlert.set(false);
     this.error.set(null);
-  }
-
-  private setLoading(loading: boolean): void {
-    this.isLoading.set(loading);
-    this.setClosable(!loading);
   }
 
   private loadArticles(): void {
@@ -155,5 +180,10 @@ export class FormWarehouseAddItemPopup extends BasePopup {
         next: (articles) => this.articles.set(articles),
         error: () => this.articles.set([]),
       });
+  }
+
+  override ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
+    super.ngOnDestroy();
   }
 }

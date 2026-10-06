@@ -8,7 +8,7 @@
       type="button"
       [disabled]="isLoading()"
       [attr.aria-label]="'management.settings.warehouse.form.close' | translate"
-      (click)="close()"
+      (click)="leave()"
     >
       <img [src]="closeIcon" width="12" height="12" alt="" />
     </button>
@@ -45,7 +45,7 @@
         size="small"
         [fullWidth]="true"
         [disabled]="isLoading()"
-        (clicked)="close()"
+        (clicked)="leave()"
       >
         {{ 'management.settings.warehouse.form.cancel' | translate }}
       </app-button>

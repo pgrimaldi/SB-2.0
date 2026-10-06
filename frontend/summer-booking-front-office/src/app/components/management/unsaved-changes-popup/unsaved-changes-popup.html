@@ -1,0 +1,9 @@
+<app-confirm-popup
+  [title]="'unsaved_changes.title' | translate"
+  [text]="'unsaved_changes.text' | translate"
+  [texts]="'unsaved_changes' | translate"
+  [danger]="true"
+  [open]="unsaved.asking()"
+  (openChange)="openChange($event)"
+  (confirmed)="unsaved.answer(true)"
+/>

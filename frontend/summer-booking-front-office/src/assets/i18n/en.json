@@ -458,5 +458,11 @@
     "max": "The highest value is {{max}}",
     "min": "The lowest value is {{min}}",
     "required": "This field is required"
+  },
+  "unsaved_changes": {
+    "title": "Unsaved changes",
+    "text": "You have unsaved changes: if you leave, they will be lost.",
+    "cancel": "Stay",
+    "confirm": "Leave without saving"
   }
 }
