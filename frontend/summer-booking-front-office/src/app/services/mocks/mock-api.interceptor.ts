@@ -1,7 +1,13 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
-import { contactSupportMock, emailConfigurationMock, supportInfoMock } from './system/system.mock';
+import {
+  contactSupportMock,
+  emailConfigurationMock,
+  saveEmailConfigurationMock,
+  sendTestEmailMock,
+  supportInfoMock,
+} from './system/system.mock';
 import {
   warehouseAddMock,
   warehouseComboboxMock,
@@ -69,6 +75,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/system/email-configuration`
   ) {
     return emailConfigurationMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/system/save-email-configuration`
+  ) {
+    return saveEmailConfigurationMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/system/send-test-email`
+  ) {
+    return sendTestEmailMock(request);
   }
 
   if (

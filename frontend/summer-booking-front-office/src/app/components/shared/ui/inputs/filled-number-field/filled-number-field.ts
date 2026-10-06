@@ -34,6 +34,8 @@ export class FilledNumberField {
   readonly label = input<string>();
   /** Asterisk after the label; screen readers announce the field as required. */
   readonly isMandatory = input(false);
+  /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
+  readonly readonly = input(false);
   readonly value = model<number | null>(null);
   readonly name = input<string>();
   readonly decimal = input(false);

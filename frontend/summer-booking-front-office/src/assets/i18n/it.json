@@ -326,7 +326,21 @@
         },
         "send_test": "Invia email test",
         "reset": "Reset",
-        "save": "Salva"
+        "save": "Salva",
+        "test_sent": {
+          "title": "Email di test inviata",
+          "text": "Controlla la casella di posta per verificare che la configurazione funzioni.",
+          "close": "Chiudi"
+        },
+        "saved": {
+          "title": "Configurazione salvata",
+          "text": "Le impostazioni email sono state salvate.",
+          "close": "Chiudi"
+        },
+        "override": {
+          "question": "Vuoi sovrascrivere le impostazioni predefinite?",
+          "confirm": "Sì"
+        }
       }
     }
   },

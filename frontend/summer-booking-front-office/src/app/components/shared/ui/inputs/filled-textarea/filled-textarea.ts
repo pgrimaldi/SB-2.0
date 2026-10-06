@@ -24,6 +24,8 @@ export class FilledTextarea {
   readonly label = input<string>();
   /** Asterisk after the label; screen readers announce the field as required. */
   readonly isMandatory = input(false);
+  /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
+  readonly readonly = input(false);
   readonly value = model('');
   readonly rows = input(3);
   readonly maxLength = input<number>();

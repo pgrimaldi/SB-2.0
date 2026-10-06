@@ -25,6 +25,7 @@
     #field
     matInput
     [required]="isMandatory()"
+    [readonly]="readonly()"
     type="text"
     autocomplete="off"
     [attr.inputmode]="decimal() ? 'decimal' : 'numeric'"

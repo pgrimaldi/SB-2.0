@@ -4,6 +4,9 @@
 // setting on the left and its field on the right; the three buttons under the panel, on the right.
 // Bigger than the mockup (user): wider page, texts and fields; the buttons as in the mockup.
 .email__configuration {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 0.5rem;
   --filled-field-height: 2.25rem;
   --filled-field-text-size: 0.875rem;
   --filled-field-line-height: 1.25rem;
@@ -53,11 +56,28 @@
   line-height: 1.125rem;
 }
 
-.email__configuration__actions {
-  --button-text-size: 0.75rem;
-  --button-height: 1.75rem;
-  --button-padding: 0.5rem;
+.email__configuration__override {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.25rem;
+}
 
+.email__configuration__question {
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.email__configuration__override app-button {
+  flex-shrink: 0;
+  width: 8rem;
+}
+
+.email__configuration__actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;

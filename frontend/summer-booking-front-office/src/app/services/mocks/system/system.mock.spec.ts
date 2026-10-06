@@ -118,4 +118,86 @@ describe('contactSupportMock', () => {
 
     expect((invalid as HttpErrorResponse).status).toBe(400);
   });
+
+  it('should accept the test email with complete settings (204) and refuse wrong ones (400)', async () => {
+    const system = await service();
+    const settings = {
+      idProperty: DEMO_PROPERTY.publicId,
+      senderMailAddress: 'prenotazioni@lido-demo.example',
+      senderName: 'Lido Demo',
+      smtpServerAddress: 'smtp.lido-demo.example',
+      smtpPort: 587,
+      smtpUsername: 'prenotazioni@lido-demo.example',
+      smtpPassword: 'password-di-esempio',
+      smtpSecurity: 'Tls' as const,
+    };
+
+    expect(await firstValueFrom(system.sendTestEmail(settings))).toBeNull();
+    const invalid = await firstValueFrom(
+      system.sendTestEmail({ ...settings, smtpServerAddress: ' ', smtpPort: null }),
+    ).catch((failure: HttpErrorResponse) => failure);
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({
+        errors: [
+          { field: 'smtpServerAddress', code: 'validation.invalid_value' },
+          { field: 'smtpPort', code: 'validation.invalid_value' },
+        ],
+      }),
+    );
+  });
+
+  it('should save the email configuration, which the next reading answers (204)', async () => {
+    const system = await service();
+    const before = await firstValueFrom(
+      system.emailConfiguration({ idProperty: DEMO_PROPERTY.publicId }),
+    );
+
+    const answer = await firstValueFrom(
+      system.saveEmailConfiguration({
+        idProperty: DEMO_PROPERTY.publicId,
+        ...before,
+        senderName: 'Lido Salvato',
+        smtpPort: 465,
+        smtpSecurity: 'Ssl',
+      }),
+    );
+    const after = await firstValueFrom(
+      system.emailConfiguration({ idProperty: DEMO_PROPERTY.publicId }),
+    );
+
+    expect(answer).toBeNull();
+    expect(after).toEqual({
+      ...before,
+      senderName: 'Lido Salvato',
+      smtpPort: 465,
+      smtpSecurity: 'Ssl',
+    });
+  });
+
+  it('should refuse to save a wrong configuration (400)', async () => {
+    const invalid = await firstValueFrom(
+      (await service()).saveEmailConfiguration({
+        idProperty: DEMO_PROPERTY.publicId,
+        senderMailAddress: '',
+        senderName: 'Lido Demo',
+        smtpServerAddress: 'smtp.lido-demo.example',
+        smtpPort: 70000,
+        smtpUsername: 'utente',
+        smtpPassword: 'password-di-esempio',
+        smtpSecurity: null,
+      }),
+    ).catch((failure: HttpErrorResponse) => failure);
+
+    expect((invalid as HttpErrorResponse).status).toBe(400);
+    expect((invalid as HttpErrorResponse).error).toEqual(
+      expect.objectContaining({
+        errors: [
+          { field: 'senderMailAddress', code: 'validation.invalid_value' },
+          { field: 'smtpPort', code: 'validation.invalid_value' },
+          { field: 'smtpSecurity', code: 'validation.invalid_value' },
+        ],
+      }),
+    );
+  });
 });

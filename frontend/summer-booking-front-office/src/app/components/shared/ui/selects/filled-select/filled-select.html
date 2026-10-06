@@ -13,7 +13,7 @@
     [required]="isMandatory()"
     [aria-labelledby]="labelledBy() ?? id + '-label'"
     [placeholder]="placeholder() ?? ''"
-    [disabled]="disabled()"
+    [disabled]="disabled() || readonly()"
     [value]="value()"
     (valueChange)="value.set($event)"
   >

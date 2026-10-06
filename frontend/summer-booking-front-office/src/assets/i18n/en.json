@@ -326,7 +326,21 @@
         },
         "send_test": "Send test email",
         "reset": "Reset",
-        "save": "Save"
+        "save": "Save",
+        "test_sent": {
+          "title": "Test email sent",
+          "text": "Check the mailbox to make sure the configuration works.",
+          "close": "Close"
+        },
+        "saved": {
+          "title": "Configuration saved",
+          "text": "The email settings have been saved.",
+          "close": "Close"
+        },
+        "override": {
+          "question": "Do you want to override the default settings?",
+          "confirm": "Yes"
+        }
       }
     }
   },

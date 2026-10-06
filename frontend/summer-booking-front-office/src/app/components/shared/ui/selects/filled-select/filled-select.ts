@@ -20,6 +20,8 @@ export class FilledSelect<K extends string = string> {
   readonly options = input<readonly SelectOption<K>[]>([]);
   readonly value = model<K | null>(null);
   readonly disabled = input(false);
+  /** Shown but not changeable, like `disabled`; set by a Signal Forms `[formField]` too. */
+  readonly readonly = input(false);
   /** Ids of the page elements that name the select, when its label is not above it. */
   readonly labelledBy = input<string>();
 

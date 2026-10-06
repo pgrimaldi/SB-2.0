@@ -2,13 +2,19 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { ContactSupportRequest } from '../../../entities/system/contact-support-request';
-import { EmailConfigurationData } from '../../../entities/system/email-configuration-data';
+import {
+  EmailConfigurationData,
+  SmtpSecurity,
+} from '../../../entities/system/email-configuration-data';
+import { EmailConfigurationRequest } from '../../../entities/system/email-configuration-request';
 import { SupportInfo } from '../../../entities/system/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { MOCK_PROPERTIES } from '../properties/properties.mock';
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'message'] as const;
+const SMTP_SECURITIES: readonly SmtpSecurity[] = ['None', 'Ssl', 'Tls'];
+const REQUIRED_EMAIL_FIELDS = ['senderMailAddress', 'smtpServerAddress', 'smtpUsername'] as const;
 
 /** Invented values: never a real mail server or real credentials. */
 const EMAIL_CONFIGURATION: EmailConfigurationData = {
@@ -53,6 +59,81 @@ const SUPPORT_HOURS: Record<'it' | 'en', string[]> = {
     'October 1 - April 30, Monday to Friday: 9:00 am to 6:00 pm',
   ],
 };
+
+/**
+ * `POST /api/system/send-test-email` with `EmailConfigurationRequest`: the real backend tries the
+ * settings by sending an email, the mock only checks them (see `emailConfigurationErrors`). 204
+ * without a body; 401 without a valid access token; 400 with one error per wrong field.
+ */
+export const sendTestEmailMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const errors = emailConfigurationErrors(request.body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(1000));
+};
+
+/**
+ * `POST /api/system/save-email-configuration` with `EmailConfigurationRequest`: same checks as the
+ * test email; the mock keeps the values until the page is reloaded, so the GET (and Reset) answers
+ * them. 204 without a body; 401 without a valid access token; 400 with one error per wrong field.
+ */
+export const saveEmailConfigurationMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const errors = emailConfigurationErrors(request.body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.invalid_request', {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+  const body = request.body as EmailConfigurationRequest;
+  Object.assign(EMAIL_CONFIGURATION, {
+    senderMailAddress: body.senderMailAddress,
+    senderName: body.senderName,
+    smtpServerAddress: body.smtpServerAddress,
+    smtpPort: body.smtpPort as number,
+    smtpUsername: body.smtpUsername,
+    smtpPassword: body.smtpPassword,
+    smtpSecurity: body.smtpSecurity as SmtpSecurity,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/** Sender, server and username filled, port from 1 to 65535, a known security. */
+function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
+  const body = (requestBody ?? {}) as Partial<Record<keyof EmailConfigurationRequest, unknown>>;
+  const errors: MockFieldError[] = [];
+  if (!MOCK_PROPERTIES.some((row) => row.publicId === body.idProperty)) {
+    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
+  }
+  for (const field of REQUIRED_EMAIL_FIELDS) {
+    const value = body[field];
+    if (typeof value !== 'string' || !value.trim()) {
+      errors.push({ field, code: 'validation.invalid_value' });
+    }
+  }
+  const port = body.smtpPort;
+  if (!Number.isInteger(port) || (port as number) < 1 || (port as number) > 65535) {
+    errors.push({ field: 'smtpPort', code: 'validation.invalid_value' });
+  }
+  if (!SMTP_SECURITIES.includes(body.smtpSecurity as SmtpSecurity)) {
+    errors.push({ field: 'smtpSecurity', code: 'validation.invalid_value' });
+  }
+  return errors;
+}
 
 /**
  * `POST /api/system/info-support` with `{ idProperty }`: the support contacts and hours, the hours in
