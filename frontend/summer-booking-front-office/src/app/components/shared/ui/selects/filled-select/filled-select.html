@@ -6,7 +6,12 @@
     }
   </label>
 }
-<mat-form-field class="filled__select__control" appearance="fill" subscriptSizing="dynamic">
+<mat-form-field
+  class="filled__select__control"
+  appearance="fill"
+  subscriptSizing="dynamic"
+  [class.filled__select__locked]="readonly() || disabled()"
+>
   <mat-select
     panelClass="select__panel"
     hideSingleSelectionIndicator

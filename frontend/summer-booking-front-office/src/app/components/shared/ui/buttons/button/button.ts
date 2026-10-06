@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { resolveIcons } from '../../icons/icons';
 
-export type ButtonAppearance = 'primary' | 'secondary' | 'light' | 'soft';
+export type ButtonAppearance = 'primary' | 'secondary' | 'light';
 // The only four sizes: small 1.75rem, medium 2rem, large 2.875rem (forms), extralarge 3.75rem.
 export type ButtonSize = 'small' | 'medium' | 'large' | 'extralarge';
 
@@ -25,7 +25,6 @@ const SPINNER_SIZES: Record<ButtonSize, number> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.button__light]': "appearance() === 'light'",
-    '[class.button__soft]': "appearance() === 'soft'",
     '[class.button__small]': "size() === 'small'",
     '[class.button__medium]': "size() === 'medium'",
     '[class.button__large]': "size() === 'large'",

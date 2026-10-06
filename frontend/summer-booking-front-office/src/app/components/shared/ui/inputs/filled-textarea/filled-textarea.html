@@ -9,12 +9,14 @@
   appearance="fill"
   subscriptSizing="dynamic"
   [class.filled__textarea__invalid]="!!error()"
+  [class.filled__textarea__locked]="readonly() || disabled()"
 >
   <textarea
     #field
     matInput
     [required]="isMandatory()"
     [readonly]="readonly()"
+    [disabled]="disabled()"
     [id]="id"
     [rows]="rows()"
     [value]="value()"

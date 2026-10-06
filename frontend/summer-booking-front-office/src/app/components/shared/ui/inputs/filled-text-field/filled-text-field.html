@@ -11,12 +11,14 @@
   appearance="fill"
   subscriptSizing="dynamic"
   [class.filled__text__field__invalid]="!!error()"
+  [class.filled__text__field__locked]="readonly() || disabled()"
 >
   <input
     #field
     matInput
     [required]="isMandatory()"
     [readonly]="readonly()"
+    [disabled]="disabled()"
     [type]="type()"
     [id]="id"
     [value]="value()"

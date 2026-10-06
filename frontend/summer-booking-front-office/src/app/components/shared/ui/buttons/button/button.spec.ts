@@ -50,10 +50,10 @@ describe('Button', () => {
     expect(fixture.componentInstance.clicks).toBe(1);
   });
 
-  it('should show the icon before the text and take the soft look', async () => {
+  it('should show the icon before the text', async () => {
     @Component({
       imports: [Button],
-      template: `<app-button appearance="soft" [pathIcon]="['/assets/images/mail-send-white.svg']"
+      template: `<app-button [pathIcon]="['/assets/images/mail-send-white.svg']"
         >Invia email test</app-button
       >`,
     })
@@ -63,7 +63,6 @@ describe('Button', () => {
     const element: HTMLElement = fixture.nativeElement;
     const label = element.querySelector('.button__label')!;
 
-    expect(element.querySelector('app-button')?.classList).toContain('button__soft');
     expect(label.firstElementChild?.getAttribute('src')).toBe('/assets/images/mail-send-white.svg');
     expect(label.textContent?.trim()).toBe('Invia email test');
   });

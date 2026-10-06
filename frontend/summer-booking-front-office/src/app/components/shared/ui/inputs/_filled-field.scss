@@ -1,8 +1,10 @@
 @use '@angular/material' as mat;
 
-// Grey form fields of the designer's mockup of the form popups (02/10/2026). $block is the component
+// Form fields of the designer's mockup of the form popups (02/10/2026). $block is the component
 // name (e.g. filled__text__field) used by its classes. A page can make the fields bigger with
 // --filled-field-height, --filled-field-text-size and --filled-field-line-height (defaults: the popups).
+// At a glance (user, 06/10/2026): white with a thin border when the field can be changed, grey with
+// grey text when it is read-only or disabled (class $block__locked).
 @mixin filled-field($block) {
   :host {
     display: flex;
@@ -19,7 +21,7 @@
         container-text-line-height: var(--filled-field-line-height, 1.125rem),
         container-text-tracking: normal,
         container-text-weight: 500,
-        filled-container-color: var(--color__tertiary__theme),
+        filled-container-color: var(--color__layout__surface),
         filled-container-shape: 0.3125rem,
         filled-active-indicator-height: 0,
         filled-focus-active-indicator-height: 0,
@@ -46,16 +48,25 @@
     color: var(--color__layout__error);
   }
 
-  // Material rounds only the top of a filled field: the grey field is round all around.
+  // The border is an inset shadow of Material's own container (the element with the fill): drawn on
+  // the control, an outline or a shadow ends up under that fill and only its corners show. Colour and
+  // width are variables, so the states only change them. Material rounds only the top of a filled
+  // field: here the field is round all around.
   .#{$block}__control {
-    width: 100%;
-    overflow: hidden;
-    border-radius: 0.3125rem;
-    outline: 0.0625rem solid transparent;
-    outline-offset: -0.0625rem;
+    // Soft blue of the labels (user's choice among four, 06/10/2026): in theme and light.
+    --filled-field-border-color: var(--color__layout__text__soft);
+    --filled-field-border-width: 0.0625rem;
 
+    width: 100%;
+
+    // While typing: the same soft blue, only thicker (user).
     &:focus-within {
-      outline-color: var(--color__main__theme__one);
+      --filled-field-border-width: 0.125rem;
+    }
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      border-radius: 0.3125rem;
+      box-shadow: inset 0 0 0 var(--filled-field-border-width) var(--filled-field-border-color);
     }
 
     ::ng-deep .mdc-text-field {
@@ -65,10 +76,10 @@
 
   // Invalid: a thicker red border and a reddish fill, so the field stands out from the others.
   .#{$block}__invalid,
+  .#{$block}__invalid:hover,
   .#{$block}__invalid:focus-within {
-    outline-width: 0.125rem;
-    outline-offset: -0.125rem;
-    outline-color: var(--color__layout__error);
+    --filled-field-border-color: var(--color__layout__error);
+    --filled-field-border-width: 0.125rem;
 
     @include mat.form-field-overrides(
       (
@@ -77,6 +88,20 @@
             var(--color__layout__error) 10%,
             var(--color__layout__surface)
           ),
+      )
+    );
+  }
+
+  .#{$block}__locked,
+  .#{$block}__locked:hover {
+    --filled-field-border-color: transparent;
+
+    @include mat.form-field-overrides(
+      (
+        filled-container-color: var(--color__tertiary__theme),
+        filled-disabled-container-color: var(--color__tertiary__theme),
+        filled-input-text-color: var(--color__layout__muted__strong),
+        filled-disabled-input-text-color: var(--color__layout__muted__strong),
       )
     );
   }

@@ -9,6 +9,7 @@
   appearance="fill"
   subscriptSizing="dynamic"
   [class.filled__number__field__invalid]="!!error()"
+  [class.filled__number__field__locked]="readonly() || disabled()"
 >
   <!-- One @if around the span alone, or Material would not place it before the number. -->
   @if (currency() && icons().list[0]; as icon) {
@@ -26,6 +27,7 @@
     matInput
     [required]="isMandatory()"
     [readonly]="readonly()"
+    [disabled]="disabled()"
     type="text"
     autocomplete="off"
     [attr.inputmode]="decimal() ? 'decimal' : 'numeric'"

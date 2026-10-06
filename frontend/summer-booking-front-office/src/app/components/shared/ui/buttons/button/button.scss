@@ -56,14 +56,6 @@ button {
   );
 }
 
-:host(.button__soft) {
-  @include mat.button-overrides(
-    (
-      filled-container-color: var(--color__layout__text__soft),
-    )
-  );
-}
-
 :host(.button__light) {
   @include mat.button-overrides(
     (

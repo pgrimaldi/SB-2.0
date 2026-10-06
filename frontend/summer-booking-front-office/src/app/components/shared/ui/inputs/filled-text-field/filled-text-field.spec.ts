@@ -8,6 +8,7 @@ import { FilledTextField } from './filled-text-field';
     label="Articolo"
     placeholder="Mario"
     [isMandatory]="mandatory()"
+    [readonly]="locked()"
     [maxLength]="500"
     [error]="error()"
     [(value)]="name"
@@ -17,6 +18,7 @@ class FilledTextFieldHost {
   readonly name = signal('Lettino');
   readonly error = signal<string | null>(null);
   readonly mandatory = signal(false);
+  readonly locked = signal(false);
 }
 
 describe('FilledTextField', () => {
@@ -72,5 +74,18 @@ describe('FilledTextField', () => {
     expect(asterisk.getAttribute('aria-hidden')).toBe('true');
     expect(element.querySelector('input')!.required).toBe(true);
     expect(element.querySelector('input')!.getAttribute('aria-required')).toBe('true');
+  });
+
+  it('should look locked (grey) when read-only, editable (white) otherwise', async () => {
+    const fixture = TestBed.createComponent(FilledTextFieldHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const control = () => element.querySelector('.filled__text__field__control')!;
+
+    expect(control().classList).not.toContain('filled__text__field__locked');
+    fixture.componentInstance.locked.set(true);
+    await fixture.whenStable();
+    expect(control().classList).toContain('filled__text__field__locked');
+    expect(element.querySelector('input')!.readOnly).toBe(true);
   });
 });

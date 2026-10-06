@@ -15,9 +15,9 @@
       placeholder-text-color: var(--color__main__theme__one),
       enabled-arrow-color: var(--color__main__theme__one),
       focused-arrow-color: var(--color__main__theme__one),
-      // Disabled: the value stays readable in blue, only the faded arrow says it cannot change.
-      disabled-trigger-text-color: var(--color__main__theme__one),
-      disabled-arrow-color: color-mix(in srgb, var(--color__main__theme__one) 35%, transparent),
+      // Disabled or read-only: grey text and a faded arrow, on the grey field of the mixin.
+      disabled-trigger-text-color: var(--color__layout__muted__strong),
+      disabled-arrow-color: color-mix(in srgb, var(--color__layout__muted__strong) 50%, transparent),
     )
   );
   @include mat.form-field-overrides(
