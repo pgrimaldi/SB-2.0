@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { Subject, defer, firstValueFrom, of, throwError } from 'rxjs';
 import { AuthSession } from '../../entities/auth/credentials';
 import { AuthService } from '../../services/api/auth/auth.service';
-import { AuthBehaviour, LOGOUT_RETRY_DELAY } from './auth.behaviour';
+import { AUTH_LOCK, inTabLock } from './auth-lock';
+import { AuthBehaviour, COOKIE_CALL_TIMEOUT, LOGOUT_RETRY_DELAY } from './auth.behaviour';
 
 describe('AuthBehaviour', () => {
   const session = (accessToken: string, email = 'user@example.com'): AuthSession => ({
@@ -38,6 +39,30 @@ describe('AuthBehaviour', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: server }] });
     return TestBed.inject(AuthBehaviour);
+  };
+
+  /** Calls on the refresh cookie start once the lock is free, after the current task. */
+  const settle = () => new Promise((resolve) => setTimeout(resolve));
+
+  /** Two tabs of the same browser: same storage, same cookie lock, messages between them. */
+  const twoTabs = () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: server },
+        // Shared by both tabs, as the browser's Web Locks are.
+        { provide: AUTH_LOCK, useValue: inTabLock() },
+      ],
+    });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const [firstTab, secondTab] = [0, 1].map(() =>
+      TestBed.runInInjectionContext(() => new AuthBehaviour()),
+    );
+    onTestFinished(() => {
+      firstTab.ngOnDestroy();
+      secondTab.ngOnDestroy();
+    });
+    return { firstTab, secondTab, navigate };
   };
 
   const storedValues = () =>
@@ -115,7 +140,7 @@ describe('AuthBehaviour', () => {
     expect(storedValues()).toBe('');
   });
 
-  it('should ask for one new token even when several requests need it at once', () => {
+  it('should ask for one new token even when several requests need it at once', async () => {
     const auth = load();
     const answer = new Subject<AuthSession>();
     server.refresh.mockReturnValue(answer);
@@ -123,6 +148,7 @@ describe('AuthBehaviour', () => {
 
     auth.refresh().subscribe((token) => tokens.push(token));
     auth.refresh().subscribe((token) => tokens.push(token));
+    await settle();
     answer.next(session('fresh'));
     answer.complete();
 
@@ -130,7 +156,7 @@ describe('AuthBehaviour', () => {
     expect(tokens).toEqual(['fresh', 'fresh']);
   });
 
-  it('should not sign in again with a refresh answer that arrives after the logout', async () => {
+  it('should not sign in again with a refresh answer that arrives after a logout in another tab', async () => {
     const auth = load();
     vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     auth.start(session('first'), true);
@@ -138,8 +164,9 @@ describe('AuthBehaviour', () => {
     server.refresh.mockReturnValue(late);
     const tokens: (string | null)[] = [];
     auth.refresh().subscribe((token) => tokens.push(token));
+    await settle();
 
-    await auth.logout();
+    auth.expire();
     late.next(session('late'));
     late.complete();
 
@@ -148,12 +175,13 @@ describe('AuthBehaviour', () => {
     expect(storedValues()).toBe('');
   });
 
-  it('should keep the new user when a refresh of the previous session answers late', () => {
+  it('should keep the new user when a refresh of the previous session answers late', async () => {
     const auth = load();
     auth.start(session('first', 'anna@example.com'), false);
     const late = new Subject<AuthSession>();
     server.refresh.mockReturnValue(late);
     auth.refresh().subscribe();
+    await settle();
 
     auth.start(session('bea-token', 'bea@example.com'), false);
     late.next(session('anna-late', 'anna@example.com'));
@@ -163,12 +191,13 @@ describe('AuthBehaviour', () => {
     expect(auth.user()?.email).toBe('bea@example.com');
   });
 
-  it('should keep the new session when a refresh of the previous one fails late', () => {
+  it('should keep the new session when a refresh of the previous one fails late', async () => {
     const auth = load();
     auth.start(session('first', 'anna@example.com'), true);
     const late = new Subject<AuthSession>();
     server.refresh.mockReturnValue(late);
     auth.refresh().subscribe();
+    await settle();
 
     auth.start(session('bea-token', 'bea@example.com'), true);
     late.error(new HttpErrorResponse({ status: 401 }));
@@ -177,19 +206,137 @@ describe('AuthBehaviour', () => {
     expect(localStorage.getItem('sb.signed-in')).toBe('true');
   });
 
-  it('should ask the server again for a new session, not share the refresh of the previous one', () => {
+  it('should ask the server again for a new session, not share the refresh of the previous one', async () => {
     const auth = load();
     auth.start(session('first', 'anna@example.com'), false);
-    server.refresh.mockReturnValueOnce(new Subject<AuthSession>());
+    const late = new Subject<AuthSession>();
+    server.refresh.mockReturnValueOnce(late);
     auth.refresh().subscribe();
+    await settle();
 
     auth.start(session('bea-token', 'bea@example.com'), false);
     server.refresh.mockReturnValueOnce(of(session('bea-fresh', 'bea@example.com')));
     let token: string | null = null;
     auth.refresh().subscribe((fresh) => (token = fresh));
+    late.complete();
+    await settle();
 
     expect(server.refresh).toHaveBeenCalledTimes(2);
     expect(token).toBe('bea-fresh');
+  });
+
+  it('should let a sign-in reach the server only once the refresh still running has answered', async () => {
+    const auth = load();
+    const refresh = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(refresh);
+    server.signIn.mockReturnValue(of(session('bea-token', 'bea@example.com')));
+    auth.refresh().subscribe();
+    await settle();
+
+    const signedIn = firstValueFrom(
+      auth.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
+    );
+    await settle();
+    expect(server.signIn).not.toHaveBeenCalled();
+
+    refresh.error(new HttpErrorResponse({ status: 401 }));
+    await signedIn;
+    expect(auth.user()?.email).toBe('bea@example.com');
+  });
+
+  it('should log out only after the refresh still running, and not refresh while logging out', async () => {
+    const auth = load();
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('first'), true);
+    const refresh = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(refresh);
+    const logout = new Subject<void>();
+    server.logout.mockReturnValue(logout);
+    auth.refresh().subscribe();
+    await settle();
+
+    const loggedOut = auth.logout();
+    await settle();
+    expect(server.logout).not.toHaveBeenCalled();
+    refresh.next(session('second'));
+    refresh.complete();
+    await settle();
+    expect(server.logout).toHaveBeenCalledTimes(1);
+
+    const waiting = firstValueFrom(auth.refresh());
+    logout.next();
+    logout.complete();
+    expect(await loggedOut).toBe(true);
+    expect(await waiting).toBeNull();
+    expect(server.refresh).toHaveBeenCalledTimes(1); // the waiting refresh asked nothing
+  });
+
+  it('should let the next call start when one does not answer within the time limit', async () => {
+    vi.useFakeTimers();
+    const auth = load();
+    server.refresh.mockReturnValue(new Subject<AuthSession>()); // never answers
+    server.signIn.mockReturnValue(of(session('bea-token', 'bea@example.com')));
+    const refreshed = firstValueFrom(auth.refresh());
+    const signedIn = firstValueFrom(
+      auth.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
+    );
+
+    await vi.advanceTimersByTimeAsync(COOKIE_CALL_TIMEOUT);
+
+    expect(await refreshed).toBeNull();
+    await signedIn;
+    expect(auth.user()?.email).toBe('bea@example.com');
+  });
+
+  it('should make the tabs of the browser take turns on the cookie', async () => {
+    const { firstTab, secondTab } = twoTabs();
+    firstTab.start(session('first'), true);
+    server.refresh.mockReturnValueOnce(of(session('first'))); // the second tab opens
+    await secondTab.restore();
+    const refresh = new Subject<AuthSession>();
+    server.refresh.mockReturnValue(refresh);
+    firstTab.refresh().subscribe();
+    await settle();
+
+    const loggedOut = secondTab.logout();
+    await settle();
+    expect(server.logout).not.toHaveBeenCalled();
+
+    refresh.next(session('second'));
+    refresh.complete();
+    expect(await loggedOut).toBe(true);
+    expect(server.logout).toHaveBeenCalledTimes(1);
+    await settle();
+    expect(firstTab.isAuthenticated()).toBe(false); // told by the other tab
+  });
+
+  it('should leave this tab when someone signs in in another one, without logging out', async () => {
+    const { firstTab, secondTab, navigate } = twoTabs();
+    firstTab.start(session('anna-token', 'anna@example.com'), true);
+    await settle();
+
+    secondTab.start(session('bea-token', 'bea@example.com'), true);
+    await settle();
+
+    expect(firstTab.isAuthenticated()).toBe(false);
+    expect(navigate).toHaveBeenCalledWith('/');
+    expect(server.logout).not.toHaveBeenCalled();
+    expect(localStorage.getItem('sb.signed-in')).toBe('true'); // the other tab is still signed in
+    expect(secondTab.user()?.email).toBe('bea@example.com');
+  });
+
+  it('should leave this tab when the refresh cookie now belongs to another user', async () => {
+    const auth = load();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    auth.start(session('anna-token', 'anna@example.com'), true);
+    server.refresh.mockReturnValue(of(session('bea-token', 'bea@example.com')));
+
+    expect(await firstValueFrom(auth.refresh())).toBeNull();
+
+    expect(auth.isAuthenticated()).toBe(false);
+    expect(navigate).toHaveBeenCalledWith('/');
+    expect(server.logout).not.toHaveBeenCalled();
+    expect(localStorage.getItem('sb.signed-in')).toBe('true');
   });
 
   it('should end the session here and go back to the home once the server has revoked it', async () => {

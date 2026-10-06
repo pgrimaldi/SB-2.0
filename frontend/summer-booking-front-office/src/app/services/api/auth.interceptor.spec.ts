@@ -34,6 +34,9 @@ describe('authInterceptor', () => {
 
   afterEach(() => sessionStorage.clear());
 
+  /** The refresh starts once the lock of the cookie is free, after the current task. */
+  const settle = () => new Promise((resolve) => setTimeout(resolve));
+
   it('should send the access token to our API only', () => {
     const { http, controller } = setup();
 
@@ -46,12 +49,13 @@ describe('authInterceptor', () => {
     expect(other.request.headers.has('Authorization')).toBe(false);
   });
 
-  it('should renew an expired token with the refresh cookie and repeat the request once', () => {
+  it('should renew an expired token with the refresh cookie and repeat the request once', async () => {
     const { http, controller } = setup();
     let answer: unknown;
 
     http.get(`${api}/warehouse/list`).subscribe((body) => (answer = body));
     controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
+    await settle();
     const refresh = controller.expectOne(`${api}/auth/refresh`);
     expect(refresh.request.headers.has('Authorization')).toBe(false); // the cookie is enough
     refresh.flush(session('second'));
@@ -62,13 +66,14 @@ describe('authInterceptor', () => {
     expect(answer).toEqual({ total: 0, rows: [] });
   });
 
-  it('should sign out and go back to the home when the session is over', () => {
+  it('should sign out and go back to the home when the session is over', async () => {
     const { auth, http, controller } = setup();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     let status = 0;
 
     http.get(`${api}/warehouse/list`).subscribe({ error: (error) => (status = error.status) });
     controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
+    await settle();
     controller.expectOne(`${api}/auth/refresh`).flush(null, unauthorized);
 
     expect(status).toBe(401);
@@ -92,13 +97,14 @@ describe('authInterceptor', () => {
     expect(auth.token()).toBe('bea-token');
   });
 
-  it('should not repeat the request nor sign out the new user when the session changes during the refresh', () => {
+  it('should not repeat the request nor sign out the new user when the session changes during the refresh', async () => {
     const { auth, http, controller } = setup();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     let status = 0;
 
     http.get(`${api}/warehouse/list`).subscribe({ error: (error) => (status = error.status) });
     controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
+    await settle();
     const refresh = controller.expectOne(`${api}/auth/refresh`);
     auth.start(session('bea-token', 'bea@example.com'), false);
     refresh.flush(session('anna-late'));
