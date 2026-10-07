@@ -15,7 +15,7 @@ import { routes } from './app.routes';
 import { DATE_FORMATS, DateLanguageBehaviour } from './behaviours/i18n/date-language.behaviour';
 import { AuthBehaviour } from './behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from './behaviours/i18n/language.behaviour';
-import { DATA_RELOAD } from './components/shared/data/data-reload';
+import { DATA_RELOAD } from './components/shared/ui/data/data-reload';
 import { MessageFormatCompiler } from './components/shared/i18n/message-format';
 import { authInterceptor } from './services/api/auth.interceptor';
 import { languageInterceptor } from './services/api/language.interceptor';

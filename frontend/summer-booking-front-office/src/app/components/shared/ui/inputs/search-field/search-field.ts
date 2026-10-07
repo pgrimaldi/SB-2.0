@@ -24,7 +24,7 @@ export interface SearchFieldTexts {
   clear?: string;
 }
 
-/** For now nothing listens to `search`: the search is not wired to any page. */
+/** `app-table` listens to `searched`; the search of the header is not wired to any page yet. */
 @Component({
   selector: 'app-search-field',
   imports: [MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],

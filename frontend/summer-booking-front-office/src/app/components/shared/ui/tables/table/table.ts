@@ -29,7 +29,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable, catchError, of, switchMap } from 'rxjs';
-import { DATA_RELOAD } from '../../../data/data-reload';
+import { DATA_RELOAD } from '../../data/data-reload';
 import { SelectionCheckbox } from '../../checkboxes/selection-checkbox/selection-checkbox';
 import { resolveIcons } from '../../icons/icons';
 import { SearchField, SearchFieldTexts } from '../../inputs/search-field/search-field';

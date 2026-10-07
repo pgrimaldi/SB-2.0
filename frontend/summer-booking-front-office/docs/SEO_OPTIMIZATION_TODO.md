@@ -11,7 +11,7 @@ Voci che valgono per ogni pagina pubblica.
 ### Cosa manca da fare
 
 - **Dominio definitivo**: serve per canonical, Open Graph, sitemap e dati strutturati. Il riferimento usa `https://hub.summerbooking.it/`.
-- **robots.txt**: permettere la scansione delle pagine pubbliche e indicare la sitemap. Il riferimento ha `User-agent: *`, `Disallow:` vuoto e `Sitemap: https://hub.summerbooking.it/sitemap.xml`. Aggiungerlo anche alle route servite dalla CloudFront Function.
+- **robots.txt**: permettere la scansione delle pagine pubbliche e indicare la sitemap. Il riferimento ha `User-agent: *`, `Disallow:` vuoto e `Sitemap: https://hub.summerbooking.it/sitemap.xml`. Metterlo in `public/`, così finisce nella radice del bucket: la CloudFront Function non riscrive i file con estensione e non va toccata.
 - **sitemap.xml**: elenco delle pagine pubbliche in entrambe le lingue, con le alternative `hreflang`. La sitemap del riferimento contiene anche `/hub/advantages`, `/hub/functionality`, `/hub/booking`, `/hub/prizes`, `/hub/about-us`… da allineare man mano che creiamo le pagine.
 - **hreflang**: per ogni pagina indicare le versioni `it`, `en` e `x-default` (tag `<link rel="alternate" hreflang="…">`). Il riferimento è solo in italiano e non li ha.
 - **Prerendering**: oggi il contenuto esiste solo dopo l'esecuzione del JavaScript. Va generato nell'HTML iniziale di ogni pagina pubblica (le nostre regole SEO lo richiedono). Migliora anche FCP e LCP.

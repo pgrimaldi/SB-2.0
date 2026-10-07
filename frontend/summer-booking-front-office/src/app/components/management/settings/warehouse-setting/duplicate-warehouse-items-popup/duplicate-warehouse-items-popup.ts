@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   effect,
   inject,
   input,
@@ -10,7 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
@@ -31,7 +30,6 @@ export class DuplicateWarehouseItemsPopup {
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly open = model(false);
   readonly idItems = input<readonly string[]>([]);
@@ -63,19 +61,16 @@ export class DuplicateWarehouseItemsPopup {
     }
     this.isLoading.set(true);
     this.error.set(null);
-    this.warehouse
-      .duplicateWarehouseItems({ idProperty, idItems })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.open.set(false);
-          this.duplicated.emit(idItems);
-        },
-        error: (error: unknown) => {
-          this.isLoading.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    this.warehouse.duplicateWarehouseItems({ idProperty, idItems }).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.open.set(false);
+        this.duplicated.emit(idItems);
+      },
+      error: (error: unknown) => {
+        this.isLoading.set(false);
+        this.error.set(toApiProblem(error));
+      },
+    });
   }
 }

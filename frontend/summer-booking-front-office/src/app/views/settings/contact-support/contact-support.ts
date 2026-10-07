@@ -20,7 +20,7 @@ import {
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
-import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
+import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { requiredText } from '../../../components/shared/forms/validators';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';

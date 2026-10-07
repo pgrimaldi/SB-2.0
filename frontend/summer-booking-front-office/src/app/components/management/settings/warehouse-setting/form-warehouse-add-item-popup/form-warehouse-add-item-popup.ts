@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   OnDestroy,
   ViewEncapsulation,
   computed,
@@ -11,7 +10,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
   TreeValidationResult,
@@ -61,7 +60,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly added = output<void>();
 
@@ -196,13 +194,10 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     if (!idProperty) {
       return;
     }
-    this.warehouse
-      .comboboxList({ idProperty })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (articles) => this.articles.set(articles),
-        error: () => this.articles.set([]),
-      });
+    this.warehouse.comboboxList({ idProperty }).subscribe({
+      next: (articles) => this.articles.set(articles),
+      error: () => this.articles.set([]),
+    });
   }
 
   override ngOnDestroy(): void {

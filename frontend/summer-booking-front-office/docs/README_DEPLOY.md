@@ -49,7 +49,7 @@ Console **CloudFront** → **Crea distribuzione**:
 - **Origine**: il bucket S3 (endpoint REST, non l'endpoint "website");
 - **Accesso all'origine**: **Origin Access Control (OAC)**, creando un nuovo controllo con le impostazioni predefinite. Al termine la console propone la policy del bucket: copiarla in S3 → bucket → **Autorizzazioni** → **Policy del bucket**. Consente a questa sola distribuzione di leggere gli oggetti (`s3:GetObject`);
 - **Criterio del protocollo visualizzatore**: **Reindirizza HTTP a HTTPS**;
-- **Criterio di cache**: **CachingOptimized**, che rispetta le intestazioni `Cache-Control` impostate dal deploy;
+- **Criterio di cache**: **CachingOptimized** (TTL minimo 1 secondo, predefinito 1 giorno, massimo 1 anno): CloudFront usa il `max-age` impostato dal deploy entro questi limiti; `no-cache` diventa al massimo 1 secondo di cache su CloudFront, mentre il browser lo rispetta. Le future API (`/api`) avranno un comportamento separato, senza cache delle risposte personali;
 - **Compressione automatica degli oggetti**: attiva;
 - **Oggetto root predefinito**: `index.html`;
 - **Firewall (WAF)**: secondo le esigenze dell'ambiente;
@@ -81,6 +81,8 @@ La build non mette più script né stili inline in `index.html` (`optimization.s
 ```text
 default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 ```
+
+Stato: su DEV la `Content-Security-Policy` è attiva dal 07/10/2026; su PROD va fatta con gli stessi passi.
 
 Si attiva in due fasi, prima su DEV e poi su PROD:
 
@@ -320,7 +322,7 @@ Risultati attesi:
   - `X-Content-Type-Options: nosniff`;
   - `X-Frame-Options: DENY`;
   - `Referrer-Policy: strict-origin-when-cross-origin`;
-- `Content-Security-Policy` e `X-XSS-Protection` assenti finché non vengono deliberatamente configurati.
+- `Content-Security-Policy` con il valore della sezione "Content Security Policy" (su DEV dal 07/10/2026); `X-XSS-Protection` assente.
 
 Verificare le prestazioni con Lighthouse in una finestra in incognito: le estensioni del browser falsano i risultati.
 

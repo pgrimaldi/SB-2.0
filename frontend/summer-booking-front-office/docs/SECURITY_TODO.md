@@ -14,14 +14,14 @@ Aggiornato al 07/10/2026.
 
 ### Stato (07/10/2026, audit S04)
 
-- **Fatto nel frontend**: la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesa circa 9 KB, il costo sulla prima visualizzazione è minimo). La policy qui sotto, senza le due righe dei Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home IT/EN, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): si verifica nella fase Report-Only su DEV.
-- **Da fare in CloudFront**: fasi Report-Only e attivazione, prima DEV poi PROD, con la procedura di `README_DEPLOY.md` (sezione "Content Security Policy").
+- **Fatto nel frontend**: la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesa circa 9 KB, il costo sulla prima visualizzazione è minimo). La policy qui sotto, senza le due righe dei Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home IT/EN, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): l'ha verificata l'utente su DEV in Report-Only.
+- **Fatto su DEV** (07/10/2026): Report-Only senza violazioni (area gestionale compresa, verificata dall'utente), poi CSP attiva in CloudFront. **Da fare**: PROD, con la procedura di `README_DEPLOY.md` (sezione "Content Security Policy").
 - **Decisioni prese**: niente `autoCsp` né nonce (policy semplice, senza hash da ricalcolare); `style-src 'unsafe-inline'` accettato, perché Angular e Material inseriscono gli stili a runtime; Trusted Types e raccolta dei report rimandati (vedi sotto).
 
 ### Cosa fare
 
 1. **Inviare la CSP come header HTTP** da CloudFront, nella stessa *response headers policy* già usata per gli altri header (vedi sotto), non con un tag `<meta>`: alcune direttive (`frame-ancestors`, report) nel `<meta>` non funzionano.
-2. **Partire in sola osservazione**: prima `Content-Security-Policy-Report-Only` con un endpoint di report (`Reporting-Endpoints` + `report-to`), poi, dopo qualche giorno senza violazioni inattese, passare a `Content-Security-Policy`.
+2. **Partire in sola osservazione**: prima `Content-Security-Policy-Report-Only` (violazioni lette nella console del browser; l'endpoint dei report è ancora aperto, vedi sotto), poi, dopo qualche giorno senza violazioni inattese, passare a `Content-Security-Policy`.
 3. **Policy di partenza** pensata per l'app di oggi. Tutto viene dal nostro dominio: script, stili, font (`@font-face` locale), immagini, traduzioni JSON, API `/api`, service worker e manifest.
 
    ```text
@@ -58,14 +58,14 @@ Già configurati sull'ambiente DEV con la policy `summerbooking-dev-frontoffice-
 
 - `Strict-Transport-Security: max-age=31536000` (senza `includeSubDomains` né `preload`);
 - `X-Content-Type-Options: nosniff`;
-- `X-Frame-Options: DENY` (in futuro affiancato da `frame-ancestors 'none'` nella CSP);
+- `X-Frame-Options: DENY` (su DEV già affiancato da `frame-ancestors 'none'` nella CSP);
 - `Referrer-Policy: strict-origin-when-cross-origin`;
 - `X-XSS-Protection` volutamente non attivo (header superato).
 
 Ancora da fare:
 
 - **PROD**: creare la policy equivalente per l'ambiente di produzione e associarla alla sua distribuzione.
-- **CSP**: aggiungerla alla stessa policy, prima in Report-Only (vedi sopra).
+- **CSP su PROD**: aggiungerla alla policy di PROD, prima in Report-Only (vedi sopra).
 - **HSTS più stretto**: `includeSubDomains`, `preload` e durata di 2 anni solo dopo aver verificato che tutti i sottodomini del dominio definitivo funzionino esclusivamente in HTTPS: un'impostazione errata resta memorizzata dai browser.
 - **`Permissions-Policy`**: disattivare ciò che l'app non usa (es. `camera=(), microphone=(), geolocation=()`); va aggiunto come header personalizzato della policy.
 - **`Cross-Origin-Opener-Policy: same-origin`**: anche questo come header personalizzato.

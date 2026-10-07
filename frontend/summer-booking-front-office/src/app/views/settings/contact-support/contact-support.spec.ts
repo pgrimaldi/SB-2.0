@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
-import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
+import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';

@@ -30,7 +30,7 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
-import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
+import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { Button } from '../../../components/shared/ui/buttons/button/button';

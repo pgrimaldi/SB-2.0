@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { Observable, Subject, of, throwError } from 'rxjs';
-import { DATA_RELOAD } from '../../../data/data-reload';
+import { DATA_RELOAD } from '../../data/data-reload';
 import {
   Table,
   TableColumn,
