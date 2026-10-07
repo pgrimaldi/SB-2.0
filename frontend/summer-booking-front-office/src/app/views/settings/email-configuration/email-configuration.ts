@@ -65,6 +65,8 @@ const CONNECTION_FIELDS = [
   'smtpSecurity',
 ] as const;
 
+type Connection = Pick<EmailConfigurationFields, (typeof CONNECTION_FIELDS)[number]>;
+
 interface SecurityTexts {
   none: string;
   ssl: string;
@@ -127,19 +129,25 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly editable = signal(false);
   /** The server has a password saved (it never sends it). */
   protected readonly passwordSaved = signal(false);
-  /** The connection the saved password belongs to, as the server last answered or saved it. */
-  private readonly savedConnection = signal<Partial<EmailConfigurationFields>>({});
+  /**
+   * The connection the saved password belongs to, as the server last answered or saved it: only
+   * these four values, never the password.
+   */
+  private readonly savedConnection = signal<Connection | null>(null);
+  /** Goes up with every save that succeeds: a reading started before it answers older values. */
+  private savesDone = 0;
   /**
    * The saved password must not be sent to another server, port, user or with another security
    * (e.g. a server of whoever changed it, or a connection without encryption): then it is typed again.
    */
-  private readonly passwordToRetype = computed(
-    () =>
+  private readonly passwordToRetype = computed(() => {
+    const saved = this.savedConnection();
+    return (
       this.passwordSaved() &&
-      CONNECTION_FIELDS.some(
-        (field) => this.configuration()[field] !== this.savedConnection()[field],
-      ),
-  );
+      !!saved &&
+      CONNECTION_FIELDS.some((field) => this.configuration()[field] !== saved[field])
+    );
+  });
   /** The last reading arrived: nothing can be changed before the values of the server are there. */
   private readonly loaded = signal(false);
   protected readonly configurationForm = form(this.configuration, (path) => {
@@ -211,15 +219,19 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         return;
       }
       const subscription = untracked(() => {
+        const savesAtStart = this.savesDone;
         this.isReloading.set(true);
         this.error.set(null);
         return this.system.emailConfiguration({ idProperty }).subscribe({
           next: (data) => {
             this.isReloading.set(false);
+            if (savesAtStart !== this.savesDone) {
+              return; // the values just saved are newer than this answer
+            }
             const { hasSmtpPassword, ...fields } = data;
             this.configuration.set({ ...fields, smtpPassword: '' });
             this.passwordSaved.set(hasSmtpPassword);
-            this.savedConnection.set(fields);
+            this.savedConnection.set(connectionOf(fields));
             this.configurationForm().reset();
             this.loaded.set(true);
           },
@@ -252,11 +264,14 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     this.submitWith(
       this.isSaving,
       (request) => this.system.saveEmailConfiguration(request),
-      () => {
-        // The new password is now the saved one: the field is empty again.
-        this.passwordSaved.update((saved) => saved || this.configuration().smtpPassword !== '');
-        this.savedConnection.set(this.configuration());
-        this.configuration.update((fields) => ({ ...fields, smtpPassword: '' }));
+      (sent) => {
+        // From what was sent, not from the form: a reading may have changed it meanwhile. The
+        // password, now saved, leaves the page: the field is empty again.
+        const { idProperty, smtpPassword, ...savedFields } = sent;
+        this.savesDone++;
+        this.passwordSaved.update((saved) => saved || smtpPassword !== null);
+        this.savedConnection.set(connectionOf(savedFields));
+        this.configuration.set({ ...savedFields, smtpPassword: '' });
         this.configurationForm().reset();
         this.saved.set(true);
       },
@@ -270,7 +285,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   private submitWith(
     isRunning: WritableSignal<boolean>,
     call: (request: EmailConfigurationRequest) => Observable<void>,
-    done: () => void,
+    done: (sent: EmailConfigurationRequest) => void,
   ): void {
     const idProperty = this.auth.user()?.idProperty;
     if (this.isBusy() || !idProperty) {
@@ -281,8 +296,9 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const { smtpPassword, ...fields } = this.configuration();
-        await firstValueFrom(call({ idProperty, ...fields, smtpPassword: smtpPassword || null }));
-        done();
+        const request = { idProperty, ...fields, smtpPassword: smtpPassword || null };
+        await firstValueFrom(call(request));
+        done(request);
         return undefined;
       } catch (error: unknown) {
         return this.failed(toApiProblem(error));
@@ -311,4 +327,13 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+function connectionOf(values: Connection): Connection {
+  return {
+    smtpServerAddress: values.smtpServerAddress,
+    smtpPort: values.smtpPort,
+    smtpUsername: values.smtpUsername,
+    smtpSecurity: values.smtpSecurity,
+  };
 }
