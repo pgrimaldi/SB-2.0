@@ -83,6 +83,8 @@ export class LoginDialog implements OnDestroy {
   private readonly content = viewChild.required<TemplateRef<unknown>>('content');
   private dialogRef?: MatDialogRef<unknown>;
   private mobileQuery?: MediaQueryList;
+  /** Goes up at every opening: an attempt shows its error only in the opening it started from. */
+  private opening = 0;
 
   constructor() {
     effect(() => {
@@ -105,6 +107,9 @@ export class LoginDialog implements OnDestroy {
       return;
     }
 
+    // Closing the popup does not stop the attempt: the server may already have opened the session.
+    // Until it answers the button keeps its spinner, also in the popup opened again.
+    const opening = this.opening;
     this.pending.set(true);
     this.error.set(null);
     this.authBehaviour
@@ -115,12 +120,15 @@ export class LoginDialog implements OnDestroy {
       })
       .subscribe({
         next: () => {
+          this.pending.set(false);
           this.close();
           void this.router.navigateByUrl('/beachmap');
         },
         error: (error: unknown) => {
           this.pending.set(false);
-          this.error.set(toApiProblem(error));
+          if (this.dialogRef && opening === this.opening) {
+            this.error.set(toApiProblem(error));
+          }
         },
       });
   }
@@ -129,6 +137,7 @@ export class LoginDialog implements OnDestroy {
     if (this.dialogRef) {
       return;
     }
+    this.opening++;
     this.followScreen();
     const dialogRef = this.dialog.open(this.content(), {
       width: this.width(),
@@ -172,7 +181,6 @@ export class LoginDialog implements OnDestroy {
     this.email.set('');
     this.password.set('');
     this.remember.set(false);
-    this.pending.set(false);
     this.error.set(null);
   }
 

@@ -45,7 +45,13 @@
         ></p>
       }
 
-      <app-button size="large" buttonType="submit" [fullWidth]="true" [disabled]="pending()">
+      <app-button
+        size="large"
+        buttonType="submit"
+        [fullWidth]="true"
+        [disabled]="pending()"
+        [loading]="pending()"
+      >
         <span appI18nText="hub.login.submit"></span>
       </app-button>
     </form>

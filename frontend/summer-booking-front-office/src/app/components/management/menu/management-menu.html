@@ -20,13 +20,17 @@
     [attr.aria-busy]="loggingOut()"
     (click)="logout()"
   >
-    <img
-      class="management__menu__icon"
-      src="/assets/images/logout.svg"
-      width="22"
-      height="22"
-      alt=""
-    />
+    @if (loggingOut()) {
+      <app-spinner class="management__menu__icon" [diameter]="16" />
+    } @else {
+      <img
+        class="management__menu__icon"
+        src="/assets/images/logout.svg"
+        width="22"
+        height="22"
+        alt=""
+      />
+    }
     <span class="management__menu__label" appI18nText="management.menu.logout"></span>
   </button>
 </aside>

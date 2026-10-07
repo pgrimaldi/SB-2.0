@@ -1,0 +1,11 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: inline-flex;
+
+  @include mat.progress-spinner-overrides(
+    (
+      active-indicator-color: currentColor,
+    )
+  );
+}

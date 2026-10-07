@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { LoginDialog } from './login-dialog';
 
@@ -89,6 +89,31 @@ describe('LoginDialog', () => {
         () => new HttpErrorResponse({ status: 423, error: { code: 'auth.account_locked' } }),
       );
     expect(await signInError(brandNew)).toBe('Si è verificato un errore. Riprova.');
+  });
+
+  it('should keep the spinner when closed and opened again during a sign-in, without the error of that attempt', async () => {
+    const answer = new Subject<void>();
+    TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: () => answer } });
+    const { fixture } = await setup(false);
+    const host = fixture.componentInstance;
+    const submit = () =>
+      document.querySelector<HTMLButtonElement>('mat-dialog-container button[type="submit"]')!;
+    host.open.set(true);
+    await fixture.whenStable();
+    document.querySelector<HTMLFormElement>('mat-dialog-container form')!.requestSubmit();
+    await fixture.whenStable();
+
+    host.open.set(false); // closed while the server has not answered yet
+    await fixture.whenStable();
+    host.open.set(true);
+    await fixture.whenStable();
+    expect(submit().disabled).toBe(true); // no second sign-in meanwhile
+    expect(submit().querySelector('mat-progress-spinner')).not.toBeNull();
+
+    answer.error(new HttpErrorResponse({ status: 401 }));
+    await fixture.whenStable();
+    expect(document.querySelector('.login__dialog__error')).toBeNull();
+    expect(submit().disabled).toBe(false);
   });
 
   it('should open only when open becomes true, at 30% width on regular screens', async () => {

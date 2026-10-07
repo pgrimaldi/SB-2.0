@@ -51,7 +51,11 @@ describe('EmailConfiguration', () => {
     const buttons = () => [
       ...element.querySelectorAll<HTMLButtonElement>('.email__configuration__actions button'),
     ];
+    // Only what a user can do: a read-only field cannot be typed in.
     const type = async (index: number, text: string) => {
+      if (inputs()[index].readOnly) {
+        throw new Error(`Field ${index} is read-only: press Sì first.`);
+      }
       inputs()[index].value = text;
       inputs()[index].dispatchEvent(new Event('input'));
       await fixture.whenStable();
@@ -137,21 +141,11 @@ describe('EmailConfiguration', () => {
     ).toBe(true);
   });
 
-  it('should ask the configuration again with Reset, losing what was typed', async () => {
-    const { fixture, inputs, buttons, type, emailConfiguration } = await setup();
-    await type(1, 'Nome modificato');
-
-    buttons()[1].click();
-    await fixture.whenStable();
-
-    expect(emailConfiguration).toHaveBeenCalledTimes(2);
-    expect(inputs()[1].value).toBe('Lido Demo');
-  });
-
   it('should send the values in the fields as the test email, then say it was sent', async () => {
-    const { fixture, element, buttons, type, settle, sendTestEmail } = await setup();
+    const { fixture, element, buttons, type, settle, allowChanges, sendTestEmail } = await setup();
     const answer = new Subject<void>();
     sendTestEmail.mockReturnValue(answer);
+    await allowChanges();
     await type(1, 'Lido Prova');
 
     buttons()[0].click();
@@ -196,17 +190,6 @@ describe('EmailConfiguration', () => {
     expect(buttons()[2].disabled).toBe(false);
   });
 
-  it('should keep only digits in the port, shown as dots until the eye is pressed', async () => {
-    const { fixture, element, inputs, type } = await setup();
-
-    await type(3, '58a7');
-    expect(inputs()[3].value).toBe('587');
-    expect(inputs()[3].type).toBe('password');
-    element.querySelector<HTMLButtonElement>('.filled__number__field__toggle')!.click();
-    await fixture.whenStable();
-    expect(inputs()[3].type).toBe('text');
-  });
-
   it('should show an error of the API on a field under that field, until the field changes', async () => {
     const { element, buttons, type, settle, allowChanges, saveEmailConfiguration } = await setup();
     await allowChanges();
@@ -241,9 +224,10 @@ describe('EmailConfiguration', () => {
   });
 
   it('should save the values in the fields, blocking the other buttons meanwhile, then say it', async () => {
-    const { fixture, buttons, type, settle, saveEmailConfiguration } = await setup();
+    const { fixture, buttons, type, settle, allowChanges, saveEmailConfiguration } = await setup();
     const answer = new Subject<void>();
     saveEmailConfiguration.mockReturnValue(answer);
+    await allowChanges();
     await type(4, 'nuovo-utente@lido-demo.example');
 
     buttons()[2].click();

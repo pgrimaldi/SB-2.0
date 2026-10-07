@@ -5,10 +5,11 @@ import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { UnsavedChangesBehaviour } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
+import { Spinner } from '../../shared/ui/spinners/spinner/spinner';
 
 @Component({
   selector: 'app-management-menu',
-  imports: [AlertPopup, I18nText, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [AlertPopup, I18nText, RouterLink, RouterLinkActive, Spinner, TranslatePipe],
   templateUrl: './management-menu.html',
   styleUrl: './management-menu.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
