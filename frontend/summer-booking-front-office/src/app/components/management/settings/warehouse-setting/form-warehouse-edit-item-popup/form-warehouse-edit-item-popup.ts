@@ -26,7 +26,10 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { EditedWarehouseQuantities } from '../../../../../entities/warehouse/edit-warehouse-item-request';
+import {
+  EditWarehouseItemRequest,
+  EditedWarehouseQuantities,
+} from '../../../../../entities/warehouse/edit-warehouse-item-request';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
@@ -85,11 +88,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   });
   protected readonly isLoading = signal(false);
   /** The values the popup opened with: changed ones are unsaved. */
-  private opened = {
-    articleQuantity: null as number | null,
-    thresholdQuantity: null as number | null,
-    thresholdAlert: false,
-  };
+  private opened: EditWarehouseItemRequest | null = null;
   protected readonly canSave = computed(
     () => this.idArticle() !== null && this.quantitiesForm().valid(),
   );
@@ -145,12 +144,14 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   }
 
   hasUnsavedChanges(): boolean {
+    if (!this.open() || !this.opened) {
+      return false;
+    }
     const quantities = this.quantities();
     return (
-      this.open() &&
-      (quantities.articleQuantity !== this.opened.articleQuantity ||
-        quantities.thresholdQuantity !== this.opened.thresholdQuantity ||
-        this.thresholdAlert() !== this.opened.thresholdAlert)
+      quantities.articleQuantity !== this.opened.articleQuantity ||
+      quantities.thresholdQuantity !== this.opened.thresholdQuantity ||
+      this.thresholdAlert() !== this.opened.isThresholdWarningActive
     );
   }
 
@@ -184,6 +185,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
 
   private fill(): void {
     const item = this.item();
+    const idProperty = this.auth.user()?.idProperty;
     const thresholdQuantity = item?.thresholdQuantity ?? null;
     this.quantities.set({ articleQuantity: item?.totalQuantity ?? null, thresholdQuantity });
     this.quantitiesForm().reset();
@@ -191,7 +193,16 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     this.thresholdAlert.set(
       (item?.isThresholdWarningActive ?? false) && (thresholdQuantity ?? 0) > 0,
     );
-    this.opened = { ...this.quantities(), thresholdAlert: this.thresholdAlert() };
+    this.opened =
+      item && idProperty
+        ? {
+            idProperty,
+            idItem: item.idArticle,
+            articleQuantity: item.totalQuantity,
+            thresholdQuantity,
+            isThresholdWarningActive: this.thresholdAlert(),
+          }
+        : null;
     this.error.set(null);
   }
 

@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
+import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
@@ -72,6 +73,29 @@ describe('FormWarehouseEditItemPopup', () => {
   };
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
+
+  it('should detect changes against the opening values and forget them when reopened', async () => {
+    const { fixture, host, inputs, toggle, type } = await setup();
+    const component: FormWarehouseEditItemPopup = fixture.debugElement.query(
+      By.directive(FormWarehouseEditItemPopup),
+    ).componentInstance;
+
+    expect(component.hasUnsavedChanges()).toBe(false);
+    await type(inputs()[0], '');
+    expect(component.hasUnsavedChanges()).toBe(true);
+    await type(inputs()[0], '120');
+    expect(component.hasUnsavedChanges()).toBe(false);
+    toggle().click();
+    await fixture.whenStable();
+    expect(component.hasUnsavedChanges()).toBe(true);
+
+    host.open.set(false);
+    await fixture.whenStable();
+    expect(component.hasUnsavedChanges()).toBe(false);
+    host.open.set(true);
+    await fixture.whenStable();
+    expect(component.hasUnsavedChanges()).toBe(false);
+  });
 
   it('should show the values of the row, with the article locked', async () => {
     const { popup, inputs, toggle } = await setup();
