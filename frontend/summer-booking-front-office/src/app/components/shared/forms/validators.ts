@@ -11,6 +11,19 @@ export interface GreaterThanError extends ValidationError {
   readonly limit: number;
 }
 
+export interface RequiredTextError extends ValidationError {
+  readonly kind: 'required';
+}
+
+/** Unlike Angular's `required`, a text made only of spaces is empty too. */
+export function requiredText<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(path, ({ value }): RequiredTextError | undefined =>
+    value()?.trim() ? undefined : { kind: 'required' },
+  );
+}
+
 /** Unlike Angular's `min`, an empty field is an error too: "greater than 0" also means "required". */
 export function greaterThan<TPathKind extends PathKind = PathKind.Root>(
   path: SchemaPath<number | null, SchemaPathRules.Supported, TPathKind>,

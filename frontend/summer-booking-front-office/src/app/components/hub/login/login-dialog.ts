@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, required, submit } from '@angular/forms/signals';
+import { FormField, form, submit } from '@angular/forms/signals';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -25,6 +25,7 @@ import { ValidationTextBehaviour } from '../../../behaviours/validation/validati
 import { SignInRequest } from '../../../entities/auth/credentials';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
+import { requiredText } from '../../shared/forms/validators';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { Button } from '../../shared/ui/buttons/button/button';
 import { Checkbox } from '../../shared/ui/checkboxes/checkbox/checkbox';
@@ -77,8 +78,8 @@ export class LoginDialog implements OnDestroy {
   protected readonly credentialsForm = form(
     this.credentials,
     (path) => {
-      required(path.username);
-      required(path.password);
+      requiredText(path.username);
+      requiredText(path.password);
     },
     { name: 'login' },
   );

@@ -10,7 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, readonly, required } from '@angular/forms/signals';
+import { FormField, form, readonly } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
@@ -21,6 +21,7 @@ import {
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
+import { requiredText } from '../../../components/shared/forms/validators';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
@@ -68,10 +69,10 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected readonly contactForm = form(this.contact, (path) => {
     // What is sent cannot change until the server answers.
     readonly(path, { when: () => this.isLoading() });
-    required(path.firstName);
-    required(path.lastName);
-    required(path.email);
-    required(path.message);
+    requiredText(path.firstName);
+    requiredText(path.lastName);
+    requiredText(path.email);
+    requiredText(path.message);
   });
   protected readonly firstNameError = this.validationText.message(this.contactForm.firstName);
   protected readonly lastNameError = this.validationText.message(this.contactForm.lastName);
