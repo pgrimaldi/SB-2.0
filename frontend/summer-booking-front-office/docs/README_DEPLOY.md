@@ -70,9 +70,26 @@ Lasciare **CORS disabilitato**: questa distribuzione serve il frontend statico e
 | `X-Frame-Options` | `DENY` | attivo |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | attivo |
 | `X-XSS-Protection` | disattivato | — |
-| `Content-Security-Policy` | disattivato per ora | — |
+| `Content-Security-Policy` | vedi "Content Security Policy" qui sotto | attivo |
 
-`X-XSS-Protection` è un header legacy e non viene abilitato. La CSP richiede invece un collaudo dedicato, inizialmente in modalità Report-Only: decisioni e policy proposta sono documentate in `SECURITY_TODO.md`.
+`X-XSS-Protection` è un header legacy e non viene abilitato.
+
+#### Content Security Policy
+
+La build non mette più script né stili inline in `index.html` (`optimization.styles.inlineCritical: false` in `angular.json`), quindi la policy può vietare ogni script che non arrivi dal nostro dominio. Valore della policy, su una riga:
+
+```text
+default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+```
+
+Si attiva in due fasi, prima su DEV e poi su PROD:
+
+1. **Report-Only (solo segnalazioni)**. CloudFront non ha questa variante tra i *Security headers*: nella stessa policy aprire **Custom headers → Add header**, nome `Content-Security-Policy-Report-Only`, valore la policy qui sopra, **Origin override** attivo. Il browser esegue tutto ma scrive in console ogni violazione (`[Report Only] Refused to …`).
+2. **Verifica**. Con la console del browser aperta, aprire ogni pagina in IT e in EN, anche dopo il login: home, popup di accesso, gestionale, magazzino con i suoi popup, datepicker, impostazioni, aggiornamento del service worker. Nessun messaggio `Refused` deve comparire. Ripetere nei giorni successivi durante l'uso normale.
+3. **Attivazione**. Togliere il custom header `Content-Security-Policy-Report-Only` e, nei **Security headers**, attivare `Content-Security-Policy` con lo stesso valore e **Origin override** attivo. Da qui il browser blocca davvero ciò che la policy non permette.
+4. **Controllo**. `curl -I https://<dominio>/` deve mostrare `content-security-policy` con il valore atteso (e non più `content-security-policy-report-only`).
+
+La policy permette solo il nostro dominio: un servizio esterno futuro (API su un altro dominio, pagamenti, mappe, analytics, font esterni) va aggiunto alla direttiva giusta (es. `connect-src`) prima di usarlo, solo con i domini indicati dalla sua documentazione, ripassando dalla fase Report-Only. Il valore della CSP in CloudFront non può superare 1783 caratteri. Decisioni e punti ancora aperti (Trusted Types, raccolta dei report) sono in `SECURITY_TODO.md`.
 
 Non attivare `includeSubDomains` o `preload` e non aumentare la durata HSTS senza aver verificato che tutti i sottodomini interessati funzionino esclusivamente in HTTPS: un'impostazione errata resta memorizzata dai browser e può rendere irraggiungibili servizi ancora HTTP.
 

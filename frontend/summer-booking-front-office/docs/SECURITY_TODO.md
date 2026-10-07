@@ -2,15 +2,21 @@
 
 Attività di sicurezza ancora da fare. Le voci si decidono insieme prima di implementarle; una volta completate si rimuovono da questo file.
 
-Aggiornato al 30/09/2026.
+Aggiornato al 07/10/2026.
 
 ## Content Security Policy severa (difesa contro XSS)
 
 ### Perché serve
 
-- Con la gestione attuale dei token un attacco XSS (script iniettato nella pagina) **non può rubare la sessione in modo duraturo**: l'access token è solo in memoria e il refresh token è in un cookie `HttpOnly` che JavaScript non legge.
-- Però, **finché la pagina è aperta**, uno script iniettato potrebbe comunque usare l'access token in memoria per chiamare le nostre API a nome dell'utente.
+- Con la gestione dei token prevista un attacco XSS (script iniettato nella pagina) **non può leggere il refresh token**: l'access token è solo in memoria e il refresh token sarà in un cookie `HttpOnly` che JavaScript non legge (oggi il cookie reale non esiste ancora: lo creerà il backend; i mock lo simulano).
+- Questo non basta a proteggere la sessione: **finché la pagina è aperta**, uno script iniettato gira con gli stessi poteri dell'app, quindi può usare l'access token in memoria e anche chiedere nuovi token con il refresh (il browser allega il cookie da solo), chiamando le nostre API a nome dell'utente. `HttpOnly` impedisce la lettura del cookie, non le azioni di uno script nella stessa pagina.
 - Angular già protegge dall'XSS (escape delle interpolazioni, sanitizzazione di `[innerHTML]`, che usiamo in `app-i18n-text` per le traduzioni). La CSP è la **seconda linea di difesa**: se per un errore nostro o di una dipendenza entrasse uno script, il browser si rifiuterebbe di eseguirlo o di mandare dati altrove.
+
+### Stato (07/10/2026, audit S04)
+
+- **Fatto nel frontend**: la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesa circa 9 KB, il costo sulla prima visualizzazione è minimo). La policy qui sotto, senza le due righe dei Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home IT/EN, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): si verifica nella fase Report-Only su DEV.
+- **Da fare in CloudFront**: fasi Report-Only e attivazione, prima DEV poi PROD, con la procedura di `README_DEPLOY.md` (sezione "Content Security Policy").
+- **Decisioni prese**: niente `autoCsp` né nonce (policy semplice, senza hash da ricalcolare); `style-src 'unsafe-inline'` accettato, perché Angular e Material inseriscono gli stili a runtime; Trusted Types e raccolta dei report rimandati (vedi sotto).
 
 ### Cosa fare
 
@@ -38,13 +44,10 @@ Aggiornato al 30/09/2026.
 
 4. **Verificare** ogni pagina in IT/EN (home, login, gestionale, magazzino, datepicker, service worker) con la console del browser aperta, e la policy con CSP Evaluator.
 
-### Da decidere prima di attivarla
+### Ancora aperto
 
-- **CSS critico inline in `index.html`**: la build di produzione oggi inserisce uno `<style>` e un `onload="this.media='all'"` inline, che `script-src 'self'` bloccherebbe. Opzioni:
-  - disattivare l'inlining del CSS critico (`optimization.styles.inlineCritical: false`): policy semplice (`script-src 'self'`), ma primo rendering un po' più lento;
-  - attivare `security.autoCsp` di Angular: calcola gli hash degli script inline in fase di build. In quel caso l'header CloudFront **non** deve contenere `default-src` né `script-src`, e non è compatibile con il rendering lato server;
-  - usare un nonce diverso per ogni risposta (`ngCspNonce`), che però richiede una funzione sull'edge (Lambda@Edge) per scriverlo nell'HTML.
-- **`style-src 'unsafe-inline'`**: Angular inserisce a runtime gli stili dei componenti come `<style>`. Senza un nonce per risposta servono stili inline permessi. Il rischio è molto minore di quello degli script, ma va accettato consapevolmente, oppure si adotta il nonce.
+- **CSS critico inline**: deciso il 07/10/2026, inlining disattivato (vedi "Stato"). Le alternative scartate erano `security.autoCsp` (hash degli script inline calcolati in build; l'header CloudFront non dovrebbe contenere `default-src` né `script-src`) e un nonce per risposta (`ngCspNonce`, richiede Lambda@Edge). Se in futuro si riattiva l'inlining, la build torna a mettere uno script inline e la policy va rivista.
+- **`style-src 'unsafe-inline'`**: accettato consapevolmente il 07/10/2026; l'alternativa sarebbe il nonce per risposta.
 - **Trusted Types** (`require-trusted-types-for 'script'`): Angular li supporta. Vanno provati in Report-Only perché bloccano anche le librerie che scrivono HTML nel DOM. Nei browser che non li supportano l'app funziona comunque.
 - **Endpoint dei report**: serve un indirizzo che raccolga le violazioni (backend nostro o servizio esterno).
 - **Servizi esterni futuri** (pagamenti Stripe, mappe, analytics, font esterni…): ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
