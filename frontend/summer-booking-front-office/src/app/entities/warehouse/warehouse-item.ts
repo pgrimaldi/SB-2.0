@@ -1,10 +1,10 @@
-export interface WarehouseItem {
-  idArticle: string;
-  name: string;
-  totalQuantity: number;
+export class WarehouseItem {
+  idArticle: string | null = null;
+  name: string | null = null;
+  totalQuantity: number | null = null;
   /** `total` minus today's consumptions. */
-  availableQuantity: number;
-  thresholdQuantity: number | null;
+  availableQuantity: number | null = null;
+  thresholdQuantity: number | null = null;
   /** Only with a threshold above 0. */
-  isThresholdWarningActive: boolean;
+  isThresholdWarningActive = false;
 }

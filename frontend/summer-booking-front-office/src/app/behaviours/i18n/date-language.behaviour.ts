@@ -1,7 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, computed, effect, inject } from '@angular/core';
 import { DateAdapter, MatDateFormats } from '@angular/material/core';
-import { Language, LanguageBehaviour } from './language.behaviour';
+import { DatePart } from '../../entities/shared/date-part';
+import { Language } from '../../entities/shared/language';
+import { LanguageBehaviour } from './language.behaviour';
 
 /** Used when the browser does not name a region for the language. */
 const DATE_LOCALES: Record<Language, string> = { it: 'it-IT', en: 'en-GB' };
@@ -17,8 +19,6 @@ export const DATE_FORMATS: MatDateFormats = {
     monthYearA11yLabel: { month: 'long', year: 'numeric' },
   },
 };
-
-type DatePart = 'day' | 'month' | 'year';
 
 /**
  * Sets the locale of Material's date adapter, so all calendars and date fields follow the language

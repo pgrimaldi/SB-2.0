@@ -36,7 +36,7 @@ export class FilledTextField {
   /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
   readonly readonly = input(false);
   readonly disabled = input(false);
-  readonly value = model('');
+  readonly value = model<string | null>(null);
   readonly maxLength = input<number>();
   readonly type = input<'text' | 'password'>('text');
   /** Ids of the page elements that name the field, when its label is not above it. */

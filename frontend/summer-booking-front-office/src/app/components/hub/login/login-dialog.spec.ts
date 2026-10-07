@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
@@ -43,6 +43,23 @@ describe('LoginDialog', () => {
     return { fixture, open };
   };
 
+  /** Email and password are required: without them Accedi sends nothing. */
+  const signInWithCredentials = async (fixture: ComponentFixture<unknown>) => {
+    const [email, password] = document.querySelectorAll<HTMLInputElement>(
+      'mat-dialog-container input:not([type="checkbox"])',
+    );
+    for (const [input, text] of [
+      [email, 'utente@example.com'],
+      [password, 'password-di-prova'],
+    ] as const) {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+    }
+    await fixture.whenStable();
+    document.querySelector<HTMLFormElement>('mat-dialog-container form')!.requestSubmit();
+    await fixture.whenStable();
+  };
+
   const signInError = async (answer: () => Observable<never>) => {
     TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: answer } });
     const { fixture } = await setup(false);
@@ -58,8 +75,7 @@ describe('LoginDialog', () => {
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
 
-    document.querySelector<HTMLFormElement>('mat-dialog-container form')!.requestSubmit();
-    await fixture.whenStable();
+    await signInWithCredentials(fixture);
     return document.querySelector('.login__dialog__error')?.textContent?.trim();
   };
 
@@ -100,8 +116,7 @@ describe('LoginDialog', () => {
       document.querySelector<HTMLButtonElement>('mat-dialog-container button[type="submit"]')!;
     host.open.set(true);
     await fixture.whenStable();
-    document.querySelector<HTMLFormElement>('mat-dialog-container form')!.requestSubmit();
-    await fixture.whenStable();
+    await signInWithCredentials(fixture);
 
     host.open.set(false); // closed while the server has not answered yet
     await fixture.whenStable();

@@ -3,13 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, forkJoin } from 'rxjs';
-
-export type Language = 'it' | 'en';
-
-export interface LanguageOption {
-  code: Language;
-  flagSrc: string;
-}
+import { Language, LanguageOption } from '../../entities/shared/language';
 
 const DEFAULT_LANGUAGE: Language = 'it';
 const STORAGE_KEY = 'sb.language';

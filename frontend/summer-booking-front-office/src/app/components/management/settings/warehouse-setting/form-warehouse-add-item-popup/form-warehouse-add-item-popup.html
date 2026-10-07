@@ -19,18 +19,20 @@
         [isMandatory]="true"
         [placeholder]="'management.settings.warehouse.form.choose' | translate"
         [options]="articleOptions()"
-        [(value)]="idArticle"
+        [formField]="draftForm.idArticle"
+        [error]="idArticleError()"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.quantity' | translate"
         [isMandatory]="true"
-        [(value)]="articleQuantity"
+        [formField]="draftForm.totalQuantity"
+        [error]="totalQuantityError()"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.threshold' | translate"
-        [(value)]="thresholdQuantity"
+        [formField]="draftForm.thresholdQuantity"
       />
-      <app-toggle [disabled]="!canAlert()" [(checked)]="thresholdAlert">
+      <app-toggle [formField]="draftForm.isThresholdWarningActive">
         {{ 'management.settings.warehouse.form.threshold_alert' | translate }}
       </app-toggle>
     </div>

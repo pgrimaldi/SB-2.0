@@ -26,10 +26,7 @@ import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popu
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import {
-  ContactSupportFields,
-  EMPTY_CONTACT_SUPPORT_FIELDS,
-} from '../../../entities/settings/contact-support/contact-support-request';
+import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { SystemService } from '../../../services/api/system/system.service';
@@ -67,7 +64,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected readonly emailIcon = '/assets/images/email.svg';
   protected readonly clockIcon = '/assets/images/clock.svg';
 
-  private readonly contact = signal<ContactSupportFields>({ ...EMPTY_CONTACT_SUPPORT_FIELDS });
+  private readonly contact = signal(new ContactSupportRequest());
   protected readonly contactForm = form(this.contact, (path) => {
     // What is sent cannot change until the server answers.
     readonly(path, { when: () => this.isLoading() });
@@ -121,23 +118,24 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     if (this.isLoading() || !idProperty || this.contactForm().invalid()) {
       return;
     }
-    const { firstName, lastName, email, mobilePhone, message } = this.contact();
+    const contact = this.contact();
     this.isLoading.set(true);
     this.error.set(null);
     this.system
       .contactSupport({
+        ...contact,
         idProperty,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim(),
-        mobilePhone: mobilePhone.trim() || null,
-        message: message.trim(),
+        firstName: trimmed(contact.firstName),
+        lastName: trimmed(contact.lastName),
+        email: trimmed(contact.email),
+        mobilePhone: trimmed(contact.mobilePhone),
+        message: trimmed(contact.message),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.contact.set({ ...EMPTY_CONTACT_SUPPORT_FIELDS });
+          this.contact.set(new ContactSupportRequest());
           this.contactForm().reset();
           this.sent.set(true);
         },
@@ -155,4 +153,8 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+function trimmed(text: string | null): string | null {
+  return text?.trim() || null;
 }

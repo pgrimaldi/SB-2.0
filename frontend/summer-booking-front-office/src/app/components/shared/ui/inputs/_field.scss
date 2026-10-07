@@ -22,6 +22,10 @@
         outlined-focus-outline-color: var(--color__main__theme__one),
         outlined-input-text-color: var(--color__main__theme__two),
         outlined-caret-color: var(--color__main__theme__one),
+        outlined-error-outline-color: var(--color__layout__error),
+        outlined-error-hover-outline-color: var(--color__layout__error),
+        outlined-error-focus-outline-color: var(--color__layout__error),
+        outlined-error-caret-color: var(--color__layout__error),
       )
     );
   }
@@ -37,5 +41,13 @@
   .#{$block}__mandatory {
     margin-left: 0.125rem;
     color: var(--color__layout__error);
+  }
+
+  // Closer to its field than the label above (the host gap is 0.5rem).
+  .#{$block}__error {
+    margin: -0.25rem 0 0;
+    color: var(--color__layout__error);
+    font-size: 0.75rem;
+    line-height: 1rem;
   }
 }

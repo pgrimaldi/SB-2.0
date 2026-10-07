@@ -17,6 +17,9 @@ import {
   timer,
 } from 'rxjs';
 import { AuthSession, AuthUser, SignInRequest } from '../../entities/auth/credentials';
+import { LogoutOutcome } from '../../entities/auth/logout-outcome';
+import { Session } from '../../entities/auth/session';
+import { TabMessage } from '../../entities/auth/tab-message';
 import { AuthService } from '../../services/api/auth/auth.service';
 import { AUTH_LOCK } from './auth-lock';
 
@@ -39,19 +42,6 @@ const CHANNEL_NAME = 'sb-auth';
 export const LOGOUT_RETRY_DELAY = 1000;
 /** A call on the refresh cookie that has not answered by then fails, and the next one can start. */
 export const COOKIE_CALL_TIMEOUT = 15_000;
-
-interface Session {
-  accessToken: string;
-  user: AuthUser;
-}
-
-/** Between the tabs: always for one session, so an old message cannot reach a newer one. */
-interface TabMessage {
-  type: 'signin' | 'logout';
-  session: string;
-}
-
-type LogoutOutcome = 'revoked' | 'failed' | 'gone';
 
 /**
  * Signed-in session (OWASP guidance for single-page apps):

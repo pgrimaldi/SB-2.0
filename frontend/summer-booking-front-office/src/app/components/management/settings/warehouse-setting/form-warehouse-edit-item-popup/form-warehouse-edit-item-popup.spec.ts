@@ -154,10 +154,9 @@ describe('FormWarehouseEditItemPopup', () => {
 
     save().click();
     await fixture.whenStable();
-    expect(editWarehouseItem).toHaveBeenCalledWith({
-      idProperty: 'p1',
-      idItem: 'a1',
-      articleQuantity: 100,
+    expect(editWarehouseItem).toHaveBeenCalledWith('p1', {
+      ...LETTINO,
+      totalQuantity: 100,
       thresholdQuantity: 8,
       isThresholdWarningActive: false,
     });

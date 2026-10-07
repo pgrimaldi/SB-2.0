@@ -14,12 +14,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormField, form, required, submit } from '@angular/forms/signals';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
+import { SignInRequest } from '../../../entities/auth/credentials';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
@@ -52,7 +55,7 @@ const MOBILE_QUERY = '(width < 48rem)';
 /** Password recovery and registration are not wired yet. */
 @Component({
   selector: 'app-login-dialog',
-  imports: [Button, Checkbox, I18nText, PasswordField, TextField, TranslatePipe],
+  imports: [Button, Checkbox, FormField, I18nText, PasswordField, TextField, TranslatePipe],
   templateUrl: './login-dialog.html',
   styleUrl: './login-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,13 +68,22 @@ export class LoginDialog implements OnDestroy {
 
   private readonly authBehaviour = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly validationText = inject(ValidationTextBehaviour);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly window = inject(DOCUMENT).defaultView;
 
-  protected readonly email = signal('');
-  protected readonly password = signal('');
-  protected readonly remember = signal(false);
+  private readonly credentials = signal(new SignInRequest());
+  protected readonly credentialsForm = form(
+    this.credentials,
+    (path) => {
+      required(path.username);
+      required(path.password);
+    },
+    { name: 'login' },
+  );
+  protected readonly usernameError = this.validationText.message(this.credentialsForm.username);
+  protected readonly passwordError = this.validationText.message(this.credentialsForm.password);
   protected readonly pending = signal(false);
   protected readonly error = signal<ApiProblem | null>(null);
   protected readonly errorKey = toSignal(
@@ -106,18 +118,22 @@ export class LoginDialog implements OnDestroy {
     if (this.pending()) {
       return;
     }
+    // Every field becomes touched, so each shows its error; nothing is sent while one is wrong.
+    void submit(this.credentialsForm, async () => {
+      this.send();
+      return undefined;
+    });
+  }
 
+  private send(): void {
     // Closing the popup does not stop the attempt: the server may already have opened the session.
     // Until it answers the button keeps its spinner, also in the popup opened again.
     const opening = this.opening;
     this.pending.set(true);
     this.error.set(null);
+    const credentials = this.credentials();
     this.authBehaviour
-      .signIn({
-        username: this.email().trim(),
-        password: this.password(),
-        remember: this.remember(),
-      })
+      .signIn({ ...credentials, username: credentials.username?.trim() ?? null })
       .subscribe({
         next: () => {
           this.pending.set(false);
@@ -138,6 +154,7 @@ export class LoginDialog implements OnDestroy {
       return;
     }
     this.opening++;
+    this.reset();
     this.followScreen();
     const dialogRef = this.dialog.open(this.content(), {
       width: this.width(),
@@ -178,9 +195,8 @@ export class LoginDialog implements OnDestroy {
   }
 
   private reset(): void {
-    this.email.set('');
-    this.password.set('');
-    this.remember.set(false);
+    this.credentials.set(new SignInRequest());
+    this.credentialsForm().reset();
     this.error.set(null);
   }
 
@@ -194,7 +210,7 @@ export class LoginDialog implements OnDestroy {
       this.close();
     }
     if (!this.dialogRef) {
-      // No new popup opened meanwhile.
+      // No new popup opened meanwhile. Emptied here too: the typed password does not stay in memory.
       this.stopFollowingScreen();
       this.reset();
     }

@@ -1,8 +1,8 @@
-export interface SignInRequest {
-  username: string;
-  password: string;
+export class SignInRequest {
+  username: string | null = null;
+  password: string | null = null;
   /** The server keeps the refresh cookie after the browser is closed. */
-  remember: boolean;
+  remember = false;
 }
 
 export interface AuthUser {
@@ -11,11 +11,6 @@ export interface AuthUser {
   roles: string[];
 }
 
-/**
- * Answer of `POST /api/auth/signin` and `POST /api/auth/refresh`. The access token is opaque to the
- * app (never decoded) and lives only in memory. The refresh token is not here: the server keeps it in
- * an HttpOnly, Secure, SameSite=Strict cookie that JavaScript cannot read.
- */
 export interface AuthSession {
   accessToken: string;
   /** Seconds the access token is valid for. */

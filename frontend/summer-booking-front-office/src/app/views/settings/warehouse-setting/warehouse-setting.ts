@@ -81,8 +81,8 @@ export class WarehouseSetting {
     },
   ]);
   protected readonly rowActions = standardRowActions<WarehouseItem>({
-    delete: (item) => this.askDelete([item.idArticle], item.name),
-    duplicate: (item) => this.askDuplicate([item.idArticle], item.name),
+    delete: ({ idArticle, name }) => idArticle && this.askDelete([idArticle], name),
+    duplicate: ({ idArticle, name }) => idArticle && this.askDuplicate([idArticle], name),
     edit: (item) => this.editItem(item),
   });
 

@@ -21,15 +21,15 @@
     [disabled]="disabled()"
     [type]="inputType()"
     [id]="id"
-    [value]="value()"
+    [value]="value() ?? ''"
     [placeholder]="placeholder() ?? ''"
     [attr.maxlength]="maxLength() ?? null"
-    [attr.name]="name() ?? null"
+    [name]="name() ?? ''"
     [attr.autocomplete]="autocomplete() ?? null"
     [attr.aria-labelledby]="labelledBy() ?? null"
     [errorStateMatcher]="errorMatcher"
     [attr.aria-describedby]="error() ? id + '-error' : null"
-    (input)="value.set(field.value)"
+    (input)="value.set(field.value || null)"
     (blur)="touch.emit()"
   />
   @if (type() === 'password') {

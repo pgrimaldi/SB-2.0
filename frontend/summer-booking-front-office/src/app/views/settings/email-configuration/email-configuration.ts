@@ -42,12 +42,9 @@ import { SelectOption } from '../../../components/shared/ui/selects/select/selec
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import {
   EMAIL_CONFIGURATION_MASKED_FIELDS,
-  EmailConfigurationFields,
   EmailConfigurationRequest,
   MAX_SMTP_PORT,
   SMTP_CONNECTION_FIELDS,
-  SmtpConnection,
-  smtpConnectionOf,
 } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { SmtpSecurity } from '../../../entities/settings/email-configuration/email-configuration-data';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
@@ -94,24 +91,16 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   /** No currency: only the eye. */
   protected readonly portIcons = ['', ...this.eyeIcons] as const;
 
-  private readonly configuration = signal<EmailConfigurationFields>({
-    senderMailAddress: '',
-    senderName: '',
-    smtpServerAddress: '',
-    smtpPort: null,
-    smtpUsername: '',
-    smtpPassword: '',
-    smtpSecurity: null,
-  });
+  private readonly configuration = signal(new EmailConfigurationRequest());
   /** "Sì" of "Vuoi sovrascrivere le impostazioni predefinite?": until then every field is read-only. */
   protected readonly editable = signal(false);
   /** The server has a password saved (it never sends it). */
   protected readonly passwordSaved = signal(false);
   /**
-   * The connection the saved password belongs to, as the server last answered or saved it: only
-   * these four values, never the password.
+   * The values the saved password belongs to, as the server last answered or saved them; never with
+   * the password.
    */
-  private readonly savedConnection = signal<SmtpConnection | null>(null);
+  private readonly savedConnection = signal<EmailConfigurationRequest | null>(null);
   /** Goes up with every save that succeeds: a reading started before it answers older values. */
   private savesDone = 0;
   /**
@@ -123,7 +112,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     return (
       this.passwordSaved() &&
       !!saved &&
-      SMTP_CONNECTION_FIELDS.some((field) => this.configuration()[field] !== saved[field])
+      // An emptied field is null, while the server may answer an empty text.
+      SMTP_CONNECTION_FIELDS.some(
+        (field) => (this.configuration()[field] || null) !== (saved[field] || null),
+      )
     );
   });
   /** The last reading arrived: nothing can be changed before the values of the server are there. */
@@ -143,11 +135,11 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   });
   /** Under each field: what is wrong in it, found here or by the backend. */
   protected readonly fieldErrors = Object.fromEntries(
-    (Object.keys(this.configuration()) as (keyof EmailConfigurationFields)[]).map((name) => [
+    (Object.keys(this.configuration()) as (keyof EmailConfigurationRequest)[]).map((name) => [
       name,
       this.validationText.message(this.configurationForm[name]),
     ]),
-  ) as Readonly<Record<keyof EmailConfigurationFields, Signal<string | null>>>;
+  ) as Readonly<Record<keyof EmailConfigurationRequest, Signal<string | null>>>;
   private readonly securityTexts = toSignal(
     this.translateService.stream(
       'management.settings.email_configuration.security',
@@ -207,9 +199,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
               return; // the values just saved are newer than this answer
             }
             const { hasSmtpPassword, ...fields } = data;
-            this.configuration.set({ ...fields, smtpPassword: '' });
+            const configuration = { ...fields, idProperty, smtpPassword: null };
+            this.configuration.set(configuration);
             this.passwordSaved.set(hasSmtpPassword);
-            this.savedConnection.set(smtpConnectionOf(fields));
+            this.savedConnection.set(configuration);
             this.configurationForm().reset();
             this.loaded.set(true);
           },
@@ -245,11 +238,11 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       (sent) => {
         // From what was sent, not from the form: a reading may have changed it meanwhile. The
         // password, now saved, leaves the page: the field is empty again.
-        const { idProperty, smtpPassword, ...savedFields } = sent;
+        const savedValues = { ...sent, smtpPassword: null };
         this.savesDone++;
-        this.passwordSaved.update((saved) => saved || smtpPassword !== null);
-        this.savedConnection.set(smtpConnectionOf(savedFields));
-        this.configuration.set({ ...savedFields, smtpPassword: '' });
+        this.passwordSaved.update((saved) => saved || sent.smtpPassword !== null);
+        this.savedConnection.set(savedValues);
+        this.configuration.set(savedValues);
         this.configurationForm().reset();
         this.saved.set(true);
       },
@@ -273,8 +266,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       isRunning.set(true);
       this.error.set(null);
       try {
-        const { smtpPassword, ...fields } = this.configuration();
-        const request = { idProperty, ...fields, smtpPassword: smtpPassword || null };
+        const request = { ...this.configuration(), idProperty };
         await firstValueFrom(call(request));
         done(request);
         return undefined;

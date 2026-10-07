@@ -2,10 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ManagementRequest } from '../../../entities/management/management-request';
 import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
+import { SupportInfoRequest } from '../../../entities/settings/contact-support/support-info-request';
 import { EmailConfigurationData } from '../../../entities/settings/email-configuration/email-configuration-data';
+import { EmailConfigurationDataRequest } from '../../../entities/settings/email-configuration/email-configuration-data-request';
 import { EmailConfigurationRequest } from '../../../entities/settings/email-configuration/email-configuration-request';
 
 @Injectable({ providedIn: 'root' })
@@ -13,14 +14,12 @@ export class SystemService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/system`;
 
-  readonly supportInfo = (
-    request: Pick<ManagementRequest, 'idProperty'>,
-  ): Observable<SupportInfo> =>
+  readonly supportInfo = (request: SupportInfoRequest): Observable<SupportInfo> =>
     this.httpClient.post<SupportInfo>(`${this.endpoint}/info-support`, request);
 
   /** GET: the property travels in the query string (`?idProperty=…`). */
   readonly emailConfiguration = (
-    request: Pick<ManagementRequest, 'idProperty'>,
+    request: EmailConfigurationDataRequest,
   ): Observable<EmailConfigurationData> =>
     this.httpClient.get<EmailConfigurationData>(`${this.endpoint}/email-configuration`, {
       params: { idProperty: request.idProperty },

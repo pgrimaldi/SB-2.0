@@ -27,7 +27,7 @@ export class FilledTextarea {
   /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
   readonly readonly = input(false);
   readonly disabled = input(false);
-  readonly value = model('');
+  readonly value = model<string | null>(null);
   readonly rows = input(3);
   readonly maxLength = input<number>();
   readonly name = input<string>();

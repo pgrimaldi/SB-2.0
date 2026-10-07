@@ -7,12 +7,12 @@ import {
   computed,
   effect,
   inject,
-  linkedSignal,
   output,
   signal,
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormField, disabled, form, required } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
@@ -22,10 +22,13 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
+import { greaterThan } from '../../../../shared/forms/validators';
 import { Button } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
@@ -37,7 +40,7 @@ let nextId = 0;
 
 @Component({
   selector: 'app-form-warehouse-add-item-popup',
-  imports: [Button, FilledNumberField, FilledSelect, Toggle, TranslatePipe],
+  imports: [Button, FilledNumberField, FilledSelect, FormField, Toggle, TranslatePipe],
   templateUrl: './form-warehouse-add-item-popup.html',
   styleUrl: './form-warehouse-add-item-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +52,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly validationText = inject(ValidationTextBehaviour);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly added = output<void>();
@@ -57,20 +61,22 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
     this.articles().map(({ id, value }) => ({ value: id, label: value })),
   );
-  protected readonly idArticle = signal<string | null>(null);
-  protected readonly articleQuantity = signal<number | null>(null);
-  protected readonly thresholdQuantity = signal<number | null>(null);
-  protected readonly canAlert = computed(() => (this.thresholdQuantity() ?? 0) > 0);
-  /** Goes off by itself when the threshold is no longer above 0. */
-  protected readonly thresholdAlert = linkedSignal<boolean, boolean>({
-    source: this.canAlert,
-    computation: (canAlert, previous) => canAlert && (previous?.value ?? false),
+  private readonly draft = signal(new WarehouseItem());
+  protected readonly draftForm = form(this.draft, (path) => {
+    required(path.idArticle);
+    greaterThan(path.totalQuantity, 0);
+    disabled(
+      path.isThresholdWarningActive,
+      ({ valueOf }) => (valueOf(path.thresholdQuantity) ?? 0) <= 0,
+    );
   });
-  protected readonly isLoading = signal(false);
-  /** Minimal check: the full validation will come later. */
-  protected readonly canAdd = computed(
-    () => this.idArticle() !== null && (this.articleQuantity() ?? 0) > 0,
+  protected readonly idArticleError = this.validationText.message(this.draftForm.idArticle);
+  protected readonly totalQuantityError = this.validationText.message(
+    this.draftForm.totalQuantity,
+    'management.settings.warehouse.form.field_names.total',
   );
+  protected readonly isLoading = signal(false);
+  protected readonly canAdd = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -85,6 +91,12 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     super();
     this.unsaved.watch(this);
     effect(() => {
+      // Off once the threshold is no longer above 0, and still off when a threshold is typed again.
+      if (this.draftForm.isThresholdWarningActive().disabled()) {
+        untracked(() => this.draftForm.isThresholdWarningActive().value.set(false));
+      }
+    });
+    effect(() => {
       if (this.open()) {
         untracked(() => {
           this.reset();
@@ -96,21 +108,13 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
 
   protected add(): void {
     const idProperty = this.auth.user()?.idProperty;
-    const idArticle = this.idArticle();
-    const articleQuantity = this.articleQuantity();
-    if (this.isLoading() || !idProperty || idArticle === null || articleQuantity === null) {
+    if (this.isLoading() || !idProperty || !this.canAdd()) {
       return;
     }
     this.isLoading.set(true);
     this.error.set(null);
     this.warehouse
-      .addWarehouseItem({
-        idProperty,
-        idArticle,
-        articleQuantity,
-        thresholdQuantity: this.thresholdQuantity(),
-        isThresholdWarningActive: this.thresholdAlert(),
-      })
+      .addWarehouseItem(idProperty, this.draft())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -126,12 +130,13 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   }
 
   hasUnsavedChanges(): boolean {
+    const { idArticle, totalQuantity, thresholdQuantity, isThresholdWarningActive } = this.draft();
     return (
       this.open() &&
-      (this.idArticle() !== null ||
-        this.articleQuantity() !== null ||
-        this.thresholdQuantity() !== null ||
-        this.thresholdAlert())
+      (idArticle !== null ||
+        totalQuantity !== null ||
+        thresholdQuantity !== null ||
+        isThresholdWarningActive)
     );
   }
 
@@ -164,10 +169,8 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   }
 
   private reset(): void {
-    this.idArticle.set(null);
-    this.articleQuantity.set(null);
-    this.thresholdQuantity.set(null);
-    this.thresholdAlert.set(false);
+    this.draft.set(new WarehouseItem());
+    this.draftForm().reset();
     this.error.set(null);
   }
 

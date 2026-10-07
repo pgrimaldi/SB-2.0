@@ -4,10 +4,8 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
-import { AddWarehouseItemRequest } from '../../../entities/warehouse/add-warehouse-item-request';
 import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-warehouse-items-request';
 import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
-import { EditWarehouseItemRequest } from '../../../entities/warehouse/edit-warehouse-item-request';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
@@ -229,7 +227,7 @@ export const warehouseComboboxMock = (
 };
 
 /**
- * `POST /api/warehouse/add-warehouse-item` with `AddWarehouseItemRequest`: adds the pieces to the total
+ * `POST /api/warehouse/add-warehouse-item` with the new row and `idProperty`: adds the pieces to the total
  * of the article and sets its threshold and threshold alert (until the page is reloaded); 204 without
  * a body. 401 without a valid access token; 400 with one error per wrong field (see `itemErrors`).
  */
@@ -237,8 +235,8 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<AddWarehouseItemRequest>;
-  const { item, errors } = itemErrors(body, body.idArticle, 'idArticle');
+  const body = (request.body ?? {}) as ItemBody;
+  const { item, errors } = itemErrors(body);
   if (errors.length || !item) {
     return problem(request, 400, 'validation.invalid_request', {
       title: 'Invalid request',
@@ -246,13 +244,13 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
     });
   }
 
-  item.totalQuantity += body.articleQuantity as number;
+  item.totalQuantity += body.totalQuantity as number;
   setThreshold(item, body);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `POST /api/warehouse/edit-warehouse-item` with `EditWarehouseItemRequest`: sets total, threshold and
+ * `POST /api/warehouse/edit-warehouse-item` with the row and `idProperty`: sets total, threshold and
  * threshold alert of the article (until the page is reloaded); 204 without a body. 401 without a valid
  * access token; 400 with one error per wrong field (see `itemErrors`).
  */
@@ -262,8 +260,8 @@ export const warehouseEditMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<EditWarehouseItemRequest>;
-  const { item, errors } = itemErrors(body, body.idItem, 'idItem');
+  const body = (request.body ?? {}) as ItemBody;
+  const { item, errors } = itemErrors(body);
   if (errors.length || !item) {
     return problem(request, 400, 'validation.invalid_request', {
       title: 'Invalid request',
@@ -271,7 +269,7 @@ export const warehouseEditMock = (
     });
   }
 
-  item.totalQuantity = body.articleQuantity as number;
+  item.totalQuantity = body.totalQuantity as number;
   setThreshold(item, body);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -380,16 +378,14 @@ function copyName(item: InventoryRow): string {
   return copy;
 }
 
+type ItemBody = Partial<WarehouseItem & { idProperty: string }>;
+
 /** Checks as the backend answers them: one error per wrong field. */
-function itemErrors(
-  body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
-  id: unknown,
-  field: 'idArticle' | 'idItem',
-): { item?: InventoryRow; errors: MockFieldError[] } {
+function itemErrors(body: ItemBody): { item?: InventoryRow; errors: MockFieldError[] } {
   const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
   const item = INVENTORY_ITEMS.find(
     (row) =>
-      row.publicId === id &&
+      row.publicId === body.idArticle &&
       row.propertyId === property?.id &&
       row.isActive &&
       row.deletedAt === null,
@@ -400,10 +396,10 @@ function itemErrors(
     errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
   }
   if (!item) {
-    errors.push({ field, code: 'validation.invalid_value' });
+    errors.push({ field: 'idArticle', code: 'validation.invalid_value' });
   }
-  if (!wholeNumber(body.articleQuantity) || body.articleQuantity === 0) {
-    errors.push({ field: 'articleQuantity', code: 'validation.invalid_value' });
+  if (!wholeNumber(body.totalQuantity) || body.totalQuantity === 0) {
+    errors.push({ field: 'totalQuantity', code: 'validation.invalid_value' });
   }
   if (thresholdQuantity !== null && !wholeNumber(thresholdQuantity)) {
     errors.push({ field: 'thresholdQuantity', code: 'validation.invalid_value' });
@@ -418,10 +414,7 @@ function itemErrors(
   return { item, errors };
 }
 
-function setThreshold(
-  item: InventoryRow,
-  body: Partial<Omit<AddWarehouseItemRequest, 'idArticle'>>,
-): void {
+function setThreshold(item: InventoryRow, body: ItemBody): void {
   item.lowStockThreshold = body.thresholdQuantity as number | null;
   item.isThresholdWarningActive = body.isThresholdWarningActive as boolean;
 }
@@ -470,7 +463,7 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 
   // The server decides where to search: the mock looks in the article name, ignoring case.
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = search ? items.filter((item) => item.name.toLowerCase().includes(search)) : items;
+  const found = search ? items.filter((item) => item.name?.toLowerCase().includes(search)) : items;
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;

@@ -8,13 +8,12 @@ import {
   effect,
   inject,
   input,
-  linkedSignal,
   output,
   signal,
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form } from '@angular/forms/signals';
+import { FormField, disabled, form } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
@@ -26,10 +25,6 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import {
-  EditWarehouseItemRequest,
-  EditedWarehouseQuantities,
-} from '../../../../../entities/warehouse/edit-warehouse-item-request';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
@@ -66,31 +61,25 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
 
   protected readonly articleOptions = computed<readonly SelectOption[]>(() => {
     const item = this.item();
-    return item ? [{ value: item.idArticle, label: item.name }] : [];
+    return item?.idArticle ? [{ value: item.idArticle, label: item.name ?? '' }] : [];
   });
-  protected readonly idArticle = computed(() => this.item()?.idArticle ?? null);
-  private readonly quantities = signal<EditedWarehouseQuantities>({
-    articleQuantity: null,
-    thresholdQuantity: null,
+  protected readonly draft = signal(new WarehouseItem());
+  protected readonly draftForm = form(this.draft, (path) => {
+    greaterThan(path.totalQuantity, 0);
+    disabled(
+      path.isThresholdWarningActive,
+      ({ valueOf }) => (valueOf(path.thresholdQuantity) ?? 0) <= 0,
+    );
   });
-  protected readonly quantitiesForm = form(this.quantities, (path) => {
-    greaterThan(path.articleQuantity, 0);
-  });
-  protected readonly articleQuantityError = this.validationText.message(
-    this.quantitiesForm.articleQuantity,
+  protected readonly totalQuantityError = this.validationText.message(
+    this.draftForm.totalQuantity,
     'management.settings.warehouse.form.field_names.total',
   );
-  protected readonly canAlert = computed(() => (this.quantities().thresholdQuantity ?? 0) > 0);
-  /** Goes off by itself when the threshold is no longer above 0. */
-  protected readonly thresholdAlert = linkedSignal<boolean, boolean>({
-    source: this.canAlert,
-    computation: (canAlert, previous) => canAlert && (previous?.value ?? false),
-  });
   protected readonly isLoading = signal(false);
   /** The values the popup opened with: changed ones are unsaved. */
-  private opened: EditWarehouseItemRequest | null = null;
+  private opened: WarehouseItem | null = null;
   protected readonly canSave = computed(
-    () => this.idArticle() !== null && this.quantitiesForm().valid(),
+    () => this.draft().idArticle !== null && this.draftForm().valid(),
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -106,6 +95,12 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     super();
     this.unsaved.watch(this);
     effect(() => {
+      // Off once the threshold is no longer above 0, and still off when a threshold is typed again.
+      if (this.draftForm.isThresholdWarningActive().disabled()) {
+        untracked(() => this.draftForm.isThresholdWarningActive().value.set(false));
+      }
+    });
+    effect(() => {
       if (this.open()) {
         untracked(() => this.fill());
       }
@@ -114,21 +109,13 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
 
   protected save(): void {
     const idProperty = this.auth.user()?.idProperty;
-    const idItem = this.idArticle();
-    const { articleQuantity, thresholdQuantity } = this.quantities();
-    if (this.isLoading() || !idProperty || idItem === null || articleQuantity === null) {
+    if (this.isLoading() || !idProperty || !this.canSave()) {
       return;
     }
     this.isLoading.set(true);
     this.error.set(null);
     this.warehouse
-      .editWarehouseItem({
-        idProperty,
-        idItem,
-        articleQuantity,
-        thresholdQuantity,
-        isThresholdWarningActive: this.thresholdAlert(),
-      })
+      .editWarehouseItem(idProperty, this.draft())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -147,11 +134,11 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     if (!this.open() || !this.opened) {
       return false;
     }
-    const quantities = this.quantities();
+    const draft = this.draft();
     return (
-      quantities.articleQuantity !== this.opened.articleQuantity ||
-      quantities.thresholdQuantity !== this.opened.thresholdQuantity ||
-      this.thresholdAlert() !== this.opened.isThresholdWarningActive
+      draft.totalQuantity !== this.opened.totalQuantity ||
+      draft.thresholdQuantity !== this.opened.thresholdQuantity ||
+      draft.isThresholdWarningActive !== this.opened.isThresholdWarningActive
     );
   }
 
@@ -185,24 +172,17 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
 
   private fill(): void {
     const item = this.item();
-    const idProperty = this.auth.user()?.idProperty;
-    const thresholdQuantity = item?.thresholdQuantity ?? null;
-    this.quantities.set({ articleQuantity: item?.totalQuantity ?? null, thresholdQuantity });
-    this.quantitiesForm().reset();
-    // Set by hand the alert would win over the threshold: checked here too.
-    this.thresholdAlert.set(
-      (item?.isThresholdWarningActive ?? false) && (thresholdQuantity ?? 0) > 0,
-    );
-    this.opened =
-      item && idProperty
-        ? {
-            idProperty,
-            idItem: item.idArticle,
-            articleQuantity: item.totalQuantity,
-            thresholdQuantity,
-            isThresholdWarningActive: this.thresholdAlert(),
-          }
-        : null;
+    const draft = item
+      ? {
+          ...item,
+          // Checked here too: `opened` is taken before the effect turns the alert off.
+          isThresholdWarningActive:
+            item.isThresholdWarningActive && (item.thresholdQuantity ?? 0) > 0,
+        }
+      : new WarehouseItem();
+    this.draft.set(draft);
+    this.draftForm().reset();
+    this.opened = item ? draft : null;
     this.error.set(null);
   }
 

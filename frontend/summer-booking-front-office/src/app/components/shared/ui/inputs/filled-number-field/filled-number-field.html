@@ -35,7 +35,7 @@
     [attr.inputmode]="decimal() ? 'decimal' : 'numeric'"
     [id]="id"
     [value]="text()"
-    [attr.name]="name() ?? null"
+    [name]="name() ?? ''"
     [attr.aria-labelledby]="labelledBy() ?? null"
     [errorStateMatcher]="errorMatcher"
     [attr.aria-describedby]="error() ? id + '-error' : null"

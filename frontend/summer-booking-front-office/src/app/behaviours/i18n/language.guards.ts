@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, CanMatchFn, RedirectFunction } from '@angular/router';
-import { Language, LanguageBehaviour } from './language.behaviour';
+import { Language } from '../../entities/shared/language';
+import { LanguageBehaviour } from './language.behaviour';
 
 /** Matches the `:lang` segment only for supported languages; anything else falls through to 404. */
 export const languageMatchGuard: CanMatchFn = (_route, segments) =>

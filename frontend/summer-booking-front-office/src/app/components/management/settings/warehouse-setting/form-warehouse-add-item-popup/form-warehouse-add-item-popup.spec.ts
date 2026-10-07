@@ -6,6 +6,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseAddItemPopup } from './form-warehouse-add-item-popup';
 
@@ -220,10 +221,10 @@ describe('FormWarehouseAddItemPopup', () => {
 
     add().click();
     await fixture.whenStable();
-    expect(addWarehouseItem).toHaveBeenCalledWith({
-      idProperty: 'p1',
+    expect(addWarehouseItem).toHaveBeenCalledWith('p1', {
+      ...new WarehouseItem(),
       idArticle: 'a2',
-      articleQuantity: 7,
+      totalQuantity: 7,
       thresholdQuantity: 2,
       isThresholdWarningActive: true,
     });

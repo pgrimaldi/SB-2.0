@@ -109,11 +109,11 @@ export const saveEmailConfigurationMock = (
   }
   const body = request.body as EmailConfigurationRequest;
   Object.assign(EMAIL_CONFIGURATION, {
-    senderMailAddress: body.senderMailAddress,
-    senderName: body.senderName,
-    smtpServerAddress: body.smtpServerAddress,
+    senderMailAddress: body.senderMailAddress as string,
+    senderName: body.senderName as string,
+    smtpServerAddress: body.smtpServerAddress as string,
     smtpPort: body.smtpPort as number,
-    smtpUsername: body.smtpUsername,
+    smtpUsername: body.smtpUsername as string,
     smtpSecurity: body.smtpSecurity as SmtpSecurity,
   });
   smtpPassword = body.smtpPassword ?? smtpPassword;

@@ -16,23 +16,23 @@
       <app-text-field
         [attr.inert]="pending() ? '' : null"
         type="email"
-        name="email"
         autocomplete="email"
         [label]="'hub.login.email' | translate"
-        [(value)]="email"
+        [formField]="credentialsForm.username"
+        [error]="usernameError()"
       />
       <app-password-field
         [attr.inert]="pending() ? '' : null"
-        name="password"
         autocomplete="current-password"
         [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
         [label]="'hub.login.password' | translate"
         [texts]="'field.password' | translate"
-        [(value)]="password"
+        [formField]="credentialsForm.password"
+        [error]="passwordError()"
       />
 
       <div class="login__dialog__options" [attr.inert]="pending() ? '' : null">
-        <app-checkbox name="remember" [(checked)]="remember">
+        <app-checkbox [formField]="credentialsForm.remember">
           <span appI18nText="hub.login.remember"></span>
         </app-checkbox>
         <button class="login__dialog__link" type="button" appI18nText="hub.login.forgot"></button>

@@ -4,15 +4,11 @@ import { DateAdapter } from '@angular/material/core';
 import { debounceTime } from 'rxjs';
 import { BookingDayType } from '../../entities/enums/booking-day-type';
 import { ManagementRequest } from '../../entities/management/management-request';
+import { DateRange } from '../../entities/shared/date-range';
 import { AuthBehaviour } from '../auth/auth.behaviour';
 
 /** The date arrows can be clicked quickly: the pages ask the API only after this pause. */
 export const DATES_DEBOUNCE = 500;
-
-interface Dates {
-  start: Date;
-  end: Date;
-}
 
 /** Provided by the management layout: it lives, and starts again from today, with it. */
 @Injectable()
@@ -26,9 +22,9 @@ export class ManagementFiltersBehaviour {
 
   /** The dates the user stopped on: they follow the header after `DATES_DEBOUNCE` ms of quiet. */
   private readonly settledDates = toSignal(
-    toObservable(computed<Dates>(() => ({ start: this.startDate(), end: this.endDate() }))).pipe(
-      debounceTime(DATES_DEBOUNCE),
-    ),
+    toObservable(
+      computed<DateRange>(() => ({ start: this.startDate(), end: this.endDate() })),
+    ).pipe(debounceTime(DATES_DEBOUNCE)),
     {
       initialValue: { start: this.startDate(), end: this.endDate() },
       equal: (a, b) =>

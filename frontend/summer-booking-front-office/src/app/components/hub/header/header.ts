@@ -10,7 +10,8 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { Language, LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
+import { LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
+import { Language } from '../../../entities/shared/language';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { Button } from '../../shared/ui/buttons/button/button';
 import { LoginDialog } from '../login/login-dialog';

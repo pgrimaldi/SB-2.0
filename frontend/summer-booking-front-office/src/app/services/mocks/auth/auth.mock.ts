@@ -38,17 +38,13 @@ const accessTokens = new Map<string, number>();
 
 /** `POST /api/auth/signin`: session and refresh cookie for the test account, 401 otherwise. */
 export const signInMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-  const {
-    username = '',
-    password = '',
-    remember = false,
-  } = (request.body ?? {}) as Partial<SignInRequest>;
+  const { username, password, remember = false } = (request.body ?? {}) as Partial<SignInRequest>;
 
-  return from(sha256(password)).pipe(
+  return from(sha256(password ?? '')).pipe(
     delay(400),
     switchMap((passwordSha256) => {
       const valid =
-        username.trim().toLowerCase() === MOCK_ACCOUNT.username &&
+        username?.trim().toLowerCase() === MOCK_ACCOUNT.username &&
         passwordSha256 === MOCK_ACCOUNT.passwordSha256;
       if (!valid) {
         return unauthorized(request, 'auth.invalid_credentials', 'Invalid credentials');

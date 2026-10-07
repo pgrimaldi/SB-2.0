@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { DateLanguageBehaviour } from './date-language.behaviour';
-import { Language, LanguageBehaviour } from './language.behaviour';
+import { Language } from '../../entities/shared/language';
+import { LanguageBehaviour } from './language.behaviour';
 
 describe('DateLanguageBehaviour', () => {
   /** Pretends the browser has these languages set. */

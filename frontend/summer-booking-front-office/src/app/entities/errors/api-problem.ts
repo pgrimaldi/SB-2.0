@@ -12,11 +12,9 @@ export interface ApiFieldError {
 }
 
 /**
- * An error of a call to our API, in one shape whatever happened: the backend's Problem Details
- * (RFC 9457) extended with `code`, or what the frontend builds for errors that do not come from the
- * backend (no connection, proxy pages, browser errors). `code` is the translation key under `error.`
- * (e.g. `auth.invalid_credentials` → `error.auth.invalid_credentials`): no conversion in between.
- * `title` and `type` are for developers and logs only, never shown to the user.
+ * `code` is the translation key under `error.` (e.g. `auth.invalid_credentials` →
+ * `error.auth.invalid_credentials`): no conversion in between. `title` and `type` are for developers
+ * and logs only, never shown to the user.
  */
 export interface ApiProblem {
   /** 0 when there was no answer (no connection). */
