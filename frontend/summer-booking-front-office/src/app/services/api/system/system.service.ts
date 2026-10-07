@@ -3,10 +3,10 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ManagementRequest } from '../../../entities/management/management-request';
-import { ContactSupportRequest } from '../../../entities/system/contact-support-request';
-import { EmailConfigurationData } from '../../../entities/system/email-configuration-data';
-import { EmailConfigurationRequest } from '../../../entities/system/email-configuration-request';
-import { SupportInfo } from '../../../entities/system/support-info';
+import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
+import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
+import { EmailConfigurationData } from '../../../entities/settings/email-configuration/email-configuration-data';
+import { EmailConfigurationRequest } from '../../../entities/settings/email-configuration/email-configuration-request';
 
 @Injectable({ providedIn: 'root' })
 export class SystemService {

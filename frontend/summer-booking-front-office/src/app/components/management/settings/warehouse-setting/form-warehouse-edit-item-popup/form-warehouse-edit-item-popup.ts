@@ -26,6 +26,7 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { EditedWarehouseQuantities } from '../../../../../entities/warehouse/edit-warehouse-item-request';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
@@ -38,11 +39,6 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 let nextId = 0;
-
-interface EditedQuantities {
-  articleQuantity: number | null;
-  thresholdQuantity: number | null;
-}
 
 @Component({
   selector: 'app-form-warehouse-edit-item-popup',
@@ -70,7 +66,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     return item ? [{ value: item.idArticle, label: item.name }] : [];
   });
   protected readonly idArticle = computed(() => this.item()?.idArticle ?? null);
-  private readonly quantities = signal<EditedQuantities>({
+  private readonly quantities = signal<EditedWarehouseQuantities>({
     articleQuantity: null,
     thresholdQuantity: null,
   });

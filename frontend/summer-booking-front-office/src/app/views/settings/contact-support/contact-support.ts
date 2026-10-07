@@ -26,25 +26,13 @@ import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popu
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { SupportInfo } from '../../../entities/system/support-info';
+import {
+  ContactSupportFields,
+  EMPTY_CONTACT_SUPPORT_FIELDS,
+} from '../../../entities/settings/contact-support/contact-support-request';
+import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { SystemService } from '../../../services/api/system/system.service';
-
-interface ContactFields {
-  firstName: string;
-  lastName: string;
-  email: string;
-  mobilePhone: string;
-  message: string;
-}
-
-const NO_CONTACT: ContactFields = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  mobilePhone: '',
-  message: '',
-};
 
 @Component({
   selector: 'app-contact-support',
@@ -79,7 +67,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected readonly emailIcon = '/assets/images/email.svg';
   protected readonly clockIcon = '/assets/images/clock.svg';
 
-  private readonly contact = signal<ContactFields>({ ...NO_CONTACT });
+  private readonly contact = signal<ContactSupportFields>({ ...EMPTY_CONTACT_SUPPORT_FIELDS });
   protected readonly contactForm = form(this.contact, (path) => {
     // What is sent cannot change until the server answers.
     readonly(path, { when: () => this.isLoading() });
@@ -149,7 +137,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
       .subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.contact.set({ ...NO_CONTACT });
+          this.contact.set({ ...EMPTY_CONTACT_SUPPORT_FIELDS });
           this.contactForm().reset();
           this.sent.set(true);
         },

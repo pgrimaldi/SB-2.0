@@ -40,32 +40,18 @@ import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popu
 import { FilledSelect } from '../../../components/shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../components/shared/ui/selects/select/select';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { EmailConfigurationRequest } from '../../../entities/system/email-configuration-request';
-import { SmtpSecurity } from '../../../entities/system/email-configuration-data';
+import {
+  EMAIL_CONFIGURATION_MASKED_FIELDS,
+  EmailConfigurationFields,
+  EmailConfigurationRequest,
+  MAX_SMTP_PORT,
+  SMTP_CONNECTION_FIELDS,
+  SmtpConnection,
+  smtpConnectionOf,
+} from '../../../entities/settings/email-configuration/email-configuration-request';
+import { SmtpSecurity } from '../../../entities/settings/email-configuration/email-configuration-data';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { SystemService } from '../../../services/api/system/system.service';
-
-/** The password field holds only a new password: empty keeps the saved one. */
-type EmailConfigurationFields = Omit<EmailConfigurationRequest, 'idProperty' | 'smtpPassword'> & {
-  smtpPassword: string;
-};
-
-type TextFieldName = Exclude<keyof EmailConfigurationFields, 'smtpPort' | 'smtpSecurity'>;
-
-/** A masked field of the page; `key` is its translation group under `fields`. */
-type MaskedField = { name: TextFieldName; key: string } | { name: 'smtpPort'; key: string };
-
-const MAX_TCP_PORT = 65535;
-
-/** Where the saved password goes: changing one of them means sending it somewhere else. */
-const CONNECTION_FIELDS = [
-  'smtpServerAddress',
-  'smtpPort',
-  'smtpUsername',
-  'smtpSecurity',
-] as const;
-
-type Connection = Pick<EmailConfigurationFields, (typeof CONNECTION_FIELDS)[number]>;
 
 interface SecurityTexts {
   none: string;
@@ -97,15 +83,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
 
-  /** In page order. */
-  protected readonly maskedFields: readonly MaskedField[] = [
-    { name: 'senderMailAddress', key: 'from_email' },
-    { name: 'senderName', key: 'from_name' },
-    { name: 'smtpServerAddress', key: 'smtp_server' },
-    { name: 'smtpPort', key: 'smtp_port' },
-    { name: 'smtpUsername', key: 'smtp_username' },
-    { name: 'smtpPassword', key: 'smtp_password' },
-  ];
+  protected readonly maskedFields = EMAIL_CONFIGURATION_MASKED_FIELDS;
   protected readonly sendTestIcon = ['/assets/images/mail-send-white.svg'] as const;
   protected readonly resetIcon = ['/assets/images/trash-white.svg'] as const;
   /** [content shown, content hidden]: the designer's eyes (Eye_close once open, Eye_start at first). */
@@ -133,7 +111,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
    * The connection the saved password belongs to, as the server last answered or saved it: only
    * these four values, never the password.
    */
-  private readonly savedConnection = signal<Connection | null>(null);
+  private readonly savedConnection = signal<SmtpConnection | null>(null);
   /** Goes up with every save that succeeds: a reading started before it answers older values. */
   private savesDone = 0;
   /**
@@ -145,7 +123,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     return (
       this.passwordSaved() &&
       !!saved &&
-      CONNECTION_FIELDS.some((field) => this.configuration()[field] !== saved[field])
+      SMTP_CONNECTION_FIELDS.some((field) => this.configuration()[field] !== saved[field])
     );
   });
   /** The last reading arrived: nothing can be changed before the values of the server are there. */
@@ -156,7 +134,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     readonly(path, { when: () => !this.editable() || this.isBusy() });
     required(path.smtpPort);
     min(path.smtpPort, 1);
-    max(path.smtpPort, MAX_TCP_PORT);
+    max(path.smtpPort, MAX_SMTP_PORT);
     validate(path.smtpPassword, ({ value }) =>
       !value() && this.passwordToRetype()
         ? { kind: 'email_configuration.smtp_password.retype' }
@@ -231,7 +209,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
             const { hasSmtpPassword, ...fields } = data;
             this.configuration.set({ ...fields, smtpPassword: '' });
             this.passwordSaved.set(hasSmtpPassword);
-            this.savedConnection.set(connectionOf(fields));
+            this.savedConnection.set(smtpConnectionOf(fields));
             this.configurationForm().reset();
             this.loaded.set(true);
           },
@@ -270,7 +248,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         const { idProperty, smtpPassword, ...savedFields } = sent;
         this.savesDone++;
         this.passwordSaved.update((saved) => saved || smtpPassword !== null);
-        this.savedConnection.set(connectionOf(savedFields));
+        this.savedConnection.set(smtpConnectionOf(savedFields));
         this.configuration.set({ ...savedFields, smtpPassword: '' });
         this.configurationForm().reset();
         this.saved.set(true);
@@ -327,13 +305,4 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
-}
-
-function connectionOf(values: Connection): Connection {
-  return {
-    smtpServerAddress: values.smtpServerAddress,
-    smtpPort: values.smtpPort,
-    smtpUsername: values.smtpUsername,
-    smtpSecurity: values.smtpSecurity,
-  };
 }

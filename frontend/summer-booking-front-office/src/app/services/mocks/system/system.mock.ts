@@ -1,13 +1,16 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ManagementRequest } from '../../../entities/management/management-request';
-import { ContactSupportRequest } from '../../../entities/system/contact-support-request';
+import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import {
   EmailConfigurationData,
   SmtpSecurity,
-} from '../../../entities/system/email-configuration-data';
-import { EmailConfigurationRequest } from '../../../entities/system/email-configuration-request';
-import { SupportInfo } from '../../../entities/system/support-info';
+} from '../../../entities/settings/email-configuration/email-configuration-data';
+import {
+  EmailConfigurationRequest,
+  SMTP_CONNECTION_FIELDS,
+} from '../../../entities/settings/email-configuration/email-configuration-request';
+import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { MOCK_PROPERTIES } from '../properties/properties.mock';
@@ -141,9 +144,9 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   if (!SMTP_SECURITIES.includes(body.smtpSecurity as SmtpSecurity)) {
     errors.push({ field: 'smtpSecurity', code: 'validation.invalid_value' });
   }
-  const otherConnection = (
-    ['smtpServerAddress', 'smtpPort', 'smtpUsername', 'smtpSecurity'] as const
-  ).some((field) => body[field] !== EMAIL_CONFIGURATION[field]);
+  const otherConnection = SMTP_CONNECTION_FIELDS.some(
+    (field) => body[field] !== EMAIL_CONFIGURATION[field],
+  );
   if (
     body.smtpPassword === null
       ? smtpPassword !== null && otherConnection
