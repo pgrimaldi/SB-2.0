@@ -514,6 +514,22 @@ describe('Table bar', () => {
     const names = [...element.querySelectorAll('tbody td')].map((cell) => cell.textContent?.trim());
     expect(names).toEqual(['Row 2', 'Row 20', 'Row 21', 'Row 22', 'Row 23', 'Row 24', 'Row 25']);
   });
+
+  it('should keep the search when Enter is pressed in the search field', () => {
+    const { fixture, host, element } = setup();
+    const input = element.querySelector<HTMLInputElement>('.table__search input')!;
+    input.value = 'Row 2';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    vi.advanceTimersByTime(500);
+    fixture.detectChanges();
+
+    // What the browser does on Enter in an <input type="search">.
+    input.dispatchEvent(new Event('search', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.requests.at(-1)?.search).toBe('Row 2');
+  });
 });
 
 describe('Table default look', () => {

@@ -39,7 +39,8 @@ export class SearchField implements OnDestroy {
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [magnifier, X]. */
   readonly pathIcon = input<readonly string[] | null>();
-  readonly search = output<string>();
+  /** Not `search`: an `<input type="search">` fires a native `search` event (e.g. on Enter) too. */
+  readonly searched = output<string>();
 
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly text = signal('');
@@ -66,7 +67,7 @@ export class SearchField implements OnDestroy {
   }
 
   private emitSearch(text: string): void {
-    this.search.emit(text);
+    this.searched.emit(text);
   }
 
   ngOnDestroy(): void {

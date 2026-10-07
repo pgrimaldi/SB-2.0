@@ -19,7 +19,7 @@
         [texts]="texts()?.search"
         [matIcon]="matIcon()"
         [pathIcon]="pathIcon()"
-        (search)="search.set($event)"
+        (searched)="search.set($event)"
       />
     }
     @if (!hideCreateButton()) {

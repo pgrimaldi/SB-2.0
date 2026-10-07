@@ -7,7 +7,7 @@ import { SearchField } from './search-field';
   template: `<app-search-field
     placeholder="Cerca per nome"
     [texts]="{ submit: 'Cerca', clear: 'Svuota' }"
-    (search)="searches.push($event)"
+    (searched)="searches.push($event)"
   />`,
 })
 class SearchFieldHost {
