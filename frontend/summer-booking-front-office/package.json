@@ -11,7 +11,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --no-watch",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "verify": "npm run lint && tsc -p tsconfig.spec.json --noEmit && npm run test:ci"
   },
   "private": true,
   "packageManager": "npm@11.16.0",

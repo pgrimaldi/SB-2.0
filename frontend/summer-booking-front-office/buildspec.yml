@@ -16,6 +16,8 @@ phases:
       - test -n "$CLOUDFRONT_DISTRIBUTION_ID"
   build:
     commands:
+      # Lint, types of the tests and unit tests first: when one fails nothing is built or published.
+      - npm run verify --prefix frontend/summer-booking-front-office
       - npm run build --prefix frontend/summer-booking-front-office -- --configuration "$BUILD_CONFIGURATION"
   post_build:
     commands:

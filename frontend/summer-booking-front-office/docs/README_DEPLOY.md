@@ -10,7 +10,8 @@ Credenziali, chiavi AWS e secret non devono mai essere salvati nel repository o 
 push su GitHub (branch dell'ambiente)
   → CodePipeline: stage Source (CodeConnections)
   → CodePipeline: stage Build (azione AWS CodeBuild)
-      → CodeBuild esegue buildspec.yml: npm ci, build dell'ambiente (dev o production),
+      → CodeBuild esegue buildspec.yml: npm ci, verifiche (lint, tipi dei test, test unitari),
+        build dell'ambiente (dev o production),
         caricamento su S3 con intestazioni di cache, invalidazione CloudFront
   → bucket S3 privato ← CloudFront (Origin Access Control) ← browser
 ```
@@ -262,7 +263,7 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
 
 1. **install**: installa la versione di Node indicata in `.nvmrc` ed esegue `npm ci`.
 2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` siano impostate.
-3. **build**: `ng build --configuration $BUILD_CONFIGURATION`. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
+3. **build**: prima `npm run verify` (lint, controllo dei tipi dei test con `tsc -p tsconfig.spec.json --noEmit`, test unitari con `ng test --no-watch`): se una verifica fallisce la build non parte e nel passo successivo non si pubblica nulla, il sito online resta quello precedente (dal 07/10/2026, Q03 dell'audit esterno; prima si pubblicava anche con test rotti). Poi `ng build --configuration $BUILD_CONFIGURATION`, che controlla anche i tipi dell'app e dei template. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
 4. **post_build**: se la build è fallita si ferma senza toccare il bucket e il sito online resta quello precedente. Altrimenti carica i file con intestazioni `Cache-Control` diverse, che CloudFront inoltra al browser:
    - bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
