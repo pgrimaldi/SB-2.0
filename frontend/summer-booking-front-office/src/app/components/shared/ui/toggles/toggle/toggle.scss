@@ -3,6 +3,9 @@
 // Small switch of the designer's mockup (02/10/2026).
 :host {
   display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
 
   @include mat.slide-toggle-overrides(
     (
@@ -65,4 +68,11 @@
 
 .toggle ::ng-deep label {
   padding-left: 0.625rem;
+}
+
+.toggle__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
 }

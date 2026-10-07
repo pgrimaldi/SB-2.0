@@ -31,7 +31,7 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
-import { apiFieldErrors } from '../../../behaviours/validation/api-field-errors';
+import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { Button } from '../../../components/shared/ui/buttons/button/button';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
@@ -283,8 +283,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
    * error (Signal Forms does not validate them): then the message goes under the panel too.
    */
   private failed(problem: ApiProblem): TreeValidationResult {
-    const errors = apiFieldErrors(problem, this.configurationForm);
-    if (!this.editable() || !errors.length || errors.length < (problem.errors?.length ?? 0)) {
+    const errors = apiFieldErrorsOrGeneral(problem, this.configurationForm, (general) =>
+      this.error.set(general),
+    );
+    if (!this.editable()) {
       this.error.set(problem);
     }
     return errors;

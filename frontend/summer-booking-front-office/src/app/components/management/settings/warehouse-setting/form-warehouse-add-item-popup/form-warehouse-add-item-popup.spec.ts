@@ -277,4 +277,35 @@ describe('FormWarehouseAddItemPopup', () => {
     await fixture.whenStable();
     expect(add().disabled).toBe(true);
   });
+
+  it('should show an error of the API on a field under that field, not in the general message', async () => {
+    const context = await setup();
+    const { fixture, popup, addWarehouseItem } = context;
+    addWarehouseItem.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              status: 400,
+              code: 'validation.invalid_request',
+              title: 'Invalid request',
+              errors: [{ field: 'totalQuantity', code: 'validation.invalid_value' }],
+            },
+          }),
+      ),
+    );
+    const add = await fill(context);
+
+    add().click();
+    await new Promise((resolve) => setTimeout(resolve));
+    await fixture.whenStable();
+    expect(
+      popup()!
+        .querySelectorAll('app-filled-number-field')[0]
+        .querySelector('.filled__number__field__error')
+        ?.textContent?.trim(),
+    ).toBe('error.unknown');
+    expect(popup()!.querySelector('[role="alert"]')).toBeNull();
+  });
 });

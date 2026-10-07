@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   OnDestroy,
   ViewEncapsulation,
   computed,
@@ -12,17 +11,18 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, disabled, form } from '@angular/forms/signals';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
@@ -53,7 +53,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
 
   /** Read only when the popup opens. */
   readonly item = input<WarehouseItem | null>(null);
@@ -74,6 +73,12 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   protected readonly totalQuantityError = this.validationText.message(
     this.draftForm.totalQuantity,
     'management.settings.warehouse.form.field_names.total',
+  );
+  protected readonly thresholdQuantityError = this.validationText.message(
+    this.draftForm.thresholdQuantity,
+  );
+  protected readonly isThresholdWarningActiveError = this.validationText.message(
+    this.draftForm.isThresholdWarningActive,
   );
   protected readonly isLoading = signal(false);
   /** The values the popup opened with: changed ones are unsaved. */
@@ -112,22 +117,25 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     if (this.isLoading() || !idProperty || !this.canSave()) {
       return;
     }
-    this.isLoading.set(true);
-    this.error.set(null);
-    this.warehouse
-      .editWarehouseItem(idProperty, this.draft())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.close();
-          this.saved.emit();
-        },
-        error: (error: unknown) => {
-          this.isLoading.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
+    // a field goes under that field.
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isLoading.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.warehouse.editWarehouseItem(idProperty, this.draft()));
+        this.isLoading.set(false);
+        this.close();
+        this.saved.emit();
+        return undefined;
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isLoading.set(false);
+      }
+    });
   }
 
   hasUnsavedChanges(): boolean {

@@ -81,6 +81,7 @@
         [label]="'management.settings.contact_support.form.mobile_phone' | translate"
         [placeholder]="'management.settings.contact_support.form.examples.mobile_phone' | translate"
         [formField]="contactForm.mobilePhone"
+        [error]="mobilePhoneError()"
       />
       <app-filled-textarea
         [label]="'management.settings.contact_support.form.message' | translate"

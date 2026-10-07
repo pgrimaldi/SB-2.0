@@ -42,13 +42,29 @@ describe('ContactSupport', () => {
       fields()[index].dispatchEvent(new Event('input'));
       await fixture.whenStable();
     };
+    // The answer of the API is awaited by Signal Forms submit(): one more tick before checking.
+    const settle = async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
     const fill = async () => {
       await type(0, ' Anna ');
       await type(1, 'Bianchi');
       await type(2, 'anna.bianchi@example.com');
       await type(4, 'Vorrei informazioni.');
     };
-    return { fixture, element, fields, send, type, fill, contactSupport, supportInfo, language };
+    return {
+      fixture,
+      element,
+      fields,
+      send,
+      type,
+      settle,
+      fill,
+      contactSupport,
+      supportInfo,
+      language,
+    };
   };
 
   afterEach(() =>
@@ -90,7 +106,7 @@ describe('ContactSupport', () => {
   });
 
   it('should send the trimmed fields, null without a mobile phone, then thank and empty the form', async () => {
-    const { fixture, element, fields, send, fill, contactSupport } = await setup();
+    const { fixture, element, fields, send, settle, fill, contactSupport } = await setup();
     const answer = new Subject<void>();
     contactSupport.mockReturnValue(answer);
     await fill();
@@ -110,7 +126,7 @@ describe('ContactSupport', () => {
 
     answer.next();
     answer.complete();
-    await fixture.whenStable();
+    await settle();
     expect(document.querySelector('.message__popup h2')?.textContent?.trim()).toBe(
       'management.settings.contact_support.sent.title',
     );
@@ -150,5 +166,37 @@ describe('ContactSupport', () => {
     expect(element.querySelector('.contact__support__info__error')?.textContent?.trim()).not.toBe(
       '',
     );
+  });
+
+  it('should show an error of the API on a field under that field, until the field changes', async () => {
+    const { element, send, type, settle, fill, contactSupport } = await setup();
+    contactSupport.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              status: 400,
+              code: 'validation.invalid_request',
+              title: 'Invalid request',
+              errors: [{ field: 'email', code: 'validation.invalid_value' }],
+            },
+          }),
+      ),
+    );
+    await fill();
+    const emailError = () =>
+      element
+        .querySelectorAll('app-filled-text-field')[2]
+        .querySelector('.filled__text__field__error');
+
+    send().click();
+    await settle();
+    // The message of the code (here the fallback key: the test has no translations).
+    expect(emailError()?.textContent?.trim()).toBe('error.unknown');
+    expect(element.querySelector('.contact__support__error')).toBeNull();
+
+    await type(2, 'anna@example.com');
+    expect(emailError()).toBeNull();
   });
 });

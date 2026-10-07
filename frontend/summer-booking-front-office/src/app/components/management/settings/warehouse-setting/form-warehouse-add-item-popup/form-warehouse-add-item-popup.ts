@@ -12,16 +12,24 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, disabled, form, required } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  disabled,
+  form,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
@@ -75,6 +83,12 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     this.draftForm.totalQuantity,
     'management.settings.warehouse.form.field_names.total',
   );
+  protected readonly thresholdQuantityError = this.validationText.message(
+    this.draftForm.thresholdQuantity,
+  );
+  protected readonly isThresholdWarningActiveError = this.validationText.message(
+    this.draftForm.isThresholdWarningActive,
+  );
   protected readonly isLoading = signal(false);
   protected readonly canAdd = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -111,22 +125,25 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     if (this.isLoading() || !idProperty || !this.canAdd()) {
       return;
     }
-    this.isLoading.set(true);
-    this.error.set(null);
-    this.warehouse
-      .addWarehouseItem(idProperty, this.draft())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.close();
-          this.added.emit();
-        },
-        error: (error: unknown) => {
-          this.isLoading.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
+    // a field goes under that field.
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isLoading.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.warehouse.addWarehouseItem(idProperty, this.draft()));
+        this.isLoading.set(false);
+        this.close();
+        this.added.emit();
+        return undefined;
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isLoading.set(false);
+      }
+    });
   }
 
   hasUnsavedChanges(): boolean {

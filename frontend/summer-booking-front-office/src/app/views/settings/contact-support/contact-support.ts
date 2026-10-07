@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   OnDestroy,
   computed,
   effect,
@@ -9,16 +8,17 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, readonly } from '@angular/forms/signals';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/data/data-reload';
 import { requiredText } from '../../../components/shared/forms/validators';
@@ -45,7 +45,6 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
 
   protected readonly supportInfo = signal<SupportInfo | null>(null);
@@ -77,6 +76,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected readonly firstNameError = this.validationText.message(this.contactForm.firstName);
   protected readonly lastNameError = this.validationText.message(this.contactForm.lastName);
   protected readonly emailError = this.validationText.message(this.contactForm.email);
+  protected readonly mobilePhoneError = this.validationText.message(this.contactForm.mobilePhone);
   protected readonly messageError = this.validationText.message(this.contactForm.message);
   protected readonly isLoading = signal(false);
   protected readonly sent = signal(false);
@@ -116,35 +116,39 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected send(event: Event): void {
     event.preventDefault();
     const idProperty = this.auth.user()?.idProperty;
-    if (this.isLoading() || !idProperty || this.contactForm().invalid()) {
+    if (this.isLoading() || !idProperty) {
       return;
     }
-    const contact = this.contact();
-    this.isLoading.set(true);
-    this.error.set(null);
-    this.system
-      .contactSupport({
-        ...contact,
-        idProperty,
-        firstName: trimmed(contact.firstName),
-        lastName: trimmed(contact.lastName),
-        email: trimmed(contact.email),
-        mobilePhone: trimmed(contact.mobilePhone),
-        message: trimmed(contact.message),
-      })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.contact.set(new ContactSupportRequest());
-          this.contactForm().reset();
-          this.sent.set(true);
-        },
-        error: (error: unknown) => {
-          this.isLoading.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
+    // a field goes under that field.
+    void submit(this.contactForm, async (): Promise<TreeValidationResult> => {
+      const contact = this.contact();
+      this.isLoading.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(
+          this.system.contactSupport({
+            ...contact,
+            idProperty,
+            firstName: trimmed(contact.firstName),
+            lastName: trimmed(contact.lastName),
+            email: trimmed(contact.email),
+            mobilePhone: trimmed(contact.mobilePhone),
+            message: trimmed(contact.message),
+          }),
+        );
+        this.contact.set(new ContactSupportRequest());
+        this.contactForm().reset();
+        this.sent.set(true);
+        return undefined;
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.contactForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isLoading.set(false);
+      }
+    });
   }
 
   hasUnsavedChanges(): boolean {

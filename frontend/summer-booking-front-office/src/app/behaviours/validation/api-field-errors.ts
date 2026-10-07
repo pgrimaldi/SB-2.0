@@ -24,6 +24,22 @@ export function apiFieldErrors<TModel extends object>(
 }
 
 /**
+ * The same, for a form with a general message too: an error with no field to go under (an id, a
+ * field the form has not, or none at all) sends the whole problem there.
+ */
+export function apiFieldErrorsOrGeneral<TModel extends object>(
+  problem: ApiProblem,
+  form: FieldTree<TModel>,
+  general: (problem: ApiProblem) => void,
+): ApiValidationError[] {
+  const errors = apiFieldErrors(problem, form);
+  if (!errors.length || errors.length < (problem.errors?.length ?? 0)) {
+    general(problem);
+  }
+  return errors;
+}
+
+/**
  * An id is never a field the user sees: an error on it goes to the general message, otherwise it
  * would block the form with no visible reason.
  */

@@ -211,4 +211,36 @@ describe('FormWarehouseEditItemPopup', () => {
     await type(inputs()[0], '4');
     expect(message()).toBeNull();
   });
+
+  it('should show an error of the API on a field under that field, until the field changes', async () => {
+    const { fixture, popup, inputs, save, type, editWarehouseItem } = await setup();
+    editWarehouseItem.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              status: 400,
+              code: 'validation.invalid_request',
+              title: 'Invalid request',
+              errors: [{ field: 'thresholdQuantity', code: 'validation.invalid_value' }],
+            },
+          }),
+      ),
+    );
+    const thresholdError = () =>
+      popup()!
+        .querySelectorAll('app-filled-number-field')[1]
+        .querySelector('.filled__number__field__error');
+    await type(inputs()[1], '9');
+
+    save().click();
+    await new Promise((resolve) => setTimeout(resolve));
+    await fixture.whenStable();
+    expect(thresholdError()?.textContent?.trim()).toBe('error.unknown');
+    expect(popup()!.querySelector('[role="alert"]')).toBeNull();
+
+    await type(inputs()[1], '7');
+    expect(thresholdError()).toBeNull();
+  });
 });
