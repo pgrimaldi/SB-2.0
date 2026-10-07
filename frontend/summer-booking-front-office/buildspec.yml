@@ -31,8 +31,12 @@ phases:
       # index.html, translations, service worker and the other files: revalidated on every visit. Uploaded last,
       # so the new index.html only goes online once the bundles it references are in place.
       - aws s3 cp "$DIST" "s3://$S3_BUCKET" --recursive --exclude "main-*.js" --exclude "chunk-*.js" --exclude "polyfills-*.js" --exclude "styles-*.css" --exclude "assets/*" --include "assets/i18n/*" --cache-control "no-cache"
-      # Removes the files of previous builds (everything else is already up to date).
-      - aws s3 sync "$DIST" "s3://$S3_BUCKET" --delete
+      # Removes the files of previous builds, but not their bundles: a tab still open on the old version
+      # asks for them when it opens a page it has not loaded yet.
+      - aws s3 sync "$DIST" "s3://$S3_BUCKET" --delete --exclude "main-*.js" --exclude "chunk-*.js" --exclude "polyfills-*.js" --exclude "styles-*.css"
+      # Bundles of previous builds go after 24 hours: by then every open tab has been reloaded.
+      - CUTOFF=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%S)
+      - aws s3api list-objects-v2 --bucket "$S3_BUCKET" --query "Contents[].[LastModified,Key]" --output text | awk -v cutoff="$CUTOFF" '$1 < cutoff && $2 ~ /^(main|chunk|polyfills|styles)-[^\/]+\.(js|css)$/ { print $2 }' | while read -r key; do [ -e "$DIST/$key" ] || aws s3 rm "s3://$S3_BUCKET/$key"; done
       - aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*"
 
 artifacts:

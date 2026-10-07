@@ -285,7 +285,8 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
    - bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
    - `index.html`, traduzioni in `assets/i18n/`, service worker, manifest e favicon: `no-cache`, caricati per ultimi in modo che la nuova `index.html` vada online solo quando i file che richiama sono già nel bucket;
-   - un `aws s3 sync --delete` finale rimuove i file delle build precedenti;
+   - un `aws s3 sync --delete` rimuove i file delle build precedenti, tranne i bundle con hash: una scheda ancora aperta sulla versione vecchia li chiede quando apre una pagina che non aveva ancora caricato;
+   - i bundle delle build precedenti vengono cancellati solo quando hanno più di 24 ore (`aws s3api list-objects-v2` + `aws s3 rm`), e mai quelli della build appena caricata (dal 07/10/2026, R01 dell'audit esterno, durata scelta dall'utente);
    - infine invalida la cache di CloudFront (`/*`).
 
 Il caricamento usa `aws s3 cp --recursive`, che riscrive sempre i metadati. `aws s3 sync` salterebbe i file invariati e lascerebbe le vecchie intestazioni.
