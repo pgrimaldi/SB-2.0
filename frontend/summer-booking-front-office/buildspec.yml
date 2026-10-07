@@ -33,10 +33,16 @@ phases:
       - aws s3 cp "$DIST" "s3://$S3_BUCKET" --recursive --exclude "main-*.js" --exclude "chunk-*.js" --exclude "polyfills-*.js" --exclude "styles-*.css" --exclude "assets/*" --include "assets/i18n/*" --cache-control "no-cache"
       # Removes the files of previous builds, but not their bundles: a tab still open on the old version
       # asks for them when it opens a page it has not loaded yet.
-      - aws s3 sync "$DIST" "s3://$S3_BUCKET" --delete --exclude "main-*.js" --exclude "chunk-*.js" --exclude "polyfills-*.js" --exclude "styles-*.css"
-      # Bundles of previous builds go after 24 hours: by then every open tab has been reloaded.
+      - aws s3 sync "$DIST" "s3://$S3_BUCKET" --delete --exclude "main-*.js" --exclude "chunk-*.js" --exclude "polyfills-*.js" --exclude "styles-*.css" --exclude "retired/*"
+      # A bundle no longer used gets an empty marker retired/<name>: its LastModified is when the bundle
+      # was replaced (the bundle's own LastModified is only when it was uploaded, maybe days before).
       - CUTOFF=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%S)
-      - aws s3api list-objects-v2 --bucket "$S3_BUCKET" --query "Contents[].[LastModified,Key]" --output text | awk -v cutoff="$CUTOFF" '$1 < cutoff && $2 ~ /^(main|chunk|polyfills|styles)-[^\/]+\.(js|css)$/ { print $2 }' | while read -r key; do [ -e "$DIST/$key" ] || aws s3 rm "s3://$S3_BUCKET/$key"; done
+      - aws s3api list-objects-v2 --bucket "$S3_BUCKET" --query "Contents[].[LastModified,Key]" --output text > s3-objects.txt
+      - awk '{ print $2 }' s3-objects.txt > s3-keys.txt
+      - awk '$2 ~ /^(main|chunk|polyfills|styles)-[^\/]+\.(js|css)$/ { print $2 }' s3-objects.txt | while read -r key; do [ -e "$DIST/$key" ] || grep -qxF "retired/$key" s3-keys.txt || aws s3api put-object --bucket "$S3_BUCKET" --key "retired/$key" > /dev/null; done
+      # 24 hours after the replacement the bundle goes, with its marker; a bundle used again (e.g. a
+      # rollback) loses its marker.
+      - awk -v cutoff="$CUTOFF" '$2 ~ /^retired\// { print ($1 < cutoff), substr($2, 9) }' s3-objects.txt | while read -r expired key; do if [ -e "$DIST/$key" ]; then aws s3 rm "s3://$S3_BUCKET/retired/$key"; elif [ "$expired" = 1 ]; then aws s3 rm "s3://$S3_BUCKET/$key" && aws s3 rm "s3://$S3_BUCKET/retired/$key"; fi; done
       - aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*"
 
 artifacts:

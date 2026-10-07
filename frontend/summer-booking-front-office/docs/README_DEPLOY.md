@@ -288,7 +288,8 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
    - `index.html`, traduzioni in `assets/i18n/`, service worker, manifest e favicon: `no-cache`, caricati per ultimi in modo che la nuova `index.html` vada online solo quando i file che richiama sono già nel bucket;
    - un `aws s3 sync --delete` rimuove i file delle build precedenti, tranne i bundle con hash: una scheda ancora aperta sulla versione vecchia li chiede quando apre una pagina che non aveva ancora caricato;
-   - i bundle delle build precedenti vengono cancellati solo quando hanno più di 24 ore (`aws s3api list-objects-v2` + `aws s3 rm`), e mai quelli della build appena caricata (dal 07/10/2026, R01 dell'audit esterno, durata scelta dall'utente);
+   - un bundle che la nuova build non usa più riceve un file vuoto `retired/<nome del bundle>`: la sua data (`LastModified`) è il momento in cui il bundle è stato sostituito. La data del bundle stesso non basta, perché dice solo quando è stato caricato, magari giorni prima;
+   - 24 ore dopo la sostituzione, al primo deploy successivo, il bundle viene cancellato insieme al suo `retired/…`; se una build torna a usare un bundle (es. un ritorno alla versione precedente), il suo `retired/…` viene tolto. I file in `retired/` sono vuoti e non contengono nulla dell'app; il `sync --delete` li esclude (dal 07/10/2026, R01 dell'audit esterno, durata scelta dall'utente; la prima versione contava le 24 ore dal caricamento ed è stata corretta su segnalazione del revisore);
    - infine invalida la cache di CloudFront (`/*`).
 
 Il caricamento usa `aws s3 cp --recursive`, che riscrive sempre i metadati. `aws s3 sync` salterebbe i file invariati e lascerebbe le vecchie intestazioni.
