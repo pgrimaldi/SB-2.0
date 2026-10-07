@@ -246,6 +246,23 @@ describe('Table', () => {
     expect(element.querySelector('.table__empty__cell')).toBeNull();
   });
 
+  it('should stay on its page when the request fails, to load it again', async () => {
+    const { fixture, host, next } = await setup();
+    next().click();
+    await fixture.whenStable();
+    next().click();
+    await fixture.whenStable();
+    host.answer = () => throwError(() => new Error('network down'));
+
+    fixture.debugElement
+      .query((node) => node.componentInstance instanceof Table)
+      .componentInstance.reload();
+    await fixture.whenStable();
+
+    expect(host.requests.slice(-2).map((request) => request.page)).toEqual([3, 3]);
+    expect(host.errors.length).toBe(1);
+  });
+
   it('should say that the table has no items only when the server answers with none', async () => {
     const pending = new Subject<Page<Row>>();
     const { fixture, host, element } = await setup((host) => (host.answer = () => pending));

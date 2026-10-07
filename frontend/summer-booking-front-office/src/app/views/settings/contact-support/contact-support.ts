@@ -10,7 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, form, readonly, required } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
@@ -81,6 +81,8 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
 
   private readonly contact = signal<ContactFields>({ ...NO_CONTACT });
   protected readonly contactForm = form(this.contact, (path) => {
+    // What is sent cannot change until the server answers.
+    readonly(path, { when: () => this.isLoading() });
     required(path.firstName);
     required(path.lastName);
     required(path.email);

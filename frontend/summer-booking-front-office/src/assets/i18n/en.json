@@ -315,7 +315,9 @@
           },
           "smtp_password": {
             "title": "Password (smtp_password):",
-            "description": "The password of the username."
+            "description": "The password of the username.",
+            "saved": "Password set: type to change it",
+            "missing": "No password set"
           },
           "smtp_security": {
             "title": "Security type (smtp_security):",
@@ -457,7 +459,12 @@
     "greater_than": "The {{field}} value must be greater than {{limit}}",
     "max": "The highest value is {{max}}",
     "min": "The lowest value is {{min}}",
-    "required": "This field is required"
+    "required": "This field is required",
+    "email_configuration": {
+      "smtp_password": {
+        "retype": "You changed the connection settings: type the password again or enter a new one."
+      }
+    }
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

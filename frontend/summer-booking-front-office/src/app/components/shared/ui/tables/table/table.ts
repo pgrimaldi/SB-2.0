@@ -342,11 +342,11 @@ export class Table<T, P extends object> implements OnDestroy {
   constructor() {
     effect(() => this.paginatorIntl.setTexts(this.texts()?.paginator));
     // A page that no longer exists (e.g. its rows were deleted): the answer has no rows but still the
-    // total, so the table goes at once to the last page there is instead of saying it is empty.
+    // total, so the table goes at once to the last page there is instead of saying it is empty. Only
+    // for a real answer (`empty`): a failed request keeps its page, to be asked again.
     effect(() => {
-      const { rows, total } = this.result();
-      const lastPage = Math.max(1, Math.ceil(total / this.pageSize()));
-      if (!rows.length && this.page() > lastPage) {
+      const lastPage = Math.max(1, Math.ceil(this.total() / this.pageSize()));
+      if (this.empty() && this.page() > lastPage) {
         this.page.set(lastPage);
       }
     });

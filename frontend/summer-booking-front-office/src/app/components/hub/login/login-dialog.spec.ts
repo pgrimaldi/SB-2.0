@@ -109,6 +109,9 @@ describe('LoginDialog', () => {
     await fixture.whenStable();
     expect(submit().disabled).toBe(true); // no second sign-in meanwhile
     expect(submit().querySelector('mat-progress-spinner')).not.toBeNull();
+    expect(
+      document.querySelector('mat-dialog-container app-text-field')?.hasAttribute('inert'),
+    ).toBe(true);
 
     answer.error(new HttpErrorResponse({ status: 401 }));
     await fixture.whenStable();

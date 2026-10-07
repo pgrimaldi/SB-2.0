@@ -14,6 +14,7 @@
 
     <form class="login__dialog__form" (submit)="signIn($event)">
       <app-text-field
+        [attr.inert]="pending() ? '' : null"
         type="email"
         name="email"
         autocomplete="email"
@@ -21,6 +22,7 @@
         [(value)]="email"
       />
       <app-password-field
+        [attr.inert]="pending() ? '' : null"
         name="password"
         autocomplete="current-password"
         [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
@@ -29,7 +31,7 @@
         [(value)]="password"
       />
 
-      <div class="login__dialog__options">
+      <div class="login__dialog__options" [attr.inert]="pending() ? '' : null">
         <app-checkbox name="remember" [(checked)]="remember">
           <span appI18nText="hub.login.remember"></span>
         </app-checkbox>

@@ -106,6 +106,7 @@ describe('ContactSupport', () => {
       message: 'Vorrei informazioni.',
     });
     expect(element.querySelector('mat-progress-spinner')).not.toBeNull();
+    expect(fields().every((field) => field.readOnly)).toBe(true); // nothing changes until the answer
 
     answer.next();
     answer.complete();

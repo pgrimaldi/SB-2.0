@@ -17,15 +17,16 @@ const SMTP_SECURITIES: readonly SmtpSecurity[] = ['None', 'Ssl', 'Tls'];
 const REQUIRED_EMAIL_FIELDS = ['senderMailAddress', 'smtpServerAddress', 'smtpUsername'] as const;
 
 /** Invented values: never a real mail server or real credentials. */
-const EMAIL_CONFIGURATION: EmailConfigurationData = {
+const EMAIL_CONFIGURATION: Omit<EmailConfigurationData, 'hasSmtpPassword'> = {
   senderMailAddress: 'prenotazioni@lido-demo.example',
   senderName: 'Lido Demo',
   smtpServerAddress: 'smtp.lido-demo.example',
   smtpPort: 587,
   smtpUsername: 'prenotazioni@lido-demo.example',
-  smtpPassword: 'password-di-esempio',
   smtpSecurity: 'Tls',
 };
+/** Kept apart, like the real server keeps it encrypted: it is never part of an answer. */
+let smtpPassword: string | null = 'password-di-esempio';
 
 /**
  * `GET /api/system/email-configuration?idProperty=…`: the mail settings of the property. 401
@@ -45,7 +46,11 @@ export const emailConfigurationMock = (
     });
   }
   return of(
-    new HttpResponse({ status: 200, url: request.url, body: { ...EMAIL_CONFIGURATION } }),
+    new HttpResponse({
+      status: 200,
+      url: request.url,
+      body: { ...EMAIL_CONFIGURATION, hasSmtpPassword: smtpPassword !== null },
+    }),
   ).pipe(delay(150));
 };
 
@@ -106,13 +111,17 @@ export const saveEmailConfigurationMock = (
     smtpServerAddress: body.smtpServerAddress,
     smtpPort: body.smtpPort as number,
     smtpUsername: body.smtpUsername,
-    smtpPassword: body.smtpPassword,
     smtpSecurity: body.smtpSecurity as SmtpSecurity,
   });
+  smtpPassword = body.smtpPassword ?? smtpPassword;
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
-/** Sender, server and username filled, port from 1 to 65535, a known security. */
+/**
+ * Sender, server and username filled, port from 1 to 65535, a known security; the password a new
+ * non-empty text, or `null` (keep the saved one) only for the same server, port, user and security:
+ * the saved password is never sent anywhere else.
+ */
 function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   const body = (requestBody ?? {}) as Partial<Record<keyof EmailConfigurationRequest, unknown>>;
   const errors: MockFieldError[] = [];
@@ -131,6 +140,16 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   }
   if (!SMTP_SECURITIES.includes(body.smtpSecurity as SmtpSecurity)) {
     errors.push({ field: 'smtpSecurity', code: 'validation.invalid_value' });
+  }
+  const otherConnection = (
+    ['smtpServerAddress', 'smtpPort', 'smtpUsername', 'smtpSecurity'] as const
+  ).some((field) => body[field] !== EMAIL_CONFIGURATION[field]);
+  if (
+    body.smtpPassword === null
+      ? smtpPassword !== null && otherConnection
+      : typeof body.smtpPassword !== 'string' || !body.smtpPassword
+  ) {
+    errors.push({ field: 'smtpPassword', code: 'validation.invalid_value' });
   }
   return errors;
 }

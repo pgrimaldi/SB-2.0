@@ -9,15 +9,18 @@ import { SystemService } from '../../../services/api/system/system.service';
 import { EmailConfiguration } from './email-configuration';
 
 describe('EmailConfiguration', () => {
-  const CONFIGURATION = {
+  const FIELDS = {
     senderMailAddress: 'prenotazioni@lido-demo.example',
     senderName: 'Lido Demo',
     smtpServerAddress: 'smtp.lido-demo.example',
     smtpPort: 587,
     smtpUsername: 'prenotazioni@lido-demo.example',
-    smtpPassword: 'password-di-esempio',
     smtpSecurity: 'Tls' as const,
   };
+  /** The server never sends the SMTP password: only that one is saved. */
+  const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true };
+  /** Without a new password typed, the saved one is kept (null). */
+  const SENT = { idProperty: 'p1', ...FIELDS, smtpPassword: null };
 
   const setup = async (
     emailConfiguration = vi.fn(() => of(CONFIGURATION)),
@@ -124,7 +127,7 @@ describe('EmailConfiguration', () => {
       'smtp.lido-demo.example',
       '587',
       'prenotazioni@lido-demo.example',
-      'password-di-esempio',
+      '',
     ]);
     expect(element.querySelector('.mat-mdc-select-value')?.textContent?.trim()).toBe('TLS');
   });
@@ -150,11 +153,7 @@ describe('EmailConfiguration', () => {
 
     buttons()[0].click();
     await fixture.whenStable();
-    expect(sendTestEmail).toHaveBeenCalledWith({
-      idProperty: 'p1',
-      ...CONFIGURATION,
-      senderName: 'Lido Prova',
-    });
+    expect(sendTestEmail).toHaveBeenCalledWith({ ...SENT, senderName: 'Lido Prova' });
     expect(element.querySelector('mat-progress-spinner')).not.toBeNull();
 
     answer.next();
@@ -185,7 +184,7 @@ describe('EmailConfiguration', () => {
     await type(3, '0');
     expect(portError()?.textContent?.trim()).toBe('invalidate.min');
 
-    await type(3, '465');
+    await type(3, '587'); // the saved port: the password need not be typed again
     expect(portError()).toBeNull();
     expect(buttons()[2].disabled).toBe(false);
   });
@@ -228,14 +227,13 @@ describe('EmailConfiguration', () => {
     const answer = new Subject<void>();
     saveEmailConfiguration.mockReturnValue(answer);
     await allowChanges();
-    await type(4, 'nuovo-utente@lido-demo.example');
+    await type(1, 'Lido Nuovo');
 
     buttons()[2].click();
     await fixture.whenStable();
     expect(saveEmailConfiguration).toHaveBeenCalledWith({
-      idProperty: 'p1',
-      ...CONFIGURATION,
-      smtpUsername: 'nuovo-utente@lido-demo.example',
+      ...SENT,
+      senderName: 'Lido Nuovo',
     });
     expect(buttons()[0].disabled).toBe(true);
     expect(buttons()[1].disabled).toBe(true);
@@ -248,6 +246,70 @@ describe('EmailConfiguration', () => {
     );
     expect(buttons()[0].disabled).toBe(false);
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+  });
+
+  it('should never show the saved SMTP password, and send a new one only when it is typed', async () => {
+    const { inputs, buttons, type, settle, allowChanges, saveEmailConfiguration } = await setup();
+    saveEmailConfiguration.mockReturnValue(of(undefined));
+    const password = () => inputs()[5];
+    expect(password().value).toBe('');
+    expect(password().placeholder).toBe(
+      'management.settings.email_configuration.fields.smtp_password.saved',
+    );
+
+    await allowChanges();
+    await type(5, 'nuova-password');
+    buttons()[2].click();
+    await settle();
+
+    expect(saveEmailConfiguration).toHaveBeenCalledWith({
+      ...SENT,
+      smtpPassword: 'nuova-password',
+    });
+    expect(password().value).toBe(''); // saved: the field never holds it again
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+  });
+
+  it('should lock the fields until the server answers Salva', async () => {
+    const { fixture, inputs, buttons, settle, allowChanges, saveEmailConfiguration } =
+      await setup();
+    const answer = new Subject<void>();
+    saveEmailConfiguration.mockReturnValue(answer);
+    await allowChanges();
+
+    buttons()[2].click();
+    await fixture.whenStable();
+    expect(inputs().every((input) => input.readOnly)).toBe(true);
+
+    answer.next();
+    answer.complete();
+    await settle();
+    expect(inputs().some((input) => input.readOnly)).toBe(false);
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+  });
+
+  it('should ask the password again before the saved one could go to another server', async () => {
+    const { fixture, element, inputs, buttons, type, allowChanges, saveEmailConfiguration } =
+      await setup();
+    const passwordError = () =>
+      element
+        .querySelectorAll('app-filled-text-field')[4]
+        .querySelector('.filled__text__field__error');
+    await allowChanges();
+
+    await type(2, 'smtp.altro-server.example');
+    expect(passwordError()?.textContent?.trim()).toBe(
+      'invalidate.email_configuration.smtp_password.retype',
+    );
+    expect(buttons()[2].disabled).toBe(true);
+    buttons()[0].click(); // the test email sends nothing either
+    await fixture.whenStable();
+
+    await type(5, 'password-attuale');
+    expect(passwordError()).toBeNull();
+    expect(buttons()[2].disabled).toBe(false);
+    expect(saveEmailConfiguration).not.toHaveBeenCalled();
+    expect(inputs()[5].value).toBe('password-attuale');
   });
 
   it('should let the settings be changed only once they have arrived from the server', async () => {

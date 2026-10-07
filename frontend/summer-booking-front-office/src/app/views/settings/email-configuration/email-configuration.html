@@ -47,6 +47,14 @@
             autocomplete="new-password"
             [pathIcon]="eyeIcons"
             [texts]="'field.masked' | translate"
+            [placeholder]="
+              field.name === 'smtpPassword'
+                ? ((passwordSaved()
+                    ? 'management.settings.email_configuration.fields.smtp_password.saved'
+                    : 'management.settings.email_configuration.fields.smtp_password.missing'
+                  ) | translate)
+                : ''
+            "
             [labelledBy]="id + ' ' + id + '-description'"
             [error]="fieldErrors[field.name]()"
             [formField]="configurationForm[field.name]"

@@ -20,6 +20,7 @@ import {
   readonly,
   required,
   submit,
+  validate,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
@@ -44,7 +45,10 @@ import { SmtpSecurity } from '../../../entities/system/email-configuration-data'
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { SystemService } from '../../../services/api/system/system.service';
 
-type EmailConfigurationFields = Omit<EmailConfigurationRequest, 'idProperty'>;
+/** The password field holds only a new password: empty keeps the saved one. */
+type EmailConfigurationFields = Omit<EmailConfigurationRequest, 'idProperty' | 'smtpPassword'> & {
+  smtpPassword: string;
+};
 
 type TextFieldName = Exclude<keyof EmailConfigurationFields, 'smtpPort' | 'smtpSecurity'>;
 
@@ -52,6 +56,14 @@ type TextFieldName = Exclude<keyof EmailConfigurationFields, 'smtpPort' | 'smtpS
 type MaskedField = { name: TextFieldName; key: string } | { name: 'smtpPort'; key: string };
 
 const MAX_TCP_PORT = 65535;
+
+/** Where the saved password goes: changing one of them means sending it somewhere else. */
+const CONNECTION_FIELDS = [
+  'smtpServerAddress',
+  'smtpPort',
+  'smtpUsername',
+  'smtpSecurity',
+] as const;
 
 interface SecurityTexts {
   none: string;
@@ -113,14 +125,35 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   });
   /** "Sì" of "Vuoi sovrascrivere le impostazioni predefinite?": until then every field is read-only. */
   protected readonly editable = signal(false);
+  /** The server has a password saved (it never sends it). */
+  protected readonly passwordSaved = signal(false);
+  /** The connection the saved password belongs to, as the server last answered or saved it. */
+  private readonly savedConnection = signal<Partial<EmailConfigurationFields>>({});
+  /**
+   * The saved password must not be sent to another server, port, user or with another security
+   * (e.g. a server of whoever changed it, or a connection without encryption): then it is typed again.
+   */
+  private readonly passwordToRetype = computed(
+    () =>
+      this.passwordSaved() &&
+      CONNECTION_FIELDS.some(
+        (field) => this.configuration()[field] !== this.savedConnection()[field],
+      ),
+  );
   /** The last reading arrived: nothing can be changed before the values of the server are there. */
   private readonly loaded = signal(false);
   protected readonly configurationForm = form(this.configuration, (path) => {
-    // Read-only also while a reading runs: its answer would overwrite what is being typed.
-    readonly(path, { when: () => !this.editable() || this.isReloading() });
+    // Read-only also while a call runs: a reading would overwrite what is typed meanwhile, and Salva
+    // or the test email have already sent the values (rule: nothing changes until the server answers).
+    readonly(path, { when: () => !this.editable() || this.isBusy() });
     required(path.smtpPort);
     min(path.smtpPort, 1);
     max(path.smtpPort, MAX_TCP_PORT);
+    validate(path.smtpPassword, ({ value }) =>
+      !value() && this.passwordToRetype()
+        ? { kind: 'email_configuration.smtp_password.retype' }
+        : undefined,
+    );
   });
   /** Under each field: what is wrong in it, found here or by the backend. */
   protected readonly fieldErrors = Object.fromEntries(
@@ -163,6 +196,12 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
 
   constructor() {
     this.unsaved.watch(this);
+    // The request to type the password again shows at once, not only after leaving its field.
+    effect(() => {
+      if (this.passwordToRetype()) {
+        untracked(() => this.configurationForm.smtpPassword().markAsTouched());
+      }
+    });
     // Loaded again with Reset and when the language changes (what was typed is lost: user's choice).
     effect((onCleanup) => {
       this.reloads();
@@ -177,7 +216,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         return this.system.emailConfiguration({ idProperty }).subscribe({
           next: (data) => {
             this.isReloading.set(false);
-            this.configuration.set(data);
+            const { hasSmtpPassword, ...fields } = data;
+            this.configuration.set({ ...fields, smtpPassword: '' });
+            this.passwordSaved.set(hasSmtpPassword);
+            this.savedConnection.set(fields);
             this.configurationForm().reset();
             this.loaded.set(true);
           },
@@ -211,6 +253,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       this.isSaving,
       (request) => this.system.saveEmailConfiguration(request),
       () => {
+        // The new password is now the saved one: the field is empty again.
+        this.passwordSaved.update((saved) => saved || this.configuration().smtpPassword !== '');
+        this.savedConnection.set(this.configuration());
+        this.configuration.update((fields) => ({ ...fields, smtpPassword: '' }));
         this.configurationForm().reset();
         this.saved.set(true);
       },
@@ -234,7 +280,8 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       isRunning.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(call({ idProperty, ...this.configuration() }));
+        const { smtpPassword, ...fields } = this.configuration();
+        await firstValueFrom(call({ idProperty, ...fields, smtpPassword: smtpPassword || null }));
         done();
         return undefined;
       } catch (error: unknown) {

@@ -7,6 +7,10 @@ export interface EmailConfigurationData {
   smtpServerAddress: string;
   smtpPort: number;
   smtpUsername: string;
-  smtpPassword: string;
+  /**
+   * The SMTP password itself never leaves the server (a secret of an external system): only whether
+   * one is saved.
+   */
+  hasSmtpPassword: boolean;
   smtpSecurity: SmtpSecurity;
 }

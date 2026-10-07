@@ -315,7 +315,9 @@
           },
           "smtp_password": {
             "title": "Password (smtp_password):",
-            "description": "La password associata al nome utente."
+            "description": "La password associata al nome utente.",
+            "saved": "Password impostata: scrivi per cambiarla",
+            "missing": "Nessuna password impostata"
           },
           "smtp_security": {
             "title": "Tipo di Sicurezza (smtp_security):",
@@ -457,7 +459,12 @@
     "greater_than": "Il valore {{field}} deve essere superiore a {{limit}}",
     "max": "Il valore massimo è {{max}}",
     "min": "Il valore minimo è {{min}}",
-    "required": "Questo campo è obbligatorio"
+    "required": "Questo campo è obbligatorio",
+    "email_configuration": {
+      "smtp_password": {
+        "retype": "Hai cambiato i parametri di connessione: riscrivi la password o inseriscine una nuova."
+      }
+    }
   },
   "unsaved_changes": {
     "title": "Modifiche non salvate",

@@ -9,6 +9,7 @@ export interface EmailConfigurationRequest {
   /** The page sends only 1-65535 (it validates the field); `null` is the empty field. */
   smtpPort: number | null;
   smtpUsername: string;
-  smtpPassword: string;
+  /** A new password typed by the user; `null` keeps the one the server has saved. */
+  smtpPassword: string | null;
   smtpSecurity: SmtpSecurity | null;
 }
