@@ -341,6 +341,15 @@ export class Table<T, P extends object> implements OnDestroy {
 
   constructor() {
     effect(() => this.paginatorIntl.setTexts(this.texts()?.paginator));
+    // A page that no longer exists (e.g. its rows were deleted): the answer has no rows but still the
+    // total, so the table goes at once to the last page there is instead of saying it is empty.
+    effect(() => {
+      const { rows, total } = this.result();
+      const lastPage = Math.max(1, Math.ceil(total / this.pageSize()));
+      if (!rows.length && this.page() > lastPage) {
+        this.page.set(lastPage);
+      }
+    });
     // Every column has at least the room of its header (title and sort arrow): on small screens the
     // other columns give up room and, when there is none left, the rows scroll sideways inside the
     // table instead of overlapping.

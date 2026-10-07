@@ -222,6 +222,30 @@ describe('Table', () => {
     expect(host.requests.at(-1)).toEqual(host.requests.at(-2));
   });
 
+  it('should go once to the last page there is when the rows of its page are deleted', async () => {
+    const { fixture, host, element, names, next } = await setup();
+    next().click();
+    await fixture.whenStable();
+    next().click();
+    await fixture.whenStable();
+    expect(names()).toEqual(ALL.slice(20).map((row) => row.name)); // page 3: rows 21-25
+
+    const left = ALL.slice(0, 20); // the 5 rows of page 3 deleted
+    host.answer = (request) =>
+      of({
+        total: left.length,
+        rows: left.slice((request.page - 1) * request.pageSize, request.page * request.pageSize),
+      });
+    fixture.debugElement
+      .query((node) => node.componentInstance instanceof Table)
+      .componentInstance.reload();
+    await fixture.whenStable();
+
+    expect(host.requests.slice(-2).map((request) => request.page)).toEqual([3, 2]);
+    expect(names()).toEqual(ALL.slice(10, 20).map((row) => row.name));
+    expect(element.querySelector('.table__empty__cell')).toBeNull();
+  });
+
   it('should say that the table has no items only when the server answers with none', async () => {
     const pending = new Subject<Page<Row>>();
     const { fixture, host, element } = await setup((host) => (host.answer = () => pending));
