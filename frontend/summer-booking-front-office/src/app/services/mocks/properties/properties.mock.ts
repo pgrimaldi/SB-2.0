@@ -8,5 +8,9 @@ export const MOCK_PROPERTIES = [
   { id: 2, publicId: 'f9ecf8d2-02b7-4606-adbb-e560486ed90a', name: 'Bagni Esempio' },
 ] as const;
 
+export function propertyOf(idProperty: unknown): (typeof MOCK_PROPERTIES)[number] | undefined {
+  return MOCK_PROPERTIES.find((row) => row.publicId === idProperty);
+}
+
 /** Property managed by the mock test account. */
 export const DEMO_PROPERTY = MOCK_PROPERTIES[0];

@@ -11,6 +11,8 @@ export const API_ERROR_CODES = [
   'validation.invalid_date',
   'validation.end_before_start',
   'validation.invalid_value',
+  'resource.not_found',
+  'operation.not_allowed',
   'server.unexpected',
 ] as const;
 

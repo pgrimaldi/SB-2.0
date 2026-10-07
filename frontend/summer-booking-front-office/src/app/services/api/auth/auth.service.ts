@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthSession, SignInRequest } from '../../../entities/auth/credentials';
+import { onlyFieldsOf } from '../only-fields-of';
 
 /**
  * Authentication API. The refresh token travels only in the HttpOnly cookie the server sets on
@@ -14,7 +15,10 @@ export class AuthService {
   private readonly endpoint = `${environment.apiBaseUrl}/auth`;
 
   signIn(request: SignInRequest): Observable<AuthSession> {
-    return this.httpClient.post<AuthSession>(`${this.endpoint}/signin`, request);
+    return this.httpClient.post<AuthSession>(
+      `${this.endpoint}/signin`,
+      onlyFieldsOf(SignInRequest, request),
+    );
   }
 
   /** New access token (and rotated refresh cookie); fails with 401 when there is no valid session. */

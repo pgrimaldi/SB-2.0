@@ -72,6 +72,12 @@
       "invalid_date": "La data non è valida.",
       "end_before_start": "La data di fine viene prima di quella di inizio.",
       "invalid_value": "Il valore scelto non è valido."
+    },
+    "resource": {
+      "not_found": "Questo elemento non esiste più."
+    },
+    "operation": {
+      "not_allowed": "Operazione non consentita."
     }
   },
   "alert": {

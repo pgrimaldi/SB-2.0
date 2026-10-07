@@ -53,6 +53,16 @@ export function problem(
   ).pipe(delay(150));
 }
 
+/** The property is not one the user may work on: the operation is cancelled. */
+export function operationNotAllowed(request: HttpRequest<unknown>): Observable<never> {
+  return problem(request, 403, 'operation.not_allowed', { title: 'Operation not allowed' });
+}
+
+/** An article that does not exist, or no longer: the operation is cancelled. */
+export function resourceNotFound(request: HttpRequest<unknown>): Observable<never> {
+  return problem(request, 404, 'resource.not_found', { title: 'Resource not found' });
+}
+
 function randomHex(bytes: number): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (byte) =>
     byte.toString(16).padStart(2, '0'),

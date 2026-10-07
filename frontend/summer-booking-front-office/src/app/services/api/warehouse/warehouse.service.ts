@@ -9,6 +9,7 @@ import { Page } from '../../../entities/pagination/page';
 import { WarehouseComboboxRequest } from '../../../entities/warehouse/warehouse-combobox-request';
 import { WarehouseListRequest } from '../../../entities/warehouse/warehouse-list-request';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
+import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
 export class WarehouseService {
@@ -29,11 +30,17 @@ export class WarehouseService {
 
   /** Answers 204 with no body. */
   readonly addWarehouseItem = (idProperty: string, item: WarehouseItem): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/add-warehouse-item`, { idProperty, ...item });
+    this.httpClient.post<void>(`${this.endpoint}/add-warehouse-item`, {
+      ...onlyFieldsOf(WarehouseItem, item),
+      idProperty,
+    });
 
   /** Answers 204 with no body. */
   readonly editWarehouseItem = (idProperty: string, item: WarehouseItem): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/edit-warehouse-item`, { idProperty, ...item });
+    this.httpClient.post<void>(`${this.endpoint}/edit-warehouse-item`, {
+      ...onlyFieldsOf(WarehouseItem, item),
+      idProperty,
+    });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteWarehouseItems = (request: DeleteWarehouseItemsRequest): Observable<void> =>

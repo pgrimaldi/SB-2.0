@@ -8,8 +8,13 @@ import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-
 import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, problem } from '../errors/problem.mock';
-import { MOCK_PROPERTIES } from '../properties/properties.mock';
+import {
+  MockFieldError,
+  operationNotAllowed,
+  problem,
+  resourceNotFound,
+} from '../errors/problem.mock';
+import { propertyOf } from '../properties/properties.mock';
 
 /**
  * Rows of `catalog.inventory_items`: same structure as the sample DB, invented values (no data of
@@ -201,8 +206,8 @@ const TODAY_CONSUMPTIONS: { resourceId: string; quantity: number; state: Consump
 
 /**
  * `POST /api/warehouse/combobox-list` with `{ idProperty }`: the active articles of the property
- * (never of other properties), id and name only, by name; none for an unknown property. 401 without
- * a valid access token; 400 without `idProperty`.
+ * (never of other properties), id and name only, by name. 401 without a valid access token; 403 for
+ * a missing or unknown property.
  */
 export const warehouseComboboxMock = (
   request: HttpRequest<unknown>,
@@ -210,16 +215,14 @@ export const warehouseComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<Pick<ManagementRequest, 'idProperty'>>;
-  if (typeof body.idProperty !== 'string' || !body.idProperty) {
-    return problem(request, 400, 'validation.invalid_request', {
-      title: 'Invalid request',
-      errors: [{ field: 'idProperty', code: 'validation.invalid_value' }],
-    });
+  const property = propertyOf(
+    ((request.body ?? {}) as Partial<Pick<ManagementRequest, 'idProperty'>>).idProperty,
+  );
+  if (!property) {
+    return operationNotAllowed(request);
   }
-  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
   const items: ComboboxItem[] = INVENTORY_ITEMS.filter(
-    (item) => item.propertyId === property?.id && item.isActive && item.deletedAt === null,
+    (item) => item.propertyId === property.id && item.isActive && item.deletedAt === null,
   )
     .map((item) => ({ id: item.publicId, value: item.name }))
     .sort((first, second) => compare(first.value, second.value));
@@ -229,15 +232,24 @@ export const warehouseComboboxMock = (
 /**
  * `POST /api/warehouse/add-warehouse-item` with the new row and `idProperty`: adds the pieces to the total
  * of the article and sets its threshold and threshold alert (until the page is reloaded); 204 without
- * a body. 401 without a valid access token; 400 with one error per wrong field (see `itemErrors`).
+ * a body. 401 without a valid access token; 403 for an unknown property; 404 for an article that is
+ * not an active one of the property; 400 with one error per wrong field (see `itemErrors`).
  */
 export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as ItemBody;
-  const { item, errors } = itemErrors(body);
-  if (errors.length || !item) {
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const item = articleOf(property.id, body.idArticle);
+  if (!item) {
+    return resourceNotFound(request);
+  }
+  const errors = itemErrors(body);
+  if (errors.length) {
     return problem(request, 400, 'validation.invalid_request', {
       title: 'Invalid request',
       errors,
@@ -252,7 +264,8 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
 /**
  * `POST /api/warehouse/edit-warehouse-item` with the row and `idProperty`: sets total, threshold and
  * threshold alert of the article (until the page is reloaded); 204 without a body. 401 without a valid
- * access token; 400 with one error per wrong field (see `itemErrors`).
+ * access token; 403 for an unknown property; 404 for an article that is not an active one of the
+ * property; 400 with one error per wrong field (see `itemErrors`).
  */
 export const warehouseEditMock = (
   request: HttpRequest<unknown>,
@@ -261,8 +274,16 @@ export const warehouseEditMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as ItemBody;
-  const { item, errors } = itemErrors(body);
-  if (errors.length || !item) {
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const item = articleOf(property.id, body.idArticle);
+  if (!item) {
+    return resourceNotFound(request);
+  }
+  const errors = itemErrors(body);
+  if (errors.length) {
     return problem(request, 400, 'validation.invalid_request', {
       title: 'Invalid request',
       errors,
@@ -277,8 +298,9 @@ export const warehouseEditMock = (
 /**
  * `POST /api/warehouse/delete-warehouse-item` with `DeleteWarehouseItemsRequest`: all or nothing, as
  * agreed with the backend. If one id is not an active article of the property nothing is deleted
- * (400, error on `idItems`); otherwise the rows get `deletedAt`, like the soft delete of the DB.
- * Repeated ids count once. 204 without a body; 401 without a valid access token.
+ * (404 `resource.not_found`); otherwise the rows get `deletedAt`, like the soft delete of the DB.
+ * Repeated ids count once. 204 without a body; 401 without a valid access token; 403 for an unknown
+ * property.
  */
 export const warehouseDeleteMock = (
   request: HttpRequest<unknown>,
@@ -286,12 +308,14 @@ export const warehouseDeleteMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const { items, errors } = itemsOf((request.body ?? {}) as Partial<DeleteWarehouseItemsRequest>);
-  if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
-      title: 'Invalid request',
-      errors,
-    });
+  const body = (request.body ?? {}) as Partial<DeleteWarehouseItemsRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const items = itemsOf(property.id, body.idItems);
+  if (!items) {
+    return resourceNotFound(request);
   }
 
   const deletedAt = new Date().toISOString();
@@ -305,7 +329,8 @@ export const warehouseDeleteMock = (
  * `POST /api/warehouse/duplicate-warehouse-item` with `DuplicateWarehouseItemsRequest`: all or
  * nothing, like the delete. Each copy keeps total, threshold and alert; the name is chosen by the
  * backend: the mock invents "Lettino (copia)", then "Lettino (copia 2)" and so on.
- * 204 without a body; 401 without a valid access token.
+ * 204 without a body; 401 without a valid access token; 403 for an unknown property; 404 when one id
+ * is not an active article of the property.
  */
 export const warehouseDuplicateMock = (
   request: HttpRequest<unknown>,
@@ -313,14 +338,14 @@ export const warehouseDuplicateMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const { items, errors } = itemsOf(
-    (request.body ?? {}) as Partial<DuplicateWarehouseItemsRequest>,
-  );
-  if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
-      title: 'Invalid request',
-      errors,
-    });
+  const body = (request.body ?? {}) as Partial<DuplicateWarehouseItemsRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const items = itemsOf(property.id, body.idItems);
+  if (!items) {
+    return resourceNotFound(request);
   }
 
   for (const item of items) {
@@ -334,35 +359,26 @@ export const warehouseDuplicateMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
+function articleOf(propertyId: number, idArticle: unknown): InventoryRow | undefined {
+  return INVENTORY_ITEMS.find(
+    (row) =>
+      row.publicId === idArticle &&
+      row.propertyId === propertyId &&
+      row.isActive &&
+      row.deletedAt === null,
+  );
+}
+
 /**
- * The active articles of the property for `idItems` (repeated ids once), with one error per wrong
- * field: an id that is not one of them makes the whole request wrong.
+ * The active articles of the property for `idItems` (repeated ids once); null when one id is not
+ * one of them, or there are none: the whole request is cancelled.
  */
-function itemsOf(body: Partial<DeleteWarehouseItemsRequest>): {
-  items: InventoryRow[];
-  errors: MockFieldError[];
-} {
-  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
-  const idItems = Array.isArray(body.idItems) ? [...new Set(body.idItems)] : [];
-  const items = idItems
-    .map((idItem) =>
-      INVENTORY_ITEMS.find(
-        (row) =>
-          row.publicId === idItem &&
-          row.propertyId === property?.id &&
-          row.isActive &&
-          row.deletedAt === null,
-      ),
-    )
+function itemsOf(propertyId: number, idItems: unknown): InventoryRow[] | null {
+  const ids = Array.isArray(idItems) ? [...new Set(idItems)] : [];
+  const items = ids
+    .map((id) => articleOf(propertyId, id))
     .filter((item): item is InventoryRow => item !== undefined);
-  const errors: MockFieldError[] = [];
-  if (!property) {
-    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
-  }
-  if (!idItems.length || items.length < idItems.length) {
-    errors.push({ field: 'idItems', code: 'validation.invalid_value' });
-  }
-  return { items, errors };
+  return ids.length && items.length === ids.length ? items : null;
 }
 
 function copyName(item: InventoryRow): string {
@@ -380,24 +396,10 @@ function copyName(item: InventoryRow): string {
 
 type ItemBody = Partial<WarehouseItem & { idProperty: string }>;
 
-/** Checks as the backend answers them: one error per wrong field. */
-function itemErrors(body: ItemBody): { item?: InventoryRow; errors: MockFieldError[] } {
-  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
-  const item = INVENTORY_ITEMS.find(
-    (row) =>
-      row.publicId === body.idArticle &&
-      row.propertyId === property?.id &&
-      row.isActive &&
-      row.deletedAt === null,
-  );
+/** Checks as the backend answers them: one error per wrong field (never on an id). */
+function itemErrors(body: ItemBody): MockFieldError[] {
   const thresholdQuantity = body.thresholdQuantity;
   const errors: MockFieldError[] = [];
-  if (!property) {
-    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
-  }
-  if (!item) {
-    errors.push({ field: 'idArticle', code: 'validation.invalid_value' });
-  }
   if (!wholeNumber(body.totalQuantity) || body.totalQuantity === 0) {
     errors.push({ field: 'totalQuantity', code: 'validation.invalid_value' });
   }
@@ -411,7 +413,7 @@ function itemErrors(body: ItemBody): { item?: InventoryRow; errors: MockFieldErr
   ) {
     errors.push({ field: 'isThresholdWarningActive', code: 'validation.invalid_value' });
   }
-  return { item, errors };
+  return errors;
 }
 
 function setThreshold(item: InventoryRow, body: ItemBody): void {
@@ -424,14 +426,18 @@ const MAX_PAGE_SIZE = 100;
 /**
  * `POST /api/warehouse/list`: one page of the active articles of the requested property (never of
  * other properties) with today's availability; released consumptions free the stock. The period is
- * validated but the invented consumptions are all for today. 401 without a valid access token; 400
- * when dates or part of the day are missing or invalid.
+ * validated but the invented consumptions are all for today. 401 without a valid access token; 403
+ * for a missing or unknown property; 400 when dates or part of the day are missing or invalid.
  */
 export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<ManagementRequest & PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
   const errors = periodErrors(body);
   if (errors.length) {
     return problem(request, 400, 'validation.invalid_request', {
@@ -442,10 +448,9 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const property = MOCK_PROPERTIES.find((row) => row.publicId === body.idProperty);
 
   const items: WarehouseItem[] = INVENTORY_ITEMS.filter(
-    (item) => item.propertyId === property?.id && item.isActive && item.deletedAt === null,
+    (item) => item.propertyId === property.id && item.isActive && item.deletedAt === null,
   ).map((item) => {
     const consumedQuantity = TODAY_CONSUMPTIONS.filter(
       (consumption) => consumption.resourceId === item.publicId && consumption.state !== 'released',

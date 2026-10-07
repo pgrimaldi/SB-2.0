@@ -19,6 +19,14 @@ export function apiFieldErrors<TModel extends object>(
   const fields = form as unknown as Readonly<Record<string, FieldTree<unknown>>>;
   const value = form().value();
   return (problem.errors ?? [])
-    .filter(({ field }) => Object.hasOwn(value, field))
+    .filter(({ field }) => Object.hasOwn(value, field) && !isId(field))
     .map(({ field, code, args }) => ({ kind: 'api', fieldTree: fields[field], code, args }));
+}
+
+/**
+ * An id is never a field the user sees: an error on it goes to the general message, otherwise it
+ * would block the form with no visible reason.
+ */
+function isId(field: string): boolean {
+  return /^id[A-Z]/.test(field);
 }

@@ -12,8 +12,8 @@ import {
 } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, problem } from '../errors/problem.mock';
-import { MOCK_PROPERTIES } from '../properties/properties.mock';
+import { MockFieldError, operationNotAllowed, problem } from '../errors/problem.mock';
+import { propertyOf } from '../properties/properties.mock';
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'message'] as const;
 const SMTP_SECURITIES: readonly SmtpSecurity[] = ['None', 'Ssl', 'Tls'];
@@ -33,7 +33,7 @@ let smtpPassword: string | null = 'password-di-esempio';
 
 /**
  * `GET /api/system/email-configuration?idProperty=…`: the mail settings of the property. 401
- * without a valid access token; 400 for a missing or unknown property.
+ * without a valid access token; 403 `operation.not_allowed` for a missing or unknown property.
  */
 export const emailConfigurationMock = (
   request: HttpRequest<unknown>,
@@ -41,12 +41,8 @@ export const emailConfigurationMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const idProperty = request.params.get('idProperty');
-  if (!MOCK_PROPERTIES.some((row) => row.publicId === idProperty)) {
-    return problem(request, 400, 'validation.invalid_request', {
-      title: 'Invalid request',
-      errors: [{ field: 'idProperty', code: 'validation.invalid_value' }],
-    });
+  if (!propertyOf(request.params.get('idProperty'))) {
+    return operationNotAllowed(request);
   }
   return of(
     new HttpResponse({
@@ -71,13 +67,17 @@ const SUPPORT_HOURS: Record<'it' | 'en', string[]> = {
 /**
  * `POST /api/system/send-test-email` with `EmailConfigurationRequest`: the real backend tries the
  * settings by sending an email, the mock only checks them (see `emailConfigurationErrors`). 204
- * without a body; 401 without a valid access token; 400 with one error per wrong field.
+ * without a body; 401 without a valid access token; 403 for an unknown property; 400 with one error
+ * per wrong field.
  */
 export const sendTestEmailMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
+  }
+  if (!propertyOf((request.body as Partial<EmailConfigurationRequest> | null)?.idProperty)) {
+    return operationNotAllowed(request);
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
@@ -92,13 +92,17 @@ export const sendTestEmailMock = (
 /**
  * `POST /api/system/save-email-configuration` with `EmailConfigurationRequest`: same checks as the
  * test email; the mock keeps the values until the page is reloaded, so the GET (and Reset) answers
- * them. 204 without a body; 401 without a valid access token; 400 with one error per wrong field.
+ * them. 204 without a body; 401 without a valid access token; 403 for an unknown property; 400 with
+ * one error per wrong field.
  */
 export const saveEmailConfigurationMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
+  }
+  if (!propertyOf((request.body as Partial<EmailConfigurationRequest> | null)?.idProperty)) {
+    return operationNotAllowed(request);
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
@@ -128,9 +132,6 @@ export const saveEmailConfigurationMock = (
 function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   const body = (requestBody ?? {}) as Partial<Record<keyof EmailConfigurationRequest, unknown>>;
   const errors: MockFieldError[] = [];
-  if (!MOCK_PROPERTIES.some((row) => row.publicId === body.idProperty)) {
-    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
-  }
   for (const field of REQUIRED_EMAIL_FIELDS) {
     const value = body[field];
     if (typeof value !== 'string' || !value.trim()) {
@@ -160,18 +161,15 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
 /**
  * `POST /api/system/info-support` with `{ idProperty }`: the support contacts and hours, the hours in
  * the language of `Accept-Language` (Italian when it is not English). 401 without a valid access
- * token; 400 for an unknown property.
+ * token; 403 for an unknown property.
  */
 export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<Pick<ManagementRequest, 'idProperty'>>;
-  if (!MOCK_PROPERTIES.some((row) => row.publicId === body.idProperty)) {
-    return problem(request, 400, 'validation.invalid_request', {
-      title: 'Invalid request',
-      errors: [{ field: 'idProperty', code: 'validation.invalid_value' }],
-    });
+  if (!propertyOf(body.idProperty)) {
+    return operationNotAllowed(request);
   }
   const language = request.headers.get('Accept-Language')?.startsWith('en') ? 'en' : 'it';
   const info: SupportInfo = {
@@ -185,8 +183,8 @@ export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpE
 /**
  * `POST /api/system/contact-support` with `ContactSupportRequest`: the real backend sends the
  * message to the support team, the mock only checks it. 204 without a body; 401 without a valid
- * access token; 400 with one error per missing field (blank counts as missing; the mobile phone may
- * be `null`).
+ * access token; 403 for an unknown property; 400 with one error per missing field (blank counts as
+ * missing; the mobile phone may be `null`).
  */
 export const contactSupportMock = (
   request: HttpRequest<unknown>,
@@ -195,10 +193,10 @@ export const contactSupportMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<Record<keyof ContactSupportRequest, unknown>>;
-  const errors: MockFieldError[] = [];
-  if (!MOCK_PROPERTIES.some((row) => row.publicId === body.idProperty)) {
-    errors.push({ field: 'idProperty', code: 'validation.invalid_value' });
+  if (!propertyOf(body.idProperty)) {
+    return operationNotAllowed(request);
   }
+  const errors: MockFieldError[] = [];
   for (const field of REQUIRED_FIELDS) {
     const value = body[field];
     if (typeof value !== 'string' || !value.trim()) {
