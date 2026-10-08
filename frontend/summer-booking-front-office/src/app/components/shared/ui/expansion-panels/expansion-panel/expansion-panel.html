@@ -1,0 +1,29 @@
+<mat-expansion-panel
+  class="expansion__panel"
+  hideToggle
+  [expanded]="expanded()"
+  (expandedChange)="expanded.set($event)"
+>
+  <mat-expansion-panel-header class="expansion__panel__header">
+    <mat-panel-title class="expansion__panel__title">
+      @if (icons().list[0]; as icon) {
+        @if (icons().material) {
+          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="20" height="20" alt="" />
+        }
+      }
+      {{ title() }}
+    </mat-panel-title>
+    @if (icons().list[1]; as icon) {
+      <span class="expansion__panel__arrow" aria-hidden="true">
+        @if (icons().material) {
+          <mat-icon>{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="10" height="14" alt="" />
+        }
+      </span>
+    }
+  </mat-expansion-panel-header>
+  <div class="expansion__panel__content"><ng-content /></div>
+</mat-expansion-panel>

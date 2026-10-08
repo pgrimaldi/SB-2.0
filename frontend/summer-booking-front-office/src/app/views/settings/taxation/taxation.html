@@ -1,0 +1,70 @@
+<main class="taxation">
+  <app-expansion-panel
+    [title]="'management.settings.taxation.printer.title' | translate"
+    [pathIcon]="printerPanelIcons"
+    [(expanded)]="printersExpanded"
+  >
+    @if (printers().length) {
+      <h3 class="taxation__subtitle">
+        {{ 'management.settings.taxation.printer.added' | translate }}
+      </h3>
+      <ul class="taxation__printers">
+        @for (printer of printers(); track printer.idPrinter) {
+          <li class="taxation__printer">
+            <p class="taxation__printer__name">{{ printer.printerName }}</p>
+            <p class="taxation__printer__ip">{{ printer.printerIP }}</p>
+            <app-toggle
+              class="taxation__printer__toggle"
+              [checked]="printer.isEnabled"
+              [accessibleLabel]="
+                'management.settings.taxation.printer.enabled'
+                  | translate: { name: printer.printerName }
+              "
+            />
+            <app-icon-button
+              class="taxation__printer__delete"
+              [label]="
+                'management.settings.taxation.printer.delete'
+                  | translate: { name: printer.printerName }
+              "
+              [pathIcon]="deletePrinterIcon"
+            />
+          </li>
+        }
+      </ul>
+    }
+    @if (printersErrorMessage(); as printersErrorMessage) {
+      <p class="taxation__error" role="alert">{{ printersErrorMessage }}</p>
+    }
+    <app-button size="small" [pathIcon]="addPrinterIcon">
+      {{ 'management.settings.taxation.printer.add' | translate }}
+    </app-button>
+  </app-expansion-panel>
+
+  <app-button class="taxation__guide" size="small" [pathIcon]="downloadGuideIcon">
+    {{ 'management.settings.taxation.guide' | translate }}
+  </app-button>
+
+  <app-expansion-panel
+    [title]="'management.settings.taxation.receipt.title' | translate"
+    [pathIcon]="receiptPanelIcons"
+    [(expanded)]="receiptExpanded"
+  >
+    <h3 class="taxation__subtitle">
+      {{ 'management.settings.taxation.receipt.terms' | translate }}
+    </h3>
+    @if (receiptErrorMessage(); as receiptErrorMessage) {
+      <p class="taxation__error" role="alert">{{ receiptErrorMessage }}</p>
+    } @else {
+      <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
+    }
+    <div class="taxation__choices">
+      <app-checkbox labelPosition="before">
+        {{ 'management.settings.taxation.receipt.accept' | translate }}
+      </app-checkbox>
+      <app-checkbox labelPosition="before">
+        {{ 'management.settings.taxation.receipt.refuse' | translate }}
+      </app-checkbox>
+    </div>
+  </app-expansion-panel>
+</main>

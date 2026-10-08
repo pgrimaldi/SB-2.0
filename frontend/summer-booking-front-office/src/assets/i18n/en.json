@@ -352,6 +352,22 @@
           "question": "Do you want to override the default settings?",
           "confirm": "Yes"
         }
+      },
+      "taxation": {
+        "printer": {
+          "title": "Printer",
+          "added": "Added printers",
+          "enabled": "Printer {{name}} enabled",
+          "delete": "Delete the printer {{name}}",
+          "add": "Add printer"
+        },
+        "guide": "Download the “Cassa Fiscale Online” activation guide",
+        "receipt": {
+          "title": "Electronic receipt",
+          "terms": "Terms and conditions",
+          "accept": "I accept",
+          "refuse": "I do not accept"
+        }
       }
     }
   },

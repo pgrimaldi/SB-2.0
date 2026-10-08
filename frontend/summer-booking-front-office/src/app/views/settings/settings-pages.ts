@@ -28,7 +28,11 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
   { path: 'discounts', label: 'management.settings.menu.discounts' },
   { path: 'sharing', label: 'management.settings.menu.sharing' },
   { path: 'online-bookings', label: 'management.settings.menu.online_bookings' },
-  { path: 'fiscalization', label: 'management.settings.menu.fiscalization' },
+  {
+    path: 'taxation',
+    label: 'management.settings.menu.fiscalization',
+    loadComponent: () => import('./taxation/taxation').then((component) => component.Taxation),
+  },
   {
     path: 'email-configuration',
     label: 'management.settings.menu.email',

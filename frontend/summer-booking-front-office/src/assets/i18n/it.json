@@ -352,6 +352,22 @@
           "question": "Vuoi sovrascrivere le impostazioni predefinite?",
           "confirm": "Sì"
         }
+      },
+      "taxation": {
+        "printer": {
+          "title": "Stampante",
+          "added": "Stampanti aggiunte",
+          "enabled": "Stampante {{name}} attiva",
+          "delete": "Elimina la stampante {{name}}",
+          "add": "Aggiungi stampante"
+        },
+        "guide": "Scarica Guida all’attivazione di “Cassa Fiscale Online”",
+        "receipt": {
+          "title": "Scontrino elettronico",
+          "terms": "Termini e condizioni",
+          "accept": "Accetto",
+          "refuse": "Non accetto"
+        }
       }
     }
   },

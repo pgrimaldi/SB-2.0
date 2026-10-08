@@ -4,6 +4,7 @@
   [name]="name() ?? null"
   [checked]="checked()"
   [disabled]="disabled()"
+  [aria-label]="accessibleLabel() ?? null"
   [aria-describedby]="error() ? id + '-error' : ''"
   (change)="checked.set($event.checked)"
   ><ng-content

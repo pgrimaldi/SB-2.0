@@ -8,6 +8,7 @@ import {
   sendTestEmailMock,
   supportInfoMock,
 } from './system/system.mock';
+import { electronicReceiptMock, printerListMock } from './taxation/taxation.mock';
 import {
   warehouseAddMock,
   warehouseComboboxMock,
@@ -103,6 +104,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/system/contact-support`
   ) {
     return contactSupportMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/taxation/printer-list`
+  ) {
+    return printerListMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt`
+  ) {
+    return electronicReceiptMock(request);
   }
 
   return next(request);

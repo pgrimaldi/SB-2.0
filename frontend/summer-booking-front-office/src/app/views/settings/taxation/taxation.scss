@@ -1,0 +1,101 @@
+// Designer's mockup (08/10/2026): two panels that open, the guide button between them on the right.
+.taxation {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 4.5rem 2rem;
+  color: var(--color__main__theme__one);
+}
+
+.taxation__subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.taxation__printers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  margin: 0 0 1.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.taxation__printer {
+  --icon-button-background: transparent;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.taxation__printer__name,
+.taxation__printer__ip {
+  grid-column: 1;
+  margin: 0;
+}
+
+.taxation__printer__ip {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.taxation__printer__toggle,
+.taxation__printer__delete {
+  grid-row: 1 / span 2;
+}
+
+// A lighter blue than the other buttons, as in the mockup.
+.taxation__guide {
+  --color__main__theme__one: var(--color__layout__text__soft);
+
+  align-self: flex-end;
+  margin-top: 1.25rem;
+}
+
+// The terms arrive as HTML through innerHTML: their tags do not get the attributes that scope the
+// component styles, hence ::ng-deep, limited to this box.
+.taxation__terms ::ng-deep {
+  font-size: 0.75rem;
+  line-height: 1.17;
+
+  h4 {
+    margin: 1.25rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  p,
+  ul {
+    margin: 0;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+.taxation__choices {
+  display: flex;
+  gap: 3.5rem;
+  margin-top: 2.5rem;
+}
+
+.taxation__error {
+  margin: 0 0 1.25rem;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+}
