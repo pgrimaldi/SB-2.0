@@ -407,7 +407,7 @@ $motion: $motion-duration $motion-easing;
   }
 }
 
-@media (width < 48rem) {
+@media (width <= 48rem), (width < 64rem) and (orientation: portrait) {
   .header {
     height: 6.5rem;
   }

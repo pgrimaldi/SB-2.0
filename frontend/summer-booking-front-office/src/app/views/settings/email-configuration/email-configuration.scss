@@ -2,7 +2,7 @@
 
 // Designer's mockup (06/10/2026): one white panel, on each row the name and the explanation of the
 // setting on the left and its field on the right; the three buttons under the panel, on the right.
-// Bigger than the mockup (user): wider page, texts and fields; the buttons as in the mockup.
+// Bigger than the mockup (user): wider page, texts and fields; extra room for the test email label.
 .email__configuration {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
@@ -83,7 +83,12 @@
   gap: 1rem;
 
   app-button {
+    flex-shrink: 0;
     width: 8rem;
+
+    &:first-child {
+      width: 12rem;
+    }
   }
 }
 
@@ -93,8 +98,17 @@
     gap: 0.5rem;
   }
 
-  .email__configuration__actions app-button {
-    flex: 1;
-    width: auto;
+  .email__configuration__actions {
+    flex-wrap: wrap;
+
+    app-button {
+      flex: 1 0 calc(50% - 0.5rem);
+      width: auto;
+
+      &:first-child {
+        flex-basis: 100%;
+        width: auto;
+      }
+    }
   }
 }

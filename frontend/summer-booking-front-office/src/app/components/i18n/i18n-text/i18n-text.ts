@@ -21,13 +21,16 @@ import { combineLatest, switchMap } from 'rxjs';
     } @else {
       <span class="i18n__text__value">{{ text() }}</span>
     }
+    @for (translation of reserved(); track translation) {
+      <span
+        class="i18n__text__reserve"
+        aria-hidden="true"
+        [attr.data-i18n-reserve]="translation"
+      ></span>
+    }
   `,
   styleUrl: './i18n-text.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '[attr.data-i18n-reserve-1]': 'reserved()[0] ?? null',
-    '[attr.data-i18n-reserve-2]': 'reserved()[1] ?? null',
-  },
 })
 export class I18nText {
   readonly key = input.required<string>({ alias: 'appI18nText' });
@@ -57,17 +60,18 @@ export class I18nText {
     { initialValue: [] as unknown[] },
   );
 
-  /** The two longest translations different from the visible one (enough for up to three languages). */
   protected readonly reserved = computed(() => {
     const plain = (value: string) => (this.isHtml() ? value.replace(/<[^>]*>/g, '') : value);
     const visible = plain(this.text());
     const key = this.key();
 
-    return this.translations()
-      .filter((value): value is string => typeof value === 'string' && value !== key)
-      .map(plain)
-      .filter((value) => value !== visible)
-      .sort((first, second) => second.length - first.length)
-      .slice(0, 2);
+    return [
+      ...new Set(
+        this.translations()
+          .filter((value): value is string => typeof value === 'string' && value !== key)
+          .map(plain)
+          .filter((value) => value !== visible),
+      ),
+    ];
   });
 }

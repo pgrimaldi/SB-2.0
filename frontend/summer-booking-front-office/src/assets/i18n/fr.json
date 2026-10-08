@@ -364,7 +364,7 @@
           "delete": "Supprimer l'imprimante {{name}}",
           "add": "Ajouter une imprimante"
         },
-        "guide": "Télécharger le guide d'activation de « Cassa Fiscale Online »",
+        "guide": "Télécharger le guide d'activation",
         "receipt": {
           "title": "Ticket de caisse électronique",
           "terms": "Conditions générales",

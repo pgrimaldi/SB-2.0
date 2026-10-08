@@ -33,6 +33,7 @@ import {
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
+import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
@@ -64,6 +65,7 @@ interface SecurityTexts {
     FilledSelect,
     FilledTextField,
     FormField,
+    I18nText,
     MessagePopup,
     TranslatePipe,
   ],
