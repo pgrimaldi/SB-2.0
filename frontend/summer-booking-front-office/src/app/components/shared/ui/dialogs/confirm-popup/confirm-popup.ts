@@ -18,7 +18,7 @@ export interface ConfirmPopupTexts {
 }
 
 /**
- * Confirming does not close the popup: the caller runs the action with `loading` on and then closes
+ * Confirming does not close the popup: the caller runs the action with `isLoading` on and then closes
  * it, or leaves it open with the `error`.
  */
 @Component({
@@ -36,7 +36,7 @@ export class ConfirmPopup extends BasePopup {
   readonly texts = input<ConfirmPopupTexts | null>();
   /** For an action that cannot be undone: the confirm button is red. */
   readonly danger = input(false);
-  readonly loading = input(false);
+  readonly isLoading = input(false);
   readonly error = input<string | null>();
   readonly confirmed = output<void>();
 
@@ -44,7 +44,7 @@ export class ConfirmPopup extends BasePopup {
 
   constructor() {
     super();
-    effect(() => this.setClosable(!this.loading()));
+    effect(() => this.setClosable(!this.isLoading()));
   }
 
   protected dialogConfig(): MatDialogConfig {

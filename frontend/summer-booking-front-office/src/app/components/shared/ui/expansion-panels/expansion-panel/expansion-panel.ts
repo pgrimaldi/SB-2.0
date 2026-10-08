@@ -12,7 +12,7 @@ import { resolveIcons } from '../../icons/icons';
 })
 export class ExpansionPanel {
   readonly title = input<string>();
-  readonly expanded = model(false);
+  readonly isExpanded = model(false);
   /** Icons as Material icon names (Material Symbols font): [before the title, arrow]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Image paths, used when `matIcon` is not given: [before the title, arrow pointing right]. */

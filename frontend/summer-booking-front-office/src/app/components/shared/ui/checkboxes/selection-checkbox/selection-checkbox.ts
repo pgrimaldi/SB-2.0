@@ -11,6 +11,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 export class SelectionCheckbox {
   /** Accessible name only: there is no visible label. */
   readonly label = input<string>();
-  readonly indeterminate = input(false);
+  readonly isIndeterminate = input(false);
   readonly checked = model(false);
 }

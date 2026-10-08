@@ -39,8 +39,8 @@ const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
     [(pageSize)]="pageSize"
     [texts]="texts"
     [useAppTheme]="true"
-    [hideCreateButton]="true"
-    [hideMassiveActions]="true"
+    [isCreateButtonHidden]="true"
+    [areMassiveActionsHidden]="true"
     (loadError)="errors.push($event)"
   />`,
 })
@@ -378,9 +378,9 @@ describe('Table', () => {
     [params]="params"
     [load]="load"
     [texts]="texts"
-    [searchable]="true"
-    [hideCreateButton]="true"
-    [hideMassiveActions]="true"
+    [isSearchable]="true"
+    [isCreateButtonHidden]="true"
+    [areMassiveActionsHidden]="true"
     [pathIcon]="['/search.svg', '/clear.svg']"
   >
     <button appTableIconAction type="button" class="delete">Elimina</button>
@@ -599,8 +599,8 @@ describe('Table default look', () => {
     [params]="params"
     [load]="load"
     [texts]="texts"
-    [hideCreateButton]="true"
-    [hideMassiveActions]="true"
+    [isCreateButtonHidden]="true"
+    [areMassiveActionsHidden]="true"
   />`,
 })
 class TableDefaultHost {
@@ -699,8 +699,8 @@ describe('Table row buttons', () => {
     [params]="params"
     [load]="load"
     [texts]="texts"
-    [hideCreateButton]="true"
-    [hideMassiveActions]="true"
+    [isCreateButtonHidden]="true"
+    [areMassiveActionsHidden]="true"
     [rowActions]="actions()"
     [matIcon]="material() ? ['search', 'close'] : null"
     [pathIcon]="['search.svg', 'clear.svg']"
@@ -968,8 +968,8 @@ describe('Table title, create button and chosen rows', () => {
     [texts]="texts"
     [title]="show() ? 'Impostazioni magazzino' : undefined"
     [createLabel]="'Aggiungi articolo'"
-    [hideMassiveActions]="!show()"
-    [hideCreateButton]="!show()"
+    [areMassiveActionsHidden]="!show()"
+    [isCreateButtonHidden]="!show()"
     [pathIcon]="icons()"
     (duplicateSelected)="events.push('duplicate ' + $event.join(','))"
     (deleteSelected)="events.push('delete ' + $event.join(','))"

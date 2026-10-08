@@ -14,7 +14,7 @@
   [class.filled__number__field__locked]="readonly() || disabled()"
 >
   <!-- One @if around the span alone, or Material would not place it before the number. -->
-  @if (currency() && icons().list[0]; as icon) {
+  @if (isCurrency() && icons().list[0]; as icon) {
     <span matTextPrefix class="filled__number__field__currency">
       @if (icons().material) {
         <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
@@ -32,7 +32,7 @@
     [disabled]="disabled()"
     [type]="inputType()"
     [attr.autocomplete]="autocomplete() ?? 'off'"
-    [attr.inputmode]="decimal() ? 'decimal' : 'numeric'"
+    [attr.inputmode]="isDecimal() ? 'decimal' : 'numeric'"
     [id]="id"
     [value]="text()"
     [name]="name() ?? ''"
@@ -42,7 +42,7 @@
     (input)="changeValue(field)"
     (blur)="touch.emit()"
   />
-  @if (masked()) {
+  @if (isMasked()) {
     <button
       matSuffix
       class="filled__number__field__toggle"

@@ -29,15 +29,15 @@ const SPINNER_SIZES: Record<ButtonSize, number> = {
     '[class.button__medium]': "size() === 'medium'",
     '[class.button__large]': "size() === 'large'",
     '[class.button__extralarge]': "size() === 'extralarge'",
-    '[class.button__full__width]': 'fullWidth()',
+    '[class.button__full__width]': 'isFullWidth()',
   },
 })
 export class Button {
   readonly appearance = input<ButtonAppearance>('primary');
   readonly size = input<ButtonSize>('medium');
-  readonly fullWidth = input(false);
+  readonly isFullWidth = input(false);
   readonly disabled = input(false);
-  readonly loading = input(false);
+  readonly isLoading = input(false);
   readonly accessibleLabel = input<string>();
   /** A submit button of its form instead of a plain button. */
   readonly isSubmitButton = input(false);
@@ -51,7 +51,7 @@ export class Button {
   protected readonly spinnerSize = computed(() => SPINNER_SIZES[this.size()]);
 
   protected press(): void {
-    if (!this.loading()) {
+    if (!this.isLoading()) {
       this.clicked.emit();
     }
   }

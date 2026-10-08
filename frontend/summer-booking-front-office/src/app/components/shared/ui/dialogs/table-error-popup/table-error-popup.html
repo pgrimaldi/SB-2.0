@@ -2,12 +2,12 @@
   <div class="table__error__popup">
     <h2 class="table__error__popup__title" [id]="id + '-title'">{{ title() }}</h2>
     <p class="table__error__popup__text" [id]="id + '-text'">{{ text() }}</p>
-    @if (!hideCloseButton() || !hideRetryButton()) {
+    @if (!isCloseButtonHidden() || !isRetryButtonHidden()) {
       <div class="table__error__popup__actions">
-        @if (!hideCloseButton()) {
+        @if (!isCloseButtonHidden()) {
           <app-button appearance="light" (clicked)="close()">{{ texts()?.close }}</app-button>
         }
-        @if (!hideRetryButton()) {
+        @if (!isRetryButtonHidden()) {
           <app-button (clicked)="retryLoad()">{{ texts()?.retry }}</app-button>
         }
       </div>

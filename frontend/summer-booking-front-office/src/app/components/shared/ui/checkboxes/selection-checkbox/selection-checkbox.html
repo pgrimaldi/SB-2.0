@@ -1,6 +1,6 @@
 <mat-checkbox
   [aria-label]="label() ?? ''"
   [checked]="checked()"
-  [indeterminate]="indeterminate()"
+  [indeterminate]="isIndeterminate()"
   (change)="checked.set($event.checked)"
 />

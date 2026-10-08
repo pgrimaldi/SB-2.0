@@ -9,8 +9,8 @@ import { TableErrorPopup } from './table-error-popup';
     title="Errore"
     text="In questo momento non riusciamo a fornire le informazioni richieste."
     [texts]="{ close: 'Chiudi', retry: 'Riprova' }"
-    [hideCloseButton]="hideClose()"
-    [hideRetryButton]="hideRetry()"
+    [isCloseButtonHidden]="hideClose()"
+    [isRetryButtonHidden]="hideRetry()"
     [(open)]="open"
     (retry)="retries = retries + 1"
   />`,

@@ -2,7 +2,7 @@
   <app-expansion-panel
     [title]="'management.settings.taxation.printer.title' | translate"
     [pathIcon]="printerPanelIcons"
-    [(expanded)]="printersExpanded"
+    [(isExpanded)]="printersExpanded"
   >
     @if (printers().length) {
       <h3 class="taxation__subtitle">
@@ -48,7 +48,7 @@
   <app-expansion-panel
     [title]="'management.settings.taxation.receipt.title' | translate"
     [pathIcon]="receiptPanelIcons"
-    [(expanded)]="receiptExpanded"
+    [(isExpanded)]="receiptExpanded"
   >
     <h3 class="taxation__subtitle">
       {{ 'management.settings.taxation.receipt.terms' | translate }}

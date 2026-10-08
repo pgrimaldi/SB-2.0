@@ -13,7 +13,7 @@
   "
   [texts]="'management.settings.warehouse.delete' | translate"
   [danger]="true"
-  [loading]="isLoading()"
+  [isLoading]="isLoading()"
   [error]="errorMessage()"
   [(open)]="open"
   (confirmed)="deleteItems()"

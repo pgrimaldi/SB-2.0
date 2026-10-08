@@ -12,7 +12,7 @@
         {{ title() }}
       </h2>
     }
-    @if (searchable()) {
+    @if (isSearchable()) {
       <app-search-field
         class="table__search"
         [placeholder]="texts()?.search?.placeholder"
@@ -22,7 +22,7 @@
         (searched)="search.set($event)"
       />
     }
-    @if (!hideCreateButton()) {
+    @if (!isCreateButtonHidden()) {
       <button class="table__create" type="button" (click)="create.emit()">
         @if (icons().list[4]; as icon) {
           @if (icons().material) {
@@ -41,7 +41,7 @@
   <div class="table__bar">
     @if (hasIconZone()) {
       <div class="table__bar__icons">
-        @if (!hideMassiveActions() && selection().length > 1) {
+        @if (!areMassiveActionsHidden() && selection().length > 1) {
           <button class="table__clear" type="button" (click)="selection.set([])">
             {{ texts()?.selection?.clear }}
           </button>
@@ -102,7 +102,7 @@
         <app-selection-checkbox
           [label]="texts()?.selection?.all"
           [checked]="allSelected()"
-          [indeterminate]="someSelected()"
+          [isIndeterminate]="someSelected()"
           (checkedChange)="selectAll($event)"
         />
       </th>

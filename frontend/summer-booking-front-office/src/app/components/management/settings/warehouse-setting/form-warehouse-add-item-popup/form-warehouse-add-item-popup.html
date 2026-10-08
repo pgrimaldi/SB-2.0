@@ -49,7 +49,7 @@
       <app-button
         appearance="light"
         size="small"
-        [fullWidth]="true"
+        [isFullWidth]="true"
         [disabled]="isLoading()"
         (clicked)="close()"
       >
@@ -57,9 +57,9 @@
       </app-button>
       <app-button
         size="small"
-        [fullWidth]="true"
+        [isFullWidth]="true"
         [disabled]="!canAdd()"
-        [loading]="isLoading()"
+        [isLoading]="isLoading()"
         (clicked)="add()"
       >
         {{ 'management.settings.warehouse.form.add' | translate }}

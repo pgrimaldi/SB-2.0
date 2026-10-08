@@ -71,7 +71,7 @@
             class="home__booster__action home__action__mobile"
             appearance="light"
             size="extralarge"
-            [fullWidth]="true"
+            [isFullWidth]="true"
           >
             <span appI18nText="home.booster.action"></span>
           </app-button>
@@ -128,7 +128,7 @@
           <app-button class="home__action__desktop" size="medium">
             <span appI18nText="home.growth.action"></span>
           </app-button>
-          <app-button class="home__action__mobile" size="extralarge" [fullWidth]="true">
+          <app-button class="home__action__mobile" size="extralarge" [isFullWidth]="true">
             <span appI18nText="home.growth.action"></span>
           </app-button>
         </div>
@@ -161,7 +161,7 @@
             <p
               class="home__about__us__quote"
               [appI18nText]="'home.about_us.reviews.' + review.key + '.quote'"
-              [html]="true"
+              [isHtml]="true"
             ></p>
           </app-card>
         }

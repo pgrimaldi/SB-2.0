@@ -1,7 +1,7 @@
 <!-- While loading the label stays (it keeps the size and the name of the button) but cannot be seen:
 the spinner is drawn over it. -->
 <ng-template #label>
-  <span class="button__label" [class.button__label__hidden]="loading()">
+  <span class="button__label" [class.button__label__hidden]="isLoading()">
     @if (icons().list[0]; as icon) {
       @if (icons().material) {
         <mat-icon class="button__icon" aria-hidden="true">{{ icon }}</mat-icon>
@@ -11,7 +11,7 @@ the spinner is drawn over it. -->
     }
     <ng-content />
   </span>
-  @if (loading()) {
+  @if (isLoading()) {
     <mat-progress-spinner
       class="button__spinner"
       mode="indeterminate"
@@ -27,8 +27,8 @@ the spinner is drawn over it. -->
     [attr.aria-label]="accessibleLabel() ?? null"
     [attr.type]="isSubmitButton() ? 'submit' : 'button'"
     [disabled]="disabled()"
-    [attr.aria-busy]="loading() || null"
-    [attr.aria-disabled]="loading() || null"
+    [attr.aria-busy]="isLoading() || null"
+    [attr.aria-disabled]="isLoading() || null"
     (click)="press()"
   >
     <ng-container [ngTemplateOutlet]="label" />
@@ -39,8 +39,8 @@ the spinner is drawn over it. -->
     [attr.aria-label]="accessibleLabel() ?? null"
     [attr.type]="isSubmitButton() ? 'submit' : 'button'"
     [disabled]="disabled()"
-    [attr.aria-busy]="loading() || null"
-    [attr.aria-disabled]="loading() || null"
+    [attr.aria-busy]="isLoading() || null"
+    [attr.aria-disabled]="isLoading() || null"
     (click)="press()"
   >
     <ng-container [ngTemplateOutlet]="label" />

@@ -97,9 +97,9 @@
         <app-button
           size="small"
           [isSubmitButton]="true"
-          [fullWidth]="true"
+          [isFullWidth]="true"
           [disabled]="contactForm().invalid()"
-          [loading]="isLoading()"
+          [isLoading]="isLoading()"
         >
           {{ 'management.settings.contact_support.form.send' | translate }}
         </app-button>

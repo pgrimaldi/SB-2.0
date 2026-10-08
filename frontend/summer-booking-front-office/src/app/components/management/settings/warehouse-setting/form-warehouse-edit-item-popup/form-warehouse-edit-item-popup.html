@@ -47,7 +47,7 @@
       <app-button
         appearance="light"
         size="small"
-        [fullWidth]="true"
+        [isFullWidth]="true"
         [disabled]="isLoading()"
         (clicked)="close()"
       >
@@ -55,9 +55,9 @@
       </app-button>
       <app-button
         size="small"
-        [fullWidth]="true"
+        [isFullWidth]="true"
         [disabled]="!canSave()"
-        [loading]="isLoading()"
+        [isLoading]="isLoading()"
         (clicked)="save()"
       >
         {{ 'management.settings.warehouse.form.save' | translate }}

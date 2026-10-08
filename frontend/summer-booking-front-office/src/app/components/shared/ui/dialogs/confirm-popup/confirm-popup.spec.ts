@@ -10,7 +10,7 @@ import { ConfirmPopup } from './confirm-popup';
     text="Vuoi eliminare l'articolo Lettino?"
     [texts]="{ cancel: 'Annulla', confirm: 'Elimina' }"
     [danger]="danger()"
-    [loading]="loading()"
+    [isLoading]="loading()"
     [error]="error()"
     [(open)]="open"
     (confirmed)="confirmations = confirmations + 1"

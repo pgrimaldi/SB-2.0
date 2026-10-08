@@ -30,8 +30,8 @@ export class TableErrorPopup extends BasePopup {
   readonly text = input<string>();
   readonly texts = input<TableErrorPopupTexts | null>();
   /** Esc and a click outside still close the popup. */
-  readonly hideCloseButton = input(false);
-  readonly hideRetryButton = input(false);
+  readonly isCloseButtonHidden = input(false);
+  readonly isRetryButtonHidden = input(false);
   readonly retry = output<void>();
 
   protected readonly id = `table-error-popup-${nextId++}`;

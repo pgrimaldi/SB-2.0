@@ -6,12 +6,12 @@
       <p class="confirm__popup__error" role="alert">{{ error }}</p>
     }
     <div class="confirm__popup__actions">
-      <app-button appearance="light" [disabled]="loading()" (clicked)="close()">
+      <app-button appearance="light" [disabled]="isLoading()" (clicked)="close()">
         {{ texts()?.cancel }}
       </app-button>
       <app-button
         [class.confirm__popup__danger]="danger()"
-        [loading]="loading()"
+        [isLoading]="isLoading()"
         (clicked)="confirmed.emit()"
       >
         {{ texts()?.confirm }}

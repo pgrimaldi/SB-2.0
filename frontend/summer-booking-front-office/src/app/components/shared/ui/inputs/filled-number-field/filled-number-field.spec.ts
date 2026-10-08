@@ -6,8 +6,8 @@ import { FilledNumberField } from './filled-number-field';
   imports: [FilledNumberField],
   template: `<app-filled-number-field
     label="Soglia"
-    [decimal]="decimal()"
-    [currency]="currency()"
+    [isDecimal]="decimal()"
+    [isCurrency]="currency()"
     [pathIcon]="['/assets/images/euro.svg']"
     [error]="error()"
     [(value)]="threshold"
@@ -25,7 +25,7 @@ class FilledNumberFieldHost {
   template: `<app-filled-number-field
     labelledBy="port-title"
     autocomplete="new-password"
-    [masked]="true"
+    [isMasked]="true"
     [pathIcon]="['', '/assets/images/eye-close.svg', '/assets/images/eye-start.svg']"
     [texts]="{ show: 'Mostra il contenuto' }"
     [value]="587"

@@ -8,7 +8,7 @@ import { combineLatest, switchMap } from 'rxjs';
  * so layouts stay identical in every language. The reserved texts live in hidden
  * pseudo-elements: they are not read by screen readers nor indexed as page content.
  *
- * With `[html]="true"` the translation may contain simple inline markup (e.g. `<em>` for
+ * With `[isHtml]="true"` the translation may contain simple inline markup (e.g. `<em>` for
  * highlighted words); Angular sanitizes it and the reserved space uses the plain text.
  * The languages are the ones ngx-translate knows (`addLangs`, or loaded translations): the
  * directive needs nothing else from the app.
@@ -16,7 +16,7 @@ import { combineLatest, switchMap } from 'rxjs';
 @Component({
   selector: '[appI18nText]',
   template: `
-    @if (html()) {
+    @if (isHtml()) {
       <span class="i18n__text__value" [innerHTML]="text()"></span>
     } @else {
       <span class="i18n__text__value">{{ text() }}</span>
@@ -31,7 +31,7 @@ import { combineLatest, switchMap } from 'rxjs';
 })
 export class I18nText {
   readonly key = input.required<string>({ alias: 'appI18nText' });
-  readonly html = input(false);
+  readonly isHtml = input(false);
   readonly params = input<Record<string, unknown>>();
 
   private readonly translateService = inject(TranslateService);
@@ -59,7 +59,7 @@ export class I18nText {
 
   /** The two longest translations different from the visible one (enough for up to three languages). */
   protected readonly reserved = computed(() => {
-    const plain = (value: string) => (this.html() ? value.replace(/<[^>]*>/g, '') : value);
+    const plain = (value: string) => (this.isHtml() ? value.replace(/<[^>]*>/g, '') : value);
     const visible = plain(this.text());
     const key = this.key();
 

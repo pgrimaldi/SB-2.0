@@ -195,12 +195,12 @@ export class Table<T, P extends object> implements OnDestroy {
   readonly createLabel = input<string>();
   /** Blue header, striped rows, rounded corners; otherwise the clean, minimal default look. */
   readonly useAppTheme = input(false);
-  readonly searchable = input(false);
+  readonly isSearchable = input(false);
   /** Buttons of every row, in the last column; empty or `null`: no such column. */
   readonly rowActions = input<readonly TableRowAction<T>[] | null>([]);
   /** Hides the row checkboxes and the buttons on the chosen rows (duplicate, delete). */
-  readonly hideMassiveActions = input(false);
-  readonly hideCreateButton = input(false);
+  readonly areMassiveActionsHidden = input(false);
+  readonly isCreateButtonHidden = input(false);
   /**
    * Icons as Material icon names (Material Symbols font): [search magnifier, search X, duplicate
    * chosen, delete chosen, create, title].
@@ -230,11 +230,11 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly hasIconActions = computed(() => this.iconActions().length > 0);
   protected readonly hasTextActions = computed(() => this.textActions().length > 0);
   protected readonly hasIconZone = computed(
-    () => !this.hideMassiveActions() || this.hasIconActions(),
+    () => !this.areMassiveActionsHidden() || this.hasIconActions(),
   );
   protected readonly hasBar = computed(() => this.hasIconZone() || this.hasTextActions());
   protected readonly hasHeading = computed(
-    () => !!this.title() || this.searchable() || !this.hideCreateButton(),
+    () => !!this.title() || this.isSearchable() || !this.isCreateButtonHidden(),
   );
   protected readonly titleId = `table__title__${nextTableId++}`;
 
@@ -314,7 +314,7 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly empty = computed(() => this.result() !== NO_ROWS && this.rows().length === 0);
   protected readonly total = computed(() => this.result().total);
   protected readonly fields = computed(() => [
-    ...(this.hideMassiveActions() ? [] : [SELECT_COLUMN]),
+    ...(this.areMassiveActionsHidden() ? [] : [SELECT_COLUMN]),
     ...this.columns().map((column) => column.field),
     ...(this.hasRowActions() ? [ROW_ACTIONS_COLUMN] : []),
   ]);
@@ -412,7 +412,7 @@ export class Table<T, P extends object> implements OnDestroy {
   private fitColumns(): readonly number[] | null {
     this.layoutChanges();
     const columns = this.columns();
-    const first = this.hideMassiveActions() ? 0 : 1; // the checkboxes come before the columns
+    const first = this.areMassiveActionsHidden() ? 0 : 1; // the checkboxes come before the columns
     const others = first + (this.hasRowActions() ? 1 : 0);
     this.useAppTheme(); // paddings and font weight of the headers depend on the look
     const grid = this.grid().nativeElement;

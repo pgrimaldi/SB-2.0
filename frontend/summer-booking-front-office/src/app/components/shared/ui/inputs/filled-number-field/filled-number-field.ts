@@ -26,7 +26,7 @@ export interface FilledNumberFieldTexts {
 }
 
 /**
- * Only digits 0-9 can be typed (no signs, no exponent); with `decimal` also one separator, comma or
+ * Only digits 0-9 can be typed (no signs, no exponent); with `isDecimal` also one separator, comma or
  * dot.
  */
 @Component({
@@ -49,10 +49,10 @@ export class FilledNumberField {
   readonly name = input<string>();
   /** Browser autofill hint; `off` when not given. */
   readonly autocomplete = input<string>();
-  readonly decimal = input(false);
-  readonly currency = input(false);
+  readonly isDecimal = input(false);
+  readonly isCurrency = input(false);
   /** The digits are dots, as in a password field, with the eye after them to show them. */
-  readonly masked = input(false);
+  readonly isMasked = input(false);
   /** Icons as Material icon names (Material Symbols font): [currency, content shown, content hidden]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden]. */
@@ -72,10 +72,10 @@ export class FilledNumberField {
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly visible = signal(false);
   protected readonly inputType = computed(() =>
-    this.masked() && !this.visible() ? 'password' : 'text',
+    this.isMasked() && !this.visible() ? 'password' : 'text',
   );
   protected readonly decimals = computed(() =>
-    !this.decimal() ? 0 : this.currency() ? CURRENCY_DECIMALS : Infinity,
+    !this.isDecimal() ? 0 : this.isCurrency() ? CURRENCY_DECIMALS : Infinity,
   );
   /**
    * Text in the field. It stays as typed while it means the same number (e.g. "3," while typing

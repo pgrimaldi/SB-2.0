@@ -5,7 +5,7 @@
     </p>
     <app-button
       size="small"
-      [fullWidth]="true"
+      [isFullWidth]="true"
       [disabled]="!canOverride()"
       (clicked)="editable.set(true)"
     >
@@ -34,7 +34,7 @@
         @if (field.name === 'smtpPort') {
           <app-filled-number-field
             autocomplete="new-password"
-            [masked]="true"
+            [isMasked]="true"
             [pathIcon]="portIcons"
             [texts]="'field.masked' | translate"
             [labelledBy]="id + ' ' + id + '-description'"
@@ -91,29 +91,29 @@
   <div class="email__configuration__actions">
     <app-button
       size="small"
-      [fullWidth]="true"
+      [isFullWidth]="true"
       [pathIcon]="sendTestIcon"
       [disabled]="isBusy() && !isSendingTest()"
-      [loading]="isSendingTest()"
+      [isLoading]="isSendingTest()"
       (clicked)="sendTestEmail()"
     >
       {{ 'management.settings.email_configuration.send_test' | translate }}
     </app-button>
     <app-button
       size="small"
-      [fullWidth]="true"
+      [isFullWidth]="true"
       [pathIcon]="resetIcon"
       [disabled]="isBusy() && !isReloading()"
-      [loading]="isReloading()"
+      [isLoading]="isReloading()"
       (clicked)="reset()"
     >
       {{ 'management.settings.email_configuration.reset' | translate }}
     </app-button>
     <app-button
       size="small"
-      [fullWidth]="true"
+      [isFullWidth]="true"
       [disabled]="(isBusy() && !isSaving()) || configurationForm().invalid()"
-      [loading]="isSaving()"
+      [isLoading]="isSaving()"
       (clicked)="save()"
     >
       {{ 'management.settings.email_configuration.save' | translate }}

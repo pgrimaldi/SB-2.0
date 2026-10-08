@@ -11,10 +11,10 @@
     [load]="warehouse.list"
     idField="idArticle"
     [texts]="'table' | translate"
-    [searchable]="true"
+    [isSearchable]="true"
     [useAppTheme]="false"
-    [hideMassiveActions]="true"
-    [hideCreateButton]="true"
+    [areMassiveActionsHidden]="true"
+    [isCreateButtonHidden]="true"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
   />

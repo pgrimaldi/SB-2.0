@@ -24,7 +24,7 @@ describe('Button', () => {
   it('should show a spinner and ignore clicks while loading, keeping the label', async () => {
     @Component({
       imports: [Button],
-      template: `<app-button [loading]="loading()" (clicked)="clicks = clicks + 1"
+      template: `<app-button [isLoading]="loading()" (clicked)="clicks = clicks + 1"
         >Aggiungi</app-button
       >`,
     })

@@ -6,7 +6,7 @@ import { SelectionCheckbox } from './selection-checkbox';
   imports: [SelectionCheckbox],
   template: `<app-selection-checkbox
     label="Scegli la riga"
-    [indeterminate]="partial()"
+    [isIndeterminate]="partial()"
     [(checked)]="chosen"
   />`,
 })
