@@ -1,23 +1,24 @@
-name: Sync README_DEPLOY to Nuclino
+name: Sync docs to Nuclino
 
 on:
   push:
     branches: [dev]
     paths:
-      - frontend/summer-booking-front-office/docs/README_DEPLOY.md
+      - "**/*.md"
+      - .github/nuclino-docs.json
       - .github/workflows/sync-readme-deploy-nuclino.yml
 
 permissions:
   contents: read
 
 concurrency:
-  group: nuclino-readme-deploy
+  group: nuclino-docs
   cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-24.04
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
       - name: Read documentation from dev
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -26,15 +27,14 @@ jobs:
           ref: dev
           persist-credentials: false
 
-      - name: Update the Nuclino item content
+      - name: Update the configured Nuclino items
         env:
           NUCLINO_API_KEY: ${{ secrets.NUCLINO_API_KEY }}
-          NUCLINO_ITEM_ID: aec3346f-8065-47f6-a699-a1f591067b43
-          MARKDOWN_FILE: frontend/summer-booking-front-office/docs/README_DEPLOY.md
         shell: bash
         run: |
           node <<'NODE'
-          const { readFileSync } = require('node:fs');
+          const { readFileSync, realpathSync } = require('node:fs');
+          const { extname, isAbsolute, relative, resolve, sep } = require('node:path');
 
           async function sync() {
             const apiKey = process.env.NUCLINO_API_KEY;
@@ -42,14 +42,44 @@ jobs:
               throw new Error('Missing repository secret NUCLINO_API_KEY.');
             }
 
-            const content = readFileSync(process.env.MARKDOWN_FILE, 'utf8');
-            if (!content.trim()) {
-              throw new Error('README_DEPLOY is empty: nothing was sent to Nuclino.');
+            const { files, idsNuclino } = JSON.parse(readFileSync('.github/nuclino-docs.json', 'utf8'));
+            if (!Array.isArray(files) || !Array.isArray(idsNuclino) || files.length !== idsNuclino.length) {
+              throw new Error('nuclino-docs.json: files and idsNuclino must be arrays with the same length.');
             }
 
-            const response = await fetch(
-              `https://api.nuclino.com/v0/items/${process.env.NUCLINO_ITEM_ID}`,
-              {
+            const root = realpathSync('.');
+            const usedFiles = new Set();
+            const usedIds = new Set();
+            // Validate and read every document before updating any item.
+            const documents = files.map((file, index) => {
+              const id = idsNuclino[index];
+              if (typeof file !== 'string' || isAbsolute(file) || extname(file).toLowerCase() !== '.md') {
+                throw new Error(`Entry ${index + 1}: file must be a repository-relative Markdown path.`);
+              }
+              if (typeof id !== 'string' || !/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id)) {
+                throw new Error(`Entry ${index + 1}: invalid Nuclino item ID.`);
+              }
+
+              const path = realpathSync(resolve(root, file));
+              const localPath = relative(root, path);
+              if (localPath === '..' || localPath.startsWith(`..${sep}`) || isAbsolute(localPath)) {
+                throw new Error(`Entry ${index + 1}: file must remain inside the repository.`);
+              }
+              if (usedFiles.has(path) || usedIds.has(id.toLowerCase())) {
+                throw new Error(`Entry ${index + 1}: duplicate file or Nuclino item ID.`);
+              }
+              usedFiles.add(path);
+              usedIds.add(id.toLowerCase());
+
+              const content = readFileSync(path, 'utf8');
+              if (!content.trim()) {
+                throw new Error(`Empty document: ${file}. Nothing was sent to Nuclino.`);
+              }
+              return { file, id, content };
+            });
+
+            for (const { file, id, content } of documents) {
+              const response = await fetch(`https://api.nuclino.com/v0/items/${id}`, {
                 method: 'PUT',
                 headers: {
                   Authorization: `Bearer ${apiKey}`,
@@ -58,14 +88,12 @@ jobs:
                 body: JSON.stringify({ content }),
                 redirect: 'error',
                 signal: AbortSignal.timeout(30000),
-              },
-            );
-
-            if (!response.ok) {
-              throw new Error(`Nuclino update failed (HTTP ${response.status}).`);
+              });
+              if (!response.ok) {
+                throw new Error(`Nuclino update failed for ${file} (HTTP ${response.status}).`);
+              }
+              console.log(`Synced ${file} to Nuclino. The item title was not changed.`);
             }
-
-            console.log('README_DEPLOY synced to Nuclino. The item title was not changed.');
           }
 
           sync().catch((error) => {

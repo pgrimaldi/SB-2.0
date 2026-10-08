@@ -346,17 +346,33 @@ Ripetere i passi da 1 a 6 con risorse separate: bucket, distribuzione, funzione 
 
 Per un dominio personalizzato il certificato ACM usato da CloudFront deve stare in `us-east-1`. Le regole dell'organizzazione limitano alcune azioni in quella regione: verificare con l'amministratore AWS prima di configurarlo.
 
-## 11. Copia di questa guida su Nuclino
+## 11. Copia dei documenti su Nuclino
 
-Il workflow GitHub Actions `.github/workflows/sync-readme-deploy-nuclino.yml` copia questa guida nell'item Nuclino di test `aec3346f-8065-47f6-a699-a1f591067b43`. La fonte ufficiale resta questo file sul branch `dev`: le modifiche fatte direttamente nell'item vengono sovrascritte alla sincronizzazione successiva, mentre il titolo dell'item non cambia.
+Il workflow GitHub Actions `.github/workflows/sync-readme-deploy-nuclino.yml`, chiamato **Sync docs to Nuclino**, legge le associazioni da `.github/nuclino-docs.json`. La fonte ufficiale resta ciascun file sul branch `dev`: le modifiche fatte direttamente negli item vengono sovrascritte alla sincronizzazione successiva, mentre i titoli degli item non cambiano.
+
+L'elenco ha due liste abbinate **per posizione**: il primo file aggiorna il primo ID, il secondo file il secondo ID e così via. I percorsi partono dalla root del repository, non dalla cartella `.github`. La configurazione iniziale è:
+
+```json
+{
+  "_comment": "Mantenere le liste con lo stesso numero gli elementi. Il riferimento tra file e item su nuclino è posizionale!! (quindi il primo file corrisponde al primo id, il secondo al secondo...)",
+  "files": ["frontend/summer-booking-front-office/docs/README_DEPLOY.md"],
+  "idsNuclino": ["aec3346f-8065-47f6-a699-a1f591067b43"]
+}
+```
+
+Il campo `_comment` è un avviso per chi modifica l'elenco: JSON non ammette commenti e il workflow ignora questo campo.
+
+Per aggiungere un documento, creare il suo item su Nuclino, aggiungere il percorso del Markdown in fondo a `files` e il relativo ID in fondo a `idsNuclino`, poi fare commit e push su `dev`. Non servono un altro secret o modifiche al workflow. Rimuovere un'associazione interrompe gli aggiornamenti di quell'item ma non lo cancella da Nuclino. Se si riordinano gli elenchi, spostare sempre insieme file e ID: un ID valido abbinato al file sbagliato non è riconoscibile automaticamente.
 
 Configurazione e primo test:
 
 1. In GitHub, nel repository, aprire **Settings → Secrets and variables → Actions** e creare il repository secret `NUCLINO_API_KEY` con la chiave API Nuclino. Non inserire mai la chiave nei file o nei log. La chiave ha i diritti dell'account Nuclino che l'ha creata, non quelli del token GitHub.
 2. Pubblicare il workflow sul branch `dev` con commit e push: il primo caricamento del workflow avvia anche la prima sincronizzazione.
-3. Aprire **Actions → Sync README_DEPLOY to Nuclino**, verificare che l'esecuzione sia riuscita e controllare il contenuto dell'item Nuclino.
+3. Aprire **Actions → Sync docs to Nuclino**, verificare che l'esecuzione sia riuscita e controllare il contenuto degli item Nuclino.
 
-I push successivi avviano la sincronizzazione solo se cambiano questo Markdown o il workflow stesso. Le esecuzioni non si sovrappongono e leggono la versione più recente di `dev`. Un file mancante o vuoto non viene inviato; un secret mancante o una risposta API non riuscita fanno fallire il workflow, senza stampare la chiave o il contenuto della risposta.
+I push su `dev` avviano la sincronizzazione se cambia un file `.md`, l'elenco JSON o il workflow. Si aggiornano tutti e soltanto i documenti elencati; un Markdown non elencato non viene pubblicato. Le esecuzioni non si sovrappongono e leggono la versione più recente di `dev`.
+
+Prima di inviare qualsiasi documento si controllano tutte le associazioni: liste di lunghezze diverse, ID non validi, duplicati, file mancanti, vuoti, non Markdown o esterni al repository bloccano l'intera sincronizzazione. Anche un secret mancante blocca l'invio. Gli aggiornamenti API sono sequenziali: se una chiamata fallisce, il workflow si ferma, ma gli item già aggiornati restano aggiornati; il successivo push che attiva il workflow risincronizza l'elenco. La chiave e il contenuto delle risposte non vengono stampati nei log.
 
 Il workflow non installa dipendenze dell'applicazione, non esegue build e non accede ad AWS. Non modifica `buildspec.yml` né CodePipeline; gli eventuali deploy avviati dallo stesso push dipendono dai trigger già configurati in AWS.
 
