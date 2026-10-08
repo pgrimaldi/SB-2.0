@@ -2,6 +2,7 @@
   class="checkbox"
   [name]="name() ?? null"
   [checked]="checked()"
+  [labelPosition]="hasLabelBefore() ? 'before' : 'after'"
   (change)="checked.set($event.checked)"
   ><ng-content
 /></mat-checkbox>

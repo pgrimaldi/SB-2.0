@@ -11,7 +11,7 @@
     [required]="isMandatory()"
     [id]="id"
     [value]="value() ?? ''"
-    [type]="type()"
+    [type]="isEmailField() ? 'email' : 'text'"
     [name]="name() ?? ''"
     [attr.autocomplete]="autocomplete() ?? null"
     [errorStateMatcher]="errorMatcher"

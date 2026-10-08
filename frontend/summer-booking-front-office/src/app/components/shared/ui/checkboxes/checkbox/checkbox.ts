@@ -11,4 +11,5 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 export class Checkbox {
   readonly name = input<string>();
   readonly checked = model(false);
+  readonly hasLabelBefore = input(false);
 }

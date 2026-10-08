@@ -59,10 +59,10 @@
       <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
     }
     <div class="taxation__choices">
-      <app-checkbox labelPosition="before">
+      <app-checkbox [hasLabelBefore]="true">
         {{ 'management.settings.taxation.receipt.accept' | translate }}
       </app-checkbox>
-      <app-checkbox labelPosition="before">
+      <app-checkbox [hasLabelBefore]="true">
         {{ 'management.settings.taxation.receipt.refuse' | translate }}
       </app-checkbox>
     </div>

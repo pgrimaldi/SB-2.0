@@ -86,7 +86,7 @@ function renderPart(
     }
     case 'date':
     case 'time':
-      return formatDate(args[part.name], part.kind, part.style, locale) ?? part.source;
+      return formatDate(args[part.name], part.kind === 'time', part.style, locale) ?? part.source;
     case 'plural': {
       const value = toNumber(args[part.name]);
       if (value === null) {

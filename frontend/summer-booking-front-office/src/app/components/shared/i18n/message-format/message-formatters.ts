@@ -61,7 +61,7 @@ export function formatNumber(
  */
 export function formatDate(
   value: unknown,
-  kind: 'date' | 'time',
+  isHourOnly: boolean,
   style: DateStyle,
   locale: string | undefined,
 ): string | null {
@@ -74,7 +74,7 @@ export function formatDate(
     return null;
   }
   const options: Intl.DateTimeFormatOptions = {
-    [kind === 'date' ? 'dateStyle' : 'timeStyle']: style,
+    [isHourOnly ? 'timeStyle' : 'dateStyle']: style,
     // A day has no time: read in UTC it stays the same day everywhere.
     ...(day && { timeZone: 'UTC' }),
   };

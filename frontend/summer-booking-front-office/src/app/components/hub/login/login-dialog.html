@@ -15,7 +15,7 @@
     <form class="login__dialog__form" (submit)="signIn($event)">
       <app-text-field
         [attr.inert]="pending() ? '' : null"
-        type="email"
+        [isEmailField]="true"
         autocomplete="email"
         [label]="'hub.login.email' | translate"
         [formField]="credentialsForm.username"
@@ -49,7 +49,7 @@
 
       <app-button
         size="large"
-        buttonType="submit"
+        [isSubmitButton]="true"
         [fullWidth]="true"
         [disabled]="pending()"
         [loading]="pending()"

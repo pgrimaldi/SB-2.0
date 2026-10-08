@@ -96,7 +96,7 @@
       <div class="contact__support__send">
         <app-button
           size="small"
-          buttonType="submit"
+          [isSubmitButton]="true"
           [fullWidth]="true"
           [disabled]="contactForm().invalid()"
           [loading]="isLoading()"

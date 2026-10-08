@@ -15,7 +15,7 @@
 }
 
 .icon__button {
-  background: #ebebeb;
+  background: var(--icon-button-background, #ebebeb);
 
   img {
     display: block;

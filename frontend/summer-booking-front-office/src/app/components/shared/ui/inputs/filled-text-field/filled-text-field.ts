@@ -38,7 +38,8 @@ export class FilledTextField {
   readonly disabled = input(false);
   readonly value = model<string | null>(null);
   readonly maxLength = input<number>();
-  readonly type = input<'text' | 'password'>('text');
+  /** Content hidden as a password, with the eye to show it. */
+  readonly isPasswordField = input(false);
   /** Ids of the page elements that name the field, when its label is not above it. */
   readonly labelledBy = input<string>();
   readonly name = input<string>();
@@ -47,7 +48,7 @@ export class FilledTextField {
   readonly autocomplete = input<string>();
   readonly error = input<string | null>();
   readonly texts = input<FilledTextFieldTexts | null>();
-  /** With `type="password"`, the eye after the text: [content shown, content hidden]. */
+  /** With `isPasswordField`, the eye after the text: [content shown, content hidden]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Image paths, used when `matIcon` is not given: [content shown, content hidden]. */
   readonly pathIcon = input<readonly string[] | null>();
@@ -63,7 +64,7 @@ export class FilledTextField {
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly visible = signal(false);
   protected readonly inputType = computed(() =>
-    this.type() === 'password' && !this.visible() ? 'password' : 'text',
+    this.isPasswordField() && !this.visible() ? 'password' : 'text',
   );
   private readonly matInput = viewChild.required(MatInput);
 

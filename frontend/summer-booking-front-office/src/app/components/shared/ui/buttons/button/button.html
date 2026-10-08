@@ -25,7 +25,7 @@ the spinner is drawn over it. -->
   <button
     mat-flat-button
     [attr.aria-label]="accessibleLabel() ?? null"
-    [attr.type]="buttonType()"
+    [attr.type]="isSubmitButton() ? 'submit' : 'button'"
     [disabled]="disabled()"
     [attr.aria-busy]="loading() || null"
     [attr.aria-disabled]="loading() || null"
@@ -37,7 +37,7 @@ the spinner is drawn over it. -->
   <button
     mat-button
     [attr.aria-label]="accessibleLabel() ?? null"
-    [attr.type]="buttonType()"
+    [attr.type]="isSubmitButton() ? 'submit' : 'button'"
     [disabled]="disabled()"
     [attr.aria-busy]="loading() || null"
     [attr.aria-disabled]="loading() || null"

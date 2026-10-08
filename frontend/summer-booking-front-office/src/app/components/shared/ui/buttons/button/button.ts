@@ -39,7 +39,8 @@ export class Button {
   readonly disabled = input(false);
   readonly loading = input(false);
   readonly accessibleLabel = input<string>();
-  readonly buttonType = input<'button' | 'submit'>('button');
+  /** A submit button of its form instead of a plain button. */
+  readonly isSubmitButton = input(false);
   /** Icons as Material icon names (Material Symbols font): [icon before the text]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [icon before the text]. */

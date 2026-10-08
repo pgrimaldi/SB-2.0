@@ -93,7 +93,7 @@ describe('FilledTextField', () => {
     @Component({
       imports: [FilledTextField],
       template: `<app-filled-text-field
-        type="password"
+        [isPasswordField]="true"
         [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
         [texts]="{ show: 'Mostra il contenuto' }"
         [(value)]="secret"

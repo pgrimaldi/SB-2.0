@@ -80,8 +80,8 @@ export class AuthBehaviour implements OnDestroy {
   readonly user = computed(() => this.session()?.user ?? null, { equal: sameUser });
 
   constructor() {
-    this.storage('session')?.removeItem(LEGACY_SESSION_KEY);
-    this.storage('local')?.removeItem(LEGACY_SESSION_KEY);
+    this.sessionStorage()?.removeItem(LEGACY_SESSION_KEY);
+    this.localStorage()?.removeItem(LEGACY_SESSION_KEY);
     this.channel?.addEventListener('message', this.otherTabMessage);
   }
 
@@ -112,9 +112,9 @@ export class AuthBehaviour implements OnDestroy {
     this.changeHands();
     this.session.set({ accessToken, user });
     this.forgetSignIn();
-    this.storage(remember ? 'local' : 'session')?.setItem(SIGNED_IN_KEY, 'true');
+    (remember ? this.localStorage() : this.sessionStorage())?.setItem(SIGNED_IN_KEY, 'true');
     this.sessionName = crypto.randomUUID();
-    this.storage('local')?.setItem(SESSION_NAME_KEY, this.sessionName);
+    this.localStorage()?.setItem(SESSION_NAME_KEY, this.sessionName);
     this.tell('signin');
   }
 
@@ -124,8 +124,8 @@ export class AuthBehaviour implements OnDestroy {
    */
   async restore(): Promise<void> {
     if (
-      this.storage('session')?.getItem(SIGNED_IN_KEY) ||
-      this.storage('local')?.getItem(SIGNED_IN_KEY)
+      this.sessionStorage()?.getItem(SIGNED_IN_KEY) ||
+      this.localStorage()?.getItem(SIGNED_IN_KEY)
     ) {
       await firstValueFrom(this.refresh()).catch(() => undefined);
     }
@@ -153,7 +153,7 @@ export class AuthBehaviour implements OnDestroy {
         return of(null);
       }
       if (!this.isAuthenticated() && this.cookieOwner() !== ownerAtStart) {
-        this.storage('session')?.removeItem(SIGNED_IN_KEY);
+        this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
         return of(null);
       }
       if (!this.ownsCookie()) {
@@ -176,7 +176,7 @@ export class AuthBehaviour implements OnDestroy {
         if (!this.sessionName) {
           // A tab that opens on a session started elsewhere (or by an older version, without a name).
           this.sessionName = this.cookieOwner() ?? crypto.randomUUID();
-          this.storage('local')?.setItem(SESSION_NAME_KEY, this.sessionName);
+          this.localStorage()?.setItem(SESSION_NAME_KEY, this.sessionName);
         }
         return accessToken;
       }),
@@ -258,10 +258,10 @@ export class AuthBehaviour implements OnDestroy {
     this.changeHands();
     this.session.set(null);
     this.sessionName = null;
-    this.storage('session')?.removeItem(SIGNED_IN_KEY);
+    this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
     if (ownsCookie) {
-      this.storage('local')?.removeItem(SIGNED_IN_KEY);
-      this.storage('local')?.removeItem(SESSION_NAME_KEY);
+      this.localStorage()?.removeItem(SIGNED_IN_KEY);
+      this.localStorage()?.removeItem(SESSION_NAME_KEY);
     }
   }
 
@@ -275,7 +275,7 @@ export class AuthBehaviour implements OnDestroy {
   }
 
   private cookieOwner(): string | null {
-    return this.storage('local')?.getItem(SESSION_NAME_KEY) ?? null;
+    return this.localStorage()?.getItem(SESSION_NAME_KEY) ?? null;
   }
 
   private tell(type: TabMessage['type'], session = this.sessionName): void {
@@ -326,7 +326,7 @@ export class AuthBehaviour implements OnDestroy {
     this.changeHands();
     this.session.set(null);
     this.sessionName = null;
-    this.storage('session')?.removeItem(SIGNED_IN_KEY);
+    this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
     void this.router.navigateByUrl('/');
   }
 
@@ -337,14 +337,23 @@ export class AuthBehaviour implements OnDestroy {
   }
 
   private forgetSignIn(): void {
-    this.storage('session')?.removeItem(SIGNED_IN_KEY);
-    this.storage('local')?.removeItem(SIGNED_IN_KEY);
+    this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
+    this.localStorage()?.removeItem(SIGNED_IN_KEY);
   }
 
   /** Undefined when storage is blocked (e.g. private mode). */
-  private storage(kind: 'session' | 'local'): Storage | undefined {
+  private localStorage(): Storage | undefined {
     try {
-      return kind === 'local' ? this.window?.localStorage : this.window?.sessionStorage;
+      return this.window?.localStorage;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /** Undefined when storage is blocked (e.g. private mode). */
+  private sessionStorage(): Storage | undefined {
+    try {
+      return this.window?.sessionStorage;
     } catch {
       return undefined;
     }

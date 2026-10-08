@@ -43,7 +43,7 @@
           />
         } @else {
           <app-filled-text-field
-            type="password"
+            [isPasswordField]="true"
             autocomplete="new-password"
             [pathIcon]="eyeIcons"
             [texts]="'field.masked' | translate"

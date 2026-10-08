@@ -25,7 +25,8 @@ export class TextField {
   /** Asterisk after the label; screen readers announce the field as required. */
   readonly isMandatory = input(false);
   readonly value = model<string | null>(null);
-  readonly type = input<'text' | 'email'>('text');
+  /** An email address: phones show the keyboard for it. */
+  readonly isEmailField = input(false);
   readonly name = input<string>();
   readonly autocomplete = input<string>();
   readonly error = input<string | null>();

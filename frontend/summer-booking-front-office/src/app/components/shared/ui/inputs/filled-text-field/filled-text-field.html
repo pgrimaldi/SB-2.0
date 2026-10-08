@@ -32,7 +32,7 @@
     (input)="value.set(field.value || null)"
     (blur)="touch.emit()"
   />
-  @if (type() === 'password') {
+  @if (isPasswordField()) {
     <button
       matSuffix
       class="filled__text__field__toggle"
