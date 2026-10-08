@@ -346,6 +346,22 @@ Ripetere i passi da 1 a 6 con risorse separate: bucket, distribuzione, funzione 
 
 Per un dominio personalizzato il certificato ACM usato da CloudFront deve stare in `us-east-1`. Le regole dell'organizzazione limitano alcune azioni in quella regione: verificare con l'amministratore AWS prima di configurarlo.
 
+## 11. Copia di questa guida su Nuclino
+
+Il workflow GitHub Actions `.github/workflows/sync-readme-deploy-nuclino.yml` copia questa guida nell'item Nuclino di test `aec3346f-8065-47f6-a699-a1f591067b43`. La fonte ufficiale resta questo file sul branch `dev`: le modifiche fatte direttamente nell'item vengono sovrascritte alla sincronizzazione successiva, mentre il titolo dell'item non cambia.
+
+Configurazione e primo test:
+
+1. In GitHub, nel repository, aprire **Settings → Secrets and variables → Actions** e creare il repository secret `NUCLINO_API_KEY` con la chiave API Nuclino. Non inserire mai la chiave nei file o nei log. La chiave ha i diritti dell'account Nuclino che l'ha creata, non quelli del token GitHub.
+2. Pubblicare il workflow sul branch `dev` con commit e push: il primo caricamento del workflow avvia anche la prima sincronizzazione.
+3. Aprire **Actions → Sync README_DEPLOY to Nuclino**, verificare che l'esecuzione sia riuscita e controllare il contenuto dell'item Nuclino.
+
+I push successivi avviano la sincronizzazione solo se cambiano questo Markdown o il workflow stesso. Le esecuzioni non si sovrappongono e leggono la versione più recente di `dev`. Un file mancante o vuoto non viene inviato; un secret mancante o una risposta API non riuscita fanno fallire il workflow, senza stampare la chiave o il contenuto della risposta.
+
+Il workflow non installa dipendenze dell'applicazione, non esegue build e non accede ad AWS. Non modifica `buildspec.yml` né CodePipeline; gli eventuali deploy avviati dallo stesso push dipendono dai trigger già configurati in AWS.
+
+Riferimenti: [aggiornamento di un item Nuclino](https://help.nuclino.com/fa38d15f-items-and-collections), [autenticazione e diritti della chiave](https://help.nuclino.com/8090bb76-authentication), [repository secrets GitHub](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+
 ## Deploy manuale (solo emergenze)
 
 Dalla cartella `frontend/summer-booking-front-office`, con credenziali AWS autorizzate:

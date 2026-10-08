@@ -1,0 +1,75 @@
+name: Sync README_DEPLOY to Nuclino
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - frontend/summer-booking-front-office/docs/README_DEPLOY.md
+      - .github/workflows/sync-readme-deploy-nuclino.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuclino-readme-deploy
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Read documentation from dev
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # Queued runs use the latest document, not an older triggering commit.
+          ref: dev
+          persist-credentials: false
+
+      - name: Update the Nuclino item content
+        env:
+          NUCLINO_API_KEY: ${{ secrets.NUCLINO_API_KEY }}
+          NUCLINO_ITEM_ID: aec3346f-8065-47f6-a699-a1f591067b43
+          MARKDOWN_FILE: frontend/summer-booking-front-office/docs/README_DEPLOY.md
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require('node:fs');
+
+          async function sync() {
+            const apiKey = process.env.NUCLINO_API_KEY;
+            if (!apiKey) {
+              throw new Error('Missing repository secret NUCLINO_API_KEY.');
+            }
+
+            const content = readFileSync(process.env.MARKDOWN_FILE, 'utf8');
+            if (!content.trim()) {
+              throw new Error('README_DEPLOY is empty: nothing was sent to Nuclino.');
+            }
+
+            const response = await fetch(
+              `https://api.nuclino.com/v0/items/${process.env.NUCLINO_ITEM_ID}`,
+              {
+                method: 'PUT',
+                headers: {
+                  Authorization: `Bearer ${apiKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content }),
+                redirect: 'error',
+                signal: AbortSignal.timeout(30000),
+              },
+            );
+
+            if (!response.ok) {
+              throw new Error(`Nuclino update failed (HTTP ${response.status}).`);
+            }
+
+            console.log('README_DEPLOY synced to Nuclino. The item title was not changed.');
+          }
+
+          sync().catch((error) => {
+            console.error(error.message);
+            process.exitCode = 1;
+          });
+          NODE
