@@ -7,7 +7,13 @@ import { LanguageBehaviour } from './language.behaviour';
 
 /** Used when the browser does not name a region for the language. */
 const DATE_PARTS: readonly DatePart[] = [DatePart.Day, DatePart.Month, DatePart.Year];
-const DATE_LOCALES: Record<Language, string> = { [Language.It]: 'it-IT', [Language.En]: 'en-GB' };
+const DATE_LOCALES: Record<Language, string> = {
+  [Language.It]: 'it-IT',
+  [Language.En]: 'en-GB',
+  [Language.Fr]: 'fr-FR',
+  [Language.Es]: 'es-ES',
+  [Language.De]: 'de-DE',
+};
 
 /** For Material's native date adapter: the browser (Intl) writes dates as each language does. */
 export const DATE_FORMATS: MatDateFormats = {

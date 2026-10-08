@@ -18,6 +18,9 @@ export class LanguageBehaviour {
   readonly languages: readonly LanguageOption[] = [
     { code: Language.It, flagSrc: '/assets/images/flag-it.svg' },
     { code: Language.En, flagSrc: '/assets/images/flag-gb.svg' },
+    { code: Language.Fr, flagSrc: '/assets/images/flag-fr.svg' },
+    { code: Language.Es, flagSrc: '/assets/images/flag-es.svg' },
+    { code: Language.De, flagSrc: '/assets/images/flag-de.svg' },
   ];
   private readonly currentCode = signal<Language>(DEFAULT_LANGUAGE);
 

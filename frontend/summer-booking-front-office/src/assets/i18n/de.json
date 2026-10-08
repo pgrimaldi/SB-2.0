@@ -1,0 +1,500 @@
+{
+  "language": {
+    "selector": "Sprache auswählen",
+    "names": {
+      "it": "Italiano",
+      "en": "English",
+      "fr": "Français",
+      "es": "Español",
+      "de": "Deutsch"
+    }
+  },
+  "carousel": {
+    "previous": "Zurück",
+    "next": "Weiter",
+    "position": "Zu Position {{position}} wechseln",
+    "slide": "{{index}} von {{total}}"
+  },
+  "table": {
+    "empty": "Die Tabelle enthält keine Einträge",
+    "paginator": {
+      "first": "Erste Seite",
+      "previous": "Vorherige Seite",
+      "next": "Nächste Seite",
+      "last": "Letzte Seite",
+      "size": "Einträge pro Seite:",
+      "range": "{{start}} – {{end}} von {{total}}"
+    },
+    "search": {
+      "placeholder": "In der Tabelle suchen",
+      "submit": "Suchen",
+      "clear": "Suche löschen"
+    },
+    "sort": {
+      "action": "Nach {{column}} sortieren"
+    },
+    "load_error": {
+      "title": "Fehler",
+      "text": "Die angeforderten Informationen können derzeit nicht bereitgestellt werden. Bitte versuchen Sie es erneut und wenden Sie sich an den Support, falls das Problem weiterhin besteht.",
+      "close": "Schließen",
+      "retry": "Erneut versuchen"
+    },
+    "actions": {
+      "header": "Aktionen",
+      "delete": "Löschen",
+      "duplicate": "Duplizieren",
+      "edit": "Bearbeiten"
+    },
+    "selection": {
+      "all": "Alle Zeilen der Seite auswählen",
+      "row": "Zeile auswählen",
+      "duplicate": "Auswahl duplizieren",
+      "delete": "Auswahl löschen",
+      "clear": "Auswahl aufheben"
+    }
+  },
+  "error": {
+    "unknown": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "network": {
+      "unavailable": "Keine Verbindung. Überprüfen Sie Ihr Netzwerk und versuchen Sie es erneut."
+    },
+    "server": {
+      "unavailable": "Der Dienst ist derzeit nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
+      "unexpected": "Der Dienst hat unerwartet geantwortet. Bitte versuchen Sie es später erneut."
+    },
+    "client": {
+      "unexpected": "In der Anwendung ist ein Fehler aufgetreten. Laden Sie die Seite neu und versuchen Sie es erneut."
+    },
+    "auth": {
+      "invalid_credentials": "Ungültige Zugangsdaten",
+      "invalid_token": "Ihre Sitzung ist nicht mehr gültig. Bitte melden Sie sich erneut an.",
+      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+    },
+    "validation": {
+      "invalid_request": "Einige Daten sind ungültig. Bitte prüfen Sie sie und versuchen Sie es erneut.",
+      "invalid_date": "Das Datum ist ungültig.",
+      "end_before_start": "Das Enddatum liegt vor dem Startdatum.",
+      "invalid_value": "Der gewählte Wert ist ungültig."
+    },
+    "resource": {
+      "not_found": "Dieser Eintrag existiert nicht mehr."
+    },
+    "operation": {
+      "not_allowed": "Vorgang nicht erlaubt."
+    }
+  },
+  "alert": {
+    "close": "Verstanden"
+  },
+  "field": {
+    "password": {
+      "show": "Passwort anzeigen"
+    },
+    "search": {
+      "submit": "Suchen",
+      "clear": "Suche löschen"
+    },
+    "masked": {
+      "show": "Inhalt anzeigen"
+    }
+  },
+  "hub": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      },
+      "nav": {
+        "label": "Hauptmenü",
+        "advantages": "Vorteile",
+        "features": "Funktionen",
+        "booking": "Booking",
+        "pricing": "Preise"
+      },
+      "login": "Anmelden",
+      "menu": {
+        "open": "Menü öffnen",
+        "close": "Menü schließen"
+      }
+    },
+    "footer": {
+      "social": {
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "E-Mail",
+        "youtube": "YouTube"
+      },
+      "links": {
+        "about": "Über uns",
+        "support": "Kundensupport",
+        "demo": "Kostenlose Demo anfordern",
+        "contacts": "Kontakte und Standorte",
+        "legal": "Impressum",
+        "terms": "Allgemeine Geschäftsbedingungen",
+        "privacy": "Datenschutz- und Cookie-Richtlinie",
+        "cookies": "Cookie-Einstellungen verwalten"
+      },
+      "legal": {
+        "group": "Summer Booking Hub ist Teil von Qbitsoft srl - Alle Rechte vorbehalten",
+        "company": "©{{year}} Qbitsoft Srl - USt-IdNr. 02375470503 - REA Pi-202428"
+      }
+    },
+    "login": {
+      "title": "Anmelden",
+      "close": "Schließen",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "remember": "Angemeldet bleiben",
+      "forgot": "Passwort vergessen?",
+      "submit": "Anmelden",
+      "or": "Oder",
+      "register": {
+        "question": "Noch nicht registriert?",
+        "action": "Registrieren Sie Ihren Betrieb"
+      }
+    }
+  },
+  "management": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      },
+      "datepicker": {
+        "start": {
+          "label": "Startdatum",
+          "previous": "Vorheriger Tag (Startdatum)",
+          "next": "Nächster Tag (Startdatum)"
+        },
+        "end": {
+          "label": "Enddatum",
+          "previous": "Vorheriger Tag (Enddatum)",
+          "next": "Nächster Tag (Enddatum)"
+        }
+      },
+      "today": {
+        "today": "Heute",
+        "other": "Nicht heute"
+      },
+      "period": {
+        "label": "Tageszeit",
+        "full_day": "Ganzer Tag",
+        "morning": "Vormittag",
+        "afternoon": "Nachmittag"
+      },
+      "search": {
+        "placeholder": "Nach Name suchen"
+      },
+      "actions": {
+        "configuration": "Konfiguration",
+        "settings": "Einstellungen",
+        "assistant": "Virtueller Assistent",
+        "notifications": "Benachrichtigungen",
+        "account": "Konto"
+      }
+    },
+    "menu": {
+      "label": "Verwaltungsmenü",
+      "warehouse": "Lager",
+      "logout": "Abmelden"
+    },
+    "logout_failed": {
+      "title": "Abmeldung fehlgeschlagen",
+      "text": "Wir konnten Ihre Sitzung auf dem Server nicht beenden, Sie sind daher weiterhin angemeldet. Überprüfen Sie Ihre Internetverbindung und klicken Sie erneut auf „Abmelden“."
+    },
+    "warehouse": {
+      "title": "Lager",
+      "table": {
+        "name": "Artikel",
+        "total": "Gesamt",
+        "threshold": "Schwellenwert",
+        "available": "Verfügbar"
+      }
+    },
+    "settings": {
+      "menu": {
+        "label": "Einstellungen",
+        "property": "Informationen zum Betrieb",
+        "users": "Benutzerverwaltung",
+        "seasons": "Saisons und Zeiträume",
+        "sectors": "Sektoren und Reihen",
+        "map": "Karte konfigurieren",
+        "warehouse": "Lagereinstellungen",
+        "price_list": "Preisliste",
+        "services": "Leistungen",
+        "discounts": "Rabatte und Gutscheine",
+        "sharing": "Sharing",
+        "online_bookings": "Online-Buchungen",
+        "fiscalization": "Fiskalisierung",
+        "email": "E-Mail-Konfiguration",
+        "database": "Datenbank",
+        "help": "Support und Anleitungen"
+      },
+      "warehouse": {
+        "title": "Lagereinstellungen",
+        "create": "Artikel hinzufügen",
+        "form": {
+          "title": "Artikel hinzufügen",
+          "edit_title": "Artikel bearbeiten",
+          "close": "Schließen",
+          "name": "Artikel",
+          "choose": "Auswählen",
+          "quantity": "Menge eingeben",
+          "threshold": "Schwellenwert",
+          "threshold_alert": "Schwellenwert-Warnung aktivieren",
+          "cancel": "Abbrechen",
+          "add": "Hinzufügen",
+          "save": "Speichern",
+          "field_names": {
+            "total": "Gesamt"
+          }
+        },
+        "delete": {
+          "cancel": "Abbrechen",
+          "confirm": "Löschen",
+          "one": {
+            "title": "Artikel löschen",
+            "text": "Möchten Sie den Artikel {{name}} löschen?"
+          },
+          "many": {
+            "title": "Artikel löschen",
+            "text": "Möchten Sie die {{count}} ausgewählten Artikel löschen?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Abbrechen",
+          "confirm": "Duplizieren",
+          "one": {
+            "title": "Artikel duplizieren",
+            "text": "Möchten Sie den Artikel {{name}} duplizieren?"
+          },
+          "many": {
+            "title": "Artikel duplizieren",
+            "text": "Möchten Sie die {{count}} ausgewählten Artikel duplizieren?"
+          }
+        }
+      },
+      "contact_support": {
+        "help": {
+          "title": "Brauchen Sie Hilfe?",
+          "phone": "Telefon",
+          "email": "E-Mail",
+          "hours": "Supportzeiten"
+        },
+        "form": {
+          "title": "Kontaktieren Sie uns",
+          "first_name": "Vorname",
+          "last_name": "Nachname",
+          "email": "E-Mail",
+          "mobile_phone": "Mobiltelefon",
+          "message": "Nachricht",
+          "send": "Nachricht senden",
+          "examples": {
+            "first_name": "Mario",
+            "last_name": "Rossi",
+            "email": "mario.rossi@gmail.com",
+            "mobile_phone": "3345678901"
+          }
+        },
+        "sent": {
+          "title": "Nachricht erfolgreich gesendet",
+          "text": "Vielen Dank für Ihre Nachricht, wir melden uns so schnell wie möglich bei Ihnen",
+          "close": "Schließen"
+        }
+      },
+      "email_configuration": {
+        "fields": {
+          "from_email": {
+            "title": "E-Mail-Adresse des Absenders (from_email):",
+            "description": "Die E-Mail-Adresse, die als Absender verwendet wird."
+          },
+          "from_name": {
+            "title": "Name des Absenders (from_name):",
+            "description": "Der Name, der als Absender der E-Mail angezeigt wird."
+          },
+          "smtp_server": {
+            "title": "SMTP-Server (smtp_server):",
+            "description": "Die Adresse des SMTP-Servers, über den die E-Mails gesendet werden (zum Beispiel smtp.gmail.com für Gmail)."
+          },
+          "smtp_port": {
+            "title": "SMTP-Port (smtp_port):",
+            "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (TLS) SMTP-Authentifizierung:"
+          },
+          "smtp_username": {
+            "title": "Benutzername (smtp_username):",
+            "description": "Der Benutzername für die Anmeldung am SMTP-Server, oft identisch mit der E-Mail-Adresse."
+          },
+          "smtp_password": {
+            "title": "Passwort (smtp_password):",
+            "description": "Das Passwort des Benutzernamens.",
+            "saved": "Passwort festgelegt: zum Ändern neu eingeben",
+            "missing": "Kein Passwort festgelegt"
+          },
+          "smtp_security": {
+            "title": "Sicherheitstyp (smtp_security):",
+            "description": "Der verwendete Sicherheitstyp (Keine, SSL, TLS)."
+          }
+        },
+        "security": {
+          "none": "Keine",
+          "ssl": "SSL",
+          "tls": "TLS"
+        },
+        "send_test": "Test-E-Mail senden",
+        "reset": "Zurücksetzen",
+        "save": "Speichern",
+        "test_sent": {
+          "title": "Test-E-Mail gesendet",
+          "text": "Prüfen Sie das Postfach, um sicherzustellen, dass die Konfiguration funktioniert.",
+          "close": "Schließen"
+        },
+        "saved": {
+          "title": "Konfiguration gespeichert",
+          "text": "Die E-Mail-Einstellungen wurden gespeichert.",
+          "close": "Schließen"
+        },
+        "override": {
+          "question": "Möchten Sie die Standardeinstellungen überschreiben?",
+          "confirm": "Ja"
+        }
+      },
+      "taxation": {
+        "printer": {
+          "title": "Drucker",
+          "added": "Hinzugefügte Drucker",
+          "enabled": "Drucker {{name}} aktiv",
+          "delete": "Drucker {{name}} löschen",
+          "add": "Drucker hinzufügen"
+        },
+        "guide": "Aktivierungsanleitung für „Cassa Fiscale Online“ herunterladen",
+        "receipt": {
+          "title": "Elektronischer Kassenbeleg",
+          "terms": "Allgemeine Geschäftsbedingungen",
+          "accept": "Ich akzeptiere",
+          "refuse": "Ich akzeptiere nicht"
+        }
+      }
+    }
+  },
+  "home": {
+    "page": {
+      "title": "Verwaltungssoftware für Strandbäder: Testen Sie Summer Booking Hub",
+      "description": "Cloud-Verwaltungssoftware für Strandbäder, um Umsätze und Margen ohne versteckte Kosten zu steigern."
+    },
+    "hero": {
+      "title": "Vision, Sichtbarkeit, Kontrolle.",
+      "description": "Mit Summer Booking Hub, der Verwaltungsplattform der neuen Generation, öffnen Sie Ihrem Strandbad neue Horizonte.",
+      "image": {
+        "alt": "Leuchtturm über einem Strand mit Sonnenschirmen"
+      }
+    },
+    "management": {
+      "title": "Beach Management System",
+      "description": "Nicht nur ein Werkzeug, sondern eine Cloud-Verwaltungsplattform der neuen Generation, die die Arbeit vereinfacht und Zeit und Ressourcen freisetzt, damit Sie wachsen und besser werden.",
+      "cards": {
+        "all": {
+          "title": "Alles in einem",
+          "intro": "Online- und Offline-Buchungen, interaktive Karte, Preislisten, Pakete und Zusatzleistungen: Verwalten Sie alles an einem Ort.",
+          "detail": "Kundenkartei, individuelle Angebote und maßgeschneidertes Marketing."
+        },
+        "agility": {
+          "title": "Maximale operative Flexibilität",
+          "intro": "Zugriff von überall und mit jedem Gerät, auch mit der einfachsten Verbindung. Sichere Cloud, automatische Backups und Updates.",
+          "detail": "Die Einrichtung geht schnell, die Schulung auch: Sie sind sofort voll einsatzbereit."
+        },
+        "control": {
+          "title": "Gezielte Kontrolle",
+          "intro": "Berichte und Statistiken in Echtzeit, um Umsätze, Kosten, Erlöse und den Verlauf der Saison zu verfolgen.",
+          "detail": "Verwalten Sie Preise, Rollen, Lager und Personal mit maximaler Effizienz."
+        }
+      }
+    },
+    "shift": {
+      "title": "Einen Gang höher schalten",
+      "cards": {
+        "reserve": {
+          "title": "+30 % Buchungen",
+          "intro": "Vom Internet an den Strand. Dank einfacher Buchung und gezielter Angebote und Rabatte haben unsere Kunden ihre Buchungen um bis zu 30 % pro Jahr gesteigert.",
+          "detail": "Möchten auch Sie zweistellig wachsen?"
+        },
+        "explode": {
+          "title": "+30.000 Online-Buchungen",
+          "intro": "Decken Sie alle Online-Kanäle ab: vom Summer Booking Portal und der App bis zu Ihrer Website, Instagram und Facebook.",
+          "detail": "Der Trend ist klar: Die Zahlen sind schon heute beachtlich und werden weiter steigen."
+        },
+        "services": {
+          "title": "+50 % Umsatz mit Zusatzleistungen",
+          "intro": "Vom SUP bis zum Parkplatz, vom Fahrrad bis zum Drink unter dem Sonnenschirm. Alles ist leichter anzubieten und leichter zu kaufen.",
+          "detail": "Steigern Sie Erlöse und Umsatz mit minimalem Aufwand."
+        }
+      }
+    },
+    "booster": {
+      "title": "Sell booster",
+      "channels": "Verkaufen Sie überall und sorgenfrei: im Web,\nüber das Summer Booking Portal und die App,\nam Telefon oder unter dem Sonnenschirm.",
+      "offers": "Pakete, Angebote und Zusatzleistungen sind einfach anzubieten und leicht zu kaufen",
+      "action": "Kostenlose Demo anfordern",
+      "image": {
+        "alt": "Summer Booking App auf zwei Smartphones"
+      }
+    },
+    "growth": {
+      "title": "Entdecken Sie, wie Sie\nIhr Strandbad mit\nSummer Booking Hub wachsen lassen",
+      "action": "Kostenlose Demo anfordern"
+    },
+    "about_us": {
+      "title": "Was man über uns sagt",
+      "carousel": "Kundenbewertungen",
+      "reviews": {
+        "anna": {
+          "author": "Anna, Bagno Alba",
+          "quote": "\"Die Verwaltung unseres Strandbads ist viel einfacher und effizienter geworden, <em>unsere Kunden buchen gerne über die App</em> und wir haben Fehler und Missverständnisse beseitigt. Begeistert!\""
+        },
+        "carla": {
+          "author": "Carla, Unternehmerin aus Latium",
+          "quote": "\"Ich kann mein Strandbad jetzt viel einfacher führen. <em>Ich bin nicht technikaffin, habe es aber problemlos geschafft.</em>\""
+        },
+        "franco": {
+          "author": "Franco, Unternehmer aus Kalabrien",
+          "quote": "\"Endlich kann ich <em>die Lage an meinem Strand auch von zu Hause aus prüfen.</em> Früher konnte ich mein Strandbad nie verlassen.\""
+        },
+        "marco": {
+          "author": "Marco, Unternehmer aus Kalabrien",
+          "quote": "\"Dank Sharing hatte ich diesen Sommer den höchsten Umsatz seit Jahren: Kunden <em>zufrieden, Strand immer voll!</em>\""
+        },
+        "paolo": {
+          "author": "Paolo, Unternehmer aus der Toskana",
+          "quote": "\"Ich habe mehrere Verwaltungsprogramme ausprobiert: Summer Booking Hub ist <em>mit Abstand das beste.</em> Außerdem ist der Support fantastisch, immer sehr freundlich und hilfsbereit.\""
+        }
+      }
+    },
+    "media": {
+      "title": "Presse über uns",
+      "carousel": "Medien, die über uns berichten",
+      "logo": "Logo von {{name}}"
+    }
+  },
+  "not_found": {
+    "page": {
+      "title": "Seite nicht gefunden | Summer Booking"
+    },
+    "title": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "link": "Zurück zur Startseite"
+  },
+  "invalidate": {
+    "greater_than": "Der Wert {{field}} muss größer als {{limit}} sein",
+    "max": "Der Höchstwert ist {{max}}",
+    "min": "Der Mindestwert ist {{min}}",
+    "required": "Dieses Feld ist ein Pflichtfeld",
+    "email_configuration": {
+      "smtp_password": {
+        "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
+      }
+    }
+  },
+  "unsaved_changes": {
+    "title": "Nicht gespeicherte Änderungen",
+    "text": "Sie haben nicht gespeicherte Änderungen: Wenn Sie die Seite verlassen, gehen sie verloren.",
+    "cancel": "Bleiben",
+    "confirm": "Ohne Speichern verlassen"
+  }
+}

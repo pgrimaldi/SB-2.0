@@ -2,7 +2,7 @@
 
 Attività di sicurezza ancora da fare. Le voci si decidono insieme prima di implementarle; una volta completate si rimuovono da questo file.
 
-Aggiornato al 07/10/2026.
+Aggiornato al 08/10/2026.
 
 ## Content Security Policy severa (difesa contro XSS)
 
@@ -10,11 +10,11 @@ Aggiornato al 07/10/2026.
 
 - Con la gestione dei token prevista un attacco XSS (script iniettato nella pagina) **non può leggere il refresh token**: l'access token è solo in memoria e il refresh token sarà in un cookie `HttpOnly` che JavaScript non legge (oggi il cookie reale non esiste ancora: lo creerà il backend; i mock lo simulano).
 - Questo non basta a proteggere la sessione: **finché la pagina è aperta**, uno script iniettato gira con gli stessi poteri dell'app, quindi può usare l'access token in memoria e anche chiedere nuovi token con il refresh (il browser allega il cookie da solo), chiamando le nostre API a nome dell'utente. `HttpOnly` impedisce la lettura del cookie, non le azioni di uno script nella stessa pagina.
-- Angular già protegge dall'XSS (escape delle interpolazioni, sanitizzazione di `[innerHTML]`, che usiamo in `app-i18n-text` per le traduzioni). La CSP è la **seconda linea di difesa**: se per un errore nostro o di una dipendenza entrasse uno script, il browser si rifiuterebbe di eseguirlo o di mandare dati altrove.
+- Angular già protegge dall'XSS (escape delle interpolazioni, sanitizzazione di `[innerHTML]`, che usiamo in `app-i18n-text` per le traduzioni e nella pagina Fiscalizzazione per i termini HTML che arrivano dal backend). La CSP è la **seconda linea di difesa**: se per un errore nostro o di una dipendenza entrasse uno script, il browser si rifiuterebbe di eseguirlo o di mandare dati altrove.
 
 ### Stato (07/10/2026, audit S04)
 
-- **Fatto nel frontend**: la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesa circa 9 KB, il costo sulla prima visualizzazione è minimo). La policy qui sotto, senza le due righe dei Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home IT/EN, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): l'ha verificata l'utente su DEV in Report-Only.
+- **Fatto nel frontend**: la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesa circa 9 KB, il costo sulla prima visualizzazione è minimo). La policy qui sotto, senza le due righe dei Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home in tutte le lingue, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): l'ha verificata l'utente su DEV in Report-Only.
 - **Fatto su DEV** (07/10/2026): Report-Only senza violazioni (area gestionale compresa, verificata dall'utente), poi CSP attiva in CloudFront. **Da fare**: PROD, con la procedura di `README_DEPLOY.md` (sezione "Content Security Policy").
 - **Decisioni prese**: niente `autoCsp` né nonce (policy semplice, senza hash da ricalcolare); `style-src 'unsafe-inline'` accettato, perché Angular e Material inseriscono gli stili a runtime; Trusted Types e raccolta dei report rimandati (vedi sotto).
 

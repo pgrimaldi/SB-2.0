@@ -22,7 +22,7 @@ describe('LanguageBehaviour', () => {
     const service = TestBed.inject(LanguageBehaviour);
 
     expect(service.preferred()).toBe('it');
-    localStorage.setItem(STORAGE_KEY, 'fr');
+    localStorage.setItem(STORAGE_KEY, 'pt');
     expect(service.preferred()).toBe('it');
     localStorage.setItem(STORAGE_KEY, 'en');
     expect(service.preferred()).toBe('en');
@@ -53,7 +53,7 @@ describe('LanguageBehaviour', () => {
   it('should not match unsupported languages', async () => {
     const harness = await RouterTestingHarness.create();
 
-    await harness.navigateByUrl('/fr/home');
+    await harness.navigateByUrl('/pt/home');
 
     expect(harness.routeNativeElement?.querySelector('.not__found')).toBeTruthy();
   });

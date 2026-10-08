@@ -110,7 +110,7 @@ Poiché CloudFront non ha il permesso `s3:ListBucket`, un file inesistente resti
 
 Non configurare un fallback globale che trasformi ogni 403 o 404 in `/index.html`: nasconderebbe errori reali di asset, permessi o route inesistenti, e produrrebbe "soft 404" per i motori di ricerca.
 
-Le pagine dell'app aperte da URL diretto o ricaricate vengono riscritte verso `/index.html` da una funzione: le pagine pubbliche di un elenco esplicito e tutte le pagine dell'area riservata (ogni indirizzo senza estensione fuori da `/it` e `/en`). I file (con estensione) restano serviti così come sono da S3, anche quando mancano:
+Le pagine dell'app aperte da URL diretto o ricaricate vengono riscritte verso `/index.html` da una funzione: le pagine pubbliche di un elenco esplicito e tutte le pagine dell'area riservata (ogni indirizzo senza estensione fuori dalle lingue `/it`, `/en`, `/fr`, `/es`, `/de`). I file (con estensione) restano serviti così come sono da S3, anche quando mancano:
 
 1. Console **CloudFront** → **Funzioni** → **Crea funzione**, runtime più recente proposto.
 2. Scheda **Sviluppo**: incollare il codice seguente e **Salva modifiche**.
@@ -119,22 +119,32 @@ Le pagine dell'app aperte da URL diretto o ricaricate vengono riscritte verso `/
 
 ```js
 // Pagine pubbliche servite da index.html: solo queste, così un indirizzo pubblico sbagliato resta un 404 vero.
-// Aggiornare questo elenco quando si aggiunge una pagina pubblica (/it/..., /en/...).
+// Aggiornare questo elenco quando si aggiunge una pagina pubblica (/it/..., /en/...) o una lingua.
 var PUBLIC_ROUTES = {
     '/': true,
     '/home': true,
     '/it': true,
     '/it/home': true,
     '/en': true,
-    '/en/home': true
+    '/en/home': true,
+    '/fr': true,
+    '/fr/home': true,
+    '/es': true,
+    '/es/home': true,
+    '/de': true,
+    '/de/home': true
 };
+// Le lingue dell'app (enum Language): i loro indirizzi sono pagine pubbliche.
+var LANGUAGES = ['it', 'en', 'fr', 'es', 'de'];
 
 function handler(event) {
     var request = event.request;
     var uri = request.uri;
     // Un file ha un punto nell'ultimo pezzo dell'indirizzo (main.js, logo.svg): lo serve S3 così com'è.
     var isFile = uri.substring(uri.lastIndexOf('/') + 1).indexOf('.') !== -1;
-    var isPublic = uri === '/it' || uri === '/en' || uri.indexOf('/it/') === 0 || uri.indexOf('/en/') === 0;
+    var isPublic = LANGUAGES.some(function (language) {
+        return uri === '/' + language || uri.indexOf('/' + language + '/') === 0;
+    });
 
     // Pagine pubbliche in elenco e tutte le pagine dell'area riservata (es. /warehouse, /settings/sharing).
     if (PUBLIC_ROUTES[uri] === true || (!isFile && !isPublic)) {
@@ -148,12 +158,12 @@ function handler(event) {
 Route servite:
 
 - `/` e `/home`, che reindirizzano alla home nella lingua preferita;
-- `/it`, `/it/home`, `/en`, `/en/home`, le pagine pubbliche localizzate;
+- `/it`, `/it/home`, `/en`, `/en/home`, `/fr`, `/fr/home`, `/es`, `/es/home`, `/de`, `/de/home`, le pagine pubbliche localizzate;
 - tutte le pagine dell'area riservata (`/beachmap`, `/warehouse`, `/settings`, `/settings/…` e quelle future), senza elencarle: senza sessione l'app rimanda alla home, con una sessione salvata il refresh resta sulla pagina; un indirizzo riservato inesistente mostra la pagina 404 dell'app (con `noindex`).
 
-Un indirizzo pubblico sbagliato (es. `/it/pagina-sbagliata`) e un file mancante restano errori veri di S3. Le route dell'area riservata non devono iniziare con `/it` o `/en` né avere un punto nell'ultimo pezzo dell'indirizzo.
+Un indirizzo pubblico sbagliato (es. `/it/pagina-sbagliata`) e un file mancante restano errori veri di S3. Le route dell'area riservata non devono iniziare con il codice di una lingua (`/it`, `/en`, `/fr`, `/es`, `/de`) né avere un punto nell'ultimo pezzo dell'indirizzo.
 
-Una nuova pagina pubblica va aggiunta a `PUBLIC_ROUTES` sia qui sia nella funzione pubblicata; una nuova pagina dell'area riservata non richiede modifiche. Il refresh si verifica sull'ambiente DEV dopo aver pubblicato la funzione (in locale `ng serve` serve sempre `index.html`). La modifica della funzione non richiede invalidazione della cache.
+Una nuova pagina pubblica va aggiunta a `PUBLIC_ROUTES` sia qui sia nella funzione pubblicata; una nuova lingua va aggiunta a `LANGUAGES` e a `PUBLIC_ROUTES` (francese, spagnolo e tedesco aggiunti il 08/10/2026: la funzione pubblicata va aggiornata con questo codice); una nuova pagina dell'area riservata non richiede modifiche. Il refresh si verifica sull'ambiente DEV dopo aver pubblicato la funzione (in locale `ng serve` serve sempre `index.html`). La modifica della funzione non richiede invalidazione della cache.
 
 ## 4. Connessione a GitHub
 

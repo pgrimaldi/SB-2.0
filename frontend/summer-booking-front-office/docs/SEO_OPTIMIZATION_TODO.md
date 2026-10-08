@@ -27,7 +27,7 @@ Voci che valgono per ogni pagina pubblica.
 - **Contenuto non presente nell'HTML iniziale**: senza JavaScript i motori di ricerca vedono solo il loader. Da noi va risolto con il prerendering.
 - **Il `theme-color` è `#000000`**: incoerente con i colori del sito; scegliere il colore di brand.
 
-## Home (`/it/home`, `/en/home`)
+## Home (`/it/home`, `/en/home`, `/fr/home`, `/es/home`, `/de/home`)
 
 ### Cosa manca da fare
 
