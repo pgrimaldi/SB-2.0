@@ -1,5 +1,8 @@
-/**
- * `revoked`: the server ended the session; `failed`: it could not be reached; `gone`: the session had
- * already changed hands, nothing was sent.
- */
-export type LogoutOutcome = 'revoked' | 'failed' | 'gone';
+export enum LogoutOutcome {
+  /** The server ended the session. */
+  Revoked,
+  /** The server could not be reached. */
+  Failed,
+  /** The session had already changed hands: nothing was sent. */
+  Gone,
+}

@@ -7,7 +7,7 @@ import {
   output,
 } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
-import { Button } from '../../buttons/button/button';
+import { Button, ButtonAppearance } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
 
 let nextId = 0;
@@ -39,6 +39,7 @@ export class ConfirmPopup extends BasePopup {
   readonly isLoading = input(false);
   readonly error = input<string | null>();
   readonly confirmed = output<void>();
+  protected readonly ButtonAppearance = ButtonAppearance;
 
   protected readonly id = `confirm-popup-${nextId++}`;
 

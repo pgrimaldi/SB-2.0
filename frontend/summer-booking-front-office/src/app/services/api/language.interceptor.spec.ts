@@ -1,3 +1,4 @@
+import { Language } from '../../entities/shared/language';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -24,7 +25,7 @@ describe('languageInterceptor', () => {
     httpClient.post(api, {}).subscribe();
     expect(controller.expectOne(api).request.headers.get('Accept-Language')).toBe('it');
 
-    TestBed.inject(LanguageBehaviour).use('en');
+    TestBed.inject(LanguageBehaviour).use(Language.En);
     httpClient.post(api, {}).subscribe();
     httpClient.get('https://example.com/other').subscribe();
 

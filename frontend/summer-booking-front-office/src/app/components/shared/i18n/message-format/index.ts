@@ -7,4 +7,4 @@ export type { CompiledMessage, MessageArgs, MessageFormatOptions } from './messa
 export { compileMessage, isMessage } from './message-format';
 export { MESSAGE_FORMAT_OPTIONS, MessageFormatCompiler } from './message-format.compiler';
 export type { Message, MessagePart } from './message-parser';
-export { MessageSyntaxError, parseMessage } from './message-parser';
+export { MessagePartKind, MessageSyntaxError, parseMessage } from './message-parser';

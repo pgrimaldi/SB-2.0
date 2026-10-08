@@ -115,7 +115,7 @@ export class AuthBehaviour implements OnDestroy {
     (remember ? this.localStorage() : this.sessionStorage())?.setItem(SIGNED_IN_KEY, 'true');
     this.sessionName = crypto.randomUUID();
     this.localStorage()?.setItem(SESSION_NAME_KEY, this.sessionName);
-    this.tell('signin');
+    this.tellSignIn();
   }
 
   /**
@@ -186,7 +186,7 @@ export class AuthBehaviour implements OnDestroy {
         }
         if (generation === this.generation) {
           if (this.isAuthenticated()) {
-            this.tell('logout');
+            this.tellLogout();
             this.expire();
           } else {
             this.clear();
@@ -225,16 +225,18 @@ export class AuthBehaviour implements OnDestroy {
             delay: (error) =>
               isSessionOver(error) ? throwError(() => error) : timer(LOGOUT_RETRY_DELAY),
           }),
-          map((): LogoutOutcome => (stillOurs() ? 'revoked' : 'gone')),
-          catchError((error) => of<LogoutOutcome>(isSessionOver(error) ? 'revoked' : 'failed')),
+          map(() => (stillOurs() ? LogoutOutcome.Revoked : LogoutOutcome.Gone)),
+          catchError((error) =>
+            of(isSessionOver(error) ? LogoutOutcome.Revoked : LogoutOutcome.Failed),
+          ),
         ),
-      ).pipe(catchError(() => of<LogoutOutcome>('failed'))),
+      ).pipe(catchError(() => of(LogoutOutcome.Failed))),
     );
-    if (outcome === 'failed') {
+    if (outcome === LogoutOutcome.Failed) {
       return false;
     }
-    if (outcome === 'revoked' && generation === this.generation) {
-      this.tell('logout', name);
+    if (outcome === LogoutOutcome.Revoked && generation === this.generation) {
+      this.tellLogout(name);
       this.expire();
     } else if (generation === this.generation) {
       this.leaveHere();
@@ -278,9 +280,17 @@ export class AuthBehaviour implements OnDestroy {
     return this.localStorage()?.getItem(SESSION_NAME_KEY) ?? null;
   }
 
-  private tell(type: TabMessage['type'], session = this.sessionName): void {
+  private tellSignIn(): void {
+    this.tell(false, this.sessionName);
+  }
+
+  private tellLogout(session = this.sessionName): void {
+    this.tell(true, session);
+  }
+
+  private tell(isLogout: boolean, session: string | null): void {
     if (session) {
-      this.channel?.postMessage({ type, session } satisfies TabMessage);
+      this.channel?.postMessage({ isLogout, session } satisfies TabMessage);
     }
   }
 
@@ -366,10 +376,10 @@ export class AuthBehaviour implements OnDestroy {
     // Messages arrive later than the calls on the cookie: a sign-in counts only while its session
     // still owns the cookie, or an older one could make a newer session leave.
     const owner = this.cookieOwner();
-    if (data.type === 'logout' && data.session === this.sessionName) {
+    if (data.isLogout === true && data.session === this.sessionName) {
       this.expire();
     } else if (
-      data.type === 'signin' &&
+      data.isLogout === false &&
       data.session !== this.sessionName &&
       (!owner || owner === data.session)
     ) {

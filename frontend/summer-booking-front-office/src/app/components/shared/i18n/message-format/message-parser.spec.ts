@@ -1,4 +1,10 @@
-import { MessageSyntaxError, parseMessage } from './message-parser';
+import {
+  DateStyle,
+  MessagePartKind,
+  MessageSyntaxError,
+  NumberStyle,
+  parseMessage,
+} from './message-parser';
 
 describe('parseMessage', () => {
   it('should read plain text, apostrophes and # outside plurals as text', () => {
@@ -10,16 +16,26 @@ describe('parseMessage', () => {
     expect(
       parseMessage('{name}: {total, number, currency} il { day , date , long } {at, time}'),
     ).toEqual([
-      { kind: 'value', name: 'name', source: '{name}' },
+      { kind: MessagePartKind.Value, name: 'name', source: '{name}' },
       ': ',
-      { kind: 'number', name: 'total', style: 'currency', source: '{total, number, currency}' },
+      {
+        kind: MessagePartKind.Number,
+        name: 'total',
+        style: NumberStyle.Currency,
+        source: '{total, number, currency}',
+      },
       ' il ',
-      { kind: 'date', name: 'day', style: 'long', source: '{ day , date , long }' },
+      {
+        kind: MessagePartKind.Date,
+        name: 'day',
+        style: DateStyle.Long,
+        source: '{ day , date , long }',
+      },
       ' ',
-      { kind: 'time', name: 'at', style: 'medium', source: '{at, time}' },
+      { kind: MessagePartKind.Time, name: 'at', style: DateStyle.Medium, source: '{at, time}' },
     ]);
     expect(parseMessage('{n, number}')).toEqual([
-      { kind: 'number', name: 'n', style: 'number', source: '{n, number}' },
+      { kind: MessagePartKind.Number, name: 'n', style: NumberStyle.Number, source: '{n, number}' },
     ]);
   });
 
@@ -29,17 +45,22 @@ describe('parseMessage', () => {
     );
 
     expect(plural).toEqual({
-      kind: 'plural',
+      kind: MessagePartKind.Plural,
       name: 'count',
       source: '{count, plural, =0 {nessun posto} one {# posto il {day, date}} other {# posti}}',
       branches: {
         '=0': ['nessun posto'],
         one: [
-          { kind: 'count' },
+          { kind: MessagePartKind.Count },
           ' posto il ',
-          { kind: 'date', name: 'day', style: 'medium', source: '{day, date}' },
+          {
+            kind: MessagePartKind.Date,
+            name: 'day',
+            style: DateStyle.Medium,
+            source: '{day, date}',
+          },
         ],
-        other: [{ kind: 'count' }, ' posti'],
+        other: [{ kind: MessagePartKind.Count }, ' posti'],
       },
     });
   });

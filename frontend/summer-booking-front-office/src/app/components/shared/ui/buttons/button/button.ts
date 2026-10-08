@@ -5,16 +5,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { resolveIcons } from '../../icons/icons';
 
-export type ButtonAppearance = 'primary' | 'secondary' | 'light';
-// The only four sizes: small 1.75rem, medium 2rem, large 2.875rem (forms), extralarge 3.75rem.
-export type ButtonSize = 'small' | 'medium' | 'large' | 'extralarge';
+export enum ButtonAppearance {
+  Primary,
+  Secondary,
+  Light,
+}
+
+/** The only four sizes: small 1.75rem, medium 2rem, large 2.875rem (forms), extralarge 3.75rem. */
+export enum ButtonSize {
+  Small,
+  Medium,
+  Large,
+  ExtraLarge,
+}
 
 /** Spinner diameter in px. */
 const SPINNER_SIZES: Record<ButtonSize, number> = {
-  small: 14,
-  medium: 16,
-  large: 20,
-  extralarge: 24,
+  [ButtonSize.Small]: 14,
+  [ButtonSize.Medium]: 16,
+  [ButtonSize.Large]: 20,
+  [ButtonSize.ExtraLarge]: 24,
 };
 
 @Component({
@@ -24,17 +34,17 @@ const SPINNER_SIZES: Record<ButtonSize, number> = {
   styleUrl: './button.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.button__light]': "appearance() === 'light'",
-    '[class.button__small]': "size() === 'small'",
-    '[class.button__medium]': "size() === 'medium'",
-    '[class.button__large]': "size() === 'large'",
-    '[class.button__extralarge]': "size() === 'extralarge'",
+    '[class.button__light]': 'appearance() === ButtonAppearance.Light',
+    '[class.button__small]': 'size() === ButtonSize.Small',
+    '[class.button__medium]': 'size() === ButtonSize.Medium',
+    '[class.button__large]': 'size() === ButtonSize.Large',
+    '[class.button__extralarge]': 'size() === ButtonSize.ExtraLarge',
     '[class.button__full__width]': 'isFullWidth()',
   },
 })
 export class Button {
-  readonly appearance = input<ButtonAppearance>('primary');
-  readonly size = input<ButtonSize>('medium');
+  readonly appearance = input(ButtonAppearance.Primary);
+  readonly size = input(ButtonSize.Medium);
   readonly isFullWidth = input(false);
   readonly disabled = input(false);
   readonly isLoading = input(false);
@@ -47,6 +57,8 @@ export class Button {
   readonly pathIcon = input<readonly string[] | null>();
   readonly clicked = output<void>();
 
+  protected readonly ButtonAppearance = ButtonAppearance;
+  protected readonly ButtonSize = ButtonSize;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly spinnerSize = computed(() => SPINNER_SIZES[this.size()]);
 

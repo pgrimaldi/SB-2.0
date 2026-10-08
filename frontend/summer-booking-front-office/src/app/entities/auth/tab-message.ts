@@ -1,4 +1,5 @@
 export interface TabMessage {
-  type: 'signin' | 'logout';
+  /** `false`: a sign-in. */
+  isLogout: boolean;
   session: string;
 }

@@ -47,8 +47,8 @@
 
     <div class="form__warehouse__add__item__popup__buttons">
       <app-button
-        appearance="light"
-        size="small"
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isLoading()"
         (clicked)="close()"
@@ -56,7 +56,7 @@
         {{ 'management.settings.warehouse.form.cancel' | translate }}
       </app-button>
       <app-button
-        size="small"
+        [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="!canAdd()"
         [isLoading]="isLoading()"

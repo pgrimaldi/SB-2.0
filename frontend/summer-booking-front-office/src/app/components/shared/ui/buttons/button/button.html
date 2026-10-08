@@ -21,7 +21,7 @@ the spinner is drawn over it. -->
   }
 </ng-template>
 
-@if (appearance() !== 'secondary') {
+@if (appearance() !== ButtonAppearance.Secondary) {
   <button
     mat-flat-button
     [attr.aria-label]="accessibleLabel() ?? null"

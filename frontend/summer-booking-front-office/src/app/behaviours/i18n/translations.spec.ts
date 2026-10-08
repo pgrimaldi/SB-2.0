@@ -1,7 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Message, isMessage, parseMessage } from '../../components/shared/i18n/message-format';
+import {
+  Message,
+  MessagePartKind,
+  isMessage,
+  parseMessage,
+} from '../../components/shared/i18n/message-format';
 import { API_ERROR_CODES } from '../../entities/errors/api-error-codes';
 import { FRONTEND_ERROR_CODES } from '../../entities/errors/api-problem';
 import { LanguageBehaviour } from './language.behaviour';
@@ -30,14 +35,14 @@ function flatten(node: object, prefix = ''): Texts {
   }, {});
 }
 
-/** Arguments of a message with their type (`count:plural`, `day:date`…), sorted and without repeats. */
+/** Arguments of a message with their type (`count:Plural`, `day:Date`…), sorted and without repeats. */
 function messageArguments(message: Message): string[] {
   const found = message.flatMap((part): string[] =>
-    typeof part === 'string' || part.kind === 'count'
+    typeof part === 'string' || part.kind === MessagePartKind.Count
       ? []
-      : part.kind === 'plural'
-        ? [`${part.name}:plural`, ...Object.values(part.branches).flatMap(messageArguments)]
-        : [`${part.name}:${part.kind}`],
+      : part.kind === MessagePartKind.Plural
+        ? [`${part.name}:Plural`, ...Object.values(part.branches).flatMap(messageArguments)]
+        : [`${part.name}:${MessagePartKind[part.kind]}`],
   );
   return [...new Set(found)].sort();
 }

@@ -12,7 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
-import { Button } from '../../../components/shared/ui/buttons/button/button';
+import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { IconButton } from '../../../components/shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/checkbox';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
@@ -36,6 +36,7 @@ export class Taxation {
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+  protected readonly ButtonSize = ButtonSize;
 
   /** [before the title, arrow]. */
   protected readonly printerPanelIcons = [

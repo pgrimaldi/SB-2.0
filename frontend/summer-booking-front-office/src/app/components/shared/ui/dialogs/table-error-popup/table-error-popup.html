@@ -5,7 +5,9 @@
     @if (!isCloseButtonHidden() || !isRetryButtonHidden()) {
       <div class="table__error__popup__actions">
         @if (!isCloseButtonHidden()) {
-          <app-button appearance="light" (clicked)="close()">{{ texts()?.close }}</app-button>
+          <app-button [appearance]="ButtonAppearance.Light" (clicked)="close()">{{
+            texts()?.close
+          }}</app-button>
         }
         @if (!isRetryButtonHidden()) {
           <app-button (clicked)="retryLoad()">{{ texts()?.retry }}</app-button>

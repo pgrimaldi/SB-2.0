@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { LanguageBehaviour } from '../../../behaviours/i18n/language.behaviour';
 import { Language } from '../../../entities/shared/language';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
-import { Button } from '../../shared/ui/buttons/button/button';
+import { Button, ButtonSize } from '../../shared/ui/buttons/button/button';
 import { LoginDialog } from '../login/login-dialog';
 import { DropdownMenu, DropdownMenuItem } from '../../shared/ui/menus/dropdown-menu/dropdown-menu';
 
@@ -32,6 +32,7 @@ export class Header {
   private readonly document = inject(DOCUMENT);
   private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
+  protected readonly ButtonSize = ButtonSize;
 
   protected readonly isCompact = signal(false);
   protected readonly isMenuOpen = signal(false);

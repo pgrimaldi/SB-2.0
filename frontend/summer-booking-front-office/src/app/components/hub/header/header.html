@@ -41,7 +41,7 @@
 
       <ng-container [ngTemplateOutlet]="languageMenu" />
 
-      <app-button size="small" (clicked)="openLogin()">
+      <app-button [size]="ButtonSize.Small" (clicked)="openLogin()">
         <span appI18nText="hub.header.login"></span>
       </app-button>
     </div>
@@ -88,7 +88,7 @@
       </div>
 
       <div class="header__menu__actions">
-        <app-button size="extralarge" [isFullWidth]="true" (clicked)="openLogin()">
+        <app-button [size]="ButtonSize.ExtraLarge" [isFullWidth]="true" (clicked)="openLogin()">
           <span appI18nText="hub.header.login"></span>
         </app-button>
       </div>

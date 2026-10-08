@@ -123,8 +123,8 @@
           mat-header-cell
           mat-sort-header
           class="table__cell"
-          [class.table__cell__center]="align === 'center'"
-          [class.table__cell__end]="align === 'end'"
+          [class.table__cell__center]="align === TableColumnAlign.Center"
+          [class.table__cell__end]="align === TableColumnAlign.End"
           [disabled]="!column.sortable"
           [arrowPosition]="useAppTheme() ? 'after' : 'before'"
           [sortActionDescription]="

@@ -6,7 +6,11 @@ import { Footer } from '../../../components/hub/footer/footer';
 import { Header } from '../../../components/hub/header/header';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { EqualHeight } from '../../../components/shared/layout/equal-height/equal-height';
-import { Button } from '../../../components/shared/ui/buttons/button/button';
+import {
+  Button,
+  ButtonAppearance,
+  ButtonSize,
+} from '../../../components/shared/ui/buttons/button/button';
 import { Card } from '../../../components/shared/ui/cards/card/card';
 import { CardLogo } from '../../../components/shared/ui/cards/card-logo/card-logo';
 import { Carousel } from '../../../components/shared/ui/carousels/carousel/carousel';
@@ -34,6 +38,8 @@ export class Home implements OnDestroy {
   private readonly translateService = inject(TranslateService);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
+  protected readonly ButtonAppearance = ButtonAppearance;
+  protected readonly ButtonSize = ButtonSize;
 
   protected readonly managementCards = [
     { key: 'all', icon: 'all-in-one' },

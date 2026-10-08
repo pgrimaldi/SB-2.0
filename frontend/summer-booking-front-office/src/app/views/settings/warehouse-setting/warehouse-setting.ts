@@ -3,7 +3,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WarehouseService } from '../../../services/api/warehouse/warehouse.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { Table, TableColumn, TableRowId } from '../../../components/shared/ui/tables/table/table';
+import {
+  Table,
+  TableColumn,
+  TableColumnAlign,
+  TableRowId,
+} from '../../../components/shared/ui/tables/table/table';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
@@ -72,11 +77,16 @@ export class WarehouseSetting {
   );
   protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
     { field: 'name', header: this.headers().name, width: 50, sortable: true },
-    { field: 'totalQuantity', header: this.headers().total, align: 'center', sortable: true },
+    {
+      field: 'totalQuantity',
+      header: this.headers().total,
+      align: TableColumnAlign.Center,
+      sortable: true,
+    },
     {
       field: 'thresholdQuantity',
       header: this.headers().threshold,
-      align: 'center',
+      align: TableColumnAlign.Center,
       sortable: true,
     },
   ]);

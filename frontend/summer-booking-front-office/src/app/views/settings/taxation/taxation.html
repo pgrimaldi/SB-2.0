@@ -36,12 +36,12 @@
     @if (printersErrorMessage(); as printersErrorMessage) {
       <p class="taxation__error" role="alert">{{ printersErrorMessage }}</p>
     }
-    <app-button size="small" [pathIcon]="addPrinterIcon">
+    <app-button [size]="ButtonSize.Small" [pathIcon]="addPrinterIcon">
       {{ 'management.settings.taxation.printer.add' | translate }}
     </app-button>
   </app-expansion-panel>
 
-  <app-button class="taxation__guide" size="small" [pathIcon]="downloadGuideIcon">
+  <app-button class="taxation__guide" [size]="ButtonSize.Small" [pathIcon]="downloadGuideIcon">
     {{ 'management.settings.taxation.guide' | translate }}
   </app-button>
 

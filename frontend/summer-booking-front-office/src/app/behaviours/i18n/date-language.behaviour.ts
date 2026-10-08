@@ -6,7 +6,8 @@ import { Language } from '../../entities/shared/language';
 import { LanguageBehaviour } from './language.behaviour';
 
 /** Used when the browser does not name a region for the language. */
-const DATE_LOCALES: Record<Language, string> = { it: 'it-IT', en: 'en-GB' };
+const DATE_PARTS: readonly DatePart[] = [DatePart.Day, DatePart.Month, DatePart.Year];
+const DATE_LOCALES: Record<Language, string> = { [Language.It]: 'it-IT', [Language.En]: 'en-GB' };
 
 /** For Material's native date adapter: the browser (Intl) writes dates as each language does. */
 export const DATE_FORMATS: MatDateFormats = {
@@ -45,7 +46,7 @@ export class DateLanguageBehaviour {
     new Intl.DateTimeFormat(this.locale(), DATE_FORMATS.display.dateInput)
       .formatToParts(new Date(2000, 0, 2))
       .map((part) => part.type)
-      .filter((type): type is DatePart => type === 'day' || type === 'month' || type === 'year'),
+      .filter((type): type is DatePart => DATE_PARTS.includes(type as DatePart)),
   );
 
   constructor() {
@@ -62,9 +63,9 @@ export class DateLanguageBehaviour {
     if (numbers?.length !== 3) {
       return null;
     }
-    const [day, month, year] = (['day', 'month', 'year'] as const).map((type) => {
+    const [day, month, year] = DATE_PARTS.map((type) => {
       const typed = numbers[this.order().indexOf(type)];
-      return type === 'year' && typed.length <= 2 ? 2000 + Number(typed) : Number(typed);
+      return type === DatePart.Year && typed.length <= 2 ? 2000 + Number(typed) : Number(typed);
     });
     const date = new Date(year, month - 1, day);
     const isReal =

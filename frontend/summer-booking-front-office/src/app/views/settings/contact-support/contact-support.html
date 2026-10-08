@@ -95,7 +95,7 @@
       }
       <div class="contact__support__send">
         <app-button
-          size="small"
+          [size]="ButtonSize.Small"
           [isSubmitButton]="true"
           [isFullWidth]="true"
           [disabled]="contactForm().invalid()"

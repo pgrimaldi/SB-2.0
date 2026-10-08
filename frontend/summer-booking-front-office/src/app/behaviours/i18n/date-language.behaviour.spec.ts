@@ -11,7 +11,7 @@ describe('DateLanguageBehaviour', () => {
     vi.spyOn(navigator, 'languages', 'get').mockReturnValue(languages);
   };
 
-  const setup = (language: Language = 'it') => {
+  const setup = (language: Language = Language.It) => {
     TestBed.configureTestingModule({
       providers: [provideTranslateService(), provideNativeDateAdapter()],
     });
@@ -32,7 +32,7 @@ describe('DateLanguageBehaviour', () => {
 
   it("should set the locale of Material's date adapter, following the language", () => {
     browser(['it-IT', 'en-US']);
-    setup('it');
+    setup(Language.It);
     const adapter = TestBed.inject<DateAdapter<Date>>(DateAdapter);
     const written = () =>
       adapter.format(new Date(2026, 9, 3), { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -40,7 +40,7 @@ describe('DateLanguageBehaviour', () => {
     TestBed.tick();
     expect(written()).toBe('03/10/2026');
 
-    TestBed.inject(LanguageBehaviour).use('en');
+    TestBed.inject(LanguageBehaviour).use(Language.En);
     TestBed.tick();
     expect(written()).toBe('10/03/2026'); // en-US: month first
   });
@@ -58,12 +58,12 @@ describe('DateLanguageBehaviour', () => {
 
   it("should use the browser's region for the site language, wherever the user is", () => {
     browser(['it-IT', 'en-US']);
-    expect(setup('en').locale()).toBe('en-US'); // American browser language, wherever the user is
+    expect(setup(Language.En).locale()).toBe('en-US'); // American browser language, wherever the user is
   });
 
   it('should read English dates in the order of the browser region', () => {
     browser(['en-AU', 'en']);
-    const dates = setup('en');
+    const dates = setup(Language.En);
 
     expect(dates.locale()).toBe('en-AU');
     expect(dates.parse('03/10/2026')).toEqual(new Date(2026, 9, 3)); // day first in Australia
@@ -71,15 +71,15 @@ describe('DateLanguageBehaviour', () => {
 
   it('should use en-GB for English when the browser names no English region', () => {
     browser(['it-IT', 'en']);
-    expect(setup('en').locale()).toBe('en-GB');
+    expect(setup(Language.En).locale()).toBe('en-GB');
   });
 
   it('should keep the usual locale of the other languages when the browser names none', () => {
     browser(['en-US']);
-    expect(setup('it').locale()).toBe('it-IT');
+    expect(setup(Language.It).locale()).toBe('it-IT');
     TestBed.resetTestingModule();
 
     browser(['it-CH', 'de-CH']);
-    expect(setup('it').locale()).toBe('it-CH'); // Swiss Italian browser
+    expect(setup(Language.It).locale()).toBe('it-CH'); // Swiss Italian browser
   });
 });

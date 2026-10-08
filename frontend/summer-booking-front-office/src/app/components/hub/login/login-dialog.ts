@@ -27,7 +27,7 @@ import { ApiProblem } from '../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { requiredText } from '../../shared/forms/validators';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
-import { Button } from '../../shared/ui/buttons/button/button';
+import { Button, ButtonSize } from '../../shared/ui/buttons/button/button';
 import { Checkbox } from '../../shared/ui/checkboxes/checkbox/checkbox';
 import { PasswordField } from '../../shared/ui/inputs/password-field/password-field';
 import { TextField } from '../../shared/ui/inputs/text-field/text-field';
@@ -94,6 +94,7 @@ export class LoginDialog implements OnDestroy {
     { initialValue: null },
   );
   private readonly content = viewChild.required<TemplateRef<unknown>>('content');
+  protected readonly ButtonSize = ButtonSize;
   private dialogRef?: MatDialogRef<unknown>;
   private mobileQuery?: MediaQueryList;
   /** Goes up at every opening: an attempt shows its error only in the opening it started from. */

@@ -36,7 +36,7 @@ import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item'
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { greaterThan } from '../../../../shared/forms/validators';
-import { Button } from '../../../../shared/ui/buttons/button/button';
+import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
@@ -62,6 +62,8 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   private readonly validationText = inject(ValidationTextBehaviour);
 
   readonly added = output<void>();
+  protected readonly ButtonAppearance = ButtonAppearance;
+  protected readonly ButtonSize = ButtonSize;
 
   private readonly articles = signal<readonly ComboboxItem[]>([]);
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>

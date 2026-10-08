@@ -5,9 +5,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { Language, LanguageOption } from '../../entities/shared/language';
 
-const DEFAULT_LANGUAGE: Language = 'it';
+const DEFAULT_LANGUAGE = Language.It;
 const STORAGE_KEY = 'sb.language';
-const LANGUAGE_PREFIX = /^\/(it|en)(?=[/?#]|$)/;
+const LANGUAGE_PREFIX = new RegExp(`^/(${Object.values(Language).join('|')})(?=[/?#]|$)`);
 
 @Injectable({ providedIn: 'root' })
 export class LanguageBehaviour {
@@ -16,8 +16,8 @@ export class LanguageBehaviour {
   private readonly document = inject(DOCUMENT);
 
   readonly languages: readonly LanguageOption[] = [
-    { code: 'it', flagSrc: '/assets/images/flag-it.svg' },
-    { code: 'en', flagSrc: '/assets/images/flag-gb.svg' },
+    { code: Language.It, flagSrc: '/assets/images/flag-it.svg' },
+    { code: Language.En, flagSrc: '/assets/images/flag-gb.svg' },
   ];
   private readonly currentCode = signal<Language>(DEFAULT_LANGUAGE);
 

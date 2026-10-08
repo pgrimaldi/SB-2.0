@@ -1,15 +1,17 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Button } from './button';
+import { Button, ButtonAppearance } from './button';
 
 @Component({
   imports: [Button],
   template: `
     <app-button class="primary">Accedi</app-button>
-    <app-button class="secondary" appearance="secondary">Annulla</app-button>
+    <app-button class="secondary" [appearance]="ButtonAppearance.Secondary">Annulla</app-button>
   `,
 })
-class ButtonHost {}
+class ButtonHost {
+  protected readonly ButtonAppearance = ButtonAppearance;
+}
 
 describe('Button', () => {
   it('should project the label for every appearance', async () => {

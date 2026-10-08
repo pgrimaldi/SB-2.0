@@ -1,3 +1,4 @@
+import { Language } from '../../entities/shared/language';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -42,7 +43,7 @@ describe('LanguageBehaviour', () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/it/home');
 
-    TestBed.inject(LanguageBehaviour).switchTo('en');
+    TestBed.inject(LanguageBehaviour).switchTo(Language.En);
     await harness.fixture.whenStable();
 
     expect(TestBed.inject(Router).url).toBe('/en/home');

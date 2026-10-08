@@ -392,7 +392,7 @@ describe('AuthBehaviour', () => {
     const { firstTab } = twoTabs();
     const otherTab = new BroadcastChannel('sb-auth');
     onTestFinished(() => otherTab.close());
-    otherTab.postMessage({ type: 'logout', session: 'an-older-session' });
+    otherTab.postMessage({ isLogout: true, session: 'an-older-session' });
     firstTab.start(session('bea-token', 'bea@example.com'), true);
 
     await settle();
@@ -418,7 +418,7 @@ describe('AuthBehaviour', () => {
     localStorage.setItem('sb.session-name', 'bea-session');
     const beaTab = new BroadcastChannel('sb-auth');
     onTestFinished(() => beaTab.close());
-    beaTab.postMessage({ type: 'signin', session: 'bea-session' });
+    beaTab.postMessage({ isLogout: false, session: 'bea-session' });
     await settle();
     expect(firstTab.isAuthenticated()).toBe(false);
 
@@ -436,7 +436,7 @@ describe('AuthBehaviour', () => {
     // Another tab of Anna logs out; Bea signs in, remembered, before that message arrives here:
     const annaOtherTab = new BroadcastChannel('sb-auth');
     onTestFinished(() => annaOtherTab.close());
-    annaOtherTab.postMessage({ type: 'logout', session: annaSession });
+    annaOtherTab.postMessage({ isLogout: true, session: annaSession });
     secondTab.start(session('bea-token', 'bea@example.com'), true);
     await settle();
     expect(firstTab.isAuthenticated()).toBe(false);

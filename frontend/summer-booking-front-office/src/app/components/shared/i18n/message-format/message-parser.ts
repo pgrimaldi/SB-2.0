@@ -1,31 +1,51 @@
-export type NumberStyle = 'number' | 'integer' | 'percent' | 'currency';
+export enum MessagePartKind {
+  Value,
+  Number,
+  Date,
+  Time,
+  Plural,
+  Count,
+}
 
-export type DateStyle = 'short' | 'medium' | 'long' | 'full';
+export enum NumberStyle {
+  Number,
+  Integer,
+  Percent,
+  Currency,
+}
+
+/** The values are those of `dateStyle` and `timeStyle` of `Intl.DateTimeFormat`. */
+export enum DateStyle {
+  Short = 'short',
+  Medium = 'medium',
+  Long = 'long',
+  Full = 'full',
+}
 
 export type MessagePart =
   | string
-  | { readonly kind: 'value'; readonly name: string; readonly source: string }
+  | { readonly kind: MessagePartKind.Value; readonly name: string; readonly source: string }
   | {
-      readonly kind: 'number';
+      readonly kind: MessagePartKind.Number;
       readonly name: string;
       readonly style: NumberStyle;
       readonly source: string;
     }
   | {
-      readonly kind: 'date' | 'time';
+      readonly kind: MessagePartKind.Date | MessagePartKind.Time;
       readonly name: string;
       readonly style: DateStyle;
       readonly source: string;
     }
   | {
-      readonly kind: 'plural';
+      readonly kind: MessagePartKind.Plural;
       readonly name: string;
       /** `other` is always present. */
       readonly branches: Readonly<Record<string, Message>>;
       readonly source: string;
     }
   /** `#` inside a plural branch: the number of that plural. */
-  | { readonly kind: 'count' };
+  | { readonly kind: MessagePartKind.Count };
 
 export type Message = readonly MessagePart[];
 
@@ -42,8 +62,34 @@ export class MessageSyntaxError extends Error {
 
 const NAME = /[A-Za-z_]\w*/y;
 const PLURAL_SELECTOR = /=\d+|zero|one|two|few|many|other/y;
-const NUMBER_STYLES: readonly string[] = ['integer', 'percent', 'currency'];
-const DATE_STYLES: readonly string[] = ['short', 'medium', 'long', 'full'];
+// The words of the syntax, as they are written in the translations.
+const ARGUMENT_TYPES: Readonly<
+  Record<
+    string,
+    MessagePartKind.Number | MessagePartKind.Date | MessagePartKind.Time | MessagePartKind.Plural
+  >
+> = {
+  number: MessagePartKind.Number,
+  date: MessagePartKind.Date,
+  time: MessagePartKind.Time,
+  plural: MessagePartKind.Plural,
+};
+const NUMBER_STYLES: Readonly<Record<string, NumberStyle>> = {
+  integer: NumberStyle.Integer,
+  percent: NumberStyle.Percent,
+  currency: NumberStyle.Currency,
+};
+const DATE_STYLES: Readonly<Record<string, DateStyle>> = {
+  short: DateStyle.Short,
+  medium: DateStyle.Medium,
+  long: DateStyle.Long,
+  full: DateStyle.Full,
+};
+
+/** Own keys only: a word such as `constructor` is not in the table. */
+function wordIn<T>(table: Readonly<Record<string, T>>, word: string): T | undefined {
+  return Object.hasOwn(table, word) ? table[word] : undefined;
+}
 
 /**
  * Parses a message in the ICU MessageFormat syntax (the subset this library supports):
@@ -97,7 +143,7 @@ class MessageParser {
 
   private count(): MessagePart {
     this.position++;
-    return { kind: 'count' };
+    return { kind: MessagePartKind.Count };
   }
 
   private argument(): MessagePart {
@@ -107,32 +153,35 @@ class MessageParser {
     const source = () => this.text.slice(start, this.position);
 
     if (this.skip('}')) {
-      return { kind: 'value', name, source: source() };
+      return { kind: MessagePartKind.Value, name, source: source() };
     }
     this.expect(',');
-    const kind = this.token(NAME, 'Argument type expected');
-    if (kind === 'plural') {
+    const type = this.token(NAME, 'Argument type expected');
+    const kind = wordIn(ARGUMENT_TYPES, type);
+    if (kind === MessagePartKind.Plural) {
       this.expect(',');
       const branches = this.branches();
       this.expect('}');
       return { kind, name, branches, source: source() };
     }
-    if (kind !== 'number' && kind !== 'date' && kind !== 'time') {
-      this.fail(`Unknown argument type "${kind}"`);
+    if (kind === undefined) {
+      this.fail(`Unknown argument type "${type}"`);
     }
-    const style = this.skip(',') ? this.token(NAME, 'Style expected') : undefined;
+    const word = this.skip(',') ? this.token(NAME, 'Style expected') : undefined;
     this.expect('}');
 
-    if (kind === 'number') {
-      if (style !== undefined && !NUMBER_STYLES.includes(style)) {
-        this.fail(`Unknown number style "${style}"`);
+    if (kind === MessagePartKind.Number) {
+      const style = word === undefined ? NumberStyle.Number : wordIn(NUMBER_STYLES, word);
+      if (style === undefined) {
+        this.fail(`Unknown number style "${word}"`);
       }
-      return { kind, name, style: (style ?? 'number') as NumberStyle, source: source() };
+      return { kind, name, style, source: source() };
     }
-    if (style !== undefined && !DATE_STYLES.includes(style)) {
-      this.fail(`Unknown ${kind} style "${style}"`);
+    const style = word === undefined ? DateStyle.Medium : wordIn(DATE_STYLES, word);
+    if (style === undefined) {
+      this.fail(`Unknown ${type} style "${word}"`);
     }
-    return { kind, name, style: (style ?? 'medium') as DateStyle, source: source() };
+    return { kind, name, style, source: source() };
   }
 
   /** `=0 {…} one {…} other {…}`: at least `other`, each selector once. */

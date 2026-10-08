@@ -38,10 +38,17 @@ import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
 import { TableTextAction } from './table-text-action';
 
+/** The values are those of the CSS `text-align`: the cells use them as they are. */
+export enum TableColumnAlign {
+  Start = 'start',
+  Center = 'center',
+  End = 'end',
+}
+
 export interface TableColumn<T> {
   field: keyof T & string;
   header: string;
-  align?: 'start' | 'center' | 'end';
+  align?: TableColumnAlign;
   /**
    * Share of the table width, in percent (e.g. 40). Columns without it split the rest equally.
    * Widths never depend on the rows shown.
@@ -227,6 +234,7 @@ export class Table<T, P extends object> implements OnDestroy {
   });
   private readonly iconActions = contentChildren(TableIconAction);
   private readonly textActions = contentChildren(TableTextAction);
+  protected readonly TableColumnAlign = TableColumnAlign;
   protected readonly hasIconActions = computed(() => this.iconActions().length > 0);
   protected readonly hasTextActions = computed(() => this.textActions().length > 0);
   protected readonly hasIconZone = computed(

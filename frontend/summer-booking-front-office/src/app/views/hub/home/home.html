@@ -62,15 +62,15 @@
           </div>
           <app-button
             class="home__booster__action home__action__desktop"
-            appearance="light"
-            size="small"
+            [appearance]="ButtonAppearance.Light"
+            [size]="ButtonSize.Small"
           >
             <span appI18nText="home.booster.action"></span>
           </app-button>
           <app-button
             class="home__booster__action home__action__mobile"
-            appearance="light"
-            size="extralarge"
+            [appearance]="ButtonAppearance.Light"
+            [size]="ButtonSize.ExtraLarge"
             [isFullWidth]="true"
           >
             <span appI18nText="home.booster.action"></span>
@@ -125,10 +125,14 @@
         <h2 id="home-growth-title" appI18nText="home.growth.title"></h2>
 
         <div class="home__growth__actions">
-          <app-button class="home__action__desktop" size="medium">
+          <app-button class="home__action__desktop" [size]="ButtonSize.Medium">
             <span appI18nText="home.growth.action"></span>
           </app-button>
-          <app-button class="home__action__mobile" size="extralarge" [isFullWidth]="true">
+          <app-button
+            class="home__action__mobile"
+            [size]="ButtonSize.ExtraLarge"
+            [isFullWidth]="true"
+          >
             <span appI18nText="home.growth.action"></span>
           </app-button>
         </div>

@@ -6,6 +6,7 @@ import { DATA_RELOAD } from '../../data/data-reload';
 import {
   Table,
   TableColumn,
+  TableColumnAlign,
   TablePage as Page,
   TablePageRequest as PageRequest,
   TableRowAction,
@@ -49,7 +50,7 @@ class TableHost {
   readonly pageSize = signal(10);
   readonly columns: TableColumn<Row>[] = [
     { field: 'name', header: 'Nome', sortable: true },
-    { field: 'total', header: 'Totale', align: 'center' },
+    { field: 'total', header: 'Totale', align: TableColumnAlign.Center },
   ];
   readonly texts = {
     empty: 'La tabella non contiene elementi',
@@ -607,7 +608,7 @@ class TableDefaultHost {
   readonly params = { day: '2026-09-30' };
   readonly columns: TableColumn<Row>[] = [
     { field: 'name', header: 'Nome' },
-    { field: 'total', header: 'Totale', align: 'center' },
+    { field: 'total', header: 'Totale', align: TableColumnAlign.Center },
   ];
   readonly texts = { paginator: { range: '{{start}} – {{end}} di {{total}}' } };
   readonly load = (request: Filters & PageRequest) =>

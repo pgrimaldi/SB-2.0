@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
-import { Button } from '../../buttons/button/button';
+import { Button, ButtonAppearance } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
 
 let nextId = 0;
@@ -33,6 +33,7 @@ export class TableErrorPopup extends BasePopup {
   readonly isCloseButtonHidden = input(false);
   readonly isRetryButtonHidden = input(false);
   readonly retry = output<void>();
+  protected readonly ButtonAppearance = ButtonAppearance;
 
   protected readonly id = `table-error-popup-${nextId++}`;
 

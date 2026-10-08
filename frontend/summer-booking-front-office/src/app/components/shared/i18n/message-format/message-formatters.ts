@@ -38,11 +38,11 @@ export function formatNumber(
   defaultCurrency: string,
 ): string {
   const options: Intl.NumberFormatOptions =
-    style === 'integer'
+    style === NumberStyle.Integer
       ? { maximumFractionDigits: 0 }
-      : style === 'percent'
+      : style === NumberStyle.Percent
         ? { style: 'percent' }
-        : style === 'currency'
+        : style === NumberStyle.Currency
           ? {
               style: 'currency',
               currency:

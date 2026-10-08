@@ -5,7 +5,7 @@ import {
   supportedLocale,
   toNumber,
 } from './message-formatters';
-import { Message, MessagePart, parseMessage } from './message-parser';
+import { Message, MessagePart, MessagePartKind, NumberStyle, parseMessage } from './message-parser';
 
 export type MessageArgs = Readonly<Record<string, unknown>>;
 
@@ -72,22 +72,27 @@ function renderPart(
   }
   const { locale, defaultCurrency } = context;
   switch (part.kind) {
-    case 'count':
-      return count === null ? '#' : formatNumber(count, 'number', locale, null, defaultCurrency);
-    case 'value': {
+    case MessagePartKind.Count:
+      return count === null
+        ? '#'
+        : formatNumber(count, NumberStyle.Number, locale, null, defaultCurrency);
+    case MessagePartKind.Value: {
       const value = args[part.name];
       return typeof value === 'string' || typeof value === 'number' ? String(value) : part.source;
     }
-    case 'number': {
+    case MessagePartKind.Number: {
       const value = toNumber(args[part.name]);
       return value === null
         ? part.source
         : formatNumber(value, part.style, locale, args['currency'], defaultCurrency);
     }
-    case 'date':
-    case 'time':
-      return formatDate(args[part.name], part.kind === 'time', part.style, locale) ?? part.source;
-    case 'plural': {
+    case MessagePartKind.Date:
+    case MessagePartKind.Time:
+      return (
+        formatDate(args[part.name], part.kind === MessagePartKind.Time, part.style, locale) ??
+        part.source
+      );
+    case MessagePartKind.Plural: {
       const value = toNumber(args[part.name]);
       if (value === null) {
         return part.source;

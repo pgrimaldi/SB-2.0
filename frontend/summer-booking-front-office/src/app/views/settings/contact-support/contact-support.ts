@@ -22,7 +22,7 @@ import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-fiel
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { requiredText } from '../../../components/shared/forms/validators';
-import { Button } from '../../../components/shared/ui/buttons/button/button';
+import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
@@ -46,6 +46,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+  protected readonly ButtonSize = ButtonSize;
 
   protected readonly supportInfo = signal<SupportInfo | null>(null);
   /** Only digits (and a leading +) in a `tel:` link. */

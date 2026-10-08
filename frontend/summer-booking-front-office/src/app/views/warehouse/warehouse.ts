@@ -4,7 +4,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ManagementFiltersBehaviour } from '../../behaviours/management/management-filters.behaviour';
 import { TableErrorPopup } from '../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
-import { Table, TableColumn } from '../../components/shared/ui/tables/table/table';
+import {
+  Table,
+  TableColumn,
+  TableColumnAlign,
+} from '../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../components/shared/ui/titles/page-title/page-title';
 import { WarehouseItem } from '../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../services/api/warehouse/warehouse.service';
@@ -47,11 +51,16 @@ export class Warehouse {
   );
   protected readonly columns = computed<readonly TableColumn<WarehouseItem>[]>(() => [
     { field: 'name', header: this.headers().name, width: 50, sortable: true },
-    { field: 'totalQuantity', header: this.headers().total, align: 'center', sortable: true },
+    {
+      field: 'totalQuantity',
+      header: this.headers().total,
+      align: TableColumnAlign.Center,
+      sortable: true,
+    },
     {
       field: 'availableQuantity',
       header: this.headers().available,
-      align: 'center',
+      align: TableColumnAlign.Center,
       sortable: true,
     },
   ]);

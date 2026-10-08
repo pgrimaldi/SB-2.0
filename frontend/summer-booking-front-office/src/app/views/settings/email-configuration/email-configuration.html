@@ -4,7 +4,7 @@
       {{ 'management.settings.email_configuration.override.question' | translate }}
     </p>
     <app-button
-      size="small"
+      [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [disabled]="!canOverride()"
       (clicked)="editable.set(true)"
@@ -90,7 +90,7 @@
   }
   <div class="email__configuration__actions">
     <app-button
-      size="small"
+      [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [pathIcon]="sendTestIcon"
       [disabled]="isBusy() && !isSendingTest()"
@@ -100,7 +100,7 @@
       {{ 'management.settings.email_configuration.send_test' | translate }}
     </app-button>
     <app-button
-      size="small"
+      [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [pathIcon]="resetIcon"
       [disabled]="isBusy() && !isReloading()"
@@ -110,7 +110,7 @@
       {{ 'management.settings.email_configuration.reset' | translate }}
     </app-button>
     <app-button
-      size="small"
+      [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [disabled]="(isBusy() && !isSaving()) || configurationForm().invalid()"
       [isLoading]="isSaving()"

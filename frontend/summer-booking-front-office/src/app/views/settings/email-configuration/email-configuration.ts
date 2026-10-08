@@ -33,7 +33,7 @@ import {
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
-import { Button } from '../../../components/shared/ui/buttons/button/button';
+import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
@@ -79,6 +79,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+  protected readonly ButtonSize = ButtonSize;
 
   protected readonly maskedFields = EMAIL_CONFIGURATION_MASKED_FIELDS;
   protected readonly sendTestIcon = ['/assets/images/mail-send-white.svg'] as const;
