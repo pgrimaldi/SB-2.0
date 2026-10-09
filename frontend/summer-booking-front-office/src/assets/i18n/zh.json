@@ -1,0 +1,502 @@
+{
+  "language": {
+    "selector": "选择语言",
+    "names": {
+      "it": "Italiano",
+      "en": "English",
+      "fr": "Français",
+      "es": "Español",
+      "de": "Deutsch",
+      "zh": "中文",
+      "ar": "العربية"
+    }
+  },
+  "carousel": {
+    "previous": "上一个",
+    "next": "下一个",
+    "position": "转到第 {{position}} 项",
+    "slide": "第 {{index}} 项，共 {{total}} 项"
+  },
+  "table": {
+    "empty": "表格中没有内容",
+    "paginator": {
+      "first": "第一页",
+      "previous": "上一页",
+      "next": "下一页",
+      "last": "最后一页",
+      "size": "每页条数：",
+      "range": "{{start}} – {{end}}，共 {{total}}"
+    },
+    "search": {
+      "placeholder": "在表格中搜索",
+      "submit": "搜索",
+      "clear": "清除搜索"
+    },
+    "sort": {
+      "action": "按{{column}}排序"
+    },
+    "load_error": {
+      "title": "错误",
+      "text": "目前无法提供所需信息。请重试；如果问题仍然存在，请联系客服。",
+      "close": "关闭",
+      "retry": "重试"
+    },
+    "actions": {
+      "header": "操作",
+      "delete": "删除",
+      "duplicate": "复制",
+      "edit": "编辑"
+    },
+    "selection": {
+      "all": "选择本页所有行",
+      "row": "选择此行",
+      "duplicate": "复制所选",
+      "delete": "删除所选",
+      "clear": "清除选择"
+    }
+  },
+  "error": {
+    "unknown": "发生错误，请重试。",
+    "network": {
+      "unavailable": "无网络连接。请检查网络后重试。"
+    },
+    "server": {
+      "unavailable": "服务暂时不可用，请稍后重试。",
+      "unexpected": "服务返回了意外的响应，请稍后重试。"
+    },
+    "client": {
+      "unexpected": "应用程序出错。请刷新页面后重试。"
+    },
+    "auth": {
+      "invalid_credentials": "凭据无效",
+      "invalid_token": "会话已失效，请重新登录。",
+      "session_expired": "会话已过期，请重新登录。"
+    },
+    "validation": {
+      "invalid_request": "部分数据无效，请检查后重试。",
+      "invalid_date": "日期无效。",
+      "end_before_start": "结束日期早于开始日期。",
+      "invalid_value": "所选值无效。"
+    },
+    "resource": {
+      "not_found": "该项目已不存在。"
+    },
+    "operation": {
+      "not_allowed": "不允许此操作。"
+    }
+  },
+  "alert": {
+    "close": "知道了"
+  },
+  "field": {
+    "password": {
+      "show": "显示密码"
+    },
+    "search": {
+      "submit": "搜索",
+      "clear": "清除搜索"
+    },
+    "masked": {
+      "show": "显示内容"
+    }
+  },
+  "hub": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      },
+      "nav": {
+        "label": "主菜单",
+        "advantages": "优势",
+        "features": "功能",
+        "booking": "Booking",
+        "pricing": "价格"
+      },
+      "login": "登录",
+      "menu": {
+        "open": "打开菜单",
+        "close": "关闭菜单"
+      }
+    },
+    "footer": {
+      "social": {
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "email": "电子邮件",
+        "youtube": "YouTube"
+      },
+      "links": {
+        "about": "关于我们",
+        "support": "客户支持",
+        "demo": "申请免费演示",
+        "contacts": "联系方式与办公地点",
+        "legal": "法律声明",
+        "terms": "条款与条件",
+        "privacy": "隐私与 Cookie 政策",
+        "cookies": "管理 Cookie 设置"
+      },
+      "legal": {
+        "group": "Summer Booking Hub 隶属于 Qbitsoft srl - 保留所有权利",
+        "company": "©{{year}} Qbitsoft Srl - 增值税号 02375470503 - REA Pi-202428"
+      }
+    },
+    "login": {
+      "title": "登录",
+      "close": "关闭",
+      "email": "电子邮件",
+      "password": "密码",
+      "remember": "记住我的登录信息",
+      "forgot": "忘记密码？",
+      "submit": "登录",
+      "or": "或",
+      "register": {
+        "question": "还没有注册？",
+        "action": "注册您的浴场"
+      }
+    }
+  },
+  "management": {
+    "header": {
+      "logo": {
+        "alt": "Summer Booking Hub"
+      },
+      "datepicker": {
+        "start": {
+          "label": "开始日期",
+          "previous": "前一天（开始日期）",
+          "next": "后一天（开始日期）"
+        },
+        "end": {
+          "label": "结束日期",
+          "previous": "前一天（结束日期）",
+          "next": "后一天（结束日期）"
+        }
+      },
+      "today": {
+        "today": "今天",
+        "other": "非今天"
+      },
+      "period": {
+        "label": "时段",
+        "full_day": "全天",
+        "morning": "上午",
+        "afternoon": "下午"
+      },
+      "search": {
+        "placeholder": "按名称搜索"
+      },
+      "actions": {
+        "configuration": "配置",
+        "settings": "设置",
+        "assistant": "虚拟助手",
+        "notifications": "通知",
+        "account": "账户"
+      }
+    },
+    "menu": {
+      "label": "管理菜单",
+      "warehouse": "仓库",
+      "logout": "退出登录"
+    },
+    "logout_failed": {
+      "title": "退出失败",
+      "text": "我们无法在服务器上关闭您的会话，因此您仍处于登录状态。请检查网络连接，然后再次点击“退出登录”。"
+    },
+    "warehouse": {
+      "title": "仓库",
+      "table": {
+        "name": "物品",
+        "total": "总数",
+        "threshold": "阈值",
+        "available": "可用"
+      }
+    },
+    "settings": {
+      "menu": {
+        "label": "设置",
+        "property": "浴场信息",
+        "users": "用户管理",
+        "seasons": "季节和时段",
+        "sectors": "区域和排",
+        "map": "配置地图",
+        "warehouse": "仓库设置",
+        "price_list": "价目表",
+        "services": "服务",
+        "discounts": "折扣和代金券",
+        "sharing": "Sharing",
+        "online_bookings": "在线预订",
+        "fiscalization": "税务设置",
+        "email": "邮件配置",
+        "database": "数据库",
+        "help": "帮助和指南"
+      },
+      "warehouse": {
+        "title": "仓库设置",
+        "create": "添加物品",
+        "form": {
+          "title": "添加物品",
+          "edit_title": "编辑物品",
+          "close": "关闭",
+          "name": "物品",
+          "choose": "选择",
+          "quantity": "输入数量",
+          "threshold": "阈值",
+          "threshold_alert": "启用阈值提醒",
+          "cancel": "取消",
+          "add": "添加",
+          "save": "保存",
+          "field_names": {
+            "total": "总数"
+          }
+        },
+        "delete": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除物品",
+            "text": "要删除物品 {{name}} 吗？"
+          },
+          "many": {
+            "title": "删除物品",
+            "text": "要删除所选的 {{count}} 个物品吗？"
+          }
+        },
+        "duplicate": {
+          "cancel": "取消",
+          "confirm": "复制",
+          "one": {
+            "title": "复制物品",
+            "text": "要复制物品 {{name}} 吗？"
+          },
+          "many": {
+            "title": "复制物品",
+            "text": "要复制所选的 {{count}} 个物品吗？"
+          }
+        }
+      },
+      "contact_support": {
+        "help": {
+          "title": "需要帮助吗？",
+          "phone": "电话",
+          "email": "电子邮件",
+          "hours": "服务时间"
+        },
+        "form": {
+          "title": "联系我们",
+          "first_name": "名",
+          "last_name": "姓",
+          "email": "电子邮件",
+          "mobile_phone": "手机",
+          "message": "留言",
+          "send": "发送留言",
+          "examples": {
+            "first_name": "Mario",
+            "last_name": "Rossi",
+            "email": "mario.rossi@gmail.com",
+            "mobile_phone": "3345678901"
+          }
+        },
+        "sent": {
+          "title": "留言发送成功",
+          "text": "感谢您的联系，我们会尽快回复您",
+          "close": "关闭"
+        }
+      },
+      "email_configuration": {
+        "fields": {
+          "from_email": {
+            "title": "发件人邮箱：",
+            "description": "用作发件人的电子邮件地址。"
+          },
+          "from_name": {
+            "title": "发件人名称：",
+            "description": "作为邮件发件人显示的名称。"
+          },
+          "smtp_server": {
+            "title": "SMTP 服务器：",
+            "description": "用于发送邮件的 SMTP 服务器地址（例如 Gmail 为 smtp.gmail.com）。"
+          },
+          "smtp_port": {
+            "title": "SMTP 端口：",
+            "description": "SMTP 服务器的端口。常用端口：25（不安全）465（SSL）587（TLS）SMTP 认证："
+          },
+          "smtp_username": {
+            "title": "用户名：",
+            "description": "用于登录 SMTP 服务器的用户名，通常与电子邮件地址相同。"
+          },
+          "smtp_password": {
+            "title": "密码：",
+            "description": "该用户名对应的密码。",
+            "saved": "已设置密码：输入新密码即可更改",
+            "missing": "未设置密码"
+          },
+          "smtp_security": {
+            "title": "安全类型：",
+            "description": "使用的安全类型（无、SSL、TLS）。"
+          }
+        },
+        "security": {
+          "none": "无",
+          "ssl": "SSL",
+          "tls": "TLS"
+        },
+        "send_test": "发送测试邮件",
+        "reset": "重置",
+        "save": "保存",
+        "test_sent": {
+          "title": "测试邮件已发送",
+          "text": "请检查邮箱，确认配置是否正常。",
+          "close": "关闭"
+        },
+        "saved": {
+          "title": "配置已保存",
+          "text": "邮件设置已保存。",
+          "close": "关闭"
+        },
+        "override": {
+          "question": "要覆盖默认设置吗？",
+          "confirm": "是"
+        }
+      },
+      "taxation": {
+        "printer": {
+          "title": "打印机",
+          "added": "已添加的打印机",
+          "enabled": "打印机 {{name}} 已启用",
+          "delete": "删除打印机 {{name}}",
+          "add": "添加打印机"
+        },
+        "guide": "下载指南",
+        "receipt": {
+          "title": "电子收据",
+          "terms": "条款与条件",
+          "accept": "我接受",
+          "refuse": "我不接受"
+        }
+      }
+    }
+  },
+  "home": {
+    "page": {
+      "title": "海滩浴场管理软件：试用 Summer Booking Hub",
+      "description": "面向海滩浴场的云端管理软件，提升销售额和利润，无隐藏费用。"
+    },
+    "hero": {
+      "title": "远见、可见、可控。",
+      "description": "借助新一代管理平台 Summer Booking Hub，让您的海滩浴场迈向新的天地。",
+      "image": {
+        "alt": "俯瞰布满遮阳伞的海滩的灯塔"
+      }
+    },
+    "management": {
+      "title": "Beach Management System",
+      "description": "不只是一个工具，而是新一代云端管理平台：简化工作，节省时间和资源，助您成长和进步。",
+      "cards": {
+        "all": {
+          "title": "一站式",
+          "intro": "线上线下预订、互动地图、价目表、套餐和增值服务：一处管理全部。",
+          "detail": "客户档案、个性化报价和量身定制的营销。"
+        },
+        "agility": {
+          "title": "极致的运营灵活性",
+          "intro": "随时随地、任何设备均可访问，网络条件再基础也没问题。安全云端，自动备份和更新。",
+          "detail": "部署迅速，培训快捷：立即全面投入运营。"
+        },
+        "control": {
+          "title": "精准掌控",
+          "intro": "实时报表和统计，监控销售、成本、收入和整个季节的走势。",
+          "detail": "高效管理价格、角色、仓库和员工。"
+        }
+      }
+    },
+    "shift": {
+      "title": "加快步伐",
+      "cards": {
+        "reserve": {
+          "title": "预订 +30%",
+          "intro": "从线上到海滩。预订便捷，优惠和折扣精准推送，我们的客户每年预订量最高增长 30%。",
+          "detail": "您也想实现两位数增长吗？"
+        },
+        "explode": {
+          "title": "+30,000 笔在线预订",
+          "intro": "覆盖所有线上渠道：从 Summer Booking 门户和应用，到您的网站、Instagram 和 Facebook。",
+          "detail": "趋势很明显：数字已经可观，并将持续增长。"
+        },
+        "services": {
+          "title": "增值服务销售 +50%",
+          "intro": "从桨板到停车，从自行车到遮阳伞下的饮品。一切都更容易推荐，也更容易购买。",
+          "detail": "以最小的投入提升营收和营业额。"
+        }
+      }
+    },
+    "booster": {
+      "title": "Sell booster",
+      "channels": "随处销售，无忧无虑：网站、\nSummer Booking 门户和应用、\n电话或遮阳伞下。",
+      "offers": "套餐、优惠和增值服务，推荐简单，购买方便",
+      "action": "申请免费演示",
+      "image": {
+        "alt": "两部智能手机上的 Summer Booking 应用"
+      }
+    },
+    "growth": {
+      "title": "了解如何借助\nSummer Booking Hub\n发展您的浴场",
+      "action": "申请免费演示"
+    },
+    "about_us": {
+      "title": "客户评价",
+      "carousel": "客户评论",
+      "reviews": {
+        "anna": {
+          "author": "Anna, Bagno Alba",
+          "quote": "“我们海滩浴场的管理变得简单高效多了，<em>客户很高兴能通过应用预订</em>，错误和误会也都没有了。太满意了！”"
+        },
+        "carla": {
+          "author": "Carla，拉齐奥企业主",
+          "quote": "“我管理浴场变得轻松多了。<em>我不太懂技术，但用起来毫无问题。</em>”"
+        },
+        "franco": {
+          "author": "Franco，卡拉布里亚企业主",
+          "quote": "“终于可以<em>在家也能掌握海滩的情况了。</em>以前我根本离不开浴场。”"
+        },
+        "marco": {
+          "author": "Marco，卡拉布里亚企业主",
+          "quote": "“多亏了 sharing，今年夏天的营业额是近几年最高的：客户<em>满意，浴场天天满员！</em>”"
+        },
+        "paolo": {
+          "author": "Paolo，托斯卡纳企业主",
+          "quote": "“我试过好几款管理软件，Summer Booking Hub <em>绝对是最好的。</em>而且客服非常棒，总是热情周到。”"
+        }
+      }
+    },
+    "media": {
+      "title": "媒体报道",
+      "carousel": "报道我们的媒体",
+      "logo": "{{name}} 标志"
+    }
+  },
+  "not_found": {
+    "page": {
+      "title": "页面未找到 | Summer Booking"
+    },
+    "title": "页面未找到",
+    "description": "您要查找的页面不存在或已被移动。",
+    "link": "返回首页"
+  },
+  "invalidate": {
+    "greater_than": "{{field}}的值必须大于 {{limit}}",
+    "max": "最大值为 {{max}}",
+    "min": "最小值为 {{min}}",
+    "required": "此字段为必填项",
+    "email_configuration": {
+      "smtp_password": {
+        "retype": "您更改了连接参数：请重新输入密码或输入新密码。"
+      }
+    }
+  },
+  "unsaved_changes": {
+    "title": "未保存的更改",
+    "text": "您有未保存的更改：如果离开，这些更改将丢失。",
+    "cancel": "留下",
+    "confirm": "离开"
+  }
+}

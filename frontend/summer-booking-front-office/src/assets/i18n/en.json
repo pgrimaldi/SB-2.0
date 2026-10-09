@@ -6,7 +6,9 @@
       "en": "English",
       "fr": "Français",
       "es": "Español",
-      "de": "Deutsch"
+      "de": "Deutsch",
+      "zh": "中文",
+      "ar": "العربية"
     }
   },
   "carousel": {
@@ -303,33 +305,33 @@
       "email_configuration": {
         "fields": {
           "from_email": {
-            "title": "Sender email address (from_email):",
+            "title": "Sender email address:",
             "description": "The email address used as the sender."
           },
           "from_name": {
-            "title": "Sender name (from_name):",
+            "title": "Sender name:",
             "description": "The name shown as the sender of the email."
           },
           "smtp_server": {
-            "title": "SMTP server (smtp_server):",
+            "title": "SMTP server:",
             "description": "The address of the SMTP server used to send the emails (for example, smtp.gmail.com for Gmail)."
           },
           "smtp_port": {
-            "title": "SMTP port (smtp_port):",
+            "title": "SMTP port:",
             "description": "The port of the SMTP server. Common ports are: 25 (not secure) 465 (SSL) 587 (TLS) SMTP authentication:"
           },
           "smtp_username": {
-            "title": "Username (smtp_username):",
+            "title": "Username:",
             "description": "The username to sign in to the SMTP server, often the same as the email address."
           },
           "smtp_password": {
-            "title": "Password (smtp_password):",
+            "title": "Password:",
             "description": "The password of the username.",
             "saved": "Password set: type to change it",
             "missing": "No password set"
           },
           "smtp_security": {
-            "title": "Security type (smtp_security):",
+            "title": "Security type:",
             "description": "The security type used (None, SSL, TLS)."
           }
         },

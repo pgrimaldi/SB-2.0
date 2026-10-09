@@ -64,7 +64,9 @@
     flex-direction: row;
   }
 
+  // Centred in the room of the longest translation, like the labels of the bottom bar.
   .settings__menu__item {
+    text-align: center;
     white-space: nowrap;
   }
 }

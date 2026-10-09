@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-sa" viewBox="0 0 512 512">
+  <path fill="#006c35" d="M0 0h512v512H0z"/>
+  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="14">
+    <path d="M116 230c14-32 30-46 44-46M160 184v52M196 236c8-26 22-40 40-40s26 12 26 28-10 18-26 18M300 180v60M336 236c10-20 24-30 40-30M392 176v64"/>
+    <path d="M128 260h270"/>
+  </g>
+  <path fill="#fff" d="M112 318l24-8h244v16H136z"/>
+  <path fill="#fff" d="M380 300h10v44h-10zM390 312h26v12h-26z"/>
+</svg>

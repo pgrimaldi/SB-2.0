@@ -6,7 +6,9 @@
       "en": "English",
       "fr": "Français",
       "es": "Español",
-      "de": "Deutsch"
+      "de": "Deutsch",
+      "zh": "中文",
+      "ar": "العربية"
     }
   },
   "carousel": {
@@ -303,33 +305,33 @@
       "email_configuration": {
         "fields": {
           "from_email": {
-            "title": "Indirizzo email mittente (from_email):",
+            "title": "Indirizzo email mittente:",
             "description": "L'indirizzo email che verrà utilizzato come mittente."
           },
           "from_name": {
-            "title": "Nome Mittente (from_name):",
+            "title": "Nome Mittente:",
             "description": "Il nome che verrà visualizzato come mittente dell'email."
           },
           "smtp_server": {
-            "title": "Server SMTP (smtp_server):",
+            "title": "Server SMTP:",
             "description": "L'indirizzo del server SMTP utilizzato per l'invio delle email (ad esempio, smtp.gmail.com per Gmail)."
           },
           "smtp_port": {
-            "title": "Porta SMTP (smtp_port):",
+            "title": "Porta SMTP:",
             "description": "La porta del server SMTP. Le porte comuni sono: 25 (non sicura) 465 (SSL) 587 (TLS) Autenticazione SMTP:"
           },
           "smtp_username": {
-            "title": "Nome utente (smtp_username):",
+            "title": "Nome utente:",
             "description": "Il nome utente per autenticarsi al server SMTP, spesso è lo stesso dell'indirizzo email."
           },
           "smtp_password": {
-            "title": "Password (smtp_password):",
+            "title": "Password:",
             "description": "La password associata al nome utente.",
             "saved": "Password impostata: scrivi per cambiarla",
             "missing": "Nessuna password impostata"
           },
           "smtp_security": {
-            "title": "Tipo di Sicurezza (smtp_security):",
+            "title": "Tipo di Sicurezza:",
             "description": "Il tipo di sicurezza utilizzata (Nessuna, SSL, TLS)."
           }
         },

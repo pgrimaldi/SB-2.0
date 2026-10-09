@@ -1,3 +1,4 @@
+import { Directionality } from '@angular/cdk/bidi';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -7,6 +8,7 @@ import {
   afterNextRender,
   computed,
   contentChildren,
+  inject,
   input,
   signal,
   viewChild,
@@ -37,8 +39,8 @@ export interface CarouselTexts {
   styleUrl: './carousel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '(keydown.arrowleft)': 'previous()',
-    '(keydown.arrowright)': 'next()',
+    '(keydown.arrowleft)': 'isRightToLeft() ? next() : previous()',
+    '(keydown.arrowright)': 'isRightToLeft() ? previous() : next()',
   },
 })
 export class Carousel implements OnDestroy {
@@ -50,7 +52,10 @@ export class Carousel implements OnDestroy {
   readonly pathIcon = input<readonly string[] | null>();
 
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
+  /** Right to left (Arabic): the slides start on the right and the next ones come from the left. */
+  protected readonly isRightToLeft = computed(() => this.directionality.valueSignal() === 'rtl');
 
+  private readonly directionality = inject(Directionality);
   private readonly slideDirectives = contentChildren(CarouselSlide);
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
   private readonly viewportWidth = signal(0);
@@ -72,13 +77,14 @@ export class Carousel implements OnDestroy {
     Array.from({ length: this.maxIndex() + 1 }, (_, position) => position),
   );
 
-  /** The last position aligns the last slide with the right edge instead of leaving a gap. */
+  /** The last position aligns the last slide with the end edge instead of leaving a gap. */
   private readonly offset = computed(() => {
     const maxOffset = Math.max(0, this.slides().length * this.slideWidth() - this.viewportWidth());
     return Math.min(this.index() * this.slideWidth(), maxOffset);
   });
   protected readonly transform = computed(
-    () => `translate3d(${this.dragOffset() - this.offset()}px, 0, 0)`,
+    () =>
+      `translate3d(${this.dragOffset() + (this.isRightToLeft() ? this.offset() : -this.offset())}px, 0, 0)`,
   );
 
   constructor() {
@@ -128,6 +134,8 @@ export class Carousel implements OnDestroy {
       return;
     }
     const distance = event.clientX - this.dragStartX;
+    // Dragging right goes back to the previous slides; to the left in a right-to-left language.
+    const backward = this.isRightToLeft() ? -distance : distance;
     if (!this.dragging() && Math.abs(distance) < DRAG_START_DISTANCE) {
       return;
     }
@@ -136,13 +144,13 @@ export class Carousel implements OnDestroy {
       this.viewport().nativeElement.setPointerCapture(event.pointerId);
     }
     const atEdge =
-      (distance > 0 && this.index() === 0) || (distance < 0 && this.index() === this.maxIndex());
+      (backward > 0 && this.index() === 0) || (backward < 0 && this.index() === this.maxIndex());
     this.dragOffset.set(atEdge ? distance / 3 : distance);
   }
 
   protected onPointerUp(): void {
     if (this.dragging()) {
-      const distance = this.dragOffset();
+      const distance = this.isRightToLeft() ? -this.dragOffset() : this.dragOffset();
       const threshold = this.slideWidth() * SWIPE_THRESHOLD;
       if (distance <= -threshold) {
         this.next();

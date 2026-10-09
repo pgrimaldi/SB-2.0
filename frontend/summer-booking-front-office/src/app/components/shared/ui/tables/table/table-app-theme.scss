@@ -69,7 +69,7 @@
     padding-inline: 0.9375rem;
 
     &:first-child {
-      padding-left: 1.875rem;
+      padding-inline-start: 1.875rem;
     }
   }
 
@@ -80,7 +80,7 @@
   // the keyboard focus ring there.)
   .table__cell__center ::ng-deep .mat-sort-header-container {
     justify-content: center;
-    padding-left: 18px;
+    padding-inline-start: 18px;
   }
 
   .table__cell__end ::ng-deep .mat-sort-header-container {
@@ -98,7 +98,7 @@
       padding-inline: 3.125rem 1.875rem;
 
       &:first-child {
-        padding-left: 1.875rem;
+        padding-inline-start: 1.875rem;
       }
     }
   }

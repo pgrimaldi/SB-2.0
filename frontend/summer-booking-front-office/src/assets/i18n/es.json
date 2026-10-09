@@ -6,7 +6,9 @@
       "en": "English",
       "fr": "Français",
       "es": "Español",
-      "de": "Deutsch"
+      "de": "Deutsch",
+      "zh": "中文",
+      "ar": "العربية"
     }
   },
   "carousel": {
@@ -303,33 +305,33 @@
       "email_configuration": {
         "fields": {
           "from_email": {
-            "title": "Dirección de correo del remitente (from_email):",
+            "title": "Dirección de correo del remitente:",
             "description": "La dirección de correo que se utilizará como remitente."
           },
           "from_name": {
-            "title": "Nombre del remitente (from_name):",
+            "title": "Nombre del remitente:",
             "description": "El nombre que se mostrará como remitente del correo."
           },
           "smtp_server": {
-            "title": "Servidor SMTP (smtp_server):",
+            "title": "Servidor SMTP:",
             "description": "La dirección del servidor SMTP utilizado para enviar los correos (por ejemplo, smtp.gmail.com para Gmail)."
           },
           "smtp_port": {
-            "title": "Puerto SMTP (smtp_port):",
+            "title": "Puerto SMTP:",
             "description": "El puerto del servidor SMTP. Los puertos habituales son: 25 (no seguro) 465 (SSL) 587 (TLS) Autenticación SMTP:"
           },
           "smtp_username": {
-            "title": "Nombre de usuario (smtp_username):",
+            "title": "Nombre de usuario:",
             "description": "El nombre de usuario para autenticarse en el servidor SMTP, a menudo es el mismo que la dirección de correo."
           },
           "smtp_password": {
-            "title": "Contraseña (smtp_password):",
+            "title": "Contraseña:",
             "description": "La contraseña asociada al nombre de usuario.",
             "saved": "Contraseña establecida: escribe para cambiarla",
             "missing": "No hay ninguna contraseña establecida"
           },
           "smtp_security": {
-            "title": "Tipo de seguridad (smtp_security):",
+            "title": "Tipo de seguridad:",
             "description": "El tipo de seguridad utilizado (Ninguna, SSL, TLS)."
           }
         },

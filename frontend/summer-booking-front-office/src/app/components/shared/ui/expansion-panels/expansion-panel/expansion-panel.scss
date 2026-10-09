@@ -46,6 +46,11 @@
   transition: transform 150ms ease;
 }
 
+// Right to left (Arabic): closed, the arrow points left; open, down as in every language.
+:host-context([dir='rtl']) .expansion__panel:not(.mat-expanded) .expansion__panel__arrow {
+  transform: scaleX(-1);
+}
+
 .expansion__panel.mat-expanded .expansion__panel__arrow {
   transform: rotate(90deg);
 }

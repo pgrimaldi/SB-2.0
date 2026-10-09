@@ -69,7 +69,7 @@
 .management__header__actions {
   display: flex;
   gap: 0.625rem;
-  margin-left: 1.625rem; // with the header gap: 3.125rem from the search, as in the reference
+  margin-inline-start: 1.625rem; // with the header gap: 3.125rem from the search, as in the reference
 }
 
 .management__header__today__other {
@@ -88,7 +88,7 @@
   }
 
   .management__header__actions {
-    margin-left: auto;
+    margin-inline-start: auto;
   }
 
   // After the actions, which stay on the first row next to the logo.

@@ -44,7 +44,7 @@
 
   // Asterisk of a required field, after the label.
   .#{$block}__mandatory {
-    margin-left: 0.125rem;
+    margin-inline-start: 0.125rem;
     color: var(--color__layout__error);
   }
 
@@ -114,7 +114,7 @@
     place-items: center;
     width: calc(var(--filled-field-line-height, 1.125rem) + 0.5rem);
     height: var(--filled-field-line-height, 1.125rem);
-    margin-right: 0.25rem;
+    margin-inline-end: 0.25rem;
     padding: 0;
     border: 0;
     border-radius: 0.25rem;

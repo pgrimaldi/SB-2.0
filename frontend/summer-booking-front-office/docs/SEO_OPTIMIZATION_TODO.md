@@ -12,9 +12,9 @@ Voci che valgono per ogni pagina pubblica.
 
 - **Dominio definitivo**: serve per canonical, Open Graph, sitemap e dati strutturati. Il riferimento usa `https://hub.summerbooking.it/`.
 - **robots.txt**: permettere la scansione delle pagine pubbliche e indicare la sitemap. Il riferimento ha `User-agent: *`, `Disallow:` vuoto e `Sitemap: https://hub.summerbooking.it/sitemap.xml`. Metterlo in `public/`, così finisce nella radice del bucket: la CloudFront Function non riscrive i file con estensione e non va toccata.
-- **sitemap.xml**: elenco delle pagine pubbliche in entrambe le lingue, con le alternative `hreflang`. La sitemap del riferimento contiene anche `/hub/advantages`, `/hub/functionality`, `/hub/booking`, `/hub/prizes`, `/hub/about-us`… da allineare man mano che creiamo le pagine.
-- **hreflang**: per ogni pagina indicare le versioni `it`, `en` e `x-default` (tag `<link rel="alternate" hreflang="…">`). Il riferimento è solo in italiano e non li ha.
-- **Prerendering**: oggi il contenuto esiste solo dopo l'esecuzione del JavaScript. Va generato nell'HTML iniziale di ogni pagina pubblica (le nostre regole SEO lo richiedono). Migliora anche FCP e LCP.
+- **sitemap.xml**: elenco delle pagine pubbliche in tutte le lingue (`it`, `en`, `fr`, `es`, `de`, `zh`, `ar`), con le alternative `hreflang`. La sitemap del riferimento contiene anche `/hub/advantages`, `/hub/functionality`, `/hub/booking`, `/hub/prizes`, `/hub/about-us`… da allineare man mano che creiamo le pagine.
+- **hreflang**: per ogni pagina indicare tutte le versioni, `it`, `en`, `fr`, `es`, `de`, `zh-Hans` (cinese semplificato), `ar`, e `x-default` verso l'italiano (tag `<link rel="alternate" hreflang="…">`); ogni versione elenca tutte le altre e se stessa. Il riferimento è solo in italiano e non li ha.
+- **Prerendering**: oggi il contenuto esiste solo dopo l'esecuzione del JavaScript. Va generato nell'HTML iniziale di ogni pagina pubblica, in ogni lingua, con `lang` e `dir` già giusti su `<html>` (`dir="rtl"` per l'arabo) e `<title>` e description della lingua (le nostre regole SEO lo richiedono). Migliora anche FCP e LCP.
 - **Dati strutturati di sito** (JSON-LD), comuni a tutte le pagine:
   - `Organization`: nome, URL, logo e profili social (`sameAs`: Facebook, Instagram);
   - `WebSite`: URL, nome, publisher.
@@ -27,12 +27,12 @@ Voci che valgono per ogni pagina pubblica.
 - **Contenuto non presente nell'HTML iniziale**: senza JavaScript i motori di ricerca vedono solo il loader. Da noi va risolto con il prerendering.
 - **Il `theme-color` è `#000000`**: incoerente con i colori del sito; scegliere il colore di brand.
 
-## Home (`/it/home`, `/en/home`, `/fr/home`, `/es/home`, `/de/home`)
+## Home (`/it/home`, `/en/home`, `/fr/home`, `/es/home`, `/de/home`, `/zh/home`, `/ar/home`)
 
 ### Cosa manca da fare
 
 - **Canonical** verso la home nella lingua della pagina, sul dominio definitivo.
-- **Open Graph**: `og:title`, `og:description`, `og:url`, `og:type` (`website`), più `og:image` (manca anche nel riferimento) e `og:locale` con le alternative di lingua.
+- **Open Graph**: `og:title`, `og:description`, `og:url`, `og:type` (`website`), più `og:image` (manca anche nel riferimento) e `og:locale` della pagina con `og:locale:alternate` per le altre lingue (`it_IT`, `en_GB`, `fr_FR`, `es_ES`, `de_DE`, `zh_CN`, `ar_SA`).
 - **Twitter Card**: `twitter:card` (`summary_large_image`), `twitter:title`, `twitter:description`, `twitter:image`. Il riferimento usa `https://summerbooking.it/assets/summerBooking_hub.svg`: serve un'immagine nostra in formato PNG o JPG, perché le piattaforme social non mostrano gli SVG.
 - **Titolo per la condivisione**: il riferimento usa "Summer Booking Hub" come `og:title`, diverso dal `<title>`. Decidere quale usare.
 - **Dati strutturati della pagina** (JSON-LD):

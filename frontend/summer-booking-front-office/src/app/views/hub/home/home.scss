@@ -59,7 +59,7 @@
 
 .home__hero__content p {
   margin: 1.25rem 0 0;
-  padding-right: 2rem;
+  padding-inline-end: 2rem;
   color: rgb(255 255 255 / 95%);
   font-size: 1.24rem;
 }
@@ -102,7 +102,7 @@
   display: grid;
   grid-auto-rows: 1fr;
   gap: 2rem 3rem;
-  padding-left: 1.5rem;
+  padding-inline-start: 1.5rem;
 }
 
 .home__information__cards p {
@@ -261,7 +261,7 @@
 
   .home__hero__content p {
     margin-top: 0;
-    padding-right: 0;
+    padding-inline-end: 0;
     color: #767676;
     font-size: 1.25rem;
   }
@@ -272,7 +272,7 @@
 
   .home__information__header {
     margin-bottom: 2rem;
-    text-align: left;
+    text-align: start;
   }
 
   .home__information__header h2 {

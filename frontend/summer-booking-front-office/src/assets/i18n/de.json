@@ -6,7 +6,9 @@
       "en": "English",
       "fr": "Français",
       "es": "Español",
-      "de": "Deutsch"
+      "de": "Deutsch",
+      "zh": "中文",
+      "ar": "العربية"
     }
   },
   "carousel": {
@@ -303,33 +305,33 @@
       "email_configuration": {
         "fields": {
           "from_email": {
-            "title": "E-Mail-Adresse des Absenders (from_email):",
+            "title": "E-Mail-Adresse des Absenders:",
             "description": "Die E-Mail-Adresse, die als Absender verwendet wird."
           },
           "from_name": {
-            "title": "Name des Absenders (from_name):",
+            "title": "Name des Absenders:",
             "description": "Der Name, der als Absender der E-Mail angezeigt wird."
           },
           "smtp_server": {
-            "title": "SMTP-Server (smtp_server):",
+            "title": "SMTP-Server:",
             "description": "Die Adresse des SMTP-Servers, über den die E-Mails gesendet werden (zum Beispiel smtp.gmail.com für Gmail)."
           },
           "smtp_port": {
-            "title": "SMTP-Port (smtp_port):",
+            "title": "SMTP-Port:",
             "description": "Der Port des SMTP-Servers. Übliche Ports sind: 25 (nicht sicher) 465 (SSL) 587 (TLS) SMTP-Authentifizierung:"
           },
           "smtp_username": {
-            "title": "Benutzername (smtp_username):",
+            "title": "Benutzername:",
             "description": "Der Benutzername für die Anmeldung am SMTP-Server, oft identisch mit der E-Mail-Adresse."
           },
           "smtp_password": {
-            "title": "Passwort (smtp_password):",
+            "title": "Passwort:",
             "description": "Das Passwort des Benutzernamens.",
             "saved": "Passwort festgelegt: zum Ändern neu eingeben",
             "missing": "Kein Passwort festgelegt"
           },
           "smtp_security": {
-            "title": "Sicherheitstyp (smtp_security):",
+            "title": "Sicherheitstyp:",
             "description": "Der verwendete Sicherheitstyp (Keine, SSL, TLS)."
           }
         },

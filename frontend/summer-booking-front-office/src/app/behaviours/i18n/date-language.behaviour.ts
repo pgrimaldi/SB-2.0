@@ -13,7 +13,21 @@ const DATE_LOCALES: Record<Language, string> = {
   [Language.Fr]: 'fr-FR',
   [Language.Es]: 'es-ES',
   [Language.De]: 'de-DE',
+  [Language.Zh]: 'zh-CN',
+  [Language.Ar]: 'ar-SA',
 };
+
+/**
+ * Dates always in the Gregorian calendar with the digits 0-9 (user, 09/10/2026): Arabic would
+ * otherwise use the Islamic calendar and the Eastern Arabic digits. Locales that already do keep
+ * their tag as it is.
+ */
+function gregorianWithWesternDigits(tag: string): string {
+  const { calendar, numberingSystem } = new Intl.DateTimeFormat(tag).resolvedOptions();
+  return calendar === 'gregory' && numberingSystem === 'latn'
+    ? tag
+    : new Intl.Locale(tag, { calendar: 'gregory', numberingSystem: 'latn' }).toString();
+}
 
 /** For Material's native date adapter: the browser (Intl) writes dates as each language does. */
 export const DATE_FORMATS: MatDateFormats = {
@@ -45,7 +59,7 @@ export class DateLanguageBehaviour {
    */
   readonly locale = computed(() => {
     const language = this.languageBehaviour.current();
-    return this.browserLocale(language) ?? DATE_LOCALES[language];
+    return gregorianWithWesternDigits(this.browserLocale(language) ?? DATE_LOCALES[language]);
   });
 
   private readonly order = computed(() =>

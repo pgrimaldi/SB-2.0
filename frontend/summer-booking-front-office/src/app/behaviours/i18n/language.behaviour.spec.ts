@@ -1,3 +1,4 @@
+import { Directionality } from '@angular/cdk/bidi';
 import { Language } from '../../entities/shared/language';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -48,6 +49,21 @@ describe('LanguageBehaviour', () => {
 
     expect(TestBed.inject(Router).url).toBe('/en/home');
     expect(localStorage.getItem(STORAGE_KEY)).toBe('en');
+  });
+
+  it('should mirror the page and Material for a right-to-left language, and back', () => {
+    const languageBehaviour = TestBed.inject(LanguageBehaviour);
+    const directionality = TestBed.inject(Directionality);
+
+    languageBehaviour.use(Language.Ar);
+
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(directionality.value).toBe('rtl');
+
+    languageBehaviour.use(Language.It);
+
+    expect(document.documentElement.dir).toBe('ltr');
+    expect(directionality.value).toBe('ltr');
   });
 
   it('should not match unsupported languages', async () => {

@@ -1,3 +1,4 @@
+import { Directionality } from '@angular/cdk/bidi';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Carousel } from './carousel';
@@ -93,6 +94,19 @@ describe('Carousel', () => {
 
     carousel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     carousel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    await fixture.whenStable();
+    expect(activeDot()).toBe(0);
+  });
+
+  it('should go forward with the left arrow in a right-to-left language', async () => {
+    TestBed.inject(Directionality).valueSignal.set('rtl');
+    const carousel = element.querySelector('app-carousel')!;
+
+    carousel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    await fixture.whenStable();
+    expect(activeDot()).toBe(1);
+
+    carousel.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await fixture.whenStable();
     expect(activeDot()).toBe(0);
   });

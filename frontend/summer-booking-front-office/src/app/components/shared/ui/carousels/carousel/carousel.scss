@@ -92,11 +92,19 @@
 }
 
 .carousel__arrow__previous {
-  left: 0;
+  inset-inline-start: 0;
 }
 
 .carousel__arrow__next {
-  right: 0;
+  inset-inline-end: 0;
+}
+
+// Right to left (Arabic): the slides start on the right, so the arrows point the other way.
+:host-context([dir='rtl']) .carousel__arrow {
+  img,
+  mat-icon {
+    transform: scaleX(-1);
+  }
 }
 
 .carousel__dots {

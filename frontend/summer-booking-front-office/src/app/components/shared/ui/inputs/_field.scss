@@ -39,7 +39,7 @@
 
   // Asterisk of a required field, after the label.
   .#{$block}__mandatory {
-    margin-left: 0.125rem;
+    margin-inline-start: 0.125rem;
     color: var(--color__layout__error);
   }
 

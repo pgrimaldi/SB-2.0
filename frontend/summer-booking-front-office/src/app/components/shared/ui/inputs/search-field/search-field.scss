@@ -69,7 +69,7 @@
 
 // Magnifier (or X) 0.875rem from the right edge, as in the reference.
 .search__field__button {
-  margin-right: 0.6875rem;
+  margin-inline-end: 0.6875rem;
 
   img {
     width: var(--search-field-icon-size, 1.125rem);

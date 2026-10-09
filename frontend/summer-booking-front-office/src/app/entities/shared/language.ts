@@ -5,9 +5,13 @@ export enum Language {
   Fr = 'fr',
   Es = 'es',
   De = 'de',
+  Zh = 'zh',
+  Ar = 'ar',
 }
 
 export interface LanguageOption {
   code: Language;
   flagSrc: string;
+  /** Written from right to left (Arabic): the whole page is mirrored. */
+  isRightToLeft: boolean;
 }

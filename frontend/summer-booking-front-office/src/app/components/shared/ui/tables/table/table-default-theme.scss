@@ -54,7 +54,7 @@
   // stays exactly in the middle, as in the app's look.
   .table__cell__center ::ng-deep .mat-sort-header-container {
     justify-content: center;
-    padding-right: 18px;
+    padding-inline-end: 18px;
   }
 
   .table__cell__end ::ng-deep .mat-sort-header-container {

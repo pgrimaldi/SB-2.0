@@ -6,7 +6,9 @@
       "en": "English",
       "fr": "Français",
       "es": "Español",
-      "de": "Deutsch"
+      "de": "Deutsch",
+      "zh": "中文",
+      "ar": "العربية"
     }
   },
   "carousel": {
@@ -303,33 +305,33 @@
       "email_configuration": {
         "fields": {
           "from_email": {
-            "title": "Adresse e-mail de l'expéditeur (from_email) :",
+            "title": "Adresse e-mail de l'expéditeur :",
             "description": "L'adresse e-mail utilisée comme expéditeur."
           },
           "from_name": {
-            "title": "Nom de l'expéditeur (from_name) :",
+            "title": "Nom de l'expéditeur :",
             "description": "Le nom affiché comme expéditeur de l'e-mail."
           },
           "smtp_server": {
-            "title": "Serveur SMTP (smtp_server) :",
+            "title": "Serveur SMTP :",
             "description": "L'adresse du serveur SMTP utilisé pour envoyer les e-mails (par exemple, smtp.gmail.com pour Gmail)."
           },
           "smtp_port": {
-            "title": "Port SMTP (smtp_port) :",
+            "title": "Port SMTP :",
             "description": "Le port du serveur SMTP. Les ports courants sont : 25 (non sécurisé) 465 (SSL) 587 (TLS) Authentification SMTP :"
           },
           "smtp_username": {
-            "title": "Nom d'utilisateur (smtp_username) :",
+            "title": "Nom d'utilisateur :",
             "description": "Le nom d'utilisateur pour se connecter au serveur SMTP, souvent identique à l'adresse e-mail."
           },
           "smtp_password": {
-            "title": "Mot de passe (smtp_password) :",
+            "title": "Mot de passe :",
             "description": "Le mot de passe associé au nom d'utilisateur.",
             "saved": "Mot de passe défini : saisissez-en un autre pour le modifier",
             "missing": "Aucun mot de passe défini"
           },
           "smtp_security": {
-            "title": "Type de sécurité (smtp_security) :",
+            "title": "Type de sécurité :",
             "description": "Le type de sécurité utilisé (Aucune, SSL, TLS)."
           }
         },

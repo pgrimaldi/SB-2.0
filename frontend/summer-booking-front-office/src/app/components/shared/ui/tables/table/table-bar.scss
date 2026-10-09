@@ -30,7 +30,7 @@
   height: 1.75rem;
   align-items: center;
   gap: 0.625rem;
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 0 0.875rem;
   border: 0;
   border-radius: 0.3125rem;
@@ -137,7 +137,7 @@
 }
 
 .table__bar__buttons {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 // From 1920px: a bigger search, easier to notice above the wide table.

@@ -54,6 +54,14 @@
   }
 }
 
+// Right to left (Arabic): previous day on the right, so the arrows point the other way.
+:host-context([dir='rtl']) .datepicker__arrow {
+  img,
+  mat-icon {
+    transform: scaleX(-1);
+  }
+}
+
 .datepicker__input {
   width: 5rem;
   height: 100%;

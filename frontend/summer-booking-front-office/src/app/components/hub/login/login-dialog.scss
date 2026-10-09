@@ -27,7 +27,7 @@ app-login-dialog {
 .login__dialog__close {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  inset-inline-end: 1rem;
   display: grid;
   place-items: center;
   width: 1.5rem;
@@ -73,7 +73,7 @@ app-login-dialog {
 
   // Stays on the right even when a narrow popup wraps it below the checkbox.
   .login__dialog__link {
-    margin-left: auto;
+    margin-inline-start: auto;
   }
 }
 

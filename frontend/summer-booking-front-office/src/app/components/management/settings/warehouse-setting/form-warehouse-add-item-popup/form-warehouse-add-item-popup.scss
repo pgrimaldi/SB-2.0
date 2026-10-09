@@ -36,7 +36,7 @@ app-form-warehouse-add-item-popup {
 .form__warehouse__add__item__popup__close {
   position: absolute;
   top: 0.25rem;
-  right: 0.25rem;
+  inset-inline-end: 0.25rem;
   display: grid;
   width: 1.5rem;
   height: 1.5rem;
