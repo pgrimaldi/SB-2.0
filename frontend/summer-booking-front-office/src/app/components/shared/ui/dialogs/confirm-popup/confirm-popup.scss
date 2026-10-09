@@ -16,6 +16,12 @@
   gap: 0.75rem;
 }
 
+@media (width <= 360px) {
+  .confirm__popup__actions {
+    --button-padding: 1.25rem;
+  }
+}
+
 // Set on the inner button, because app-button sets its own colours on its host.
 .confirm__popup__danger button {
   @include mat.button-overrides(

@@ -62,6 +62,12 @@
   margin-top: 1.25rem;
 }
 
+@media (width <= 360px) {
+  .taxation__guide {
+    --button-padding: 0.125rem;
+  }
+}
+
 // The terms arrive as HTML through innerHTML: their tags do not get the attributes that scope the
 // component styles, hence ::ng-deep, limited to this box.
 .taxation__terms ::ng-deep {
