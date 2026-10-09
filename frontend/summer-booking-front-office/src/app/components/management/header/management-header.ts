@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { CalendarTextsBehaviour } from '../../../behaviours/i18n/calendar-texts.behaviour';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
@@ -57,6 +58,11 @@ export class ManagementHeader {
       this.dateAdapter.sameDate(this.filters.endDate(), today)
     );
   });
+
+  constructor() {
+    // The header has calendars: their commands follow the language (see CalendarTextsBehaviour).
+    inject(CalendarTextsBehaviour);
+  }
 
   protected resetToToday(): void {
     this.filters.startDate.set(this.dateAdapter.today());

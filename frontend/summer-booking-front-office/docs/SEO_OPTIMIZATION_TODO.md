@@ -42,6 +42,7 @@ Voci che valgono per ogni pagina pubblica.
 - **Da verificare con chi ha curato il SEO**:
   - la valutazione "4.9 su 100 recensioni" deve corrispondere a recensioni reali e verificabili. La pagina ne mostra solo 5, e Google può penalizzare valutazioni non giustificate;
   - il prezzo "da 499 EUR" ha `priceValidUntil` 2026-12-31: dopo quella data va aggiornato.
+  - le parole chiave delle altre lingue (09/10/2026): ogni `<title>` mette all'inizio la parola cercata come l'italiano "Gestionale per Stabilimenti Balneari" (en "Beach Resort Management Software", fr "Logiciel de gestion de plage", es "Software para balnearios", de "Software für Strandbäder", zh "海滩浴场管理软件", ar "برنامج إدارة المنتجعات الشاطئية"), entro circa 60 caratteri, con la description entro 155. Da confermare con dati di ricerca per mercato: in Spagna "balneario" indica anche le terme (in America Latina lo stabilimento balneare), alternativa "club de playa".
 
 ### Cosa non va bene sul riferimento (da non ripetere)
 
