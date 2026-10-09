@@ -11,6 +11,21 @@
       "ar": "العربية"
     }
   },
+  "calendar": {
+    "label": "Calendrier",
+    "open": "Ouvrir le calendrier",
+    "close": "Fermer le calendrier",
+    "previous_month": "Mois précédent",
+    "next_month": "Mois suivant",
+    "previous_year": "Année précédente",
+    "next_year": "Année suivante",
+    "previous_years": "24 années précédentes",
+    "next_years": "24 années suivantes",
+    "choose_date": "Choisir une date",
+    "choose_month_year": "Choisir le mois et l’année",
+    "comparison_range": "Période de comparaison",
+    "year_range": "De {{start}} à {{end}}"
+  },
   "carousel": {
     "previous": "Précédent",
     "next": "Suivant",

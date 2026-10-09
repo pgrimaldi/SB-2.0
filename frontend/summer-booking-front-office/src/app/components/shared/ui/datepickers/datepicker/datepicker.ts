@@ -8,7 +8,11 @@ import {
   model,
 } from '@angular/core';
 import { DateAdapter } from '@angular/material/core';
-import { MatCalendarCellClassFunction, MatDatepickerModule } from '@angular/material/datepicker';
+import {
+  MatCalendarCellClassFunction,
+  MatDatepicker,
+  MatDatepickerInput,
+} from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { resolveIcons } from '../../icons/icons';
 
@@ -29,7 +33,8 @@ export interface DatepickerTexts {
  */
 @Component({
   selector: 'app-datepicker',
-  imports: [MatDatepickerModule, MatIconModule],
+  // The module provides its own MatDatepickerIntl, hiding the app's global translations.
+  imports: [MatDatepicker, MatDatepickerInput, MatIconModule],
   templateUrl: './datepicker.html',
   styleUrl: './datepicker.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

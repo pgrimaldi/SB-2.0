@@ -40,6 +40,8 @@ export class FilledTextField {
   readonly maxLength = input<number>();
   /** Content hidden as a password, with the eye to show it. */
   readonly isPasswordField = input(false);
+  /** Telephone keyboard and left-to-right content, also in a right-to-left page. */
+  readonly isPhoneField = input(false);
   /** Ids of the page elements that name the field, when its label is not above it. */
   readonly labelledBy = input<string>();
   readonly name = input<string>();
@@ -64,7 +66,7 @@ export class FilledTextField {
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly visible = signal(false);
   protected readonly inputType = computed(() =>
-    this.isPasswordField() && !this.visible() ? 'password' : 'text',
+    this.isPasswordField() && !this.visible() ? 'password' : this.isPhoneField() ? 'tel' : 'text',
   );
   private readonly matInput = viewChild.required(MatInput);
 

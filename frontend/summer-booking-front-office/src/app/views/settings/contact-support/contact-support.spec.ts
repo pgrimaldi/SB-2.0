@@ -93,6 +93,27 @@ describe('ContactSupport', () => {
     ]);
   });
 
+  it('should keep international phone numbers left-to-right inside a right-to-left page', async () => {
+    const phoneNumber = '+39 334 567 8901';
+    const { element, fields, type } = await setup(
+      vi.fn(() => of({ ...SUPPORT_INFO, phoneNumber })),
+    );
+    element.dir = 'rtl';
+
+    const phoneLink = element.querySelector<HTMLAnchorElement>('a[href^="tel:"]')!;
+    expect(phoneLink.dir).toBe('ltr');
+    expect(phoneLink.textContent?.trim()).toBe(phoneNumber);
+    expect(phoneLink.getAttribute('href')).toBe('tel:+393345678901');
+
+    const phoneInput = fields()[3] as HTMLInputElement;
+    expect(phoneInput.type).toBe('tel');
+    expect(phoneInput.dir).toBe('ltr');
+    expect(phoneInput.autocomplete).toBe('tel');
+    expect(fields()[0].getAttribute('dir')).toBeNull();
+    await type(3, phoneNumber);
+    expect(phoneInput.value).toBe(phoneNumber);
+  });
+
   it('should send only with name, surname, email and message, the mobile phone optional', async () => {
     const { send, type, fill } = await setup();
 

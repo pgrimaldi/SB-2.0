@@ -11,7 +11,7 @@
           {{ 'management.settings.contact_support.help.phone' | translate }}
         </h2>
         @if (info) {
-          <a class="contact__support__box__value" [href]="supportPhoneLink()">{{
+          <a class="contact__support__box__value" dir="ltr" [href]="supportPhoneLink()">{{
             info.phoneNumber
           }}</a>
         }
@@ -78,6 +78,7 @@
       />
       <app-filled-text-field
         autocomplete="tel"
+        [isPhoneField]="true"
         [label]="'management.settings.contact_support.form.mobile_phone' | translate"
         [placeholder]="'management.settings.contact_support.form.examples.mobile_phone' | translate"
         [formField]="contactForm.mobilePhone"

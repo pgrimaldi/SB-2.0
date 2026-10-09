@@ -11,6 +11,21 @@
       "ar": "العربية"
     }
   },
+  "calendar": {
+    "label": "التقويم",
+    "open": "فتح التقويم",
+    "close": "إغلاق التقويم",
+    "previous_month": "الشهر السابق",
+    "next_month": "الشهر التالي",
+    "previous_year": "السنة السابقة",
+    "next_year": "السنة التالية",
+    "previous_years": "السنوات الـ24 السابقة",
+    "next_years": "السنوات الـ24 التالية",
+    "choose_date": "اختيار التاريخ",
+    "choose_month_year": "اختيار الشهر والسنة",
+    "comparison_range": "نطاق المقارنة",
+    "year_range": "من {{start}} إلى {{end}}"
+  },
   "carousel": {
     "previous": "السابق",
     "next": "التالي",
@@ -180,7 +195,7 @@
         "label": "فترة اليوم",
         "full_day": "يوم كامل",
         "morning": "صباحًا",
-        "afternoon": "مساءً"
+        "afternoon": "بعد الظهر"
       },
       "search": {
         "placeholder": "ابحث بالاسم"

@@ -59,7 +59,7 @@ export const appConfig: ApplicationConfig = {
       languageBehaviour.use(preferred);
       return languageBehaviour.loadAll(preferred);
     }),
-    // Calendars and date fields follow the language (locale of the date adapter).
+    // Calendars and date fields follow the language (date locale and accessible calendar commands).
     provideAppInitializer(() => {
       inject(DateLanguageBehaviour);
     }),

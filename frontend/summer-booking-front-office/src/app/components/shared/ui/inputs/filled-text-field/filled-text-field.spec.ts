@@ -31,6 +31,7 @@ describe('FilledTextField', () => {
     expect(element.querySelector('label')?.textContent?.trim()).toBe('Articolo');
     expect(element.querySelector('label')?.getAttribute('for')).toBe(input.id);
     expect(input.value).toBe('Lettino');
+    expect(input.type).toBe('text');
     expect(input.getAttribute('maxlength')).toBe('500');
   });
 

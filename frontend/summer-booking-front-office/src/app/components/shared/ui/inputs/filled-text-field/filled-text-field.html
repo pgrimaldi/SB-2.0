@@ -20,6 +20,7 @@
     [readonly]="readonly()"
     [disabled]="disabled()"
     [type]="inputType()"
+    [attr.dir]="isPhoneField() ? 'ltr' : null"
     [id]="id"
     [value]="value() ?? ''"
     [placeholder]="placeholder() ?? ''"

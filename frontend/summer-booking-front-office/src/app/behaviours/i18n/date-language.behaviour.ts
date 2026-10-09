@@ -1,9 +1,28 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, computed, effect, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateAdapter, MatDateFormats } from '@angular/material/core';
+import { MatDatepickerIntl } from '@angular/material/datepicker';
+import { TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 import { DatePart } from '../../entities/shared/date-part';
 import { Language } from '../../entities/shared/language';
 import { LanguageBehaviour } from './language.behaviour';
+
+interface CalendarTexts {
+  label: string;
+  open: string;
+  close: string;
+  previous_month: string;
+  next_month: string;
+  previous_year: string;
+  next_year: string;
+  previous_years: string;
+  next_years: string;
+  choose_date: string;
+  choose_month_year: string;
+  comparison_range: string;
+}
 
 /** Used when the browser does not name a region for the language. */
 const DATE_PARTS: readonly DatePart[] = [DatePart.Day, DatePart.Month, DatePart.Year];
@@ -50,6 +69,8 @@ export const DATE_FORMATS: MatDateFormats = {
 export class DateLanguageBehaviour {
   private readonly languageBehaviour = inject(LanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+  private readonly datepickerIntl = inject(MatDatepickerIntl);
+  private readonly translate = inject(TranslateService);
 
   /** In order of preference, e.g. `['en-AU', 'en', 'it']`. */
   private readonly browserLanguages = inject(DOCUMENT).defaultView?.navigator.languages ?? [];
@@ -71,6 +92,29 @@ export class DateLanguageBehaviour {
 
   constructor() {
     effect(() => this.dateAdapter.setLocale(this.locale()));
+    // DateAdapter translates dates, not Material's calendar commands. Notify even an open calendar.
+    (this.translate.stream('calendar') as Observable<CalendarTexts>)
+      .pipe(takeUntilDestroyed())
+      .subscribe((texts) => {
+        if (!texts || typeof texts !== 'object') {
+          return; // No translation group loaded yet: keep Material's defaults until it arrives.
+        }
+        this.datepickerIntl.calendarLabel = texts.label;
+        this.datepickerIntl.openCalendarLabel = texts.open;
+        this.datepickerIntl.closeCalendarLabel = texts.close;
+        this.datepickerIntl.prevMonthLabel = texts.previous_month;
+        this.datepickerIntl.nextMonthLabel = texts.next_month;
+        this.datepickerIntl.prevYearLabel = texts.previous_year;
+        this.datepickerIntl.nextYearLabel = texts.next_year;
+        this.datepickerIntl.prevMultiYearLabel = texts.previous_years;
+        this.datepickerIntl.nextMultiYearLabel = texts.next_years;
+        this.datepickerIntl.switchToMonthViewLabel = texts.choose_date;
+        this.datepickerIntl.switchToMultiYearViewLabel = texts.choose_month_year;
+        this.datepickerIntl.comparisonDateLabel = texts.comparison_range;
+        this.datepickerIntl.formatYearRangeLabel = (start, end) =>
+          this.translate.instant('calendar.year_range', { start, end }) as string;
+        this.datepickerIntl.changes.next();
+      });
   }
 
   /**
