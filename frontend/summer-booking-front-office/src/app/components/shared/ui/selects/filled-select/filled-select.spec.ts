@@ -39,27 +39,21 @@ describe('FilledSelect', () => {
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should show its label, named by it, and the placeholder while nothing is chosen', async () => {
+  it('should show its label and the placeholder while nothing is chosen', async () => {
     const { element } = await setup();
     const label = element.querySelector('label')!;
 
     expect(label.textContent?.trim()).toBe('Articolo');
-    expect(element.querySelector('mat-select')?.getAttribute('aria-labelledby')).toContain(
-      label.id,
-    );
     expect(element.querySelector('.mat-mdc-select-trigger')?.textContent?.trim()).toBe('Seleziona');
   });
 
-  it('should show the error under the select and link it for screen readers', async () => {
+  it('should show the error under the select', async () => {
     const { fixture, host, element } = await setup();
     host.error.set('Il valore scelto non è valido.');
     await fixture.whenStable();
     const message = element.querySelector('.filled__select__error')!;
-    const select = element.querySelector('mat-select')!;
 
     expect(message.textContent?.trim()).toBe('Il valore scelto non è valido.');
-    expect(select.getAttribute('aria-invalid')).toBe('true');
-    expect(select.getAttribute('aria-describedby')).toContain(message.id);
     expect(element.querySelector('.filled__select__invalid')).not.toBeNull();
   });
 

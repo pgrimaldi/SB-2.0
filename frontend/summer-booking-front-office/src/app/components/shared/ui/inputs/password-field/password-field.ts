@@ -17,10 +17,6 @@ import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
 
-export interface PasswordFieldTexts {
-  show?: string;
-}
-
 @Component({
   selector: 'app-password-field',
   imports: [MatFormFieldModule, MatIconModule, MatInputModule],
@@ -30,9 +26,8 @@ export interface PasswordFieldTexts {
 })
 export class PasswordField {
   readonly label = input<string>();
-  /** Asterisk after the label; screen readers announce the field as required. */
+  /** Asterisk after the label. */
   readonly isMandatory = input(false);
-  readonly texts = input<PasswordFieldTexts | null>();
   readonly value = model<string | null>(null);
   readonly name = input<string>();
   readonly autocomplete = input<string>();
@@ -45,7 +40,7 @@ export class PasswordField {
   readonly touch = output<void>();
 
   /**
-   * Material sets `aria-invalid` itself from its error state, which it updates only with a classic
+   * Material colours the field as wrong from its error state, which it updates only with a classic
    * form control: it follows our `error` instead.
    */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };

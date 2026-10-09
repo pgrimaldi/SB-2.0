@@ -1,10 +1,9 @@
 <aside class="management__menu">
-  <nav class="management__menu__links" [attr.aria-label]="'management.menu.label' | translate">
+  <nav class="management__menu__links">
     @for (link of links; track link.route) {
       <a
         class="management__menu__item"
         routerLinkActive="management__menu__item__active"
-        ariaCurrentWhenActive="page"
         [routerLink]="link.route"
       >
         <img class="management__menu__icon" [src]="link.icon" width="19" height="19" alt="" />
@@ -17,7 +16,6 @@
     class="management__menu__item"
     type="button"
     [disabled]="loggingOut()"
-    [attr.aria-busy]="loggingOut()"
     (click)="logout()"
   >
     @if (loggingOut()) {

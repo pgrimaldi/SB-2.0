@@ -24,10 +24,9 @@ describe('MessagePopup', () => {
     const fixture = TestBed.createComponent(MessagePopupHost);
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
-    const dialog = document.querySelector<HTMLElement>('[role="dialog"]')!;
+    const dialog = document.querySelector<HTMLElement>('mat-dialog-container')!;
 
     expect(dialog.querySelector('h2')?.textContent?.trim()).toBe('Messaggio inviato con successo');
-    expect(dialog.getAttribute('aria-describedby')).toBe(dialog.querySelector('p')!.id);
     const close = dialog.querySelector<HTMLButtonElement>('app-button button')!;
     expect(close.textContent?.trim()).toBe('Chiudi');
     close.click();

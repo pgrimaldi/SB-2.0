@@ -19,5 +19,4 @@ export interface SelectOption<K extends string = string> {
 export class Select<K extends string = string> {
   readonly options = input.required<readonly SelectOption<K>[]>();
   readonly selected = model.required<K>();
-  readonly accessibleLabel = input<string>();
 }

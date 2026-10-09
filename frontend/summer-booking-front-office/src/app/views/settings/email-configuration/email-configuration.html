@@ -16,17 +16,14 @@
 
   <section class="email__configuration__panel">
     @for (field of maskedFields; track field.name) {
-      @let id = 'email-configuration-' + field.key;
       <div class="email__configuration__row">
         <div>
           <p
             class="email__configuration__title"
-            [id]="id"
             [appI18nText]="'management.settings.email_configuration.fields.' + field.key + '.title'"
           ></p>
           <p
             class="email__configuration__description"
-            [id]="id + '-description'"
             [appI18nText]="
               'management.settings.email_configuration.fields.' + field.key + '.description'
             "
@@ -38,8 +35,6 @@
             autocomplete="new-password"
             [isMasked]="true"
             [pathIcon]="portIcons"
-            [texts]="'field.masked' | translate"
-            [labelledBy]="id + ' ' + id + '-description'"
             [error]="fieldErrors.smtpPort()"
             [formField]="configurationForm.smtpPort"
           />
@@ -48,7 +43,6 @@
             [isPasswordField]="true"
             autocomplete="new-password"
             [pathIcon]="eyeIcons"
-            [texts]="'field.masked' | translate"
             [placeholder]="
               field.name === 'smtpPassword'
                 ? ((passwordSaved()
@@ -57,7 +51,6 @@
                   ) | translate)
                 : ''
             "
-            [labelledBy]="id + ' ' + id + '-description'"
             [error]="fieldErrors[field.name]()"
             [formField]="configurationForm[field.name]"
           />
@@ -68,17 +61,14 @@
       <div>
         <p
           class="email__configuration__title"
-          id="email-configuration-smtp_security"
           appI18nText="management.settings.email_configuration.fields.smtp_security.title"
         ></p>
         <p
           class="email__configuration__description"
-          id="email-configuration-smtp_security-description"
           appI18nText="management.settings.email_configuration.fields.smtp_security.description"
         ></p>
       </div>
       <app-filled-select
-        labelledBy="email-configuration-smtp_security email-configuration-smtp_security-description"
         [options]="securityOptions()"
         [error]="fieldErrors.smtpSecurity()"
         [formField]="configurationForm.smtpSecurity"
@@ -87,7 +77,7 @@
   </section>
 
   @if (errorMessage(); as errorMessage) {
-    <p class="email__configuration__error" role="alert">{{ errorMessage }}</p>
+    <p class="email__configuration__error">{{ errorMessage }}</p>
   }
   <div class="email__configuration__actions">
     <app-button

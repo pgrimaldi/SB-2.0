@@ -32,8 +32,7 @@ import { Observable, catchError, of, switchMap } from 'rxjs';
 import { DATA_RELOAD } from '../../data/data-reload';
 import { SelectionCheckbox } from '../../checkboxes/selection-checkbox/selection-checkbox';
 import { resolveIcons } from '../../icons/icons';
-import { SearchField, SearchFieldTexts } from '../../inputs/search-field/search-field';
-import { FormatTextPipe } from '../../texts/format-text';
+import { SearchField } from '../../inputs/search-field/search-field';
 import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
 import { TableTextAction } from './table-text-action';
@@ -69,8 +68,7 @@ export interface TablePaginatorTexts {
   range?: string;
 }
 
-/** The placeholder is also the accessible name of the search. */
-export interface TableSearchTexts extends SearchFieldTexts {
+export interface TableSearchTexts {
   placeholder?: string;
 }
 
@@ -79,7 +77,7 @@ export interface TableRowActionTexts {
 }
 
 export interface TableRowAction<T> {
-  /** Accessible name and tooltip of the button. */
+  /** Tooltip of the button. */
   label: string;
   /**
    * Of the same kind as the icons of the table: a Material icon name when the table has `matIcon`,
@@ -90,18 +88,9 @@ export interface TableRowAction<T> {
 }
 
 export interface TableSelectionTexts {
-  /** Label of the header checkbox (all the rows of the page). */
-  all?: string;
-  /** Label of a row checkbox. */
-  row?: string;
   duplicate?: string;
   delete?: string;
   clear?: string;
-}
-
-export interface TableSortTexts {
-  /** Screen-reader description of a sortable header, with `{{column}}`. */
-  action?: string;
 }
 
 /** The `table` group of our translation file has this shape: `[texts]="'table' | translate"`. */
@@ -109,7 +98,6 @@ export interface TableTexts {
   empty?: string;
   paginator?: TablePaginatorTexts;
   search?: TableSearchTexts;
-  sort?: TableSortTexts;
   actions?: TableRowActionTexts;
   selection?: TableSelectionTexts;
 }
@@ -151,7 +139,6 @@ const NO_ROWS: TablePage<never> = { total: 0, rows: [] };
 /** Column ids that are not field names, so they never clash with a column of the rows. */
 const ROW_ACTIONS_COLUMN = 'table__row__actions';
 const SELECT_COLUMN = 'table__row__select';
-let nextTableId = 0;
 
 /**
  * Material table that loads its own rows page by page:
@@ -162,7 +149,6 @@ let nextTableId = 0;
 @Component({
   selector: 'app-table',
   imports: [
-    FormatTextPipe,
     MatIconModule,
     MatPaginatorModule,
     MatSortModule,
@@ -244,7 +230,6 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly hasHeading = computed(
     () => !!this.title() || this.isSearchable() || !this.isCreateButtonHidden(),
   );
-  protected readonly titleId = `table__title__${nextTableId++}`;
 
   /** From the search field: 0.5 s after the last key, '' under 3 characters. */
   protected readonly search = signal('');

@@ -4,7 +4,7 @@ the spinner is drawn over it. -->
   <span class="button__label" [class.button__label__hidden]="isLoading()">
     @if (icons().list[0]; as icon) {
       @if (icons().material) {
-        <mat-icon class="button__icon" aria-hidden="true">{{ icon }}</mat-icon>
+        <mat-icon class="button__icon">{{ icon }}</mat-icon>
       } @else {
         <img class="button__icon" [src]="icon" width="14" height="14" alt="" />
       }
@@ -15,7 +15,6 @@ the spinner is drawn over it. -->
     <mat-progress-spinner
       class="button__spinner"
       mode="indeterminate"
-      aria-hidden="true"
       [diameter]="spinnerSize()"
     />
   }
@@ -24,11 +23,8 @@ the spinner is drawn over it. -->
 @if (appearance() !== ButtonAppearance.Secondary) {
   <button
     mat-flat-button
-    [attr.aria-label]="accessibleLabel() ?? null"
     [attr.type]="isSubmitButton() ? 'submit' : 'button'"
     [disabled]="disabled()"
-    [attr.aria-busy]="isLoading() || null"
-    [attr.aria-disabled]="isLoading() || null"
     (click)="press()"
   >
     <ng-container [ngTemplateOutlet]="label" />
@@ -36,11 +32,8 @@ the spinner is drawn over it. -->
 } @else {
   <button
     mat-button
-    [attr.aria-label]="accessibleLabel() ?? null"
     [attr.type]="isSubmitButton() ? 'submit' : 'button'"
     [disabled]="disabled()"
-    [attr.aria-busy]="isLoading() || null"
-    [attr.aria-disabled]="isLoading() || null"
     (click)="press()"
   >
     <ng-container [ngTemplateOutlet]="label" />

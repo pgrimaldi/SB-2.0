@@ -2,7 +2,7 @@
   <label class="filled__text__field__label" [for]="id"
     >{{ label() }}
     @if (isMandatory()) {
-      <span class="filled__text__field__mandatory" aria-hidden="true">*</span>
+      <span class="filled__text__field__mandatory">*</span>
     }
   </label>
 }
@@ -27,9 +27,7 @@
     [attr.maxlength]="maxLength() ?? null"
     [name]="name() ?? ''"
     [attr.autocomplete]="autocomplete() ?? null"
-    [attr.aria-labelledby]="labelledBy() ?? null"
     [errorStateMatcher]="errorMatcher"
-    [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="value.set(field.value || null)"
     (blur)="touch.emit()"
   />
@@ -38,14 +36,11 @@
       matSuffix
       class="filled__text__field__toggle"
       type="button"
-      [attr.aria-label]="texts()?.show ?? null"
-      [attr.aria-pressed]="visible()"
-      [attr.aria-controls]="id"
       (click)="toggleVisible()"
     >
       @if (icons().list[visible() ? 0 : 1]; as icon) {
         @if (icons().material) {
-          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          <mat-icon>{{ icon }}</mat-icon>
         } @else {
           <img [src]="icon" width="18" height="18" alt="" />
         }
@@ -54,5 +49,5 @@
   }
 </mat-form-field>
 @if (error(); as error) {
-  <p class="filled__text__field__error" [id]="id + '-error'">{{ error }}</p>
+  <p class="filled__text__field__error">{{ error }}</p>
 }

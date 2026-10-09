@@ -20,7 +20,6 @@ const FORMATS = {
   imports: [Datepicker],
   template: `<app-datepicker
     [pathIcon]="['/calendar.svg', '/left.svg', '/right.svg']"
-    [texts]="texts"
     [(start)]="start"
     [(end)]="end"
   />`,
@@ -28,10 +27,6 @@ const FORMATS = {
 class DatepickerHost {
   readonly start = signal(new Date(2026, 8, 29));
   readonly end = signal(new Date(2026, 8, 29));
-  readonly texts = {
-    start: { label: 'Data di inizio', previous: 'Inizio indietro', next: 'Inizio avanti' },
-    end: { label: 'Data di fine', previous: 'Fine indietro', next: 'Fine avanti' },
-  };
 }
 
 describe('Datepicker', () => {
@@ -62,22 +57,6 @@ describe('Datepicker', () => {
 
     const values = [...element.querySelectorAll('input')].map((input) => input.value);
     expect(values).toEqual(['29/09/2026', '29/09/2026']);
-  });
-
-  it('should name fields and arrows with the given texts', async () => {
-    const { element } = await setup();
-
-    const labels = [...element.querySelectorAll('.datepicker [aria-label]')].map((named) =>
-      named.getAttribute('aria-label'),
-    );
-    expect(labels).toEqual([
-      'Inizio indietro',
-      'Data di inizio',
-      'Inizio avanti',
-      'Fine indietro',
-      'Data di fine',
-      'Fine avanti',
-    ]);
   });
 
   it('should place its icons in order [calendar, previous day, next day]', async () => {

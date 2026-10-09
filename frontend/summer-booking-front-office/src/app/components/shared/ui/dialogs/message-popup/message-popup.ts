@@ -3,8 +3,6 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { Button } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
 
-let nextId = 0;
-
 export interface MessagePopupTexts {
   close?: string;
 }
@@ -23,13 +21,9 @@ export class MessagePopup extends BasePopup {
   readonly text = input<string>();
   readonly texts = input<MessagePopupTexts | null>();
 
-  protected readonly id = `message-popup-${nextId++}`;
 
   protected dialogConfig(): MatDialogConfig {
     return {
-      role: 'dialog',
-      ariaLabelledBy: `${this.id}-title`,
-      ariaDescribedBy: `${this.id}-text`,
       width: 'min(28rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'message__popup__panel',

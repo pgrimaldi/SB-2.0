@@ -1,13 +1,12 @@
 <ng-template #content>
   <div class="form__warehouse__add__item__popup">
-    <h2 class="form__warehouse__add__item__popup__title" [id]="id + '-title'">
+    <h2 class="form__warehouse__add__item__popup__title">
       {{ 'management.settings.warehouse.form.title' | translate }}
     </h2>
     <button
       class="form__warehouse__add__item__popup__close"
       type="button"
       [disabled]="isLoading()"
-      [attr.aria-label]="'management.settings.warehouse.form.close' | translate"
       (click)="leave()"
     >
       <img [src]="closeIcon" width="12" height="12" alt="" />
@@ -42,7 +41,7 @@
     </div>
 
     @if (errorMessage(); as errorMessage) {
-      <p class="form__warehouse__add__item__popup__error" role="alert">{{ errorMessage }}</p>
+      <p class="form__warehouse__add__item__popup__error">{{ errorMessage }}</p>
     }
 
     <div class="form__warehouse__add__item__popup__buttons">

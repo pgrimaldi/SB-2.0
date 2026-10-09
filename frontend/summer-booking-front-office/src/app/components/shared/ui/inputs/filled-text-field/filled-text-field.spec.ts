@@ -46,7 +46,7 @@ describe('FilledTextField', () => {
     expect(fixture.componentInstance.name()).toBe('Ombrellone');
   });
 
-  it('should show the example and, with an error, the message tied for screen readers', async () => {
+  it('should show the example and, with an error, the message under the field', async () => {
     const fixture = TestBed.createComponent(FilledTextFieldHost);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
@@ -57,7 +57,6 @@ describe('FilledTextField', () => {
     await fixture.whenStable();
     const message = element.querySelector('.filled__text__field__error')!;
     expect(message.textContent?.trim()).toBe('Questo campo è obbligatorio');
-    expect(input.getAttribute('aria-describedby')).toBe(message.id);
     expect(element.querySelector('.filled__text__field__invalid')).not.toBeNull();
   });
 
@@ -72,7 +71,6 @@ describe('FilledTextField', () => {
     await fixture.whenStable();
     const asterisk = element.querySelector('label .filled__text__field__mandatory')!;
     expect(asterisk.textContent).toBe('*');
-    expect(asterisk.getAttribute('aria-hidden')).toBe('true');
     expect(element.querySelector('input')!.required).toBe(true);
     expect(element.querySelector('input')!.getAttribute('aria-required')).toBe('true');
   });
@@ -96,7 +94,6 @@ describe('FilledTextField', () => {
       template: `<app-filled-text-field
         [isPasswordField]="true"
         [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
-        [texts]="{ show: 'Mostra il contenuto' }"
         [(value)]="secret"
       />`,
     })
@@ -110,14 +107,11 @@ describe('FilledTextField', () => {
     const eye = element.querySelector<HTMLButtonElement>('.filled__text__field__toggle')!;
 
     expect(input.type).toBe('password');
-    expect(eye.getAttribute('aria-label')).toBe('Mostra il contenuto');
-    expect(eye.getAttribute('aria-pressed')).toBe('false');
     expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye-slash.svg');
 
     eye.click();
     await fixture.whenStable();
     expect(input.type).toBe('text');
-    expect(eye.getAttribute('aria-pressed')).toBe('true');
     expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye.svg');
   });
 

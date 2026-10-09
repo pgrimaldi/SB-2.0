@@ -1,6 +1,5 @@
 {
   "language": {
-    "selector": "Select language",
     "names": {
       "it": "Italiano",
       "en": "English",
@@ -26,12 +25,6 @@
     "comparison_range": "Comparison range",
     "year_range": "From {{start}} to {{end}}"
   },
-  "carousel": {
-    "previous": "Previous",
-    "next": "Next",
-    "position": "Go to position {{position}}",
-    "slide": "{{index}} of {{total}}"
-  },
   "table": {
     "empty": "The table contains no items",
     "paginator": {
@@ -43,12 +36,7 @@
       "range": "{{start}} – {{end}} of {{total}}"
     },
     "search": {
-      "placeholder": "Search the table",
-      "submit": "Search",
-      "clear": "Clear search"
-    },
-    "sort": {
-      "action": "Sort by {{column}}"
+      "placeholder": "Search the table"
     },
     "load_error": {
       "title": "Error",
@@ -63,8 +51,6 @@
       "edit": "Edit"
     },
     "selection": {
-      "all": "Select all rows of the page",
-      "row": "Select the row",
       "duplicate": "Duplicate selection",
       "delete": "Delete selection",
       "clear": "Clear selection"
@@ -103,43 +89,20 @@
   "alert": {
     "close": "Got it"
   },
-  "field": {
-    "password": {
-      "show": "Show password"
-    },
-    "search": {
-      "submit": "Search",
-      "clear": "Clear search"
-    },
-    "masked": {
-      "show": "Show the content"
-    }
-  },
   "hub": {
     "header": {
       "logo": {
         "alt": "Summer Booking Hub"
       },
       "nav": {
-        "label": "Main menu",
         "advantages": "Advantages",
         "features": "Features",
         "booking": "Booking",
         "pricing": "Pricing"
       },
-      "login": "Sign in",
-      "menu": {
-        "open": "Open menu",
-        "close": "Close menu"
-      }
+      "login": "Sign in"
     },
     "footer": {
-      "social": {
-        "instagram": "Instagram",
-        "facebook": "Facebook",
-        "email": "Email",
-        "youtube": "YouTube"
-      },
       "links": {
         "about": "About us",
         "support": "Customer support",
@@ -157,7 +120,6 @@
     },
     "login": {
       "title": "Sign in",
-      "close": "Close",
       "email": "Email",
       "password": "Password",
       "remember": "Remember me",
@@ -175,24 +137,11 @@
       "logo": {
         "alt": "Summer Booking Hub"
       },
-      "datepicker": {
-        "start": {
-          "label": "Start date",
-          "previous": "Previous day (start date)",
-          "next": "Next day (start date)"
-        },
-        "end": {
-          "label": "End date",
-          "previous": "Previous day (end date)",
-          "next": "Next day (end date)"
-        }
-      },
       "today": {
         "today": "Today",
         "other": "Not today"
       },
       "period": {
-        "label": "Part of the day",
         "full_day": "Full day",
         "morning": "Morning",
         "afternoon": "Afternoon"
@@ -209,7 +158,6 @@
       }
     },
     "menu": {
-      "label": "Management menu",
       "warehouse": "Warehouse",
       "logout": "Sign out"
     },
@@ -228,7 +176,6 @@
     },
     "settings": {
       "menu": {
-        "label": "Settings",
         "property": "Property information",
         "users": "User management",
         "seasons": "Seasons and periods",
@@ -251,7 +198,6 @@
         "form": {
           "title": "Add item",
           "edit_title": "Edit item",
-          "close": "Close",
           "name": "Item",
           "choose": "Select",
           "quantity": "Enter the quantity",
@@ -377,7 +323,6 @@
         "printer": {
           "title": "Printer",
           "added": "Added printers",
-          "enabled": "Printer {{name}} enabled",
           "delete": "Delete the printer {{name}}",
           "add": "Add printer"
         },
@@ -459,7 +404,6 @@
     },
     "about_us": {
       "title": "What they say about us",
-      "carousel": "Customer reviews",
       "reviews": {
         "anna": {
           "author": "Anna, Bagno Alba",
@@ -485,7 +429,6 @@
     },
     "media": {
       "title": "In the press",
-      "carousel": "Press coverage",
       "logo": "{{name}} logo"
     }
   },

@@ -41,7 +41,6 @@ describe('Button', () => {
 
     expect(element.querySelector('mat-progress-spinner')).not.toBeNull();
     expect(button.textContent?.trim()).toBe('Aggiungi');
-    expect(button.getAttribute('aria-busy')).toBe('true');
     button.click();
     expect(fixture.componentInstance.clicks).toBe(0);
 

@@ -27,7 +27,6 @@ export interface DropdownMenuItem {
 export class DropdownMenu {
   readonly items = input.required<readonly DropdownMenuItem[]>();
   readonly selected = model('');
-  readonly accessibleLabel = input<string>();
   readonly iconOnly = input(false);
   /** Icons as Material icon names (Material Symbols font): one per item, in the order of `items`. */
   readonly matIcon = input<readonly string[] | null>();

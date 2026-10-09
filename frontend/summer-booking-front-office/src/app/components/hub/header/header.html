@@ -19,13 +19,12 @@
           width="944"
           height="342"
           alt=""
-          aria-hidden="true"
         />
       </div>
     </div>
 
     <div class="header__nav">
-      <nav [attr.aria-label]="'hub.header.nav.label' | translate">
+      <nav>
         <ul class="header__links">
           @for (item of navItems; track item) {
             <li>
@@ -49,14 +48,9 @@
     <button
       class="header__toggle"
       type="button"
-      aria-controls="hub-header-menu"
-      [attr.aria-expanded]="isMenuOpen()"
-      [attr.aria-label]="
-        (isMenuOpen() ? 'hub.header.menu.close' : 'hub.header.menu.open') | translate
-      "
       (click)="toggleMenu()"
     >
-      <span class="header__toggle__icon" aria-hidden="true">
+      <span class="header__toggle__icon">
         <span class="header__toggle__bar"></span>
         <span class="header__toggle__bar"></span>
         <span class="header__toggle__bar"></span>
@@ -64,9 +58,9 @@
     </button>
   </div>
 
-  <div id="hub-header-menu" class="header__menu">
+  <div class="header__menu">
     <div class="header__menu__body">
-      <nav [attr.aria-label]="'hub.header.nav.label' | translate">
+      <nav>
         <ul class="header__menu__links">
           @for (item of navItems; track item) {
             <li>
@@ -81,7 +75,7 @@
         </ul>
       </nav>
 
-      <div class="header__menu__divider" aria-hidden="true">
+      <div class="header__menu__divider">
         <span class="header__menu__divider__line"></span>
         <span class="header__menu__divider__dot"></span>
         <span class="header__menu__divider__line"></span>
@@ -104,7 +98,6 @@
     [pathIcon]="languageFlags"
     [selected]="currentLanguage().code"
     [iconOnly]="true"
-    [accessibleLabel]="'language.selector' | translate"
     (selectedChange)="changeLanguage($event)"
   >
     <span class="header__language__trigger">

@@ -34,14 +34,12 @@ describe('FilledTextarea', () => {
     expect(host.message()).toBe('Vorrei informazioni.');
   });
 
-  it('should show the error under the field, tied for screen readers', async () => {
-    const { fixture, host, element, textarea } = await setup();
+  it('should show the error under the field', async () => {
+    const { fixture, host, element } = await setup();
     host.error.set('Questo campo è obbligatorio');
     await fixture.whenStable();
     const message = element.querySelector('.filled__textarea__error')!;
 
     expect(message.textContent?.trim()).toBe('Questo campo è obbligatorio');
-    expect(textarea.getAttribute('aria-invalid')).toBe('true');
-    expect(textarea.getAttribute('aria-describedby')).toBe(message.id);
   });
 });

@@ -43,8 +43,6 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
-let nextId = 0;
-
 @Component({
   selector: 'app-form-warehouse-add-item-popup',
   imports: [Button, FilledNumberField, FilledSelect, FormField, Toggle, TranslatePipe],
@@ -99,7 +97,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     { initialValue: null },
   );
   protected readonly closeIcon = '/assets/images/close.svg';
-  protected readonly id = `form-warehouse-add-item-popup-${nextId++}`;
 
   constructor() {
     super();
@@ -173,8 +170,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
 
   protected dialogConfig(): MatDialogConfig {
     return {
-      role: 'dialog',
-      ariaLabelledBy: `${this.id}-title`,
       width: 'min(25rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'form__warehouse__add__item__popup__panel',

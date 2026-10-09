@@ -34,26 +34,24 @@ describe('AlertPopup', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should show title and text as an alert while open, and close with its button', async () => {
+  it('should show title and text while open, and close with its button', async () => {
     const fixture = await setup();
-    expect(document.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(document.querySelector('mat-dialog-container')).toBeNull();
 
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
-    const dialog = document.querySelector<HTMLElement>('[role="alertdialog"]')!;
+    const dialog = document.querySelector<HTMLElement>('mat-dialog-container')!;
     const title = dialog.querySelector('.alert__popup__title')!;
     const text = dialog.querySelector('.alert__popup__text')!;
     expect(title.textContent?.trim()).toBe('Disconnessione fallita');
     expect(text.textContent?.trim()).toBe('Riprova tra poco.');
-    expect(dialog.getAttribute('aria-labelledby')).toBe(title.id);
-    expect(dialog.getAttribute('aria-describedby')).toBe(text.id);
     expect(dialog.querySelector('.alert__popup__icon')).toBeNull();
 
     expect(dialog.querySelector('app-button')?.textContent?.trim()).toBe('Ho capito');
     dialog.querySelector<HTMLButtonElement>('app-button button')!.click();
     await fixture.whenStable();
     expect(fixture.componentInstance.open()).toBe(false);
-    expect(document.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(document.querySelector('mat-dialog-container')).toBeNull();
   });
 
   it('should be closed at once by its button, so it can open again right away', async () => {
@@ -61,13 +59,13 @@ describe('AlertPopup', () => {
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
 
-    document.querySelector<HTMLButtonElement>('[role="alertdialog"] app-button button')!.click();
+    document.querySelector<HTMLButtonElement>('mat-dialog-container app-button button')!.click();
     expect(fixture.componentInstance.open()).toBe(false); // not after the closing animation
     await fixture.whenStable();
 
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
-    expect(document.querySelector('[role="alertdialog"]')).not.toBeNull();
+    expect(document.querySelector('mat-dialog-container')).not.toBeNull();
   });
 
   it('should show the Material icon, else the image', async () => {
@@ -75,7 +73,7 @@ describe('AlertPopup', () => {
     const icon = async () => {
       fixture.componentInstance.open.set(true);
       await fixture.whenStable();
-      const element = document.querySelector('[role="alertdialog"] .alert__popup__icon')!;
+      const element = document.querySelector('mat-dialog-container .alert__popup__icon')!;
       fixture.componentInstance.open.set(false);
       await fixture.whenStable();
       return element;

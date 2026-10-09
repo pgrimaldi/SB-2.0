@@ -31,7 +31,7 @@ describe('TableErrorPopup', () => {
     prepare?.(fixture.componentInstance);
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
-    const dialog = () => document.querySelector<HTMLElement>('[role="alertdialog"]');
+    const dialog = () => document.querySelector<HTMLElement>('mat-dialog-container');
     const buttons = () =>
       [...(dialog()?.querySelectorAll<HTMLElement>('app-button') ?? [])].map((button) =>
         button.textContent?.trim(),
@@ -47,7 +47,7 @@ describe('TableErrorPopup', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should show title and text as an alert, with close on the left and retry on the right', async () => {
+  it('should show title and text, with close on the left and retry on the right', async () => {
     const { dialog, buttons } = await setup();
 
     const title = dialog()!.querySelector('.table__error__popup__title')!;
@@ -56,8 +56,6 @@ describe('TableErrorPopup', () => {
     expect(text.textContent?.trim()).toBe(
       'In questo momento non riusciamo a fornire le informazioni richieste.',
     );
-    expect(dialog()!.getAttribute('aria-labelledby')).toBe(title.id);
-    expect(dialog()!.getAttribute('aria-describedby')).toBe(text.id);
     expect(buttons()).toEqual(['Chiudi', 'Riprova']);
   });
 

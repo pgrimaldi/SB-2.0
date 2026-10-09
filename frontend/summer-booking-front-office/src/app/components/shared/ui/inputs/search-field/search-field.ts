@@ -19,11 +19,6 @@ const SEARCH_DELAY = 500;
 /** Shorter texts search for '' (everything). */
 const MIN_LENGTH = 3;
 
-export interface SearchFieldTexts {
-  submit?: string;
-  clear?: string;
-}
-
 /** `app-table` listens to `searched`; the search of the header is not wired to any page yet. */
 @Component({
   selector: 'app-search-field',
@@ -34,7 +29,6 @@ export interface SearchFieldTexts {
 })
 export class SearchField implements OnDestroy {
   readonly placeholder = input<string>();
-  readonly texts = input<SearchFieldTexts | null>();
   /** Icons as Material icon names (Material Symbols font): [magnifier, X]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [magnifier, X]. */

@@ -32,7 +32,7 @@ describe('ManagementMenu', () => {
     await fixture.whenStable();
 
     expect(logout).toHaveBeenCalledTimes(1);
-    const dialog = document.querySelector('[role="alertdialog"]');
+    const dialog = document.querySelector('mat-dialog-container');
     expect(dialog?.querySelector('.alert__popup__title')?.textContent?.trim()).toBe(
       'management.logout_failed.title',
     );
@@ -69,6 +69,6 @@ describe('ManagementMenu', () => {
     button.click();
     await fixture.whenStable();
 
-    expect(document.querySelector('[role="alertdialog"]')).toBeNull();
+    expect(document.querySelector('mat-dialog-container')).toBeNull();
   });
 });

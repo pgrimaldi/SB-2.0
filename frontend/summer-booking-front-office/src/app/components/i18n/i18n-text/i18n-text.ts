@@ -6,7 +6,7 @@ import { combineLatest, switchMap } from 'rxjs';
 /**
  * Renders a translated text and reserves the space of its longest translation,
  * so layouts stay identical in every language. The reserved texts live in hidden
- * pseudo-elements: they are not read by screen readers nor indexed as page content.
+ * pseudo-elements: they are not indexed as page content.
  *
  * With `[isHtml]="true"` the translation may contain simple inline markup (e.g. `<em>` for
  * highlighted words); Angular sanitizes it and the reserved space uses the plain text.
@@ -22,11 +22,7 @@ import { combineLatest, switchMap } from 'rxjs';
       <span class="i18n__text__value">{{ text() }}</span>
     }
     @for (translation of reserved(); track translation) {
-      <span
-        class="i18n__text__reserve"
-        aria-hidden="true"
-        [attr.data-i18n-reserve]="translation"
-      ></span>
+      <span class="i18n__text__reserve" [attr.data-i18n-reserve]="translation"></span>
     }
   `,
   styleUrl: './i18n-text.scss',

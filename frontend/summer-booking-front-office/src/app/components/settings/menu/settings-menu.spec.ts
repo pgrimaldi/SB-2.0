@@ -43,6 +43,5 @@ describe('SettingsMenu', () => {
       false,
       true,
     ]);
-    expect(links[1].getAttribute('aria-current')).toBe('page');
   });
 });

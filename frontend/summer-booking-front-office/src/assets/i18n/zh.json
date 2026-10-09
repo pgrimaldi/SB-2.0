@@ -1,6 +1,5 @@
 {
   "language": {
-    "selector": "选择语言",
     "names": {
       "it": "Italiano",
       "en": "English",
@@ -26,12 +25,6 @@
     "comparison_range": "比较日期范围",
     "year_range": "从{{start}}到{{end}}"
   },
-  "carousel": {
-    "previous": "上一个",
-    "next": "下一个",
-    "position": "转到第 {{position}} 项",
-    "slide": "第 {{index}} 项，共 {{total}} 项"
-  },
   "table": {
     "empty": "表格中没有内容",
     "paginator": {
@@ -43,12 +36,7 @@
       "range": "{{start}} – {{end}}，共 {{total}}"
     },
     "search": {
-      "placeholder": "在表格中搜索",
-      "submit": "搜索",
-      "clear": "清除搜索"
-    },
-    "sort": {
-      "action": "按{{column}}排序"
+      "placeholder": "在表格中搜索"
     },
     "load_error": {
       "title": "错误",
@@ -63,8 +51,6 @@
       "edit": "编辑"
     },
     "selection": {
-      "all": "选择本页所有行",
-      "row": "选择此行",
       "duplicate": "复制所选",
       "delete": "删除所选",
       "clear": "清除选择"
@@ -103,43 +89,20 @@
   "alert": {
     "close": "知道了"
   },
-  "field": {
-    "password": {
-      "show": "显示密码"
-    },
-    "search": {
-      "submit": "搜索",
-      "clear": "清除搜索"
-    },
-    "masked": {
-      "show": "显示内容"
-    }
-  },
   "hub": {
     "header": {
       "logo": {
         "alt": "Summer Booking Hub"
       },
       "nav": {
-        "label": "主菜单",
         "advantages": "优势",
         "features": "功能",
         "booking": "Booking",
         "pricing": "价格"
       },
-      "login": "登录",
-      "menu": {
-        "open": "打开菜单",
-        "close": "关闭菜单"
-      }
+      "login": "登录"
     },
     "footer": {
-      "social": {
-        "instagram": "Instagram",
-        "facebook": "Facebook",
-        "email": "电子邮件",
-        "youtube": "YouTube"
-      },
       "links": {
         "about": "关于我们",
         "support": "客户支持",
@@ -157,7 +120,6 @@
     },
     "login": {
       "title": "登录",
-      "close": "关闭",
       "email": "电子邮件",
       "password": "密码",
       "remember": "记住我的登录信息",
@@ -175,24 +137,11 @@
       "logo": {
         "alt": "Summer Booking Hub"
       },
-      "datepicker": {
-        "start": {
-          "label": "开始日期",
-          "previous": "前一天（开始日期）",
-          "next": "后一天（开始日期）"
-        },
-        "end": {
-          "label": "结束日期",
-          "previous": "前一天（结束日期）",
-          "next": "后一天（结束日期）"
-        }
-      },
       "today": {
         "today": "今天",
         "other": "非今天"
       },
       "period": {
-        "label": "时段",
         "full_day": "全天",
         "morning": "上午",
         "afternoon": "下午"
@@ -209,7 +158,6 @@
       }
     },
     "menu": {
-      "label": "管理菜单",
       "warehouse": "仓库",
       "logout": "退出登录"
     },
@@ -228,7 +176,6 @@
     },
     "settings": {
       "menu": {
-        "label": "设置",
         "property": "浴场信息",
         "users": "用户管理",
         "seasons": "季节和时段",
@@ -251,7 +198,6 @@
         "form": {
           "title": "添加物品",
           "edit_title": "编辑物品",
-          "close": "关闭",
           "name": "物品",
           "choose": "选择",
           "quantity": "输入数量",
@@ -377,7 +323,6 @@
         "printer": {
           "title": "打印机",
           "added": "已添加的打印机",
-          "enabled": "打印机 {{name}} 已启用",
           "delete": "删除打印机 {{name}}",
           "add": "添加打印机"
         },
@@ -459,7 +404,6 @@
     },
     "about_us": {
       "title": "客户评价",
-      "carousel": "客户评论",
       "reviews": {
         "anna": {
           "author": "Anna, Bagno Alba",
@@ -485,7 +429,6 @@
     },
     "media": {
       "title": "媒体报道",
-      "carousel": "报道我们的媒体",
       "logo": "{{name}} 标志"
     }
   },

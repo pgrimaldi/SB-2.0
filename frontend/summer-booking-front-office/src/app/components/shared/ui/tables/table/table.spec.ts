@@ -54,7 +54,6 @@ class TableHost {
   ];
   readonly texts = {
     empty: 'La tabella non contiene elementi',
-    sort: { action: 'Ordina per {{column}}' },
     paginator: {
       previous: 'Pagina precedente',
       next: 'Pagina successiva',
@@ -346,15 +345,12 @@ describe('Table', () => {
 
     const base = { day: '2026-09-30', page: 1, pageSize: 10, search: '' };
     expect(await sortName()).toEqual({ ...base, sortField: 'name', sortDirection: 'Ascending' });
-    expect(name.getAttribute('aria-sort')).toBe('ascending');
     expect(await sortName()).toEqual({ ...base, sortField: 'name', sortDirection: 'Descending' });
     expect(await sortName()).toEqual({ ...base, sortField: '', sortDirection: 'Ascending' });
 
     total.querySelector<HTMLElement>('.mat-sort-header-container')?.click(); // not sortable
     await fixture.whenStable();
     expect(host.requests.at(-1)?.sortField).toBe('');
-    const description = name.querySelector('[aria-describedby]')?.getAttribute('aria-describedby');
-    expect(document.getElementById(description!)?.textContent).toBe('Ordina per Nome');
   });
 
   it('should show no bar above the rows when nothing is put in it', async () => {
@@ -643,7 +639,7 @@ describe('Table row buttons', () => {
     }
   });
 
-  it('should put the given buttons in the last column, in their order, with names and icons', async () => {
+  it('should put the given buttons in the last column, in their order, with their icons', async () => {
     const { host, element, buttons } = await setup(null);
     host.actions.set(host.all);
     TestBed.tick();
@@ -652,11 +648,6 @@ describe('Table row buttons', () => {
     expect(headers.length).toBe(3);
     expect(headers[2].classList).toContain('table__actions');
     expect(headers[2].textContent?.trim()).toBe('Azioni'); // header from texts.actions.header
-    expect(buttons(0).map((button) => button.getAttribute('aria-label'))).toEqual([
-      'Elimina',
-      'Duplica',
-      'Modifica',
-    ]);
     expect(buttons(0).map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
       'delete.svg',
       'duplicate.svg',
@@ -669,7 +660,9 @@ describe('Table row buttons', () => {
     const { element, buttons } = await setup([edit]);
 
     expect(element.querySelectorAll('thead th').length).toBe(3);
-    expect(buttons(0).map((button) => button.getAttribute('aria-label'))).toEqual(['Modifica']);
+    expect(buttons(0).map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
+      'edit.svg',
+    ]);
   });
 
   it('should call the function of the button with the row it is on', async () => {
@@ -804,7 +797,6 @@ describe('Table title, create button and chosen rows', () => {
 
     expect(title.textContent?.trim()).toBe('Impostazioni magazzino');
     expect(title.querySelector('img')?.getAttribute('src')).toBe('warehouse.svg');
-    expect(element.querySelector('table')?.getAttribute('aria-labelledby')).toBe(title.id);
     expect(create.textContent?.trim()).toBe('Aggiungi articolo');
     expect(create.querySelector('img')?.getAttribute('src')).toBe('add.svg');
 
@@ -831,8 +823,7 @@ describe('Table title, create button and chosen rows', () => {
     expect(element.querySelectorAll('thead th').length).toBe(3);
     expect(element.querySelector('thead th')?.classList).toContain('table__select');
     expect(boxes().length).toBe(10);
-    expect(all().getAttribute('aria-label')).toBe('Scegli tutte le righe della pagina');
-    expect(boxes()[0].getAttribute('aria-label')).toBe('Scegli la riga');
+    expect(all()).not.toBeNull();
   });
 
   it('should show the buttons on the chosen rows only with more than one row chosen', async () => {
@@ -843,10 +834,6 @@ describe('Table title, create button and chosen rows', () => {
     expect(all().indeterminate).toBe(true); // a dash: part of the page is chosen
 
     await click(boxes()[2]);
-    expect(massive().map((button) => button.getAttribute('aria-label'))).toEqual([
-      'Duplica selezione',
-      'Elimina selezione',
-    ]);
     expect(massive().map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
       'duplicate-selected.svg',
       'delete-selected.svg',
@@ -994,8 +981,6 @@ class TableMassiveHost {
   ];
   readonly texts = {
     selection: {
-      all: 'Scegli tutte le righe della pagina',
-      row: 'Scegli la riga',
       duplicate: 'Duplica selezione',
       delete: 'Elimina selezione',
       clear: 'Cancella selezioni',

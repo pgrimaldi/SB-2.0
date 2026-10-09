@@ -48,7 +48,6 @@ export class Button {
   readonly isFullWidth = input(false);
   readonly disabled = input(false);
   readonly isLoading = input(false);
-  readonly accessibleLabel = input<string>();
   /** A submit button of its form instead of a plain button. */
   readonly isSubmitButton = input(false);
   /** Icons as Material icon names (Material Symbols font): [icon before the text]. */

@@ -1,7 +1,7 @@
 <label class="text__field__label" [for]="id"
   >{{ label() }}
   @if (isMandatory()) {
-    <span class="text__field__mandatory" aria-hidden="true">*</span>
+    <span class="text__field__mandatory">*</span>
   }
 </label>
 <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -15,11 +15,10 @@
     [name]="name() ?? ''"
     [attr.autocomplete]="autocomplete() ?? null"
     [errorStateMatcher]="errorMatcher"
-    [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="value.set(field.value || null)"
     (blur)="touch.emit()"
   />
 </mat-form-field>
 @if (error(); as error) {
-  <p class="text__field__error" [id]="id + '-error'">{{ error }}</p>
+  <p class="text__field__error">{{ error }}</p>
 }

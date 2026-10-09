@@ -4,7 +4,6 @@
     matInput
     type="search"
     [placeholder]="placeholder() ?? ''"
-    [attr.aria-label]="placeholder() ?? null"
     [value]="text()"
     (input)="text.set(field.value)"
   />
@@ -14,12 +13,11 @@
       mat-icon-button
       class="search__field__button"
       type="button"
-      [attr.aria-label]="texts()?.clear ?? null"
       (click)="clear(field)"
     >
       @if (icons().list[1]; as icon) {
         @if (icons().material) {
-          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          <mat-icon>{{ icon }}</mat-icon>
         } @else {
           <img [src]="icon" width="18" height="18" alt="" />
         }
@@ -32,11 +30,10 @@
       mat-icon-button
       class="search__field__button"
       type="button"
-      [attr.aria-label]="texts()?.submit ?? null"
     >
       @if (icons().list[0]; as icon) {
         @if (icons().material) {
-          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          <mat-icon>{{ icon }}</mat-icon>
         } @else {
           <img [src]="icon" width="18" height="18" alt="" />
         }

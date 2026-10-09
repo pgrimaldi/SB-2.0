@@ -1,10 +1,10 @@
 @if (hasHeading()) {
   <div class="table__heading">
     @if (title()) {
-      <h2 class="table__title" [id]="titleId">
+      <h2 class="table__title">
         @if (icons().list[5]; as icon) {
           @if (icons().material) {
-            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+            <mat-icon>{{ icon }}</mat-icon>
           } @else {
             <img [src]="icon" width="19" height="19" alt="" />
           }
@@ -16,7 +16,6 @@
       <app-search-field
         class="table__search"
         [placeholder]="texts()?.search?.placeholder"
-        [texts]="texts()?.search"
         [matIcon]="matIcon()"
         [pathIcon]="pathIcon()"
         (searched)="search.set($event)"
@@ -26,7 +25,7 @@
       <button class="table__create" type="button" (click)="create.emit()">
         @if (icons().list[4]; as icon) {
           @if (icons().material) {
-            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+            <mat-icon>{{ icon }}</mat-icon>
           } @else {
             <img [src]="icon" width="10" height="10" alt="" />
           }
@@ -49,13 +48,12 @@
             class="table__massive"
             type="button"
             [class.table__massive__framed]="icons().material"
-            [attr.aria-label]="texts()?.selection?.duplicate ?? null"
             [matTooltip]="texts()?.selection?.duplicate ?? ''"
             (click)="duplicateSelected.emit([...selection()])"
           >
             @if (icons().list[2]; as icon) {
               @if (icons().material) {
-                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+                <mat-icon>{{ icon }}</mat-icon>
               } @else {
                 <img [src]="icon" width="28" height="28" alt="" />
               }
@@ -65,13 +63,12 @@
             class="table__massive table__massive__delete"
             type="button"
             [class.table__massive__framed]="icons().material"
-            [attr.aria-label]="texts()?.selection?.delete ?? null"
             [matTooltip]="texts()?.selection?.delete ?? ''"
             (click)="deleteSelected.emit([...selection()])"
           >
             @if (icons().list[3]; as icon) {
               @if (icons().material) {
-                <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+                <mat-icon>{{ icon }}</mat-icon>
               } @else {
                 <img [src]="icon" width="28" height="28" alt="" />
               }
@@ -94,13 +91,11 @@
     matSort
     class="table__grid"
     [dataSource]="rows()"
-    [attr.aria-labelledby]="title() ? titleId : null"
     (matSortChange)="changeSort($event)"
   >
     <ng-container [matColumnDef]="selectColumn">
       <th *matHeaderCellDef mat-header-cell class="table__cell table__select">
         <app-selection-checkbox
-          [label]="texts()?.selection?.all"
           [checked]="allSelected()"
           [isIndeterminate]="someSelected()"
           (checkedChange)="selectAll($event)"
@@ -108,7 +103,6 @@
       </th>
       <td *matCellDef="let row" mat-cell class="table__cell table__select">
         <app-selection-checkbox
-          [label]="texts()?.selection?.row"
           [checked]="selected().has(idOf(row))"
           (checkedChange)="selectRow(row)"
         />
@@ -127,9 +121,6 @@
           [class.table__cell__end]="align === TableColumnAlign.End"
           [disabled]="!column.sortable"
           [arrowPosition]="useAppTheme() ? 'after' : 'before'"
-          [sortActionDescription]="
-            (texts()?.sort?.action | formatText: { column: column.header }) ?? ''
-          "
           [style.text-align]="align"
           [style.width]="headerWidths()[$index]"
         >
@@ -151,13 +142,12 @@
             <button
               class="table__action"
               type="button"
-              [attr.aria-label]="rowAction.label"
               [matTooltip]="rowAction.label"
               (click)="rowAction.action(row)"
             >
               @if (rowAction.icon) {
                 @if (icons().material) {
-                  <mat-icon aria-hidden="true">{{ rowAction.icon }}</mat-icon>
+                  <mat-icon>{{ rowAction.icon }}</mat-icon>
                 } @else {
                   <img [src]="rowAction.icon" width="24" height="24" alt="" />
                 }

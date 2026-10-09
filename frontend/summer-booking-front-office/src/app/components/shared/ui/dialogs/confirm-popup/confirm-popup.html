@@ -1,9 +1,9 @@
 <ng-template #content>
   <div class="confirm__popup">
-    <h2 class="confirm__popup__title" [id]="id + '-title'">{{ title() }}</h2>
-    <p class="confirm__popup__text" [id]="id + '-text'">{{ text() }}</p>
+    <h2 class="confirm__popup__title">{{ title() }}</h2>
+    <p class="confirm__popup__text">{{ text() }}</p>
     @if (error(); as error) {
-      <p class="confirm__popup__error" role="alert">{{ error }}</p>
+      <p class="confirm__popup__error">{{ error }}</p>
     }
     <div class="confirm__popup__actions">
       <app-button

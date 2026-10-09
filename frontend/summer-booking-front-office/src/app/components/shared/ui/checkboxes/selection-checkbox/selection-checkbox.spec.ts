@@ -4,11 +4,7 @@ import { SelectionCheckbox } from './selection-checkbox';
 
 @Component({
   imports: [SelectionCheckbox],
-  template: `<app-selection-checkbox
-    label="Scegli la riga"
-    [isIndeterminate]="partial()"
-    [(checked)]="chosen"
-  />`,
+  template: `<app-selection-checkbox [isIndeterminate]="partial()" [(checked)]="chosen" />`,
 })
 class SelectionCheckboxHost {
   readonly chosen = signal(false);
@@ -16,12 +12,11 @@ class SelectionCheckboxHost {
 }
 
 describe('SelectionCheckbox', () => {
-  it('should be named by its label and tell when it is ticked', async () => {
+  it('should tell when it is ticked', async () => {
     const fixture = TestBed.createComponent(SelectionCheckboxHost);
     await fixture.whenStable();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
 
-    expect(input.getAttribute('aria-label')).toBe('Scegli la riga');
     input.click();
     await fixture.whenStable();
     expect(fixture.componentInstance.chosen()).toBe(true);

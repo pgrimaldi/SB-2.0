@@ -165,7 +165,6 @@ export class LoginDialog implements OnDestroy {
       maxWidth: 'none',
       maxHeight: MAX_HEIGHT,
       panelClass: 'login__dialog__panel',
-      ariaLabelledBy: 'login-dialog-title',
     });
     this.dialogRef = dialogRef;
     dialogRef.afterClosed().subscribe(() => this.closed(dialogRef));

@@ -3,12 +3,11 @@
   class="icon__button"
   type="button"
   [class.icon__button__text]="!icons().list[0]"
-  [attr.aria-label]="label() ?? null"
   [matTooltip]="label() ?? ''"
 >
   @if (icons().list[0]; as icon) {
     @if (icons().material) {
-      <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+      <mat-icon>{{ icon }}</mat-icon>
     } @else {
       <img [src]="icon" width="16" height="16" alt="" />
     }

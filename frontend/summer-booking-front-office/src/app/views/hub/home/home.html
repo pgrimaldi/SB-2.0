@@ -1,7 +1,7 @@
 <app-header />
 
 <main class="home__page" appEqualHeight="app-card">
-  <section class="home__hero" aria-labelledby="home-hero-title">
+  <section class="home__hero">
     <picture class="home__hero__media">
       <source
         media="(width < 64rem) and (orientation: portrait)"
@@ -27,15 +27,15 @@
     </picture>
 
     <div class="home__hero__content">
-      <h1 id="home-hero-title" appI18nText="home.hero.title"></h1>
+      <h1 appI18nText="home.hero.title"></h1>
       <p appI18nText="home.hero.description"></p>
     </div>
   </section>
 
-  <section class="home__information" aria-labelledby="home-management-title">
+  <section class="home__information">
     <div class="home__information__content">
       <div class="home__information__header">
-        <h2 id="home-management-title" appI18nText="home.management.title"></h2>
+        <h2 appI18nText="home.management.title"></h2>
         <p appI18nText="home.management.description"></p>
       </div>
 
@@ -51,11 +51,11 @@
     </div>
   </section>
 
-  <section class="home__intermezzo" aria-labelledby="home-booster-title">
+  <section class="home__intermezzo">
     <div class="home__intermezzo__panel">
       <div class="home__intermezzo__content">
         <div class="home__booster__text">
-          <h2 id="home-booster-title" appI18nText="home.booster.title"></h2>
+          <h2 appI18nText="home.booster.title"></h2>
           <div class="home__booster__description">
             <p appI18nText="home.booster.channels"></p>
             <p appI18nText="home.booster.offers"></p>
@@ -98,10 +98,10 @@
     </div>
   </section>
 
-  <section class="home__information" aria-labelledby="home-shift-title">
+  <section class="home__information">
     <div class="home__information__content">
       <div class="home__information__header">
-        <h2 id="home-shift-title" appI18nText="home.shift.title"></h2>
+        <h2 appI18nText="home.shift.title"></h2>
       </div>
 
       <div class="home__information__cards">
@@ -119,10 +119,10 @@
     </div>
   </section>
 
-  <section class="home__intermezzo home__growth" aria-labelledby="home-growth-title">
+  <section class="home__intermezzo home__growth">
     <div class="home__intermezzo__panel">
       <div class="home__intermezzo__content">
-        <h2 id="home-growth-title" appI18nText="home.growth.title"></h2>
+        <h2 appI18nText="home.growth.title"></h2>
 
         <div class="home__growth__actions">
           <app-button class="home__action__desktop" [size]="ButtonSize.Medium">
@@ -143,18 +143,15 @@
   <section
     id="about-us"
     class="home__information home__about__us"
-    aria-labelledby="home-about-us-title"
   >
     <div class="home__information__content">
       <div class="home__information__header">
-        <h2 id="home-about-us-title" appI18nText="home.about_us.title"></h2>
+        <h2 appI18nText="home.about_us.title"></h2>
       </div>
 
       <app-carousel
         class="home__information__carousel"
         [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
-        [accessibleLabel]="'home.about_us.carousel' | translate"
-        [texts]="'carousel' | translate"
       >
         @for (review of aboutUsReviews; track review.key) {
           <app-card *appCarouselSlide [pathIcon]="['/assets/images/hub/' + review.icon + '.svg']">
@@ -173,17 +170,15 @@
     </div>
   </section>
 
-  <section id="media" class="home__information" aria-labelledby="home-media-title">
+  <section id="media" class="home__information">
     <div class="home__information__content">
       <div class="home__information__header">
-        <h2 id="home-media-title" appI18nText="home.media.title"></h2>
+        <h2 appI18nText="home.media.title"></h2>
       </div>
 
       <app-carousel
         class="home__information__carousel"
         [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
-        [accessibleLabel]="'home.media.carousel' | translate"
-        [texts]="'carousel' | translate"
       >
         @for (outlet of mediaOutlets; track outlet.logo) {
           <app-card-logo

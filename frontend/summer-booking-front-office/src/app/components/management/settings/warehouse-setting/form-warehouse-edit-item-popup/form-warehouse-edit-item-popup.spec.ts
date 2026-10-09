@@ -189,7 +189,9 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(host.open()).toBe(true);
     expect(host.saved).toBe(0);
     // The message of the code (here the fallback key: the test has no translations).
-    expect(popup()!.querySelector('[role="alert"]')?.textContent?.trim()).toBe('error.unknown');
+    expect(
+      popup()!.querySelector('.form__warehouse__edit__item__popup__error')?.textContent?.trim(),
+    ).toBe('error.unknown');
     expect(inputs()[0].value).toBe('90');
   });
 
@@ -201,13 +203,10 @@ describe('FormWarehouseEditItemPopup', () => {
     await type(inputs()[0], '');
     // The generic key (the test has no translations).
     expect(message()?.textContent?.trim()).toBe('invalidate.greater_than');
-    expect(inputs()[0].getAttribute('aria-describedby')).toContain(message()!.id);
     expect(save().disabled).toBe(true);
 
-    // Empty, Material announces it as required rather than invalid; with a value, invalid.
     await type(inputs()[0], '0');
     expect(message()).not.toBeNull();
-    expect(inputs()[0].getAttribute('aria-invalid')).toBe('true');
     await type(inputs()[0], '4');
     expect(message()).toBeNull();
   });
@@ -238,7 +237,7 @@ describe('FormWarehouseEditItemPopup', () => {
     await new Promise((resolve) => setTimeout(resolve));
     await fixture.whenStable();
     expect(thresholdError()?.textContent?.trim()).toBe('error.unknown');
-    expect(popup()!.querySelector('[role="alert"]')).toBeNull();
+    expect(popup()!.querySelector('.form__warehouse__edit__item__popup__error')).toBeNull();
 
     await type(inputs()[1], '7');
     expect(thresholdError()).toBeNull();

@@ -1,7 +1,7 @@
 <ng-template #content>
   <div class="table__error__popup">
-    <h2 class="table__error__popup__title" [id]="id + '-title'">{{ title() }}</h2>
-    <p class="table__error__popup__text" [id]="id + '-text'">{{ text() }}</p>
+    <h2 class="table__error__popup__title">{{ title() }}</h2>
+    <p class="table__error__popup__text">{{ text() }}</p>
     @if (!isCloseButtonHidden() || !isRetryButtonHidden()) {
       <div class="table__error__popup__actions">
         @if (!isCloseButtonHidden()) {

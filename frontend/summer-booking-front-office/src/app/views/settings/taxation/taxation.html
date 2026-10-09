@@ -16,10 +16,6 @@
             <app-toggle
               class="taxation__printer__toggle"
               [checked]="printer.isEnabled"
-              [accessibleLabel]="
-                'management.settings.taxation.printer.enabled'
-                  | translate: { name: printer.printerName }
-              "
             />
             <app-icon-button
               class="taxation__printer__delete"
@@ -34,7 +30,7 @@
       </ul>
     }
     @if (printersErrorMessage(); as printersErrorMessage) {
-      <p class="taxation__error" role="alert">{{ printersErrorMessage }}</p>
+      <p class="taxation__error">{{ printersErrorMessage }}</p>
     }
     <app-button [size]="ButtonSize.Small" [pathIcon]="addPrinterIcon">
       {{ 'management.settings.taxation.printer.add' | translate }}
@@ -54,7 +50,7 @@
       {{ 'management.settings.taxation.receipt.terms' | translate }}
     </h3>
     @if (receiptErrorMessage(); as receiptErrorMessage) {
-      <p class="taxation__error" role="alert">{{ receiptErrorMessage }}</p>
+      <p class="taxation__error">{{ receiptErrorMessage }}</p>
     } @else {
       <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
     }

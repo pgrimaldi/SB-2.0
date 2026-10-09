@@ -261,7 +261,9 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(host.open()).toBe(true);
     expect(host.added).toBe(0);
     // The message of the code (here the fallback key: the test has no translations).
-    expect(popup()!.querySelector('[role="alert"]')?.textContent?.trim()).toBe('error.unknown');
+    expect(
+      popup()!.querySelector('.form__warehouse__add__item__popup__error')?.textContent?.trim(),
+    ).toBe('error.unknown');
     expect(popup()!.querySelector('mat-progress-spinner')).toBeNull();
     expect(trigger().textContent?.trim()).toBe('Ombrellone');
   });
@@ -306,6 +308,6 @@ describe('FormWarehouseAddItemPopup', () => {
         .querySelector('.filled__number__field__error')
         ?.textContent?.trim(),
     ).toBe('error.unknown');
-    expect(popup()!.querySelector('[role="alert"]')).toBeNull();
+    expect(popup()!.querySelector('.form__warehouse__add__item__popup__error')).toBeNull();
   });
 });

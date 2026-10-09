@@ -13,7 +13,7 @@ import { BasePopup } from './base-popup';
 })
 class TestPopup extends BasePopup {
   protected dialogConfig(): MatDialogConfig {
-    return { panelClass: 'test__popup__panel', ariaLabel: 'Popup di prova' };
+    return { panelClass: 'test__popup__panel', width: '20rem' };
   }
 }
 
@@ -51,9 +51,7 @@ describe('BasePopup', () => {
     await fixture.whenStable();
 
     expect(panel()?.querySelector('.test__popup__text')?.textContent).toBe('Testo');
-    expect(document.querySelector('mat-dialog-container')?.getAttribute('aria-label')).toBe(
-      'Popup di prova',
-    );
+    expect(panel()?.getAttribute('style')).toContain('width: 20rem');
   });
 
   it('should be closed at once by close(), and open again right away', async () => {

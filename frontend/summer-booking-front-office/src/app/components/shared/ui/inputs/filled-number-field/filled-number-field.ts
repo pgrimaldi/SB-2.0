@@ -20,11 +20,6 @@ let nextId = 0;
 
 const CURRENCY_DECIMALS = 2;
 
-export interface FilledNumberFieldTexts {
-  /** Name of the eye of a masked field, e.g. "Mostra il contenuto". */
-  show?: string;
-}
-
 /**
  * Only digits 0-9 can be typed (no signs, no exponent); with `isDecimal` also one separator, comma or
  * dot.
@@ -38,14 +33,12 @@ export interface FilledNumberFieldTexts {
 })
 export class FilledNumberField {
   readonly label = input<string>();
-  /** Asterisk after the label; screen readers announce the field as required. */
+  /** Asterisk after the label. */
   readonly isMandatory = input(false);
   /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
   readonly readonly = input(false);
   readonly disabled = input(false);
   readonly value = model<number | null>(null);
-  /** Ids of the page elements that name the field, when its label is not above it. */
-  readonly labelledBy = input<string>();
   readonly name = input<string>();
   /** Browser autofill hint; `off` when not given. */
   readonly autocomplete = input<string>();
@@ -58,12 +51,11 @@ export class FilledNumberField {
   /** Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly error = input<string | null>();
-  readonly texts = input<FilledNumberFieldTexts | null>();
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */
   readonly touch = output<void>();
 
   /**
-   * Material sets `aria-invalid` itself from its error state, which it updates only with a classic
+   * Material colours the field as wrong from its error state, which it updates only with a classic
    * form control: it follows our `error` instead.
    */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };

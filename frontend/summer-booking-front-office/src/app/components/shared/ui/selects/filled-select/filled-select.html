@@ -1,8 +1,8 @@
 @if (label()) {
-  <label class="filled__select__label" [id]="id + '-label'"
+  <label class="filled__select__label"
     >{{ label() }}
     @if (isMandatory()) {
-      <span class="filled__select__mandatory" aria-hidden="true">*</span>
+      <span class="filled__select__mandatory">*</span>
     }
   </label>
 }
@@ -17,8 +17,6 @@
     panelClass="select__panel"
     hideSingleSelectionIndicator
     [required]="isMandatory()"
-    [aria-labelledby]="labelledBy() ?? id + '-label'"
-    [aria-describedby]="error() ? id + '-error' : ''"
     [errorStateMatcher]="errorMatcher"
     [placeholder]="placeholder() ?? ''"
     [disabled]="disabled() || readonly()"
@@ -32,5 +30,5 @@
   </mat-select>
 </mat-form-field>
 @if (error(); as error) {
-  <p class="filled__select__error" [id]="id + '-error'">{{ error }}</p>
+  <p class="filled__select__error">{{ error }}</p>
 }

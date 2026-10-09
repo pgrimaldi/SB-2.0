@@ -8,7 +8,7 @@
     <mat-panel-title class="expansion__panel__title">
       @if (icons().list[0]; as icon) {
         @if (icons().material) {
-          <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          <mat-icon>{{ icon }}</mat-icon>
         } @else {
           <img [src]="icon" width="20" height="20" alt="" />
         }
@@ -16,7 +16,7 @@
       {{ title() }}
     </mat-panel-title>
     @if (icons().list[1]; as icon) {
-      <span class="expansion__panel__arrow" aria-hidden="true">
+      <span class="expansion__panel__arrow">
         @if (icons().material) {
           <mat-icon>{{ icon }}</mat-icon>
         } @else {

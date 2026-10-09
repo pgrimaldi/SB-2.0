@@ -1,6 +1,5 @@
 {
   "language": {
-    "selector": "اختر اللغة",
     "names": {
       "it": "Italiano",
       "en": "English",
@@ -26,12 +25,6 @@
     "comparison_range": "نطاق المقارنة",
     "year_range": "من {{start}} إلى {{end}}"
   },
-  "carousel": {
-    "previous": "السابق",
-    "next": "التالي",
-    "position": "انتقل إلى الموضع {{position}}",
-    "slide": "{{index}} من {{total}}"
-  },
   "table": {
     "empty": "لا توجد عناصر في الجدول",
     "paginator": {
@@ -43,12 +36,7 @@
       "range": "{{start}} – {{end}} من {{total}}"
     },
     "search": {
-      "placeholder": "ابحث في الجدول",
-      "submit": "بحث",
-      "clear": "مسح البحث"
-    },
-    "sort": {
-      "action": "ترتيب حسب {{column}}"
+      "placeholder": "ابحث في الجدول"
     },
     "load_error": {
       "title": "خطأ",
@@ -63,8 +51,6 @@
       "edit": "تعديل"
     },
     "selection": {
-      "all": "تحديد كل صفوف الصفحة",
-      "row": "تحديد الصف",
       "duplicate": "نسخ المحدد",
       "delete": "حذف المحدد",
       "clear": "إلغاء التحديد"
@@ -103,43 +89,20 @@
   "alert": {
     "close": "فهمت"
   },
-  "field": {
-    "password": {
-      "show": "إظهار كلمة المرور"
-    },
-    "search": {
-      "submit": "بحث",
-      "clear": "مسح البحث"
-    },
-    "masked": {
-      "show": "إظهار المحتوى"
-    }
-  },
   "hub": {
     "header": {
       "logo": {
         "alt": "Summer Booking Hub"
       },
       "nav": {
-        "label": "القائمة الرئيسية",
         "advantages": "المزايا",
         "features": "الميزات",
         "booking": "Booking",
         "pricing": "الأسعار"
       },
-      "login": "دخول",
-      "menu": {
-        "open": "فتح القائمة",
-        "close": "إغلاق القائمة"
-      }
+      "login": "دخول"
     },
     "footer": {
-      "social": {
-        "instagram": "Instagram",
-        "facebook": "Facebook",
-        "email": "البريد الإلكتروني",
-        "youtube": "YouTube"
-      },
       "links": {
         "about": "من نحن",
         "support": "دعم العملاء",
@@ -157,7 +120,6 @@
     },
     "login": {
       "title": "تسجيل الدخول",
-      "close": "إغلاق",
       "email": "البريد الإلكتروني",
       "password": "كلمة المرور",
       "remember": "تذكّرني",
@@ -175,24 +137,11 @@
       "logo": {
         "alt": "Summer Booking Hub"
       },
-      "datepicker": {
-        "start": {
-          "label": "تاريخ البداية",
-          "previous": "اليوم السابق (تاريخ البداية)",
-          "next": "اليوم التالي (تاريخ البداية)"
-        },
-        "end": {
-          "label": "تاريخ النهاية",
-          "previous": "اليوم السابق (تاريخ النهاية)",
-          "next": "اليوم التالي (تاريخ النهاية)"
-        }
-      },
       "today": {
         "today": "اليوم",
         "other": "ليس اليوم"
       },
       "period": {
-        "label": "فترة اليوم",
         "full_day": "يوم كامل",
         "morning": "صباحًا",
         "afternoon": "بعد الظهر"
@@ -209,7 +158,6 @@
       }
     },
     "menu": {
-      "label": "قائمة الإدارة",
       "warehouse": "المخزن",
       "logout": "خروج"
     },
@@ -228,7 +176,6 @@
     },
     "settings": {
       "menu": {
-        "label": "الإعدادات",
         "property": "معلومات المنشأة",
         "users": "المستخدمون",
         "seasons": "المواسم والفترات",
@@ -251,7 +198,6 @@
         "form": {
           "title": "إضافة صنف",
           "edit_title": "تعديل صنف",
-          "close": "إغلاق",
           "name": "الصنف",
           "choose": "اختر",
           "quantity": "أدخل الكمية",
@@ -377,7 +323,6 @@
         "printer": {
           "title": "الطابعة",
           "added": "الطابعات المضافة",
-          "enabled": "الطابعة {{name}} مفعّلة",
           "delete": "حذف الطابعة {{name}}",
           "add": "إضافة طابعة"
         },
@@ -459,7 +404,6 @@
     },
     "about_us": {
       "title": "ماذا يقولون عنا",
-      "carousel": "آراء العملاء",
       "reviews": {
         "anna": {
           "author": "Anna, Bagno Alba",
@@ -485,7 +429,6 @@
     },
     "media": {
       "title": "تحدثوا عنا",
-      "carousel": "وسائل إعلام تحدثت عنا",
       "logo": "شعار {{name}}"
     }
   },

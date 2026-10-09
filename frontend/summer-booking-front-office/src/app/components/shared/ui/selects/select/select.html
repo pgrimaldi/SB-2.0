@@ -2,7 +2,6 @@
   class="select__control"
   panelClass="select__panel"
   hideSingleSelectionIndicator
-  [aria-label]="accessibleLabel() ?? ''"
   [value]="selected()"
   (valueChange)="selected.set($event)"
 >

@@ -10,8 +10,6 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { Button, ButtonAppearance } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
 
-let nextId = 0;
-
 export interface ConfirmPopupTexts {
   cancel?: string;
   confirm?: string;
@@ -41,7 +39,6 @@ export class ConfirmPopup extends BasePopup {
   readonly confirmed = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
 
-  protected readonly id = `confirm-popup-${nextId++}`;
 
   constructor() {
     super();
@@ -50,9 +47,6 @@ export class ConfirmPopup extends BasePopup {
 
   protected dialogConfig(): MatDialogConfig {
     return {
-      role: 'alertdialog',
-      ariaLabelledBy: `${this.id}-title`,
-      ariaDescribedBy: `${this.id}-text`,
       width: 'min(28rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'confirm__popup__panel',

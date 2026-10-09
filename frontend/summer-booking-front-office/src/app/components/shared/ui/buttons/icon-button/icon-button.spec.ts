@@ -23,20 +23,18 @@ import { IconButton } from './icon-button';
 class IconButtonHost {}
 
 describe('IconButton', () => {
-  it('should show the Material icon, else the image, else the text, named by its label', async () => {
+  it('should show the Material icon, else the image, else the text', async () => {
     const fixture = TestBed.createComponent(IconButtonHost);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
     const button = (name: string) => element.querySelector(`.${name} button`)!;
 
-    expect(button('path').getAttribute('aria-label')).toBe('Impostazioni');
     expect(button('path').querySelector('img')?.getAttribute('src')).toBe(
       '/assets/images/settings.svg',
     );
     expect(button('material').querySelector('mat-icon')?.textContent?.trim()).toBe('notifications');
     expect(button('both').querySelector('mat-icon')?.textContent?.trim()).toBe('settings'); // matIcon wins
     expect(button('both').querySelector('img')).toBeNull();
-    expect(button('text').getAttribute('aria-label')).toBe('Account');
     expect(button('text').textContent?.trim()).toBe('S');
     expect(button('text').querySelector('img, mat-icon')).toBeNull();
   });

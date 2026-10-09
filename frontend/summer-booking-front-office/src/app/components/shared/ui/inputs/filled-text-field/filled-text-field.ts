@@ -17,11 +17,6 @@ import { resolveIcons } from '../../icons/icons';
 
 let nextId = 0;
 
-export interface FilledTextFieldTexts {
-  /** Name of the eye of a password field, e.g. "Mostra il contenuto". */
-  show?: string;
-}
-
 @Component({
   selector: 'app-filled-text-field',
   imports: [MatFormFieldModule, MatIconModule, MatInputModule],
@@ -31,7 +26,7 @@ export interface FilledTextFieldTexts {
 })
 export class FilledTextField {
   readonly label = input<string>();
-  /** Asterisk after the label; screen readers announce the field as required. */
+  /** Asterisk after the label. */
   readonly isMandatory = input(false);
   /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
   readonly readonly = input(false);
@@ -42,14 +37,11 @@ export class FilledTextField {
   readonly isPasswordField = input(false);
   /** Telephone keyboard and left-to-right content, also in a right-to-left page. */
   readonly isPhoneField = input(false);
-  /** Ids of the page elements that name the field, when its label is not above it. */
-  readonly labelledBy = input<string>();
   readonly name = input<string>();
   readonly placeholder = input<string>();
   /** Browser autofill hint, e.g. `given-name`, `email`, `tel`. */
   readonly autocomplete = input<string>();
   readonly error = input<string | null>();
-  readonly texts = input<FilledTextFieldTexts | null>();
   /** With `isPasswordField`, the eye after the text: [content shown, content hidden]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Image paths, used when `matIcon` is not given: [content shown, content hidden]. */
@@ -58,7 +50,7 @@ export class FilledTextField {
   readonly touch = output<void>();
 
   /**
-   * Material sets `aria-invalid` itself from its error state, which it updates only with a classic
+   * Material colours the field as wrong from its error state, which it updates only with a classic
    * form control: it follows our `error` instead.
    */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };

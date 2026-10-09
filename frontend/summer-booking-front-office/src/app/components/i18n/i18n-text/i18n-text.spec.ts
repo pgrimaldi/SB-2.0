@@ -36,9 +36,6 @@ describe('I18nText', () => {
       'Vision, Sichtbarkeit, Kontrolle.',
     ]);
     expect(reserved().every((element) => element.textContent === '')).toBe(true);
-    expect(reserved().every((element) => element.getAttribute('aria-hidden') === 'true')).toBe(
-      true,
-    );
 
     translate.use('fr');
     await fixture.whenStable();

@@ -1,7 +1,7 @@
 <mat-card class="card" appearance="raised">
   @if (icons().list[0]; as icon) {
     @if (icons().material) {
-      <mat-icon class="card__icon" aria-hidden="true">{{ icon }}</mat-icon>
+      <mat-icon class="card__icon">{{ icon }}</mat-icon>
     } @else {
       <img class="card__icon" [src]="icon" width="64" height="64" loading="lazy" alt="" />
     }

@@ -115,7 +115,7 @@
     }
 
     // Phone: without the "items per page" label the selector fits on the line of the arrows, away
-    // from the rows. The select stays named by the label (hidden, still read by screen readers).
+    // from the rows.
     ::ng-deep .mat-mdc-paginator-page-size-label {
       display: none;
     }

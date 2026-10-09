@@ -39,7 +39,7 @@ describe('DeleteWarehouseItemsPopup', () => {
     prepare?.(fixture.componentInstance);
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
-    const dialog = () => document.querySelector<HTMLElement>('[role="alertdialog"]');
+    const dialog = () => document.querySelector<HTMLElement>('mat-dialog-container');
     const confirm = async () => {
       dialog()!.querySelectorAll<HTMLButtonElement>('app-button button')[1].click();
       await fixture.whenStable();
@@ -102,6 +102,8 @@ describe('DeleteWarehouseItemsPopup', () => {
     expect(host.open()).toBe(true);
     expect(host.deleted).toEqual([]);
     // The message of the code (here the fallback key: the test has no translations).
-    expect(dialog()!.querySelector('[role="alert"]')?.textContent?.trim()).toBe('error.unknown');
+    expect(dialog()!.querySelector('.confirm__popup__error')?.textContent?.trim()).toBe(
+      'error.unknown',
+    );
   });
 });

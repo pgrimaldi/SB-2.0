@@ -1,6 +1,5 @@
 {
   "language": {
-    "selector": "Sprache auswählen",
     "names": {
       "it": "Italiano",
       "en": "English",
@@ -26,12 +25,6 @@
     "comparison_range": "Vergleichszeitraum",
     "year_range": "Von {{start}} bis {{end}}"
   },
-  "carousel": {
-    "previous": "Zurück",
-    "next": "Weiter",
-    "position": "Zu Position {{position}} wechseln",
-    "slide": "{{index}} von {{total}}"
-  },
   "table": {
     "empty": "Die Tabelle enthält keine Einträge",
     "paginator": {
@@ -43,12 +36,7 @@
       "range": "{{start}} – {{end}} von {{total}}"
     },
     "search": {
-      "placeholder": "In der Tabelle suchen",
-      "submit": "Suchen",
-      "clear": "Suche löschen"
-    },
-    "sort": {
-      "action": "Nach {{column}} sortieren"
+      "placeholder": "In der Tabelle suchen"
     },
     "load_error": {
       "title": "Fehler",
@@ -63,8 +51,6 @@
       "edit": "Bearbeiten"
     },
     "selection": {
-      "all": "Alle Zeilen der Seite auswählen",
-      "row": "Zeile auswählen",
       "duplicate": "Auswahl duplizieren",
       "delete": "Auswahl löschen",
       "clear": "Auswahl aufheben"
@@ -103,43 +89,20 @@
   "alert": {
     "close": "Verstanden"
   },
-  "field": {
-    "password": {
-      "show": "Passwort anzeigen"
-    },
-    "search": {
-      "submit": "Suchen",
-      "clear": "Suche löschen"
-    },
-    "masked": {
-      "show": "Inhalt anzeigen"
-    }
-  },
   "hub": {
     "header": {
       "logo": {
         "alt": "Summer Booking Hub"
       },
       "nav": {
-        "label": "Hauptmenü",
         "advantages": "Vorteile",
         "features": "Funktionen",
         "booking": "Booking",
         "pricing": "Preise"
       },
-      "login": "Anmelden",
-      "menu": {
-        "open": "Menü öffnen",
-        "close": "Menü schließen"
-      }
+      "login": "Anmelden"
     },
     "footer": {
-      "social": {
-        "instagram": "Instagram",
-        "facebook": "Facebook",
-        "email": "E-Mail",
-        "youtube": "YouTube"
-      },
       "links": {
         "about": "Über uns",
         "support": "Kundensupport",
@@ -157,7 +120,6 @@
     },
     "login": {
       "title": "Anmelden",
-      "close": "Schließen",
       "email": "E-Mail",
       "password": "Passwort",
       "remember": "Angemeldet bleiben",
@@ -175,24 +137,11 @@
       "logo": {
         "alt": "Summer Booking Hub"
       },
-      "datepicker": {
-        "start": {
-          "label": "Startdatum",
-          "previous": "Vorheriger Tag (Startdatum)",
-          "next": "Nächster Tag (Startdatum)"
-        },
-        "end": {
-          "label": "Enddatum",
-          "previous": "Vorheriger Tag (Enddatum)",
-          "next": "Nächster Tag (Enddatum)"
-        }
-      },
       "today": {
         "today": "Heute",
         "other": "Nicht heute"
       },
       "period": {
-        "label": "Tageszeit",
         "full_day": "Ganzer Tag",
         "morning": "Vormittag",
         "afternoon": "Nachmittag"
@@ -209,7 +158,6 @@
       }
     },
     "menu": {
-      "label": "Verwaltungsmenü",
       "warehouse": "Lager",
       "logout": "Abmelden"
     },
@@ -228,7 +176,6 @@
     },
     "settings": {
       "menu": {
-        "label": "Einstellungen",
         "property": "Informationen zum Betrieb",
         "users": "Benutzerverwaltung",
         "seasons": "Saisons und Zeiträume",
@@ -251,7 +198,6 @@
         "form": {
           "title": "Artikel hinzufügen",
           "edit_title": "Artikel bearbeiten",
-          "close": "Schließen",
           "name": "Artikel",
           "choose": "Auswählen",
           "quantity": "Menge eingeben",
@@ -377,7 +323,6 @@
         "printer": {
           "title": "Drucker",
           "added": "Hinzugefügte Drucker",
-          "enabled": "Drucker {{name}} aktiv",
           "delete": "Drucker {{name}} löschen",
           "add": "Drucker hinzufügen"
         },
@@ -459,7 +404,6 @@
     },
     "about_us": {
       "title": "Was man über uns sagt",
-      "carousel": "Kundenbewertungen",
       "reviews": {
         "anna": {
           "author": "Anna, Bagno Alba",
@@ -485,7 +429,6 @@
     },
     "media": {
       "title": "Presse über uns",
-      "carousel": "Medien, die über uns berichten",
       "logo": "Logo von {{name}}"
     }
   },

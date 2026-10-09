@@ -1,10 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-/**
- * A request is running. In the colour of the text around it; hidden from screen readers: the element
- * that waits says it with `aria-busy`.
- */
+/** A request is running. In the colour of the text around it. */
 @Component({
   selector: 'app-spinner',
   imports: [MatProgressSpinnerModule],

@@ -22,7 +22,7 @@ let nextId = 0;
 })
 export class FilledTextarea {
   readonly label = input<string>();
-  /** Asterisk after the label; screen readers announce the field as required. */
+  /** Asterisk after the label. */
   readonly isMandatory = input(false);
   /** Shown but not editable; a Signal Forms `[formField]` sets it from the `readonly` rule. */
   readonly readonly = input(false);
@@ -37,7 +37,7 @@ export class FilledTextarea {
   readonly touch = output<void>();
 
   /**
-   * Material sets `aria-invalid` itself from its error state, which it updates only with a classic
+   * Material colours the field as wrong from its error state, which it updates only with a classic
    * form control: it follows our `error` instead.
    */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };

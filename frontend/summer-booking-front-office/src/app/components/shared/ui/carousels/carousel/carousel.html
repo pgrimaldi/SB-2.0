@@ -1,8 +1,5 @@
 <div
   class="carousel"
-  role="region"
-  aria-roledescription="carousel"
-  [attr.aria-label]="accessibleLabel() ?? null"
 >
   <div
     #viewport
@@ -17,17 +14,11 @@
       @for (slide of slides(); track $index) {
         <li
           class="carousel__slide"
-          [attr.aria-hidden]="isVisible($index) ? null : 'true'"
           [attr.inert]="isVisible($index) ? null : ''"
         >
           <!-- The slide role lives on the inner element: a role on the <li> would break the list. -->
           <div
             class="carousel__slide__content"
-            role="group"
-            aria-roledescription="slide"
-            [attr.aria-label]="
-              texts()?.slide | formatText: { index: $index + 1, total: slides().length }
-            "
           >
             <ng-container [ngTemplateOutlet]="slide" />
           </div>
@@ -39,12 +30,11 @@
       <button
         class="carousel__arrow carousel__arrow__previous"
         type="button"
-        [attr.aria-label]="texts()?.previous ?? null"
         (click)="previous()"
       >
         @if (icons().list[0]; as icon) {
           @if (icons().material) {
-            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+            <mat-icon>{{ icon }}</mat-icon>
           } @else {
             <img [src]="icon" width="12" height="16" alt="" />
           }
@@ -55,12 +45,11 @@
       <button
         class="carousel__arrow carousel__arrow__next"
         type="button"
-        [attr.aria-label]="texts()?.next ?? null"
         (click)="next()"
       >
         @if (icons().list[1]; as icon) {
           @if (icons().material) {
-            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+            <mat-icon>{{ icon }}</mat-icon>
           } @else {
             <img [src]="icon" width="12" height="16" alt="" />
           }
@@ -76,8 +65,6 @@
           class="carousel__dot"
           type="button"
           [class.carousel__dot__active]="position === index()"
-          [attr.aria-current]="position === index() ? 'true' : null"
-          [attr.aria-label]="texts()?.position | formatText: { position: position + 1 }"
           (click)="goTo(position)"
         ></button>
       }

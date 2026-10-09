@@ -1,7 +1,7 @@
 <label class="filled__textarea__label" [for]="id"
   >{{ label() }}
   @if (isMandatory()) {
-    <span class="filled__textarea__mandatory" aria-hidden="true">*</span>
+    <span class="filled__textarea__mandatory">*</span>
   }
 </label>
 <mat-form-field
@@ -24,11 +24,10 @@
     [attr.maxlength]="maxLength() ?? null"
     [name]="name() ?? ''"
     [errorStateMatcher]="errorMatcher"
-    [attr.aria-describedby]="error() ? id + '-error' : null"
     (input)="value.set(field.value || null)"
     (blur)="touch.emit()"
   ></textarea>
 </mat-form-field>
 @if (error(); as error) {
-  <p class="filled__textarea__error" [id]="id + '-error'">{{ error }}</p>
+  <p class="filled__textarea__error">{{ error }}</p>
 }

@@ -9,8 +9,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectionCheckbox {
-  /** Accessible name only: there is no visible label. */
-  readonly label = input<string>();
   readonly isIndeterminate = input(false);
   readonly checked = model(false);
 }

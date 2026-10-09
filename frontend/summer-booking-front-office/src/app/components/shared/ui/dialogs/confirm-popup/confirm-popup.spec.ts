@@ -32,7 +32,7 @@ describe('ConfirmPopup', () => {
     const fixture = TestBed.createComponent(ConfirmPopupHost);
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
-    const dialog = () => document.querySelector<HTMLElement>('[role="alertdialog"]');
+    const dialog = () => document.querySelector<HTMLElement>('mat-dialog-container');
     const buttons = () => [...dialog()!.querySelectorAll<HTMLButtonElement>('app-button button')];
     const escape = async () => {
       document.body.dispatchEvent(
@@ -82,7 +82,7 @@ describe('ConfirmPopup', () => {
     host.loading.set(false);
     host.error.set('Alcuni dati non sono validi. Controlla e riprova.');
     await fixture.whenStable();
-    expect(dialog()!.querySelector('[role="alert"]')?.textContent?.trim()).toBe(
+    expect(dialog()!.querySelector('.confirm__popup__error')?.textContent?.trim()).toBe(
       'Alcuni dati non sono validi. Controlla e riprova.',
     );
     await escape();

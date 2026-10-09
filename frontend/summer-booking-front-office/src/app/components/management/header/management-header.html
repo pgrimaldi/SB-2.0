@@ -14,7 +14,6 @@
         '/assets/images/arrow-left.svg',
         '/assets/images/arrow-right.svg',
       ]"
-      [texts]="'management.header.datepicker' | translate"
       [(start)]="filters.startDate"
       [(end)]="filters.endDate"
     />
@@ -36,7 +35,6 @@
     </button>
 
     <app-select
-      [accessibleLabel]="'management.header.period.label' | translate"
       [options]="periods()"
       [(selected)]="filters.period"
     />
@@ -44,7 +42,6 @@
     <!-- Not wired for now: typing does not filter anything. -->
     <app-search-field
       [placeholder]="'management.header.search.placeholder' | translate"
-      [texts]="'field.search' | translate"
       [pathIcon]="['/assets/images/search.svg', '/assets/images/clear.svg']"
     />
   </div>

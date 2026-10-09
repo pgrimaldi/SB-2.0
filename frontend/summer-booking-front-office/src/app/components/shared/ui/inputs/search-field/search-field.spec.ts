@@ -4,11 +4,7 @@ import { SearchField } from './search-field';
 
 @Component({
   imports: [SearchField],
-  template: `<app-search-field
-    placeholder="Cerca per nome"
-    [texts]="{ submit: 'Cerca', clear: 'Svuota' }"
-    (searched)="searches.push($event)"
-  />`,
+  template: `<app-search-field placeholder="Cerca per nome" (searched)="searches.push($event)" />`,
 })
 class SearchFieldHost {
   readonly searches: string[] = [];
@@ -64,20 +60,17 @@ describe('SearchField', () => {
       element.querySelector('.search__field__button img, .search__field__button mat-icon'),
     ).toBeNull();
 
-    expect(button().getAttribute('aria-label')).toBe('Cerca'); // empty: magnifier
     type('om');
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     vi.advanceTimersByTime(100);
     expect(searches).toEqual([]); // Enter starts no search
 
     type('lettino');
-    expect(button().getAttribute('aria-label')).toBe('Svuota');
 
     button().click();
     fixture.detectChanges();
     expect(input.value).toBe('');
     expect(document.activeElement).toBe(input);
-    expect(button().getAttribute('aria-label')).toBe('Cerca');
 
     button().click(); // the magnifier does nothing
     vi.advanceTimersByTime(500);

@@ -1,6 +1,6 @@
 <main class="contact__support">
-  <section class="contact__support__panel" aria-labelledby="contact-support-help">
-    <h1 class="contact__support__title" id="contact-support-help">
+  <section class="contact__support__panel">
+    <h1 class="contact__support__title">
       {{ 'management.settings.contact_support.help.title' | translate }}
     </h1>
     @let info = supportInfo();
@@ -38,16 +38,15 @@
       </li>
     </ul>
     @if (supportInfoErrorMessage(); as supportInfoErrorMessage) {
-      <p class="contact__support__error contact__support__info__error" role="alert">
+      <p class="contact__support__error contact__support__info__error">
         {{ supportInfoErrorMessage }}
       </p>
     }
   </section>
 
-  <section class="contact__support__panel" aria-labelledby="contact-support-form">
+  <section class="contact__support__panel">
     <h2
       class="contact__support__title contact__support__title__underlined"
-      id="contact-support-form"
     >
       {{ 'management.settings.contact_support.form.title' | translate }}
     </h2>
@@ -92,7 +91,7 @@
       />
 
       @if (errorMessage(); as errorMessage) {
-        <p class="contact__support__error" role="alert">{{ errorMessage }}</p>
+        <p class="contact__support__error">{{ errorMessage }}</p>
       }
       <div class="contact__support__send">
         <app-button

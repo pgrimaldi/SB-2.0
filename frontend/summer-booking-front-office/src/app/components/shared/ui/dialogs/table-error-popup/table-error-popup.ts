@@ -9,8 +9,6 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { Button, ButtonAppearance } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
 
-let nextId = 0;
-
 export interface TableErrorPopupTexts {
   close?: string;
   retry?: string;
@@ -35,7 +33,6 @@ export class TableErrorPopup extends BasePopup {
   readonly retry = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
 
-  protected readonly id = `table-error-popup-${nextId++}`;
 
   protected retryLoad(): void {
     this.close();
@@ -44,9 +41,6 @@ export class TableErrorPopup extends BasePopup {
 
   protected dialogConfig(): MatDialogConfig {
     return {
-      role: 'alertdialog',
-      ariaLabelledBy: `${this.id}-title`,
-      ariaDescribedBy: `${this.id}-text`,
       width: 'min(28rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'table__error__popup__panel',

@@ -16,24 +16,12 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { resolveIcons } from '../../icons/icons';
 
-export interface DatepickerDateTexts {
-  label?: string;
-  previous?: string;
-  next?: string;
-}
-
-export interface DatepickerTexts {
-  start?: DatepickerDateTexts;
-  end?: DatepickerDateTexts;
-}
-
 /**
  * Dates are written by the app's date adapter, whose locale and formats the app sets (e.g.
  * `provideNativeDateAdapter`). The arrow icons are the same for both dates.
  */
 @Component({
   selector: 'app-datepicker',
-  // The module provides its own MatDatepickerIntl, hiding the app's global translations.
   imports: [MatDatepicker, MatDatepickerInput, MatIconModule],
   templateUrl: './datepicker.html',
   styleUrl: './datepicker.scss',
@@ -44,7 +32,6 @@ export interface DatepickerTexts {
 export class Datepicker {
   readonly start = model.required<Date>();
   readonly end = model.required<Date>();
-  readonly texts = input<DatepickerTexts | null>();
   /** Icons as Material icon names (Material Symbols font): [calendar, previous day, next day]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [calendar, previous day, next day]. */

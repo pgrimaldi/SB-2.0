@@ -5,7 +5,7 @@ import { Select, SelectOption } from './select';
 
 @Component({
   imports: [Select],
-  template: `<app-select accessibleLabel="Periodo" [options]="options" [(selected)]="selected" />`,
+  template: `<app-select [options]="options" [(selected)]="selected" />`,
 })
 class SelectHost {
   readonly options: SelectOption<'a' | 'b'>[] = [
@@ -25,7 +25,6 @@ describe('Select', () => {
     const element: HTMLElement = fixture.nativeElement;
 
     expect(element.querySelector('.mat-mdc-select-value')?.textContent?.trim()).toBe('Prima');
-    expect(element.querySelector('mat-select')?.getAttribute('aria-label')).toBe('Periodo');
 
     element.querySelector<HTMLElement>('.mat-mdc-select-trigger')!.click();
     await fixture.whenStable();

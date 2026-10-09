@@ -4,11 +4,9 @@
   [name]="name() ?? null"
   [checked]="checked()"
   [disabled]="disabled()"
-  [aria-label]="accessibleLabel() ?? null"
-  [aria-describedby]="error() ? id + '-error' : ''"
   (change)="checked.set($event.checked)"
   ><ng-content
 /></mat-slide-toggle>
 @if (error(); as error) {
-  <p class="toggle__error" [id]="id + '-error'">{{ error }}</p>
+  <p class="toggle__error">{{ error }}</p>
 }

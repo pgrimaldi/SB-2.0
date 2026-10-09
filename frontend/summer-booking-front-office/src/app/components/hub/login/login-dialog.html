@@ -3,14 +3,13 @@
     <button
       class="login__dialog__close"
       type="button"
-      [attr.aria-label]="'hub.login.close' | translate"
       (click)="close()"
     >
       <!-- Heroicons (MIT): x-mark. -->
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12" /></svg>
+      <svg viewBox="0 0 24 24"><path d="M6 18 18 6M6 6l12 12" /></svg>
     </button>
 
-    <h2 id="login-dialog-title" class="login__dialog__title" appI18nText="hub.login.title"></h2>
+    <h2 class="login__dialog__title" appI18nText="hub.login.title"></h2>
 
     <form class="login__dialog__form" (submit)="signIn($event)">
       <app-text-field
@@ -26,7 +25,6 @@
         autocomplete="current-password"
         [pathIcon]="['/assets/images/eye.svg', '/assets/images/eye-slash.svg']"
         [label]="'hub.login.password' | translate"
-        [texts]="'field.password' | translate"
         [formField]="credentialsForm.password"
         [error]="passwordError()"
       />
@@ -41,7 +39,6 @@
       @if (errorKey(); as errorKey) {
         <p
           class="login__dialog__error"
-          role="alert"
           [appI18nText]="errorKey"
           [params]="error()?.args"
         ></p>

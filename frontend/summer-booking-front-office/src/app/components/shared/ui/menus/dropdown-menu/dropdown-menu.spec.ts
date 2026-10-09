@@ -6,12 +6,7 @@ import { DropdownMenu } from './dropdown-menu';
 @Component({
   imports: [DropdownMenu],
   template: `
-    <app-dropdown-menu
-      accessibleLabel="Lingua"
-      [items]="items"
-      [pathIcon]="['/it.svg', '/gb.svg']"
-      [(selected)]="selected"
-    >
+    <app-dropdown-menu [items]="items" [pathIcon]="['/it.svg', '/gb.svg']" [(selected)]="selected">
       Lingua
     </app-dropdown-menu>
   `,
@@ -35,7 +30,6 @@ describe('DropdownMenu', () => {
     fixture.nativeElement.querySelector('.dropdown__menu__trigger').click();
     await fixture.whenStable();
     const options = [...document.querySelectorAll<HTMLButtonElement>('[mat-menu-item]')];
-    expect(options.map((option) => option.getAttribute('aria-current'))).toEqual(['true', null]);
     expect(options.map((option) => option.querySelector('img')?.getAttribute('src'))).toEqual([
       '/it.svg',
       '/gb.svg',

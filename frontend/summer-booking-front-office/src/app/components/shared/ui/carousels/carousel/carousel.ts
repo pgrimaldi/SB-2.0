@@ -15,26 +15,16 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { resolveIcons } from '../../icons/icons';
-import { FormatTextPipe } from '../../texts/format-text';
 import { CarouselSlide } from './carousel-slide';
 
 const SWIPE_THRESHOLD = 0.2;
 /** Pointer movement below this distance is still treated as a click. */
 const DRAG_START_DISTANCE = 5;
 
-export interface CarouselTexts {
-  previous?: string;
-  next?: string;
-  /** With `{{index}}` and `{{total}}`. */
-  slide?: string;
-  /** With `{{position}}`. */
-  position?: string;
-}
-
 /** Slides per view and the peek of the next slide are set in CSS (see carousel.scss). */
 @Component({
   selector: 'app-carousel',
-  imports: [FormatTextPipe, MatIconModule, NgTemplateOutlet],
+  imports: [MatIconModule, NgTemplateOutlet],
   templateUrl: './carousel.html',
   styleUrl: './carousel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,8 +34,6 @@ export interface CarouselTexts {
   },
 })
 export class Carousel implements OnDestroy {
-  readonly accessibleLabel = input<string>();
-  readonly texts = input<CarouselTexts | null>();
   /** Icons as Material icon names (Material Symbols font): [previous arrow, next arrow]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [previous arrow, next arrow]. */
@@ -110,7 +98,7 @@ export class Carousel implements OnDestroy {
     this.index.set(Math.min(Math.max(position, 0), this.maxIndex()));
   }
 
-  /** Only slides fully inside the viewport are exposed to assistive technologies and focus. */
+  /** Only slides fully inside the viewport can be clicked or reached with Tab (`inert` on the others). */
   protected isVisible(slide: number): boolean {
     const slideWidth = this.slideWidth();
     if (!slideWidth) {
