@@ -87,7 +87,8 @@
     }
   },
   "alert": {
-    "close": "J'ai compris"
+    "close": "J'ai compris",
+    "error_title": "L'opération a échoué"
   },
   "hub": {
     "header": {
@@ -323,7 +324,16 @@
         "printer": {
           "title": "Imprimante",
           "added": "Imprimantes ajoutées",
-          "delete": "Supprimer l'imprimante {{name}}",
+          "table": {
+            "name": "Nom",
+            "ip": "Adresse IP"
+          },
+          "delete": {
+            "title": "Supprimer l'imprimante",
+            "text": "Voulez-vous supprimer l'imprimante {{name}} ?",
+            "cancel": "Annuler",
+            "confirm": "Supprimer"
+          },
           "add": "Ajouter une imprimante"
         },
         "guide": "Télécharger le guide",

@@ -68,8 +68,8 @@ describe('DeleteWarehouseItemsPopup', () => {
     );
   });
 
-  it('should delete the ids, then close and tell the page which ones', async () => {
-    const { fixture, host, dialog, confirm, deleteWarehouseItems } = await setup((page) =>
+  it('should close at once, wait with the page spinner, then tell the page which ones', async () => {
+    const { fixture, host, confirm, deleteWarehouseItems } = await setup((page) =>
       page.idItems.set(['a1', 'a2']),
     );
     const answer = new Subject<void>();
@@ -77,17 +77,18 @@ describe('DeleteWarehouseItemsPopup', () => {
 
     await confirm();
     expect(deleteWarehouseItems).toHaveBeenCalledWith({ idProperty: 'p1', idItems: ['a1', 'a2'] });
-    expect(dialog()!.querySelector('mat-progress-spinner')).not.toBeNull();
+    expect(host.open()).toBe(false);
+    expect(document.querySelector('.page__spinner')).not.toBeNull();
 
     answer.next();
     answer.complete();
     await fixture.whenStable();
-    expect(host.open()).toBe(false);
+    expect(document.querySelector('.page__spinner')).toBeNull();
     expect(host.deleted).toEqual(['a1', 'a2']);
   });
 
-  it('should stay open with the error when nothing is deleted', async () => {
-    const { host, dialog, confirm, deleteWarehouseItems } = await setup();
+  it('should show the error in a popup when nothing is deleted', async () => {
+    const { host, confirm, deleteWarehouseItems } = await setup();
     deleteWarehouseItems.mockReturnValue(
       throwError(
         () =>
@@ -99,10 +100,11 @@ describe('DeleteWarehouseItemsPopup', () => {
     );
 
     await confirm();
-    expect(host.open()).toBe(true);
+    expect(host.open()).toBe(false);
     expect(host.deleted).toEqual([]);
+    expect(document.querySelector('.page__spinner')).toBeNull();
     // The message of the code (here the fallback key: the test has no translations).
-    expect(dialog()!.querySelector('.confirm__popup__error')?.textContent?.trim()).toBe(
+    expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(
       'error.unknown',
     );
   });

@@ -4,40 +4,40 @@
     [pathIcon]="printerPanelIcons"
     [(isExpanded)]="printersExpanded"
   >
-    @if (printers().length) {
+    @if (hasPrinters()) {
       <h3 class="taxation__subtitle">
         {{ 'management.settings.taxation.printer.added' | translate }}
       </h3>
-      <ul class="taxation__printers">
-        @for (printer of printers(); track printer.idPrinter) {
-          <li class="taxation__printer">
-            <p class="taxation__printer__name">{{ printer.printerName }}</p>
-            <p class="taxation__printer__ip">{{ printer.printerIP }}</p>
-            <app-toggle
-              class="taxation__printer__toggle"
-              [checked]="printer.isEnabled"
-            />
-            <app-icon-button
-              class="taxation__printer__delete"
-              [label]="
-                'management.settings.taxation.printer.delete'
-                  | translate: { name: printer.printerName }
-              "
-              [pathIcon]="deletePrinterIcon"
-            />
-          </li>
-        }
-      </ul>
     }
-    @if (printersErrorMessage(); as printersErrorMessage) {
-      <p class="taxation__error">{{ printersErrorMessage }}</p>
-    }
+    <app-table
+      #printersTable
+      class="taxation__printers"
+      [columns]="printerColumns()"
+      [params]="printerParams()"
+      [load]="loadPrinters"
+      idField="idPrinter"
+      [texts]="'table' | translate"
+      [areMassiveActionsHidden]="true"
+      [isCreateButtonHidden]="true"
+      [pageSize]="printersPerPage"
+      [pageSizeOptions]="[printersPerPage]"
+      [isPageSizeSelectorHidden]="true"
+      [rowActions]="printerActions()"
+      [rowToggle]="setPrinterEnabled"
+      (loadError)="printersLoadFailed.set(true)"
+    />
     <app-button [size]="ButtonSize.Small" [pathIcon]="addPrinterIcon">
       {{ 'management.settings.taxation.printer.add' | translate }}
     </app-button>
   </app-expansion-panel>
 
-  <app-button class="taxation__guide" [size]="ButtonSize.Small" [pathIcon]="downloadGuideIcon">
+  <app-button
+    class="taxation__guide"
+    [size]="ButtonSize.Small"
+    [pathIcon]="downloadGuideIcon"
+    [isLoading]="isGuideDownloading()"
+    (clicked)="downloadGuide()"
+  >
     {{ 'management.settings.taxation.guide' | translate }}
   </app-button>
 
@@ -64,3 +64,30 @@
     </div>
   </app-expansion-panel>
 </main>
+
+<app-confirm-popup
+  [title]="'management.settings.taxation.printer.delete.title' | translate"
+  [text]="
+    'management.settings.taxation.printer.delete.text'
+      | translate: { name: printerToDelete()?.printerName }
+  "
+  [texts]="'management.settings.taxation.printer.delete' | translate"
+  [danger]="true"
+  [(open)]="isDeletePrinterAsked"
+  (confirmed)="deletePrinter()"
+/>
+<app-table-error-popup
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="printersLoadFailed"
+  (retry)="printersTable.reload()"
+/>
+<app-page-spinner [isLoading]="isPrinterActionRunning()" />
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="actionErrorMessage() ?? ''"
+  [texts]="'alert' | translate"
+  [pathIcon]="actionErrorIcon"
+  [(open)]="isActionErrorShown"
+/>

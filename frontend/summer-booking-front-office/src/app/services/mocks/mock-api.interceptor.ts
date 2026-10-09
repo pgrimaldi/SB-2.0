@@ -8,7 +8,13 @@ import {
   sendTestEmailMock,
   supportInfoMock,
 } from './system/system.mock';
-import { electronicReceiptMock, printerListMock } from './taxation/taxation.mock';
+import {
+  deletePrinterMock,
+  downloadGuideElectronicReceiptMock,
+  electronicReceiptMock,
+  printerListMock,
+  setPrinterIsActiveMock,
+} from './taxation/taxation.mock';
 import {
   warehouseAddMock,
   warehouseComboboxMock,
@@ -118,6 +124,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt`
   ) {
     return electronicReceiptMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/taxation/set-is-active`
+  ) {
+    return setPrinterIsActiveMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/taxation/delete-printer`
+  ) {
+    return deletePrinterMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/taxation/download-guide-electronic-receipt`
+  ) {
+    return downloadGuideElectronicReceiptMock(request);
   }
 
   return next(request);

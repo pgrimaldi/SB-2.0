@@ -13,8 +13,14 @@
   "
   [texts]="'management.settings.warehouse.delete' | translate"
   [danger]="true"
-  [isLoading]="isLoading()"
-  [error]="errorMessage()"
   [(open)]="open"
   (confirmed)="deleteItems()"
+/>
+<app-page-spinner [isLoading]="isLoading()" />
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="errorMessage() ?? ''"
+  [texts]="'alert' | translate"
+  [pathIcon]="errorIcon"
+  [(open)]="isErrorShown"
 />

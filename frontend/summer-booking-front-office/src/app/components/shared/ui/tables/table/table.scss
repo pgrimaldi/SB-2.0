@@ -87,11 +87,16 @@
 }
 
 // Sizes in em follow the text of the rows, so they grow with it on large screens. The column is as
-// wide as its buttons (`--table-actions-count`: 1.75em each, 0.375em between them), never less than
-// its header ("Azioni", 4em), plus the side paddings each look gives in `--table-actions-padding`.
+// wide as its buttons (`--table-actions-count`: 1.75em each) and its switch (`--table-actions-toggle`:
+// 1.875rem, the switch keeps its size), 0.375em between them, never less than its header ("Azioni",
+// 4em), plus the side paddings each look gives in `--table-actions-padding`.
 .table__actions {
   width: calc(
-    max(var(--table-actions-count) * 1.75em + (var(--table-actions-count) - 1) * 0.375em, 4em) +
+    max(
+        var(--table-actions-count) * 1.75em + var(--table-actions-toggle) * 1.875rem +
+          (var(--table-actions-count) + var(--table-actions-toggle) - 1) * 0.375em,
+        4em
+      ) +
       var(--table-actions-padding, 0rem)
   );
   text-align: end;
@@ -104,6 +109,7 @@
 
 .table__actions__buttons {
   display: inline-flex;
+  align-items: center;
   vertical-align: middle;
   gap: 0.375em;
 }

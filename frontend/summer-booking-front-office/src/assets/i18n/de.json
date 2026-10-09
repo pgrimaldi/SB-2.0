@@ -87,7 +87,8 @@
     }
   },
   "alert": {
-    "close": "Verstanden"
+    "close": "Verstanden",
+    "error_title": "Vorgang fehlgeschlagen"
   },
   "hub": {
     "header": {
@@ -323,7 +324,16 @@
         "printer": {
           "title": "Drucker",
           "added": "Hinzugefügte Drucker",
-          "delete": "Drucker {{name}} löschen",
+          "table": {
+            "name": "Name",
+            "ip": "IP-Adresse"
+          },
+          "delete": {
+            "title": "Drucker löschen",
+            "text": "Möchten Sie den Drucker {{name}} löschen?",
+            "cancel": "Abbrechen",
+            "confirm": "Löschen"
+          },
           "add": "Drucker hinzufügen"
         },
         "guide": "Anleitung herunterladen",

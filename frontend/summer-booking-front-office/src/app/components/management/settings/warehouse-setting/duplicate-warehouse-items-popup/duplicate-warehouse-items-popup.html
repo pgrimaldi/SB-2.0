@@ -13,8 +13,14 @@
         | translate: { count: idItems().length })
   "
   [texts]="'management.settings.warehouse.duplicate' | translate"
-  [isLoading]="isLoading()"
-  [error]="errorMessage()"
   [(open)]="open"
   (confirmed)="duplicateItems()"
+/>
+<app-page-spinner [isLoading]="isLoading()" />
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="errorMessage() ?? ''"
+  [texts]="'alert' | translate"
+  [pathIcon]="errorIcon"
+  [(open)]="isErrorShown"
 />

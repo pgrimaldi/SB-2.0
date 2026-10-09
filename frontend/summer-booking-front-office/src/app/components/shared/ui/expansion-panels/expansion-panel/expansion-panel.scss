@@ -41,17 +41,25 @@
   gap: 0.75rem;
 }
 
+// The arrow turns, not its box: Material clips what goes out of the header content, and a turned box
+// would push half of the arrow out. The box is as wide as the image turned (14px).
 .expansion__panel__arrow {
   display: flex;
-  transition: transform 150ms ease;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.875rem;
+
+  > * {
+    transition: transform 150ms ease;
+  }
 }
 
 // Right to left (Arabic): closed, the arrow points left; open, down as in every language.
-:host-context([dir='rtl']) .expansion__panel:not(.mat-expanded) .expansion__panel__arrow {
+:host-context([dir='rtl']) .expansion__panel:not(.mat-expanded) .expansion__panel__arrow > * {
   transform: scaleX(-1);
 }
 
-.expansion__panel.mat-expanded .expansion__panel__arrow {
+.expansion__panel.mat-expanded .expansion__panel__arrow > * {
   transform: rotate(90deg);
 }
 

@@ -87,7 +87,8 @@
     }
   },
   "alert": {
-    "close": "知道了"
+    "close": "知道了",
+    "error_title": "操作失败"
   },
   "hub": {
     "header": {
@@ -323,7 +324,16 @@
         "printer": {
           "title": "打印机",
           "added": "已添加的打印机",
-          "delete": "删除打印机 {{name}}",
+          "table": {
+            "name": "名称",
+            "ip": "IP 地址"
+          },
+          "delete": {
+            "title": "删除打印机",
+            "text": "要删除打印机 {{name}} 吗？",
+            "cancel": "取消",
+            "confirm": "删除"
+          },
           "add": "添加打印机"
         },
         "guide": "下载指南",

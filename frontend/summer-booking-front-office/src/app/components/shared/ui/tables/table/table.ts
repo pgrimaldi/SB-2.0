@@ -33,6 +33,7 @@ import { DATA_RELOAD } from '../../data/data-reload';
 import { SelectionCheckbox } from '../../checkboxes/selection-checkbox/selection-checkbox';
 import { resolveIcons } from '../../icons/icons';
 import { SearchField } from '../../inputs/search-field/search-field';
+import { Toggle } from '../../toggles/toggle/toggle';
 import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
 import { TableTextAction } from './table-text-action';
@@ -86,6 +87,9 @@ export interface TableRowAction<T> {
   icon: string;
   action: (row: T) => void;
 }
+
+/** Called with the row and the state the user has just chosen. */
+export type TableRowToggle<T> = (row: T, isEnabled: boolean) => void;
 
 export interface TableSelectionTexts {
   duplicate?: string;
@@ -156,6 +160,7 @@ const SELECT_COLUMN = 'table__row__select';
     MatTooltipModule,
     SearchField,
     SelectionCheckbox,
+    Toggle,
   ],
   providers: [TablePaginatorIntl, { provide: MatPaginatorIntl, useExisting: TablePaginatorIntl }],
   templateUrl: './table.html',
@@ -169,6 +174,7 @@ const SELECT_COLUMN = 'table__row__select';
   host: {
     '[style.--table-page-size]': 'reservedRows()',
     '[style.--table-actions-count]': 'rowActions()?.length ?? 0',
+    '[style.--table-actions-toggle]': 'rowToggle() ? 1 : 0',
     '[class.table__theme__app]': 'useAppTheme()',
     '[class.table__theme__default]': '!useAppTheme()',
   },
@@ -183,6 +189,8 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Ids in the order they were chosen, kept across pages, searches and sorting. */
   readonly selection = model<readonly TableRowId[]>([]);
   readonly pageSizeOptions = input<readonly number[]>(TABLE_PAGE_SIZE_OPTIONS);
+  /** For a fixed number of rows per page: the paginator has no rows-per-page selector. */
+  readonly isPageSizeSelectorHidden = input(false);
   readonly texts = input<TableTexts | null>();
   readonly title = input<string>();
   readonly createLabel = input<string>();
@@ -191,6 +199,8 @@ export class Table<T, P extends object> implements OnDestroy {
   readonly isSearchable = input(false);
   /** Buttons of every row, in the last column; empty or `null`: no such column. */
   readonly rowActions = input<readonly TableRowAction<T>[] | null>([]);
+  /** Switch of every row, before its buttons: it shows the row's `isEnabled`; `null`: no switch. */
+  readonly rowToggle = input<TableRowToggle<T> | null>(null);
   /** Hides the row checkboxes and the buttons on the chosen rows (duplicate, delete). */
   readonly areMassiveActionsHidden = input(false);
   readonly isCreateButtonHidden = input(false);
@@ -312,7 +322,9 @@ export class Table<T, P extends object> implements OnDestroy {
     ...(this.hasRowActions() ? [ROW_ACTIONS_COLUMN] : []),
   ]);
   protected readonly rowActionsColumn = ROW_ACTIONS_COLUMN;
-  protected readonly hasRowActions = computed(() => (this.rowActions()?.length ?? 0) > 0);
+  protected readonly hasRowActions = computed(
+    () => (this.rowActions()?.length ?? 0) > 0 || !!this.rowToggle(),
+  );
   protected readonly selectColumn = SELECT_COLUMN;
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly headerWidths = computed(() => {
@@ -380,6 +392,10 @@ export class Table<T, P extends object> implements OnDestroy {
 
   protected idOf(row: T): TableRowId {
     return row[this.idField()] as TableRowId;
+  }
+
+  protected isEnabled(row: T): boolean {
+    return (row as { isEnabled?: unknown }).isEnabled === true;
   }
 
   protected selectAll(checked: boolean): void {

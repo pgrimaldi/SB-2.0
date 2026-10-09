@@ -13,5 +13,4 @@ export class Toggle {
   readonly checked = model(false);
   readonly disabled = input(false);
   readonly error = input<string | null>();
-
 }

@@ -1,0 +1,11 @@
+// Above the header and the menu of the app (z-index up to 100), below the popups of Material (1000).
+.page__spinner {
+  position: fixed;
+  z-index: 900;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color__white) 50%, transparent);
+  color: var(--color__main__theme__one);
+  cursor: progress;
+}

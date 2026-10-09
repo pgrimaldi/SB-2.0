@@ -994,3 +994,70 @@ class TableMassiveHost {
       rows: ALL.slice((request.page - 1) * request.pageSize, request.page * request.pageSize),
     });
 }
+
+interface SwitchRow {
+  idPrinter: string;
+  name: string;
+  isEnabled: boolean;
+}
+
+@Component({
+  imports: [Table],
+  template: `<app-table
+    [columns]="columns"
+    [params]="params"
+    [load]="load"
+    idField="idPrinter"
+    [texts]="{ actions: { header: 'Azioni' } }"
+    [isCreateButtonHidden]="true"
+    [areMassiveActionsHidden]="true"
+    [rowActions]="actions"
+    [rowToggle]="toggle"
+  />`,
+})
+class TableRowToggleHost {
+  readonly params = { day: '2026-09-30' };
+  readonly columns: TableColumn<SwitchRow>[] = [{ field: 'name', header: 'Nome' }];
+  readonly actions: readonly TableRowAction<SwitchRow>[] = [
+    { label: 'Elimina', icon: 'delete.svg', action: () => {} },
+  ];
+  readonly events: string[] = [];
+  readonly toggle = (row: SwitchRow, isEnabled: boolean) =>
+    this.events.push(`${row.idPrinter} ${isEnabled}`);
+  readonly load = () =>
+    of({
+      total: 2,
+      rows: [
+        { idPrinter: 'pr1', name: 'EPSON - 1', isEnabled: false },
+        { idPrinter: 'pr2', name: 'EPSON - 2', isEnabled: true },
+      ],
+    });
+}
+
+describe('Table row switch', () => {
+  it('should show the isEnabled of each row before its buttons and give the new state', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
+    });
+    const fixture = TestBed.createComponent(TableRowToggleHost);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    const cells = [...element.querySelectorAll('tbody td.table__actions')];
+    const switches = cells.map((cell) =>
+      cell.querySelector<HTMLButtonElement>('app-toggle button')!,
+    );
+
+    expect(cells[0].querySelector('.table__actions__buttons')?.firstElementChild?.tagName).toBe(
+      'APP-TOGGLE',
+    );
+    expect(switches.map((button) => button.classList.contains('mdc-switch--selected'))).toEqual([
+      false,
+      true,
+    ]);
+
+    switches[0].click();
+    switches[1].click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.events).toEqual(['pr1 true', 'pr2 false']);
+  });
+});

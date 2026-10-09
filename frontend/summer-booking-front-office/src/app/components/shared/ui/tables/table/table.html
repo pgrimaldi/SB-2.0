@@ -138,6 +138,9 @@
       </th>
       <td *matCellDef="let row" mat-cell class="table__cell table__actions">
         <span class="table__actions__buttons">
+          @if (rowToggle(); as rowToggle) {
+            <app-toggle [checked]="isEnabled(row)" (checkedChange)="rowToggle(row, $event)" />
+          }
           @for (rowAction of rowActions(); track $index) {
             <button
               class="table__action"
@@ -176,6 +179,7 @@
     [length]="total()"
     [pageSize]="pageSize()"
     [pageSizeOptions]="pageSizeOptions()"
+    [hidePageSize]="isPageSizeSelectorHidden()"
     [pageIndex]="page() - 1"
     [selectConfig]="selectConfig"
     (page)="changePage($event)"

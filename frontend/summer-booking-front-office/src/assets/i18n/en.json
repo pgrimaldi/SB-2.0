@@ -87,7 +87,8 @@
     }
   },
   "alert": {
-    "close": "Got it"
+    "close": "Got it",
+    "error_title": "Operation failed"
   },
   "hub": {
     "header": {
@@ -323,7 +324,16 @@
         "printer": {
           "title": "Printer",
           "added": "Added printers",
-          "delete": "Delete the printer {{name}}",
+          "table": {
+            "name": "Name",
+            "ip": "IP address"
+          },
+          "delete": {
+            "title": "Delete printer",
+            "text": "Do you want to delete the printer {{name}}?",
+            "cancel": "Cancel",
+            "confirm": "Delete"
+          },
           "add": "Add printer"
         },
         "guide": "Download the guide",
