@@ -116,15 +116,23 @@ const SELECT_CONFIG: MatPaginatorSelectConfig = { panelClass: 'select__panel' };
 /** .NET enum names, as the API expects them. */
 export type TableSortDirection = 'Ascending' | 'Descending';
 
+/** A filter chosen by the page, e.g. `{ field: 'bookingDayType', value: 'FullDay' }`. */
+export interface TableFilter {
+  field: string;
+  value: string;
+}
+
 /**
- * Page asked by the table: `page` starts from 1; `search` is the searched text ('' for none);
- * `sortField` is the `field` of the sorted column ('' for none: the server's own order) and
- * `sortDirection` its direction (meaningful only with a `sortField`).
+ * Page asked by the table: `page` starts from 1; `search` is the searched text ('' for none), the
+ * server decides in which fields; `filters` are those of the page (`[]` for none); `sortField` is
+ * the `field` of the sorted column ('' for none: the server's own order) and `sortDirection` its
+ * direction (meaningful only with a `sortField`).
  */
 export interface TablePageRequest {
   page: number;
   pageSize: number;
   search: string;
+  filters: TableFilter[];
   sortField: string;
   sortDirection: TableSortDirection;
 }
@@ -183,6 +191,8 @@ export class Table<T, P extends object> implements OnDestroy {
   readonly columns = input.required<readonly TableColumn<T>[]>();
   /** `null` loads nothing (e.g. signed out). */
   readonly params = input.required<P | null>();
+  /** Sent in `filters`; `null` or none: `[]`. */
+  readonly filters = input<readonly TableFilter[] | null>(null);
   readonly load = input.required<TableLoad<P, T>>();
   readonly idField = input<keyof T & string>('id' as keyof T & string);
   readonly pageSize = model(TABLE_PAGE_SIZE);
@@ -251,7 +261,12 @@ export class Table<T, P extends object> implements OnDestroy {
 
   /** From 1, unlike Material's page index. */
   protected readonly page = linkedSignal({
-    source: () => ({ params: this.params(), search: this.search(), sort: this.sort() }),
+    source: () => ({
+      params: this.params(),
+      search: this.search(),
+      filters: this.filters(),
+      sort: this.sort(),
+    }),
     computation: () => 1,
   });
 
@@ -276,6 +291,7 @@ export class Table<T, P extends object> implements OnDestroy {
           page: this.page(),
           pageSize: this.pageSize(),
           search: this.search(),
+          filters: [...(this.filters() ?? [])],
           sortField: sort?.active ?? '',
           sortDirection: (sort?.direction === 'desc'
             ? 'Descending'

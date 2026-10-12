@@ -9,6 +9,7 @@ import {
   TableColumnAlign,
   TablePage as Page,
   TablePageRequest as PageRequest,
+  TableFilter,
   TableRowAction,
   TableRowId,
 } from './table';
@@ -36,6 +37,7 @@ const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
   template: `<app-table
     [columns]="columns"
     [params]="params()"
+    [filters]="filters()"
     [load]="load"
     [(pageSize)]="pageSize"
     [texts]="texts"
@@ -47,6 +49,7 @@ const ALL: Row[] = Array.from({ length: 25 }, (_, i) => ({
 })
 class TableHost {
   readonly params = signal<Filters | null>({ day: '2026-09-30' });
+  readonly filters = signal<TableFilter[] | null>(null);
   readonly pageSize = signal(10);
   readonly columns: TableColumn<Row>[] = [
     { field: 'name', header: 'Nome', sortable: true },
@@ -101,6 +104,7 @@ describe('Table', () => {
         page: 1,
         pageSize: 10,
         search: '',
+        filters: [],
         sortField: '',
         sortDirection: 'Ascending',
       },
@@ -150,6 +154,7 @@ describe('Table', () => {
       page: 2,
       pageSize: 20,
       search: '',
+      filters: [],
       sortField: '',
       sortDirection: 'Ascending',
     });
@@ -167,6 +172,7 @@ describe('Table', () => {
       page: 2,
       pageSize: 10,
       search: '',
+      filters: [],
       sortField: '',
       sortDirection: 'Ascending',
     });
@@ -186,6 +192,26 @@ describe('Table', () => {
       page: 1,
       pageSize: 10,
       search: '',
+      filters: [],
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
+  });
+
+  it('should send the filters of the page and go back to page 1 when they change', async () => {
+    const { fixture, host, next } = await setup();
+    next().click();
+    await fixture.whenStable();
+
+    host.filters.set([{ field: 'bookingDayType', value: 'Morning' }]);
+    await fixture.whenStable();
+
+    expect(host.requests.at(-1)).toEqual({
+      day: '2026-09-30',
+      page: 1,
+      pageSize: 10,
+      search: '',
+      filters: [{ field: 'bookingDayType', value: 'Morning' }],
       sortField: '',
       sortDirection: 'Ascending',
     });
@@ -343,7 +369,7 @@ describe('Table', () => {
       return host.requests.at(-1);
     };
 
-    const base = { day: '2026-09-30', page: 1, pageSize: 10, search: '' };
+    const base = { day: '2026-09-30', page: 1, pageSize: 10, search: '', filters: [] };
     expect(await sortName()).toEqual({ ...base, sortField: 'name', sortDirection: 'Ascending' });
     expect(await sortName()).toEqual({ ...base, sortField: 'name', sortDirection: 'Descending' });
     expect(await sortName()).toEqual({ ...base, sortField: '', sortDirection: 'Ascending' });
@@ -530,6 +556,7 @@ describe('Table bar', () => {
       page: 2,
       pageSize: 10,
       search: '',
+      filters: [],
       sortField: '',
       sortDirection: 'Ascending',
     });
@@ -546,6 +573,7 @@ describe('Table bar', () => {
       page: 1,
       pageSize: 10,
       search: 'Row 2',
+      filters: [],
       sortField: '',
       sortDirection: 'Ascending',
     });

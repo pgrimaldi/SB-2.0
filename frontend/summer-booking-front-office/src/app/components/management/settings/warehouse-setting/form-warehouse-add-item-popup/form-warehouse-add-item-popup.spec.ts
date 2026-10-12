@@ -118,7 +118,7 @@ describe('FormWarehouseAddItemPopup', () => {
   it('should offer the articles of the property in the select', async () => {
     const { openSelect, comboboxList } = await setup();
 
-    expect(comboboxList).toHaveBeenCalledWith({ idProperty: 'p1' });
+    expect(comboboxList).toHaveBeenCalledWith('p1');
     expect((await openSelect()).map((option) => option.textContent?.trim())).toEqual([
       'Lettino',
       'Ombrellone',

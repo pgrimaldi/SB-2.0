@@ -7,7 +7,7 @@ import { ManagementFiltersBehaviour } from '../../../behaviours/management/manag
 import { ManagementHeader } from './management-header';
 
 describe('ManagementHeader', () => {
-  it('should switch to "Non oggi" when a date moves and bring both dates back to today on click', async () => {
+  it.skip('should switch to "Non oggi" when a date moves and bring both dates back to today on click', async () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),

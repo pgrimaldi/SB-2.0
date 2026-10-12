@@ -117,7 +117,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   if (
-    request.method === 'GET' &&
+    request.method === 'POST' &&
     request.url === `${environment.apiBaseUrl}/taxation/printer-list`
   ) {
     return printerListMock(request);

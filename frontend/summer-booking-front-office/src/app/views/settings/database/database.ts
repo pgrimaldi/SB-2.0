@@ -32,10 +32,6 @@ interface DatabaseTexts {
   reservation_status: { pending: string; confirmed: string; cancelled: string; no_show: string };
 }
 
-interface ExistingBookingListParams {
-  idProperty: string;
-}
-
 /** The row as the table shows it: dates and enums already written in the current language. */
 interface ExistingBookingRow {
   idBooking: string | null;
@@ -77,7 +73,7 @@ export class Database {
 
   protected readonly loadFailed = signal(false);
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
-  protected readonly params = computed<ExistingBookingListParams | null>(() => {
+  protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.idProperty;
     return idProperty ? { idProperty } : null;
   });
@@ -111,7 +107,7 @@ export class Database {
   ]);
 
   /** The texts are asked with each page: after a language change they are those of the new one. */
-  protected readonly load: TableLoad<ExistingBookingListParams, ExistingBookingRow> = (request) =>
+  protected readonly load: TableLoad<{ idProperty: string }, ExistingBookingRow> = (request) =>
     this.database.existingBookingList(request).pipe(
       switchMap((page) =>
         (

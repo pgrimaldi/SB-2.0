@@ -11,7 +11,7 @@ import {
 } from '../../../components/shared/ui/tables/table/table';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
-import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
+import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import { DeleteWarehouseItemsPopup } from '../../../components/management/settings/warehouse-setting/delete-warehouse-items-popup/delete-warehouse-items-popup';
@@ -42,11 +42,15 @@ interface WarehouseSettingsHeaders {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WarehouseSetting {
-  protected readonly filters = inject(ManagementFiltersBehaviour);
+  private readonly auth = inject(AuthBehaviour);
   protected readonly warehouse = inject(WarehouseService);
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
+  protected readonly params = computed<{ idProperty: string } | null>(() => {
+    const idProperty = this.auth.user()?.idProperty;
+    return idProperty ? { idProperty } : null;
+  });
   protected readonly adding = signal(false);
   protected readonly editing = signal(false);
   protected readonly editedItem = signal<WarehouseItem | null>(null);

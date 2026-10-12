@@ -1,8 +1,8 @@
 import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
 import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
-import { DownloadGuideElectronicReceiptRequest } from '../../../entities/settings/taxation/download-guide-electronic-receipt-request';
 import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
 import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
@@ -52,20 +52,31 @@ const TERMS: Record<'it' | 'en', string> = {
 };
 
 /**
- * `GET /api/taxation/printer-list?idProperty=…`: the printers of the property. 401 without a valid
- * access token; 403 `operation.not_allowed` for a missing or unknown property.
+ * `POST /api/taxation/printer-list` with `PageRequest`: one page of the printers of the
+ * property; search, filters and sorting are not read. 401 without a valid access token; 403
+ * `operation.not_allowed` for a missing or unknown property.
  */
 export const printerListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  if (!propertyOf(request.params.get('idProperty'))) {
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  if (!propertyOf(body.idProperty)) {
     return operationNotAllowed(request);
   }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE);
   // Copies, as from a real server: the page never holds the mock's own objects.
-  const body = printers.map((printer) => ({ ...printer }));
-  return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(150));
+  const answer: Page<PrinterItemListResponse> = {
+    total: printers.length,
+    rows: printers.slice((page - 1) * pageSize, page * pageSize).map((printer) => ({ ...printer })),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
+
+function positiveInteger(value: unknown, fallback: number): number {
+  return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
+}
 
 /**
  * `POST /api/taxation/set-is-active` with `SetPrinterIsActiveRequest`: switches the
@@ -132,7 +143,7 @@ export const electronicReceiptMock = (
 
 /**
  * `POST /api/taxation/download-guide-electronic-receipt` with
- * `DownloadGuideElectronicReceiptRequest`: the guide as a file. The real document and its type are
+ * `{ idProperty }`: the guide as a file. The real document and its type are
  * not known yet: the mock sends an invented text file. 401 without a valid access token; 403 for an
  * unknown property.
  */
@@ -142,7 +153,7 @@ export const downloadGuideElectronicReceiptMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DownloadGuideElectronicReceiptRequest>;
+  const body = (request.body ?? {}) as { idProperty?: unknown };
   if (!propertyOf(body.idProperty)) {
     return operationNotAllowed(request);
   }

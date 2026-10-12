@@ -74,7 +74,7 @@ describe('ContactSupport', () => {
   it('should show the support contacts of the API and the five fields with their examples', async () => {
     const { element, fields, supportInfo } = await setup();
 
-    expect(supportInfo).toHaveBeenCalledWith({ idProperty: 'p1' });
+    expect(supportInfo).toHaveBeenCalledWith('p1');
     expect(element.querySelector('a[href="tel:0507916620"]')?.textContent?.trim()).toBe(
       '050 7916620',
     );

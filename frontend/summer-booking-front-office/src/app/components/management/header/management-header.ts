@@ -8,11 +8,12 @@ import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { CalendarTextsBehaviour } from '../../../behaviours/i18n/calendar-texts.behaviour';
 import { ManagementFiltersBehaviour } from '../../../behaviours/management/management-filters.behaviour';
 import { BookingDayType } from '../../../entities/enums/booking-day-type';
-import { I18nText } from '../../i18n/i18n-text/i18n-text';
+// import { I18nText } from '../../i18n/i18n-text/i18n-text';
 import { IconButton } from '../../shared/ui/buttons/icon-button/icon-button';
-import { Datepicker } from '../../shared/ui/datepickers/datepicker/datepicker';
+// import { Datepicker } from '../../shared/ui/datepickers/datepicker/datepicker';
 import { SearchField } from '../../shared/ui/inputs/search-field/search-field';
-import { Select, SelectOption } from '../../shared/ui/selects/select/select';
+// import { Select } from '../../shared/ui/selects/select/select';
+import { SelectOption } from '../../shared/ui/selects/select/select';
 
 /** Translation group `management.header.period`. */
 interface PeriodTexts {
@@ -24,7 +25,7 @@ interface PeriodTexts {
 
 @Component({
   selector: 'app-management-header',
-  imports: [Datepicker, I18nText, IconButton, SearchField, Select, TranslatePipe],
+  imports: [/* Datepicker, I18nText, */ IconButton, SearchField, /* Select, */ TranslatePipe],
   templateUrl: './management-header.html',
   styleUrl: './management-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

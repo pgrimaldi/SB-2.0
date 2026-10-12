@@ -115,7 +115,7 @@ describe('EmailConfiguration', () => {
   it('should fill the fields with the configuration of the property, all hidden but the security', async () => {
     const { element, emailConfiguration } = await setup();
 
-    expect(emailConfiguration).toHaveBeenCalledWith({ idProperty: 'p1' });
+    expect(emailConfiguration).toHaveBeenCalledWith('p1');
     expect([...element.querySelectorAll('input')].map((input) => input.value)).toEqual([
       'prenotazioni@lido-demo.example',
       'Lido Demo',

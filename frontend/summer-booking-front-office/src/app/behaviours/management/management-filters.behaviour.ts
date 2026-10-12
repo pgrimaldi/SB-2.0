@@ -3,9 +3,8 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { debounceTime } from 'rxjs';
 import { BookingDayType } from '../../entities/enums/booking-day-type';
-import { ManagementRequest } from '../../entities/management/management-request';
+import { PageFilter } from '../../entities/pagination/page';
 import { DateRange } from '../../entities/shared/date-range';
-import { AuthBehaviour } from '../auth/auth.behaviour';
 
 /** The date arrows can be clicked quickly: the pages ask the API only after this pause. */
 export const DATES_DEBOUNCE = 500;
@@ -13,7 +12,6 @@ export const DATES_DEBOUNCE = 500;
 /** Provided by the management layout: it lives, and starts again from today, with it. */
 @Injectable()
 export class ManagementFiltersBehaviour {
-  private readonly auth = inject(AuthBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
   readonly startDate = signal(this.dateAdapter.today());
@@ -33,20 +31,16 @@ export class ManagementFiltersBehaviour {
   );
 
   /**
-   * What every management API request sends; it changes (and the pages ask the API again) when the
-   * dates settle or the part of the day changes. Null once the user has signed out.
+   * The header choices as table filters (`[filters]` of `app-table`); they change when the dates
+   * settle or the part of the day changes.
    */
-  readonly request = computed<ManagementRequest | null>(() => {
-    const user = this.auth.user();
+  readonly filters = computed<PageFilter[]>(() => {
     const { start, end } = this.settledDates();
-    return user
-      ? {
-          idProperty: user.idProperty,
-          datetimeFrom: utcDayStart(start),
-          datetimeTo: utcDayEnd(end),
-          bookingDayType: this.period(),
-        }
-      : null;
+    return [
+      { field: 'datetimeFrom', value: utcDayStart(start) },
+      { field: 'datetimeTo', value: utcDayEnd(end) },
+      { field: 'bookingDayType', value: this.period() },
+    ];
   });
 }
 

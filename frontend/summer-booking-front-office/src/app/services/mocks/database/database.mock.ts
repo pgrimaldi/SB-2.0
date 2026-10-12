@@ -1,10 +1,9 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
-import { ExistingBookingListRequest } from '../../../entities/database/existing-booking-list-request';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
-import { DEFAULT_PAGE_SIZE, Page } from '../../../entities/pagination/page';
+import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { operationNotAllowed } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
@@ -20,7 +19,7 @@ const RESERVATIONS: ReservationRow[] = [
   {
     propertyId: 1,
     idBooking: '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a01',
-    customerName: 'Giulia Bianchi',
+    customerName: 'Gianni Riva',
     reservationKind: ReservationKind.Spot,
     dateFrom: '2026-06-01T00:00:00.000Z',
     dateTo: '2026-06-30T00:00:00.000Z',
@@ -200,7 +199,7 @@ export const existingBookingListMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<ExistingBookingListRequest>;
+  const body = (request.body ?? {}) as Partial<PageRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
     return operationNotAllowed(request);
@@ -220,14 +219,9 @@ export const existingBookingListMock = (
     }),
   );
 
-  // The server decides where to search: the mock looks in the customer and agreement names.
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
   const found = search
-    ? bookings.filter((item) =>
-        [item.customerName, item.agreementName].some((text) =>
-          text?.toLowerCase().includes(search),
-        ),
-      )
+    ? bookings.filter((item) => item.customerName?.toLowerCase().includes(search))
     : bookings;
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {

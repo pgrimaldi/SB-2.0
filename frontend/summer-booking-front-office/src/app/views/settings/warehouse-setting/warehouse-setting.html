@@ -7,7 +7,7 @@
   <app-table
     #table
     [columns]="columns()"
-    [params]="filters.request()"
+    [params]="params()"
     [load]="warehouse.list"
     idField="idArticle"
     [texts]="'table' | translate"

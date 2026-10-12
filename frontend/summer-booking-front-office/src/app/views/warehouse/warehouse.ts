@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { ManagementFiltersBehaviour } from '../../behaviours/management/management-filters.behaviour';
+import { AuthBehaviour } from '../../behaviours/auth/auth.behaviour';
 import { TableErrorPopup } from '../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
   Table,
@@ -27,11 +27,15 @@ interface WarehouseHeaders {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Warehouse {
-  protected readonly filters = inject(ManagementFiltersBehaviour);
+  private readonly auth = inject(AuthBehaviour);
   protected readonly warehouse = inject(WarehouseService);
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
+  protected readonly params = computed<{ idProperty: string } | null>(() => {
+    const idProperty = this.auth.user()?.idProperty;
+    return idProperty ? { idProperty } : null;
+  });
   protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
   /**
    * In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create].

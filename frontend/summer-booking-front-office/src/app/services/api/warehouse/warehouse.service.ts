@@ -5,9 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-warehouse-items-request';
 import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
-import { Page } from '../../../entities/pagination/page';
-import { WarehouseComboboxRequest } from '../../../entities/warehouse/warehouse-combobox-request';
-import { WarehouseListRequest } from '../../../entities/warehouse/warehouse-list-request';
+import { Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { onlyFieldsOf } from '../only-fields-of';
 
@@ -21,12 +19,12 @@ export class WarehouseService {
    * (`[load]="warehouse.list"`), and only an arrow function keeps `this` (this service) when it is
    * passed around on its own; a method would lose it and fail on `this.httpClient`.
    */
-  readonly list = (request: WarehouseListRequest): Observable<Page<WarehouseItem>> =>
+  readonly list = (request: PageRequest): Observable<Page<WarehouseItem>> =>
     this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
 
   /** All the articles of the property, not paged, sorted by name. */
-  readonly comboboxList = (request: WarehouseComboboxRequest): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/combobox-list`, request);
+  readonly comboboxList = (idProperty: string): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/combobox-list`, { idProperty });
 
   /** Answers 204 with no body. */
   readonly addWarehouseItem = (idProperty: string, item: WarehouseItem): Observable<void> =>

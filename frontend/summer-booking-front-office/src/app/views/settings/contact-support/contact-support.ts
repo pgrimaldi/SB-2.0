@@ -99,7 +99,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
         return;
       }
       const subscription = untracked(() =>
-        this.system.supportInfo({ idProperty }).subscribe({
+        this.system.supportInfo(idProperty).subscribe({
           next: (supportInfo) => {
             this.supportInfo.set(supportInfo);
             this.supportInfoError.set(null);

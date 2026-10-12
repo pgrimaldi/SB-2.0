@@ -3,8 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Observable, Subject, of, throwError } from 'rxjs';
+import { Observable, Subject, map, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { PageRequest } from '../../../entities/pagination/page';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
 import { Taxation } from './taxation';
@@ -30,7 +31,14 @@ describe('Taxation', () => {
     const markElectronicReceiptAccepted = vi.fn(() =>
       user.update((current) => ({ ...current, isElectronicReceiptAccepted: true })),
     );
-    const printerList = vi.fn(() => printers);
+    const printerList = vi.fn(({ page, pageSize }: PageRequest) =>
+      printers.pipe(
+        map((list) => ({
+          total: list.length,
+          rows: list.slice((page - 1) * pageSize, page * pageSize),
+        })),
+      ),
+    );
     const electronicReceipt = vi.fn(() => of({ termsAndConditions }));
     const answer = new Subject<void>();
     const setPrinterIsActive = vi.fn(() => answer);
@@ -86,7 +94,15 @@ describe('Taxation', () => {
   it('should load the printers and the terms of the property', async () => {
     const { element, printerList, electronicReceipt } = await setup('<p>Termini</p>');
 
-    expect(printerList).toHaveBeenCalledWith('p1');
+    expect(printerList).toHaveBeenCalledWith({
+      idProperty: 'p1',
+      page: 1,
+      pageSize: 5,
+      search: '',
+      filters: [],
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
     expect(electronicReceipt).toHaveBeenCalledWith('p1');
     expect(
       [...element.querySelectorAll('.taxation__printers tbody tr.table__row')].map((row) =>
@@ -151,7 +167,15 @@ describe('Taxation', () => {
     answer.complete();
     await settle(fixture);
     expect(spinner()).toBeNull();
-    expect(printerList).toHaveBeenCalledWith('p1');
+    expect(printerList).toHaveBeenCalledWith({
+      idProperty: 'p1',
+      page: 1,
+      pageSize: 5,
+      search: '',
+      filters: [],
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
     expect(document.querySelector('.alert__popup__text')).toBeNull();
   });
 
@@ -169,7 +193,15 @@ describe('Taxation', () => {
     );
     await settle(fixture);
 
-    expect(printerList).toHaveBeenCalledWith('p1');
+    expect(printerList).toHaveBeenCalledWith({
+      idProperty: 'p1',
+      page: 1,
+      pageSize: 5,
+      search: '',
+      filters: [],
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
     // In a popup, the message of the code (here the fallback key: the test has no translations).
     expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(
       'error.unknown',
@@ -196,7 +228,15 @@ describe('Taxation', () => {
     answer.next();
     answer.complete();
     await settle(fixture);
-    expect(printerList).toHaveBeenCalledWith('p1');
+    expect(printerList).toHaveBeenCalledWith({
+      idProperty: 'p1',
+      page: 1,
+      pageSize: 5,
+      search: '',
+      filters: [],
+      sortField: '',
+      sortDirection: 'Ascending',
+    });
   });
 
   it('should download the guide with the spinner on its button', async () => {
@@ -206,7 +246,7 @@ describe('Taxation', () => {
 
     button().click();
     await fixture.whenStable();
-    expect(downloadGuideElectronicReceipt).toHaveBeenCalledWith({ idProperty: 'p1' });
+    expect(downloadGuideElectronicReceipt).toHaveBeenCalledWith('p1');
     expect(element.querySelector('.taxation__guide mat-progress-spinner')).not.toBeNull();
     button().click(); // ignored while it is running
     expect(downloadGuideElectronicReceipt).toHaveBeenCalledTimes(1);
@@ -241,7 +281,7 @@ describe('Taxation', () => {
     expect(dialog()?.querySelector('.table__error__popup__title')?.textContent?.trim()).toBe(
       'table.load_error.title',
     );
-    printerList.mockReturnValue(of(PRINTERS));
+    printerList.mockReturnValue(of({ total: PRINTERS.length, rows: PRINTERS }));
     dialog()!.querySelectorAll<HTMLButtonElement>('app-button button')[1].click();
     await fixture.whenStable();
 

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
+import { Observable, firstValueFrom, of, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { AddPrinterItemPopup } from '../../../components/management/settings/taxation/add-printer-item-popup/add-printer-item-popup';
 import { ElectronicReceiptAccountForm } from '../../../components/management/settings/taxation/electronic-receipt-account-form/electronic-receipt-account-form';
@@ -40,10 +40,6 @@ import { TaxationService } from '../../../services/api/taxation/taxation.service
 
 /** Used only when the server gives no name in `Content-Disposition`. */
 const GUIDE_FALLBACK_NAME = 'electronic-receipt-guide';
-
-interface PrinterListParams {
-  idProperty: string;
-}
 
 /** Translation group `management.settings.taxation.printer.table`. */
 interface PrinterTableHeaders {
@@ -104,7 +100,7 @@ export class Taxation {
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
   private readonly idProperty = computed(() => this.auth.user()?.idProperty ?? null);
-  protected readonly printerParams = computed<PrinterListParams | null>(() => {
+  protected readonly printerParams = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.idProperty();
     return idProperty ? { idProperty } : null;
   });
@@ -178,21 +174,14 @@ export class Taxation {
     });
   }
 
-  /** The API sends every printer at once: the table gets the page it asks for. */
-  protected readonly loadPrinters: TableLoad<PrinterListParams, PrinterItemListResponse> = ({
-    idProperty,
-    page,
-    pageSize,
-  }) =>
-    this.taxation.printerList(idProperty).pipe(
+  protected readonly loadPrinters: TableLoad<{ idProperty: string }, PrinterItemListResponse> = (
+    request,
+  ) =>
+    this.taxation.printerList(request).pipe(
       tap({
-        next: (printers) => this.hasPrinters.set(printers.length > 0),
+        next: (page) => this.hasPrinters.set(page.total > 0),
         error: () => this.hasPrinters.set(false),
       }),
-      map((printers) => ({
-        total: printers.length,
-        rows: printers.slice((page - 1) * pageSize, page * pageSize),
-      })),
     );
 
   protected readonly setPrinterEnabled: TableRowToggle<PrinterItemListResponse> = (
@@ -217,9 +206,7 @@ export class Taxation {
     }
     this.isGuideDownloading.set(true);
     try {
-      const guide = await firstValueFrom(
-        this.taxation.downloadGuideElectronicReceipt({ idProperty }),
-      );
+      const guide = await firstValueFrom(this.taxation.downloadGuideElectronicReceipt(idProperty));
       this.fileDownload.save(guide, GUIDE_FALLBACK_NAME);
     } catch (error: unknown) {
       this.showActionError(error);

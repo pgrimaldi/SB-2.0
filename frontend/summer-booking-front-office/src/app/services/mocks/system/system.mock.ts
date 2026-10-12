@@ -1,6 +1,5 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
-import { ManagementRequest } from '../../../entities/management/management-request';
 import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import {
   EmailConfigurationData,
@@ -167,7 +166,7 @@ export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpE
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<Pick<ManagementRequest, 'idProperty'>>;
+  const body = (request.body ?? {}) as { idProperty?: unknown };
   if (!propertyOf(body.idProperty)) {
     return operationNotAllowed(request);
   }

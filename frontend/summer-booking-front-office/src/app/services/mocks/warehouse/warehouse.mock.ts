@@ -1,8 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
-import { BookingDayType } from '../../../entities/enums/booking-day-type';
-import { ManagementRequest } from '../../../entities/management/management-request';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-warehouse-items-request';
 import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
@@ -215,9 +213,7 @@ export const warehouseComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(
-    ((request.body ?? {}) as Partial<Pick<ManagementRequest, 'idProperty'>>).idProperty,
-  );
+  const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
   if (!property) {
     return operationNotAllowed(request);
   }
@@ -425,27 +421,19 @@ const MAX_PAGE_SIZE = 100;
 
 /**
  * `POST /api/warehouse/list`: one page of the active articles of the requested property (never of
- * other properties) with today's availability; released consumptions free the stock. The period is
- * validated but the invented consumptions are all for today. 401 without a valid access token; 403
- * for a missing or unknown property; 400 when dates or part of the day are missing or invalid.
+ * other properties) with today's availability; released consumptions free the stock. The filters
+ * are not read: the invented consumptions are all for today. 401 without a valid access token; 403
+ * for a missing or unknown property.
  */
 export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<ManagementRequest & PageRequest>;
+  const body = (request.body ?? {}) as Partial<PageRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
     return operationNotAllowed(request);
   }
-  const errors = periodErrors(body);
-  if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
-      title: 'Invalid request',
-      errors,
-    });
-  }
-
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
 
@@ -515,27 +503,4 @@ function wholeNumber(value: unknown): value is number {
 
 function positiveInteger(value: unknown, fallback: number): number {
   return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
-}
-
-/** Checks as the backend answers them: one error per wrong field. */
-function periodErrors({
-  datetimeFrom,
-  datetimeTo,
-  bookingDayType,
-}: Partial<ManagementRequest>): MockFieldError[] {
-  const from = Date.parse(datetimeFrom ?? '');
-  const to = Date.parse(datetimeTo ?? '');
-  const errors: MockFieldError[] = [];
-  if (Number.isNaN(from)) {
-    errors.push({ field: 'datetimeFrom', code: 'validation.invalid_date' });
-  }
-  if (Number.isNaN(to)) {
-    errors.push({ field: 'datetimeTo', code: 'validation.invalid_date' });
-  } else if (!Number.isNaN(from) && from > to) {
-    errors.push({ field: 'datetimeTo', code: 'validation.end_before_start' });
-  }
-  if (!Object.values(BookingDayType).includes(bookingDayType as BookingDayType)) {
-    errors.push({ field: 'bookingDayType', code: 'validation.invalid_value' });
-  }
-  return errors;
 }

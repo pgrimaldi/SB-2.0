@@ -195,7 +195,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         const savesAtStart = this.savesDone;
         this.isReloading.set(true);
         this.error.set(null);
-        return this.system.emailConfiguration({ idProperty }).subscribe({
+        return this.system.emailConfiguration(idProperty).subscribe({
           next: (data) => {
             this.isReloading.set(false);
             if (savesAtStart !== this.savesDone) {
