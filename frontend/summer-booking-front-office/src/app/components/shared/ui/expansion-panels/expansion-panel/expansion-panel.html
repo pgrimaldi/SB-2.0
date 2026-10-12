@@ -15,6 +15,13 @@
       }
       {{ title() }}
     </mat-panel-title>
+    <span
+      class="expansion__panel__actions"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <ng-content select="[appExpansionPanelAction]" />
+    </span>
     @if (icons().list[1]; as icon) {
       <span class="expansion__panel__arrow">
         @if (icons().material) {

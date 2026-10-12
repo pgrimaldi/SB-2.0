@@ -43,6 +43,17 @@
 
 // The arrow turns, not its box: Material clips what goes out of the header content, and a turned box
 // would push half of the arrow out. The box is as wide as the image turned (14px).
+.expansion__panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-end: 1rem;
+
+  &:empty {
+    display: none;
+  }
+}
+
 .expansion__panel__arrow {
   display: flex;
   align-items: center;

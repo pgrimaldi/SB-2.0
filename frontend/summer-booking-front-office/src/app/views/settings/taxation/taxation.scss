@@ -24,14 +24,6 @@
   margin-bottom: 1.75rem;
 }
 
-// A lighter blue than the other buttons, as in the mockup.
-.taxation__guide {
-  --color__main__theme__one: var(--color__layout__text__soft);
-
-  align-self: flex-end;
-  margin-top: 1.25rem;
-}
-
 @media (width <= 360px) {
   .taxation__guide {
     --button-padding: 0.125rem;

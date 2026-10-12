@@ -35,21 +35,21 @@
     </app-button>
   </app-expansion-panel>
 
-  <app-button
-    class="taxation__guide"
-    [size]="ButtonSize.Small"
-    [pathIcon]="downloadGuideIcon"
-    [isLoading]="isGuideDownloading()"
-    (clicked)="downloadGuide()"
-  >
-    {{ 'management.settings.taxation.guide' | translate }}
-  </app-button>
-
   <app-expansion-panel
     [title]="'management.settings.taxation.receipt.title' | translate"
     [pathIcon]="receiptPanelIcons"
     [(isExpanded)]="receiptExpanded"
   >
+    <app-button
+      appExpansionPanelAction
+      class="taxation__guide"
+      [size]="ButtonSize.Small"
+      [pathIcon]="downloadGuideIcon"
+      [isLoading]="isGuideDownloading()"
+      (clicked)="downloadGuide()"
+    >
+      {{ 'management.settings.taxation.guide' | translate }}
+    </app-button>
     <h3 class="taxation__subtitle">
       {{ 'management.settings.taxation.receipt.terms' | translate }}
     </h3>
