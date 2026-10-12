@@ -191,8 +191,17 @@ describe('EmailConfiguration', () => {
     expect(buttons()[2].disabled).toBe(false);
   });
 
-  it('should save the values in the fields, blocking the other buttons meanwhile, then say it', async () => {
-    const { fixture, buttons, type, settle, allowChanges, saveEmailConfiguration } = await setup();
+  it('should save the values in the fields, blocking the other buttons meanwhile, then say it and lock the fields again', async () => {
+    const {
+      fixture,
+      element,
+      inputs,
+      buttons,
+      type,
+      settle,
+      allowChanges,
+      saveEmailConfiguration,
+    } = await setup();
     const answer = new Subject<void>();
     saveEmailConfiguration.mockReturnValue(answer);
     await allowChanges();
@@ -214,6 +223,10 @@ describe('EmailConfiguration', () => {
       'management.settings.email_configuration.saved.title',
     );
     expect(buttons()[0].disabled).toBe(false);
+    expect(inputs().every((input) => input.readOnly)).toBe(true);
+    expect(
+      element.querySelector<HTMLButtonElement>('.email__configuration__override button')!.disabled,
+    ).toBe(false);
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 
@@ -239,7 +252,7 @@ describe('EmailConfiguration', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 
-  it('should lock the fields until the server answers Salva', async () => {
+  it('should lock the fields until the server answers Salva, and give them back when it fails', async () => {
     const { fixture, inputs, buttons, settle, allowChanges, saveEmailConfiguration } =
       await setup();
     const answer = new Subject<void>();
@@ -250,8 +263,7 @@ describe('EmailConfiguration', () => {
     await fixture.whenStable();
     expect(inputs().every((input) => input.readOnly)).toBe(true);
 
-    answer.next();
-    answer.complete();
+    answer.error(new HttpErrorResponse({ status: 500 }));
     await settle();
     expect(inputs().some((input) => input.readOnly)).toBe(false);
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());

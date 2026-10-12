@@ -251,6 +251,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         this.savedConnection.set(savedValues);
         this.configuration.set(savedValues);
         this.configurationForm().reset();
+        this.editable.set(false);
         this.saved.set(true);
       },
     );
