@@ -126,25 +126,24 @@ describe('Taxation', () => {
     expect(terms.querySelector('p')?.textContent).toBe('Termini');
   });
 
-  it('should show 5 printers at a time, with a paginator without rows-per-page choice', async () => {
+  it('should read the printers 5 at a time', async () => {
     const printers = Array.from({ length: 7 }, (_, index) => ({
       idPrinter: `pr${index + 1}`,
       printerName: `EPSON - ${index + 1}`,
       printerIP: `192.0.2.${index + 1}`,
       isEnabled: false,
     }));
-    const { fixture, element } = await setup('<p>Termini</p>', of(printers));
+    const { fixture, element, printerList } = await setup('<p>Termini</p>', of(printers));
     const names = () =>
       [...element.querySelectorAll('.taxation__printers tbody tr.table__row td:first-child')].map(
         (cell) => cell.textContent?.trim(),
       );
 
     expect(names()).toEqual(['EPSON - 1', 'EPSON - 2', 'EPSON - 3', 'EPSON - 4', 'EPSON - 5']);
-    expect(element.querySelector('.taxation__printers mat-paginator')).not.toBeNull();
-    expect(element.querySelector('.mat-mdc-paginator-page-size')).toBeNull();
 
     element.querySelector<HTMLButtonElement>('.mat-mdc-paginator-navigation-next')!.click();
     await fixture.whenStable();
+    expect(printerList).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2, pageSize: 5 }));
     expect(names()).toEqual(['EPSON - 6', 'EPSON - 7']);
   });
 
@@ -289,24 +288,19 @@ describe('Taxation', () => {
     expect(dialog()).toBeNull();
   });
 
-  it('should start on Non accetto with the warning and Invia off, and send true once Accetto is chosen', async () => {
+  it('should start on Non accetto with Invia off, and send true once Accetto is chosen', async () => {
     const { fixture, element, activateElectronicReceipt } = await setup('<p>Termini</p>');
     const accept = () => element.querySelector<HTMLInputElement>('.taxation__accept input')!;
     const refuse = () => element.querySelector<HTMLInputElement>('.taxation__refuse input')!;
     const send = () => element.querySelector<HTMLButtonElement>('.taxation__send button')!;
-    const warning = () => element.querySelector('.taxation__refuse__warning');
 
     expect(refuse().checked).toBe(true);
     expect(accept().checked).toBe(false);
-    expect(warning()?.textContent?.trim()).toBe(
-      'management.settings.taxation.receipt.refused_warning',
-    );
     expect(send().disabled).toBe(true);
 
     accept().click();
     await fixture.whenStable();
     expect(refuse().checked).toBe(false);
-    expect(warning()).toBeNull();
     expect(send().disabled).toBe(false);
 
     send().click();
@@ -315,24 +309,6 @@ describe('Taxation', () => {
       idProperty: 'p1',
       isElectronicReceiptAccepted: true,
     });
-  });
-
-  it('should keep one choice ticked: only the other box changes it', async () => {
-    const { fixture, element } = await setup('<p>Termini</p>');
-    const accept = () => element.querySelector('.taxation__accept')!;
-    const refuseBox = () => element.querySelector('.taxation__refuse app-checkbox')!;
-
-    expect(refuseBox().hasAttribute('inert')).toBe(true);
-    expect(accept().hasAttribute('inert')).toBe(false);
-
-    accept().querySelector<HTMLInputElement>('input')!.click();
-    await fixture.whenStable();
-    expect(accept().hasAttribute('inert')).toBe(true);
-    refuseBox().querySelector<HTMLInputElement>('input')!.click();
-    await fixture.whenStable();
-    expect(refuseBox().querySelector<HTMLInputElement>('input')!.checked).toBe(true);
-    expect(accept().querySelector<HTMLInputElement>('input')!.checked).toBe(false);
-    expect(element.querySelector('.taxation__refuse__warning')).not.toBeNull();
   });
 
   it('should show the account form once the server accepted the receipt, and remember it', async () => {

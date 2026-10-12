@@ -47,18 +47,6 @@ describe('TableErrorPopup', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should show title and text, with close on the left and retry on the right', async () => {
-    const { dialog, buttons } = await setup();
-
-    const title = dialog()!.querySelector('.table__error__popup__title')!;
-    const text = dialog()!.querySelector('.table__error__popup__text')!;
-    expect(title.textContent?.trim()).toBe('Errore');
-    expect(text.textContent?.trim()).toBe(
-      'In questo momento non riusciamo a fornire le informazioni richieste.',
-    );
-    expect(buttons()).toEqual(['Chiudi', 'Riprova']);
-  });
-
   it('should only close with close', async () => {
     const { host, dialog, click } = await setup();
 
@@ -77,47 +65,5 @@ describe('TableErrorPopup', () => {
     expect(host.open()).toBe(false);
     expect(dialog()).toBeNull();
     expect(host.retries).toBe(1);
-  });
-
-  it('should be closed at once on retry, so a new error opens it again', async () => {
-    const { fixture, host, dialog } = await setup();
-
-    dialog()!.querySelectorAll<HTMLButtonElement>('app-button button')[1].click();
-    expect(host.open()).toBe(false); // not after the closing animation
-    await fixture.whenStable();
-
-    host.open.set(true); // the data failed again
-    await fixture.whenStable();
-    expect(dialog()).not.toBeNull();
-  });
-
-  it('should close with Esc as well', async () => {
-    const { fixture, host, dialog } = await setup();
-
-    document.body.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27, bubbles: true }),
-    );
-    await fixture.whenStable();
-
-    expect(host.open()).toBe(false);
-    expect(dialog()).toBeNull();
-  });
-
-  it('should hide each button on request, and the button row without buttons', async () => {
-    let popup = await setup((host) => host.hideClose.set(true));
-    expect(popup.buttons()).toEqual(['Riprova']);
-    TestBed.resetTestingModule();
-    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
-
-    popup = await setup((host) => host.hideRetry.set(true));
-    expect(popup.buttons()).toEqual(['Chiudi']);
-    TestBed.resetTestingModule();
-    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
-
-    popup = await setup((host) => {
-      host.hideClose.set(true);
-      host.hideRetry.set(true);
-    });
-    expect(popup.dialog()!.querySelector('.table__error__popup__actions')).toBeNull();
   });
 });

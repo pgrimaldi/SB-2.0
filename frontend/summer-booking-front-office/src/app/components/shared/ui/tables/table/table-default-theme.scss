@@ -1,7 +1,6 @@
 @use '@angular/material' as mat;
 
-// The default look (the designer's proposal of 30/09/2026); sizes are common to both looks
-// (table.scss).
+// The default look; sizes are common to both looks (table.scss).
 :host(.table__theme__default) {
   // Side paddings of a cell, for the width of the columns of the row buttons and of the checkboxes.
   --table-actions-padding: 1.125rem;

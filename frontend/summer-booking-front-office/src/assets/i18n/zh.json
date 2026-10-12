@@ -375,6 +375,8 @@
             "vat_number": "增值税号",
             "pin": "PIN",
             "password": "密码",
+            "pin_saved": "已设置 PIN：输入以更改",
+            "password_saved": "已设置密码",
             "save": "保存",
             "saved": "账户配置成功",
             "edit": "修改",

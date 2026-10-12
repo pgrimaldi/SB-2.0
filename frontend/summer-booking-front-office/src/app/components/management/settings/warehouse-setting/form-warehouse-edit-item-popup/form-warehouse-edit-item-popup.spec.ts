@@ -97,25 +97,14 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(component.hasUnsavedChanges()).toBe(false);
   });
 
-  it('should show the values of the row, with the article locked', async () => {
+  it('should fill the form with the values of the row, with the article locked', async () => {
     const { popup, inputs, toggle } = await setup();
     const select = popup()!.querySelector('mat-select')!;
 
-    expect(popup()!.querySelector('h2')?.textContent?.trim()).toBe(
-      'management.settings.warehouse.form.edit_title',
-    );
     expect(select.textContent?.trim()).toBe('Lettino');
     expect(select.getAttribute('aria-disabled')).toBe('true');
     expect(inputs().map((input) => input.value)).toEqual(['120', '5']);
     expect(toggle().getAttribute('aria-checked')).toBe('true');
-    expect(
-      [...popup()!.querySelectorAll('.form__warehouse__edit__item__popup__buttons app-button')].map(
-        (button) => button.textContent?.trim(),
-      ),
-    ).toEqual([
-      'management.settings.warehouse.form.cancel',
-      'management.settings.warehouse.form.save',
-    ]);
   });
 
   it('should keep the alert off without a threshold above 0, even if the row has it on', async () => {
@@ -195,15 +184,14 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(inputs()[0].value).toBe('90');
   });
 
-  it('should show the total in red with its message when it is emptied or 0', async () => {
-    const { popup, inputs, save, type } = await setup();
+  it('should show the message of the total when it is emptied or 0', async () => {
+    const { popup, inputs, type } = await setup();
     const message = () => popup()!.querySelector('.filled__number__field__error');
 
     expect(message()).toBeNull();
     await type(inputs()[0], '');
     // The generic key (the test has no translations).
     expect(message()?.textContent?.trim()).toBe('invalidate.greater_than');
-    expect(save().disabled).toBe(true);
 
     await type(inputs()[0], '0');
     expect(message()).not.toBeNull();

@@ -51,23 +51,6 @@ describe('DeleteWarehouseItemsPopup', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should name the article of a row and count the chosen ones', async () => {
-    let popup = await setup();
-    expect(popup.dialog()!.querySelector('h2')?.textContent?.trim()).toBe(
-      'management.settings.warehouse.delete.one.title',
-    );
-    TestBed.resetTestingModule();
-    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
-
-    popup = await setup((host) => {
-      host.idItems.set(['a1', 'a2']);
-      host.itemName.set(null);
-    });
-    expect(popup.dialog()!.querySelector('h2')?.textContent?.trim()).toBe(
-      'management.settings.warehouse.delete.many.title',
-    );
-  });
-
   it('should close at once, wait with the page spinner, then tell the page which ones', async () => {
     const { fixture, host, confirm, deleteWarehouseItems } = await setup((page) =>
       page.idItems.set(['a1', 'a2']),

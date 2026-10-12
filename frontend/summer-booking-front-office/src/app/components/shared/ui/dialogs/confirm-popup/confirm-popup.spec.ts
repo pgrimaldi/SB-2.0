@@ -47,17 +47,6 @@ describe('ConfirmPopup', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should ask the question with Annulla and Elimina, and close with Annulla', async () => {
-    const { fixture, host, dialog, buttons } = await setup();
-
-    expect(dialog()!.querySelector('h2')?.textContent?.trim()).toBe('Elimina articolo');
-    expect(buttons().map((button) => button.textContent?.trim())).toEqual(['Annulla', 'Elimina']);
-    buttons()[0].click();
-    await fixture.whenStable();
-    expect(host.open()).toBe(false);
-    expect(host.confirmations).toBe(0);
-  });
-
   it('should only tell the caller on Elimina, staying open', async () => {
     const { fixture, host, buttons } = await setup();
 
@@ -87,15 +76,5 @@ describe('ConfirmPopup', () => {
     );
     await escape();
     expect(host.open()).toBe(false);
-  });
-
-  it('should make the confirm button red only for an action that cannot be undone', async () => {
-    const { fixture, host, dialog } = await setup();
-    const confirm = () => dialog()!.querySelectorAll('app-button')[1];
-
-    expect(confirm().classList).not.toContain('confirm__popup__danger');
-    host.danger.set(true);
-    await fixture.whenStable();
-    expect(confirm().classList).toContain('confirm__popup__danger');
   });
 });

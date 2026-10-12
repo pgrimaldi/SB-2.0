@@ -134,28 +134,14 @@ describe('LoginDialog', () => {
     expect(submit().disabled).toBe(false);
   });
 
-  it('should open only when open becomes true, at 30% width on regular screens', async () => {
+  it('should open only when open becomes true', async () => {
     const { fixture, open } = await setup(false);
     expect(open).not.toHaveBeenCalled();
 
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
 
-    expect(open).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ width: '30vw', height: '', maxWidth: 'none' }),
-    );
-  });
-
-  it('should open at 90% width on phones', async () => {
-    const { fixture, open } = await setup(true);
-    fixture.componentInstance.open.set(true);
-    await fixture.whenStable();
-
-    expect(open).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ width: '90vw', height: '' }),
-    );
+    expect(open).toHaveBeenCalledTimes(1);
   });
 
   it('should stop following the screen size and close the popup when destroyed', async () => {

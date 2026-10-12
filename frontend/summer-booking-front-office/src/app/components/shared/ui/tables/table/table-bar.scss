@@ -72,7 +72,7 @@
   gap: 0.625rem;
 }
 
-// The designer's images are the whole button (white square, thin border of
+// The images are the whole button (white square, thin border of
 // the colour of the symbol, the symbol): they fill it. A Material icon is only the symbol: the button
 // draws the square and the border around it (`table__massive__framed`).
 .table__massive {
@@ -105,7 +105,7 @@
 }
 
 .table__massive__delete {
-  color: #fd6665; // red of the designer's delete button, used only here
+  color: #fd6665; // red of the delete button image, used only here
 }
 
 .table__clear {

@@ -114,6 +114,10 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.contactForm().dirty();
+  }
+
   protected send(event: Event): void {
     event.preventDefault();
     const idProperty = this.auth.user()?.idProperty;
@@ -150,10 +154,6 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
         this.isLoading.set(false);
       }
     });
-  }
-
-  hasUnsavedChanges(): boolean {
-    return this.contactForm().dirty();
   }
 
   ngOnDestroy(): void {

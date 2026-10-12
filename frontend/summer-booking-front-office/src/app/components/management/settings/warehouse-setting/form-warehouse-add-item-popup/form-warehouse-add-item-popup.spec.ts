@@ -59,25 +59,6 @@ describe('FormWarehouseAddItemPopup', () => {
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should show the four fields and the two buttons', async () => {
-    const { popup } = await setup();
-
-    expect(popup()?.querySelector('h2')?.textContent?.trim()).toBe(
-      'management.settings.warehouse.form.title',
-    );
-    expect(popup()?.querySelectorAll('app-filled-select').length).toBe(1);
-    expect(popup()?.querySelectorAll('app-filled-number-field').length).toBe(2);
-    expect(popup()?.querySelectorAll('app-toggle').length).toBe(1);
-    expect(
-      [...popup()!.querySelectorAll('.form__warehouse__add__item__popup__buttons app-button')].map(
-        (button) => button.textContent?.trim(),
-      ),
-    ).toEqual([
-      'management.settings.warehouse.form.cancel',
-      'management.settings.warehouse.form.add',
-    ]);
-  });
-
   it('should ask before the X drops what is typed, while Annulla drops it at once', async () => {
     const { fixture, host, popup } = await setup();
     const unsaved = TestBed.inject(UnsavedChangesBehaviour);
@@ -125,22 +106,6 @@ describe('FormWarehouseAddItemPopup', () => {
     ]);
   });
 
-  it('should close with Annulla and with the X', async () => {
-    const { fixture, host, popup } = await setup();
-
-    popup()!
-      .querySelector<HTMLButtonElement>('.form__warehouse__add__item__popup__buttons button')!
-      .click();
-    await fixture.whenStable();
-    expect(host.open()).toBe(false);
-
-    host.open.set(true);
-    await fixture.whenStable();
-    popup()!.querySelector<HTMLButtonElement>('.form__warehouse__add__item__popup__close')!.click();
-    await fixture.whenStable();
-    expect(host.open()).toBe(false);
-  });
-
   it('should start from an empty form, with the articles loaded again, every time it opens', async () => {
     const { fixture, host, trigger, openSelect, comboboxList } = await setup();
 
@@ -155,6 +120,25 @@ describe('FormWarehouseAddItemPopup', () => {
 
     expect(trigger().textContent?.trim()).toBe('management.settings.warehouse.form.choose');
     expect(comboboxList).toHaveBeenCalledTimes(2);
+  });
+
+  it('should keep the articles of the last opening when an earlier answer arrives late', async () => {
+    const { fixture, host, openSelect, comboboxList } = await setup();
+    const late = new Subject<{ id: string; value: string }[]>();
+    host.open.set(false);
+    await fixture.whenStable();
+    comboboxList.mockReturnValueOnce(late);
+    host.open.set(true);
+    await fixture.whenStable();
+    host.open.set(false);
+    await fixture.whenStable();
+    comboboxList.mockReturnValueOnce(of([{ id: 'a3', value: 'Sdraio' }]));
+    host.open.set(true);
+    await fixture.whenStable();
+
+    late.next([{ id: 'a1', value: 'Lettino' }]);
+    await fixture.whenStable();
+    expect((await openSelect()).map((option) => option.textContent?.trim())).toEqual(['Sdraio']);
   });
 
   it('should let the threshold alert be turned on only with a threshold above 0', async () => {

@@ -1,12 +1,12 @@
 @use '../../../styles/settings-panel' as panel;
 
-// Designer's mockup (05/10/2026): two white panels in a centred column, the help boxes side by side
+// Two white panels in a centred column, the help boxes side by side
 // (one per row on the phone), then the contact form with the button at the bottom right.
 .contact__support {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  // Wide enough for each line of the support hours on one line, as in the mockup.
+  // Wide enough for each line of the support hours on one line.
   width: min(100% - 2rem, 56rem);
   margin-inline: auto;
   padding-block: 1rem 2rem;

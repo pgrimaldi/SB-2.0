@@ -375,6 +375,8 @@
             "vat_number": "USt-IdNr.",
             "pin": "PIN",
             "password": "Passwort",
+            "pin_saved": "PIN festgelegt: zum Ändern eingeben",
+            "password_saved": "Passwort festgelegt",
             "save": "Speichern",
             "saved": "Konto erfolgreich eingerichtet",
             "edit": "Bearbeiten",

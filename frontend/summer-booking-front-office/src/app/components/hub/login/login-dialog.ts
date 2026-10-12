@@ -201,10 +201,6 @@ export class LoginDialog implements OnDestroy {
     this.error.set(null);
   }
 
-  private readonly resize = (): void => {
-    this.dialogRef?.updateSize(this.width(), this.height());
-  };
-
   private closed(dialogRef: MatDialogRef<unknown>): void {
     if (this.dialogRef === dialogRef) {
       // Esc or a click outside: still the current popup.
@@ -216,6 +212,10 @@ export class LoginDialog implements OnDestroy {
       this.reset();
     }
   }
+
+  private readonly resize = (): void => {
+    this.dialogRef?.updateSize(this.width(), this.height());
+  };
 
   ngOnDestroy(): void {
     this.stopFollowingScreen();

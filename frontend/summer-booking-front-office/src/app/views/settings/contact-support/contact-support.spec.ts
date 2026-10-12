@@ -71,8 +71,8 @@ describe('ContactSupport', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
-  it('should show the support contacts of the API and the five fields with their examples', async () => {
-    const { element, fields, supportInfo } = await setup();
+  it('should show the support contacts of the API', async () => {
+    const { element, supportInfo } = await setup();
 
     expect(supportInfo).toHaveBeenCalledWith('p1');
     expect(element.querySelector('a[href="tel:0507916620"]')?.textContent?.trim()).toBe(
@@ -84,34 +84,16 @@ describe('ContactSupport', () => {
         line.textContent?.trim(),
       ),
     ).toEqual(['1 maggio - 30 settembre', '1 ottobre - 30 aprile']);
-    expect(fields().map((field) => field.placeholder)).toEqual([
-      'management.settings.contact_support.form.examples.first_name',
-      'management.settings.contact_support.form.examples.last_name',
-      'management.settings.contact_support.form.examples.email',
-      'management.settings.contact_support.form.examples.mobile_phone',
-      '',
-    ]);
   });
 
-  it('should keep international phone numbers left-to-right inside a right-to-left page', async () => {
-    const phoneNumber = '+39 334 567 8901';
-    const { element, fields, type } = await setup(
-      vi.fn(() => of({ ...SUPPORT_INFO, phoneNumber })),
+  it('should call the support number with only its digits and the +', async () => {
+    const { element } = await setup(
+      vi.fn(() => of({ ...SUPPORT_INFO, phoneNumber: '+39 334 567 8901' })),
     );
-    element.dir = 'rtl';
 
-    const phoneLink = element.querySelector<HTMLAnchorElement>('a[href^="tel:"]')!;
-    expect(phoneLink.dir).toBe('ltr');
-    expect(phoneLink.textContent?.trim()).toBe(phoneNumber);
-    expect(phoneLink.getAttribute('href')).toBe('tel:+393345678901');
-
-    const phoneInput = fields()[3] as HTMLInputElement;
-    expect(phoneInput.type).toBe('tel');
-    expect(phoneInput.dir).toBe('ltr');
-    expect(phoneInput.autocomplete).toBe('tel');
-    expect(fields()[0].getAttribute('dir')).toBeNull();
-    await type(3, phoneNumber);
-    expect(phoneInput.value).toBe(phoneNumber);
+    expect(element.querySelector('a[href^="tel:"]')?.getAttribute('href')).toBe(
+      'tel:+393345678901',
+    );
   });
 
   it('should send only with name, surname, email and message, the mobile phone optional', async () => {

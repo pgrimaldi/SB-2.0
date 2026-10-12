@@ -26,14 +26,14 @@ import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-sp
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DuplicateWarehouseItemsPopup {
-  private readonly warehouse = inject(WarehouseService);
-  private readonly auth = inject(AuthBehaviour);
-  private readonly errorText = inject(ErrorTextBehaviour);
-
   readonly open = model(false);
   readonly idItems = input<readonly string[]>([]);
   readonly itemName = input<string | null>(null);
   readonly duplicated = output<readonly string[]>();
+
+  private readonly warehouse = inject(WarehouseService);
+  private readonly auth = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
 
   protected readonly isLoading = signal(false);
   protected readonly isErrorShown = signal(false);

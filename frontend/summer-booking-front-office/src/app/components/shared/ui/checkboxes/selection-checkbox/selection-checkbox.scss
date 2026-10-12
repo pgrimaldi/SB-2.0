@@ -1,6 +1,6 @@
 @use '../checkbox' as checkbox;
 
-// The box (15px, as in the designer's table) takes its own room only: the state layer around it
+// The box (15px) takes its own room only: the state layer around it
 // overflows instead of pushing what is beside it.
 :host {
   display: inline-flex;

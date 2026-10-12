@@ -33,13 +33,14 @@ import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
+  readonly back = output<void>();
+
   private readonly taxation = inject(TaxationService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
-  readonly back = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly backIcon = '/assets/images/PanelChevron_setting.svg';
@@ -51,6 +52,9 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   private savedAccount = new ElectronicReceiptAccount();
   protected readonly isSaved = signal(false);
   protected readonly isEditing = signal(false);
+  /** The server has one saved (it is never kept in the page). */
+  protected readonly isPinSaved = signal(false);
+  protected readonly isPasswordSaved = signal(false);
   protected readonly accountForm = form(this.account, (path) => {
     readonly(path, () => this.isSaved() && !this.isEditing());
     readonly(path.password, () => this.isSaved());
@@ -61,6 +65,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.companyName,
       error: this.validationText.message(this.accountForm.companyName),
       isSecret: false,
+      isSecretSaved: null,
       columns: 6,
     },
     {
@@ -68,6 +73,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.companyAddress,
       error: this.validationText.message(this.accountForm.companyAddress),
       isSecret: false,
+      isSecretSaved: null,
       columns: 11,
     },
     {
@@ -75,6 +81,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.streetNumber,
       error: this.validationText.message(this.accountForm.streetNumber),
       isSecret: false,
+      isSecretSaved: null,
       columns: 3,
     },
     {
@@ -82,6 +89,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.postalCode,
       error: this.validationText.message(this.accountForm.postalCode),
       isSecret: false,
+      isSecretSaved: null,
       columns: 4,
     },
     {
@@ -89,6 +97,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.city,
       error: this.validationText.message(this.accountForm.city),
       isSecret: false,
+      isSecretSaved: null,
       columns: 8,
     },
     {
@@ -96,6 +105,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.country,
       error: this.validationText.message(this.accountForm.country),
       isSecret: false,
+      isSecretSaved: null,
       columns: 8,
     },
     {
@@ -103,6 +113,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.taxCode,
       error: this.validationText.message(this.accountForm.taxCode),
       isSecret: false,
+      isSecretSaved: null,
       columns: 10,
     },
     {
@@ -110,6 +121,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.vatNumber,
       error: this.validationText.message(this.accountForm.vatNumber),
       isSecret: false,
+      isSecretSaved: null,
       columns: 10,
     },
     {
@@ -117,6 +129,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.pin,
       error: this.validationText.message(this.accountForm.pin),
       isSecret: true,
+      isSecretSaved: this.isPinSaved,
       columns: 10,
     },
     {
@@ -124,6 +137,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       field: this.accountForm.password,
       error: this.validationText.message(this.accountForm.password),
       isSecret: true,
+      isSecretSaved: this.isPasswordSaved,
       columns: 10,
     },
   ];
@@ -142,6 +156,10 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
     this.unsaved.watch(this);
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.accountForm().dirty();
+  }
+
   protected save(): void {
     const idProperty = this.auth.user()?.idProperty;
     if (this.isLoading() || !idProperty) {
@@ -150,11 +168,14 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
     void submit(this.accountForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
+      const sent = this.account();
       try {
-        await firstValueFrom(
-          this.taxation.saveElectronicReceiptAccount(idProperty, this.account()),
-        );
-        this.savedAccount = this.account();
+        await firstValueFrom(this.taxation.saveElectronicReceiptAccount(idProperty, sent));
+        // Once saved, PIN and password leave the page: the fields are empty again.
+        this.savedAccount = { ...sent, pin: null, password: null };
+        this.account.set(this.savedAccount);
+        this.isPinSaved.update((isSaved) => isSaved || sent.pin !== null);
+        this.isPasswordSaved.update((isSaved) => isSaved || sent.password !== null);
         this.accountForm().reset();
         this.isSaved.set(true);
         this.isEditing.set(false);
@@ -178,10 +199,6 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
     this.accountForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
-  }
-
-  hasUnsavedChanges(): boolean {
-    return this.accountForm().dirty();
   }
 
   ngOnDestroy(): void {

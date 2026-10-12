@@ -86,7 +86,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly maskedFields = EMAIL_CONFIGURATION_MASKED_FIELDS;
   protected readonly sendTestIcon = ['/assets/images/mail-send-white.svg'] as const;
   protected readonly resetIcon = ['/assets/images/trash-white.svg'] as const;
-  /** [content shown, content hidden]: the designer's eyes (Eye_close once open, Eye_start at first). */
+  /** [content shown, content hidden]: the eye icons (Eye_close once open, Eye_start at first). */
   protected readonly eyeIcons = [
     '/assets/images/eye-close.svg',
     '/assets/images/eye-start.svg',
@@ -183,7 +183,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         untracked(() => this.configurationForm.smtpPassword().markAsTouched());
       }
     });
-    // Loaded again with Reset and when the language changes (what was typed is lost: user's choice).
+    // Loaded again with Reset and when the language changes (what was typed is lost).
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
@@ -218,6 +218,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       });
       onCleanup(() => subscription.unsubscribe());
     });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.configurationForm().dirty();
   }
 
   /** Reset: the values of the server again (what was typed is lost), read-only until "Sì" again. */
@@ -293,10 +297,6 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       this.error.set(problem);
     }
     return errors;
-  }
-
-  hasUnsavedChanges(): boolean {
-    return this.configurationForm().dirty();
   }
 
   ngOnDestroy(): void {

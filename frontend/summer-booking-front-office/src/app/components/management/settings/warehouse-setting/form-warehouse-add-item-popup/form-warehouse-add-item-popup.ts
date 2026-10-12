@@ -21,7 +21,7 @@ import {
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { firstValueFrom, of, switchMap } from 'rxjs';
+import { Subscription, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -53,17 +53,19 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
   encapsulation: ViewEncapsulation.None,
 })
 export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
+  readonly added = output<void>();
+
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
-  readonly added = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
 
   private readonly articles = signal<readonly ComboboxItem[]>([]);
+  private articlesSubscription?: Subscription;
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
     this.articles().map(({ id, value }) => ({ value: id, label: value })),
   );
@@ -116,6 +118,17 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    const { idArticle, totalQuantity, thresholdQuantity, isThresholdWarningActive } = this.draft();
+    return (
+      this.open() &&
+      (idArticle !== null ||
+        totalQuantity !== null ||
+        thresholdQuantity !== null ||
+        isThresholdWarningActive)
+    );
+  }
+
   protected add(): void {
     const idProperty = this.auth.user()?.idProperty;
     if (this.isLoading() || !idProperty || !this.canAdd()) {
@@ -139,17 +152,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
         this.isLoading.set(false);
       }
     });
-  }
-
-  hasUnsavedChanges(): boolean {
-    const { idArticle, totalQuantity, thresholdQuantity, isThresholdWarningActive } = this.draft();
-    return (
-      this.open() &&
-      (idArticle !== null ||
-        totalQuantity !== null ||
-        thresholdQuantity !== null ||
-        isThresholdWarningActive)
-    );
   }
 
   protected async leave(): Promise<void> {
@@ -179,17 +181,20 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   }
 
   private loadArticles(): void {
+    // A slower answer of an earlier opening must not replace the list of this one.
+    this.articlesSubscription?.unsubscribe();
     const idProperty = this.auth.user()?.idProperty;
     if (!idProperty) {
       return;
     }
-    this.warehouse.comboboxList(idProperty).subscribe({
+    this.articlesSubscription = this.warehouse.comboboxList(idProperty).subscribe({
       next: (articles) => this.articles.set(articles),
       error: () => this.articles.set([]),
     });
   }
 
   override ngOnDestroy(): void {
+    this.articlesSubscription?.unsubscribe();
     this.unsaved.unwatch(this);
     super.ngOnDestroy();
   }

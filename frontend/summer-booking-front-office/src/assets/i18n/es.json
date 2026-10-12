@@ -375,6 +375,8 @@
             "vat_number": "NIF/IVA",
             "pin": "PIN",
             "password": "Contraseña",
+            "pin_saved": "PIN configurado: escribe para cambiarlo",
+            "password_saved": "Contraseña configurada",
             "save": "Guardar",
             "saved": "Cuenta configurada correctamente",
             "edit": "Editar",

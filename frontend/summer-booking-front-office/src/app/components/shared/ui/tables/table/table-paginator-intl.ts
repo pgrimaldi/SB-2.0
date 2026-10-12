@@ -7,6 +7,13 @@ import type { TablePaginatorTexts } from './table';
 export class TablePaginatorIntl extends MatPaginatorIntl {
   private range?: string;
 
+  override getRangeLabel = (page: number, pageSize: number, length: number): string =>
+    formatText(this.range, {
+      start: Math.min(page * pageSize + 1, length),
+      end: Math.min((page + 1) * pageSize, length),
+      total: length,
+    }) ?? '';
+
   /** Called again at every language change: `changes.next()` makes the paginator redraw. */
   setTexts(texts: TablePaginatorTexts | null | undefined): void {
     this.firstPageLabel = texts?.first ?? '';
@@ -17,11 +24,4 @@ export class TablePaginatorIntl extends MatPaginatorIntl {
     this.range = texts?.range;
     this.changes.next();
   }
-
-  override getRangeLabel = (page: number, pageSize: number, length: number): string =>
-    formatText(this.range, {
-      start: Math.min(page * pageSize + 1, length),
-      end: Math.min((page + 1) * pageSize, length),
-      total: length,
-    }) ?? '';
 }

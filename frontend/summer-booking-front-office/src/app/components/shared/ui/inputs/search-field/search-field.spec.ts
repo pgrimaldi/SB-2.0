@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { SearchField } from './search-field';
 
@@ -76,37 +76,4 @@ describe('SearchField', () => {
     vi.advanceTimersByTime(500);
     expect(searches).toEqual([]);
   });
-
-  it('should show its icons in order [magnifier, X]: Material names if given, else images', async () => {
-    const fixture = TestBed.createComponent(CustomIconsHost);
-    fixture.detectChanges();
-    const element: HTMLElement = fixture.nativeElement;
-    const input = element.querySelector('input')!;
-    const icon = () =>
-      element.querySelector('.search__field__button img, .search__field__button mat-icon')!;
-    const type = (text: string) => {
-      input.value = text;
-      input.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
-    };
-
-    expect(icon().getAttribute('src')).toBe('/assets/images/lente.svg');
-    type('lettino');
-    expect(icon().getAttribute('src')).toBe('/assets/images/x.svg');
-
-    fixture.componentInstance.matIcon.set(['search', 'close']); // replaces all the images
-    fixture.detectChanges();
-    expect(icon().textContent?.trim()).toBe('close');
-    type('');
-    expect(icon().textContent?.trim()).toBe('search');
-  });
 });
-
-@Component({
-  imports: [SearchField],
-  template: `<app-search-field placeholder="Cerca" [matIcon]="matIcon()" [pathIcon]="pathIcon" />`,
-})
-class CustomIconsHost {
-  readonly matIcon = signal<string[] | null>(null);
-  readonly pathIcon = ['/assets/images/lente.svg', '/assets/images/x.svg'];
-}

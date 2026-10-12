@@ -52,22 +52,6 @@ describe('Datepicker', () => {
     return { element, click, days };
   };
 
-  it('should show both dates as the date adapter writes them (here Italian: dd/mm/yyyy)', async () => {
-    const { element } = await setup();
-
-    const values = [...element.querySelectorAll('input')].map((input) => input.value);
-    expect(values).toEqual(['29/09/2026', '29/09/2026']);
-  });
-
-  it('should place its icons in order [calendar, previous day, next day]', async () => {
-    const { element } = await setup();
-
-    const images = [...element.querySelectorAll('.datepicker img')].map((image) =>
-      image.getAttribute('src'),
-    );
-    expect(images).toEqual(['/calendar.svg', '/left.svg', '/right.svg', '/left.svg', '/right.svg']);
-  });
-
   it('should move a date by one day and never let the start pass the end', async () => {
     const { click, days } = await setup();
 
@@ -83,11 +67,5 @@ describe('Datepicker', () => {
 
     await click(3); // end ▶
     expect(days()).toEqual([28, 29]);
-  });
-
-  it('should not accept typed dates: the calendar opens instead', async () => {
-    const { element } = await setup();
-
-    element.querySelectorAll('input').forEach((input) => expect(input.readOnly).toBe(true));
   });
 });

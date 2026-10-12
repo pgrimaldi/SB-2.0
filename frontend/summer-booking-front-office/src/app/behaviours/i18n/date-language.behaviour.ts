@@ -18,7 +18,7 @@ const DATE_LOCALES: Record<Language, string> = {
 };
 
 /**
- * Dates always in the Gregorian calendar with the digits 0-9 (user, 09/10/2026): Arabic would
+ * Dates always in the Gregorian calendar with the digits 0-9: Arabic would
  * otherwise use the Islamic calendar and the Eastern Arabic digits. Locales that already do keep
  * their tag as it is.
  */

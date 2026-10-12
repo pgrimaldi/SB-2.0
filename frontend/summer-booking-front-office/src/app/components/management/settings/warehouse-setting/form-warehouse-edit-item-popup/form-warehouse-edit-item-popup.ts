@@ -46,14 +46,15 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
   encapsulation: ViewEncapsulation.None,
 })
 export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
+  readonly item = input<WarehouseItem | null>(null);
+  readonly saved = output<void>();
+
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
-  readonly item = input<WarehouseItem | null>(null);
-  readonly saved = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
 
@@ -108,6 +109,18 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    if (!this.open() || !this.opened) {
+      return false;
+    }
+    const draft = this.draft();
+    return (
+      draft.totalQuantity !== this.opened.totalQuantity ||
+      draft.thresholdQuantity !== this.opened.thresholdQuantity ||
+      draft.isThresholdWarningActive !== this.opened.isThresholdWarningActive
+    );
+  }
+
   protected save(): void {
     const idProperty = this.auth.user()?.idProperty;
     if (this.isLoading() || !idProperty || !this.canSave()) {
@@ -131,18 +144,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
         this.isLoading.set(false);
       }
     });
-  }
-
-  hasUnsavedChanges(): boolean {
-    if (!this.open() || !this.opened) {
-      return false;
-    }
-    const draft = this.draft();
-    return (
-      draft.totalQuantity !== this.opened.totalQuantity ||
-      draft.thresholdQuantity !== this.opened.thresholdQuantity ||
-      draft.isThresholdWarningActive !== this.opened.isThresholdWarningActive
-    );
   }
 
   protected async leave(): Promise<void> {

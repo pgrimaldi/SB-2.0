@@ -375,6 +375,8 @@
             "vat_number": "VAT number",
             "pin": "PIN",
             "password": "Password",
+            "pin_saved": "PIN set: type to change it",
+            "password_saved": "Password set",
             "save": "Save",
             "saved": "Account set up successfully",
             "edit": "Edit",

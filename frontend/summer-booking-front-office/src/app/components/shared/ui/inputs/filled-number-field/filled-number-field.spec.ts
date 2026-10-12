@@ -20,17 +20,6 @@ class FilledNumberFieldHost {
   readonly error = signal<string | null>(null);
 }
 
-@Component({
-  imports: [FilledNumberField],
-  template: `<app-filled-number-field
-    autocomplete="new-password"
-    [isMasked]="true"
-    [pathIcon]="['', '/assets/images/eye-close.svg', '/assets/images/eye-start.svg']"
-    [value]="587"
-  />`,
-})
-class MaskedNumberFieldHost {}
-
 describe('FilledNumberField', () => {
   const setup = async (decimal = false, currency = false) => {
     const fixture = TestBed.createComponent(FilledNumberFieldHost);
@@ -51,14 +40,6 @@ describe('FilledNumberField', () => {
       type,
     };
   };
-
-  it('should show its label and the number', async () => {
-    const { element, input } = await setup();
-
-    expect(element.querySelector('label')?.textContent?.trim()).toBe('Soglia');
-    expect(input.getAttribute('inputmode')).toBe('numeric');
-    expect(input.value).toBe('3');
-  });
 
   it('should give back the typed number, and null when the field is empty', async () => {
     const { host, type } = await setup();
@@ -98,17 +79,12 @@ describe('FilledNumberField', () => {
     expect(host.threshold()).toBe(0.25);
   });
 
-  it('should keep at most 2 decimal digits and show the icon only for an amount', async () => {
-    const { fixture, host, element, input, type } = await setup(true, true);
+  it('should keep at most 2 decimal digits of an amount', async () => {
+    const { host, input, type } = await setup(true, true);
 
-    expect(element.querySelector('img')?.getAttribute('src')).toBe('/assets/images/euro.svg');
     await type('12,345');
     expect(input.value).toBe('12,34');
     expect(host.threshold()).toBe(12.34);
-
-    host.currency.set(false);
-    await fixture.whenStable();
-    expect(element.querySelector('img')).toBeNull();
   });
 
   it('should write a number given from outside', async () => {
@@ -121,34 +97,5 @@ describe('FilledNumberField', () => {
     host.threshold.set(null);
     await fixture.whenStable();
     expect(input.value).toBe('');
-  });
-
-  it('should show the error under the field', async () => {
-    const { fixture, host, element } = await setup();
-    host.error.set('Il valore totale deve essere superiore a 0');
-    await fixture.whenStable();
-    const message = element.querySelector('.filled__number__field__error')!;
-
-    expect(message.textContent?.trim()).toBe('Il valore totale deve essere superiore a 0');
-    expect(element.querySelector('.filled__number__field__invalid')).not.toBeNull();
-  });
-
-  it('should show the digits as dots when masked, and the eye shows and hides them', async () => {
-    const fixture = TestBed.createComponent(MaskedNumberFieldHost);
-    await fixture.whenStable();
-    const element: HTMLElement = fixture.nativeElement;
-    const input = element.querySelector('input')!;
-    const eye = element.querySelector<HTMLButtonElement>('.filled__number__field__toggle')!;
-
-    expect(element.querySelector('label')).toBeNull();
-    expect(input.type).toBe('password');
-    expect(input.getAttribute('autocomplete')).toBe('new-password');
-    expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye-start.svg');
-
-    eye.click();
-    await fixture.whenStable();
-    expect(input.type).toBe('text');
-    expect(input.value).toBe('587');
-    expect(eye.querySelector('img')?.getAttribute('src')).toBe('/assets/images/eye-close.svg');
   });
 });

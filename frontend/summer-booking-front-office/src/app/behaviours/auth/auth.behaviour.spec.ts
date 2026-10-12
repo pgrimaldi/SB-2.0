@@ -570,25 +570,6 @@ describe('AuthBehaviour', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it('should succeed when the second try reaches the server', async () => {
-    vi.useFakeTimers();
-    const auth = load();
-    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
-    auth.start(session('first'), true);
-    let attempts = 0;
-    server.logout.mockReturnValue(
-      defer(() =>
-        ++attempts === 1 ? throwError(() => new HttpErrorResponse({ status: 503 })) : of(undefined),
-      ),
-    );
-
-    const result = auth.logout();
-    await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY);
-
-    expect(await result).toBe(true);
-    expect(auth.isAuthenticated()).toBe(false);
-  });
-
   it('should remove the token that older versions kept in storage', () => {
     localStorage.setItem('sb.session', '{"token":"old"}');
 

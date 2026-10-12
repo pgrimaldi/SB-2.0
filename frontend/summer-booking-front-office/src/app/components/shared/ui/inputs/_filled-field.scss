@@ -1,9 +1,8 @@
 @use '@angular/material' as mat;
 
-// Form fields of the designer's mockup of the form popups (02/10/2026). $block is the component
-// name (e.g. filled__text__field) used by its classes. A page can make the fields bigger with
+// Form fields of the form popups. $block is the component name (e.g. filled__text__field) used by its classes. A page can make the fields bigger with
 // --filled-field-height, --filled-field-text-size and --filled-field-line-height (defaults: the popups).
-// At a glance (user, 06/10/2026): white with a thin border when the field can be changed, grey with
+// At a glance: white with a thin border when the field can be changed, grey with
 // grey text when it is read-only or disabled (class $block__locked).
 @mixin filled-field($block) {
   :host {
@@ -53,13 +52,13 @@
   // width are variables, so the states only change them. Material rounds only the top of a filled
   // field: here the field is round all around.
   .#{$block}__control {
-    // Soft blue of the labels (user's choice among four, 06/10/2026): in theme and light.
+    // Soft blue of the labels, in theme and light.
     --filled-field-border-color: var(--color__layout__text__soft);
     --filled-field-border-width: 0.0625rem;
 
     width: 100%;
 
-    // While typing: the same soft blue, only thicker (user).
+    // While typing: the same soft blue, only thicker.
     &:focus-within {
       --filled-field-border-width: 0.125rem;
     }

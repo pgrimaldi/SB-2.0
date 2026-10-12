@@ -1,6 +1,6 @@
 @use '@angular/material' as mat;
 
-// Same mockup as the popup to add an article (designer's mockup, 02/10/2026).
+// Same measures as the popup to add an article.
 // The popup renders in an overlay outside the component: these styles are global.
 .form__warehouse__edit__item__popup__panel {
   @include mat.dialog-overrides(

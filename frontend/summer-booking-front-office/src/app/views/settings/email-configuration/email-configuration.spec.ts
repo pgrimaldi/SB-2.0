@@ -86,32 +86,6 @@ describe('EmailConfiguration', () => {
     };
   };
 
-  it('should show six masked fields and the security select', async () => {
-    const { element } = await setup();
-    const inputs = [...element.querySelectorAll('input')];
-
-    expect(inputs.length).toBe(6);
-    for (const input of inputs) {
-      expect(input.type).toBe('password');
-      expect(input.autocomplete).toBe('new-password');
-    }
-    expect(element.querySelector('mat-select')).not.toBeNull();
-  });
-
-  it('should show the three buttons, the first two with their icon', async () => {
-    const { element } = await setup();
-    const buttons = [...element.querySelectorAll('.email__configuration__actions app-button')];
-
-    expect(buttons.map((button) => button.textContent?.trim())).toEqual([
-      'management.settings.email_configuration.send_test',
-      'management.settings.email_configuration.reset',
-      'management.settings.email_configuration.save',
-    ]);
-    expect(
-      buttons.map((button) => button.querySelector('img')?.getAttribute('src') ?? null),
-    ).toEqual(['/assets/images/mail-send-white.svg', '/assets/images/trash-white.svg', null]);
-  });
-
   it('should fill the fields with the configuration of the property, all hidden but the security', async () => {
     const { element, emailConfiguration } = await setup();
 

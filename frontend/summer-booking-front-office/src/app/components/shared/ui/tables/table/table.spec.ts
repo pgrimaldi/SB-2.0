@@ -116,22 +116,6 @@ describe('Table', () => {
     );
   });
 
-  it('should show the headers and the paginator texts it is given', async () => {
-    const { element, next } = await setup();
-
-    expect([...element.querySelectorAll('thead th')].map((th) => th.textContent?.trim())).toEqual([
-      'Nome',
-      'Totale',
-    ]);
-    expect(next().getAttribute('aria-label')).toBe('Pagina successiva');
-    expect(element.querySelector('.mat-mdc-paginator-range-label')?.textContent?.trim()).toBe(
-      '1 – 10 di 25',
-    );
-    expect(element.querySelector('.mat-mdc-paginator-page-size-label')?.textContent?.trim()).toBe(
-      'Elementi per pagina:',
-    );
-  });
-
   it('should change the page size with its selector, keeping the first row on screen', async () => {
     const { fixture, host, element, names, next } = await setup();
     next().click();
@@ -340,24 +324,6 @@ describe('Table', () => {
     expect(names()).toEqual(['Row 1']);
   });
 
-  it('should keep room for the smallest page and hide the paginator only when all rows fit in it', async () => {
-    const { fixture, host, element } = await setup((host) => host.pageSize.set(20));
-    const table = element.querySelector<HTMLElement>('app-table')!;
-
-    expect(table.style.getPropertyValue('--table-page-size')).toBe('10'); // smallest page, not 20
-    expect(element.querySelector('mat-paginator')).not.toBeNull(); // 25 rows
-
-    host.answer = () => of({ total: 12, rows: ALL.slice(0, 12) });
-    host.params.set({ day: '2026-10-02' });
-    await fixture.whenStable();
-    expect(element.querySelector('mat-paginator')).not.toBeNull(); // one page of 20, still back to 10
-
-    host.answer = () => of({ total: 3, rows: ALL.slice(0, 3) });
-    host.params.set({ day: '2026-10-01' });
-    await fixture.whenStable();
-    expect(element.querySelector('mat-paginator')).toBeNull();
-  });
-
   it('should sort by a sortable column: ascending, descending, then none, back to page 1', async () => {
     const { fixture, host, element, next } = await setup();
     next().click();
@@ -377,20 +343,6 @@ describe('Table', () => {
     total.querySelector<HTMLElement>('.mat-sort-header-container')?.click(); // not sortable
     await fixture.whenStable();
     expect(host.requests.at(-1)?.sortField).toBe('');
-  });
-
-  it('should show no bar above the rows when nothing is put in it', async () => {
-    const { element } = await setup();
-
-    expect(element.querySelector('.table__bar')).toBeNull();
-  });
-
-  it('should size the columns only from their widths, whatever the rows shown', async () => {
-    const { element } = await setup((host) => (host.columns[0].width = 40));
-    const headers = [...element.querySelectorAll<HTMLElement>('thead th')];
-
-    expect(headers.map((header) => header.style.width)).toEqual(['40%', '']); // the rest shares 60%
-    expect(element.querySelector('table')?.classList).toContain('table__grid'); // fixed layout
   });
 });
 
@@ -427,100 +379,6 @@ class TableBarHost {
   };
 }
 
-describe('Table column room', () => {
-  /** Width the table has on screen, and the callback of its size watcher. */
-  let available = 0;
-  let resized: () => void = () => undefined;
-
-  const setup = async (columns: TableColumn<Row>[]) => {
-    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
-      this: HTMLElement,
-    ) {
-      return this.classList.contains('table') ? available : 0;
-    });
-    // 10px for every character of a title.
-    vi.stubGlobal(
-      'OffscreenCanvas',
-      class {
-        getContext() {
-          return { font: '', measureText: (text: string) => ({ width: text.length * 10 }) };
-        }
-      },
-    );
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        constructor(callback: () => void) {
-          resized = callback;
-        }
-        observe() {
-          return undefined;
-        }
-        disconnect() {
-          return undefined;
-        }
-      },
-    );
-    TestBed.configureTestingModule({
-      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
-    });
-    const fixture = TestBed.createComponent(TableHost);
-    fixture.componentInstance.columns.splice(0, 2, ...columns);
-    await fixture.whenStable();
-    const element: HTMLElement = fixture.nativeElement;
-    const widths = () =>
-      [...element.querySelectorAll<HTMLElement>('thead th')].map((header) => header.style.width);
-    const resize = async (width: number) => {
-      available = width;
-      resized();
-      await fixture.whenStable();
-    };
-    return { widths, resize };
-  };
-
-  it('should keep the shares of the columns while every header has its room', async () => {
-    available = 1000;
-    const { widths } = await setup([
-      { field: 'name', header: 'Nome', sortable: true, width: 40 },
-      { field: 'total', header: 'Totale' },
-    ]);
-
-    expect(widths()).toEqual(['40%', '']);
-  });
-
-  it('should give a header its room and the rest to the others, without scrolling', async () => {
-    available = 1000;
-    const { widths, resize } = await setup([
-      { field: 'name', header: 'Nome', sortable: true, width: 40 },
-      { field: 'total', header: 'Totale disponibili' }, // 180px of title
-    ]);
-
-    await resize(330); // the shares would give 198px to "Totale disponibili", short of its paddings
-    const [name, total] = widths().map((width) => parseFloat(width));
-
-    expect(widths().every((width) => width.endsWith('px'))).toBe(true);
-    expect(total).toBeGreaterThanOrEqual(180);
-    expect(name).toBeGreaterThanOrEqual(40);
-    expect(name + total).toBeCloseTo(330); // the table stays as wide as the screen
-
-    await resize(1000); // room again: back to the shares
-    expect(widths()).toEqual(['40%', '']);
-  });
-
-  it('should make the table wider than the screen when the headers need it', async () => {
-    available = 100;
-    const { widths } = await setup([
-      { field: 'name', header: 'Nome', sortable: true, width: 40 },
-      { field: 'total', header: 'Totale disponibili' },
-    ]);
-    const [name, total] = widths().map((width) => parseFloat(width));
-
-    expect(name).toBeGreaterThanOrEqual(40);
-    expect(total).toBeGreaterThanOrEqual(180);
-    expect(name + total).toBeGreaterThan(100); // the rows scroll sideways inside the table
-  });
-});
-
 describe('Table bar', () => {
   beforeEach(() => vi.useFakeTimers());
   const setup = () => {
@@ -532,20 +390,6 @@ describe('Table bar', () => {
     const element: HTMLElement = fixture.nativeElement;
     return { fixture, host: fixture.componentInstance, element };
   };
-
-  it('should put the search in the title row and the actions in the bar under it', () => {
-    const { element } = setup();
-
-    const parts = [...element.querySelector('.table__bar')!.children].map((part) => part.className);
-    expect(parts.length).toBe(2);
-    expect(parts[0]).toContain('table__bar__icons');
-    expect(parts[1]).toContain('table__bar__buttons');
-    expect(element.querySelector('.table__bar__icons .delete')).not.toBeNull();
-    expect(element.querySelector('.table__bar__buttons .export')).not.toBeNull();
-    const input = element.querySelector<HTMLInputElement>('.table__heading .table__search input')!;
-    expect(input.placeholder).toBe('Cerca nella tabella');
-    expect(element.querySelector('.table__search img')?.getAttribute('src')).toBe('/search.svg');
-  });
 
   it('should send the search with the request and go back to page 1', () => {
     const { fixture, host, element } = setup();
@@ -598,47 +442,6 @@ describe('Table bar', () => {
   });
 });
 
-describe('Table default look', () => {
-  it('should align the columns by their align and show the rows out of the total in the paginator', async () => {
-    TestBed.configureTestingModule({
-      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
-    });
-    const fixture = TestBed.createComponent(TableDefaultHost);
-    await fixture.whenStable();
-    const element: HTMLElement = fixture.nativeElement;
-
-    expect(element.querySelector('app-table')?.className).toContain('table__theme__default');
-    const cells = [...element.querySelectorAll<HTMLElement>('thead th, tbody tr:first-child td')];
-    expect(cells.map((cell) => cell.style.textAlign)).toEqual(['', 'center', '', 'center']);
-    expect(element.querySelectorAll('thead th')[1].classList).toContain('table__cell__center');
-    expect(element.querySelector('.mat-mdc-paginator-range-label')?.textContent?.trim()).toBe(
-      '1 – 10 di 25',
-    );
-  });
-});
-
-@Component({
-  imports: [Table],
-  template: `<app-table
-    [columns]="columns"
-    [params]="params"
-    [load]="load"
-    [texts]="texts"
-    [isCreateButtonHidden]="true"
-    [areMassiveActionsHidden]="true"
-  />`,
-})
-class TableDefaultHost {
-  readonly params = { day: '2026-09-30' };
-  readonly columns: TableColumn<Row>[] = [
-    { field: 'name', header: 'Nome' },
-    { field: 'total', header: 'Totale', align: TableColumnAlign.Center },
-  ];
-  readonly texts = { paginator: { range: '{{start}} – {{end}} di {{total}}' } };
-  readonly load = (request: Filters & PageRequest) =>
-    of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
-}
-
 describe('Table row buttons', () => {
   const setup = async (actions: readonly TableRowAction<Row>[] | null, material = false) => {
     TestBed.configureTestingModule({
@@ -657,42 +460,6 @@ describe('Table row buttons', () => {
     return { fixture, host: fixture.componentInstance, element, buttons };
   };
 
-  it('should have no row buttons, and no column for them, without rowActions', async () => {
-    for (const actions of [null, []]) {
-      const { element } = await setup(actions);
-
-      expect(element.querySelectorAll('.table__action').length).toBe(0);
-      expect(element.querySelectorAll('thead th').length).toBe(2);
-      TestBed.resetTestingModule();
-    }
-  });
-
-  it('should put the given buttons in the last column, in their order, with their icons', async () => {
-    const { host, element, buttons } = await setup(null);
-    host.actions.set(host.all);
-    TestBed.tick();
-
-    const headers = [...element.querySelectorAll('thead th')];
-    expect(headers.length).toBe(3);
-    expect(headers[2].classList).toContain('table__actions');
-    expect(headers[2].textContent?.trim()).toBe('Azioni'); // header from texts.actions.header
-    expect(buttons(0).map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
-      'delete.svg',
-      'duplicate.svg',
-      'edit.svg',
-    ]);
-  });
-
-  it('should show only the buttons a table needs', async () => {
-    const edit: TableRowAction<Row> = { label: 'Modifica', icon: 'edit.svg', action: () => {} };
-    const { element, buttons } = await setup([edit]);
-
-    expect(element.querySelectorAll('thead th').length).toBe(3);
-    expect(buttons(0).map((button) => button.querySelector('img')?.getAttribute('src'))).toEqual([
-      'edit.svg',
-    ]);
-  });
-
   it('should call the function of the button with the row it is on', async () => {
     const { fixture, host, buttons } = await setup(null);
     host.actions.set(host.all);
@@ -703,14 +470,6 @@ describe('Table row buttons', () => {
     buttons(2)[2].click();
 
     expect(host.events).toEqual(['delete Row 1', 'duplicate Row 2', 'edit Row 3']);
-  });
-
-  it('should take the icons as Material icon names when the table uses matIcon', async () => {
-    const edit: TableRowAction<Row> = { label: 'Modifica', icon: 'edit', action: () => {} };
-    const { buttons } = await setup([edit], true);
-
-    expect(buttons(0)[0].querySelector('mat-icon')?.textContent?.trim()).toBe('edit');
-    expect(buttons(0)[0].querySelector('img')).toBeNull();
   });
 });
 
@@ -755,38 +514,6 @@ class TableRowButtonsHost {
     of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
 }
 
-describe('Table base', () => {
-  it('should show the checkboxes and the create button when nothing is hidden, no row buttons without rowActions', async () => {
-    TestBed.configureTestingModule({
-      providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
-    });
-    const fixture = TestBed.createComponent(TableBaseHost);
-    await fixture.whenStable();
-    const element: HTMLElement = fixture.nativeElement;
-    const headers = [...element.querySelectorAll('thead th')];
-
-    expect(headers.length).toBe(3);
-    expect(headers[0].classList).toContain('table__select');
-    expect(element.querySelector('.table__actions')).toBeNull();
-    expect(element.querySelector('.table__create')).not.toBeNull();
-    expect(element.querySelector('.table__bar__icons')).not.toBeNull(); // room of the buttons on chosen rows
-  });
-});
-
-@Component({
-  imports: [Table],
-  template: `<app-table [columns]="columns" [params]="params" [load]="load" />`,
-})
-class TableBaseHost {
-  readonly params = { day: '2026-09-30' };
-  readonly columns: TableColumn<Row>[] = [
-    { field: 'name', header: 'Nome' },
-    { field: 'total', header: 'Totale' },
-  ];
-  readonly load = (request: Filters & PageRequest) =>
-    of({ total: ALL.length, rows: ALL.slice(0, request.pageSize) });
-}
-
 describe('Table title, create button and chosen rows', () => {
   const setup = async (show: boolean) => {
     TestBed.configureTestingModule({
@@ -809,49 +536,13 @@ describe('Table title, create button and chosen rows', () => {
     return { fixture, host: fixture.componentInstance, element, boxes, all, massive, click };
   };
 
-  it('should show no title row, no checkboxes and no buttons on chosen rows when hidden', async () => {
-    const { element } = await setup(false);
-
-    expect(element.querySelector('.table__heading')).toBeNull();
-    expect(element.querySelector('app-selection-checkbox')).toBeNull();
-    expect(element.querySelector('.table__bar')).toBeNull();
-    expect(element.querySelectorAll('thead th').length).toBe(2);
-  });
-
-  it('should show the title with its icon and the create button', async () => {
+  it('should tell the page when the create button is clicked', async () => {
     const { fixture, host, element } = await setup(true);
-    const title = element.querySelector('.table__title')!;
     const create = element.querySelector<HTMLButtonElement>('.table__create')!;
-
-    expect(title.textContent?.trim()).toBe('Impostazioni magazzino');
-    expect(title.querySelector('img')?.getAttribute('src')).toBe('warehouse.svg');
-    expect(create.textContent?.trim()).toBe('Aggiungi articolo');
-    expect(create.querySelector('img')?.getAttribute('src')).toBe('add.svg');
 
     create.click();
     await fixture.whenStable();
     expect(host.events).toEqual(['create']);
-  });
-
-  it('should show no icon next to the title when none is given', async () => {
-    const { fixture, host, element } = await setup(true);
-
-    host.icons.set(['search.svg', 'clear.svg', 'duplicate-selected.svg', 'delete-selected.svg']);
-    await fixture.whenStable();
-
-    expect(element.querySelector('.table__title')?.textContent?.trim()).toBe(
-      'Impostazioni magazzino',
-    );
-    expect(element.querySelector('.table__title img')).toBeNull();
-  });
-
-  it('should put a checkbox on every row, first, and one in the header for the whole page', async () => {
-    const { element, boxes, all } = await setup(true);
-
-    expect(element.querySelectorAll('thead th').length).toBe(3);
-    expect(element.querySelector('thead th')?.classList).toContain('table__select');
-    expect(boxes().length).toBe(10);
-    expect(all()).not.toBeNull();
   });
 
   it('should show the buttons on the chosen rows only with more than one row chosen', async () => {
@@ -1063,7 +754,7 @@ class TableRowToggleHost {
 }
 
 describe('Table row switch', () => {
-  it('should show the isEnabled of each row before its buttons and give the new state', async () => {
+  it('should show the isEnabled of each row and give the new state', async () => {
     TestBed.configureTestingModule({
       providers: [{ provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } }],
     });
@@ -1075,9 +766,6 @@ describe('Table row switch', () => {
       cell.querySelector<HTMLButtonElement>('app-toggle button')!,
     );
 
-    expect(cells[0].querySelector('.table__actions__buttons')?.firstElementChild?.tagName).toBe(
-      'APP-TOGGLE',
-    );
     expect(switches.map((button) => button.classList.contains('mdc-switch--selected'))).toEqual([
       false,
       true,

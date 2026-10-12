@@ -1,6 +1,5 @@
 @use '@angular/material' as mat;
 
-// Designer's mockup of Fiscalizzazione, "Aggiungi nuova stampante" (12/10/2026).
 // The popup renders in an overlay outside the component: these styles are global.
 .add__printer__item__popup__panel {
   @include mat.dialog-overrides(
@@ -133,7 +132,7 @@ app-add-printer-item-popup {
   margin-top: 1.625rem;
 }
 
-// From 1280px (720p, and so 1080p too: user, 12/10/2026): Nome and Modello on one row (half each), Indirizzo IP, Porta and SSL on the
+// From 1280px (720p, and so 1080p too): Nome and Modello on one row (half each), Indirizzo IP, Porta and SSL on the
 // next (60%, 20%, 20%); the order of the fields in the page stays the one of the smaller screens.
 // The rates go three on the first row and two, centred, on the second (six
 // columns: two each, the second row starts half a rate in); only the first has the label

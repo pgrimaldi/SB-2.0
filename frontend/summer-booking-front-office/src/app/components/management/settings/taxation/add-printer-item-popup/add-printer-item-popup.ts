@@ -54,13 +54,14 @@ const VAT_RATES = ['0', '4', '5', '10', '22'];
   encapsulation: ViewEncapsulation.None,
 })
 export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
+  readonly added = output<void>();
+
   private readonly taxation = inject(TaxationService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
-  readonly added = output<void>();
   protected readonly ButtonSize = ButtonSize;
   protected readonly vatRateOptions: readonly SelectOption[] = VAT_RATES.map((rate) => ({
     value: rate,
@@ -105,6 +106,12 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return (
+      this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new AddPrinterItemRequest())
+    );
+  }
+
   protected save(): void {
     const idProperty = this.auth.user()?.idProperty;
     if (this.isLoading() || !idProperty) {
@@ -127,12 +134,6 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
         this.isLoading.set(false);
       }
     });
-  }
-
-  hasUnsavedChanges(): boolean {
-    return (
-      this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new AddPrinterItemRequest())
-    );
   }
 
   protected async leave(): Promise<void> {

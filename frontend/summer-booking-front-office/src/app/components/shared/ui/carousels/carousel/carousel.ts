@@ -39,11 +39,12 @@ export class Carousel implements OnDestroy {
   /** Icons as image paths, used when `matIcon` is not given: [previous arrow, next arrow]. */
   readonly pathIcon = input<readonly string[] | null>();
 
+  private readonly directionality = inject(Directionality);
+
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   /** Right to left (Arabic): the slides start on the right and the next ones come from the left. */
   protected readonly isRightToLeft = computed(() => this.directionality.valueSignal() === 'rtl');
 
-  private readonly directionality = inject(Directionality);
   private readonly slideDirectives = contentChildren(CarouselSlide);
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
   private readonly viewportWidth = signal(0);

@@ -113,19 +113,25 @@ export class Database {
         (
           this.translateService.get('management.settings.database') as Observable<DatabaseTexts>
         ).pipe(
-          map((texts) => ({
-            total: page.total,
-            rows: page.rows.map((item) => this.toRow(item, texts)),
-          })),
+          map((texts) => {
+            const day = new Intl.DateTimeFormat(this.dateLanguage.locale(), {
+              ...DATE_FORMATS.display.dateInput,
+              timeZone: 'UTC',
+            });
+            return {
+              total: page.total,
+              rows: page.rows.map((item) => this.toRow(item, texts, day)),
+            };
+          }),
         ),
       ),
     );
 
-  private toRow(item: ExistingBookingItem, texts: DatabaseTexts): ExistingBookingRow {
-    const day = new Intl.DateTimeFormat(this.dateLanguage.locale(), {
-      ...DATE_FORMATS.display.dateInput,
-      timeZone: 'UTC',
-    });
+  private toRow(
+    item: ExistingBookingItem,
+    texts: DatabaseTexts,
+    day: Intl.DateTimeFormat,
+  ): ExistingBookingRow {
     return {
       ...item,
       reservationKind: item.reservationKind

@@ -375,6 +375,8 @@
             "vat_number": "Numéro de TVA",
             "pin": "PIN",
             "password": "Mot de passe",
+            "pin_saved": "PIN défini : saisissez-le pour le modifier",
+            "password_saved": "Mot de passe défini",
             "save": "Enregistrer",
             "saved": "Compte configuré avec succès",
             "edit": "Modifier",

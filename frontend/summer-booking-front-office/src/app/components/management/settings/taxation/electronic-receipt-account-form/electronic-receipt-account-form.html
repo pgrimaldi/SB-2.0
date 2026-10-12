@@ -28,6 +28,11 @@
       [isPasswordField]="item.isSecret"
       [pathIcon]="item.isSecret ? eyeIcons : null"
       [autocomplete]="item.isSecret ? 'new-password' : undefined"
+      [placeholder]="
+        item.isSecretSaved?.()
+          ? ('management.settings.taxation.receipt.account.' + item.key + '_saved' | translate)
+          : ''
+      "
       [formField]="item.field"
       [error]="item.error()"
     />

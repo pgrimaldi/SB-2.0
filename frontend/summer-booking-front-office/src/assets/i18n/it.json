@@ -375,6 +375,8 @@
             "vat_number": "Partita IVA",
             "pin": "PIN",
             "password": "Password",
+            "pin_saved": "PIN impostato: scrivi per cambiarlo",
+            "password_saved": "Password impostata",
             "save": "Salva",
             "saved": "Account configurato con successo",
             "edit": "Modifica",

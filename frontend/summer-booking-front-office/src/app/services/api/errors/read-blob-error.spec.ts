@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { FRONTEND_ERROR_CODES } from '../../../entities/errors/api-problem';
 import { readBlobError } from './read-blob-error';
 import { toApiProblem } from './to-api-problem';
 
@@ -25,7 +26,9 @@ describe('readBlobError', () => {
   it('should treat a body that is not JSON as an answer in another format', async () => {
     const error = new HttpErrorResponse({ status: 500, error: new Blob(['<html>']) });
 
-    expect((await problemOf(error)).code).not.toBe('operation.not_allowed');
-    expect((await problemOf(error)).status).toBe(500);
+    expect(await problemOf(error)).toEqual({
+      status: 500,
+      code: FRONTEND_ERROR_CODES.unexpected,
+    });
   });
 });

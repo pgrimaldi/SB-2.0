@@ -109,7 +109,7 @@ describe('ElectronicReceiptAccountForm', () => {
     ).toBeTruthy();
   });
 
-  it('should lock the saved account behind Modifica, which opens all but the password, and Annulla', async () => {
+  it('should empty PIN and password once saved and lock the account behind Modifica, which opens all but the password, and Annulla', async () => {
     const { fixture, element, inputs, type, settle, saveElectronicReceiptAccount } = await setup();
     saveElectronicReceiptAccount.mockReturnValue(of(undefined));
     const button = (name: string) =>
@@ -127,6 +127,15 @@ describe('ElectronicReceiptAccountForm', () => {
 
     button('save')!.click();
     await settle();
+    expect(saveElectronicReceiptAccount).toHaveBeenCalledWith(
+      'p1',
+      expect.objectContaining({ password: 'segreta-1' }),
+    );
+    expect(inputs()[9].value).toBe('');
+    expect(inputs()[9].placeholder).toBe(
+      'management.settings.taxation.receipt.account.password_saved',
+    );
+    expect(inputs()[8].placeholder).toBe('');
     expect(editable()).toEqual([]);
     expect(button('save')).toBeNull();
     expect(button('cancel')).toBeNull();
@@ -143,6 +152,7 @@ describe('ElectronicReceiptAccountForm', () => {
     button('cancel')!.click();
     await fixture.whenStable();
     expect(inputs()[0].value).toBe('Bagno Esempio');
+    expect(inputs()[9].value).toBe('');
     expect(editable()).toEqual([]);
     expect(button('edit')).not.toBeNull();
   });
