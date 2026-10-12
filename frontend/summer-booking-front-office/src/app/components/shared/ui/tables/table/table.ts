@@ -203,6 +203,8 @@ export class Table<T, P extends object> implements OnDestroy {
   readonly rowToggle = input<TableRowToggle<T> | null>(null);
   /** Hides the row checkboxes and the buttons on the chosen rows (duplicate, delete). */
   readonly areMassiveActionsHidden = input(false);
+  /** Row checkboxes even with `areMassiveActionsHidden`, for pages with their own actions. */
+  readonly isSelectable = input(false);
   readonly isCreateButtonHidden = input(false);
   /**
    * Icons as Material icon names (Material Symbols font): [search magnifier, search X, duplicate
@@ -317,10 +319,13 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly empty = computed(() => this.result() !== NO_ROWS && this.rows().length === 0);
   protected readonly total = computed(() => this.result().total);
   protected readonly fields = computed(() => [
-    ...(this.areMassiveActionsHidden() ? [] : [SELECT_COLUMN]),
+    ...(this.hasSelectColumn() ? [SELECT_COLUMN] : []),
     ...this.columns().map((column) => column.field),
     ...(this.hasRowActions() ? [ROW_ACTIONS_COLUMN] : []),
   ]);
+  protected readonly hasSelectColumn = computed(
+    () => !this.areMassiveActionsHidden() || this.isSelectable(),
+  );
   protected readonly rowActionsColumn = ROW_ACTIONS_COLUMN;
   protected readonly hasRowActions = computed(
     () => (this.rowActions()?.length ?? 0) > 0 || !!this.rowToggle(),
@@ -421,7 +426,7 @@ export class Table<T, P extends object> implements OnDestroy {
   private fitColumns(): readonly number[] | null {
     this.layoutChanges();
     const columns = this.columns();
-    const first = this.areMassiveActionsHidden() ? 0 : 1; // the checkboxes come before the columns
+    const first = this.hasSelectColumn() ? 1 : 0; // the checkboxes come before the columns
     const others = first + (this.hasRowActions() ? 1 : 0);
     this.useAppTheme(); // paddings and font weight of the headers depend on the look
     const grid = this.grid().nativeElement;

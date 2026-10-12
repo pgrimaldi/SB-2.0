@@ -1,0 +1,26 @@
+<main class="database">
+  <h1 class="database__title">{{ 'management.settings.database.title' | translate }}</h1>
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="params()"
+    [load]="load"
+    idField="idBooking"
+    [texts]="'table' | translate"
+    [isSearchable]="true"
+    [areMassiveActionsHidden]="true"
+    [isSelectable]="true"
+    [(selection)]="idSelectedBookings"
+    [isCreateButtonHidden]="true"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+  />
+</main>
+
+<app-table-error-popup
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

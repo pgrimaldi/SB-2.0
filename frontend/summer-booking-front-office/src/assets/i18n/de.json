@@ -381,6 +381,27 @@
             "cancel": "Abbrechen"
           }
         }
+      },
+      "database": {
+        "title": "Daten nach Gruppe löschen",
+        "table": {
+          "customer": "Kunde",
+          "reservation_kind": "Buchungsart",
+          "date_from": "Von",
+          "date_to": "bis",
+          "agreement": "Vereinbarungen",
+          "reservation_status": "Status"
+        },
+        "reservation_kind": {
+          "spot": "Platz",
+          "service": "Leistungen"
+        },
+        "reservation_status": {
+          "pending": "Ausstehend",
+          "confirmed": "Bestätigt",
+          "cancelled": "Storniert",
+          "no_show": "Nicht erschienen"
+        }
       }
     }
   },

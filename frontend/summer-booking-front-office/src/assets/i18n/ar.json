@@ -381,6 +381,27 @@
             "cancel": "إلغاء"
           }
         }
+      },
+      "database": {
+        "title": "حذف البيانات حسب المجموعة",
+        "table": {
+          "customer": "العميل",
+          "reservation_kind": "نوع الحجز",
+          "date_from": "من",
+          "date_to": "إلى",
+          "agreement": "الاتفاقيات",
+          "reservation_status": "الحالة"
+        },
+        "reservation_kind": {
+          "spot": "موقع",
+          "service": "خدمات"
+        },
+        "reservation_status": {
+          "pending": "قيد الانتظار",
+          "confirmed": "مؤكد",
+          "cancelled": "ملغى",
+          "no_show": "لم يحضر"
+        }
       }
     }
   },

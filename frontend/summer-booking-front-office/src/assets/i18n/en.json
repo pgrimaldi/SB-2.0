@@ -381,6 +381,27 @@
             "cancel": "Cancel"
           }
         }
+      },
+      "database": {
+        "title": "Delete data by group",
+        "table": {
+          "customer": "Customer",
+          "reservation_kind": "Booking type",
+          "date_from": "From",
+          "date_to": "to",
+          "agreement": "Agreements",
+          "reservation_status": "Status"
+        },
+        "reservation_kind": {
+          "spot": "Spot",
+          "service": "Services"
+        },
+        "reservation_status": {
+          "pending": "Pending",
+          "confirmed": "Confirmed",
+          "cancelled": "Cancelled",
+          "no_show": "No show"
+        }
       }
     }
   },

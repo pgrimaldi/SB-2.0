@@ -381,6 +381,27 @@
             "cancel": "Annuler"
           }
         }
+      },
+      "database": {
+        "title": "Supprimer les données par groupe",
+        "table": {
+          "customer": "Client",
+          "reservation_kind": "Type de réservation",
+          "date_from": "Du",
+          "date_to": "au",
+          "agreement": "Conventions",
+          "reservation_status": "Statut"
+        },
+        "reservation_kind": {
+          "spot": "Emplacement",
+          "service": "Services"
+        },
+        "reservation_status": {
+          "pending": "En attente",
+          "confirmed": "Confirmée",
+          "cancelled": "Annulée",
+          "no_show": "Non présenté"
+        }
       }
     }
   },

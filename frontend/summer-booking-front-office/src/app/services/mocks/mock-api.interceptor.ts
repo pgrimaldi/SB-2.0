@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
+import { existingBookingListMock } from './database/database.mock';
 import {
   contactSupportMock,
   emailConfigurationMock,
@@ -169,6 +170,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/taxation/download-guide-electronic-receipt`
   ) {
     return downloadGuideElectronicReceiptMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/database/existing-booking-list`
+  ) {
+    return existingBookingListMock(request);
   }
 
   return next(request);

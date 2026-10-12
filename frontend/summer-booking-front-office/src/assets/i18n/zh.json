@@ -381,6 +381,27 @@
             "cancel": "取消"
           }
         }
+      },
+      "database": {
+        "title": "按组删除数据",
+        "table": {
+          "customer": "客户",
+          "reservation_kind": "预订类型",
+          "date_from": "从",
+          "date_to": "至",
+          "agreement": "协议",
+          "reservation_status": "状态"
+        },
+        "reservation_kind": {
+          "spot": "位置",
+          "service": "服务"
+        },
+        "reservation_status": {
+          "pending": "待定",
+          "confirmed": "已确认",
+          "cancelled": "已取消",
+          "no_show": "未到"
+        }
       }
     }
   },

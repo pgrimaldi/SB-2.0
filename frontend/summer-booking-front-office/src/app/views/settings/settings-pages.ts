@@ -41,7 +41,11 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
         (component) => component.EmailConfiguration,
       ),
   },
-  { path: 'database', label: 'management.settings.menu.database' },
+  {
+    path: 'database',
+    label: 'management.settings.menu.database',
+    loadComponent: () => import('./database/database').then((component) => component.Database),
+  },
   {
     path: 'contact-support',
     label: 'management.settings.menu.help',
