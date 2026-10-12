@@ -13,6 +13,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { AddPrinterItemPopup } from '../../../components/management/settings/taxation/add-printer-item-popup/add-printer-item-popup';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
@@ -52,6 +53,7 @@ interface PrinterTableHeaders {
 @Component({
   selector: 'app-taxation',
   imports: [
+    AddPrinterItemPopup,
     AlertPopup,
     Button,
     Checkbox,
@@ -95,6 +97,7 @@ export class Taxation {
   /** A change of a printer is running: the whole page waits for it. */
   protected readonly isPrinterActionRunning = signal(false);
   protected readonly isDeletePrinterAsked = signal(false);
+  protected readonly isAddPrinterOpen = signal(false);
   protected readonly printerToDelete = signal<PrinterItemListResponse | null>(null);
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;

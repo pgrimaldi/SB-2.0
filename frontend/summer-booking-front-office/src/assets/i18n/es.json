@@ -334,7 +334,26 @@
             "cancel": "Cancelar",
             "confirm": "Eliminar"
           },
-          "add": "Añadir impresora"
+          "add": "Añadir impresora",
+          "form": {
+            "title": "Añadir nueva impresora",
+            "name": "Nombre",
+            "ip": "Dirección IP",
+            "port": "Puerto",
+            "model": "Modelo",
+            "ssl": "SSL",
+            "modes": "Modos",
+            "fiscal": "Fiscal",
+            "non_fiscal": "No fiscal",
+            "orders": "Comandas",
+            "text": "Texto",
+            "departments": "Departamentos",
+            "vat_rate": "Tipo de IVA",
+            "first_header": "Encabezado n.º 1",
+            "second_header": "Encabezado n.º 2",
+            "footer": "Pie de página",
+            "save": "Guardar"
+          }
         },
         "guide": "Descargar la guía",
         "receipt": {

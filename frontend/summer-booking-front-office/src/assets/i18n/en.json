@@ -334,7 +334,26 @@
             "cancel": "Cancel",
             "confirm": "Delete"
           },
-          "add": "Add printer"
+          "add": "Add printer",
+          "form": {
+            "title": "Add new printer",
+            "name": "Name",
+            "ip": "IP address",
+            "port": "Port",
+            "model": "Model",
+            "ssl": "SSL",
+            "modes": "Modes",
+            "fiscal": "Fiscal",
+            "non_fiscal": "Non-fiscal",
+            "orders": "Orders",
+            "text": "Text",
+            "departments": "Departments",
+            "vat_rate": "VAT rate",
+            "first_header": "Header no. 1",
+            "second_header": "Header no. 2",
+            "footer": "Footer",
+            "save": "Save"
+          }
         },
         "guide": "Download the guide",
         "receipt": {

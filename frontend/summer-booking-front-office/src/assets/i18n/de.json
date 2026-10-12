@@ -334,7 +334,26 @@
             "cancel": "Abbrechen",
             "confirm": "Löschen"
           },
-          "add": "Drucker hinzufügen"
+          "add": "Drucker hinzufügen",
+          "form": {
+            "title": "Neuen Drucker hinzufügen",
+            "name": "Name",
+            "ip": "IP-Adresse",
+            "port": "Port",
+            "model": "Modell",
+            "ssl": "SSL",
+            "modes": "Modi",
+            "fiscal": "Fiskal",
+            "non_fiscal": "Nicht fiskal",
+            "orders": "Bestellungen",
+            "text": "Text",
+            "departments": "Abteilungen",
+            "vat_rate": "MwSt.-Satz",
+            "first_header": "Kopfzeile Nr. 1",
+            "second_header": "Kopfzeile Nr. 2",
+            "footer": "Fußzeile",
+            "save": "Speichern"
+          }
         },
         "guide": "Anleitung herunterladen",
         "receipt": {

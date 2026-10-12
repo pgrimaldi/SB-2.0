@@ -1,6 +1,6 @@
 /**
- * Error codes the backend sends today, as in the code catalog of `docs/API_CONTRACTS.docx` (shared
- * with the backend): add a new code here, in the catalog and in every translation file under
+ * Error codes the backend sends today, as in the code catalog of `API_CONTRACTS.docx` (in
+ * `shared documentation/` at the root of the repository, shared with the backend): add a new code here, in the catalog and in every translation file under
  * `error.` (the translation test fails otherwise). The mocks may only answer with these codes.
  */
 export const API_ERROR_CODES = [

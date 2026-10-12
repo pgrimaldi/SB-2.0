@@ -334,7 +334,26 @@
             "cancel": "Annuler",
             "confirm": "Supprimer"
           },
-          "add": "Ajouter une imprimante"
+          "add": "Ajouter une imprimante",
+          "form": {
+            "title": "Ajouter une imprimante",
+            "name": "Nom",
+            "ip": "Adresse IP",
+            "port": "Port",
+            "model": "Modèle",
+            "ssl": "SSL",
+            "modes": "Modes",
+            "fiscal": "Fiscal",
+            "non_fiscal": "Non fiscal",
+            "orders": "Commandes",
+            "text": "Texte",
+            "departments": "Rayons",
+            "vat_rate": "Taux de TVA",
+            "first_header": "En-tête n°1",
+            "second_header": "En-tête n°2",
+            "footer": "Pied de page",
+            "save": "Enregistrer"
+          }
         },
         "guide": "Télécharger le guide",
         "receipt": {

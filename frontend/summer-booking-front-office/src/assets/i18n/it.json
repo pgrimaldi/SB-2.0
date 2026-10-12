@@ -334,7 +334,26 @@
             "cancel": "Annulla",
             "confirm": "Elimina"
           },
-          "add": "Aggiungi stampante"
+          "add": "Aggiungi stampante",
+          "form": {
+            "title": "Aggiungi nuova stampante",
+            "name": "Nome",
+            "ip": "Indirizzo IP",
+            "port": "Porta",
+            "model": "Modello",
+            "ssl": "SSL",
+            "modes": "Modalità",
+            "fiscal": "Fiscale",
+            "non_fiscal": "Non fiscale",
+            "orders": "Comande",
+            "text": "Testo",
+            "departments": "Reparti",
+            "vat_rate": "Aliquota",
+            "first_header": "Intestazione n°1",
+            "second_header": "Intestazione n°2",
+            "footer": "Piè di pagina",
+            "save": "Salva"
+          }
         },
         "guide": "Scarica la guida",
         "receipt": {

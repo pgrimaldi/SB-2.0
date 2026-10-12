@@ -26,7 +26,11 @@
       [rowToggle]="setPrinterEnabled"
       (loadError)="printersLoadFailed.set(true)"
     />
-    <app-button [size]="ButtonSize.Small" [pathIcon]="addPrinterIcon">
+    <app-button
+      [size]="ButtonSize.Small"
+      [pathIcon]="addPrinterIcon"
+      (clicked)="isAddPrinterOpen.set(true)"
+    >
       {{ 'management.settings.taxation.printer.add' | translate }}
     </app-button>
   </app-expansion-panel>
@@ -76,6 +80,7 @@
   [(open)]="isDeletePrinterAsked"
   (confirmed)="deletePrinter()"
 />
+<app-add-printer-item-popup [(open)]="isAddPrinterOpen" />
 <app-table-error-popup
   [title]="'table.load_error.title' | translate"
   [text]="'table.load_error.text' | translate"

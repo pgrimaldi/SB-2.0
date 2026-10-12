@@ -334,7 +334,26 @@
             "cancel": "取消",
             "confirm": "删除"
           },
-          "add": "添加打印机"
+          "add": "添加打印机",
+          "form": {
+            "title": "添加新打印机",
+            "name": "名称",
+            "ip": "IP 地址",
+            "port": "端口",
+            "model": "型号",
+            "ssl": "SSL",
+            "modes": "模式",
+            "fiscal": "税控",
+            "non_fiscal": "非税控",
+            "orders": "订单",
+            "text": "文本",
+            "departments": "部门",
+            "vat_rate": "税率",
+            "first_header": "页眉 1",
+            "second_header": "页眉 2",
+            "footer": "页脚",
+            "save": "保存"
+          }
         },
         "guide": "下载指南",
         "receipt": {
