@@ -64,3 +64,26 @@ body {
 * {
   box-sizing: border-box;
 }
+
+// Fields the browser filled in keep their own colours: Chrome, Edge and Safari paint them blue or
+// yellow with an !important background and force black text, so an inset shadow of the field's own
+// background covers it; Firefox uses a filter.
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  transition: background-color 600000s 0s;
+}
+
+.mdc-text-field--filled input:-webkit-autofill {
+  -webkit-text-fill-color: var(--mat-form-field-filled-input-text-color);
+  box-shadow: 0 0 0 100rem var(--mat-form-field-filled-container-color) inset;
+}
+
+.mdc-text-field--outlined input:-webkit-autofill {
+  -webkit-text-fill-color: var(--mat-form-field-outlined-input-text-color);
+  box-shadow: 0 0 0 100rem var(--color__layout__surface) inset;
+}
+
+input:autofill {
+  filter: none;
+}
