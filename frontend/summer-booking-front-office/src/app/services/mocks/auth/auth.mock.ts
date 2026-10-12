@@ -11,6 +11,7 @@ const MOCK_ACCOUNT = {
   username: 'summertest465@gmail.com',
   idProperty: DEMO_PROPERTY.publicId,
   roles: ['Manager'],
+  isElectronicReceiptAccepted: false,
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
 
@@ -91,6 +92,10 @@ export function unauthorized(
 
 type UnauthorizedCode = Extract<ApiErrorCode, `auth.${string}`>;
 
+export function setMockElectronicReceiptAccepted(isAccepted: boolean): void {
+  MOCK_ACCOUNT.isElectronicReceiptAccepted = isAccepted;
+}
+
 function newSession(): AuthSession {
   const accessToken = `mock-access-${randomToken()}`;
   accessTokens.set(accessToken, Date.now() + ACCESS_TOKEN_SECONDS * 1000);
@@ -98,6 +103,7 @@ function newSession(): AuthSession {
     email: MOCK_ACCOUNT.username,
     idProperty: MOCK_ACCOUNT.idProperty,
     roles: MOCK_ACCOUNT.roles,
+    isElectronicReceiptAccepted: MOCK_ACCOUNT.isElectronicReceiptAccepted,
   };
   return { accessToken, expiresIn: ACCESS_TOKEN_SECONDS, user };
 }

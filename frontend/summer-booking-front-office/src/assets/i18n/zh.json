@@ -360,7 +360,26 @@
           "title": "电子收据",
           "terms": "条款与条件",
           "accept": "我接受",
-          "refuse": "我不接受"
+          "refuse": "我不接受",
+          "send": "发送",
+          "refused_warning": "要使用电子收据，您必须接受使用条款",
+          "account": {
+            "title": "账户配置",
+            "company_name": "公司名称",
+            "company_address": "公司地址",
+            "street_number": "门牌号",
+            "postal_code": "邮政编码",
+            "city": "城市",
+            "country": "国家",
+            "tax_code": "税号",
+            "vat_number": "增值税号",
+            "pin": "PIN",
+            "password": "密码",
+            "save": "保存",
+            "saved": "账户配置成功",
+            "edit": "修改",
+            "cancel": "取消"
+          }
         }
       }
     }

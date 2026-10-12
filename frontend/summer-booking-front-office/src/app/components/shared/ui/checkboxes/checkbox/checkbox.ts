@@ -12,4 +12,6 @@ export class Checkbox {
   readonly name = input<string>();
   readonly checked = model(false);
   readonly hasLabelBefore = input(false);
+  readonly disabled = input(false);
+  readonly error = input<string | null>();
 }

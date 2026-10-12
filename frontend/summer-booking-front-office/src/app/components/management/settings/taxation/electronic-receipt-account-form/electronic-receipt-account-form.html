@@ -1,0 +1,71 @@
+<div class="electronic__receipt__account__form__heading">
+  <div class="electronic__receipt__account__form__heading__title">
+    <button
+      class="electronic__receipt__account__form__back"
+      type="button"
+      [disabled]="isLoading()"
+      (click)="back.emit()"
+    >
+      <img [src]="backIcon" width="10" height="14" alt="" />
+    </button>
+    <h3 class="electronic__receipt__account__form__title">
+      {{ 'management.settings.taxation.receipt.account.title' | translate }}
+    </h3>
+  </div>
+  @if (isSaved()) {
+    <p class="electronic__receipt__account__form__saved">
+      {{ 'management.settings.taxation.receipt.account.saved' | translate }}
+      <img [src]="savedIcon" width="14" height="12" alt="" />
+    </p>
+  }
+</div>
+
+<div class="electronic__receipt__account__form__fields" [attr.inert]="isLoading() ? '' : null">
+  @for (item of fields; track item.key) {
+    <app-filled-text-field
+      [style.grid-column]="'span ' + item.columns"
+      [label]="'management.settings.taxation.receipt.account.' + item.key | translate"
+      [isPasswordField]="item.isSecret"
+      [pathIcon]="item.isSecret ? eyeIcons : null"
+      [autocomplete]="item.isSecret ? 'new-password' : undefined"
+      [formField]="item.field"
+      [error]="item.error()"
+    />
+  }
+</div>
+
+@if (errorMessage(); as errorMessage) {
+  <p class="electronic__receipt__account__form__error">{{ errorMessage }}</p>
+}
+
+<div class="electronic__receipt__account__form__buttons">
+  @if (isSaved() && !isEditing()) {
+    <app-button
+      class="electronic__receipt__account__form__edit"
+      [size]="ButtonSize.Small"
+      (clicked)="edit()"
+    >
+      {{ 'management.settings.taxation.receipt.account.edit' | translate }}
+    </app-button>
+  } @else {
+    @if (isEditing()) {
+      <app-button
+        class="electronic__receipt__account__form__cancel"
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [disabled]="isLoading()"
+        (clicked)="cancel()"
+      >
+        {{ 'management.settings.taxation.receipt.account.cancel' | translate }}
+      </app-button>
+    }
+    <app-button
+      class="electronic__receipt__account__form__save"
+      [size]="ButtonSize.Small"
+      [isLoading]="isLoading()"
+      (clicked)="save()"
+    >
+      {{ 'management.settings.taxation.receipt.account.save' | translate }}
+    </app-button>
+  }
+</div>

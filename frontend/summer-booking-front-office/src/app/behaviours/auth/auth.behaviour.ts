@@ -244,6 +244,14 @@ export class AuthBehaviour implements OnDestroy {
     return true;
   }
 
+  /** Until the next sign-in or refresh, which bring the server's value. */
+  markElectronicReceiptAccepted(): void {
+    this.session.update(
+      (session) =>
+        session && { ...session, user: { ...session.user, isElectronicReceiptAccepted: true } },
+    );
+  }
+
   /** The session is over (refused by the server, or ended in another tab): back to the home. */
   expire(): void {
     this.clear();
@@ -400,6 +408,7 @@ function sameUser(a: AuthUser | null, b: AuthUser | null): boolean {
       !!b &&
       a.email === b.email &&
       a.idProperty === b.idProperty &&
+      a.isElectronicReceiptAccepted === b.isElectronicReceiptAccepted &&
       a.roles.length === b.roles.length &&
       a.roles.every((role, index) => role === b.roles[index]))
   );

@@ -8,6 +8,7 @@ export interface AuthUser {
   email: string;
   idProperty: string;
   roles: string[];
+  isElectronicReceiptAccepted: boolean;
 }
 
 export interface AuthSession {

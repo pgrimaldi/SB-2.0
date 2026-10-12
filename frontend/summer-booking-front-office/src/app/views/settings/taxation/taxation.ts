@@ -14,6 +14,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { AddPrinterItemPopup } from '../../../components/management/settings/taxation/add-printer-item-popup/add-printer-item-popup';
+import { ElectronicReceiptAccountForm } from '../../../components/management/settings/taxation/electronic-receipt-account-form/electronic-receipt-account-form';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
@@ -58,6 +59,7 @@ interface PrinterTableHeaders {
     Button,
     Checkbox,
     ConfirmPopup,
+    ElectronicReceiptAccountForm,
     ExpansionPanel,
     PageSpinner,
     Table,
@@ -101,8 +103,9 @@ export class Taxation {
   protected readonly printerToDelete = signal<PrinterItemListResponse | null>(null);
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
+  private readonly idProperty = computed(() => this.auth.user()?.idProperty ?? null);
   protected readonly printerParams = computed<PrinterListParams | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.idProperty();
     return idProperty ? { idProperty } : null;
   });
   private readonly printerHeaders = toSignal(
@@ -133,6 +136,16 @@ export class Taxation {
   protected readonly receipt = signal(new ElectronicReceiptResponse());
   protected readonly printersLoadFailed = signal(false);
   protected readonly isGuideDownloading = signal(false);
+  protected readonly isAcceptChosen = signal(false);
+  protected readonly isReceiptActivated = computed(
+    () => this.auth.user()?.isElectronicReceiptAccepted ?? false,
+  );
+  protected readonly isReceiptAccepted = computed(
+    () => this.isReceiptActivated() || this.isAcceptChosen(),
+  );
+  protected readonly isReceiptAccountShown = signal(true);
+  protected readonly toAccountIcon = '/assets/images/PanelChevron_setting.svg';
+  protected readonly isSendingReceiptChoice = signal(false);
   /** The error of an action (switch, delete, guide) goes in a popup. */
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly isActionErrorShown = signal(false);
@@ -145,7 +158,7 @@ export class Taxation {
     // Loaded again when the language changes: the server sends the terms translated.
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.idProperty();
       if (!idProperty) {
         return;
       }
@@ -212,6 +225,32 @@ export class Taxation {
       this.showActionError(error);
     } finally {
       this.isGuideDownloading.set(false);
+    }
+  }
+
+  protected chooseReceipt(isAccepted: boolean, isChecked: boolean): void {
+    this.isAcceptChosen.set(isChecked && isAccepted);
+  }
+
+  protected async sendReceiptChoice(): Promise<void> {
+    const idProperty = this.auth.user()?.idProperty;
+    if (!idProperty || this.isSendingReceiptChoice() || !this.isAcceptChosen()) {
+      return;
+    }
+    this.isSendingReceiptChoice.set(true);
+    try {
+      await firstValueFrom(
+        this.taxation.activateElectronicReceipt({
+          idProperty,
+          isElectronicReceiptAccepted: this.isAcceptChosen(),
+        }),
+      );
+      this.auth.markElectronicReceiptAccepted();
+      this.isReceiptAccountShown.set(true);
+    } catch (error: unknown) {
+      this.showActionError(error);
+    } finally {
+      this.isSendingReceiptChoice.set(false);
     }
   }
 

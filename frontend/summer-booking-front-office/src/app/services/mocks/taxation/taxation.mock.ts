@@ -1,11 +1,13 @@
 import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
 import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
 import { DownloadGuideElectronicReceiptRequest } from '../../../entities/settings/taxation/download-guide-electronic-receipt-request';
+import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
 import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
-import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { isAuthorized, setMockElectronicReceiptAccepted, unauthorized } from '../auth/auth.mock';
 import { operationNotAllowed, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
@@ -154,4 +156,64 @@ export const downloadGuideElectronicReceiptMock = (
   return of(new HttpResponse({ status: 200, url: request.url, headers, body: guide })).pipe(
     delay(600),
   );
+};
+
+/**
+ * `POST /api/taxation/add-printer` with `AddPrinterItemRequest` and `idProperty`: the new printer is
+ * added switched off. 204 without a body; 401 without a valid access token; 403 for an unknown
+ * property.
+ */
+export const addPrinterMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<AddPrinterItemRequest> & { idProperty?: string };
+  if (!propertyOf(body.idProperty)) {
+    return operationNotAllowed(request);
+  }
+  printers = [
+    ...printers,
+    {
+      idPrinter: crypto.randomUUID(),
+      printerName: body.printerName ?? null,
+      printerIP: body.printerIP ?? null,
+      isEnabled: false,
+    },
+  ];
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/taxation/electronic-receipt-activation` with `ElectronicReceiptActivationRequest`. 204
+ * without a body; 401 without a valid access token; 403 for an unknown property.
+ */
+export const electronicReceiptActivationMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<ElectronicReceiptActivationRequest>;
+  if (!propertyOf(body.idProperty)) {
+    return operationNotAllowed(request);
+  }
+  setMockElectronicReceiptAccepted(body.isElectronicReceiptAccepted === true);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/taxation/save-electronic-receipt-account` with `ElectronicReceiptAccount` and
+ * `idProperty`. 204 without a body; 401 without a valid access token; 403 for an unknown property.
+ */
+export const saveElectronicReceiptAccountMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as { idProperty?: string };
+  if (!propertyOf(body.idProperty)) {
+    return operationNotAllowed(request);
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };

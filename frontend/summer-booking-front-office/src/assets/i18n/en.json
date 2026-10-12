@@ -360,7 +360,26 @@
           "title": "Electronic receipt",
           "terms": "Terms and conditions",
           "accept": "I accept",
-          "refuse": "I do not accept"
+          "refuse": "I do not accept",
+          "send": "Send",
+          "refused_warning": "To use the electronic receipt you must accept the terms of use",
+          "account": {
+            "title": "Account setup",
+            "company_name": "Company name",
+            "company_address": "Company address",
+            "street_number": "Street number",
+            "postal_code": "Postal code",
+            "city": "City",
+            "country": "Country",
+            "tax_code": "Tax code",
+            "vat_number": "VAT number",
+            "pin": "PIN",
+            "password": "Password",
+            "save": "Save",
+            "saved": "Account set up successfully",
+            "edit": "Edit",
+            "cancel": "Cancel"
+          }
         }
       }
     }

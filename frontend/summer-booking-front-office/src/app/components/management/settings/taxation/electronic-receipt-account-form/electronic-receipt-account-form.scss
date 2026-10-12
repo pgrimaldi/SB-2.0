@@ -1,0 +1,99 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.electronic__receipt__account__form__heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.electronic__receipt__account__form__heading__title {
+  display: flex;
+  align-items: center;
+  justify-self: stretch;
+  gap: 0.5rem;
+}
+
+.electronic__receipt__account__form__saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.25rem;
+  background: var(--color__layout__surface);
+  box-shadow: 0 0.125rem 0.5rem var(--color__layout__shadow__light);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.electronic__receipt__account__form__back {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  img {
+    transform: scaleX(-1);
+  }
+}
+
+:host-context([dir='rtl']) .electronic__receipt__account__form__back img {
+  transform: none;
+}
+
+.electronic__receipt__account__form__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.electronic__receipt__account__form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.electronic__receipt__account__form__error {
+  margin: 1.125rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.electronic__receipt__account__form__buttons {
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.625rem;
+
+  app-button {
+    min-width: 7.5rem;
+  }
+}
+
+// From 1280px (720p), in twentieths (`columns` of each field): Nome azienda 30%, Indirizzo azienda
+// 55%, Numero civico 15%; Codice postale 20%, Città 40%, Nazione 40%; then two halves per row. Below
+// it, one field per row.
+@media (width >= 80rem) {
+  .electronic__receipt__account__form__heading {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .electronic__receipt__account__form__fields {
+    display: grid;
+    grid-template-columns: repeat(20, minmax(0, 1fr));
+    column-gap: 1rem;
+  }
+}

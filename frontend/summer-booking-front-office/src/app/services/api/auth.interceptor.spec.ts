@@ -13,7 +13,12 @@ describe('authInterceptor', () => {
   const session = (accessToken: string, email = 'anna@example.com'): AuthSession => ({
     accessToken,
     expiresIn: 900,
-    user: { email, idProperty: `property-of-${email}`, roles: [] },
+    user: {
+      email,
+      idProperty: `property-of-${email}`,
+      roles: [],
+      isElectronicReceiptAccepted: false,
+    },
   });
 
   const setup = () => {

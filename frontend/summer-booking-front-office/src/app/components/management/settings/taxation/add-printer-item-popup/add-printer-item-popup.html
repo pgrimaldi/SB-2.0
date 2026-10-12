@@ -3,84 +3,116 @@
     <h2 class="add__printer__item__popup__title">
       {{ 'management.settings.taxation.printer.form.title' | translate }}
     </h2>
-    <button class="add__printer__item__popup__close" type="button" (click)="leave()">
+    <button
+      class="add__printer__item__popup__close"
+      type="button"
+      [disabled]="isLoading()"
+      (click)="leave()"
+    >
       <img [src]="closeIcon" width="12" height="12" alt="" />
     </button>
 
-    <div class="add__printer__item__popup__fields add__printer__item__popup__printer">
-      <app-filled-text-field
-        class="add__printer__item__popup__name"
-        [label]="'management.settings.taxation.printer.form.name' | translate"
-        [formField]="draftForm.printerName"
-      />
-      <app-filled-text-field
-        class="add__printer__item__popup__ip"
-        [label]="'management.settings.taxation.printer.form.ip' | translate"
-        [formField]="draftForm.printerIP"
-      />
-      <app-filled-number-field
-        class="add__printer__item__popup__port"
-        [label]="'management.settings.taxation.printer.form.port' | translate"
-        [formField]="draftForm.printerPort"
-      />
-      <app-filled-text-field
-        class="add__printer__item__popup__model"
-        [label]="'management.settings.taxation.printer.form.model' | translate"
-        [formField]="draftForm.printerModel"
-      />
-      <app-checkbox class="add__printer__item__popup__ssl" [formField]="draftForm.isSsl">
-        {{ 'management.settings.taxation.printer.form.ssl' | translate }}
-      </app-checkbox>
-    </div>
-
-    <h3 class="add__printer__item__popup__section">
-      {{ 'management.settings.taxation.printer.form.modes' | translate }}
-    </h3>
-    <div class="add__printer__item__popup__choices">
-      <app-checkbox [formField]="draftForm.isFiscalMode">
-        {{ 'management.settings.taxation.printer.form.fiscal' | translate }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isNonFiscalMode">
-        {{ 'management.settings.taxation.printer.form.non_fiscal' | translate }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isOrderMode">
-        {{ 'management.settings.taxation.printer.form.orders' | translate }}
-      </app-checkbox>
-      <app-checkbox [formField]="draftForm.isTextMode">
-        {{ 'management.settings.taxation.printer.form.text' | translate }}
-      </app-checkbox>
-    </div>
-
-    <h3 class="add__printer__item__popup__section">
-      {{ 'management.settings.taxation.printer.form.departments' | translate }}
-    </h3>
-    <div class="add__printer__item__popup__fields">
-      <div class="add__printer__item__popup__rates">
-        @for (rate of draftForm.departmentVatRates; track $index) {
-          <app-filled-select
-            [label]="
-              $first ? ('management.settings.taxation.printer.form.vat_rate' | translate) : ''
-            "
-            [options]="vatRateOptions"
-            [formField]="rate"
-          />
-        }
+    <div class="add__printer__item__popup__form" [attr.inert]="isLoading() ? '' : null">
+      <div class="add__printer__item__popup__fields add__printer__item__popup__printer">
+        <app-filled-text-field
+          class="add__printer__item__popup__name"
+          [label]="'management.settings.taxation.printer.form.name' | translate"
+          [formField]="draftForm.printerName"
+          [error]="printerNameError()"
+        />
+        <app-filled-text-field
+          class="add__printer__item__popup__ip"
+          [label]="'management.settings.taxation.printer.form.ip' | translate"
+          [formField]="draftForm.printerIP"
+          [error]="printerIPError()"
+        />
+        <app-filled-number-field
+          class="add__printer__item__popup__port"
+          [label]="'management.settings.taxation.printer.form.port' | translate"
+          [formField]="draftForm.printerPort"
+          [error]="printerPortError()"
+        />
+        <app-filled-text-field
+          class="add__printer__item__popup__model"
+          [label]="'management.settings.taxation.printer.form.model' | translate"
+          [formField]="draftForm.printerModel"
+          [error]="printerModelError()"
+        />
+        <app-checkbox
+          class="add__printer__item__popup__ssl"
+          [formField]="draftForm.isSsl"
+          [error]="isSslError()"
+        >
+          {{ 'management.settings.taxation.printer.form.ssl' | translate }}
+        </app-checkbox>
       </div>
-      <app-filled-text-field
-        [label]="'management.settings.taxation.printer.form.first_header' | translate"
-        [formField]="draftForm.firstHeader"
-      />
-      <app-filled-text-field
-        [label]="'management.settings.taxation.printer.form.second_header' | translate"
-        [formField]="draftForm.secondHeader"
-      />
-      <app-filled-text-field
-        [label]="'management.settings.taxation.printer.form.footer' | translate"
-        [formField]="draftForm.footer"
-      />
+
+      <h3 class="add__printer__item__popup__section">
+        {{ 'management.settings.taxation.printer.form.modes' | translate }}
+      </h3>
+      <div class="add__printer__item__popup__choices">
+        <app-checkbox [formField]="draftForm.isFiscalMode" [error]="isFiscalModeError()">
+          {{ 'management.settings.taxation.printer.form.fiscal' | translate }}
+        </app-checkbox>
+        <app-checkbox [formField]="draftForm.isNonFiscalMode" [error]="isNonFiscalModeError()">
+          {{ 'management.settings.taxation.printer.form.non_fiscal' | translate }}
+        </app-checkbox>
+        <app-checkbox [formField]="draftForm.isOrderMode" [error]="isOrderModeError()">
+          {{ 'management.settings.taxation.printer.form.orders' | translate }}
+        </app-checkbox>
+        <app-checkbox [formField]="draftForm.isTextMode" [error]="isTextModeError()">
+          {{ 'management.settings.taxation.printer.form.text' | translate }}
+        </app-checkbox>
+      </div>
+
+      <h3 class="add__printer__item__popup__section">
+        {{ 'management.settings.taxation.printer.form.departments' | translate }}
+      </h3>
+      <div class="add__printer__item__popup__fields">
+        <div class="add__printer__item__popup__rates">
+          @for (rate of draftForm.departmentVatRates; track $index) {
+            <app-filled-select
+              [label]="
+                $first ? ('management.settings.taxation.printer.form.vat_rate' | translate) : ''
+              "
+              [options]="vatRateOptions"
+              [formField]="rate"
+            />
+          }
+        </div>
+        @if (departmentVatRatesError(); as departmentVatRatesError) {
+          <p class="add__printer__item__popup__error">{{ departmentVatRatesError }}</p>
+        }
+        <app-filled-text-field
+          [label]="'management.settings.taxation.printer.form.first_header' | translate"
+          [formField]="draftForm.firstHeader"
+          [error]="firstHeaderError()"
+        />
+        <app-filled-text-field
+          [label]="'management.settings.taxation.printer.form.second_header' | translate"
+          [formField]="draftForm.secondHeader"
+          [error]="secondHeaderError()"
+        />
+        <app-filled-text-field
+          [label]="'management.settings.taxation.printer.form.footer' | translate"
+          [formField]="draftForm.footer"
+          [error]="footerError()"
+        />
+      </div>
     </div>
 
-    <app-button class="add__printer__item__popup__save" [size]="ButtonSize.Small">
+    @if (errorMessage(); as errorMessage) {
+      <p class="add__printer__item__popup__error add__printer__item__popup__general">
+        {{ errorMessage }}
+      </p>
+    }
+
+    <app-button
+      class="add__printer__item__popup__save"
+      [size]="ButtonSize.Small"
+      [isLoading]="isLoading()"
+      (clicked)="save()"
+    >
       {{ 'management.settings.taxation.printer.form.save' | translate }}
     </app-button>
   </div>

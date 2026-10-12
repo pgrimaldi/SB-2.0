@@ -3,6 +3,8 @@
 
 :host {
   display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
 
   @include checkbox.checkbox(1.125rem);
   @include mat.checkbox-overrides(
@@ -14,6 +16,13 @@
       label-text-weight: 400,
     )
   );
+}
+
+.checkbox__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 // The box starts on the content edge, like the other fields (the state layer overflows instead).

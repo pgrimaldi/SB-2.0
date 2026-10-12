@@ -13,6 +13,33 @@
   color: var(--color__main__theme__one);
 }
 
+.taxation__terms__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.taxation__terms__heading .taxation__subtitle {
+  margin: 0;
+}
+
+.taxation__to__account {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+:host-context([dir='rtl']) .taxation__to__account img {
+  transform: scaleX(-1);
+}
+
 .taxation__subtitle {
   margin: 0 0 1.5rem;
   font-size: 0.9375rem;
@@ -58,8 +85,26 @@
 
 .taxation__choices {
   display: flex;
+  align-items: center;
   gap: 3.5rem;
   margin-top: 2.5rem;
+}
+
+.taxation__refuse {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.taxation__refuse__warning {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.taxation__send {
+  margin-inline-start: auto;
 }
 
 .taxation__error {

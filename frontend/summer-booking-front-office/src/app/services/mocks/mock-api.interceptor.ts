@@ -9,10 +9,13 @@ import {
   supportInfoMock,
 } from './system/system.mock';
 import {
+  addPrinterMock,
   deletePrinterMock,
   downloadGuideElectronicReceiptMock,
+  electronicReceiptActivationMock,
   electronicReceiptMock,
   printerListMock,
+  saveElectronicReceiptAccountMock,
   setPrinterIsActiveMock,
 } from './taxation/taxation.mock';
 import {
@@ -131,6 +134,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/taxation/set-is-active`
   ) {
     return setPrinterIsActiveMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/taxation/electronic-receipt-activation`
+  ) {
+    return electronicReceiptActivationMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/taxation/save-electronic-receipt-account`
+  ) {
+    return saveElectronicReceiptAccountMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/taxation/add-printer`
+  ) {
+    return addPrinterMock(request);
   }
 
   if (

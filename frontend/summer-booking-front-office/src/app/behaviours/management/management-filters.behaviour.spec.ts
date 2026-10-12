@@ -19,7 +19,12 @@ describe('ManagementFiltersBehaviour', () => {
       {
         accessToken: 'token',
         expiresIn: 900,
-        user: { email: 'u@e.it', idProperty: 'property-1', roles: [] },
+        user: {
+          email: 'u@e.it',
+          idProperty: 'property-1',
+          roles: [],
+          isElectronicReceiptAccepted: false,
+        },
       },
       false,
     );

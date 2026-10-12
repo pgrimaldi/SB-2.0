@@ -113,6 +113,17 @@ app-add-printer-item-popup {
   gap: 0.75rem;
 }
 
+.add__printer__item__popup__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.add__printer__item__popup__general {
+  margin-top: 1.125rem;
+}
+
 .add__printer__item__popup__save {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;

@@ -11,7 +11,12 @@ describe('AuthBehaviour', () => {
   const session = (accessToken: string, email = 'user@example.com'): AuthSession => ({
     accessToken,
     expiresIn: 900,
-    user: { email, idProperty: `property-of-${email}`, roles: ['Manager'] },
+    user: {
+      email,
+      idProperty: `property-of-${email}`,
+      roles: ['Manager'],
+      isElectronicReceiptAccepted: false,
+    },
   });
   let server: {
     signIn: ReturnType<typeof vi.fn>;

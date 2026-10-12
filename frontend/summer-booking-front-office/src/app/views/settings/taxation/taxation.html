@@ -50,21 +50,68 @@
     >
       {{ 'management.settings.taxation.guide' | translate }}
     </app-button>
-    <h3 class="taxation__subtitle">
-      {{ 'management.settings.taxation.receipt.terms' | translate }}
-    </h3>
-    @if (receiptErrorMessage(); as receiptErrorMessage) {
-      <p class="taxation__error">{{ receiptErrorMessage }}</p>
-    } @else {
-      <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
+    @if (isReceiptActivated()) {
+      <div [hidden]="!isReceiptAccountShown()">
+        <app-electronic-receipt-account-form (back)="isReceiptAccountShown.set(false)" />
+      </div>
     }
-    <div class="taxation__choices">
-      <app-checkbox [hasLabelBefore]="true">
-        {{ 'management.settings.taxation.receipt.accept' | translate }}
-      </app-checkbox>
-      <app-checkbox [hasLabelBefore]="true">
-        {{ 'management.settings.taxation.receipt.refuse' | translate }}
-      </app-checkbox>
+    <div [hidden]="isReceiptActivated() && isReceiptAccountShown()">
+      <div class="taxation__terms__heading">
+        <h3 class="taxation__subtitle">
+          {{ 'management.settings.taxation.receipt.terms' | translate }}
+        </h3>
+        @if (isReceiptActivated()) {
+          <button
+            class="taxation__to__account"
+            type="button"
+            (click)="isReceiptAccountShown.set(true)"
+          >
+            <img [src]="toAccountIcon" width="10" height="14" alt="" />
+          </button>
+        }
+      </div>
+      @if (receiptErrorMessage(); as receiptErrorMessage) {
+        <p class="taxation__error">{{ receiptErrorMessage }}</p>
+      } @else {
+        <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
+      }
+      <div class="taxation__choices">
+        <app-checkbox
+          class="taxation__accept"
+          [hasLabelBefore]="true"
+          [checked]="isReceiptAccepted()"
+          [disabled]="isReceiptActivated()"
+          [attr.inert]="isSendingReceiptChoice() || isReceiptAccepted() ? '' : null"
+          (checkedChange)="chooseReceipt(true, $event)"
+        >
+          {{ 'management.settings.taxation.receipt.accept' | translate }}
+        </app-checkbox>
+        <span class="taxation__refuse">
+          <app-checkbox
+            [hasLabelBefore]="true"
+            [checked]="!isReceiptAccepted()"
+            [disabled]="isReceiptActivated()"
+            [attr.inert]="isSendingReceiptChoice() || !isReceiptAccepted() ? '' : null"
+            (checkedChange)="chooseReceipt(false, $event)"
+          >
+            {{ 'management.settings.taxation.receipt.refuse' | translate }}
+          </app-checkbox>
+          @if (!isReceiptAccepted()) {
+            <p class="taxation__refuse__warning">
+              {{ 'management.settings.taxation.receipt.refused_warning' | translate }}
+            </p>
+          }
+        </span>
+        <app-button
+          class="taxation__send"
+          [size]="ButtonSize.Small"
+          [isLoading]="isSendingReceiptChoice()"
+          [disabled]="!isAcceptChosen() || isReceiptActivated()"
+          (clicked)="sendReceiptChoice()"
+        >
+          {{ 'management.settings.taxation.receipt.send' | translate }}
+        </app-button>
+      </div>
     </div>
   </app-expansion-panel>
 </main>
@@ -80,7 +127,7 @@
   [(open)]="isDeletePrinterAsked"
   (confirmed)="deletePrinter()"
 />
-<app-add-printer-item-popup [(open)]="isAddPrinterOpen" />
+<app-add-printer-item-popup [(open)]="isAddPrinterOpen" (added)="printersTable.reload()" />
 <app-table-error-popup
   [title]="'table.load_error.title' | translate"
   [text]="'table.load_error.text' | translate"

@@ -2,12 +2,16 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
 import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
 import { DownloadGuideElectronicReceiptRequest } from '../../../entities/settings/taxation/download-guide-electronic-receipt-request';
+import { ElectronicReceiptAccount } from '../../../entities/settings/taxation/electronic-receipt-account';
+import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
 import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
 import { readBlobError } from '../errors/read-blob-error';
+import { onlyFieldsOf } from '../only-fields-of';
 
 /** With GET the property travels in the query string (`?idProperty=…`), with POST in the body. */
 @Injectable({ providedIn: 'root' })
@@ -28,6 +32,29 @@ export class TaxationService {
   /** Answers 204 with no body. */
   readonly setPrinterIsActive = (request: SetPrinterIsActiveRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/set-is-active`, request);
+
+  /** Answers 204 with no body. */
+  readonly addPrinter = (idProperty: string, printer: AddPrinterItemRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/add-printer`, {
+      ...onlyFieldsOf(AddPrinterItemRequest, printer),
+      idProperty,
+    });
+
+  /** Answers 204 with no body. */
+  readonly activateElectronicReceipt = (
+    request: ElectronicReceiptActivationRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/electronic-receipt-activation`, request);
+
+  /** Answers 204 with no body. */
+  readonly saveElectronicReceiptAccount = (
+    idProperty: string,
+    account: ElectronicReceiptAccount,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/save-electronic-receipt-account`, {
+      ...onlyFieldsOf(ElectronicReceiptAccount, account),
+      idProperty,
+    });
 
   /** Answers 204 with no body. */
   readonly deletePrinter = (request: DeletePrinterRequest): Observable<void> =>

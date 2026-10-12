@@ -360,7 +360,26 @@
           "title": "Elektronischer Kassenbeleg",
           "terms": "Allgemeine Geschäftsbedingungen",
           "accept": "Ich akzeptiere",
-          "refuse": "Ich akzeptiere nicht"
+          "refuse": "Ich akzeptiere nicht",
+          "send": "Senden",
+          "refused_warning": "Um den elektronischen Kassenbeleg zu nutzen, müssen Sie die Nutzungsbedingungen akzeptieren",
+          "account": {
+            "title": "Kontokonfiguration",
+            "company_name": "Firmenname",
+            "company_address": "Firmenadresse",
+            "street_number": "Hausnummer",
+            "postal_code": "Postleitzahl",
+            "city": "Stadt",
+            "country": "Land",
+            "tax_code": "Steuernummer",
+            "vat_number": "USt-IdNr.",
+            "pin": "PIN",
+            "password": "Passwort",
+            "save": "Speichern",
+            "saved": "Konto erfolgreich eingerichtet",
+            "edit": "Bearbeiten",
+            "cancel": "Abbrechen"
+          }
         }
       }
     }

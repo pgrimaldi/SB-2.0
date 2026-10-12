@@ -360,7 +360,26 @@
           "title": "Ticket electrónico",
           "terms": "Términos y condiciones",
           "accept": "Acepto",
-          "refuse": "No acepto"
+          "refuse": "No acepto",
+          "send": "Enviar",
+          "refused_warning": "Para usar el ticket electrónico debes aceptar las condiciones de uso",
+          "account": {
+            "title": "Configuración de la cuenta",
+            "company_name": "Nombre de la empresa",
+            "company_address": "Dirección de la empresa",
+            "street_number": "Número",
+            "postal_code": "Código postal",
+            "city": "Ciudad",
+            "country": "País",
+            "tax_code": "Código fiscal",
+            "vat_number": "NIF/IVA",
+            "pin": "PIN",
+            "password": "Contraseña",
+            "save": "Guardar",
+            "saved": "Cuenta configurada correctamente",
+            "edit": "Editar",
+            "cancel": "Cancelar"
+          }
         }
       }
     }

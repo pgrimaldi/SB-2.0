@@ -360,7 +360,26 @@
           "title": "Ticket de caisse électronique",
           "terms": "Conditions générales",
           "accept": "J'accepte",
-          "refuse": "Je n'accepte pas"
+          "refuse": "Je n'accepte pas",
+          "send": "Envoyer",
+          "refused_warning": "Pour utiliser le ticket de caisse électronique, vous devez accepter les conditions d'utilisation",
+          "account": {
+            "title": "Configuration du compte",
+            "company_name": "Nom de l'entreprise",
+            "company_address": "Adresse de l'entreprise",
+            "street_number": "Numéro",
+            "postal_code": "Code postal",
+            "city": "Ville",
+            "country": "Pays",
+            "tax_code": "Code fiscal",
+            "vat_number": "Numéro de TVA",
+            "pin": "PIN",
+            "password": "Mot de passe",
+            "save": "Enregistrer",
+            "saved": "Compte configuré avec succès",
+            "edit": "Modifier",
+            "cancel": "Annuler"
+          }
         }
       }
     }

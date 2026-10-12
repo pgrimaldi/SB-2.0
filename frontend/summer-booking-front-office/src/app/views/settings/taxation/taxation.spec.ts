@@ -24,7 +24,12 @@ describe('Taxation', () => {
   const setup = async (
     termsAndConditions: string,
     printers: Observable<typeof PRINTERS> = of(PRINTERS),
+    isElectronicReceiptAccepted = false,
   ) => {
+    const user = signal({ idProperty: 'p1', isElectronicReceiptAccepted });
+    const markElectronicReceiptAccepted = vi.fn(() =>
+      user.update((current) => ({ ...current, isElectronicReceiptAccepted: true })),
+    );
     const printerList = vi.fn(() => printers);
     const electronicReceipt = vi.fn(() => of({ termsAndConditions }));
     const answer = new Subject<void>();
@@ -33,6 +38,7 @@ describe('Taxation', () => {
     const guide = new Subject<HttpResponse<Blob>>();
     const downloadGuideElectronicReceipt = vi.fn(() => guide);
     const save = vi.fn();
+    const activateElectronicReceipt = vi.fn(() => of(undefined));
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -45,10 +51,11 @@ describe('Taxation', () => {
             setPrinterIsActive,
             deletePrinter,
             downloadGuideElectronicReceipt,
+            activateElectronicReceipt,
           },
         },
         { provide: FileDownloadBehaviour, useValue: { save } },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user, markElectronicReceiptAccepted } },
       ],
     });
     const fixture = TestBed.createComponent(Taxation);
@@ -67,6 +74,8 @@ describe('Taxation', () => {
       downloadGuideElectronicReceipt,
       guide,
       save,
+      activateElectronicReceipt,
+      markElectronicReceiptAccepted,
     };
   };
 
@@ -238,5 +247,93 @@ describe('Taxation', () => {
 
     expect(printerList).toHaveBeenCalledTimes(2);
     expect(dialog()).toBeNull();
+  });
+
+  it('should start on Non accetto with the warning and Invia off, and send true once Accetto is chosen', async () => {
+    const { fixture, element, activateElectronicReceipt } = await setup('<p>Termini</p>');
+    const accept = () => element.querySelector<HTMLInputElement>('.taxation__accept input')!;
+    const refuse = () => element.querySelector<HTMLInputElement>('.taxation__refuse input')!;
+    const send = () => element.querySelector<HTMLButtonElement>('.taxation__send button')!;
+    const warning = () => element.querySelector('.taxation__refuse__warning');
+
+    expect(refuse().checked).toBe(true);
+    expect(accept().checked).toBe(false);
+    expect(warning()?.textContent?.trim()).toBe(
+      'management.settings.taxation.receipt.refused_warning',
+    );
+    expect(send().disabled).toBe(true);
+
+    accept().click();
+    await fixture.whenStable();
+    expect(refuse().checked).toBe(false);
+    expect(warning()).toBeNull();
+    expect(send().disabled).toBe(false);
+
+    send().click();
+    await settle(fixture);
+    expect(activateElectronicReceipt).toHaveBeenCalledWith({
+      idProperty: 'p1',
+      isElectronicReceiptAccepted: true,
+    });
+  });
+
+  it('should keep one choice ticked: only the other box changes it', async () => {
+    const { fixture, element } = await setup('<p>Termini</p>');
+    const accept = () => element.querySelector('.taxation__accept')!;
+    const refuseBox = () => element.querySelector('.taxation__refuse app-checkbox')!;
+
+    expect(refuseBox().hasAttribute('inert')).toBe(true);
+    expect(accept().hasAttribute('inert')).toBe(false);
+
+    accept().querySelector<HTMLInputElement>('input')!.click();
+    await fixture.whenStable();
+    expect(accept().hasAttribute('inert')).toBe(true);
+    refuseBox().querySelector<HTMLInputElement>('input')!.click();
+    await fixture.whenStable();
+    expect(refuseBox().querySelector<HTMLInputElement>('input')!.checked).toBe(true);
+    expect(accept().querySelector<HTMLInputElement>('input')!.checked).toBe(false);
+    expect(element.querySelector('.taxation__refuse__warning')).not.toBeNull();
+  });
+
+  it('should show the account form once the server accepted the receipt, and remember it', async () => {
+    const { fixture, element, markElectronicReceiptAccepted } = await setup('<p>Termini</p>');
+    const form = () => element.querySelector('app-electronic-receipt-account-form');
+
+    expect(form()).toBeNull();
+    element.querySelector<HTMLInputElement>('.taxation__accept input')!.click();
+    await fixture.whenStable();
+    element.querySelector<HTMLButtonElement>('.taxation__send button')!.click();
+    await settle(fixture);
+
+    expect(markElectronicReceiptAccepted).toHaveBeenCalledTimes(1);
+    expect(form()?.parentElement?.hidden).toBe(false);
+    expect(
+      element.querySelector<HTMLElement>('.taxation__terms__heading')!.parentElement!.hidden,
+    ).toBe(true);
+  });
+
+  it('should open on the account form when already accepted, with the terms read-only behind ‹', async () => {
+    const { fixture, element } = await setup('<p>Termini</p>', of(PRINTERS), true);
+    const formBox = () =>
+      element.querySelector('app-electronic-receipt-account-form')!.parentElement!;
+    const termsBox = () =>
+      element.querySelector<HTMLElement>('.taxation__terms__heading')!.parentElement!;
+
+    expect(formBox().hidden).toBe(false);
+    expect(termsBox().hidden).toBe(true);
+
+    element.querySelector<HTMLButtonElement>('.electronic__receipt__account__form__back')!.click();
+    await fixture.whenStable();
+    expect(formBox().hidden).toBe(true);
+    expect(termsBox().hidden).toBe(false);
+    expect(element.querySelector<HTMLInputElement>('.taxation__accept input')!.checked).toBe(true);
+    expect(element.querySelector<HTMLInputElement>('.taxation__accept input')!.disabled).toBe(true);
+    expect(element.querySelector<HTMLInputElement>('.taxation__refuse input')!.disabled).toBe(true);
+    expect(element.querySelector<HTMLButtonElement>('.taxation__send button')!.disabled).toBe(true);
+    expect(element.querySelector('.taxation__refuse__warning')).toBeNull();
+
+    element.querySelector<HTMLButtonElement>('.taxation__to__account')!.click();
+    await fixture.whenStable();
+    expect(formBox().hidden).toBe(false);
   });
 });

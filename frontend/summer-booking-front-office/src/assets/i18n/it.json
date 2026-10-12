@@ -360,7 +360,26 @@
           "title": "Scontrino elettronico",
           "terms": "Termini e condizioni",
           "accept": "Accetto",
-          "refuse": "Non accetto"
+          "refuse": "Non accetto",
+          "send": "Invia",
+          "refused_warning": "Per utilizzare lo scontrino elettronico devi accettare i termini di utilizzo",
+          "account": {
+            "title": "Configurazione account",
+            "company_name": "Nome azienda",
+            "company_address": "Indirizzo azienda",
+            "street_number": "Numero civico",
+            "postal_code": "Codice postale",
+            "city": "Città",
+            "country": "Nazione",
+            "tax_code": "Codice fiscale",
+            "vat_number": "Partita IVA",
+            "pin": "PIN",
+            "password": "Password",
+            "save": "Salva",
+            "saved": "Account configurato con successo",
+            "edit": "Modifica",
+            "cancel": "Annulla"
+          }
         }
       }
     }
