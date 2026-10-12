@@ -30,7 +30,9 @@
       container-background-color: var(--color__layout__surface),
       container-text-color: var(--color__main__theme__one),
       container-text-size: 0.875rem,
-      disabled-icon-color: var(--color__layout__muted),
+      // Clearly lighter than the arrows that work, whatever the look: an arrow with nowhere to go
+      // (first or last page, or every row on screen) must look switched off.
+      disabled-icon-color: color-mix(in srgb, var(--color__layout__muted) 45%, transparent),
       select-trigger-text-size: 0.875rem,
     )
   );
@@ -50,6 +52,11 @@
       focused-arrow-color: var(--color__main__theme__one),
     )
   );
+}
+
+// Material keeps a switched-off arrow hoverable (for its tooltip): no grey circle on it.
+.table__paginator ::ng-deep .mat-mdc-button-disabled .mat-mdc-button-persistent-ripple {
+  display: none;
 }
 
 // `--table-paginator-offset` keeps the sticky paginator above anything fixed at the bottom of the
