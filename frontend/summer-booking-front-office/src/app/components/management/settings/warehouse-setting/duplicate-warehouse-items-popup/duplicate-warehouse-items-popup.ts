@@ -19,11 +19,6 @@ import { AlertPopup } from '../../../../shared/ui/dialogs/alert-popup/alert-popu
 import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
 import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-spinner';
 
-/**
- * With `itemName` the question names the article (button of a row), otherwise it counts them.
- * Once confirmed the question closes and the whole page waits for the answer; an error goes in a
- * popup.
- */
 @Component({
   selector: 'app-duplicate-warehouse-items-popup',
   imports: [AlertPopup, ConfirmPopup, PageSpinner, TranslatePipe],

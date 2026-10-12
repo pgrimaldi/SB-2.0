@@ -24,13 +24,8 @@ import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 
-/** Provisional rates (Italian VAT), until the API gives the real ones. */
 const VAT_RATES = ['0', '4', '5', '10', '22'];
 
-/**
- * Popup "Aggiungi nuova stampante" of the designer's mockup, to see how its many fields look in a
- * popup (user, 12/10/2026): Salva is not wired yet, the API is not defined.
- */
 @Component({
   selector: 'app-add-printer-item-popup',
   imports: [
@@ -76,7 +71,6 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
     );
   }
 
-  /** X, Esc and a click outside: after asking with unsaved changes. */
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.close();
@@ -93,9 +87,7 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
       maxWidth: 'none',
       maxHeight: '90vh',
       panelClass: 'add__printer__item__popup__panel',
-      // Esc and a click outside go through closeRequested: they ask first with unsaved changes.
       disableClose: true,
-      // The keyboard starts in the first field, not on the X.
       autoFocus: 'input',
     };
   }

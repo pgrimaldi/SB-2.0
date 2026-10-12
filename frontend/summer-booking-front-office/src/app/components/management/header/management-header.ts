@@ -60,7 +60,6 @@ export class ManagementHeader {
   });
 
   constructor() {
-    // The header has calendars: their commands follow the language (see CalendarTextsBehaviour).
     inject(CalendarTextsBehaviour);
   }
 

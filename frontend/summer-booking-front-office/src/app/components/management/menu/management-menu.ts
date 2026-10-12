@@ -18,7 +18,6 @@ export class ManagementMenu {
   private readonly authBehaviour = inject(AuthBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
 
-  /** `label` is a translation key. */
   protected readonly links = [
     {
       route: '/warehouse',

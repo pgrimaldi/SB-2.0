@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { I18nText } from '../../i18n/i18n-text/i18n-text';
 
-/** `label` is a translation key. */
 export interface SettingsLink {
   route: string;
   label: string;

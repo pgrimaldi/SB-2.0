@@ -50,7 +50,6 @@ export class ManagementFiltersBehaviour {
   });
 }
 
-/** The calendar day as a UTC day, no time zone conversion: 29/09 → `2026-09-29T00:00:00.000Z`. */
 function utcDayStart(day: Date): string {
   return new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate())).toISOString();
 }

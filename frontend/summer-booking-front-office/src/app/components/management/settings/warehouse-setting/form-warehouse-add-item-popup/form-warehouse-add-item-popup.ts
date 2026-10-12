@@ -102,7 +102,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     super();
     this.unsaved.watch(this);
     effect(() => {
-      // Off once the threshold is no longer above 0, and still off when a threshold is typed again.
       if (this.draftForm.isThresholdWarningActive().disabled()) {
         untracked(() => this.draftForm.isThresholdWarningActive().value.set(false));
       }
@@ -122,8 +121,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     if (this.isLoading() || !idProperty || !this.canAdd()) {
       return;
     }
-    // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
-    // a field goes under that field.
+
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
@@ -154,10 +152,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     );
   }
 
-  /**
-   * X, Esc and a click outside: not while saving; after asking with unsaved changes. Annulla closes
-   * at once: whoever presses it wants to drop what was typed (user, 06/10/2026).
-   */
   protected async leave(): Promise<void> {
     if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
       this.close();
@@ -173,9 +167,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
       width: 'min(25rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'form__warehouse__add__item__popup__panel',
-      // Esc and a click outside go through closeRequested: they ask first with unsaved changes.
       disableClose: true,
-      // The keyboard starts in the first field, not on the X.
       autoFocus: 'input',
     };
   }

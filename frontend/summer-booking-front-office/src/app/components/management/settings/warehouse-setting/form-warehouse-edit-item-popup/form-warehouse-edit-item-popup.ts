@@ -52,7 +52,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
-  /** Read only when the popup opens. */
   readonly item = input<WarehouseItem | null>(null);
   readonly saved = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
@@ -81,7 +80,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     this.draftForm.isThresholdWarningActive,
   );
   protected readonly isLoading = signal(false);
-  /** The values the popup opened with: changed ones are unsaved. */
   private opened: WarehouseItem | null = null;
   protected readonly canSave = computed(
     () => this.draft().idArticle !== null && this.draftForm().valid(),
@@ -99,7 +97,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     super();
     this.unsaved.watch(this);
     effect(() => {
-      // Off once the threshold is no longer above 0, and still off when a threshold is typed again.
       if (this.draftForm.isThresholdWarningActive().disabled()) {
         untracked(() => this.draftForm.isThresholdWarningActive().value.set(false));
       }
@@ -116,8 +113,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     if (this.isLoading() || !idProperty || !this.canSave()) {
       return;
     }
-    // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
-    // a field goes under that field.
+
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
@@ -149,10 +145,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     );
   }
 
-  /**
-   * X, Esc and a click outside: not while saving; after asking with unsaved changes. Annulla closes
-   * at once: whoever presses it wants to drop what was typed (user, 06/10/2026).
-   */
   protected async leave(): Promise<void> {
     if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
       this.close();
@@ -168,9 +160,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
       width: 'min(25rem, 90vw)',
       maxWidth: 'none',
       panelClass: 'form__warehouse__edit__item__popup__panel',
-      // Esc and a click outside go through closeRequested: they ask first with unsaved changes.
       disableClose: true,
-      // The keyboard starts in the total (the article is locked), not on the X.
       autoFocus: 'input',
     };
   }
@@ -180,7 +170,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     const draft = item
       ? {
           ...item,
-          // Checked here too: `opened` is taken before the effect turns the alert off.
           isThresholdWarningActive:
             item.isThresholdWarningActive && (item.thresholdQuantity ?? 0) > 0,
         }
