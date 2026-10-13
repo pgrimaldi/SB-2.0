@@ -124,6 +124,39 @@
   line-height: 1;
 }
 
+// Phone: little room above the title; under the title one full row each for the period with
+// Filtri, for the search, and for Annulla selezione with Cancella dati (half each).
+@media (width < 48rem) {
+  .database {
+    padding-top: 1rem;
+  }
+
+  .database app-date-range-select {
+    --date-range-select-width: 100%;
+
+    flex: 1;
+    min-width: 0;
+  }
+
+  .database ::ng-deep .table__search {
+    flex-basis: 100%;
+  }
+
+  .database__clear__selection,
+  .database__delete {
+    flex: 1;
+    order: 2;
+
+    ::ng-deep button {
+      width: 100%;
+    }
+  }
+
+  .database__clear__selection {
+    margin-inline-start: 0;
+  }
+}
+
 // From 1920px the search of the table grows: the date select and Filtri grow with it.
 @media (width >= 120rem) {
   .database__heading {
