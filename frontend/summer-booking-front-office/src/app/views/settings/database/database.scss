@@ -96,8 +96,8 @@
   cursor: pointer;
 }
 
-// At the end of the row of the search: "Annulla selezione", then the red "Cancella dati"; both off
-// until a row is chosen.
+// At the end of the row of the search: "Annulla selezione", then the red "Cancella dati" (in the
+// trash "Ripristina" and "Elimina definitivamente"); all off until a row is chosen.
 .database__clear__selection,
 .database__delete,
 .database__empty__trash,
@@ -111,8 +111,7 @@
   order: 1;
 }
 
-.database__clear__selection,
-.database__restore {
+.database__clear__selection {
   margin-inline-start: auto;
 }
 
@@ -196,8 +195,7 @@
     }
   }
 
-  .database__clear__selection,
-  .database__restore {
+  .database__clear__selection {
     margin-inline-start: 0;
   }
 }

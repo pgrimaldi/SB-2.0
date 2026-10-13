@@ -393,7 +393,7 @@ export class Database {
       return;
     }
     this.isRestoring.set(true);
-    this.database.restoreBookingItem(idProperty, this.idBookings()).subscribe({
+    this.database.restoreBookingItem({ idProperty, idBookings: this.idBookings() }).subscribe({
       next: () => {
         this.isRestoring.set(false);
         this.idSelectedBookings.set([]);
@@ -414,7 +414,7 @@ export class Database {
       return;
     }
     this.isDeletingForever.set(true);
-    this.database.deleteSelectedItem(idProperty, this.idBookings()).subscribe({
+    this.database.deleteSelectedItem({ idProperty, idBookings: this.idBookings() }).subscribe({
       next: () => {
         this.isDeletingForever.set(false);
         this.idSelectedBookings.set([]);

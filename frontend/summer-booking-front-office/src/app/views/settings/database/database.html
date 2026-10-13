@@ -69,6 +69,16 @@
         <span class="database__filters__count">{{ chips().length }}</span>
       }
     </button>
+    <app-button
+      appTableHeadingAction
+      class="database__clear__selection"
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [disabled]="!idSelectedBookings().length"
+      (clicked)="idSelectedBookings.set([])"
+    >
+      {{ 'management.settings.database.clear_selection' | translate }}
+    </app-button>
     @if (isTrash) {
       <app-button
         appTableHeadingAction
@@ -91,18 +101,6 @@
         (clicked)="isDeleteForeverAsked.set(true)"
       >
         {{ 'management.settings.database.trash_page.delete_forever' | translate }}
-      </app-button>
-    }
-    @if (!isTrash) {
-      <app-button
-        appTableHeadingAction
-        class="database__clear__selection"
-        [appearance]="ButtonAppearance.Light"
-        [size]="ButtonSize.Small"
-        [disabled]="!idSelectedBookings().length"
-        (clicked)="idSelectedBookings.set([])"
-      >
-        {{ 'management.settings.database.clear_selection' | translate }}
       </app-button>
     }
     @if (!isTrash) {
