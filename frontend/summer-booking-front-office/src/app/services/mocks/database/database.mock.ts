@@ -416,6 +416,38 @@ export const restoreBookingItemMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
+/**
+ * `POST /api/database/delete-selected-item` with `{ idProperty, idBookings }`: deletes for good the
+ * bookings in the trash (until the page is reloaded). 204 without a body; 401 without a valid access
+ * token; 403 for a missing or unknown property; 404 when a booking is not in the trash of the property.
+ */
+export const deleteSelectedItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as { idProperty?: unknown; idBookings?: unknown };
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
+  const known = RESERVATIONS.filter(
+    (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? ''),
+  ).map((row) => row.idBooking);
+  if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
+    return resourceNotFound(request);
+  }
+  for (let index = RESERVATIONS.length - 1; index >= 0; index--) {
+    const idBooking = RESERVATIONS[index].idBooking ?? '';
+    if (idBookings.includes(idBooking) && trashedBookings.delete(idBooking)) {
+      RESERVATIONS.splice(index, 1);
+    }
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
 function trashBookings(idBookings: readonly string[]): void {
   for (const id of idBookings) {
     trashedBookings.add(id);

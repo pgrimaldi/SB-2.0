@@ -3,7 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable, map, of, switchMap, tap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
@@ -162,7 +162,10 @@ export class Database {
   protected readonly isTrashedShown = signal(false);
   protected readonly isEmptyingTrash = signal(false);
   protected readonly isEmptyTrashAsked = signal(false);
+  protected readonly isTrashEmpty = signal(false);
   protected readonly isRestoring = signal(false);
+  protected readonly isDeleteForeverAsked = signal(false);
+  protected readonly isDeletingForever = signal(false);
   protected readonly closeIcon = ['/assets/images/CloseDatabaseFilters_setting.svg'] as const;
   protected readonly isActionErrorShown = signal(false);
   protected readonly actionErrorIcon = ['/assets/images/DatabaseWarning_setting.svg'] as const;
@@ -311,6 +314,11 @@ export class Database {
   /** The texts are asked with each page: after a language change they are those of the new one. */
   protected readonly load: TableLoad<{ idProperty: string }, ExistingBookingRow> = (request) =>
     (this.isTrash ? this.database.trashItemList : this.database.existingBookingList)(request).pipe(
+      tap((page) => {
+        if (this.isTrash && !request.search && !request.filters.length) {
+          this.isTrashEmpty.set(page.total === 0);
+        }
+      }),
       switchMap((page) =>
         (
           this.translateService.get('management.settings.database') as Observable<DatabaseTexts>
@@ -393,6 +401,27 @@ export class Database {
       },
       error: (error: unknown) => {
         this.isRestoring.set(false);
+        this.actionError.set(toApiProblem(error));
+        this.isActionErrorShown.set(true);
+        table.reload();
+      },
+    });
+  }
+
+  protected deleteForever(table: Table<ExistingBookingRow, { idProperty: string }>): void {
+    const idProperty = this.auth.user()?.idProperty;
+    if (this.isDeletingForever() || !idProperty) {
+      return;
+    }
+    this.isDeletingForever.set(true);
+    this.database.deleteSelectedItem(idProperty, this.idBookings()).subscribe({
+      next: () => {
+        this.isDeletingForever.set(false);
+        this.idSelectedBookings.set([]);
+        table.reload();
+      },
+      error: (error: unknown) => {
+        this.isDeletingForever.set(false);
         this.actionError.set(toApiProblem(error));
         this.isActionErrorShown.set(true);
         table.reload();

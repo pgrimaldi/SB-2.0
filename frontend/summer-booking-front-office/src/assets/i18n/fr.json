@@ -481,6 +481,12 @@
           "text": "Vous videz la corbeille.\nToutes les données seront supprimées définitivement. L'action est irréversible.",
           "cancel": "Annuler",
           "confirm": "Confirmer"
+        },
+        "delete_forever": {
+          "title": "Suppression définitive",
+          "text": "Vous supprimez définitivement les éléments sélectionnés.",
+          "cancel": "Annuler",
+          "confirm": "Confirmer"
         }
       }
     }

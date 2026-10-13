@@ -19,6 +19,7 @@
       <app-button
         class="database__empty__trash"
         [size]="ButtonSize.Small"
+        [disabled]="isTrashEmpty()"
         (clicked)="isEmptyTrashAsked.set(true)"
       >
         {{ 'management.settings.database.trash_page.empty' | translate }}
@@ -87,6 +88,7 @@
         [size]="ButtonSize.Small"
         [pathIcon]="trashIcon"
         [disabled]="!idSelectedBookings().length"
+        (clicked)="isDeleteForeverAsked.set(true)"
       >
         {{ 'management.settings.database.trash_page.delete_forever' | translate }}
       </app-button>
@@ -155,7 +157,17 @@
   [(open)]="isEmptyTrashAsked"
   (confirmed)="isEmptyTrashAsked.set(false); emptyTrash(table)"
 />
-<app-page-spinner [isLoading]="isEmptyingTrash() || isRestoring()" />
+<app-confirm-popup
+  [title]="'management.settings.database.delete_forever.title' | translate"
+  [text]="'management.settings.database.delete_forever.text' | translate"
+  [texts]="'management.settings.database.delete_forever' | translate"
+  [danger]="true"
+  [isTitleDanger]="true"
+  [pathIcon]="closeIcon"
+  [(open)]="isDeleteForeverAsked"
+  (confirmed)="isDeleteForeverAsked.set(false); deleteForever(table)"
+/>
+<app-page-spinner [isLoading]="isEmptyingTrash() || isRestoring() || isDeletingForever()" />
 <app-alert-popup
   [title]="'alert.error_title' | translate"
   [text]="actionErrorMessage() ?? ''"

@@ -481,6 +481,12 @@
           "text": "Du leerst den Papierkorb.\nAlle Daten werden endgültig gelöscht. Dies kann nicht rückgängig gemacht werden.",
           "cancel": "Abbrechen",
           "confirm": "Bestätigen"
+        },
+        "delete_forever": {
+          "title": "Endgültig löschen",
+          "text": "Du löschst die ausgewählten Elemente endgültig.",
+          "cancel": "Abbrechen",
+          "confirm": "Bestätigen"
         }
       }
     }

@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
 import {
   affiliatedHotelComboboxMock,
+  deleteSelectedItemMock,
   emptyTrashMock,
   existingBookingListMock,
   moveToTrashMock,
@@ -219,6 +220,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/database/restore-booking-item`
   ) {
     return restoreBookingItemMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/database/delete-selected-item`
+  ) {
+    return deleteSelectedItemMock(request);
   }
 
   return next(request);

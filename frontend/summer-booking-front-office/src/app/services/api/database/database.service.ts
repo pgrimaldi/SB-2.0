@@ -44,4 +44,13 @@ export class DatabaseService {
       idProperty,
       idBookings,
     });
+
+  readonly deleteSelectedItem = (
+    idProperty: string,
+    idBookings: readonly string[],
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-selected-item`, {
+      idProperty,
+      idBookings,
+    });
 }

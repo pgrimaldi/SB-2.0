@@ -481,6 +481,12 @@
           "text": "Stai svuotando il cestino.\nTutti i dati saranno eliminati definitivamente. L'azione è irreversibile.",
           "cancel": "Annulla",
           "confirm": "Conferma"
+        },
+        "delete_forever": {
+          "title": "Elimina definitiva",
+          "text": "Stai eliminando definitivamente gli elementi selezionati.",
+          "cancel": "Annulla",
+          "confirm": "Conferma"
         }
       }
     }

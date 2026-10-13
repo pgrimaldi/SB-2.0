@@ -481,6 +481,12 @@
           "text": "Estás vaciando la papelera.\nTodos los datos se eliminarán definitivamente. La acción es irreversible.",
           "cancel": "Cancelar",
           "confirm": "Confirmar"
+        },
+        "delete_forever": {
+          "title": "Eliminación definitiva",
+          "text": "Estás eliminando definitivamente los elementos seleccionados.",
+          "cancel": "Cancelar",
+          "confirm": "Confirmar"
         }
       }
     }

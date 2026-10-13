@@ -481,6 +481,12 @@
           "text": "You are emptying the trash.\nAll data will be deleted permanently. This cannot be undone.",
           "cancel": "Cancel",
           "confirm": "Confirm"
+        },
+        "delete_forever": {
+          "title": "Permanent deletion",
+          "text": "You are permanently deleting the selected items.",
+          "cancel": "Cancel",
+          "confirm": "Confirm"
         }
       }
     }
