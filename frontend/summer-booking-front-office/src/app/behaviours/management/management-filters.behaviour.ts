@@ -5,6 +5,7 @@ import { debounceTime } from 'rxjs';
 import { BookingDayType } from '../../entities/enums/booking-day-type';
 import { PageFilter } from '../../entities/pagination/page';
 import { DateRange } from '../../entities/shared/date-range';
+import { utcDayEnd, utcDayStart } from '../dates/date-periods';
 
 /** The date arrows can be clicked quickly: the pages ask the API only after this pause. */
 export const DATES_DEBOUNCE = 500;
@@ -42,14 +43,4 @@ export class ManagementFiltersBehaviour {
       { field: 'bookingDayType', value: this.period() },
     ];
   });
-}
-
-function utcDayStart(day: Date): string {
-  return new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate())).toISOString();
-}
-
-function utcDayEnd(day: Date): string {
-  return new Date(
-    Date.UTC(day.getFullYear(), day.getMonth(), day.getDate(), 23, 59, 59, 999),
-  ).toISOString();
 }

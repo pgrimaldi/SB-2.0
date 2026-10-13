@@ -1,9 +1,15 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
-import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import {
+  DEFAULT_PAGE_SIZE,
+  Page,
+  PageFilter,
+  PageRequest,
+} from '../../../entities/pagination/page';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { operationNotAllowed } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
@@ -178,6 +184,15 @@ const RESERVATIONS: ReservationRow[] = [
   },
 ];
 
+/** Hotels with an agreement with the property: invented names and ids. */
+const AFFILIATED_HOTELS: { propertyId: number; id: string; value: string }[] = [
+  { propertyId: 1, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41', value: 'Hotel Miramare' },
+  { propertyId: 1, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42', value: 'Hotel 5 stelle' },
+  { propertyId: 1, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a43', value: 'Hotel Sun' },
+  { propertyId: 1, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a44', value: 'Beach Hotel' },
+  { propertyId: 2, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a45', value: 'Hotel Esempio' },
+];
+
 const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = [
   'customerName',
@@ -220,9 +235,15 @@ export const existingBookingListMock = (
   );
 
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = search
-    ? bookings.filter((item) => item.customerName?.toLowerCase().includes(search))
-    : bookings;
+  const from = filterValue(body.filters, 'datetimeFrom');
+  const to = filterValue(body.filters, 'datetimeTo');
+  // A booking is in the period when some of its days are.
+  const found = bookings.filter(
+    (item) =>
+      (!search || item.customerName?.toLowerCase().includes(search)) &&
+      (!from || (item.dateTo ?? '') >= from) &&
+      (!to || (item.dateFrom ?? '') <= to),
+  );
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -236,12 +257,39 @@ export const existingBookingListMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
+/**
+ * `POST /api/database/get-affiliated-hotel-combobox` with `{ idProperty }`: the hotels of the property,
+ * id and name. 401 without a valid access token; 403 for a missing or unknown property.
+ */
+export const affiliatedHotelComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const hotels: ComboboxItem[] = AFFILIATED_HOTELS.filter(
+    (hotel) => hotel.propertyId === property.id,
+  ).map(({ id, value }) => ({ id, value }));
+  return of(new HttpResponse({ status: 200, url: request.url, body: hotels })).pipe(delay(150));
+};
+
 /** Texts alphabetically, ignoring case; a missing value first ascending, last descending. */
 function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? -1 : 1;
   }
   return first.localeCompare(second, 'it', { sensitivity: 'base' });
+}
+
+function filterValue(filters: unknown, field: string): string | null {
+  const filter = Array.isArray(filters)
+    ? (filters as Partial<PageFilter>[]).find((item) => item.field === field)
+    : undefined;
+  return typeof filter?.value === 'string' ? filter.value : null;
 }
 
 function positiveInteger(value: unknown, fallback: number): number {

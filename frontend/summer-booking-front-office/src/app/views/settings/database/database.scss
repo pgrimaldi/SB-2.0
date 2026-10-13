@@ -10,9 +10,29 @@
   line-height: 2rem;
 }
 
+.database__filters {
+  height: var(--date-range-select-height, 1.625rem);
+  padding-inline: 1.5rem;
+  border: 0.0625rem solid var(--color__main__theme__one);
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  color: var(--color__main__theme__one);
+  font: inherit;
+  font-size: var(--date-range-select-text-size, 0.75rem);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+// From 1920px the search of the table grows: the date select and Filtri grow with it.
 @media (width >= 120rem) {
   .database__title {
     font-size: 1.75rem;
     line-height: 2.5rem;
+  }
+
+  .database {
+    --date-range-select-width: 16rem;
+    --date-range-select-height: 2.25rem;
+    --date-range-select-text-size: 0.875rem;
   }
 }

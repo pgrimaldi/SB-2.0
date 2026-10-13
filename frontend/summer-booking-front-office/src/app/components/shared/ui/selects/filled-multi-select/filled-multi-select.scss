@@ -1,0 +1,32 @@
+@use '@angular/material' as mat;
+@use '../../inputs/filled-field' as field;
+
+// Same look as app-filled-select; the options open in the shared `select__panel` of the theme.
+@include field.filled-field(filled__multi__select);
+
+:host {
+  @include mat.select-overrides(
+    (
+      trigger-text-size: var(--filled-field-text-size, 0.75rem),
+      trigger-text-line-height: var(--filled-field-line-height, 1.125rem),
+      trigger-text-tracking: normal,
+      trigger-text-weight: 500,
+      enabled-trigger-text-color: var(--color__main__theme__one),
+      placeholder-text-color: var(--color__main__theme__one),
+      enabled-arrow-color: var(--color__main__theme__one),
+      focused-arrow-color: var(--color__main__theme__one),
+    )
+  );
+}
+
+// Material gives the field a fixed width of 180px: here it follows the room it is given.
+.filled__multi__select__control ::ng-deep .mat-mdc-form-field-infix {
+  width: auto;
+  min-width: 0;
+}
+
+// Material gives the arrow a box 24px high, which would make the field taller than the other grey
+// fields: the box is as high as the text.
+.filled__multi__select__control ::ng-deep .mat-mdc-select-arrow-wrapper {
+  height: var(--filled-field-line-height, 1.125rem);
+}

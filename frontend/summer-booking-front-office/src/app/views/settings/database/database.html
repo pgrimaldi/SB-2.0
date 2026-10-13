@@ -4,6 +4,7 @@
     #table
     [columns]="columns()"
     [params]="params()"
+    [filters]="filters()"
     [load]="load"
     idField="idBooking"
     [texts]="'table' | translate"
@@ -14,8 +15,30 @@
     [isCreateButtonHidden]="true"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
-  />
+  >
+    <app-date-range-select
+      appTableHeadingAction
+      [options]="dateOptions()"
+      [(range)]="dateRange"
+      [texts]="'management.settings.database.date_filter' | translate"
+      [pathIcon]="dateFilterIcons"
+    />
+    <button
+      appTableHeadingAction
+      class="database__filters"
+      type="button"
+      (click)="isFiltersOpen.set(true)"
+    >
+      {{ 'management.settings.database.filters.button' | translate }}
+    </button>
+  </app-table>
 </main>
+
+<app-existing-booking-filters-popup
+  [filters]="bookingFilters()"
+  [(open)]="isFiltersOpen"
+  (applied)="bookingFilters.set($event)"
+/>
 
 <app-table-error-popup
   [title]="'table.load_error.title' | translate"

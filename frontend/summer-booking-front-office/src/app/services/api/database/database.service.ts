@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 
@@ -15,4 +16,9 @@ export class DatabaseService {
       `${this.endpoint}/existing-booking-list`,
       request,
     );
+
+  readonly affiliatedHotelCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/get-affiliated-hotel-combobox`, {
+      idProperty,
+    });
 }

@@ -403,6 +403,51 @@
           "confirmed": "مؤكد",
           "cancelled": "ملغى",
           "no_show": "لم يحضر"
+        },
+        "date_filter": {
+          "all": "كل التواريخ",
+          "today": "اليوم",
+          "this_week": "هذا الأسبوع",
+          "next_seven_days": "الأيام السبعة القادمة",
+          "next_month": "الشهر القادم",
+          "next_six_months": "الأشهر الستة القادمة",
+          "confirm": "تأكيد"
+        },
+        "filters": {
+          "button": "عوامل التصفية",
+          "title": "عوامل التصفية",
+          "choose": "اختر",
+          "cancel": "إلغاء",
+          "apply": "تطبيق",
+          "booking_typology": {
+            "label": "نوع الحجز",
+            "options": {
+              "daily": "يومي",
+              "multi_day": "عدة أيام",
+              "seven_days": "7 أيام",
+              "fourteen_days": "14 يومًا",
+              "monthly": "شهري",
+              "seasonal": "موسمي"
+            }
+          },
+          "agreement_booking": {
+            "label": "حجوزات مع اتفاقيات",
+            "options": {
+              "yes": "نعم",
+              "no": "لا"
+            }
+          },
+          "agreement_structure": {
+            "label": "الهياكل المتعاقدة"
+          },
+          "payment_status": {
+            "label": "حالة الدفع",
+            "options": {
+              "awaiting_payment": "في انتظار الدفع",
+              "fully_paid": "مدفوع بالكامل",
+              "partially_paid": "مدفوع جزئيًا"
+            }
+          }
         }
       }
     }

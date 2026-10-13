@@ -403,6 +403,51 @@
           "confirmed": "已确认",
           "cancelled": "已取消",
           "no_show": "未到"
+        },
+        "date_filter": {
+          "all": "所有日期",
+          "today": "今天",
+          "this_week": "本周",
+          "next_seven_days": "未来七天",
+          "next_month": "下个月",
+          "next_six_months": "未来六个月",
+          "confirm": "确认"
+        },
+        "filters": {
+          "button": "筛选",
+          "title": "筛选",
+          "choose": "请选择",
+          "cancel": "取消",
+          "apply": "应用",
+          "booking_typology": {
+            "label": "预订类型",
+            "options": {
+              "daily": "单日",
+              "multi_day": "多日",
+              "seven_days": "7天",
+              "fourteen_days": "14天",
+              "monthly": "包月",
+              "seasonal": "季度"
+            }
+          },
+          "agreement_booking": {
+            "label": "协议预订",
+            "options": {
+              "yes": "是",
+              "no": "否"
+            }
+          },
+          "agreement_structure": {
+            "label": "协议机构"
+          },
+          "payment_status": {
+            "label": "付款状态",
+            "options": {
+              "awaiting_payment": "待付款",
+              "fully_paid": "已全额付款",
+              "partially_paid": "已部分付款"
+            }
+          }
         }
       }
     }

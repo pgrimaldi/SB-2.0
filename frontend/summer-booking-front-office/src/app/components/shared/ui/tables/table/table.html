@@ -12,6 +12,7 @@
         {{ title() }}
       </h2>
     }
+    <ng-content select="[appTableHeadingAction]" />
     @if (isSearchable()) {
       <app-search-field
         class="table__search"

@@ -1,0 +1,207 @@
+@use '@angular/material' as mat;
+
+// Sizes can be changed from outside: --date-range-select-width, --date-range-select-height,
+// --date-range-select-text-size (defaults: the search field of the tables).
+app-date-range-select {
+  display: inline-block;
+}
+
+.date__range__select {
+  display: inline-flex;
+  width: var(--date-range-select-width, 13rem);
+  height: var(--date-range-select-height, 1.625rem);
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-inline: 0.625rem;
+  border: 0.0625rem solid var(--color__main__theme__one);
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  color: var(--color__main__theme__one);
+  font: inherit;
+  font-size: var(--date-range-select-text-size, 0.75rem);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.date__range__select__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date__range__select__arrow {
+  display: block;
+  flex: none;
+  width: 0.625rem;
+  height: 0.375rem;
+}
+
+mat-icon.date__range__select__arrow {
+  width: 0.875rem;
+  height: 0.875rem;
+  font-size: 0.875rem;
+}
+
+// The overlay pane is a flex box: without a width the panel would shrink to its content.
+.date__range__select__panel {
+  width: 100%;
+  overflow: hidden;
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  box-shadow: 0 0.25rem 1rem var(--color__layout__shadow__light);
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.date__range__select__options {
+  margin: 0;
+  padding: 0.375rem 0;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+  list-style: none;
+}
+
+.date__range__select__option {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0.75rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.date__range__select__calendar {
+  @include mat.datepicker-overrides(
+    (
+      calendar-container-background-color: transparent,
+      calendar-text-size: 0.6875rem,
+      calendar-body-label-text-size: 0.6875rem,
+      calendar-header-text-size: 0.6875rem,
+      calendar-header-text-weight: 700,
+      calendar-header-text-color: var(--color__main__theme__one),
+      calendar-header-divider-color: transparent,
+      calendar-date-text-color: var(--color__layout__text__soft),
+      calendar-date-hover-state-background-color: var(--color__tertiary__theme),
+      calendar-date-focus-state-background-color: var(--color__tertiary__theme),
+      calendar-date-selected-state-background-color: var(--color__main__theme__one),
+      calendar-date-selected-state-text-color: var(--color__layout__on__main),
+      calendar-date-today-outline-color: transparent,
+      calendar-date-in-range-state-background-color: transparent,
+    )
+  );
+
+  .mat-calendar-content {
+    padding: 0 0.625rem 0.25rem;
+  }
+
+  .mat-calendar-table-header th {
+    padding-bottom: 0.25rem;
+  }
+
+  .mat-calendar-table-header-divider {
+    display: none;
+  }
+
+  // Rows lower than wide; every chosen day is its own small square.
+  .mat-calendar-body-cell-container {
+    padding-top: 10% !important;
+    padding-bottom: 0 !important;
+  }
+
+  .mat-calendar-body-cell-content {
+    top: 0.0625rem;
+    left: 0.0625rem;
+    width: calc(100% - 0.125rem);
+    height: calc(100% - 0.125rem);
+    border-radius: 0.125rem;
+  }
+
+  .mat-calendar-body-in-range .mat-calendar-body-cell-content {
+    background: var(--color__main__theme__one);
+    color: var(--color__layout__on__main);
+  }
+
+  // No month name inside the grid: the header already says it.
+  .mat-calendar-body-label {
+    visibility: hidden;
+  }
+
+  tr:has(> .mat-calendar-body-label:only-child) {
+    display: none;
+  }
+}
+
+.date__range__select__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.625rem 0.75rem 0.25rem;
+}
+
+.date__range__select__period {
+  min-width: 6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.date__range__select__month {
+  display: flex;
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 0.375rem;
+    height: 0.625rem;
+  }
+
+  mat-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Right to left (Arabic): the previous month is on the right, so the arrows point the other way.
+[dir='rtl'] .date__range__select__month {
+  img,
+  mat-icon {
+    transform: scaleX(-1);
+  }
+}
+
+.date__range__select__confirm {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0 0.625rem;
+  border: 0;
+  background: none;
+  color: var(--color__main__theme__one);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--color__layout__muted);
+    cursor: default;
+  }
+}
+
+@media (hover: hover) {
+  .date__range__select__option:hover {
+    background: var(--color__tertiary__theme);
+  }
+}

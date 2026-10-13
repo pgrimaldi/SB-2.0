@@ -403,6 +403,51 @@
           "confirmed": "Confermata",
           "cancelled": "Annullata",
           "no_show": "Non presentato"
+        },
+        "date_filter": {
+          "all": "Tutte le date",
+          "today": "Oggi",
+          "this_week": "Questa settimana",
+          "next_seven_days": "Prossimi sette giorni",
+          "next_month": "Prossimo mese",
+          "next_six_months": "Prossimi sei mesi",
+          "confirm": "Conferma"
+        },
+        "filters": {
+          "button": "Filtri",
+          "title": "Filtri",
+          "choose": "Seleziona",
+          "cancel": "Annulla",
+          "apply": "Applica",
+          "booking_typology": {
+            "label": "Tipologia prenotazioni",
+            "options": {
+              "daily": "Giornaliera",
+              "multi_day": "Più giorni",
+              "seven_days": "7 giorni",
+              "fourteen_days": "14 giorni",
+              "monthly": "Mensile",
+              "seasonal": "Stagionale"
+            }
+          },
+          "agreement_booking": {
+            "label": "Prenotazioni con convenzioni",
+            "options": {
+              "yes": "Sì",
+              "no": "No"
+            }
+          },
+          "agreement_structure": {
+            "label": "Strutture convenzionate"
+          },
+          "payment_status": {
+            "label": "Stato pagamento",
+            "options": {
+              "awaiting_payment": "In attesa di pagamento",
+              "fully_paid": "Pagato totalmente",
+              "partially_paid": "Pagato parzialmente"
+            }
+          }
         }
       }
     }

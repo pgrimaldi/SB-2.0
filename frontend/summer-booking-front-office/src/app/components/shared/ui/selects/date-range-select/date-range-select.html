@@ -1,0 +1,56 @@
+<button
+  #trigger
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  class="date__range__select"
+  type="button"
+  [class.date__range__select__open]="isOpen()"
+  (click)="toggle()"
+>
+  <span class="date__range__select__label">{{ label() }}</span>
+  @if (icons().list[0]; as icon) {
+    @if (icons().material) {
+      <mat-icon class="date__range__select__arrow">{{ icon }}</mat-icon>
+    } @else {
+      <img class="date__range__select__arrow" [src]="icon" width="10" height="6" alt="" />
+    }
+  }
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayWidth]="panelWidth()"
+  (overlayOutsideClick)="closeOutside($event)"
+  (overlayKeydown)="$event.key === 'Escape' && close()"
+  (detach)="close()"
+>
+  <div class="date__range__select__panel">
+    <ul class="date__range__select__options">
+      @for (option of options(); track option.label) {
+        <li>
+          <button class="date__range__select__option" type="button" (click)="choose(option)">
+            {{ option.label }}
+          </button>
+        </li>
+      }
+    </ul>
+    <mat-calendar
+      class="date__range__select__calendar"
+      [headerComponent]="Header"
+      [startAt]="draft()?.start ?? null"
+      [selected]="draft()"
+      (selectedChange)="pick($event)"
+    />
+    <button
+      class="date__range__select__confirm"
+      type="button"
+      [disabled]="!isDraftComplete()"
+      (click)="confirm()"
+    >
+      {{ texts()?.confirm }}
+    </button>
+  </div>
+</ng-template>

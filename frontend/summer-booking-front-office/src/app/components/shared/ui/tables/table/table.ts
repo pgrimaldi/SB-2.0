@@ -34,6 +34,7 @@ import { SelectionCheckbox } from '../../checkboxes/selection-checkbox/selection
 import { resolveIcons } from '../../icons/icons';
 import { SearchField } from '../../inputs/search-field/search-field';
 import { Toggle } from '../../toggles/toggle/toggle';
+import { TableHeadingAction } from './table-heading-action';
 import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
 import { TableTextAction } from './table-text-action';
@@ -156,7 +157,8 @@ const SELECT_COLUMN = 'table__row__select';
  * Material table that loads its own rows page by page:
  * `<app-table [columns]="columns" [params]="filters" [load]="service.list" />`.
  * Buttons marked `appTableIconAction` go on the left of the bar above the rows, those marked
- * `appTableTextAction` on the right.
+ * `appTableTextAction` on the right; those marked `appTableHeadingAction` go in the title row,
+ * before the search.
  */
 @Component({
   selector: 'app-table',
@@ -240,6 +242,7 @@ export class Table<T, P extends object> implements OnDestroy {
   private readonly grid = viewChild.required<string, ElementRef<HTMLTableElement>>('grid', {
     read: ElementRef,
   });
+  private readonly headingActions = contentChildren(TableHeadingAction);
   private readonly iconActions = contentChildren(TableIconAction);
   private readonly textActions = contentChildren(TableTextAction);
   protected readonly TableColumnAlign = TableColumnAlign;
@@ -250,7 +253,11 @@ export class Table<T, P extends object> implements OnDestroy {
   );
   protected readonly hasBar = computed(() => this.hasIconZone() || this.hasTextActions());
   protected readonly hasHeading = computed(
-    () => !!this.title() || this.isSearchable() || !this.isCreateButtonHidden(),
+    () =>
+      !!this.title() ||
+      this.headingActions().length > 0 ||
+      this.isSearchable() ||
+      !this.isCreateButtonHidden(),
   );
 
   /** From the search field: 0.5 s after the last key, '' under 3 characters. */

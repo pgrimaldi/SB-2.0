@@ -403,6 +403,51 @@
           "confirmed": "Bestätigt",
           "cancelled": "Storniert",
           "no_show": "Nicht erschienen"
+        },
+        "date_filter": {
+          "all": "Alle Daten",
+          "today": "Heute",
+          "this_week": "Diese Woche",
+          "next_seven_days": "Nächste sieben Tage",
+          "next_month": "Nächster Monat",
+          "next_six_months": "Nächste sechs Monate",
+          "confirm": "Bestätigen"
+        },
+        "filters": {
+          "button": "Filter",
+          "title": "Filter",
+          "choose": "Auswählen",
+          "cancel": "Abbrechen",
+          "apply": "Anwenden",
+          "booking_typology": {
+            "label": "Buchungsart",
+            "options": {
+              "daily": "Tagesbuchung",
+              "multi_day": "Mehrere Tage",
+              "seven_days": "7 Tage",
+              "fourteen_days": "14 Tage",
+              "monthly": "Monatlich",
+              "seasonal": "Saisonal"
+            }
+          },
+          "agreement_booking": {
+            "label": "Buchungen mit Vereinbarungen",
+            "options": {
+              "yes": "Ja",
+              "no": "Nein"
+            }
+          },
+          "agreement_structure": {
+            "label": "Partnerstrukturen"
+          },
+          "payment_status": {
+            "label": "Zahlungsstatus",
+            "options": {
+              "awaiting_payment": "Zahlung ausstehend",
+              "fully_paid": "Vollständig bezahlt",
+              "partially_paid": "Teilweise bezahlt"
+            }
+          }
         }
       }
     }

@@ -1,0 +1,51 @@
+<ng-template #content>
+  <div class="existing__booking__filters__popup">
+    <h2 class="existing__booking__filters__popup__title">
+      {{ 'management.settings.database.filters.title' | translate }}
+    </h2>
+    <button class="existing__booking__filters__popup__close" type="button" (click)="close()">
+      <img [src]="closeIcon" width="12" height="12" alt="" />
+    </button>
+
+    <div class="existing__booking__filters__popup__fields">
+      <app-filled-multi-select
+        [label]="'management.settings.database.filters.booking_typology.label' | translate"
+        [placeholder]="'management.settings.database.filters.choose' | translate"
+        [options]="bookingTypologyOptions()"
+        [(value)]="bookingTypologies"
+      />
+      <app-filled-multi-select
+        [label]="'management.settings.database.filters.agreement_booking.label' | translate"
+        [placeholder]="'management.settings.database.filters.choose' | translate"
+        [options]="agreementBookingOptions()"
+        [(value)]="agreementBookings"
+      />
+      <app-filled-multi-select
+        [label]="'management.settings.database.filters.agreement_structure.label' | translate"
+        [placeholder]="'management.settings.database.filters.choose' | translate"
+        [options]="affiliatedHotelOptions()"
+        [(value)]="idAffiliatedHotels"
+      />
+      <app-filled-multi-select
+        [label]="'management.settings.database.filters.payment_status.label' | translate"
+        [placeholder]="'management.settings.database.filters.choose' | translate"
+        [options]="paymentStatusOptions()"
+        [(value)]="paymentStatuses"
+      />
+    </div>
+
+    <div class="existing__booking__filters__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="close()"
+      >
+        {{ 'management.settings.database.filters.cancel' | translate }}
+      </app-button>
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="apply()">
+        {{ 'management.settings.database.filters.apply' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>
