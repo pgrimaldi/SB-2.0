@@ -456,7 +456,10 @@
             "more_options": "多个选项",
             "clear": "清除筛选"
           }
-        }
+        },
+        "delete": "删除数据",
+        "clear_selection": "取消选择",
+        "trash": "回收站"
       }
     }
   },

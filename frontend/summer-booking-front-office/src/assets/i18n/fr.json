@@ -456,7 +456,10 @@
             "more_options": "Plusieurs options",
             "clear": "Effacer les filtres"
           }
-        }
+        },
+        "delete": "Supprimer les données",
+        "clear_selection": "Annuler la sélection",
+        "trash": "Corbeille"
       }
     }
   },

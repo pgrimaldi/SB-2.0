@@ -456,7 +456,10 @@
             "more_options": "Varias opciones",
             "clear": "Borrar filtros"
           }
-        }
+        },
+        "delete": "Eliminar datos",
+        "clear_selection": "Anular selección",
+        "trash": "Papelera"
       }
     }
   },

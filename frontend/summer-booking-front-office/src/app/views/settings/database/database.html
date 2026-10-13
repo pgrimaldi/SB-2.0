@@ -1,5 +1,10 @@
 <main class="database">
-  <h1 class="database__title">{{ 'management.settings.database.title' | translate }}</h1>
+  <div class="database__title">
+    <h1 class="database__heading">{{ 'management.settings.database.title' | translate }}</h1>
+    <app-button class="database__trash" [size]="ButtonSize.Small" [pathIcon]="trashIcon">
+      {{ 'management.settings.database.trash' | translate }}
+    </app-button>
+  </div>
   <app-table
     #table
     [columns]="columns()"
@@ -34,6 +39,24 @@
         <span class="database__filters__count">{{ chips().length }}</span>
       }
     </button>
+    <app-button
+      appTableHeadingAction
+      class="database__clear__selection"
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [disabled]="!idSelectedBookings().length"
+      (clicked)="idSelectedBookings.set([])"
+    >
+      {{ 'management.settings.database.clear_selection' | translate }}
+    </app-button>
+    <app-button
+      appTableHeadingAction
+      class="database__delete"
+      [size]="ButtonSize.Small"
+      [disabled]="!idSelectedBookings().length"
+    >
+      {{ 'management.settings.database.delete' | translate }}
+    </app-button>
     @if (chips().length) {
       <app-filter-chips
         appTableFilterBar

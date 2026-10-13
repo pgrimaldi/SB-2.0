@@ -1,13 +1,42 @@
+@use '@angular/material' as mat;
 @use '../../../styles/table-page' as page;
 
 @include page.table-page(database);
 
+// The title on the left, Cestino on the right, above Cancella dati.
 .database__title {
-  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.database__heading {
+  margin: 0;
   color: var(--color__main__theme__one);
   font-size: 1.375rem;
   font-weight: 600;
   line-height: 2rem;
+}
+
+.database__trash {
+  --button-height: var(--date-range-select-height, 1.625rem);
+  --button-text-size: var(--date-range-select-text-size, 0.75rem);
+  --button-padding: 1rem;
+
+  // On the inner button, because app-button sets its own colours on its host.
+  ::ng-deep button {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color__layout__text__soft),
+      )
+    );
+  }
+
+  // The trash is taller than wide: whole, not stretched to a square.
+  ::ng-deep .button__icon {
+    object-fit: contain;
+  }
 }
 
 // With the chips under the search, less room under the title (and above it from 1920px), so the
@@ -32,6 +61,56 @@
   cursor: pointer;
 }
 
+// At the end of the row of the search: "Annulla selezione", then the red "Cancella dati"; both off
+// until a row is chosen.
+.database__clear__selection,
+.database__delete {
+  --button-height: var(--date-range-select-height, 1.625rem);
+  --button-text-size: var(--date-range-select-text-size, 0.75rem);
+  --button-padding: 2rem;
+  --button-border-color: var(--color__main__theme__one);
+
+  order: 1;
+}
+
+.database__clear__selection {
+  margin-inline-start: auto;
+
+  &:has(button:disabled) {
+    --button-border-color: color-mix(in srgb, var(--color__main__theme__one) 40%, transparent);
+  }
+
+  ::ng-deep button {
+    @include mat.button-overrides(
+      (
+        filled-disabled-container-color: var(--color__layout__surface),
+        filled-disabled-label-text-color: color-mix(
+            in srgb,
+            var(--color__main__theme__one) 40%,
+            transparent
+          ),
+      )
+    );
+  }
+}
+
+.database__delete {
+  // On the inner button, because app-button sets its own colours on its host.
+  ::ng-deep button {
+    @include mat.button-overrides(
+      (
+        filled-container-color: var(--color__layout__error),
+        filled-disabled-container-color: color-mix(
+            in srgb,
+            var(--color__layout__error) 40%,
+            transparent
+          ),
+        filled-disabled-label-text-color: var(--color__layout__on__main),
+      )
+    );
+  }
+}
+
 .database__filters__count {
   display: grid;
   width: 1rem;
@@ -47,7 +126,7 @@
 
 // From 1920px the search of the table grows: the date select and Filtri grow with it.
 @media (width >= 120rem) {
-  .database__title {
+  .database__heading {
     font-size: 1.75rem;
     line-height: 2.5rem;
   }

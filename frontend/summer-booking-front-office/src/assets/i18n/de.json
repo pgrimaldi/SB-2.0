@@ -456,7 +456,10 @@
             "more_options": "Mehrere Optionen",
             "clear": "Filter zurücksetzen"
           }
-        }
+        },
+        "delete": "Daten löschen",
+        "clear_selection": "Auswahl aufheben",
+        "trash": "Papierkorb"
       }
     }
   },

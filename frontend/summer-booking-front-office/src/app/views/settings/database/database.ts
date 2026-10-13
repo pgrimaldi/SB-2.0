@@ -24,6 +24,11 @@ import {
   FilterChip,
   FilterChips,
 } from '../../../components/shared/ui/chips/filter-chips/filter-chips';
+import {
+  Button,
+  ButtonAppearance,
+  ButtonSize,
+} from '../../../components/shared/ui/buttons/button/button';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
   DateRangeSelect,
@@ -105,6 +110,7 @@ const RESERVATION_STATUS_KEYS: Record<
 @Component({
   selector: 'app-database',
   imports: [
+    Button,
     DateRangeSelect,
     ExistingBookingFiltersPopup,
     FilterChips,
@@ -125,7 +131,10 @@ export class Database {
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly translateService = inject(TranslateService);
 
+  protected readonly ButtonAppearance = ButtonAppearance;
+  protected readonly ButtonSize = ButtonSize;
   protected readonly loadFailed = signal(false);
+  protected readonly trashIcon = ['/assets/images/Trash_setting.svg'] as const;
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.idProperty;
