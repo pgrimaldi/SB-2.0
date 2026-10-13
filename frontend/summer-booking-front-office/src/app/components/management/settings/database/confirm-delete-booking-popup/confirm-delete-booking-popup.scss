@@ -1,0 +1,10 @@
+:host {
+  display: contents;
+}
+
+// The popup centres its content: the field takes the whole width, its label on the left.
+.confirm__delete__booking__popup__password {
+  align-self: stretch;
+  margin-bottom: 0.5rem;
+  text-align: start;
+}

@@ -1,7 +1,11 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
-import { affiliatedHotelComboboxMock, existingBookingListMock } from './database/database.mock';
+import {
+  affiliatedHotelComboboxMock,
+  confirmDeleteBookingMock,
+  existingBookingListMock,
+} from './database/database.mock';
 import {
   contactSupportMock,
   emailConfigurationMock,
@@ -184,6 +188,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/database/get-affiliated-hotel-combobox`
   ) {
     return affiliatedHotelComboboxMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/database/confirm-delete-booking`
+  ) {
+    return confirmDeleteBookingMock(request);
   }
 
   return next(request);

@@ -1,5 +1,5 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, delay, of } from 'rxjs';
+import { Observable, delay, from, of, switchMap } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
@@ -10,8 +10,8 @@ import {
   PageFilter,
   PageRequest,
 } from '../../../entities/pagination/page';
-import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { operationNotAllowed } from '../errors/problem.mock';
+import { isAuthorized, isMockPassword, unauthorized } from '../auth/auth.mock';
+import { operationNotAllowed, problem, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 type ReservationRow = ExistingBookingItem & { propertyId: number };
@@ -275,6 +275,47 @@ export const affiliatedHotelComboboxMock = (
     (hotel) => hotel.propertyId === property.id,
   ).map(({ id, value }) => ({ id, value }));
   return of(new HttpResponse({ status: 200, url: request.url, body: hotels })).pipe(delay(150));
+};
+
+/**
+ * `POST /api/database/confirm-delete-booking` with `{ idProperty, idBookings, password }`: checks the
+ * password of the user (the one of the test account) before the bookings are deleted; for now it
+ * deletes nothing. 204 without a body; 401 without a valid access token; 403 for an unknown property;
+ * 404 when a booking is not one of the property; 400 with an error on `password` when it is wrong.
+ */
+export const confirmDeleteBookingMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as {
+    idProperty?: unknown;
+    idBookings?: unknown;
+    password?: unknown;
+  };
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
+  const known = RESERVATIONS.filter((row) => row.propertyId === property.id).map(
+    (row) => row.idBooking,
+  );
+  if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
+    return resourceNotFound(request);
+  }
+  return from(isMockPassword(body.password)).pipe(
+    delay(600),
+    switchMap((isRight) =>
+      isRight
+        ? of(new HttpResponse({ status: 204, url: request.url }))
+        : problem(request, 400, 'validation.invalid_request', {
+            title: 'Invalid request',
+            errors: [{ field: 'password', code: 'auth.invalid_credentials' }],
+          }),
+    ),
+  );
 };
 
 /** Texts alphabetically, ignoring case; a missing value first ascending, last descending. */

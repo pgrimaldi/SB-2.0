@@ -2,12 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
+  computed,
   effect,
   input,
   output,
 } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { Button, ButtonAppearance } from '../../buttons/button/button';
+import { resolveIcons } from '../../icons/icons';
 import { BasePopup } from '../base-popup/base-popup';
 
 export interface ConfirmPopupTexts {
@@ -17,11 +20,12 @@ export interface ConfirmPopupTexts {
 
 /**
  * Confirming does not close the popup: the caller runs the action with `isLoading` on and then closes
- * it, or leaves it open with the `error`.
+ * it, or leaves it open with the `error`. What is put inside (e.g. a password field) goes under the
+ * text.
  */
 @Component({
   selector: 'app-confirm-popup',
-  imports: [Button],
+  imports: [Button, MatIconModule],
   templateUrl: './confirm-popup.html',
   styleUrl: './confirm-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,9 +40,13 @@ export class ConfirmPopup extends BasePopup {
   readonly danger = input(false);
   readonly isLoading = input(false);
   readonly error = input<string | null>();
+  /** Icons as Material icon names (Material Symbols font): [close]. Without it, no X. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: [close]. Without it, no X. */
+  readonly pathIcon = input<readonly string[] | null>();
   readonly confirmed = output<void>();
   protected readonly ButtonAppearance = ButtonAppearance;
-
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
   constructor() {
     super();

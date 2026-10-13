@@ -1,0 +1,22 @@
+<app-confirm-popup
+  [title]="'management.settings.database.confirm_delete.title' | translate"
+  [texts]="'management.settings.database.confirm_delete' | translate"
+  [danger]="true"
+  [isLoading]="isLoading()"
+  [error]="errorMessage()"
+  [pathIcon]="closeIcon"
+  [(open)]="open"
+  (confirmed)="confirm()"
+>
+  <!-- For the password manager: without a username it would fill the nearest text field of the page. -->
+  <input type="email" autocomplete="username" [value]="username()" readonly hidden />
+  <app-filled-text-field
+    class="confirm__delete__booking__popup__password"
+    [label]="'management.settings.database.confirm_delete.password' | translate"
+    [isPasswordField]="true"
+    [pathIcon]="eyeIcons"
+    autocomplete="current-password"
+    [formField]="requestForm.password"
+    [error]="passwordError()"
+  />
+</app-confirm-popup>

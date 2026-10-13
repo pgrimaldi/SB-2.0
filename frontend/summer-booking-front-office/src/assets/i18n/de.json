@@ -459,7 +459,13 @@
         },
         "delete": "Daten löschen",
         "clear_selection": "Auswahl aufheben",
-        "trash": "Papierkorb"
+        "trash": "Papierkorb",
+        "confirm_delete": {
+          "title": "Passwort eingeben, um den Vorgang abzuschließen",
+          "password": "Passwort",
+          "cancel": "Abbrechen",
+          "confirm": "Bestätigen"
+        }
       }
     }
   },

@@ -157,6 +157,11 @@ function randomToken(): string {
     .join('');
 }
 
+/** The password of the signed-in test account, as the server would check it for an operation. */
+export async function isMockPassword(password: unknown): Promise<boolean> {
+  return typeof password === 'string' && (await sha256(password)) === MOCK_ACCOUNT.passwordSha256;
+}
+
 async function sha256(text: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');

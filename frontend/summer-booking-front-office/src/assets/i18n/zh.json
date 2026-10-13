@@ -459,7 +459,13 @@
         },
         "delete": "删除数据",
         "clear_selection": "取消选择",
-        "trash": "回收站"
+        "trash": "回收站",
+        "confirm_delete": {
+          "title": "输入密码以完成操作",
+          "password": "密码",
+          "cancel": "取消",
+          "confirm": "确认"
+        }
       }
     }
   },

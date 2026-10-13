@@ -459,7 +459,13 @@
         },
         "delete": "Delete data",
         "clear_selection": "Clear selection",
-        "trash": "Trash"
+        "trash": "Trash",
+        "confirm_delete": {
+          "title": "Enter your password to complete the operation",
+          "password": "Password",
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
       }
     }
   },

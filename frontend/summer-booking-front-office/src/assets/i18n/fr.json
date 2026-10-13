@@ -459,7 +459,13 @@
         },
         "delete": "Supprimer les données",
         "clear_selection": "Annuler la sélection",
-        "trash": "Corbeille"
+        "trash": "Corbeille",
+        "confirm_delete": {
+          "title": "Saisissez votre mot de passe pour terminer l'opération",
+          "password": "Mot de passe",
+          "cancel": "Annuler",
+          "confirm": "Confirmer"
+        }
       }
     }
   },

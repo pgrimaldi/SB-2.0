@@ -54,6 +54,7 @@
       class="database__delete"
       [size]="ButtonSize.Small"
       [disabled]="!idSelectedBookings().length"
+      (clicked)="isDeleteAsked.set(true)"
     >
       {{ 'management.settings.database.delete' | translate }}
     </app-button>
@@ -69,6 +70,8 @@
     }
   </app-table>
 </main>
+
+<app-confirm-delete-booking-popup [idBookings]="idBookingsToDelete()" [(open)]="isDeleteAsked" />
 
 <app-existing-booking-filters-popup
   [filters]="bookingFilters()"

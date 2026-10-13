@@ -459,7 +459,13 @@
         },
         "delete": "Cancella dati",
         "clear_selection": "Annulla selezione",
-        "trash": "Cestino"
+        "trash": "Cestino",
+        "confirm_delete": {
+          "title": "Inserisci password per completare l'operazione",
+          "password": "Password",
+          "cancel": "Annulla",
+          "confirm": "Conferma"
+        }
       }
     }
   },

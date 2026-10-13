@@ -19,6 +19,7 @@ import {
   DATE_FORMATS,
   DateLanguageBehaviour,
 } from '../../../behaviours/i18n/date-language.behaviour';
+import { ConfirmDeleteBookingPopup } from '../../../components/management/settings/database/confirm-delete-booking-popup/confirm-delete-booking-popup';
 import { ExistingBookingFiltersPopup } from '../../../components/management/settings/database/existing-booking-filters-popup/existing-booking-filters-popup';
 import {
   FilterChip,
@@ -111,6 +112,7 @@ const RESERVATION_STATUS_KEYS: Record<
   selector: 'app-database',
   imports: [
     Button,
+    ConfirmDeleteBookingPopup,
     DateRangeSelect,
     ExistingBookingFiltersPopup,
     FilterChips,
@@ -136,6 +138,8 @@ export class Database {
   protected readonly loadFailed = signal(false);
   protected readonly trashIcon = ['/assets/images/Trash_setting.svg'] as const;
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
+  protected readonly idBookingsToDelete = computed(() => this.idSelectedBookings().map(String));
+  protected readonly isDeleteAsked = signal(false);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.idProperty;
     return idProperty ? { idProperty } : null;

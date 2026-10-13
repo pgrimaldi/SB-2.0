@@ -1,7 +1,24 @@
 <ng-template #content>
   <div class="confirm__popup">
+    @if (icons().list[0]; as icon) {
+      <button
+        class="confirm__popup__close"
+        type="button"
+        [disabled]="isLoading()"
+        (click)="close()"
+      >
+        @if (icons().material) {
+          <mat-icon>{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="12" height="12" alt="" />
+        }
+      </button>
+    }
     <h2 class="confirm__popup__title">{{ title() }}</h2>
-    <p class="confirm__popup__text">{{ text() }}</p>
+    @if (text()) {
+      <p class="confirm__popup__text">{{ text() }}</p>
+    }
+    <ng-content />
     @if (error(); as error) {
       <p class="confirm__popup__error">{{ error }}</p>
     }
