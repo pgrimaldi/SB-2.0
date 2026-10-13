@@ -62,6 +62,7 @@ credentials
 /README.md
 /docs/*.docx
 /docs/*.md
+!/docs/API_CONTRACTS.md
 !/docs/README_DEPLOY.md
 !/docs/SECURITY_TODO.md
 !/docs/SEO_OPTIMIZATION_TODO.md
