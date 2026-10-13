@@ -1,3 +1,5 @@
+import { ComboboxItem } from '../combobox/combobox-item';
+
 export enum BookingTypologyFilter {
   Daily = 'Daily',
   MultiDay = 'MultiDay',
@@ -21,6 +23,6 @@ export enum PaymentStatusFilter {
 export class ExistingBookingFilters {
   bookingTypologies: BookingTypologyFilter[] = [];
   agreementBookings: AgreementBookingFilter[] = [];
-  idAffiliatedHotels: string[] = [];
+  affiliatedHotels: ComboboxItem[] = [];
   paymentStatuses: PaymentStatusFilter[] = [];
 }

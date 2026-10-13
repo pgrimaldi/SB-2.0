@@ -1,0 +1,17 @@
+@for (chip of chips(); track chip.label) {
+  <span class="filter__chips__chip">
+    <span class="filter__chips__label">{{ chip.label }}</span>
+    <button class="filter__chips__remove" type="button" (click)="removed.emit(chip)">
+      @if (icons().list[0]; as icon) {
+        @if (icons().material) {
+          <mat-icon>{{ icon }}</mat-icon>
+        } @else {
+          <img [src]="icon" width="8" height="8" alt="" />
+        }
+      }
+    </button>
+  </span>
+}
+@if (texts()?.clear; as clear) {
+  <button class="filter__chips__clear" type="button" (click)="cleared.emit()">{{ clear }}</button>
+}

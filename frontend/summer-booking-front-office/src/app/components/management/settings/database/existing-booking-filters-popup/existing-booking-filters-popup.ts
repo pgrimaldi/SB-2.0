@@ -16,6 +16,10 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import {
+  ExistingBookingFilterTexts,
+  filterOptionsOf,
+} from '../../../../../behaviours/database/existing-booking-filter-options';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import {
   AgreementBookingFilter,
@@ -28,15 +32,6 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
-
-/** Translation group `management.settings.database.filters.<filter>.options`. */
-type OptionTexts = Record<string, string>;
-
-interface FilterTexts {
-  booking_typology: { options: OptionTexts };
-  agreement_booking: { options: OptionTexts };
-  payment_status: { options: OptionTexts };
-}
 
 @Component({
   selector: 'app-existing-booking-filters-popup',
@@ -65,19 +60,21 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
   private readonly affiliatedHotels = signal<readonly ComboboxItem[]>([]);
   private affiliatedHotelsSubscription?: Subscription;
   private readonly texts = toSignal(
-    this.translateService.stream('management.settings.database.filters') as Observable<FilterTexts>,
+    this.translateService.stream(
+      'management.settings.database.filters',
+    ) as Observable<ExistingBookingFilterTexts>,
   );
   protected readonly bookingTypologyOptions = computed(() =>
-    optionsOf(Object.values(BookingTypologyFilter), this.texts()?.booking_typology.options),
+    filterOptionsOf(Object.values(BookingTypologyFilter), this.texts()?.booking_typology.options),
   );
   protected readonly agreementBookingOptions = computed(() =>
-    optionsOf(Object.values(AgreementBookingFilter), this.texts()?.agreement_booking.options),
+    filterOptionsOf(Object.values(AgreementBookingFilter), this.texts()?.agreement_booking.options),
   );
   protected readonly affiliatedHotelOptions = computed<readonly SelectOption[]>(() =>
     this.affiliatedHotels().map((hotel) => ({ value: hotel.id, label: hotel.value })),
   );
   protected readonly paymentStatusOptions = computed(() =>
-    optionsOf(Object.values(PaymentStatusFilter), this.texts()?.payment_status.options),
+    filterOptionsOf(Object.values(PaymentStatusFilter), this.texts()?.payment_status.options),
   );
 
   constructor() {
@@ -96,7 +93,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     this.applied.emit({
       bookingTypologies: [...this.bookingTypologies()],
       agreementBookings: [...this.agreementBookings()],
-      idAffiliatedHotels: [...this.idAffiliatedHotels()],
+      affiliatedHotels: this.chosenHotels(),
       paymentStatuses: [...this.paymentStatuses()],
     });
     this.close();
@@ -116,8 +113,19 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     const filters = this.filters();
     this.bookingTypologies.set(filters.bookingTypologies);
     this.agreementBookings.set(filters.agreementBookings);
-    this.idAffiliatedHotels.set(filters.idAffiliatedHotels);
+    this.idAffiliatedHotels.set(filters.affiliatedHotels.map((hotel) => hotel.id));
     this.paymentStatuses.set(filters.paymentStatuses);
+  }
+
+  /** With their names, for the chips: from the list of the server, or as they were applied. */
+  private chosenHotels(): ComboboxItem[] {
+    const known = new Map(
+      [...this.filters().affiliatedHotels, ...this.affiliatedHotels()].map((hotel) => [
+        hotel.id,
+        hotel,
+      ]),
+    );
+    return this.idAffiliatedHotels().flatMap((id) => known.get(id) ?? []);
   }
 
   private loadAffiliatedHotels(): void {
@@ -139,15 +147,4 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     this.affiliatedHotelsSubscription?.unsubscribe();
     super.ngOnDestroy();
   }
-}
-
-/** Enum values as `PascalCase`, translation keys as `snake_case`. */
-function optionsOf<K extends string>(
-  values: readonly K[],
-  texts: OptionTexts | undefined,
-): readonly SelectOption<K>[] {
-  return values.map((value) => ({
-    value,
-    label: texts?.[value.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()] ?? '',
-  }));
 }

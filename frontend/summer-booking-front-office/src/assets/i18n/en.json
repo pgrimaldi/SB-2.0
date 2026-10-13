@@ -447,6 +447,14 @@
               "fully_paid": "Fully paid",
               "partially_paid": "Partially paid"
             }
+          },
+          "chips": {
+            "booking_typology": "Type",
+            "agreement_booking": "Agreements",
+            "agreement_structure": "Structures",
+            "payment_status": "Payment status",
+            "more_options": "Several options",
+            "clear": "Clear filters"
           }
         }
       }

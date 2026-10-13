@@ -55,6 +55,11 @@ export class SearchField implements OnDestroy {
       .subscribe((text) => this.emitSearch(text));
   }
 
+  /** Empties the field from outside (e.g. "clear filters" of a page). */
+  reset(): void {
+    this.text.set('');
+  }
+
   protected clear(field: HTMLInputElement): void {
     this.text.set('');
     field.focus();

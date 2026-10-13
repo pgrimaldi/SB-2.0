@@ -30,7 +30,20 @@
       (click)="isFiltersOpen.set(true)"
     >
       {{ 'management.settings.database.filters.button' | translate }}
+      @if (chips().length) {
+        <span class="database__filters__count">{{ chips().length }}</span>
+      }
     </button>
+    @if (chips().length) {
+      <app-filter-chips
+        appTableFilterBar
+        [chips]="chips()"
+        [texts]="{ clear: 'management.settings.database.filters.chips.clear' | translate }"
+        [pathIcon]="chipIcons"
+        (removed)="removeChip($event)"
+        (cleared)="clearFilters(); table.clearSearch()"
+      />
+    }
   </app-table>
 </main>
 

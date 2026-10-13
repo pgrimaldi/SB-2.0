@@ -447,6 +447,14 @@
               "fully_paid": "مدفوع بالكامل",
               "partially_paid": "مدفوع جزئيًا"
             }
+          },
+          "chips": {
+            "booking_typology": "النوع",
+            "agreement_booking": "الاتفاقيات",
+            "agreement_structure": "الهياكل",
+            "payment_status": "حالة الدفع",
+            "more_options": "خيارات متعددة",
+            "clear": "مسح عوامل التصفية"
           }
         }
       }

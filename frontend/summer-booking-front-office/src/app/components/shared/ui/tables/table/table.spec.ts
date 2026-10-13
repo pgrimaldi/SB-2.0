@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { DATA_RELOAD } from '../../data/data-reload';
@@ -423,6 +424,28 @@ describe('Table bar', () => {
     });
     const names = [...element.querySelectorAll('tbody td')].map((cell) => cell.textContent?.trim());
     expect(names).toEqual(['Row 2', 'Row 20', 'Row 21', 'Row 22', 'Row 23', 'Row 24', 'Row 25']);
+  });
+
+  it('should empty the search when the page asks, loading everything once from page 1', () => {
+    const { fixture, host, element } = setup();
+    const input = element.querySelector<HTMLInputElement>('.table__search input')!;
+    input.value = 'Row 2';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    vi.advanceTimersByTime(500);
+    fixture.detectChanges();
+
+    (
+      fixture.debugElement.query(By.directive(Table)).componentInstance as Table<Row, Filters>
+    ).clearSearch();
+    fixture.detectChanges();
+    expect(input.value).toBe('');
+    expect(host.requests.at(-1)).toMatchObject({ search: '', page: 1 });
+
+    const loads = host.requests.length;
+    vi.advanceTimersByTime(500);
+    fixture.detectChanges();
+    expect(host.requests.length).toBe(loads);
   });
 
   it('should keep the search when Enter is pressed in the search field', () => {

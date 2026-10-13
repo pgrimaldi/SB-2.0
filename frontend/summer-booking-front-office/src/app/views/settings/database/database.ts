@@ -5,6 +5,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, map, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import {
+  ExistingBookingFilterTexts,
+  filterOptionsOf,
+} from '../../../behaviours/database/existing-booking-filter-options';
+import {
   dateRangeFilters,
   nextMonthsPeriod,
   nextWeekPeriod,
@@ -16,11 +20,16 @@ import {
   DateLanguageBehaviour,
 } from '../../../behaviours/i18n/date-language.behaviour';
 import { ExistingBookingFiltersPopup } from '../../../components/management/settings/database/existing-booking-filters-popup/existing-booking-filters-popup';
+import {
+  FilterChip,
+  FilterChips,
+} from '../../../components/shared/ui/chips/filter-chips/filter-chips';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
   DateRangeSelect,
   DateRangeSelectOption,
 } from '../../../components/shared/ui/selects/date-range-select/date-range-select';
+import { TableFilterBar } from '../../../components/shared/ui/tables/table/table-filter-bar';
 import { TableHeadingAction } from '../../../components/shared/ui/tables/table/table-heading-action';
 import {
   Table,
@@ -28,7 +37,12 @@ import {
   TableLoad,
   TableRowId,
 } from '../../../components/shared/ui/tables/table/table';
-import { ExistingBookingFilters } from '../../../entities/database/existing-booking-filters';
+import {
+  AgreementBookingFilter,
+  BookingTypologyFilter,
+  ExistingBookingFilters,
+  PaymentStatusFilter,
+} from '../../../entities/database/existing-booking-filters';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
@@ -55,6 +69,11 @@ interface DatabaseTexts {
     next_month: string;
     next_six_months: string;
   };
+}
+
+interface BookingFilterChip extends FilterChip {
+  /** What the filters become without this chip. */
+  emptied: Partial<ExistingBookingFilters>;
 }
 
 /** The row as the table shows it: dates and enums already written in the current language. */
@@ -88,8 +107,10 @@ const RESERVATION_STATUS_KEYS: Record<
   imports: [
     DateRangeSelect,
     ExistingBookingFiltersPopup,
+    FilterChips,
     Table,
     TableErrorPopup,
+    TableFilterBar,
     TableHeadingAction,
     TranslatePipe,
   ],
@@ -113,6 +134,68 @@ export class Database {
   protected readonly dateRange = signal<DateRange | null>(null);
   protected readonly isFiltersOpen = signal(false);
   protected readonly bookingFilters = signal(new ExistingBookingFilters());
+  protected readonly chipIcons = ['/assets/images/CloseDatabaseFilters_setting.svg'] as const;
+  private readonly filterTexts = toSignal(
+    this.translateService.stream(
+      'management.settings.database.filters',
+    ) as Observable<ExistingBookingFilterTexts>,
+  );
+  /** One chip for each filter with a choice; with more choices only "more options". */
+  protected readonly chips = computed<readonly BookingFilterChip[]>(() => {
+    const texts = this.filterTexts();
+    const filters = this.bookingFilters();
+    if (!texts) {
+      return [];
+    }
+    const chip = (
+      name: string,
+      labels: readonly string[],
+      emptied: Partial<ExistingBookingFilters>,
+    ): BookingFilterChip[] =>
+      labels.length
+        ? [
+            {
+              label: `${name}: ${labels.length > 1 ? texts.chips.more_options : labels[0]}`,
+              emptied,
+            },
+          ]
+        : [];
+    const labelsOf = <K extends string>(
+      values: readonly K[],
+      options: readonly { value: K; label: string }[],
+    ) => values.map((value) => options.find((option) => option.value === value)?.label ?? value);
+    return [
+      ...chip(
+        texts.chips.booking_typology,
+        labelsOf(
+          filters.bookingTypologies,
+          filterOptionsOf(Object.values(BookingTypologyFilter), texts.booking_typology.options),
+        ),
+        { bookingTypologies: [] },
+      ),
+      ...chip(
+        texts.chips.agreement_booking,
+        labelsOf(
+          filters.agreementBookings,
+          filterOptionsOf(Object.values(AgreementBookingFilter), texts.agreement_booking.options),
+        ),
+        { agreementBookings: [] },
+      ),
+      ...chip(
+        texts.chips.agreement_structure,
+        filters.affiliatedHotels.map((hotel) => hotel.value),
+        { affiliatedHotels: [] },
+      ),
+      ...chip(
+        texts.chips.payment_status,
+        labelsOf(
+          filters.paymentStatuses,
+          filterOptionsOf(Object.values(PaymentStatusFilter), texts.payment_status.options),
+        ),
+        { paymentStatuses: [] },
+      ),
+    ];
+  });
   protected readonly filters = computed(() => [
     ...dateRangeFilters(this.dateRange()),
     ...pageFiltersOf(this.bookingFilters()),
@@ -217,6 +300,15 @@ export class Database {
         : null,
     };
   }
+
+  protected removeChip(chip: BookingFilterChip): void {
+    this.bookingFilters.update((filters) => ({ ...filters, ...chip.emptied }));
+  }
+
+  protected clearFilters(): void {
+    this.bookingFilters.set(new ExistingBookingFilters());
+    this.dateRange.set(null);
+  }
 }
 
 /** One filter for each chosen value: values of the same field are alternatives. */
@@ -224,7 +316,7 @@ function pageFiltersOf(filters: ExistingBookingFilters): PageFilter[] {
   return [
     ...filters.bookingTypologies.map((value) => ({ field: 'bookingTypology', value })),
     ...filters.agreementBookings.map((value) => ({ field: 'agreementBooking', value })),
-    ...filters.idAffiliatedHotels.map((value) => ({ field: 'idAffiliatedHotel', value })),
+    ...filters.affiliatedHotels.map(({ id }) => ({ field: 'idAffiliatedHotel', value: id })),
     ...filters.paymentStatuses.map((value) => ({ field: 'paymentStatus', value })),
   ];
 }

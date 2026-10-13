@@ -447,6 +447,14 @@
               "fully_paid": "已全额付款",
               "partially_paid": "已部分付款"
             }
+          },
+          "chips": {
+            "booking_typology": "类型",
+            "agreement_booking": "协议",
+            "agreement_structure": "机构",
+            "payment_status": "付款状态",
+            "more_options": "多个选项",
+            "clear": "清除筛选"
           }
         }
       }

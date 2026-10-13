@@ -37,6 +37,10 @@
   </div>
 }
 
+@if (hasFilterBar()) {
+  <div class="table__filter__bar"><ng-content select="[appTableFilterBar]" /></div>
+}
+
 @if (hasBar()) {
   <div class="table__bar">
     @if (hasIconZone()) {

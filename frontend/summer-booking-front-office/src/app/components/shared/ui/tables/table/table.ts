@@ -34,6 +34,7 @@ import { SelectionCheckbox } from '../../checkboxes/selection-checkbox/selection
 import { resolveIcons } from '../../icons/icons';
 import { SearchField } from '../../inputs/search-field/search-field';
 import { Toggle } from '../../toggles/toggle/toggle';
+import { TableFilterBar } from './table-filter-bar';
 import { TableHeadingAction } from './table-heading-action';
 import { TableIconAction } from './table-icon-action';
 import { TablePaginatorIntl } from './table-paginator-intl';
@@ -158,7 +159,7 @@ const SELECT_COLUMN = 'table__row__select';
  * `<app-table [columns]="columns" [params]="filters" [load]="service.list" />`.
  * Buttons marked `appTableIconAction` go on the left of the bar above the rows, those marked
  * `appTableTextAction` on the right; those marked `appTableHeadingAction` go in the title row,
- * before the search.
+ * before the search; the one marked `appTableFilterBar` gets a full row under the title row.
  */
 @Component({
   selector: 'app-table',
@@ -239,10 +240,12 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Its changes (e.g. the language) load the current page again, as it is. */
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
 
+  private readonly searchField = viewChild(SearchField);
   private readonly grid = viewChild.required<string, ElementRef<HTMLTableElement>>('grid', {
     read: ElementRef,
   });
   private readonly headingActions = contentChildren(TableHeadingAction);
+  private readonly filterBars = contentChildren(TableFilterBar);
   private readonly iconActions = contentChildren(TableIconAction);
   private readonly textActions = contentChildren(TableTextAction);
   protected readonly TableColumnAlign = TableColumnAlign;
@@ -251,6 +254,7 @@ export class Table<T, P extends object> implements OnDestroy {
   protected readonly hasIconZone = computed(
     () => !this.areMassiveActionsHidden() || this.hasIconActions(),
   );
+  protected readonly hasFilterBar = computed(() => this.filterBars().length > 0);
   protected readonly hasBar = computed(() => this.hasIconZone() || this.hasTextActions());
   protected readonly hasHeading = computed(
     () =>
@@ -402,6 +406,12 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Same page, search and sorting: e.g. "retry" after a `loadError`. */
   reload(): void {
     this.reloads.update((count) => count + 1);
+  }
+
+  /** Empties the search field and searches everything again, from page 1. */
+  clearSearch(): void {
+    this.searchField()?.reset();
+    this.search.set('');
   }
 
   /**
