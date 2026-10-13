@@ -465,6 +465,16 @@
           "password": "Passwort",
           "cancel": "Abbrechen",
           "confirm": "Bestätigen"
+        },
+        "trashed": {
+          "text": "Die ausgewählten Elemente wurden in den Papierkorb verschoben",
+          "close": "OK"
+        },
+        "trash_page": {
+          "title": "Papierkorb",
+          "empty": "Papierkorb leeren",
+          "restore": "Wiederherstellen",
+          "delete_forever": "Endgültig löschen"
         }
       }
     }

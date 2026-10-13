@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, map, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
@@ -30,6 +31,7 @@ import {
   ButtonAppearance,
   ButtonSize,
 } from '../../../components/shared/ui/buttons/button/button';
+import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
   DateRangeSelect,
@@ -116,6 +118,8 @@ const RESERVATION_STATUS_KEYS: Record<
     DateRangeSelect,
     ExistingBookingFiltersPopup,
     FilterChips,
+    MessagePopup,
+    RouterLink,
     Table,
     TableErrorPopup,
     TableFilterBar,
@@ -132,14 +136,20 @@ export class Database {
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly translateService = inject(TranslateService);
+  private readonly router = inject(Router);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly loadFailed = signal(false);
+  /** The same page shows the trash too, on its own route (settings/database/trash). */
+  protected readonly isTrash = inject(ActivatedRoute).snapshot.data['isTrash'] === true;
   protected readonly trashIcon = ['/assets/images/Trash_setting.svg'] as const;
+  protected readonly restoreIcon = ['/assets/images/Restore_setting.svg'] as const;
+  protected readonly backIcon = '/assets/images/TrashBack_setting.svg';
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
   protected readonly idBookingsToDelete = computed(() => this.idSelectedBookings().map(String));
   protected readonly isDeleteAsked = signal(false);
+  protected readonly isTrashedShown = signal(false);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.idProperty;
     return idProperty ? { idProperty } : null;
@@ -277,7 +287,7 @@ export class Database {
 
   /** The texts are asked with each page: after a language change they are those of the new one. */
   protected readonly load: TableLoad<{ idProperty: string }, ExistingBookingRow> = (request) =>
-    this.database.existingBookingList(request).pipe(
+    (this.isTrash ? this.database.trashItemList : this.database.existingBookingList)(request).pipe(
       switchMap((page) =>
         (
           this.translateService.get('management.settings.database') as Observable<DatabaseTexts>
@@ -316,6 +326,16 @@ export class Database {
 
   protected removeChip(chip: BookingFilterChip): void {
     this.bookingFilters.update((filters) => ({ ...filters, ...chip.emptied }));
+  }
+
+  /** The bookings are in the trash now: they leave the list, and the choice with them. */
+  protected afterTrash(): void {
+    this.idSelectedBookings.set([]);
+    this.isTrashedShown.set(true);
+  }
+
+  protected openTrash(): void {
+    void this.router.navigateByUrl('/settings/database/trash');
   }
 
   protected clearFilters(): void {

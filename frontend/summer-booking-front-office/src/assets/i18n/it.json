@@ -465,6 +465,16 @@
           "password": "Password",
           "cancel": "Annulla",
           "confirm": "Conferma"
+        },
+        "trashed": {
+          "text": "Gli elementi selezionati sono stati spostati nel cestino",
+          "close": "Ok"
+        },
+        "trash_page": {
+          "title": "Cestino",
+          "empty": "Svuota cestino",
+          "restore": "Ripristina",
+          "delete_forever": "Elimina definitivamente"
         }
       }
     }

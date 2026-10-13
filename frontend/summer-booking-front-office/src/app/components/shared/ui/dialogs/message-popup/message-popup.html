@@ -1,6 +1,8 @@
 <ng-template #content>
   <div class="message__popup">
-    <h2 class="message__popup__title">{{ title() }}</h2>
+    @if (title()) {
+      <h2 class="message__popup__title">{{ title() }}</h2>
+    }
     <p class="message__popup__text">{{ text() }}</p>
     <app-button class="message__popup__close" (clicked)="close()">{{ texts()?.close }}</app-button>
   </div>

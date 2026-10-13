@@ -465,6 +465,16 @@
           "password": "Contraseña",
           "cancel": "Cancelar",
           "confirm": "Confirmar"
+        },
+        "trashed": {
+          "text": "Los elementos seleccionados se han movido a la papelera",
+          "close": "Aceptar"
+        },
+        "trash_page": {
+          "title": "Papelera",
+          "empty": "Vaciar papelera",
+          "restore": "Restaurar",
+          "delete_forever": "Eliminar definitivamente"
         }
       }
     }

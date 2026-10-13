@@ -465,6 +465,16 @@
           "password": "Mot de passe",
           "cancel": "Annuler",
           "confirm": "Confirmer"
+        },
+        "trashed": {
+          "text": "Les éléments sélectionnés ont été déplacés dans la corbeille",
+          "close": "OK"
+        },
+        "trash_page": {
+          "title": "Corbeille",
+          "empty": "Vider la corbeille",
+          "restore": "Restaurer",
+          "delete_forever": "Supprimer définitivement"
         }
       }
     }

@@ -6,6 +6,8 @@ export interface SettingsPage {
   label: string;
   /** Set once the page is built; without it the route shows nothing. */
   loadComponent?: Route['loadComponent'];
+  /** Other screens of the page, not in the menu (e.g. its trash); their paths are under the page's. */
+  subPages?: readonly Route[];
 }
 
 /** In menu order. The single source of both the routes (app.routes.ts) and the side panel. */
@@ -45,6 +47,13 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
     path: 'database',
     label: 'management.settings.menu.database',
     loadComponent: () => import('./database/database').then((component) => component.Database),
+    subPages: [
+      {
+        path: 'database/trash',
+        loadComponent: () => import('./database/database').then((component) => component.Database),
+        data: { isTrash: true },
+      },
+    ],
   },
   {
     path: 'contact-support',

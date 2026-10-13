@@ -1,5 +1,5 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Observable, delay, from, of, switchMap } from 'rxjs';
+import { Observable, delay, from, map, of, switchMap } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
@@ -182,6 +182,36 @@ const RESERVATIONS: ReservationRow[] = [
     agreementName: null,
     reservationStatus: ReservationStatus.Confirmed,
   },
+  {
+    propertyId: 1,
+    idBooking: '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a17',
+    customerName: 'Roberto Lilla',
+    reservationKind: ReservationKind.Spot,
+    dateFrom: '2026-06-05T00:00:00.000Z',
+    dateTo: '2026-06-07T00:00:00.000Z',
+    agreementName: null,
+    reservationStatus: ReservationStatus.Cancelled,
+  },
+  {
+    propertyId: 1,
+    idBooking: '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a18',
+    customerName: 'Silvia Senape',
+    reservationKind: ReservationKind.Service,
+    dateFrom: '2026-07-18T00:00:00.000Z',
+    dateTo: '2026-07-18T00:00:00.000Z',
+    agreementName: 'Hotel Esempio',
+    reservationStatus: ReservationStatus.NoShow,
+  },
+  {
+    propertyId: 1,
+    idBooking: '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a19',
+    customerName: 'Tommaso Ruggine',
+    reservationKind: ReservationKind.Spot,
+    dateFrom: '2026-08-22T00:00:00.000Z',
+    dateTo: '2026-08-29T00:00:00.000Z',
+    agreementName: null,
+    reservationStatus: ReservationStatus.Cancelled,
+  },
 ];
 
 /** Hotels with an agreement with the property: invented names and ids. */
@@ -192,6 +222,13 @@ const AFFILIATED_HOTELS: { propertyId: number; id: string; value: string }[] = [
   { propertyId: 1, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a44', value: 'Beach Hotel' },
   { propertyId: 2, id: '5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a45', value: 'Hotel Esempio' },
 ];
+
+/** Bookings in the trash: three from the start, then those moved there (until the page is reloaded). */
+const trashedBookings = new Set<string>([
+  '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a17',
+  '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a18',
+  '0b6f1c2e-3a4d-4e5f-8a9b-1c2d3e4f5a19',
+]);
 
 const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = [
@@ -205,12 +242,21 @@ const SORT_FIELDS = [
 
 /**
  * `POST /api/database/existing-booking-list`: one page of the bookings of the requested property
- * (never of other properties). 401 without a valid access token; 403 for a missing or unknown
- * property.
+ * (never of other properties) that are not in the trash. 401 without a valid access token; 403 for a
+ * missing or unknown property.
  */
 export const existingBookingListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
+): Observable<HttpEvent<unknown>> => bookingPageMock(request, false);
+
+/** `POST /api/database/trash-item-list`: the same, for the bookings in the trash. */
+export const trashItemListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
+  bookingPageMock(request, true);
+
+function bookingPageMock(
+  request: HttpRequest<unknown>,
+  isTrash: boolean,
+): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
@@ -222,17 +268,17 @@ export const existingBookingListMock = (
 
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const bookings = RESERVATIONS.filter((row) => row.propertyId === property.id).map(
-    (row): ExistingBookingItem => ({
-      idBooking: row.idBooking,
-      customerName: row.customerName,
-      reservationKind: row.reservationKind,
-      dateFrom: row.dateFrom,
-      dateTo: row.dateTo,
-      agreementName: row.agreementName,
-      reservationStatus: row.reservationStatus,
-    }),
-  );
+  const bookings = RESERVATIONS.filter(
+    (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? '') === isTrash,
+  ).map((row): ExistingBookingItem => ({
+    idBooking: row.idBooking,
+    customerName: row.customerName,
+    reservationKind: row.reservationKind,
+    dateFrom: row.dateFrom,
+    dateTo: row.dateTo,
+    agreementName: row.agreementName,
+    reservationStatus: row.reservationStatus,
+  }));
 
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
   const from = filterValue(body.filters, 'datetimeFrom');
@@ -255,7 +301,7 @@ export const existingBookingListMock = (
     rows: found.slice((page - 1) * pageSize, page * pageSize),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+}
 
 /**
  * `POST /api/database/get-affiliated-hotel-combobox` with `{ idProperty }`: the hotels of the property,
@@ -279,8 +325,8 @@ export const affiliatedHotelComboboxMock = (
 
 /**
  * `POST /api/database/confirm-delete-booking` with `{ idProperty, idBookings, password }`: checks the
- * password of the user (the one of the test account) before the bookings are deleted; for now it
- * deletes nothing. 204 without a body; 401 without a valid access token; 403 for an unknown property;
+ * password of the user (the one of the test account), then moves the bookings to the trash: they
+ * leave the list. 204 without a body; 401 without a valid access token; 403 for an unknown property;
  * 404 when a booking is not one of the property; 400 with an error on `password` when it is wrong.
  */
 export const confirmDeleteBookingMock = (
@@ -299,9 +345,9 @@ export const confirmDeleteBookingMock = (
     return operationNotAllowed(request);
   }
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
-  const known = RESERVATIONS.filter((row) => row.propertyId === property.id).map(
-    (row) => row.idBooking,
-  );
+  const known = RESERVATIONS.filter(
+    (row) => row.propertyId === property.id && !trashedBookings.has(row.idBooking ?? ''),
+  ).map((row) => row.idBooking);
   if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
     return resourceNotFound(request);
   }
@@ -309,7 +355,9 @@ export const confirmDeleteBookingMock = (
     delay(600),
     switchMap((isRight) =>
       isRight
-        ? of(new HttpResponse({ status: 204, url: request.url }))
+        ? of(trashBookings(idBookings as string[])).pipe(
+            map(() => new HttpResponse({ status: 204, url: request.url })),
+          )
         : problem(request, 400, 'validation.invalid_request', {
             title: 'Invalid request',
             errors: [{ field: 'password', code: 'auth.invalid_credentials' }],
@@ -317,6 +365,12 @@ export const confirmDeleteBookingMock = (
     ),
   );
 };
+
+function trashBookings(idBookings: readonly string[]): void {
+  for (const id of idBookings) {
+    trashedBookings.add(id);
+  }
+}
 
 /** Texts alphabetically, ignoring case; a missing value first ascending, last descending. */
 function compare(first: string | null, second: string | null): number {

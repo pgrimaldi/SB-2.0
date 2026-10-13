@@ -465,6 +465,16 @@
           "password": "密码",
           "cancel": "取消",
           "confirm": "确认"
+        },
+        "trashed": {
+          "text": "所选项目已移至回收站",
+          "close": "确定"
+        },
+        "trash_page": {
+          "title": "回收站",
+          "empty": "清空回收站",
+          "restore": "恢复",
+          "delete_forever": "永久删除"
         }
       }
     }

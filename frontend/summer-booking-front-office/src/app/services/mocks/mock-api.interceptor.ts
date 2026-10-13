@@ -5,6 +5,7 @@ import {
   affiliatedHotelComboboxMock,
   confirmDeleteBookingMock,
   existingBookingListMock,
+  trashItemListMock,
 } from './database/database.mock';
 import {
   contactSupportMock,
@@ -195,6 +196,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/database/confirm-delete-booking`
   ) {
     return confirmDeleteBookingMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/database/trash-item-list`
+  ) {
+    return trashItemListMock(request);
   }
 
   return next(request);

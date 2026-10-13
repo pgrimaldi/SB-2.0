@@ -1,9 +1,34 @@
 <main class="database">
   <div class="database__title">
-    <h1 class="database__heading">{{ 'management.settings.database.title' | translate }}</h1>
-    <app-button class="database__trash" [size]="ButtonSize.Small" [pathIcon]="trashIcon">
-      {{ 'management.settings.database.trash' | translate }}
-    </app-button>
+    <div class="database__title__start">
+      @if (isTrash) {
+        <a class="database__back" routerLink="/settings/database">
+          <img [src]="backIcon" width="10" height="16" alt="" />
+        </a>
+      }
+      <h1 class="database__heading" [class.database__heading__trash]="isTrash">
+        {{
+          (isTrash
+            ? 'management.settings.database.trash_page.title'
+            : 'management.settings.database.title'
+          ) | translate
+        }}
+      </h1>
+    </div>
+    @if (isTrash) {
+      <app-button class="database__empty__trash" [size]="ButtonSize.Small">
+        {{ 'management.settings.database.trash_page.empty' | translate }}
+      </app-button>
+    } @else {
+      <app-button
+        class="database__trash"
+        [size]="ButtonSize.Small"
+        [pathIcon]="trashIcon"
+        (clicked)="openTrash()"
+      >
+        {{ 'management.settings.database.trash' | translate }}
+      </app-button>
+    }
   </div>
   <app-table
     #table
@@ -39,25 +64,51 @@
         <span class="database__filters__count">{{ chips().length }}</span>
       }
     </button>
-    <app-button
-      appTableHeadingAction
-      class="database__clear__selection"
-      [appearance]="ButtonAppearance.Light"
-      [size]="ButtonSize.Small"
-      [disabled]="!idSelectedBookings().length"
-      (clicked)="idSelectedBookings.set([])"
-    >
-      {{ 'management.settings.database.clear_selection' | translate }}
-    </app-button>
-    <app-button
-      appTableHeadingAction
-      class="database__delete"
-      [size]="ButtonSize.Small"
-      [disabled]="!idSelectedBookings().length"
-      (clicked)="isDeleteAsked.set(true)"
-    >
-      {{ 'management.settings.database.delete' | translate }}
-    </app-button>
+    @if (isTrash) {
+      <app-button
+        appTableHeadingAction
+        class="database__restore"
+        [size]="ButtonSize.Small"
+        [pathIcon]="restoreIcon"
+        [disabled]="!idSelectedBookings().length"
+      >
+        {{ 'management.settings.database.trash_page.restore' | translate }}
+      </app-button>
+    }
+    @if (isTrash) {
+      <app-button
+        appTableHeadingAction
+        class="database__delete__forever"
+        [size]="ButtonSize.Small"
+        [pathIcon]="trashIcon"
+        [disabled]="!idSelectedBookings().length"
+      >
+        {{ 'management.settings.database.trash_page.delete_forever' | translate }}
+      </app-button>
+    }
+    @if (!isTrash) {
+      <app-button
+        appTableHeadingAction
+        class="database__clear__selection"
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [disabled]="!idSelectedBookings().length"
+        (clicked)="idSelectedBookings.set([])"
+      >
+        {{ 'management.settings.database.clear_selection' | translate }}
+      </app-button>
+    }
+    @if (!isTrash) {
+      <app-button
+        appTableHeadingAction
+        class="database__delete"
+        [size]="ButtonSize.Small"
+        [disabled]="!idSelectedBookings().length"
+        (clicked)="isDeleteAsked.set(true)"
+      >
+        {{ 'management.settings.database.delete' | translate }}
+      </app-button>
+    }
     @if (chips().length) {
       <app-filter-chips
         appTableFilterBar
@@ -71,7 +122,17 @@
   </app-table>
 </main>
 
-<app-confirm-delete-booking-popup [idBookings]="idBookingsToDelete()" [(open)]="isDeleteAsked" />
+<app-confirm-delete-booking-popup
+  [idBookings]="idBookingsToDelete()"
+  [(open)]="isDeleteAsked"
+  (confirmed)="afterTrash(); table.reload()"
+/>
+
+<app-message-popup
+  [text]="'management.settings.database.trashed.text' | translate"
+  [texts]="'management.settings.database.trashed' | translate"
+  [(open)]="isTrashedShown"
+/>
 
 <app-existing-booking-filters-popup
   [filters]="bookingFilters()"

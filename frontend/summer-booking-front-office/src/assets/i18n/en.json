@@ -465,6 +465,16 @@
           "password": "Password",
           "cancel": "Cancel",
           "confirm": "Confirm"
+        },
+        "trashed": {
+          "text": "The selected items have been moved to the trash",
+          "close": "OK"
+        },
+        "trash_page": {
+          "title": "Trash",
+          "empty": "Empty trash",
+          "restore": "Restore",
+          "delete_forever": "Delete permanently"
         }
       }
     }

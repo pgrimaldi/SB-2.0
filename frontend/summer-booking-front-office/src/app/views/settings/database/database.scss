@@ -3,12 +3,35 @@
 
 @include page.table-page(database);
 
-// The title on the left, Cestino on the right, above Cancella dati.
+// The title on the left, Cestino on the right, above Cancella dati (in the trash: the arrow back,
+// the title and Svuota cestino).
 .database__title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.database__title__start {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.database__back {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+
+  img {
+    width: 0.625rem;
+    height: 1rem;
+  }
+}
+
+.database__heading__trash {
+  color: var(--color__layout__text__soft);
 }
 
 .database__heading {
@@ -19,7 +42,9 @@
   line-height: 2rem;
 }
 
-.database__trash {
+.database__trash,
+.database__restore,
+.database__delete__forever {
   --button-height: var(--date-range-select-height, 1.625rem);
   --button-text-size: var(--date-range-select-text-size, 0.75rem);
   --button-padding: 1rem;
@@ -29,6 +54,12 @@
     @include mat.button-overrides(
       (
         filled-container-color: var(--color__layout__text__soft),
+        filled-disabled-container-color: color-mix(
+            in srgb,
+            var(--color__layout__text__soft) 45%,
+            transparent
+          ),
+        filled-disabled-label-text-color: var(--color__layout__on__main),
       )
     );
   }
@@ -64,7 +95,10 @@
 // At the end of the row of the search: "Annulla selezione", then the red "Cancella dati"; both off
 // until a row is chosen.
 .database__clear__selection,
-.database__delete {
+.database__delete,
+.database__empty__trash,
+.database__restore,
+.database__delete__forever {
   --button-height: var(--date-range-select-height, 1.625rem);
   --button-text-size: var(--date-range-select-text-size, 0.75rem);
   --button-padding: 2rem;
@@ -73,9 +107,12 @@
   order: 1;
 }
 
-.database__clear__selection {
+.database__clear__selection,
+.database__restore {
   margin-inline-start: auto;
+}
 
+.database__clear__selection {
   &:has(button:disabled) {
     --button-border-color: color-mix(in srgb, var(--color__main__theme__one) 40%, transparent);
   }
@@ -94,7 +131,8 @@
   }
 }
 
-.database__delete {
+.database__delete,
+.database__empty__trash {
   // On the inner button, because app-button sets its own colours on its host.
   ::ng-deep button {
     @include mat.button-overrides(
@@ -143,7 +181,9 @@
   }
 
   .database__clear__selection,
-  .database__delete {
+  .database__delete,
+  .database__restore,
+  .database__delete__forever {
     flex: 1;
     order: 2;
 
@@ -152,7 +192,8 @@
     }
   }
 
-  .database__clear__selection {
+  .database__clear__selection,
+  .database__restore {
     margin-inline-start: 0;
   }
 }

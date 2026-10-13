@@ -61,11 +61,12 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () =>
           import('./views/settings/settings').then((component) => component.Settings),
-        children: SETTINGS_PAGES.map(({ path, loadComponent }) =>
+        children: SETTINGS_PAGES.flatMap(({ path, loadComponent, subPages = [] }) => [
           loadComponent
             ? { path, loadComponent, canDeactivate: [unsavedChangesGuard] }
             : { path, children: [] },
-        ),
+          ...subPages.map((subPage) => ({ ...subPage, canDeactivate: [unsavedChangesGuard] })),
+        ]),
       },
     ],
   },
