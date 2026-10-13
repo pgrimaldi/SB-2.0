@@ -360,9 +360,9 @@
           "title": "Ticket de caisse électronique",
           "terms": "Conditions générales",
           "accept": "J'accepte",
-          "refuse": "Je n'accepte pas",
+          "refuse": "Refuser",
           "send": "Envoyer",
-          "refused_warning": "Pour utiliser le ticket de caisse électronique, vous devez accepter les conditions d'utilisation",
+          "refused_warning": "Pour utiliser le ticket électronique, acceptez les conditions d'utilisation",
           "account": {
             "title": "Configuration du compte",
             "company_name": "Nom de l'entreprise",
@@ -385,7 +385,7 @@
         }
       },
       "database": {
-        "title": "Supprimer les données par groupe",
+        "title": "Supprimer par groupe",
         "table": {
           "customer": "Client",
           "reservation_kind": "Type de réservation",
@@ -457,8 +457,8 @@
             "clear": "Effacer les filtres"
           }
         },
-        "delete": "Supprimer les données",
-        "clear_selection": "Annuler la sélection",
+        "delete": "Supprimer",
+        "clear_selection": "Désélectionner",
         "trash": "Corbeille",
         "confirm_delete": {
           "title": "Saisissez votre mot de passe pour terminer l'opération",
@@ -472,9 +472,9 @@
         },
         "trash_page": {
           "title": "Corbeille",
-          "empty": "Vider la corbeille",
-          "restore": "Restaurer",
-          "delete_forever": "Supprimer définitivement"
+          "empty": "Tout vider",
+          "restore": "Rétablir",
+          "delete_forever": "Effacer définitivement"
         },
         "empty_trash": {
           "title": "Vider la corbeille",

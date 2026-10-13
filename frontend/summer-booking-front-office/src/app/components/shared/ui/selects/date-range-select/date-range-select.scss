@@ -43,10 +43,15 @@ mat-icon.date__range__select__arrow {
   font-size: 0.875rem;
 }
 
-// The overlay pane is a flex box: without a width the panel would shrink to its content.
+// On low screens the overlay gets only the room there is: the panel scrolls inside it.
+.date__range__select__pane {
+  flex-direction: column;
+  max-height: 100%;
+}
+
 .date__range__select__panel {
-  width: 100%;
-  overflow: hidden;
+  min-height: 0;
+  overflow-y: auto;
   border: 0.0625rem solid var(--color__layout__border);
   border-radius: 0.3125rem;
   background: var(--color__layout__surface);

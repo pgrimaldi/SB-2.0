@@ -385,7 +385,7 @@
         }
       },
       "database": {
-        "title": "Eliminar datos por grupo",
+        "title": "Borrar datos por grupo",
         "table": {
           "customer": "Cliente",
           "reservation_kind": "Tipo de reserva",
@@ -457,7 +457,7 @@
             "clear": "Borrar filtros"
           }
         },
-        "delete": "Eliminar datos",
+        "delete": "Borrar datos",
         "clear_selection": "Anular selección",
         "trash": "Papelera",
         "confirm_delete": {
@@ -472,9 +472,9 @@
         },
         "trash_page": {
           "title": "Papelera",
-          "empty": "Vaciar papelera",
+          "empty": "Vaciar todo",
           "restore": "Restaurar",
-          "delete_forever": "Eliminar definitivamente"
+          "delete_forever": "Borrar definitivamente"
         },
         "empty_trash": {
           "title": "Vaciar papelera",

@@ -17,6 +17,7 @@ import { AddPrinterItemPopup } from '../../../components/management/settings/tax
 import { ElectronicReceiptAccountForm } from '../../../components/management/settings/taxation/electronic-receipt-account-form/electronic-receipt-account-form';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/checkbox';
 import { AlertPopup } from '../../../components/shared/ui/dialogs/alert-popup/alert-popup';
@@ -57,6 +58,7 @@ interface PrinterTableHeaders {
     ConfirmPopup,
     ElectronicReceiptAccountForm,
     ExpansionPanel,
+    I18nText,
     PageSpinner,
     Table,
     TableErrorPopup,

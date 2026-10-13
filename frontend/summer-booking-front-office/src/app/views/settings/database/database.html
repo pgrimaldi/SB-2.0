@@ -5,15 +5,12 @@
         <a class="database__back" routerLink="/settings/database">
           <img [src]="backIcon" width="10" height="16" alt="" />
         </a>
+        <h1 class="database__heading database__heading__trash">
+          {{ 'management.settings.database.trash_page.title' | translate }}
+        </h1>
+      } @else {
+        <h1 class="database__heading" appI18nText="management.settings.database.title"></h1>
       }
-      <h1 class="database__heading" [class.database__heading__trash]="isTrash">
-        {{
-          (isTrash
-            ? 'management.settings.database.trash_page.title'
-            : 'management.settings.database.title'
-          ) | translate
-        }}
-      </h1>
     </div>
     @if (isTrash) {
       <app-button
@@ -22,7 +19,7 @@
         [disabled]="isTrashEmpty()"
         (clicked)="isEmptyTrashAsked.set(true)"
       >
-        {{ 'management.settings.database.trash_page.empty' | translate }}
+        <span appI18nText="management.settings.database.trash_page.empty"></span>
       </app-button>
     } @else {
       <app-button
@@ -77,7 +74,7 @@
       [disabled]="!idSelectedBookings().length"
       (clicked)="idSelectedBookings.set([])"
     >
-      {{ 'management.settings.database.clear_selection' | translate }}
+      <span appI18nText="management.settings.database.clear_selection"></span>
     </app-button>
     @if (isTrash) {
       <app-button
@@ -100,7 +97,7 @@
         [disabled]="!idSelectedBookings().length"
         (clicked)="isDeleteForeverAsked.set(true)"
       >
-        {{ 'management.settings.database.trash_page.delete_forever' | translate }}
+        <span appI18nText="management.settings.database.trash_page.delete_forever"></span>
       </app-button>
     }
     @if (!isTrash) {
@@ -111,7 +108,7 @@
         [disabled]="!idSelectedBookings().length"
         (clicked)="isDeleteAsked.set(true)"
       >
-        {{ 'management.settings.database.delete' | translate }}
+        <span appI18nText="management.settings.database.delete"></span>
       </app-button>
     }
     @if (chips().length) {

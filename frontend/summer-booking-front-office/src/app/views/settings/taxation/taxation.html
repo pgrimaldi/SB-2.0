@@ -36,6 +36,7 @@
   </app-expansion-panel>
 
   <app-expansion-panel
+    class="taxation__receipt"
     [title]="'management.settings.taxation.receipt.title' | translate"
     [pathIcon]="receiptPanelIcons"
     [(isExpanded)]="receiptExpanded"
@@ -97,9 +98,10 @@
             {{ 'management.settings.taxation.receipt.refuse' | translate }}
           </app-checkbox>
           @if (!isReceiptAccepted()) {
-            <p class="taxation__refuse__warning">
-              {{ 'management.settings.taxation.receipt.refused_warning' | translate }}
-            </p>
+            <p
+              class="taxation__refuse__warning"
+              appI18nText="management.settings.taxation.receipt.refused_warning"
+            ></p>
           }
         </span>
         <app-button

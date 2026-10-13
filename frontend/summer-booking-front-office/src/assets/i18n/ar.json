@@ -414,7 +414,7 @@
           "confirm": "تأكيد"
         },
         "filters": {
-          "button": "عوامل التصفية",
+          "button": "تصفية",
           "title": "عوامل التصفية",
           "choose": "اختر",
           "cancel": "إلغاء",
@@ -471,7 +471,7 @@
           "close": "موافق"
         },
         "trash_page": {
-          "title": "سلة المهملات",
+          "title": "السلة",
           "empty": "إفراغ السلة",
           "restore": "استعادة",
           "delete_forever": "حذف نهائي"

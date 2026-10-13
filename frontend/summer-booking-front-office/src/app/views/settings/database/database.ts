@@ -22,6 +22,7 @@ import {
   DateLanguageBehaviour,
 } from '../../../behaviours/i18n/date-language.behaviour';
 import { ConfirmDeleteBookingPopup } from '../../../components/management/settings/database/confirm-delete-booking-popup/confirm-delete-booking-popup';
+import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { ExistingBookingFiltersPopup } from '../../../components/management/settings/database/existing-booking-filters-popup/existing-booking-filters-popup';
 import {
   FilterChip,
@@ -126,6 +127,7 @@ const RESERVATION_STATUS_KEYS: Record<
     DateRangeSelect,
     ExistingBookingFiltersPopup,
     FilterChips,
+    I18nText,
     MessagePopup,
     PageSpinner,
     RouterLink,
@@ -376,6 +378,7 @@ export class Database {
       next: () => {
         this.isEmptyingTrash.set(false);
         this.idSelectedBookings.set([]);
+        this.isTrashEmpty.set(true);
         table.reload();
       },
       error: (error: unknown) => {
@@ -397,6 +400,7 @@ export class Database {
       next: () => {
         this.isRestoring.set(false);
         this.idSelectedBookings.set([]);
+        this.readIsTrashEmpty(idProperty);
         table.reload();
       },
       error: (error: unknown) => {
@@ -418,6 +422,7 @@ export class Database {
       next: () => {
         this.isDeletingForever.set(false);
         this.idSelectedBookings.set([]);
+        this.readIsTrashEmpty(idProperty);
         table.reload();
       },
       error: (error: unknown) => {
@@ -427,6 +432,21 @@ export class Database {
         table.reload();
       },
     });
+  }
+
+  // The table may be showing a search or filters: its total is not the whole trash.
+  private readIsTrashEmpty(idProperty: string): void {
+    this.database
+      .trashItemList({
+        idProperty,
+        page: 1,
+        pageSize: 1,
+        search: '',
+        filters: [],
+        sortField: '',
+        sortDirection: 'Ascending',
+      })
+      .subscribe({ next: (page) => this.isTrashEmpty.set(page.total === 0) });
   }
 
   protected openTrash(): void {

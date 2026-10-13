@@ -355,14 +355,14 @@
             "save": "Speichern"
           }
         },
-        "guide": "Anleitung herunterladen",
+        "guide": "Anleitung",
         "receipt": {
           "title": "Elektronischer Kassenbeleg",
-          "terms": "Allgemeine Geschäftsbedingungen",
-          "accept": "Ich akzeptiere",
-          "refuse": "Ich akzeptiere nicht",
+          "terms": "Nutzungsbedingungen",
+          "accept": "Akzeptieren",
+          "refuse": "Ablehnen",
           "send": "Senden",
-          "refused_warning": "Um den elektronischen Kassenbeleg zu nutzen, müssen Sie die Nutzungsbedingungen akzeptieren",
+          "refused_warning": "Akzeptieren Sie die Nutzungsbedingungen, um den E-Beleg zu nutzen",
           "account": {
             "title": "Kontokonfiguration",
             "company_name": "Firmenname",
@@ -385,7 +385,7 @@
         }
       },
       "database": {
-        "title": "Daten nach Gruppe löschen",
+        "title": "Gruppenweise löschen",
         "table": {
           "customer": "Kunde",
           "reservation_kind": "Buchungsart",
@@ -457,8 +457,8 @@
             "clear": "Filter zurücksetzen"
           }
         },
-        "delete": "Daten löschen",
-        "clear_selection": "Auswahl aufheben",
+        "delete": "Löschen",
+        "clear_selection": "Abwählen",
         "trash": "Papierkorb",
         "confirm_delete": {
           "title": "Passwort eingeben, um den Vorgang abzuschließen",
@@ -472,8 +472,8 @@
         },
         "trash_page": {
           "title": "Papierkorb",
-          "empty": "Papierkorb leeren",
-          "restore": "Wiederherstellen",
+          "empty": "Alles leeren",
+          "restore": "Zurück",
           "delete_forever": "Endgültig löschen"
         },
         "empty_trash": {

@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .taxation {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
@@ -48,6 +50,18 @@
 .taxation__printers {
   display: block;
   margin-bottom: 1.75rem;
+}
+
+// Where "Scontrino elettronico" goes on two lines, its header grows to keep room above and below.
+@media (width < 30.5rem) {
+  .taxation__receipt {
+    @include mat.expansion-overrides(
+      (
+        header-collapsed-state-height: 3.75rem,
+        header-expanded-state-height: 3.75rem,
+      )
+    );
+  }
 }
 
 @media (width <= 360px) {
@@ -104,6 +118,28 @@
 
 .taxation__send {
   margin-inline-start: auto;
+}
+
+// On phones Accetto and Non accetto share a row; the warning and Invia get one each.
+@media (width < 48rem) {
+  .taxation__choices {
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+  }
+
+  .taxation__refuse {
+    display: contents;
+  }
+
+  .taxation__refuse__warning {
+    flex-basis: 100%;
+  }
+
+  .taxation__send {
+    display: flex;
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
 }
 
 .taxation__error {
