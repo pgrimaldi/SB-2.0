@@ -33,6 +33,15 @@
   }
 }
 
+.confirm__popup__title__danger {
+  color: var(--color__layout__error);
+}
+
+// A text on more lines keeps its line breaks.
+.confirm__popup__text {
+  white-space: pre-line;
+}
+
 .confirm__popup__error {
   margin: -0.5rem 0 0;
   color: var(--color__layout__error);

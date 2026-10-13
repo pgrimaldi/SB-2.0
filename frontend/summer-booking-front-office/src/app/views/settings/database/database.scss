@@ -49,6 +49,15 @@
   --button-text-size: var(--date-range-select-text-size, 0.75rem);
   --button-padding: 1rem;
 
+  // The trash is taller than wide: whole, not stretched to a square.
+  ::ng-deep .button__icon {
+    object-fit: contain;
+  }
+}
+
+// Cestino keeps the dark blue of the app buttons; the actions of the trash are light blue.
+.database__restore,
+.database__delete__forever {
   // On the inner button, because app-button sets its own colours on its host.
   ::ng-deep button {
     @include mat.button-overrides(
@@ -62,11 +71,6 @@
         filled-disabled-label-text-color: var(--color__layout__on__main),
       )
     );
-  }
-
-  // The trash is taller than wide: whole, not stretched to a square.
-  ::ng-deep .button__icon {
-    object-fit: contain;
   }
 }
 

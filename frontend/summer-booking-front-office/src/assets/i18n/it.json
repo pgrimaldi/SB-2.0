@@ -475,6 +475,12 @@
           "empty": "Svuota cestino",
           "restore": "Ripristina",
           "delete_forever": "Elimina definitivamente"
+        },
+        "empty_trash": {
+          "title": "Svuota cestino",
+          "text": "Stai svuotando il cestino.\nTutti i dati saranno eliminati definitivamente. L'azione è irreversibile.",
+          "cancel": "Annulla",
+          "confirm": "Conferma"
         }
       }
     }

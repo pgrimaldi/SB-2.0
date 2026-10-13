@@ -24,12 +24,12 @@ class ConfirmDeleteBookingPopupHost {
 
 describe('ConfirmDeleteBookingPopup', () => {
   const setup = async () => {
-    const confirmDeleteBooking = vi.fn();
+    const moveToTrash = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: DatabaseService, useValue: { confirmDeleteBooking } },
+        { provide: DatabaseService, useValue: { moveToTrash } },
         { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
       ],
     });
@@ -57,31 +57,31 @@ describe('ConfirmDeleteBookingPopup', () => {
       confirm,
       settle,
       type,
-      confirmDeleteBooking,
+      moveToTrash,
     };
   };
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
   it('should send the property, the chosen bookings and the password, then close and tell the page', async () => {
-    const { host, popup, input, confirm, settle, type, confirmDeleteBooking } = await setup();
+    const { host, popup, input, confirm, settle, type, moveToTrash } = await setup();
     const answer = new Subject<void>();
-    confirmDeleteBooking.mockReturnValue(answer);
+    moveToTrash.mockReturnValue(answer);
 
     confirm().click();
     await settle();
-    expect(confirmDeleteBooking).not.toHaveBeenCalled();
+    expect(moveToTrash).not.toHaveBeenCalled();
 
     await type('segreta');
     confirm().click();
     await settle();
-    expect(confirmDeleteBooking).toHaveBeenCalledWith('p1', {
+    expect(moveToTrash).toHaveBeenCalledWith('p1', {
       idBookings: ['b1', 'b2'],
       password: 'segreta',
     });
     expect(input().readOnly).toBe(true);
     confirm().click();
-    expect(confirmDeleteBooking).toHaveBeenCalledTimes(1);
+    expect(moveToTrash).toHaveBeenCalledTimes(1);
 
     answer.next();
     answer.complete();
@@ -92,8 +92,8 @@ describe('ConfirmDeleteBookingPopup', () => {
   });
 
   it('should show a wrong password under the field and keep the popup open', async () => {
-    const { host, popup, confirm, settle, type, confirmDeleteBooking } = await setup();
-    confirmDeleteBooking.mockReturnValue(
+    const { host, popup, confirm, settle, type, moveToTrash } = await setup();
+    moveToTrash.mockReturnValue(
       throwError(
         () =>
           new HttpErrorResponse({

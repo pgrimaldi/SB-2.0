@@ -38,6 +38,8 @@ export class ConfirmPopup extends BasePopup {
   readonly texts = input<ConfirmPopupTexts | null>();
   /** For an action that cannot be undone: the confirm button is red. */
   readonly danger = input(false);
+  /** The title red as well, e.g. for an action that deletes everything for good. */
+  readonly isTitleDanger = input(false);
   readonly isLoading = input(false);
   readonly error = input<string | null>();
   /** Icons as Material icon names (Material Symbols font): [close]. Without it, no X. */

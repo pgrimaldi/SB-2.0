@@ -9,4 +9,5 @@ export class ExistingBookingItem {
   dateTo: string | null = null;
   agreementName: string | null = null;
   reservationStatus: ReservationStatus | null = null;
+  isTrashed = false;
 }

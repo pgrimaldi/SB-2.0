@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, map, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import {
   ExistingBookingFilterTexts,
   filterOptionsOf,
@@ -31,8 +32,11 @@ import {
   ButtonAppearance,
   ButtonSize,
 } from '../../../components/shared/ui/buttons/button/button';
+import { AlertPopup } from '../../../components/shared/ui/dialogs/alert-popup/alert-popup';
+import { ConfirmPopup } from '../../../components/shared/ui/dialogs/confirm-popup/confirm-popup';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
+import { PageSpinner } from '../../../components/shared/ui/spinners/page-spinner/page-spinner';
 import {
   DateRangeSelect,
   DateRangeSelectOption,
@@ -54,9 +58,11 @@ import {
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import { PageFilter } from '../../../entities/pagination/page';
 import { DateRange } from '../../../entities/shared/date-range';
 import { DatabaseService } from '../../../services/api/database/database.service';
+import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 
 interface DatabaseTexts {
   table: {
@@ -113,12 +119,15 @@ const RESERVATION_STATUS_KEYS: Record<
 @Component({
   selector: 'app-database',
   imports: [
+    AlertPopup,
     Button,
     ConfirmDeleteBookingPopup,
+    ConfirmPopup,
     DateRangeSelect,
     ExistingBookingFiltersPopup,
     FilterChips,
     MessagePopup,
+    PageSpinner,
     RouterLink,
     Table,
     TableErrorPopup,
@@ -137,6 +146,7 @@ export class Database {
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly translateService = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly errorText = inject(ErrorTextBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -147,9 +157,22 @@ export class Database {
   protected readonly restoreIcon = ['/assets/images/Restore_setting.svg'] as const;
   protected readonly backIcon = '/assets/images/TrashBack_setting.svg';
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
-  protected readonly idBookingsToDelete = computed(() => this.idSelectedBookings().map(String));
+  protected readonly idBookings = computed(() => this.idSelectedBookings().map(String));
   protected readonly isDeleteAsked = signal(false);
   protected readonly isTrashedShown = signal(false);
+  protected readonly isEmptyingTrash = signal(false);
+  protected readonly isEmptyTrashAsked = signal(false);
+  protected readonly isRestoring = signal(false);
+  protected readonly closeIcon = ['/assets/images/CloseDatabaseFilters_setting.svg'] as const;
+  protected readonly isActionErrorShown = signal(false);
+  protected readonly actionErrorIcon = ['/assets/images/DatabaseWarning_setting.svg'] as const;
+  private readonly actionError = signal<ApiProblem | null>(null);
+  protected readonly actionErrorMessage = toSignal(
+    toObservable(this.actionError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.idProperty;
     return idProperty ? { idProperty } : null;
@@ -332,6 +355,49 @@ export class Database {
   protected afterTrash(): void {
     this.idSelectedBookings.set([]);
     this.isTrashedShown.set(true);
+  }
+
+  /** The page waits under a spinner; then the table is read again, whatever the answer. */
+  protected emptyTrash(table: Table<ExistingBookingRow, { idProperty: string }>): void {
+    const idProperty = this.auth.user()?.idProperty;
+    if (this.isEmptyingTrash() || !idProperty) {
+      return;
+    }
+    this.isEmptyingTrash.set(true);
+    this.database.emptyTrash(idProperty).subscribe({
+      next: () => {
+        this.isEmptyingTrash.set(false);
+        this.idSelectedBookings.set([]);
+        table.reload();
+      },
+      error: (error: unknown) => {
+        this.isEmptyingTrash.set(false);
+        this.actionError.set(toApiProblem(error));
+        this.isActionErrorShown.set(true);
+        table.reload();
+      },
+    });
+  }
+
+  protected restore(table: Table<ExistingBookingRow, { idProperty: string }>): void {
+    const idProperty = this.auth.user()?.idProperty;
+    if (this.isRestoring() || !idProperty) {
+      return;
+    }
+    this.isRestoring.set(true);
+    this.database.restoreBookingItem(idProperty, this.idBookings()).subscribe({
+      next: () => {
+        this.isRestoring.set(false);
+        this.idSelectedBookings.set([]);
+        table.reload();
+      },
+      error: (error: unknown) => {
+        this.isRestoring.set(false);
+        this.actionError.set(toApiProblem(error));
+        this.isActionErrorShown.set(true);
+        table.reload();
+      },
+    });
   }
 
   protected openTrash(): void {

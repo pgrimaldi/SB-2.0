@@ -475,6 +475,12 @@
           "empty": "Vider la corbeille",
           "restore": "Restaurer",
           "delete_forever": "Supprimer définitivement"
+        },
+        "empty_trash": {
+          "title": "Vider la corbeille",
+          "text": "Vous videz la corbeille.\nToutes les données seront supprimées définitivement. L'action est irréversible.",
+          "cancel": "Annuler",
+          "confirm": "Confirmer"
         }
       }
     }

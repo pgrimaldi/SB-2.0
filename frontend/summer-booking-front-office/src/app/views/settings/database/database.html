@@ -16,7 +16,11 @@
       </h1>
     </div>
     @if (isTrash) {
-      <app-button class="database__empty__trash" [size]="ButtonSize.Small">
+      <app-button
+        class="database__empty__trash"
+        [size]="ButtonSize.Small"
+        (clicked)="isEmptyTrashAsked.set(true)"
+      >
         {{ 'management.settings.database.trash_page.empty' | translate }}
       </app-button>
     } @else {
@@ -71,6 +75,7 @@
         [size]="ButtonSize.Small"
         [pathIcon]="restoreIcon"
         [disabled]="!idSelectedBookings().length"
+        (clicked)="restore(table)"
       >
         {{ 'management.settings.database.trash_page.restore' | translate }}
       </app-button>
@@ -123,7 +128,7 @@
 </main>
 
 <app-confirm-delete-booking-popup
-  [idBookings]="idBookingsToDelete()"
+  [idBookings]="idBookings()"
   [(open)]="isDeleteAsked"
   (confirmed)="afterTrash(); table.reload()"
 />
@@ -138,6 +143,25 @@
   [filters]="bookingFilters()"
   [(open)]="isFiltersOpen"
   (applied)="bookingFilters.set($event)"
+/>
+
+<app-confirm-popup
+  [title]="'management.settings.database.empty_trash.title' | translate"
+  [text]="'management.settings.database.empty_trash.text' | translate"
+  [texts]="'management.settings.database.empty_trash' | translate"
+  [danger]="true"
+  [isTitleDanger]="true"
+  [pathIcon]="closeIcon"
+  [(open)]="isEmptyTrashAsked"
+  (confirmed)="isEmptyTrashAsked.set(false); emptyTrash(table)"
+/>
+<app-page-spinner [isLoading]="isEmptyingTrash() || isRestoring()" />
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="actionErrorMessage() ?? ''"
+  [texts]="'alert' | translate"
+  [pathIcon]="actionErrorIcon"
+  [(open)]="isActionErrorShown"
 />
 
 <app-table-error-popup

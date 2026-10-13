@@ -475,6 +475,12 @@
           "empty": "Empty trash",
           "restore": "Restore",
           "delete_forever": "Delete permanently"
+        },
+        "empty_trash": {
+          "title": "Empty trash",
+          "text": "You are emptying the trash.\nAll data will be deleted permanently. This cannot be undone.",
+          "cancel": "Cancel",
+          "confirm": "Confirm"
         }
       }
     }

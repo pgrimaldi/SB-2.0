@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
-import { ConfirmDeleteBookingRequest } from '../../../entities/database/confirm-delete-booking-request';
+import { MoveToTrashRequest } from '../../../entities/database/move-to-trash-request';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { onlyFieldsOf } from '../only-fields-of';
@@ -27,12 +27,21 @@ export class DatabaseService {
       idProperty,
     });
 
-  readonly confirmDeleteBooking = (
-    idProperty: string,
-    request: ConfirmDeleteBookingRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/confirm-delete-booking`, {
-      ...onlyFieldsOf(ConfirmDeleteBookingRequest, request),
+  readonly moveToTrash = (idProperty: string, request: MoveToTrashRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/move-to-trash`, {
+      ...onlyFieldsOf(MoveToTrashRequest, request),
       idProperty,
+    });
+
+  readonly emptyTrash = (idProperty: string): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/empty-trash`, { idProperty });
+
+  readonly restoreBookingItem = (
+    idProperty: string,
+    idBookings: readonly string[],
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/restore-booking-item`, {
+      idProperty,
+      idBookings,
     });
 }

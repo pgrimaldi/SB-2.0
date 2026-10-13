@@ -475,6 +475,12 @@
           "empty": "Vaciar papelera",
           "restore": "Restaurar",
           "delete_forever": "Eliminar definitivamente"
+        },
+        "empty_trash": {
+          "title": "Vaciar papelera",
+          "text": "Estás vaciando la papelera.\nTodos los datos se eliminarán definitivamente. La acción es irreversible.",
+          "cancel": "Cancelar",
+          "confirm": "Confirmar"
         }
       }
     }

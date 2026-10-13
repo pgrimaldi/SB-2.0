@@ -14,7 +14,7 @@ import { isAuthorized, isMockPassword, unauthorized } from '../auth/auth.mock';
 import { operationNotAllowed, problem, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
-type ReservationRow = ExistingBookingItem & { propertyId: number };
+type ReservationRow = Omit<ExistingBookingItem, 'isTrashed'> & { propertyId: number };
 
 /**
  * Rows of `booking.reservations` with the customer and agreement names already joined: same
@@ -278,6 +278,7 @@ function bookingPageMock(
     dateTo: row.dateTo,
     agreementName: row.agreementName,
     reservationStatus: row.reservationStatus,
+    isTrashed: isTrash,
   }));
 
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -324,14 +325,12 @@ export const affiliatedHotelComboboxMock = (
 };
 
 /**
- * `POST /api/database/confirm-delete-booking` with `{ idProperty, idBookings, password }`: checks the
+ * `POST /api/database/move-to-trash` with `{ idProperty, idBookings, password }`: checks the
  * password of the user (the one of the test account), then moves the bookings to the trash: they
  * leave the list. 204 without a body; 401 without a valid access token; 403 for an unknown property;
  * 404 when a booking is not one of the property; 400 with an error on `password` when it is wrong.
  */
-export const confirmDeleteBookingMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
+export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
@@ -364,6 +363,57 @@ export const confirmDeleteBookingMock = (
           }),
     ),
   );
+};
+
+/**
+ * `POST /api/database/empty-trash` with `{ idProperty }`: deletes for good every booking of the
+ * property in the trash (until the page is reloaded). 204 without a body; 401 without a valid access
+ * token; 403 for a missing or unknown property.
+ */
+export const emptyTrashMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  for (let index = RESERVATIONS.length - 1; index >= 0; index--) {
+    const row = RESERVATIONS[index];
+    if (row.propertyId === property.id && trashedBookings.delete(row.idBooking ?? '')) {
+      RESERVATIONS.splice(index, 1);
+    }
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/database/restore-booking-item` with `{ idProperty, idBookings }`: takes the bookings
+ * out of the trash, back to the bookings list. 204 without a body; 401 without a valid access token;
+ * 403 for a missing or unknown property; 404 when a booking is not in the trash of the property.
+ */
+export const restoreBookingItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as { idProperty?: unknown; idBookings?: unknown };
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return operationNotAllowed(request);
+  }
+  const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
+  const known = RESERVATIONS.filter(
+    (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? ''),
+  ).map((row) => row.idBooking);
+  if (!idBookings.length || idBookings.some((id) => !known.includes(id as string))) {
+    return resourceNotFound(request);
+  }
+  for (const id of idBookings as string[]) {
+    trashedBookings.delete(id);
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 function trashBookings(idBookings: readonly string[]): void {

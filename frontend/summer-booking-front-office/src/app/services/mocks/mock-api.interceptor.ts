@@ -3,8 +3,10 @@ import { environment } from '../../../environments/environment';
 import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
 import {
   affiliatedHotelComboboxMock,
-  confirmDeleteBookingMock,
+  emptyTrashMock,
   existingBookingListMock,
+  moveToTrashMock,
+  restoreBookingItemMock,
   trashItemListMock,
 } from './database/database.mock';
 import {
@@ -193,9 +195,9 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/confirm-delete-booking`
+    request.url === `${environment.apiBaseUrl}/database/move-to-trash`
   ) {
-    return confirmDeleteBookingMock(request);
+    return moveToTrashMock(request);
   }
 
   if (
@@ -203,6 +205,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/database/trash-item-list`
   ) {
     return trashItemListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/database/empty-trash`
+  ) {
+    return emptyTrashMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/database/restore-booking-item`
+  ) {
+    return restoreBookingItemMock(request);
   }
 
   return next(request);

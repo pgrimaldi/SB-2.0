@@ -18,7 +18,7 @@ import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { ConfirmDeleteBookingRequest } from '../../../../../entities/database/confirm-delete-booking-request';
+import { MoveToTrashRequest } from '../../../../../entities/database/move-to-trash-request';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { DatabaseService } from '../../../../../services/api/database/database.service';
@@ -50,7 +50,7 @@ export class ConfirmDeleteBookingPopup {
   ] as const;
   protected readonly username = computed(() => this.auth.user()?.email ?? '');
   protected readonly isLoading = signal(false);
-  private readonly request = signal(new ConfirmDeleteBookingRequest());
+  private readonly request = signal(new MoveToTrashRequest());
   protected readonly requestForm = form(this.request, (path) => {
     requiredText(path.password);
     readonly(path, () => this.isLoading());
@@ -84,7 +84,7 @@ export class ConfirmDeleteBookingPopup {
       this.error.set(null);
       try {
         await firstValueFrom(
-          this.database.confirmDeleteBooking(idProperty, { ...this.request(), idBookings }),
+          this.database.moveToTrash(idProperty, { ...this.request(), idBookings }),
         );
         this.isLoading.set(false);
         this.open.set(false);
@@ -101,7 +101,7 @@ export class ConfirmDeleteBookingPopup {
   }
 
   private reset(): void {
-    this.request.set(new ConfirmDeleteBookingRequest());
+    this.request.set(new MoveToTrashRequest());
     this.requestForm().reset();
     this.error.set(null);
   }

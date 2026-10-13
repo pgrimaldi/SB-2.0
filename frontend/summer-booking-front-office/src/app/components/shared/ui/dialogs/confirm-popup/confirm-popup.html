@@ -14,7 +14,9 @@
         }
       </button>
     }
-    <h2 class="confirm__popup__title">{{ title() }}</h2>
+    <h2 class="confirm__popup__title" [class.confirm__popup__title__danger]="isTitleDanger()">
+      {{ title() }}
+    </h2>
     @if (text()) {
       <p class="confirm__popup__text">{{ text() }}</p>
     }

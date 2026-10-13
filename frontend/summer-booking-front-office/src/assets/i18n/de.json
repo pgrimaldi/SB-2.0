@@ -475,6 +475,12 @@
           "empty": "Papierkorb leeren",
           "restore": "Wiederherstellen",
           "delete_forever": "Endgültig löschen"
+        },
+        "empty_trash": {
+          "title": "Papierkorb leeren",
+          "text": "Du leerst den Papierkorb.\nAlle Daten werden endgültig gelöscht. Dies kann nicht rückgängig gemacht werden.",
+          "cancel": "Abbrechen",
+          "confirm": "Bestätigen"
         }
       }
     }

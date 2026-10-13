@@ -475,6 +475,12 @@
           "empty": "清空回收站",
           "restore": "恢复",
           "delete_forever": "永久删除"
+        },
+        "empty_trash": {
+          "title": "清空回收站",
+          "text": "你正在清空回收站。\n所有数据将被永久删除。此操作不可撤销。",
+          "cancel": "取消",
+          "confirm": "确认"
         }
       }
     }
