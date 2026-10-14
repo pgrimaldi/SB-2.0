@@ -161,7 +161,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isLoading() || !idProperty) {
       return;
     }

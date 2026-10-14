@@ -44,7 +44,7 @@ describe('LoginDialog', () => {
   };
 
   /** Email and password are required: without them Accedi sends nothing. */
-  const signInWithCredentials = async (fixture: ComponentFixture<unknown>) => {
+  const loginWithCredentials = async (fixture: ComponentFixture<unknown>) => {
     const [email, password] = document.querySelectorAll<HTMLInputElement>(
       'mat-dialog-container input:not([type="checkbox"])',
     );
@@ -60,8 +60,8 @@ describe('LoginDialog', () => {
     await fixture.whenStable();
   };
 
-  const signInError = async (answer: () => Observable<never>) => {
-    TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: answer } });
+  const loginError = async (answer: () => Observable<never>) => {
+    TestBed.overrideProvider(AuthBehaviour, { useValue: { login: answer } });
     const { fixture } = await setup(false);
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('it', {
@@ -75,7 +75,7 @@ describe('LoginDialog', () => {
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
 
-    await signInWithCredentials(fixture);
+    await loginWithCredentials(fixture);
     return document.querySelector('.login__dialog__error')?.textContent?.trim();
   };
 
@@ -89,14 +89,14 @@ describe('LoginDialog', () => {
           }),
       );
 
-    expect(await signInError(wrongCredentials)).toBe('Credenziali non valide');
+    expect(await loginError(wrongCredentials)).toBe('Credenziali non valide');
   });
 
   it('should show its own message when there is no connection, and a generic one for unknown codes', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const offline = () => throwError(() => new HttpErrorResponse({ status: 0 }));
 
-    expect(await signInError(offline)).toBe('Connessione assente. Controlla la rete e riprova.');
+    expect(await loginError(offline)).toBe('Connessione assente. Controlla la rete e riprova.');
     TestBed.resetTestingModule();
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
 
@@ -104,19 +104,19 @@ describe('LoginDialog', () => {
       throwError(
         () => new HttpErrorResponse({ status: 423, error: { code: 'auth.account_locked' } }),
       );
-    expect(await signInError(brandNew)).toBe('Si è verificato un errore. Riprova.');
+    expect(await loginError(brandNew)).toBe('Si è verificato un errore. Riprova.');
   });
 
   it('should keep the spinner when closed and opened again during a sign-in, without the error of that attempt', async () => {
     const answer = new Subject<void>();
-    TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: () => answer } });
+    TestBed.overrideProvider(AuthBehaviour, { useValue: { login: () => answer } });
     const { fixture } = await setup(false);
     const host = fixture.componentInstance;
     const submit = () =>
       document.querySelector<HTMLButtonElement>('mat-dialog-container button[type="submit"]')!;
     host.open.set(true);
     await fixture.whenStable();
-    await signInWithCredentials(fixture);
+    await loginWithCredentials(fixture);
 
     host.open.set(false); // closed while the server has not answered yet
     await fixture.whenStable();

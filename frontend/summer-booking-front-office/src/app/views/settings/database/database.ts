@@ -179,7 +179,7 @@ export class Database {
     { initialValue: null },
   );
   protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly dateRange = signal<DateRange | null>(null);
@@ -369,7 +369,7 @@ export class Database {
 
   /** The page waits under a spinner; then the table is read again, whatever the answer. */
   protected emptyTrash(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isEmptyingTrash() || !idProperty) {
       return;
     }
@@ -391,7 +391,7 @@ export class Database {
   }
 
   protected restore(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isRestoring() || !idProperty) {
       return;
     }
@@ -413,7 +413,7 @@ export class Database {
   }
 
   protected deleteForever(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isDeletingForever() || !idProperty) {
       return;
     }

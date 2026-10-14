@@ -25,12 +25,8 @@ describe('Taxation', () => {
   const setup = async (
     termsAndConditions: string,
     printers: Observable<typeof PRINTERS> = of(PRINTERS),
-    isElectronicReceiptAccepted = false,
   ) => {
-    const user = signal({ idProperty: 'p1', isElectronicReceiptAccepted });
-    const markElectronicReceiptAccepted = vi.fn(() =>
-      user.update((current) => ({ ...current, isElectronicReceiptAccepted: true })),
-    );
+    const user = signal({ propertyId: 'p1' });
     const printerList = vi.fn(({ page, pageSize }: PageRequest) =>
       printers.pipe(
         map((list) => ({
@@ -63,7 +59,7 @@ describe('Taxation', () => {
           },
         },
         { provide: FileDownloadBehaviour, useValue: { save } },
-        { provide: AuthBehaviour, useValue: { user, markElectronicReceiptAccepted } },
+        { provide: AuthBehaviour, useValue: { user } },
       ],
     });
     const fixture = TestBed.createComponent(Taxation);
@@ -83,7 +79,6 @@ describe('Taxation', () => {
       guide,
       save,
       activateElectronicReceipt,
-      markElectronicReceiptAccepted,
     };
   };
 
@@ -311,8 +306,8 @@ describe('Taxation', () => {
     });
   });
 
-  it('should show the account form once the server accepted the receipt, and remember it', async () => {
-    const { fixture, element, markElectronicReceiptAccepted } = await setup('<p>Termini</p>');
+  it('should show the account form once the server accepted the receipt', async () => {
+    const { fixture, element } = await setup('<p>Termini</p>');
     const form = () => element.querySelector('app-electronic-receipt-account-form');
 
     expect(form()).toBeNull();
@@ -321,15 +316,18 @@ describe('Taxation', () => {
     element.querySelector<HTMLButtonElement>('.taxation__send button')!.click();
     await settle(fixture);
 
-    expect(markElectronicReceiptAccepted).toHaveBeenCalledTimes(1);
     expect(form()?.parentElement?.hidden).toBe(false);
     expect(
       element.querySelector<HTMLElement>('.taxation__terms__heading')!.parentElement!.hidden,
     ).toBe(true);
   });
 
-  it('should open on the account form when already accepted, with the terms read-only behind ‹', async () => {
-    const { fixture, element } = await setup('<p>Termini</p>', of(PRINTERS), true);
+  it('should keep the terms read-only behind ‹ once accepted', async () => {
+    const { fixture, element } = await setup('<p>Termini</p>');
+    element.querySelector<HTMLInputElement>('.taxation__accept input')!.click();
+    await fixture.whenStable();
+    element.querySelector<HTMLButtonElement>('.taxation__send button')!.click();
+    await settle(fixture);
     const formBox = () =>
       element.querySelector('app-electronic-receipt-account-form')!.parentElement!;
     const termsBox = () =>

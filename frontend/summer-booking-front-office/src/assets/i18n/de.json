@@ -71,13 +71,16 @@
     "auth": {
       "invalid_credentials": "Ungültige Zugangsdaten",
       "invalid_token": "Ihre Sitzung ist nicht mehr gültig. Bitte melden Sie sich erneut an.",
-      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "app_not_allowed": "Nicht berechtigt",
+      "too_many_attempts": "Zu viele Versuche"
     },
     "validation": {
       "invalid_request": "Einige Daten sind ungültig. Bitte prüfen Sie sie und versuchen Sie es erneut.",
       "invalid_date": "Das Datum ist ungültig.",
       "end_before_start": "Das Enddatum liegt vor dem Startdatum.",
-      "invalid_value": "Der gewählte Wert ist ungültig."
+      "invalid_value": "Der gewählte Wert ist ungültig.",
+      "failed": "Ungültige Anfrage"
     },
     "resource": {
       "not_found": "Dieser Eintrag existiert nicht mehr."

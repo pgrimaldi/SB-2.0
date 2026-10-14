@@ -22,7 +22,7 @@ import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
-import { SignInRequest } from '../../../entities/auth/credentials';
+import { LoginRequest } from '../../../entities/auth/credentials';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { requiredText } from '../../shared/forms/validators';
@@ -74,7 +74,7 @@ export class LoginDialog implements OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly window = inject(DOCUMENT).defaultView;
 
-  private readonly credentials = signal(new SignInRequest());
+  private readonly credentials = signal(new LoginRequest());
   protected readonly credentialsForm = form(
     this.credentials,
     (path) => {
@@ -115,7 +115,7 @@ export class LoginDialog implements OnDestroy {
     dialogRef?.close();
   }
 
-  protected signIn(event: Event): void {
+  protected login(event: Event): void {
     event.preventDefault();
     if (this.pending()) {
       return;
@@ -134,7 +134,7 @@ export class LoginDialog implements OnDestroy {
     this.error.set(null);
     const credentials = this.credentials();
     this.authBehaviour
-      .signIn({ ...credentials, username: credentials.username?.trim() ?? null })
+      .login({ ...credentials, username: credentials.username?.trim() ?? null })
       .subscribe({
         next: () => {
           this.pending.set(false);
@@ -195,7 +195,7 @@ export class LoginDialog implements OnDestroy {
   }
 
   private reset(): void {
-    this.credentials.set(new SignInRequest());
+    this.credentials.set(new LoginRequest());
     this.credentialsForm().reset();
     this.error.set(null);
   }

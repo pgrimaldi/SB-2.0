@@ -122,7 +122,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isLoading() || !idProperty || !this.canSave()) {
       return;
     }

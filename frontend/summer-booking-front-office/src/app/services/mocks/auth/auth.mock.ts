@@ -1,6 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, from, of, switchMap } from 'rxjs';
-import { AuthSession, AuthUser, SignInRequest } from '../../../entities/auth/credentials';
+import { AuthSession, AuthUser, LoginRequest } from '../../../entities/auth/credentials';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
@@ -8,15 +8,15 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 // Test account of the mock. Only the SHA-256 of the password is kept: the readable password
 // never appears in the repository nor in the published JavaScript.
 const MOCK_ACCOUNT = {
+  id: '0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c',
   username: 'summertest465@gmail.com',
-  idProperty: DEMO_PROPERTY.publicId,
-  roles: ['Manager'],
-  isElectronicReceiptAccepted: false,
+  propertyId: DEMO_PROPERTY.publicId,
+  role: 'manager',
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
 
 /** As in the backend configuration (`Auth:*`). */
-const ACCESS_TOKEN_SECONDS = 15 * 60;
+const ACCESS_TOKEN_SECONDS = 10080 * 60;
 const REFRESH_TOKEN_DAYS = 30;
 const REFRESH_TOKEN_REMEMBER_ME_DAYS = 90;
 
@@ -26,7 +26,7 @@ const REFRESH_TOKEN_REMEMBER_ME_DAYS = 90;
  * registry of refresh tokens) in browser storage: sessionStorage for a standard session (ends with
  * the browser), localStorage with "remember me". Never used with mocks off (production).
  */
-const SIMULATED_COOKIE_KEY = 'sb.mock.refresh-cookie';
+const SIMULATED_COOKIE_KEY = 'sb.mock.sb_rt';
 
 interface SimulatedCookie {
   refreshToken: string;
@@ -37,9 +37,9 @@ interface SimulatedCookie {
 /** Expiry of each issued access token; the real server validates the JWT instead. */
 const accessTokens = new Map<string, number>();
 
-/** `POST /api/auth/signin`: session and refresh cookie for the test account, 401 otherwise. */
-export const signInMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-  const { username, password, remember = false } = (request.body ?? {}) as Partial<SignInRequest>;
+/** `POST /api/identity/auth/login`: session and refresh cookie for the test account, 401 otherwise. */
+export const loginMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  const { username, password, remember = false } = (request.body ?? {}) as Partial<LoginRequest>;
 
   return from(sha256(password ?? '')).pipe(
     delay(400),
@@ -56,7 +56,7 @@ export const signInMock = (request: HttpRequest<unknown>): Observable<HttpEvent<
   );
 };
 
-/** `POST /api/auth/refresh`: new access token and rotated refresh cookie, 401 without a valid one. */
+/** `POST /api/identity/auth/refresh`: new access token and rotated refresh cookie, 401 without a valid one. */
 export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   const cookie = readCookie();
   if (!cookie || cookie.expiresAt <= Date.now()) {
@@ -67,7 +67,7 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   return ok(request, newSession());
 };
 
-/** `POST /api/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
+/** `POST /api/identity/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
 export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!readCookie()) {
     return unauthorized(request, 'auth.session_expired', 'No valid session');
@@ -92,18 +92,14 @@ export function unauthorized(
 
 type UnauthorizedCode = Extract<ApiErrorCode, `auth.${string}`>;
 
-export function setMockElectronicReceiptAccepted(isAccepted: boolean): void {
-  MOCK_ACCOUNT.isElectronicReceiptAccepted = isAccepted;
-}
-
 function newSession(): AuthSession {
   const accessToken = `mock-access-${randomToken()}`;
   accessTokens.set(accessToken, Date.now() + ACCESS_TOKEN_SECONDS * 1000);
   const user: AuthUser = {
+    id: MOCK_ACCOUNT.id,
     email: MOCK_ACCOUNT.username,
-    idProperty: MOCK_ACCOUNT.idProperty,
-    roles: MOCK_ACCOUNT.roles,
-    isElectronicReceiptAccepted: MOCK_ACCOUNT.isElectronicReceiptAccepted,
+    role: MOCK_ACCOUNT.role,
+    propertyId: MOCK_ACCOUNT.propertyId,
   };
   return { accessToken, expiresIn: ACCESS_TOKEN_SECONDS, user };
 }

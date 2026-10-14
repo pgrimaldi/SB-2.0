@@ -71,13 +71,16 @@
     "auth": {
       "invalid_credentials": "凭据无效",
       "invalid_token": "会话已失效，请重新登录。",
-      "session_expired": "会话已过期，请重新登录。"
+      "session_expired": "会话已过期，请重新登录。",
+      "app_not_allowed": "未授权",
+      "too_many_attempts": "尝试次数过多"
     },
     "validation": {
       "invalid_request": "部分数据无效，请检查后重试。",
       "invalid_date": "日期无效。",
       "end_before_start": "结束日期早于开始日期。",
-      "invalid_value": "所选值无效。"
+      "invalid_value": "所选值无效。",
+      "failed": "请求无效"
     },
     "resource": {
       "not_found": "该项目已不存在。"

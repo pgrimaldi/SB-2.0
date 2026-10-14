@@ -71,13 +71,16 @@
     "auth": {
       "invalid_credentials": "بيانات الدخول غير صحيحة",
       "invalid_token": "الجلسة لم تعد صالحة. سجّل الدخول مجددًا.",
-      "session_expired": "انتهت الجلسة. سجّل الدخول مجددًا."
+      "session_expired": "انتهت الجلسة. سجّل الدخول مجددًا.",
+      "app_not_allowed": "غير مصرح",
+      "too_many_attempts": "محاولات كثيرة جدًا"
     },
     "validation": {
       "invalid_request": "بعض البيانات غير صالحة. تحقق منها وأعد المحاولة.",
       "invalid_date": "التاريخ غير صالح.",
       "end_before_start": "تاريخ النهاية قبل تاريخ البداية.",
-      "invalid_value": "القيمة المختارة غير صالحة."
+      "invalid_value": "القيمة المختارة غير صالحة.",
+      "failed": "طلب غير صالح"
     },
     "resource": {
       "not_found": "هذا العنصر لم يعد موجودًا."

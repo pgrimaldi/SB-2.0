@@ -15,9 +15,9 @@ describe('authInterceptor', () => {
     expiresIn: 900,
     user: {
       email,
-      idProperty: `property-of-${email}`,
-      roles: [],
-      isElectronicReceiptAccepted: false,
+      id: `id-of-${email}`,
+      role: 'manager',
+      propertyId: `property-of-${email}`,
     },
   });
 
@@ -61,7 +61,7 @@ describe('authInterceptor', () => {
     http.get(`${api}/warehouse/list`).subscribe((body) => (answer = body));
     controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
     await settle();
-    const refresh = controller.expectOne(`${api}/auth/refresh`);
+    const refresh = controller.expectOne(`${api}/identity/auth/refresh`);
     expect(refresh.request.headers.has('Authorization')).toBe(false); // the cookie is enough
     refresh.flush(session('second'));
     const repeated = controller.expectOne(`${api}/warehouse/list`);
@@ -79,7 +79,7 @@ describe('authInterceptor', () => {
     http.get(`${api}/warehouse/list`).subscribe({ error: (error) => (status = error.status) });
     controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
     await settle();
-    controller.expectOne(`${api}/auth/refresh`).flush(null, unauthorized);
+    controller.expectOne(`${api}/identity/auth/refresh`).flush(null, unauthorized);
 
     expect(status).toBe(401);
     expect(auth.isAuthenticated()).toBe(false);
@@ -97,7 +97,7 @@ describe('authInterceptor', () => {
     controller.expectOne(`${api}/warehouse/delete-warehouse-item`).flush(null, unauthorized);
 
     expect(status).toBe(401);
-    controller.expectNone(`${api}/auth/refresh`);
+    controller.expectNone(`${api}/identity/auth/refresh`);
     controller.expectNone(`${api}/warehouse/delete-warehouse-item`);
     expect(auth.token()).toBe('bea-token');
   });
@@ -110,7 +110,7 @@ describe('authInterceptor', () => {
     http.get(`${api}/warehouse/list`).subscribe({ error: (error) => (status = error.status) });
     controller.expectOne(`${api}/warehouse/list`).flush(null, unauthorized);
     await settle();
-    const refresh = controller.expectOne(`${api}/auth/refresh`);
+    const refresh = controller.expectOne(`${api}/identity/auth/refresh`);
     auth.start(session('bea-token', 'bea@example.com'), false);
     refresh.flush(session('anna-late'));
 
@@ -123,11 +123,11 @@ describe('authInterceptor', () => {
   it('should log out with the cookie only, and never renew the session while logging out', () => {
     const { http, controller } = setup();
 
-    http.post(`${api}/auth/logout`, null).subscribe({ error: () => undefined });
-    const logout = controller.expectOne(`${api}/auth/logout`);
+    http.post(`${api}/identity/auth/logout`, null).subscribe({ error: () => undefined });
+    const logout = controller.expectOne(`${api}/identity/auth/logout`);
     expect(logout.request.headers.has('Authorization')).toBe(false);
     logout.flush(null, unauthorized);
 
-    controller.expectNone(`${api}/auth/refresh`);
+    controller.expectNone(`${api}/identity/auth/refresh`);
   });
 });

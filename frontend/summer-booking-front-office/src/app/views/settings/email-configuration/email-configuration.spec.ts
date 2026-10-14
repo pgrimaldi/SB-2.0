@@ -35,7 +35,7 @@ describe('EmailConfiguration', () => {
           provide: SystemService,
           useValue: { emailConfiguration, sendTestEmail, saveEmailConfiguration },
         },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const translate = TestBed.inject(TranslateService);

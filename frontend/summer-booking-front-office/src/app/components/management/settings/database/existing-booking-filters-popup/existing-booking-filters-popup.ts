@@ -131,7 +131,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
   private loadAffiliatedHotels(): void {
     // A slower answer of an earlier opening must not replace the list of this one.
     this.affiliatedHotelsSubscription?.unsubscribe();
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
     }

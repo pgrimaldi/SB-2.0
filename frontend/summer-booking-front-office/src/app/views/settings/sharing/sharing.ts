@@ -101,7 +101,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
     });
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.auth.user()?.propertyId;
       if (!idProperty) {
         return;
       }
@@ -128,7 +128,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!this.canSave() || !idProperty) {
       return;
     }

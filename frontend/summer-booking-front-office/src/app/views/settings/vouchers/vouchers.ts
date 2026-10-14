@@ -78,7 +78,7 @@ export class Vouchers {
   protected readonly idVouchersToDuplicate = signal<readonly string[]>([]);
   protected readonly voucherNameToDuplicate = signal<string | null>(null);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;

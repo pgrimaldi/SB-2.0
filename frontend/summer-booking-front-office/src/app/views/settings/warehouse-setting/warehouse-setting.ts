@@ -48,7 +48,7 @@ export class WarehouseSetting {
 
   protected readonly loadFailed = signal(false);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly adding = signal(false);

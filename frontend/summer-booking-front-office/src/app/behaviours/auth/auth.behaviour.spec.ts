@@ -13,13 +13,13 @@ describe('AuthBehaviour', () => {
     expiresIn: 900,
     user: {
       email,
-      idProperty: `property-of-${email}`,
-      roles: ['Manager'],
-      isElectronicReceiptAccepted: false,
+      id: `id-of-${email}`,
+      role: 'manager',
+      propertyId: `property-of-${email}`,
     },
   });
   let server: {
-    signIn: ReturnType<typeof vi.fn>;
+    login: ReturnType<typeof vi.fn>;
     refresh: ReturnType<typeof vi.fn>;
     logout: ReturnType<typeof vi.fn>;
   };
@@ -28,7 +28,7 @@ describe('AuthBehaviour', () => {
     localStorage.clear();
     sessionStorage.clear();
     server = {
-      signIn: vi.fn(),
+      login: vi.fn(),
       refresh: vi.fn(),
       logout: vi.fn().mockReturnValue(of(undefined)),
     };
@@ -75,22 +75,22 @@ describe('AuthBehaviour', () => {
 
   it('should start the session when the server accepts the credentials', async () => {
     const auth = load();
-    server.signIn.mockReturnValue(of(session('first')));
+    server.login.mockReturnValue(of(session('first')));
     const credentials = { username: 'user@example.com', password: 'secret', remember: true };
 
-    await firstValueFrom(auth.signIn(credentials));
+    await firstValueFrom(auth.login(credentials));
 
-    expect(server.signIn).toHaveBeenCalledWith(credentials);
+    expect(server.login).toHaveBeenCalledWith(credentials);
     expect(auth.token()).toBe('first');
     expect(localStorage.getItem('sb.signed-in')).toBe('true'); // remembered
   });
 
   it('should fail like the server and start nothing with wrong credentials', async () => {
     const auth = load();
-    server.signIn.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
+    server.login.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
 
     const failure = await firstValueFrom(
-      auth.signIn({ username: 'user@example.com', password: 'wrong', remember: false }),
+      auth.login({ username: 'user@example.com', password: 'wrong', remember: false }),
     ).catch((error: HttpErrorResponse) => error);
 
     expect((failure as HttpErrorResponse).status).toBe(401);
@@ -111,7 +111,7 @@ describe('AuthBehaviour', () => {
     await auth.restore();
 
     expect(auth.token()).toBe('second');
-    expect(auth.user()?.idProperty).toBe('property-of-user@example.com');
+    expect(auth.user()?.propertyId).toBe('property-of-user@example.com');
   });
 
   it('should ask the server nothing at start-up when nobody signed in in this browser', async () => {
@@ -246,15 +246,15 @@ describe('AuthBehaviour', () => {
     const auth = load();
     const refresh = new Subject<AuthSession>();
     server.refresh.mockReturnValue(refresh);
-    server.signIn.mockReturnValue(of(session('bea-token', 'bea@example.com')));
+    server.login.mockReturnValue(of(session('bea-token', 'bea@example.com')));
     auth.refresh().subscribe();
     await settle();
 
     const signedIn = firstValueFrom(
-      auth.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
+      auth.login({ username: 'bea@example.com', password: 'secret', remember: false }),
     );
     await settle();
-    expect(server.signIn).not.toHaveBeenCalled();
+    expect(server.login).not.toHaveBeenCalled();
 
     refresh.error(new HttpErrorResponse({ status: 401 }));
     await signedIn;
@@ -292,12 +292,12 @@ describe('AuthBehaviour', () => {
     vi.useFakeTimers();
     const auth = load();
     server.refresh.mockReturnValue(new Subject<AuthSession>()); // never answers
-    server.signIn.mockReturnValue(of(session('bea-token', 'bea@example.com')));
+    server.login.mockReturnValue(of(session('bea-token', 'bea@example.com')));
     const refreshed = firstValueFrom(auth.refresh()).catch(
       (error: unknown) => (error as Error).name,
     );
     const signedIn = firstValueFrom(
-      auth.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
+      auth.login({ username: 'bea@example.com', password: 'secret', remember: false }),
     );
 
     await vi.advanceTimersByTimeAsync(COOKIE_CALL_TIMEOUT);
@@ -373,9 +373,9 @@ describe('AuthBehaviour', () => {
           : of(undefined);
       }),
     );
-    server.signIn.mockReturnValue(
+    server.login.mockReturnValue(
       defer(() => {
-        order.push('signin');
+        order.push('login');
         return of(session('bea-token', 'bea@example.com'));
       }),
     );
@@ -383,13 +383,13 @@ describe('AuthBehaviour', () => {
     const loggedOut = auth.logout();
     await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY / 2);
     const signedIn = firstValueFrom(
-      auth.signIn({ username: 'bea@example.com', password: 'secret', remember: true }),
+      auth.login({ username: 'bea@example.com', password: 'secret', remember: true }),
     );
     await vi.advanceTimersByTimeAsync(LOGOUT_RETRY_DELAY);
 
     expect(await loggedOut).toBe(true);
     await signedIn;
-    expect(order).toEqual(['logout', 'logout', 'signin']);
+    expect(order).toEqual(['logout', 'logout', 'login']);
     expect(auth.user()?.email).toBe('bea@example.com');
   });
 
@@ -507,16 +507,16 @@ describe('AuthBehaviour', () => {
     const { firstTab, secondTab } = twoTabs();
     localStorage.setItem('sb.signed-in', 'true'); // Anna, remembered, from an earlier visit
     localStorage.setItem('sb.session-name', 'anna-session');
-    const signIn = new Subject<AuthSession>();
-    server.signIn.mockReturnValue(signIn);
+    const login = new Subject<AuthSession>();
+    server.login.mockReturnValue(login);
     const signedIn = firstValueFrom(
-      firstTab.signIn({ username: 'bea@example.com', password: 'secret', remember: false }),
+      firstTab.login({ username: 'bea@example.com', password: 'secret', remember: false }),
     );
     await settle();
 
     const opened = secondTab.restore(); // a tab opening while Bea signs in
-    signIn.next(session('bea-token', 'bea@example.com'));
-    signIn.complete();
+    login.next(session('bea-token', 'bea@example.com'));
+    login.complete();
     await signedIn;
     await opened;
 

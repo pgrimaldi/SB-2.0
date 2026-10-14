@@ -32,7 +32,7 @@ describe('DeleteItemsPopup', () => {
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(DeleteItemsPopupHost);

@@ -71,13 +71,16 @@
     "auth": {
       "invalid_credentials": "Identifiants non valides",
       "invalid_token": "Votre session n'est plus valide. Reconnectez-vous.",
-      "session_expired": "Votre session a expiré. Reconnectez-vous."
+      "session_expired": "Votre session a expiré. Reconnectez-vous.",
+      "app_not_allowed": "Non autorisé",
+      "too_many_attempts": "Trop de tentatives"
     },
     "validation": {
       "invalid_request": "Certaines données ne sont pas valides. Vérifiez et réessayez.",
       "invalid_date": "La date n'est pas valide.",
       "end_before_start": "La date de fin est antérieure à la date de début.",
-      "invalid_value": "La valeur choisie n'est pas valide."
+      "invalid_value": "La valeur choisie n'est pas valide.",
+      "failed": "Requête non valide"
     },
     "resource": {
       "not_found": "Cet élément n'existe plus."

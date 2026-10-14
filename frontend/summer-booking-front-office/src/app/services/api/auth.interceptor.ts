@@ -15,9 +15,9 @@ import { isApiUrl } from './api-url';
  * 401 there is never followed by a refresh (on logout it could reopen the session being closed).
  */
 const COOKIE_ENDPOINTS = [
-  `${environment.apiBaseUrl}/auth/signin`,
-  `${environment.apiBaseUrl}/auth/refresh`,
-  `${environment.apiBaseUrl}/auth/logout`,
+  `${environment.apiBaseUrl}/identity/auth/login`,
+  `${environment.apiBaseUrl}/identity/auth/refresh`,
+  `${environment.apiBaseUrl}/identity/auth/logout`,
 ];
 
 /**

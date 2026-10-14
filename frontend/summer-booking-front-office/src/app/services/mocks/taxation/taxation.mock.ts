@@ -7,7 +7,7 @@ import { ElectronicReceiptActivationRequest } from '../../../entities/settings/t
 import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
-import { isAuthorized, setMockElectronicReceiptAccepted, unauthorized } from '../auth/auth.mock';
+import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { operationNotAllowed, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
@@ -208,7 +208,6 @@ export const electronicReceiptActivationMock = (
   if (!propertyOf(body.idProperty)) {
     return operationNotAllowed(request);
   }
-  setMockElectronicReceiptAccepted(body.isElectronicReceiptAccepted === true);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 

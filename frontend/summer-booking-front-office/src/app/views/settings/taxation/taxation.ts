@@ -101,7 +101,7 @@ export class Taxation {
   protected readonly printerToDelete = signal<PrinterItemListResponse | null>(null);
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
-  private readonly idProperty = computed(() => this.auth.user()?.idProperty ?? null);
+  private readonly idProperty = computed(() => this.auth.user()?.propertyId ?? null);
   protected readonly printerParams = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.idProperty();
     return idProperty ? { idProperty } : null;
@@ -135,9 +135,7 @@ export class Taxation {
   protected readonly printersLoadFailed = signal(false);
   protected readonly isGuideDownloading = signal(false);
   protected readonly isAcceptChosen = signal(false);
-  protected readonly isReceiptActivated = computed(
-    () => this.auth.user()?.isElectronicReceiptAccepted ?? false,
-  );
+  protected readonly isReceiptActivated = signal(false);
   protected readonly isReceiptAccepted = computed(
     () => this.isReceiptActivated() || this.isAcceptChosen(),
   );
@@ -202,7 +200,7 @@ export class Taxation {
   }
 
   protected async downloadGuide(): Promise<void> {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty || this.isGuideDownloading()) {
       return;
     }
@@ -222,7 +220,7 @@ export class Taxation {
   }
 
   protected async sendReceiptChoice(): Promise<void> {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty || this.isSendingReceiptChoice() || !this.isAcceptChosen()) {
       return;
     }
@@ -234,7 +232,7 @@ export class Taxation {
           isElectronicReceiptAccepted: this.isAcceptChosen(),
         }),
       );
-      this.auth.markElectronicReceiptAccepted();
+      this.isReceiptActivated.set(true);
       this.isReceiptAccountShown.set(true);
     } catch (error: unknown) {
       this.showActionError(error);
@@ -256,7 +254,7 @@ export class Taxation {
     idPrinter: string | null,
     call: (idProperty: string, idPrinter: string) => Observable<void>,
   ): Promise<void> {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (idProperty && idPrinter && !this.isPrinterActionRunning()) {
       this.isPrinterActionRunning.set(true);
       try {

@@ -113,7 +113,7 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isLoading() || !idProperty) {
       return;
     }

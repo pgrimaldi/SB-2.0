@@ -187,7 +187,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.auth.user()?.propertyId;
       if (!idProperty) {
         return;
       }
@@ -266,7 +266,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     call: (request: EmailConfigurationRequest) => Observable<void>,
     done: (sent: EmailConfigurationRequest) => void,
   ): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isBusy() || !idProperty) {
       return;
     }

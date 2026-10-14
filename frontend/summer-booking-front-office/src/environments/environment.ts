@@ -2,4 +2,5 @@
 export const environment = {
   production: false,
   apiBaseUrl: '/api',
+  authApp: 'hub',
 } as const;

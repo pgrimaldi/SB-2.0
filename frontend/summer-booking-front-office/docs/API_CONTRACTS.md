@@ -6,7 +6,7 @@ Ogni chiamata, tranne `auth/signin`, `auth/refresh` e `auth/logout`, porta l'hea
 
 ## /auth
 
-### POST `/api/auth/signin`
+### POST `/api/identity/auth/login`
 
 Accesso.
 
@@ -16,7 +16,8 @@ Accesso.
 {
   "username": "mario.rossi@example.com",
   "password": "password-digitata",
-  "remember": true
+  "remember": true,
+  "app": "hub"
 }
 ```
 
@@ -25,6 +26,7 @@ Accesso.
 | `username` | string | `mario.rossi@example.com` |
 | `password` | string | `password-digitata` |
 | `remember` | boolean | `true` |
+| `app` | string | `hub` |
 
 #### Response
 
@@ -33,14 +35,12 @@ Stato: 200 OK.
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio",
-  "expiresIn": 900,
+  "expiresIn": 604800,
   "user": {
+    "id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c",
     "email": "mario.rossi@example.com",
-    "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
-    "roles": [
-      "Manager"
-    ],
-    "isElectronicReceiptAccepted": false
+    "role": "manager",
+    "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
   }
 }
 ```
@@ -48,15 +48,15 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `accessToken` | string | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio` |
-| `expiresIn` | number (intero) | `900` |
-| `user` | AuthUser (oggetto) | `{"email": "mario.rossi@example.com", "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d", "roles": ["Manager"], "isElectronicReceiptAccepted": false}` |
+| `expiresIn` | number (intero) | `604800` |
+| `user` | AuthUser (oggetto) | `{"id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c", "email": "mario.rossi@example.com", "role": "manager", "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"}` |
+| `user.id` | string (UUID) | `0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c` |
 | `user.email` | string | `mario.rossi@example.com` |
-| `user.idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-| `user.roles` | string[] (array di stringhe) | `["Manager"]` |
-| `user.isElectronicReceiptAccepted` | boolean | `false` |
-| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=2592000` |
+| `user.role` | string | `manager` |
+| `user.propertyId` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `sb_rt=<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=2592000` |
 
-### POST `/api/auth/refresh`
+### POST `/api/identity/auth/refresh`
 
 Rinnovo del token.
 
@@ -71,14 +71,12 @@ Stato: 200 OK.
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio",
-  "expiresIn": 900,
+  "expiresIn": 604800,
   "user": {
+    "id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c",
     "email": "mario.rossi@example.com",
-    "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
-    "roles": [
-      "Manager"
-    ],
-    "isElectronicReceiptAccepted": false
+    "role": "manager",
+    "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
   }
 }
 ```
@@ -86,15 +84,15 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `accessToken` | string | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio` |
-| `expiresIn` | number (intero) | `900` |
-| `user` | AuthUser (oggetto) | `{"email": "mario.rossi@example.com", "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d", "roles": ["Manager"], "isElectronicReceiptAccepted": false}` |
+| `expiresIn` | number (intero) | `604800` |
+| `user` | AuthUser (oggetto) | `{"id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c", "email": "mario.rossi@example.com", "role": "manager", "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"}` |
+| `user.id` | string (UUID) | `0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c` |
 | `user.email` | string | `mario.rossi@example.com` |
-| `user.idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-| `user.roles` | string[] (array di stringhe) | `["Manager"]` |
-| `user.isElectronicReceiptAccepted` | boolean | `false` |
-| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=2592000` |
+| `user.role` | string | `manager` |
+| `user.propertyId` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `sb_rt=<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=2592000` |
 
-### POST `/api/auth/logout`
+### POST `/api/identity/auth/logout`
 
 Uscita.
 
@@ -110,7 +108,7 @@ Nessun corpo.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `Set-Cookie (header)` | cancella il cookie del refresh token | `<nome-cookie>=; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=0` |
+| `Set-Cookie (header)` | cancella il cookie del refresh token | `sb_rt=; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=0` |
 
 ## /warehouse
 

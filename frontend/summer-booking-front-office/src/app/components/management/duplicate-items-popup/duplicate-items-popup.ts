@@ -52,7 +52,7 @@ export class DuplicateItemsPopup {
   );
 
   protected duplicateItems(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     const idItems = [...this.idItems()];
     if (this.isLoading() || !idProperty || !idItems.length) {
       return;

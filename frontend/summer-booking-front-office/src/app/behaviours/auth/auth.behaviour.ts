@@ -16,7 +16,7 @@ import {
   timeout,
   timer,
 } from 'rxjs';
-import { AuthSession, AuthUser, SignInRequest } from '../../entities/auth/credentials';
+import { AuthSession, AuthUser, LoginRequest } from '../../entities/auth/credentials';
 import { LogoutOutcome } from '../../entities/auth/logout-outcome';
 import { Session } from '../../entities/auth/session';
 import { TabMessage } from '../../entities/auth/tab-message';
@@ -98,8 +98,8 @@ export class AuthBehaviour implements OnDestroy {
     return this.generation;
   }
 
-  signIn(request: SignInRequest): Observable<void> {
-    return this.oneAtATime(() => this.authService.signIn(request)).pipe(
+  login(request: LoginRequest): Observable<void> {
+    return this.oneAtATime(() => this.authService.login(request)).pipe(
       map((session) => this.start(session, request.remember)),
     );
   }
@@ -111,11 +111,11 @@ export class AuthBehaviour implements OnDestroy {
   start({ accessToken, user }: AuthSession, remember: boolean): void {
     this.changeHands();
     this.session.set({ accessToken, user });
-    this.forgetSignIn();
+    this.forgetLogin();
     (remember ? this.localStorage() : this.sessionStorage())?.setItem(SIGNED_IN_KEY, 'true');
     this.sessionName = crypto.randomUUID();
     this.localStorage()?.setItem(SESSION_NAME_KEY, this.sessionName);
-    this.tellSignIn();
+    this.tellLogin();
   }
 
   /**
@@ -168,7 +168,7 @@ export class AuthBehaviour implements OnDestroy {
         }
         const { accessToken, user } = answer;
         const current = this.user();
-        if (current && (current.email !== user.email || current.idProperty !== user.idProperty)) {
+        if (current && (current.id !== user.id || current.propertyId !== user.propertyId)) {
           this.leaveHere();
           return null;
         }
@@ -244,14 +244,6 @@ export class AuthBehaviour implements OnDestroy {
     return true;
   }
 
-  /** Until the next sign-in or refresh, which bring the server's value. */
-  markElectronicReceiptAccepted(): void {
-    this.session.update(
-      (session) =>
-        session && { ...session, user: { ...session.user, isElectronicReceiptAccepted: true } },
-    );
-  }
-
   /** The session is over (refused by the server, or ended in another tab): back to the home. */
   expire(): void {
     this.clear();
@@ -288,7 +280,7 @@ export class AuthBehaviour implements OnDestroy {
     return this.localStorage()?.getItem(SESSION_NAME_KEY) ?? null;
   }
 
-  private tellSignIn(): void {
+  private tellLogin(): void {
     this.tell(false, this.sessionName);
   }
 
@@ -354,7 +346,7 @@ export class AuthBehaviour implements OnDestroy {
     this.refreshing = null;
   }
 
-  private forgetSignIn(): void {
+  private forgetLogin(): void {
     this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
     this.localStorage()?.removeItem(SIGNED_IN_KEY);
   }
@@ -406,11 +398,10 @@ function sameUser(a: AuthUser | null, b: AuthUser | null): boolean {
     a === b ||
     (!!a &&
       !!b &&
+      a.id === b.id &&
       a.email === b.email &&
-      a.idProperty === b.idProperty &&
-      a.isElectronicReceiptAccepted === b.isElectronicReceiptAccepted &&
-      a.roles.length === b.roles.length &&
-      a.roles.every((role, index) => role === b.roles[index]))
+      a.role === b.role &&
+      a.propertyId === b.propertyId)
   );
 }
 

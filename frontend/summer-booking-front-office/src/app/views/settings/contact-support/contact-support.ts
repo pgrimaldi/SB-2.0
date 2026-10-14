@@ -94,7 +94,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     // Loaded again when the language changes: the support hours come translated by the server.
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.auth.user()?.propertyId;
       if (!idProperty) {
         return;
       }
@@ -120,7 +120,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
 
   protected send(event: Event): void {
     event.preventDefault();
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isLoading() || !idProperty) {
       return;
     }

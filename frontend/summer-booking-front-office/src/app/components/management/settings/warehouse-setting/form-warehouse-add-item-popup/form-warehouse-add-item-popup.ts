@@ -130,7 +130,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   }
 
   protected add(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isLoading() || !idProperty || !this.canAdd()) {
       return;
     }
@@ -182,7 +182,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   private loadArticles(): void {
     // A slower answer of an earlier opening must not replace the list of this one.
     this.articlesSubscription?.unsubscribe();
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
     }

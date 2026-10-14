@@ -25,7 +25,7 @@ describe('ContactSupport', () => {
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         { provide: SystemService, useValue: { contactSupport, supportInfo } },
         { provide: DATA_RELOAD, useValue: language },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(ContactSupport);

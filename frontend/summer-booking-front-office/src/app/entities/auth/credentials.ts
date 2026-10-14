@@ -1,14 +1,14 @@
-export class SignInRequest {
+export class LoginRequest {
   username: string | null = null;
   password: string | null = null;
   remember = false;
 }
 
 export interface AuthUser {
+  id: string;
   email: string;
-  idProperty: string;
-  roles: string[];
-  isElectronicReceiptAccepted: boolean;
+  role: string;
+  propertyId: string;
 }
 
 export interface AuthSession {
