@@ -3,39 +3,39 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Subject, throwError } from 'rxjs';
-import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
-import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
-import { DuplicateWarehouseItemsPopup } from './duplicate-warehouse-items-popup';
+import { Observable, Subject, throwError } from 'rxjs';
+import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { DeleteItemsPopup } from './delete-items-popup';
 
 @Component({
-  imports: [DuplicateWarehouseItemsPopup],
-  template: `<app-duplicate-warehouse-items-popup
+  imports: [DeleteItemsPopup],
+  template: `<app-delete-items-popup
     [idItems]="idItems()"
     [itemName]="itemName()"
+    translationKey="management.settings.warehouse.delete"
+    [action]="action"
     [(open)]="open"
-    (duplicated)="duplicated = $event"
+    (deleted)="deleted = $event"
   />`,
 })
-class DuplicateWarehouseItemsPopupHost {
+class DeleteItemsPopupHost {
   readonly idItems = signal<readonly string[]>(['a1']);
   readonly itemName = signal<string | null>('Lettino');
   readonly open = signal(false);
-  duplicated: readonly string[] = [];
+  action: (idProperty: string, idItems: string[]) => Observable<void> = vi.fn();
+  deleted: readonly string[] = [];
 }
 
-describe('DuplicateWarehouseItemsPopup', () => {
-  const setup = async (prepare?: (host: DuplicateWarehouseItemsPopupHost) => void) => {
-    const duplicateWarehouseItems = vi.fn();
+describe('DeleteItemsPopup', () => {
+  const setup = async (prepare?: (host: DeleteItemsPopupHost) => void) => {
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: WarehouseService, useValue: { duplicateWarehouseItems } },
         { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
       ],
     });
-    const fixture = TestBed.createComponent(DuplicateWarehouseItemsPopupHost);
+    const fixture = TestBed.createComponent(DeleteItemsPopupHost);
     prepare?.(fixture.componentInstance);
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
@@ -44,7 +44,7 @@ describe('DuplicateWarehouseItemsPopup', () => {
       dialog()!.querySelectorAll<HTMLButtonElement>('app-button button')[1].click();
       await fixture.whenStable();
     };
-    return { fixture, host: fixture.componentInstance, dialog, confirm, duplicateWarehouseItems };
+    return { fixture, host: fixture.componentInstance, confirm };
   };
 
   afterEach(() =>
@@ -52,17 +52,15 @@ describe('DuplicateWarehouseItemsPopup', () => {
   );
 
   it('should close at once, wait with the page spinner, then tell the page which ones', async () => {
-    const { fixture, host, confirm, duplicateWarehouseItems } = await setup((page) =>
-      page.idItems.set(['a1', 'a2']),
-    );
     const answer = new Subject<void>();
-    duplicateWarehouseItems.mockReturnValue(answer);
+    const action = vi.fn(() => answer.asObservable());
+    const { fixture, host, confirm } = await setup((page) => {
+      page.idItems.set(['a1', 'a2']);
+      page.action = action;
+    });
 
     await confirm();
-    expect(duplicateWarehouseItems).toHaveBeenCalledWith({
-      idProperty: 'p1',
-      idItems: ['a1', 'a2'],
-    });
+    expect(action).toHaveBeenCalledWith('p1', ['a1', 'a2']);
     expect(host.open()).toBe(false);
     expect(document.querySelector('.page__spinner')).not.toBeNull();
 
@@ -70,24 +68,24 @@ describe('DuplicateWarehouseItemsPopup', () => {
     answer.complete();
     await fixture.whenStable();
     expect(document.querySelector('.page__spinner')).toBeNull();
-    expect(host.duplicated).toEqual(['a1', 'a2']);
+    expect(host.deleted).toEqual(['a1', 'a2']);
   });
 
-  it('should show the error in a popup when nothing is duplicated', async () => {
-    const { host, confirm, duplicateWarehouseItems } = await setup();
-    duplicateWarehouseItems.mockReturnValue(
-      throwError(
-        () =>
-          new HttpErrorResponse({
-            status: 400,
-            error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
-          }),
-      ),
-    );
+  it('should show the error in a popup when nothing is deleted', async () => {
+    const { host, confirm } = await setup((page) => {
+      page.action = () =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+            }),
+        );
+    });
 
     await confirm();
     expect(host.open()).toBe(false);
-    expect(host.duplicated).toEqual([]);
+    expect(host.deleted).toEqual([]);
     expect(document.querySelector('.page__spinner')).toBeNull();
     // The message of the code (here the fallback key: the test has no translations).
     expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(

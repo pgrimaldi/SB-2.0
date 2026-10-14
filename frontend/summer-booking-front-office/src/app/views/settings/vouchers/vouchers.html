@@ -19,8 +19,29 @@
     [(selection)]="idSelectedVouchers"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
+    (deleteSelected)="askDelete($event)"
+    (duplicateSelected)="askDuplicate($event)"
   />
 </main>
+
+<app-delete-items-popup
+  [idItems]="idVouchersToDelete()"
+  [itemName]="voucherNameToDelete()"
+  translationKey="management.settings.vouchers.delete"
+  [action]="deleteVouchers"
+  [pathIcon]="errorIcon"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idVouchersToDuplicate()"
+  [itemName]="voucherNameToDuplicate()"
+  translationKey="management.settings.vouchers.duplicate"
+  [action]="duplicateVouchers"
+  [pathIcon]="errorIcon"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
+/>
 
 <app-table-error-popup
   [title]="'table.load_error.title' | translate"

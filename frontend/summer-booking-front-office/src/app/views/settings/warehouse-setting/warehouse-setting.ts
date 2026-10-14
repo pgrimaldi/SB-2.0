@@ -14,8 +14,8 @@ import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
-import { DeleteWarehouseItemsPopup } from '../../../components/management/settings/warehouse-setting/delete-warehouse-items-popup/delete-warehouse-items-popup';
-import { DuplicateWarehouseItemsPopup } from '../../../components/management/settings/warehouse-setting/duplicate-warehouse-items-popup/duplicate-warehouse-items-popup';
+import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
+import { DuplicateItemsPopup } from '../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { FormWarehouseAddItemPopup } from '../../../components/management/settings/warehouse-setting/form-warehouse-add-item-popup/form-warehouse-add-item-popup';
 import { FormWarehouseEditItemPopup } from '../../../components/management/settings/warehouse-setting/form-warehouse-edit-item-popup/form-warehouse-edit-item-popup';
 
@@ -28,8 +28,8 @@ interface WarehouseSettingsHeaders {
 @Component({
   selector: 'app-warehouse-setting',
   imports: [
-    DeleteWarehouseItemsPopup,
-    DuplicateWarehouseItemsPopup,
+    DeleteItemsPopup,
+    DuplicateItemsPopup,
     FormWarehouseAddItemPopup,
     FormWarehouseEditItemPopup,
     PageTitle,
@@ -62,6 +62,7 @@ export class WarehouseSetting {
   protected readonly idItemsToDuplicate = signal<readonly string[]>([]);
   protected readonly itemNameToDuplicate = signal<string | null>(null);
   protected readonly titleIcon = ['/assets/images/WarehouseSetting_Title.svg'] as const;
+  protected readonly errorIcon = ['/assets/images/WarehouseSetting_Warning.svg'] as const;
   /**
    * In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create].
    * No title icon: the page has its own title. The row button icons come from `rowActions`.
@@ -99,6 +100,11 @@ export class WarehouseSetting {
     duplicate: ({ idArticle, name }) => idArticle && this.askDuplicate([idArticle], name),
     edit: (item) => this.editItem(item),
   });
+
+  protected readonly deleteItems = (idProperty: string, idItems: string[]) =>
+    this.warehouse.deleteWarehouseItems({ idProperty, idItems });
+  protected readonly duplicateItems = (idProperty: string, idItems: string[]) =>
+    this.warehouse.duplicateWarehouseItems({ idProperty, idItems });
 
   protected askDelete(idItems: readonly TableRowId[], itemName: string | null = null): void {
     this.idItemsToDelete.set(idItems.map(String));

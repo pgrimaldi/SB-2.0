@@ -9,35 +9,40 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
-import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
-import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
-import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
-import { AlertPopup } from '../../../../shared/ui/dialogs/alert-popup/alert-popup';
-import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
-import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-spinner';
+import { Observable, of, switchMap } from 'rxjs';
+import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import { ApiProblem } from '../../../entities/errors/api-problem';
+import { toApiProblem } from '../../../services/api/errors/to-api-problem';
+import { AlertPopup } from '../../shared/ui/dialogs/alert-popup/alert-popup';
+import { ConfirmPopup } from '../../shared/ui/dialogs/confirm-popup/confirm-popup';
+import { PageSpinner } from '../../shared/ui/spinners/page-spinner/page-spinner';
 
+/**
+ * Translation group with `cancel`, `confirm`, `one.title`, `one.text` ({{name}}), `many.title` and
+ * `many.text` ({{count}}).
+ */
 @Component({
-  selector: 'app-delete-warehouse-items-popup',
+  selector: 'app-duplicate-items-popup',
   imports: [AlertPopup, ConfirmPopup, PageSpinner, TranslatePipe],
-  templateUrl: './delete-warehouse-items-popup.html',
+  templateUrl: './duplicate-items-popup.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeleteWarehouseItemsPopup {
+export class DuplicateItemsPopup {
   readonly open = model(false);
   readonly idItems = input<readonly string[]>([]);
   readonly itemName = input<string | null>(null);
-  readonly deleted = output<readonly string[]>();
+  readonly translationKey = input.required<string>();
+  readonly action = input.required<(idProperty: string, idItems: string[]) => Observable<void>>();
+  /** [error icon of the alert]. */
+  readonly pathIcon = input<readonly string[] | null>();
+  readonly duplicated = output<readonly string[]>();
 
-  private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
 
   protected readonly isLoading = signal(false);
   protected readonly isErrorShown = signal(false);
-  protected readonly errorIcon = ['/assets/images/WarehouseSetting_Warning.svg'] as const;
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -46,7 +51,7 @@ export class DeleteWarehouseItemsPopup {
     { initialValue: null },
   );
 
-  protected deleteItems(): void {
+  protected duplicateItems(): void {
     const idProperty = this.auth.user()?.idProperty;
     const idItems = [...this.idItems()];
     if (this.isLoading() || !idProperty || !idItems.length) {
@@ -54,10 +59,10 @@ export class DeleteWarehouseItemsPopup {
     }
     this.open.set(false);
     this.isLoading.set(true);
-    this.warehouse.deleteWarehouseItems({ idProperty, idItems }).subscribe({
+    this.action()(idProperty, idItems).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.deleted.emit(idItems);
+        this.duplicated.emit(idItems);
       },
       error: (error: unknown) => {
         this.isLoading.set(false);

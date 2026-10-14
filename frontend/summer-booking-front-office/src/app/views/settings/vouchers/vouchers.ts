@@ -7,6 +7,8 @@ import {
   DATE_FORMATS,
   DateLanguageBehaviour,
 } from '../../../behaviours/i18n/date-language.behaviour';
+import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
+import { DuplicateItemsPopup } from '../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -49,7 +51,14 @@ const DISCOUNT_TYPE_KEYS: Record<DiscountType, keyof VouchersTexts['discount_typ
 
 @Component({
   selector: 'app-vouchers',
-  imports: [PageTitle, Table, TableErrorPopup, TranslatePipe],
+  imports: [
+    DeleteItemsPopup,
+    DuplicateItemsPopup,
+    PageTitle,
+    Table,
+    TableErrorPopup,
+    TranslatePipe,
+  ],
   templateUrl: './vouchers.html',
   styleUrl: './vouchers.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,11 +71,18 @@ export class Vouchers {
 
   protected readonly loadFailed = signal(false);
   protected readonly idSelectedVouchers = signal<readonly TableRowId[]>([]);
+  protected readonly deleting = signal(false);
+  protected readonly idVouchersToDelete = signal<readonly string[]>([]);
+  protected readonly voucherNameToDelete = signal<string | null>(null);
+  protected readonly duplicating = signal(false);
+  protected readonly idVouchersToDuplicate = signal<readonly string[]>([]);
+  protected readonly voucherNameToDuplicate = signal<string | null>(null);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.idProperty;
     return idProperty ? { idProperty } : null;
   });
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;
+  protected readonly errorIcon = ['/assets/images/Vouchers_Warning.svg'] as const;
   /** In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create]. */
   protected readonly tableIcons = [
     '',
@@ -97,8 +113,9 @@ export class Vouchers {
     { field: 'discountValue', header: this.headers().discount_value, sortable: true },
   ]);
   protected readonly rowActions = standardRowActions<VoucherRow>({
-    delete: () => {},
-    duplicate: () => {},
+    delete: ({ idVoucher, voucherName }) => idVoucher && this.askDelete([idVoucher], voucherName),
+    duplicate: ({ idVoucher, voucherName }) =>
+      idVoucher && this.askDuplicate([idVoucher], voucherName),
     edit: () => {},
   });
 
@@ -145,4 +162,37 @@ export class Vouchers {
         ),
       ),
     );
+
+  protected readonly deleteVouchers = (idProperty: string, idVouchers: string[]) =>
+    this.vouchers.deleteVoucherItems({ idProperty, idVouchers });
+  protected readonly duplicateVouchers = (idProperty: string, idVouchers: string[]) =>
+    this.vouchers.duplicateVoucherItems({ idProperty, idVouchers });
+
+  protected askDelete(idVouchers: readonly TableRowId[], voucherName: string | null = null): void {
+    this.idVouchersToDelete.set(idVouchers.map(String));
+    this.voucherNameToDelete.set(voucherName);
+    this.deleting.set(true);
+  }
+
+  protected askDuplicate(
+    idVouchers: readonly TableRowId[],
+    voucherName: string | null = null,
+  ): void {
+    this.idVouchersToDuplicate.set(idVouchers.map(String));
+    this.voucherNameToDuplicate.set(voucherName);
+    this.duplicating.set(true);
+  }
+
+  /** Only after "Duplica selezione" (no name): the chosen rows are done with. */
+  protected afterDuplicate(): void {
+    if (this.voucherNameToDuplicate() === null) {
+      this.idSelectedVouchers.set([]);
+    }
+  }
+
+  protected forgetDeleted(idVouchers: readonly string[]): void {
+    this.idSelectedVouchers.update((idSelected) =>
+      idSelected.filter((idSelectedVoucher) => !idVouchers.includes(String(idSelectedVoucher))),
+    );
+  }
 }

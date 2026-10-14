@@ -530,6 +530,30 @@
         "discount_type": {
           "percentage": "Percentuale",
           "fixed": "Fisso"
+        },
+        "delete": {
+          "cancel": "Annulla",
+          "confirm": "Elimina",
+          "one": {
+            "title": "Elimina sconto/voucher",
+            "text": "Vuoi eliminare lo sconto/voucher {{name}}?"
+          },
+          "many": {
+            "title": "Elimina sconti/voucher",
+            "text": "Vuoi eliminare i {{count}} sconti/voucher selezionati?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Annulla",
+          "confirm": "Duplica",
+          "one": {
+            "title": "Duplica sconto/voucher",
+            "text": "Vuoi duplicare lo sconto/voucher {{name}}?"
+          },
+          "many": {
+            "title": "Duplica sconti/voucher",
+            "text": "Vuoi duplicare i {{count}} sconti/voucher selezionati?"
+          }
         }
       }
     }

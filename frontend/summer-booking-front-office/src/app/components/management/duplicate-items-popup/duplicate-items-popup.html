@@ -1,0 +1,21 @@
+@let name = itemName();
+@let key = translationKey();
+<app-confirm-popup
+  [title]="(name ? key + '.one.title' : key + '.many.title') | translate"
+  [text]="
+    name
+      ? (key + '.one.text' | translate: { name })
+      : (key + '.many.text' | translate: { count: idItems().length })
+  "
+  [texts]="key | translate"
+  [(open)]="open"
+  (confirmed)="duplicateItems()"
+/>
+<app-page-spinner [isLoading]="isLoading()" />
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="errorMessage() ?? ''"
+  [texts]="'alert' | translate"
+  [pathIcon]="pathIcon()"
+  [(open)]="isErrorShown"
+/>

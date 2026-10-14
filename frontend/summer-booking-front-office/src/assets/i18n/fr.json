@@ -530,6 +530,30 @@
         "discount_type": {
           "percentage": "Pourcentage",
           "fixed": "Fixe"
+        },
+        "delete": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "one": {
+            "title": "Supprimer remise/bon",
+            "text": "Voulez-vous supprimer la remise/le bon {{name}} ?"
+          },
+          "many": {
+            "title": "Supprimer remises/bons",
+            "text": "Voulez-vous supprimer les {{count}} remises/bons sélectionnés ?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Annuler",
+          "confirm": "Dupliquer",
+          "one": {
+            "title": "Dupliquer remise/bon",
+            "text": "Voulez-vous dupliquer la remise/le bon {{name}} ?"
+          },
+          "many": {
+            "title": "Dupliquer remises/bons",
+            "text": "Voulez-vous dupliquer les {{count}} remises/bons sélectionnés ?"
+          }
         }
       }
     }

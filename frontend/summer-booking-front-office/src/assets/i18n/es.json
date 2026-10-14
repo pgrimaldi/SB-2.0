@@ -530,6 +530,30 @@
         "discount_type": {
           "percentage": "Porcentaje",
           "fixed": "Fijo"
+        },
+        "delete": {
+          "cancel": "Cancelar",
+          "confirm": "Eliminar",
+          "one": {
+            "title": "Eliminar descuento/vale",
+            "text": "¿Quieres eliminar el descuento/vale {{name}}?"
+          },
+          "many": {
+            "title": "Eliminar descuentos/vales",
+            "text": "¿Quieres eliminar los {{count}} descuentos/vales seleccionados?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Cancelar",
+          "confirm": "Duplicar",
+          "one": {
+            "title": "Duplicar descuento/vale",
+            "text": "¿Quieres duplicar el descuento/vale {{name}}?"
+          },
+          "many": {
+            "title": "Duplicar descuentos/vales",
+            "text": "¿Quieres duplicar los {{count}} descuentos/vales seleccionados?"
+          }
         }
       }
     }

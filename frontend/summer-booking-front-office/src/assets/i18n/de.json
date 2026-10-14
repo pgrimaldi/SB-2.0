@@ -530,6 +530,30 @@
         "discount_type": {
           "percentage": "Prozent",
           "fixed": "Fest"
+        },
+        "delete": {
+          "cancel": "Abbrechen",
+          "confirm": "Löschen",
+          "one": {
+            "title": "Rabatt/Gutschein löschen",
+            "text": "Möchtest du den Rabatt/Gutschein {{name}} löschen?"
+          },
+          "many": {
+            "title": "Rabatte/Gutscheine löschen",
+            "text": "Möchtest du die {{count}} ausgewählten Rabatte/Gutscheine löschen?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Abbrechen",
+          "confirm": "Duplizieren",
+          "one": {
+            "title": "Rabatt/Gutschein duplizieren",
+            "text": "Möchtest du den Rabatt/Gutschein {{name}} duplizieren?"
+          },
+          "many": {
+            "title": "Rabatte/Gutscheine duplizieren",
+            "text": "Möchtest du die {{count}} ausgewählten Rabatte/Gutscheine duplizieren?"
+          }
         }
       }
     }

@@ -32,15 +32,21 @@
   [(open)]="editing"
   (saved)="table.reload()"
 />
-<app-delete-warehouse-items-popup
+<app-delete-items-popup
   [idItems]="idItemsToDelete()"
   [itemName]="itemNameToDelete()"
+  translationKey="management.settings.warehouse.delete"
+  [action]="deleteItems"
+  [pathIcon]="errorIcon"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
 />
-<app-duplicate-warehouse-items-popup
+<app-duplicate-items-popup
   [idItems]="idItemsToDuplicate()"
   [itemName]="itemNameToDuplicate()"
+  translationKey="management.settings.warehouse.duplicate"
+  [action]="duplicateItems"
+  [pathIcon]="errorIcon"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
 />

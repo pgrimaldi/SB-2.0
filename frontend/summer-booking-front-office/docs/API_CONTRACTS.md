@@ -1125,6 +1125,59 @@ Stato: 200 OK.
 | `rows[].discountType` | string (enum DiscountType) \| null | `Percentage` |
 | `rows[].discountValue` | number (decimale) \| null | `10` |
 
+### POST `/api/vouchers/delete-voucher-item`
+
+Sconti e voucher: eliminazione.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idVouchers": [
+    "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01",
+    "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idVouchers` | string[] (UUID, almeno uno) | `["6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01", "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/vouchers/duplicate-voucher-item`
+
+Sconti e voucher: duplicazione.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idVouchers": [
+    "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idVouchers` | string[] (UUID, almeno uno) | `["6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

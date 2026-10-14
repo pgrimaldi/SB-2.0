@@ -530,6 +530,30 @@
         "discount_type": {
           "percentage": "百分比",
           "fixed": "固定"
+        },
+        "delete": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除折扣/代金券",
+            "text": "要删除折扣/代金券 {{name}} 吗？"
+          },
+          "many": {
+            "title": "删除折扣/代金券",
+            "text": "要删除所选的 {{count}} 个折扣/代金券吗？"
+          }
+        },
+        "duplicate": {
+          "cancel": "取消",
+          "confirm": "复制",
+          "one": {
+            "title": "复制折扣/代金券",
+            "text": "要复制折扣/代金券 {{name}} 吗？"
+          },
+          "many": {
+            "title": "复制折扣/代金券",
+            "text": "要复制所选的 {{count}} 个折扣/代金券吗？"
+          }
         }
       }
     }
