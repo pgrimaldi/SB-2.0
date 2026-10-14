@@ -180,9 +180,9 @@ describe('ContactSupport', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
-              errors: [{ field: 'email', code: 'validation.invalid_value' }],
+              errors: [{ field: 'email', code: 'validation.invalid' }],
             },
           }),
       ),

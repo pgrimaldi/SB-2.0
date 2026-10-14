@@ -11,7 +11,7 @@ import {
 } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, operationNotAllowed, problem } from '../errors/problem.mock';
+import { MockFieldError, forbidden, problem } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'message'] as const;
@@ -32,7 +32,7 @@ let smtpPassword: string | null = 'password-di-esempio';
 
 /**
  * `GET /api/system/email-configuration?idProperty=…`: the mail settings of the property. 401
- * without a valid access token; 403 `operation.not_allowed` for a missing or unknown property.
+ * without a valid access token; 403 `auth.forbidden` for a missing or unknown property.
  */
 export const emailConfigurationMock = (
   request: HttpRequest<unknown>,
@@ -41,7 +41,7 @@ export const emailConfigurationMock = (
     return unauthorized(request);
   }
   if (!propertyOf(request.params.get('idProperty'))) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   return of(
     new HttpResponse({
@@ -76,11 +76,11 @@ export const sendTestEmailMock = (
     return unauthorized(request);
   }
   if (!propertyOf((request.body as Partial<EmailConfigurationRequest> | null)?.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
+    return problem(request, 400, 'validation.failed', {
       title: 'Invalid request',
       errors,
     });
@@ -101,11 +101,11 @@ export const saveEmailConfigurationMock = (
     return unauthorized(request);
   }
   if (!propertyOf((request.body as Partial<EmailConfigurationRequest> | null)?.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
+    return problem(request, 400, 'validation.failed', {
       title: 'Invalid request',
       errors,
     });
@@ -134,15 +134,15 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   for (const field of REQUIRED_EMAIL_FIELDS) {
     const value = body[field];
     if (typeof value !== 'string' || !value.trim()) {
-      errors.push({ field, code: 'validation.invalid_value' });
+      errors.push({ field, code: 'validation.invalid' });
     }
   }
   const port = body.smtpPort;
   if (!Number.isInteger(port) || (port as number) < 1 || (port as number) > 65535) {
-    errors.push({ field: 'smtpPort', code: 'validation.invalid_value' });
+    errors.push({ field: 'smtpPort', code: 'validation.invalid' });
   }
   if (!SMTP_SECURITIES.includes(body.smtpSecurity as SmtpSecurity)) {
-    errors.push({ field: 'smtpSecurity', code: 'validation.invalid_value' });
+    errors.push({ field: 'smtpSecurity', code: 'validation.invalid' });
   }
   const otherConnection = SMTP_CONNECTION_FIELDS.some(
     (field) => body[field] !== EMAIL_CONFIGURATION[field],
@@ -152,7 +152,7 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
       ? smtpPassword !== null && otherConnection
       : typeof body.smtpPassword !== 'string' || !body.smtpPassword
   ) {
-    errors.push({ field: 'smtpPassword', code: 'validation.invalid_value' });
+    errors.push({ field: 'smtpPassword', code: 'validation.invalid' });
   }
   return errors;
 }
@@ -168,7 +168,7 @@ export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpE
   }
   const body = (request.body ?? {}) as { idProperty?: unknown };
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const language = request.headers.get('Accept-Language')?.startsWith('en') ? 'en' : 'it';
   const info: SupportInfo = {
@@ -193,20 +193,20 @@ export const contactSupportMock = (
   }
   const body = (request.body ?? {}) as Partial<Record<keyof ContactSupportRequest, unknown>>;
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const errors: MockFieldError[] = [];
   for (const field of REQUIRED_FIELDS) {
     const value = body[field];
     if (typeof value !== 'string' || !value.trim()) {
-      errors.push({ field, code: 'validation.invalid_value' });
+      errors.push({ field, code: 'validation.invalid' });
     }
   }
   if (body.mobilePhone !== null && typeof body.mobilePhone !== 'string') {
-    errors.push({ field: 'mobilePhone', code: 'validation.invalid_value' });
+    errors.push({ field: 'mobilePhone', code: 'validation.invalid' });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
+    return problem(request, 400, 'validation.failed', {
       title: 'Invalid request',
       errors,
     });

@@ -168,9 +168,9 @@ describe('EmailConfiguration', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
-              errors: [{ field: 'senderName', code: 'validation.invalid_value' }],
+              errors: [{ field: 'senderName', code: 'validation.invalid' }],
             },
           }),
       ),

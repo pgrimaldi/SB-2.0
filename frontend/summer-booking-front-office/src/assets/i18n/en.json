@@ -70,23 +70,29 @@
     },
     "auth": {
       "invalid_credentials": "Invalid credentials",
-      "invalid_token": "Your session is no longer valid. Please sign in again.",
       "session_expired": "Your session has expired. Please sign in again.",
       "app_not_allowed": "Not authorized",
-      "too_many_attempts": "Too many attempts"
+      "too_many_attempts": "Too many attempts",
+      "unauthenticated": "The session is no longer valid. Sign in again.",
+      "forbidden": "You are not allowed to do this."
     },
     "validation": {
-      "invalid_request": "Some data are not valid. Please check and try again.",
-      "invalid_date": "The date is not valid.",
       "end_before_start": "The end date comes before the start date.",
-      "invalid_value": "The chosen value is not valid.",
-      "failed": "Invalid request"
+      "failed": "Invalid request",
+      "required": "This field is required",
+      "invalid": "The value is not valid.",
+      "email": "The email address is not valid.",
+      "max_length": "At most {{max}} characters.",
+      "min_length": "At least {{min}} characters.",
+      "length": "From {{min}} to {{max}} characters.",
+      "out_of_range": "The value is out of the allowed range.",
+      "phone": "The phone number is not valid.",
+      "phone_prefix": "The phone prefix is not valid.",
+      "must_accept": "You must accept to continue.",
+      "invalid_file_type": "This file type is not allowed."
     },
     "resource": {
       "not_found": "This item no longer exists."
-    },
-    "operation": {
-      "not_allowed": "This operation is not allowed."
     }
   },
   "alert": {

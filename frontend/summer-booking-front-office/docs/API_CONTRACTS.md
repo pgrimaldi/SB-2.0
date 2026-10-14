@@ -2,7 +2,7 @@
 
 Elenco di tutte le API usate dal frontend, divise per sezione: rotta, payload e risposta, in JSON e in tabella con un esempio per ogni property. I dati degli esempi sono inventati. Errori, header e regole comuni sono in `API_CONTRACTS.docx`.
 
-Ogni chiamata, tranne `auth/signin`, `auth/refresh` e `auth/logout`, porta l'header `Authorization: Bearer <accessToken>`.
+Ogni chiamata, tranne `identity/auth/login`, `identity/auth/refresh` e `identity/auth/logout`, porta l'header `Authorization: Bearer <accessToken>`.
 
 ## /auth
 

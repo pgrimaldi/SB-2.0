@@ -70,23 +70,29 @@
     },
     "auth": {
       "invalid_credentials": "Credenciales no válidas",
-      "invalid_token": "La sesión ya no es válida. Vuelve a iniciar sesión.",
       "session_expired": "La sesión ha caducado. Vuelve a iniciar sesión.",
       "app_not_allowed": "No autorizado",
-      "too_many_attempts": "Demasiados intentos"
+      "too_many_attempts": "Demasiados intentos",
+      "unauthenticated": "La sesión ya no es válida. Vuelve a acceder.",
+      "forbidden": "No tienes permisos para esta operación."
     },
     "validation": {
-      "invalid_request": "Algunos datos no son válidos. Revísalos e inténtalo de nuevo.",
-      "invalid_date": "La fecha no es válida.",
       "end_before_start": "La fecha de fin es anterior a la fecha de inicio.",
-      "invalid_value": "El valor elegido no es válido.",
-      "failed": "Solicitud no válida"
+      "failed": "Solicitud no válida",
+      "required": "Este campo es obligatorio",
+      "invalid": "El valor no es válido.",
+      "email": "La dirección de correo no es válida.",
+      "max_length": "Como máximo {{max}} caracteres.",
+      "min_length": "Al menos {{min}} caracteres.",
+      "length": "De {{min}} a {{max}} caracteres.",
+      "out_of_range": "El valor está fuera del intervalo permitido.",
+      "phone": "El número de teléfono no es válido.",
+      "phone_prefix": "El prefijo telefónico no es válido.",
+      "must_accept": "Debes aceptar para continuar.",
+      "invalid_file_type": "Este tipo de archivo no está permitido."
     },
     "resource": {
       "not_found": "Este elemento ya no existe."
-    },
-    "operation": {
-      "not_allowed": "Operación no permitida."
     }
   },
   "alert": {

@@ -8,7 +8,7 @@ Aggiornato al 08/10/2026.
 
 ### Perché serve
 
-- Con la gestione dei token prevista un attacco XSS (script iniettato nella pagina) **non può leggere il refresh token**: l'access token è solo in memoria e il refresh token sarà in un cookie `HttpOnly` che JavaScript non legge (oggi il cookie reale non esiste ancora: lo creerà il backend; i mock lo simulano).
+- Con la gestione dei token prevista un attacco XSS (script iniettato nella pagina) **non può leggere il refresh token**: l'access token è solo in memoria e il refresh token è nel cookie `HttpOnly` che JavaScript non legge (dal 14/10/2026 lo crea il backend reale: `sb_rt` in sviluppo, `__Secure-sb_rt` in produzione, `SameSite=Strict`, Path `/api/identity`; in locale con i mock è simulato).
 - Questo non basta a proteggere la sessione: **finché la pagina è aperta**, uno script iniettato gira con gli stessi poteri dell'app, quindi può usare l'access token in memoria e anche chiedere nuovi token con il refresh (il browser allega il cookie da solo), chiamando le nostre API a nome dell'utente. `HttpOnly` impedisce la lettura del cookie, non le azioni di uno script nella stessa pagina.
 - Angular già protegge dall'XSS (escape delle interpolazioni, sanitizzazione di `[innerHTML]`, che usiamo in `app-i18n-text` per le traduzioni e nella pagina Fiscalizzazione per i termini HTML che arrivano dal backend). La CSP è la **seconda linea di difesa**: se per un errore nostro o di una dipendenza entrasse uno script, il browser si rifiuterebbe di eseguirlo o di mandare dati altrove.
 

@@ -84,7 +84,7 @@ export function isAuthorized(request: HttpRequest<unknown>): boolean {
 
 export function unauthorized(
   request: HttpRequest<unknown>,
-  code: UnauthorizedCode = 'auth.invalid_token',
+  code: UnauthorizedCode = 'auth.unauthenticated',
   title = 'Invalid or expired access token',
 ): Observable<never> {
   return problem(request, 401, code, { title });

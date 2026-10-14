@@ -70,23 +70,29 @@
     },
     "auth": {
       "invalid_credentials": "Ungültige Zugangsdaten",
-      "invalid_token": "Ihre Sitzung ist nicht mehr gültig. Bitte melden Sie sich erneut an.",
       "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
       "app_not_allowed": "Nicht berechtigt",
-      "too_many_attempts": "Zu viele Versuche"
+      "too_many_attempts": "Zu viele Versuche",
+      "unauthenticated": "Die Sitzung ist nicht mehr gültig. Bitte erneut anmelden.",
+      "forbidden": "Du hast keine Berechtigung für diesen Vorgang."
     },
     "validation": {
-      "invalid_request": "Einige Daten sind ungültig. Bitte prüfen Sie sie und versuchen Sie es erneut.",
-      "invalid_date": "Das Datum ist ungültig.",
       "end_before_start": "Das Enddatum liegt vor dem Startdatum.",
-      "invalid_value": "Der gewählte Wert ist ungültig.",
-      "failed": "Ungültige Anfrage"
+      "failed": "Ungültige Anfrage",
+      "required": "Dieses Feld ist erforderlich",
+      "invalid": "Der Wert ist ungültig.",
+      "email": "Die E-Mail-Adresse ist ungültig.",
+      "max_length": "Höchstens {{max}} Zeichen.",
+      "min_length": "Mindestens {{min}} Zeichen.",
+      "length": "{{min}} bis {{max}} Zeichen.",
+      "out_of_range": "Der Wert liegt außerhalb des zulässigen Bereichs.",
+      "phone": "Die Telefonnummer ist ungültig.",
+      "phone_prefix": "Die Vorwahl ist ungültig.",
+      "must_accept": "Du musst zustimmen, um fortzufahren.",
+      "invalid_file_type": "Dieser Dateityp ist nicht erlaubt."
     },
     "resource": {
       "not_found": "Dieser Eintrag existiert nicht mehr."
-    },
-    "operation": {
-      "not_allowed": "Vorgang nicht erlaubt."
     }
   },
   "alert": {

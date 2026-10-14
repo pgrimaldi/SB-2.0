@@ -100,7 +100,7 @@ describe('ConfirmDeleteBookingPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               errors: [{ field: 'password', code: 'auth.invalid_credentials' }],
             },
           }),

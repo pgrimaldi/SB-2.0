@@ -14,13 +14,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, submit } from '@angular/forms/signals';
+import { FormField, TreeValidationResult, form, submit } from '@angular/forms/signals';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { LoginRequest } from '../../../entities/auth/credentials';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -121,33 +122,35 @@ export class LoginDialog implements OnDestroy {
       return;
     }
     // Every field becomes touched, so each shows its error; nothing is sent while one is wrong.
-    void submit(this.credentialsForm, async () => {
-      this.send();
-    });
+    void submit(this.credentialsForm, () => this.send());
   }
 
-  private send(): void {
+  /** An error of the server on a field goes under that field; any other one under the form. */
+  private async send(): Promise<TreeValidationResult> {
     // Closing the popup does not stop the attempt: the server may already have opened the session.
     // Until it answers the button keeps its spinner, also in the popup opened again.
     const opening = this.opening;
     this.pending.set(true);
     this.error.set(null);
     const credentials = this.credentials();
-    this.authBehaviour
-      .login({ ...credentials, username: credentials.username?.trim() ?? null })
-      .subscribe({
-        next: () => {
-          this.pending.set(false);
-          this.close();
-          void this.router.navigateByUrl('/beachmap');
-        },
-        error: (error: unknown) => {
-          this.pending.set(false);
-          if (this.dialogRef && opening === this.opening) {
-            this.error.set(toApiProblem(error));
-          }
-        },
-      });
+    try {
+      await firstValueFrom(
+        this.authBehaviour.login({
+          ...credentials,
+          username: credentials.username?.trim() ?? null,
+        }),
+      );
+      this.pending.set(false);
+      this.close();
+      void this.router.navigateByUrl('/beachmap');
+    } catch (error: unknown) {
+      this.pending.set(false);
+      if (this.dialogRef && opening === this.opening) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.credentialsForm, (general) =>
+          this.error.set(general),
+        );
+      }
+    }
   }
 
   private show(): void {

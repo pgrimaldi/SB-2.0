@@ -31,7 +31,7 @@ describe('toApiProblem', () => {
   it('should keep the well-formed validation errors of the fields', () => {
     const problem = toApiProblem(
       answer(400, {
-        code: 'validation.invalid_request',
+        code: 'validation.failed',
         errors: [
           { field: 'datetimeTo', code: 'validation.end_before_start', args: {} },
           { field: 'name', code: 'validation.too_long', args: { max: 50 } },
@@ -120,8 +120,8 @@ describe('toApiProblem', () => {
       code: 'validation.required',
     }));
 
-    expect(
-      toApiProblem(answer(400, { code: 'validation.invalid_request', errors })).errors,
-    ).toHaveLength(50);
+    expect(toApiProblem(answer(400, { code: 'validation.failed', errors })).errors).toHaveLength(
+      50,
+    );
   });
 });

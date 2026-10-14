@@ -106,11 +106,11 @@ describe('AddPrinterItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
               errors: [
-                { field: 'printerName', code: 'validation.invalid_value' },
-                { field: 'isSsl', code: 'validation.invalid_value' },
+                { field: 'printerName', code: 'validation.invalid' },
+                { field: 'isSsl', code: 'validation.invalid' },
               ],
             },
           }),

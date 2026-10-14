@@ -78,7 +78,7 @@ describe('DeleteItemsPopup', () => {
           () =>
             new HttpErrorResponse({
               status: 400,
-              error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+              error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
             }),
         );
     });

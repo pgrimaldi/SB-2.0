@@ -3,7 +3,7 @@ import { Observable, delay, of } from 'rxjs';
 import { SharingGeneralInformation } from '../../../entities/settings/sharing/sharing-general-information';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { operationNotAllowed } from '../errors/problem.mock';
+import { forbidden } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 let generalInformation: SharingGeneralInformation = {
@@ -33,7 +33,7 @@ export const sharingGeneralInformationMock = (
     return unauthorized(request);
   }
   if (!propertyOf(request.params.get('idProperty'))) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   return of(
     new HttpResponse({ status: 200, url: request.url, body: { ...generalInformation } }),
@@ -55,7 +55,7 @@ export const saveSharingInformationMock = (
     idProperty?: unknown;
   };
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   generalInformation = onlyFieldsOf(SharingGeneralInformation, {
     ...generalInformation,

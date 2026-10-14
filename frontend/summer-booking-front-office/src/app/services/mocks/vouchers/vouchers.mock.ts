@@ -6,7 +6,7 @@ import { DeleteVoucherItemsRequest } from '../../../entities/settings/vouchers/d
 import { DuplicateVoucherItemsRequest } from '../../../entities/settings/vouchers/duplicate-voucher-items-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { operationNotAllowed, resourceNotFound } from '../errors/problem.mock';
+import { forbidden, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 type VoucherRow = VoucherItem & { propertyId: number };
@@ -52,7 +52,7 @@ export const voucherListMock = (request: HttpRequest<unknown>): Observable<HttpE
   const body = (request.body ?? {}) as Partial<PageRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
@@ -88,7 +88,7 @@ export const deleteVoucherItemsMock = (
   const body = (request.body ?? {}) as Partial<DeleteVoucherItemsRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const vouchers = vouchersOf(property.id, body.idVouchers);
   if (!vouchers) {
@@ -114,7 +114,7 @@ export const duplicateVoucherItemsMock = (
   const body = (request.body ?? {}) as Partial<DuplicateVoucherItemsRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const vouchers = vouchersOf(property.id, body.idVouchers);
   if (!vouchers) {

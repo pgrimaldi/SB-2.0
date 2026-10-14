@@ -234,7 +234,7 @@ describe('FormWarehouseAddItemPopup', () => {
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+            error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
           }),
       ),
     );
@@ -274,9 +274,9 @@ describe('FormWarehouseAddItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
-              errors: [{ field: 'totalQuantity', code: 'validation.invalid_value' }],
+              errors: [{ field: 'totalQuantity', code: 'validation.invalid' }],
             },
           }),
       ),

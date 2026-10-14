@@ -70,23 +70,29 @@
     },
     "auth": {
       "invalid_credentials": "Identifiants non valides",
-      "invalid_token": "Votre session n'est plus valide. Reconnectez-vous.",
       "session_expired": "Votre session a expiré. Reconnectez-vous.",
       "app_not_allowed": "Non autorisé",
-      "too_many_attempts": "Trop de tentatives"
+      "too_many_attempts": "Trop de tentatives",
+      "unauthenticated": "La session n'est plus valide. Reconnectez-vous.",
+      "forbidden": "Vous n'avez pas les droits pour cette opération."
     },
     "validation": {
-      "invalid_request": "Certaines données ne sont pas valides. Vérifiez et réessayez.",
-      "invalid_date": "La date n'est pas valide.",
       "end_before_start": "La date de fin est antérieure à la date de début.",
-      "invalid_value": "La valeur choisie n'est pas valide.",
-      "failed": "Requête non valide"
+      "failed": "Requête non valide",
+      "required": "Ce champ est obligatoire",
+      "invalid": "La valeur n'est pas valide.",
+      "email": "L'adresse e-mail n'est pas valide.",
+      "max_length": "{{max}} caractères au maximum.",
+      "min_length": "{{min}} caractères au minimum.",
+      "length": "De {{min}} à {{max}} caractères.",
+      "out_of_range": "La valeur est hors de la plage autorisée.",
+      "phone": "Le numéro de téléphone n'est pas valide.",
+      "phone_prefix": "L'indicatif téléphonique n'est pas valide.",
+      "must_accept": "Vous devez accepter pour continuer.",
+      "invalid_file_type": "Ce type de fichier n'est pas autorisé."
     },
     "resource": {
       "not_found": "Cet élément n'existe plus."
-    },
-    "operation": {
-      "not_allowed": "Opération non autorisée."
     }
   },
   "alert": {

@@ -82,7 +82,7 @@ describe('ErrorTextBehaviour', () => {
     const texts = await firstValueFrom(
       errors.fieldTexts({
         status: 400,
-        code: 'validation.invalid_request',
+        code: 'validation.failed',
         errors: [
           { field: 'datetimeTo', code: 'validation.end_before_start' },
           { field: 'name', code: 'validation.required' },

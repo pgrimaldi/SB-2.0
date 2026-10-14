@@ -69,6 +69,7 @@ describe('LoginDialog', () => {
         unknown: 'Si è verificato un errore. Riprova.',
         network: { unavailable: 'Connessione assente. Controlla la rete e riprova.' },
         auth: { invalid_credentials: 'Credenziali non valide' },
+        validation: { failed: 'Richiesta non valida', max_length: 'Al massimo {{max}} caratteri.' },
       },
     });
     translate.use('it');
@@ -90,6 +91,27 @@ describe('LoginDialog', () => {
       );
 
     expect(await loginError(wrongCredentials)).toBe('Credenziali non valide');
+  });
+
+  it('should show an error of the backend on a field under that field, not as a general message', async () => {
+    const tooLong = () =>
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              status: 400,
+              code: 'validation.failed',
+              title: 'validation.failed',
+              errors: [{ field: 'username', code: 'validation.max_length', args: { max: 255 } }],
+            },
+          }),
+      );
+
+    expect(await loginError(tooLong)).toBeUndefined();
+    expect(document.querySelector('mat-dialog-container app-text-field')?.textContent).toContain(
+      'Al massimo 255 caratteri.',
+    );
   });
 
   it('should show its own message when there is no connection, and a generic one for unknown codes', async () => {
@@ -129,6 +151,7 @@ describe('LoginDialog', () => {
     ).toBe(true);
 
     answer.error(new HttpErrorResponse({ status: 401 }));
+    await Promise.resolve();
     await fixture.whenStable();
     expect(document.querySelector('.login__dialog__error')).toBeNull();
     expect(submit().disabled).toBe(false);
