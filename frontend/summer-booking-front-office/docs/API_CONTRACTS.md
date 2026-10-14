@@ -950,6 +950,110 @@ Stato: 200 OK.
 |---|---|---|
 | `termsAndConditions` | string (HTML) | `<h4>Generale</h4><p>Testo dei termini e condizioni…</p>` |
 
+## /sharing
+
+### GET `/api/sharing/general-information?idProperty={idProperty}`
+
+Sharing: impostazioni generali.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/sharing/general-information?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isSharingEnabled": true,
+  "isMinimumBookingDayEnabled": true,
+  "minimumBookingDayQuantity": 3,
+  "isOnlySeasonalEnabled": false,
+  "isEnabledOnAllArticles": true,
+  "isScheduledAbsenceSharing": true,
+  "isManualCreditAssignmentEnabled": false,
+  "resoldDayCreditQuantity": 1,
+  "manualCreditValue": null,
+  "isAutomaticVoucherEnabled": true,
+  "voucherCreditValue": 5.5,
+  "isPrepaidCardTopUpEnabled": false,
+  "prepaidCardCreditValue": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isSharingEnabled` | boolean | `true` |
+| `isMinimumBookingDayEnabled` | boolean | `true` |
+| `minimumBookingDayQuantity` | number (intero) \| null | `3` |
+| `isOnlySeasonalEnabled` | boolean | `false` |
+| `isEnabledOnAllArticles` | boolean | `true` |
+| `isScheduledAbsenceSharing` | boolean | `true` |
+| `isManualCreditAssignmentEnabled` | boolean | `false` |
+| `resoldDayCreditQuantity` | number (intero) \| null | `1` |
+| `manualCreditValue` | number (decimale, €) \| null | `null` |
+| `isAutomaticVoucherEnabled` | boolean | `true` |
+| `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
+| `isPrepaidCardTopUpEnabled` | boolean | `false` |
+| `prepaidCardCreditValue` | number (decimale, €) \| null | `null` |
+
+### POST `/api/sharing/save-information`
+
+Sharing: salvataggio delle impostazioni.
+
+#### Payload
+
+```json
+{
+  "isSharingEnabled": true,
+  "isMinimumBookingDayEnabled": true,
+  "minimumBookingDayQuantity": 3,
+  "isOnlySeasonalEnabled": false,
+  "isEnabledOnAllArticles": true,
+  "isScheduledAbsenceSharing": true,
+  "isManualCreditAssignmentEnabled": false,
+  "resoldDayCreditQuantity": 1,
+  "manualCreditValue": null,
+  "isAutomaticVoucherEnabled": true,
+  "voucherCreditValue": 5.5,
+  "isPrepaidCardTopUpEnabled": false,
+  "prepaidCardCreditValue": null,
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isSharingEnabled` | boolean | `true` |
+| `isMinimumBookingDayEnabled` | boolean | `true` |
+| `minimumBookingDayQuantity` | number (intero) \| null | `3` |
+| `isOnlySeasonalEnabled` | boolean | `false` |
+| `isEnabledOnAllArticles` | boolean | `true` |
+| `isScheduledAbsenceSharing` | boolean | `true` |
+| `isManualCreditAssignmentEnabled` | boolean | `false` |
+| `resoldDayCreditQuantity` | number (intero) \| null | `1` |
+| `manualCreditValue` | number (decimale, €) \| null | `null` |
+| `isAutomaticVoucherEnabled` | boolean | `true` |
+| `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
+| `isPrepaidCardTopUpEnabled` | boolean | `false` |
+| `prepaidCardCreditValue` | number (decimale, €) \| null | `null` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

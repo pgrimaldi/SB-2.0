@@ -1,0 +1,161 @@
+<main class="sharing">
+  <section class="sharing__panel">
+    <h2 class="sharing__title" appI18nText="management.settings.sharing.title"></h2>
+    <app-toggle
+      [formField]="informationForm.isSharingEnabled"
+      [error]="fieldErrors.isSharingEnabled()"
+    >
+      <span appI18nText="management.settings.sharing.enabled"></span>
+    </app-toggle>
+    <div class="sharing__row">
+      <app-toggle
+        [formField]="informationForm.isMinimumBookingDayEnabled"
+        [error]="fieldErrors.isMinimumBookingDayEnabled()"
+      >
+        <span appI18nText="management.settings.sharing.minimum_booking_days"></span>
+      </app-toggle>
+      <div class="sharing__amount">
+        <app-filled-number-field
+          class="sharing__field"
+          [formField]="informationForm.minimumBookingDayQuantity"
+          [error]="fieldErrors.minimumBookingDayQuantity()"
+        />
+        <span class="sharing__unit" appI18nText="management.settings.sharing.days"></span>
+      </div>
+    </div>
+    <app-toggle
+      [formField]="informationForm.isOnlySeasonalEnabled"
+      [error]="fieldErrors.isOnlySeasonalEnabled()"
+    >
+      <span appI18nText="management.settings.sharing.only_seasonal"></span>
+    </app-toggle>
+    <app-toggle
+      [formField]="informationForm.isEnabledOnAllArticles"
+      [error]="fieldErrors.isEnabledOnAllArticles()"
+    >
+      <span appI18nText="management.settings.sharing.all_articles"></span>
+    </app-toggle>
+    <app-toggle
+      [formField]="informationForm.isScheduledAbsenceSharing"
+      [error]="fieldErrors.isScheduledAbsenceSharing()"
+    >
+      <span appI18nText="management.settings.sharing.scheduled_absences"></span>
+    </app-toggle>
+  </section>
+
+  <section class="sharing__panel">
+    <h2 class="sharing__title" appI18nText="management.settings.sharing.credits.title"></h2>
+    <div class="sharing__credits">
+      <div class="sharing__credit__option">
+        <app-checkbox
+          [formField]="informationForm.isManualCreditAssignmentEnabled"
+          [error]="fieldErrors.isManualCreditAssignmentEnabled()"
+        >
+          <span
+            class="sharing__credit__name"
+            appI18nText="management.settings.sharing.credits.manual"
+          ></span>
+        </app-checkbox>
+      </div>
+      <span
+        class="sharing__credit__label"
+        appI18nText="management.settings.sharing.credits.resold_day_credits"
+      ></span>
+      <app-filled-number-field
+        class="sharing__field"
+        [formField]="informationForm.resoldDayCreditQuantity"
+        [error]="fieldErrors.resoldDayCreditQuantity()"
+      />
+      <span
+        class="sharing__credit__label sharing__credit__label__end"
+        appI18nText="management.settings.sharing.credits.credit_value"
+      ></span>
+      <app-filled-number-field
+        class="sharing__field"
+        [isDecimal]="true"
+        [isCurrency]="true"
+        [formField]="informationForm.manualCreditValue"
+        [error]="fieldErrors.manualCreditValue()"
+      />
+      <span class="sharing__unit">€</span>
+
+      <div class="sharing__credit__option">
+        <app-checkbox
+          [formField]="informationForm.isAutomaticVoucherEnabled"
+          [error]="fieldErrors.isAutomaticVoucherEnabled()"
+        >
+          <span
+            class="sharing__credit__name"
+            appI18nText="management.settings.sharing.credits.automatic_voucher"
+          ></span>
+        </app-checkbox>
+        <p
+          class="sharing__credit__description"
+          appI18nText="management.settings.sharing.credits.automatic_voucher_description"
+        ></p>
+      </div>
+      <span
+        class="sharing__credit__label"
+        appI18nText="management.settings.sharing.credits.credit_value"
+      ></span>
+      <app-filled-number-field
+        class="sharing__field"
+        [isDecimal]="true"
+        [isCurrency]="true"
+        [formField]="informationForm.voucherCreditValue"
+        [error]="fieldErrors.voucherCreditValue()"
+      />
+      <span class="sharing__unit">€</span>
+
+      <div class="sharing__credit__option">
+        <app-checkbox
+          [formField]="informationForm.isPrepaidCardTopUpEnabled"
+          [error]="fieldErrors.isPrepaidCardTopUpEnabled()"
+        >
+          <span
+            class="sharing__credit__name"
+            appI18nText="management.settings.sharing.credits.prepaid_card"
+          ></span>
+        </app-checkbox>
+        <p
+          class="sharing__credit__description"
+          appI18nText="management.settings.sharing.credits.prepaid_card_description"
+        ></p>
+      </div>
+      <span
+        class="sharing__credit__label"
+        appI18nText="management.settings.sharing.credits.credit_value"
+      ></span>
+      <app-filled-number-field
+        class="sharing__field"
+        [isDecimal]="true"
+        [isCurrency]="true"
+        [formField]="informationForm.prepaidCardCreditValue"
+        [error]="fieldErrors.prepaidCardCreditValue()"
+      />
+      <span class="sharing__unit">€</span>
+    </div>
+  </section>
+
+  @if (errorMessage(); as errorMessage) {
+    <p class="sharing__error">{{ errorMessage }}</p>
+  }
+  <div class="sharing__actions">
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="(!canSave() && !isSaving()) || informationForm().invalid()"
+      [isLoading]="isSaving()"
+      (clicked)="save()"
+    >
+      <span appI18nText="management.settings.sharing.save"></span>
+    </app-button>
+  </div>
+</main>
+
+<app-message-popup
+  [title]="'management.settings.sharing.saved.title' | translate"
+  [text]="'management.settings.sharing.saved.text' | translate"
+  [texts]="'management.settings.sharing.saved' | translate"
+  [(open)]="saved"
+/>

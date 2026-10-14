@@ -488,6 +488,34 @@
           "cancel": "Abbrechen",
           "confirm": "Bestätigen"
         }
+      },
+      "sharing": {
+        "title": "Sharing",
+        "enabled": "Aktivieren",
+        "minimum_booking_days": "Mindestbuchungsdauer für Sharing",
+        "days": "Tage",
+        "only_seasonal": "Nur für Saisonkarten aktivieren",
+        "all_articles": "Für alle Artikel aktivieren",
+        "scheduled_absences": "Geplante Abwesenheiten als Sharing",
+        "credits": {
+          "title": "Guthabenvergabe",
+          "manual": "Guthaben manuell vergeben",
+          "resold_day_credits": "Guthaben pro Weiterverkaufstag",
+          "credit_value": "Guthabenwert",
+          "automatic_voucher": "Automatischer Gutschein",
+          "automatic_voucher_description": "Der Kunde erhält per E-Mail einen Gutschein in Höhe des Guthabens",
+          "prepaid_card": "Prepaid-Karte aufladen",
+          "prepaid_card_description": "Die Prepaid-Karte des Kunden wird um den Guthabenwert aufgeladen"
+        },
+        "save": "Speichern",
+        "field_names": {
+          "days": "der Tage"
+        },
+        "saved": {
+          "title": "Einstellungen gespeichert",
+          "text": "Die Einstellungen wurden gespeichert.",
+          "close": "Schließen"
+        }
       }
     }
   },

@@ -488,6 +488,34 @@
           "cancel": "Annulla",
           "confirm": "Conferma"
         }
+      },
+      "sharing": {
+        "title": "Sharing",
+        "enabled": "Abilita",
+        "minimum_booking_days": "Durata minima prenotazione per applicare lo Sharing",
+        "days": "Giorni",
+        "only_seasonal": "Abilita solo sugli stagionali",
+        "all_articles": "Abilita su tutti gli articoli",
+        "scheduled_absences": "Imposta assenze programmate come Sharing",
+        "credits": {
+          "title": "Assegnazione crediti",
+          "manual": "Assegna crediti manualmente",
+          "resold_day_credits": "Numero crediti per giorno rivenduto",
+          "credit_value": "Valore credito",
+          "automatic_voucher": "Crea voucher automatico",
+          "automatic_voucher_description": "Verrà inviato all'indirizzo email del cliente un voucher del valore del credito",
+          "prepaid_card": "Ricarica tessera prepagata",
+          "prepaid_card_description": "Verrà ricaricata la tessera prepagata del cliente con l'importo del valore del credito"
+        },
+        "save": "Salva",
+        "field_names": {
+          "days": "dei giorni"
+        },
+        "saved": {
+          "title": "Impostazioni salvate",
+          "text": "Salvataggio avvenuto correttamente.",
+          "close": "Chiudi"
+        }
       }
     }
   },

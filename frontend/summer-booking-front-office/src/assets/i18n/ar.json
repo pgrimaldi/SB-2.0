@@ -488,6 +488,34 @@
           "cancel": "إلغاء",
           "confirm": "تأكيد"
         }
+      },
+      "sharing": {
+        "title": "Sharing",
+        "enabled": "تفعيل",
+        "minimum_booking_days": "الحد الأدنى لمدة الحجز لتطبيق Sharing",
+        "days": "أيام",
+        "only_seasonal": "التفعيل للحجوزات الموسمية فقط",
+        "all_articles": "التفعيل على جميع العناصر",
+        "scheduled_absences": "اعتبار الغيابات المجدولة Sharing",
+        "credits": {
+          "title": "منح الأرصدة",
+          "manual": "منح الأرصدة يدويًا",
+          "resold_day_credits": "الأرصدة لكل يوم معاد بيعه",
+          "credit_value": "قيمة الرصيد",
+          "automatic_voucher": "إنشاء قسيمة تلقائية",
+          "automatic_voucher_description": "ستُرسل إلى بريد العميل قسيمة بقيمة الرصيد",
+          "prepaid_card": "شحن البطاقة المسبقة الدفع",
+          "prepaid_card_description": "ستُشحن بطاقة العميل المسبقة الدفع بقيمة الرصيد"
+        },
+        "save": "حفظ",
+        "field_names": {
+          "days": "الأيام"
+        },
+        "saved": {
+          "title": "تم حفظ الإعدادات",
+          "text": "تم الحفظ بنجاح.",
+          "close": "إغلاق"
+        }
       }
     }
   },

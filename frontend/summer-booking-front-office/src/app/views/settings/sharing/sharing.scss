@@ -1,0 +1,165 @@
+@use '../../../styles/settings-panel' as panel;
+
+.sharing {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 0.8125rem 2rem;
+  color: var(--color__main__theme__one);
+}
+
+.sharing__panel {
+  @include panel.settings-panel;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.625rem;
+  padding: 1.5rem 1.5rem 1.375rem;
+}
+
+.sharing__title {
+  align-self: stretch;
+  margin: 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.sharing__row,
+.sharing__amount {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sharing__row {
+  align-items: flex-start;
+  gap: 0.75rem 2.5rem;
+
+  // In the middle of the field (1.625rem) beside it, also when an error shows under the field.
+  app-toggle {
+    margin-top: 0.1875rem;
+  }
+}
+
+.sharing__amount {
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sharing__field {
+  width: 6.125rem;
+
+  // The message is longer than the field: it runs under the unit beside it.
+  ::ng-deep .filled__number__field__error {
+    width: max-content;
+    max-width: 16rem;
+  }
+}
+
+// As tall as the field beside, with the text in the middle.
+.sharing__unit,
+.sharing__credit__label {
+  min-height: 1.625rem;
+}
+
+.sharing__unit {
+  display: grid;
+  align-content: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// Under the title: a checkbox (with its explanation) on the left, then "label field €"; the first
+// row has a second amount at the end of the panel.
+.sharing__credits {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) 6.625rem 6.125rem auto
+    minmax(0, 0.34fr) 4.75rem 6.125rem auto;
+  align-items: start;
+  align-self: stretch;
+  gap: 2.125rem 0.625rem;
+  margin-block: 0.3125rem 0.5rem;
+}
+
+.sharing__credit__option {
+  grid-column: 1;
+}
+
+.sharing__credit__name,
+.sharing__credit__label {
+  color: var(--color__layout__text__soft);
+  font-weight: 600;
+}
+
+.sharing__credit__name {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// While the checkbox is off-limits (loading, saving), its name fades like the label of a toggle.
+.sharing__credit__option:has(input:disabled) .sharing__credit__name {
+  color: color-mix(in srgb, var(--color__layout__text__soft) 50%, transparent);
+}
+
+.sharing__credit__label {
+  align-content: center;
+  font-size: 0.6875rem;
+  line-height: 0.75rem;
+  text-align: end;
+}
+
+.sharing__credit__label__end {
+  grid-column: 6;
+}
+
+.sharing__credit__description {
+  max-width: 12.75rem;
+  margin: 0.125rem 0 0;
+  margin-inline-start: 1.5625rem;
+  font-size: 0.625rem;
+  line-height: 0.6875rem;
+}
+
+.sharing__actions {
+  display: flex;
+  justify-content: flex-end;
+
+  app-button {
+    width: 8rem;
+  }
+}
+
+.sharing__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+@media (width < 48rem) {
+  .sharing__credits {
+    grid-template-columns: minmax(0, 1fr) 6.125rem auto;
+    row-gap: 1rem;
+  }
+
+  .sharing__credit__option {
+    grid-column: 1 / -1;
+  }
+
+  .sharing__credit__label,
+  .sharing__credit__label__end {
+    grid-column: 1;
+    text-align: start;
+  }
+}

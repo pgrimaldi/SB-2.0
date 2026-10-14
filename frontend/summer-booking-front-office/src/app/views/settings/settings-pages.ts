@@ -28,7 +28,11 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
   { path: 'price-list', label: 'management.settings.menu.price_list' },
   { path: 'services', label: 'management.settings.menu.services' },
   { path: 'discounts', label: 'management.settings.menu.discounts' },
-  { path: 'sharing', label: 'management.settings.menu.sharing' },
+  {
+    path: 'sharing',
+    label: 'management.settings.menu.sharing',
+    loadComponent: () => import('./sharing/sharing').then((component) => component.Sharing),
+  },
   { path: 'online-bookings', label: 'management.settings.menu.online_bookings' },
   {
     path: 'taxation',

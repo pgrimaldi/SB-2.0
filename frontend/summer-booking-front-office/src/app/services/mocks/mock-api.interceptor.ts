@@ -10,6 +10,7 @@ import {
   restoreBookingItemMock,
   trashItemListMock,
 } from './database/database.mock';
+import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
 import {
   contactSupportMock,
   emailConfigurationMock,
@@ -227,6 +228,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/database/delete-selected-item`
   ) {
     return deleteSelectedItemMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/sharing/general-information`
+  ) {
+    return sharingGeneralInformationMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/sharing/save-information`
+  ) {
+    return saveSharingInformationMock(request);
   }
 
   return next(request);

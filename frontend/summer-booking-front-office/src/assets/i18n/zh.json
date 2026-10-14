@@ -488,6 +488,34 @@
           "cancel": "取消",
           "confirm": "确认"
         }
+      },
+      "sharing": {
+        "title": "Sharing",
+        "enabled": "启用",
+        "minimum_booking_days": "适用 Sharing 的最短预订天数",
+        "days": "天",
+        "only_seasonal": "仅对季票启用",
+        "all_articles": "对所有物品启用",
+        "scheduled_absences": "将计划缺席设为 Sharing",
+        "credits": {
+          "title": "积分分配",
+          "manual": "手动分配积分",
+          "resold_day_credits": "每个转售日的积分数",
+          "credit_value": "积分价值",
+          "automatic_voucher": "自动生成代金券",
+          "automatic_voucher_description": "将向客户的电子邮箱发送一张与积分价值相等的代金券",
+          "prepaid_card": "为预付卡充值",
+          "prepaid_card_description": "将按积分价值为客户的预付卡充值"
+        },
+        "save": "保存",
+        "field_names": {
+          "days": "天数"
+        },
+        "saved": {
+          "title": "设置已保存",
+          "text": "设置已成功保存。",
+          "close": "关闭"
+        }
       }
     }
   },

@@ -488,6 +488,34 @@
           "cancel": "Cancel",
           "confirm": "Confirm"
         }
+      },
+      "sharing": {
+        "title": "Sharing",
+        "enabled": "Enable",
+        "minimum_booking_days": "Minimum booking length to apply Sharing",
+        "days": "Days",
+        "only_seasonal": "Enable only for seasonal passes",
+        "all_articles": "Enable on all articles",
+        "scheduled_absences": "Set scheduled absences as Sharing",
+        "credits": {
+          "title": "Credit assignment",
+          "manual": "Assign credits manually",
+          "resold_day_credits": "Credits per resold day",
+          "credit_value": "Credit value",
+          "automatic_voucher": "Create automatic voucher",
+          "automatic_voucher_description": "A voucher worth the credit value will be sent to the customer's email address",
+          "prepaid_card": "Top up prepaid card",
+          "prepaid_card_description": "The customer's prepaid card will be topped up with the credit value"
+        },
+        "save": "Save",
+        "field_names": {
+          "days": "days"
+        },
+        "saved": {
+          "title": "Settings saved",
+          "text": "The settings have been saved.",
+          "close": "Close"
+        }
       }
     }
   },

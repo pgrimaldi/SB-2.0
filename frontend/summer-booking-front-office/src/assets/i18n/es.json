@@ -488,6 +488,34 @@
           "cancel": "Cancelar",
           "confirm": "Confirmar"
         }
+      },
+      "sharing": {
+        "title": "Sharing",
+        "enabled": "Activar",
+        "minimum_booking_days": "Duración mínima de reserva para aplicar el Sharing",
+        "days": "Días",
+        "only_seasonal": "Activar solo en los de temporada",
+        "all_articles": "Activar en todos los artículos",
+        "scheduled_absences": "Ausencias programadas como Sharing",
+        "credits": {
+          "title": "Asignación de créditos",
+          "manual": "Asignar créditos manualmente",
+          "resold_day_credits": "Créditos por día revendido",
+          "credit_value": "Valor crédito",
+          "automatic_voucher": "Crear vale automático",
+          "automatic_voucher_description": "Se enviará al correo del cliente un vale por el valor del crédito",
+          "prepaid_card": "Recargar tarjeta prepago",
+          "prepaid_card_description": "Se recargará la tarjeta prepago del cliente con el valor del crédito"
+        },
+        "save": "Guardar",
+        "field_names": {
+          "days": "de los días"
+        },
+        "saved": {
+          "title": "Ajustes guardados",
+          "text": "Los ajustes se han guardado.",
+          "close": "Cerrar"
+        }
       }
     }
   },
