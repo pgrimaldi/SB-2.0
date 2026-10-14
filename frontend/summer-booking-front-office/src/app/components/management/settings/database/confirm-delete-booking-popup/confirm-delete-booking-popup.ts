@@ -89,7 +89,6 @@ export class ConfirmDeleteBookingPopup {
         this.isLoading.set(false);
         this.open.set(false);
         this.confirmed.emit(idBookings);
-        return undefined;
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.requestForm, (problem) =>
           this.error.set(problem),

@@ -123,7 +123,6 @@ export class LoginDialog implements OnDestroy {
     // Every field becomes touched, so each shows its error; nothing is sent while one is wrong.
     void submit(this.credentialsForm, async () => {
       this.send();
-      return undefined;
     });
   }
 

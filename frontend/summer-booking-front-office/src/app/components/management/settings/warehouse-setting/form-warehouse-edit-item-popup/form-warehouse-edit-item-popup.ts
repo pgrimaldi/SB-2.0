@@ -135,7 +135,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
         this.isLoading.set(false);
         this.close();
         this.saved.emit();
-        return undefined;
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
           this.error.set(problem),

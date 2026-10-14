@@ -179,7 +179,6 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
         this.accountForm().reset();
         this.isSaved.set(true);
         this.isEditing.set(false);
-        return undefined;
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.accountForm, (problem) =>
           this.error.set(problem),

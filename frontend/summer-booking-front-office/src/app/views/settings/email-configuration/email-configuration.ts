@@ -277,7 +277,6 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
         const request = { ...this.configuration(), idProperty };
         await firstValueFrom(call(request));
         done(request);
-        return undefined;
       } catch (error: unknown) {
         return this.failed(toApiProblem(error));
       } finally {

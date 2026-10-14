@@ -145,7 +145,6 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
         this.contact.set(new ContactSupportRequest());
         this.contactForm().reset();
         this.sent.set(true);
-        return undefined;
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.contactForm, (problem) =>
           this.error.set(problem),

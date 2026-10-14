@@ -125,7 +125,6 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
         this.isLoading.set(false);
         this.close();
         this.added.emit();
-        return undefined;
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
           this.error.set(problem),

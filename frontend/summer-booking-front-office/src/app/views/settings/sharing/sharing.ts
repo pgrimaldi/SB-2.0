@@ -140,7 +140,6 @@ export class Sharing implements UnsavedChanges, OnDestroy {
         await firstValueFrom(this.sharing.saveInformation(idProperty, sent));
         this.informationForm().reset();
         this.saved.set(true);
-        return undefined;
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.informationForm, (general) =>
           this.error.set(general),
