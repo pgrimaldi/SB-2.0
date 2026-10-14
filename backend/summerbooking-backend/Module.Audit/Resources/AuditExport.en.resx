@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>activity-log</value>
+  </data>
+  <data name="PlatformFileName" xml:space="preserve">
+    <value>platform-log</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Column_OccurredAt" xml:space="preserve">
+    <value>Date and time (Italian time)</value>
+  </data>
+  <data name="Column_Operator" xml:space="preserve">
+    <value>Operator</value>
+  </data>
+  <data name="Column_OperatorId" xml:space="preserve">
+    <value>Operator ID</value>
+  </data>
+  <data name="Column_Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Column_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Column_Outcome" xml:space="preserve">
+    <value>Outcome</value>
+  </data>
+  <data name="Column_BookingNumber" xml:space="preserve">
+    <value>Booking</value>
+  </data>
+  <data name="Column_Spot" xml:space="preserve">
+    <value>Spot</value>
+  </data>
+  <data name="Column_Impersonated" xml:space="preserve">
+    <value>Performed by support</value>
+  </data>
+  <data name="Column_Property" xml:space="preserve">
+    <value>Property</value>
+  </data>
+  <data name="Column_Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Column_Impersonator" xml:space="preserve">
+    <value>Support (ID)</value>
+  </data>
+  <data name="Column_ClientIp" xml:space="preserve">
+    <value>IP address</value>
+  </data>
+  <data name="Column_UserAgent" xml:space="preserve">
+    <value>User agent</value>
+  </data>
+  <data name="Column_TraceId" xml:space="preserve">
+    <value>Trace ID</value>
+  </data>
+  <data name="Value_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Value_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Outcome_succeeded" xml:space="preserve">
+    <value>Succeeded</value>
+  </data>
+  <data name="Outcome_failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Category_operator" xml:space="preserve">
+    <value>Operator</value>
+  </data>
+  <data name="Category_security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="Category_platform" xml:space="preserve">
+    <value>Platform</value>
+  </data>
+  <data name="Action_identity_login_succeeded" xml:space="preserve">
+    <value>Login succeeded</value>
+  </data>
+  <data name="Action_identity_login_failed" xml:space="preserve">
+    <value>Login failed</value>
+  </data>
+  <data name="Action_identity_login_locked" xml:space="preserve">
+    <value>Login locked after too many attempts</value>
+  </data>
+  <data name="Action_identity_login_app_denied" xml:space="preserve">
+    <value>Login denied on this app</value>
+  </data>
+  <data name="Action_identity_second_factor_requested" xml:space="preserve">
+    <value>Verification code sent</value>
+  </data>
+  <data name="Action_identity_second_factor_failed" xml:space="preserve">
+    <value>Wrong verification code</value>
+  </data>
+  <data name="Action_identity_refresh_reuse_detected" xml:space="preserve">
+    <value>Session reuse detected: all sessions closed</value>
+  </data>
+  <data name="Action_identity_logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Action_identity_password_reset_requested" xml:space="preserve">
+    <value>Password reset requested</value>
+  </data>
+  <data name="Action_identity_password_reset_completed" xml:space="preserve">
+    <value>Password reset completed</value>
+  </data>
+  <data name="Action_identity_password_changed" xml:space="preserve">
+    <value>Password changed</value>
+  </data>
+  <data name="Action_identity_account_registered" xml:space="preserve">
+    <value>Account registered</value>
+  </data>
+  <data name="Action_identity_account_deleted" xml:space="preserve">
+    <value>Account deleted</value>
+  </data>
+  <data name="Action_identity_session_revoked" xml:space="preserve">
+    <value>Session closed</value>
+  </data>
+  <data name="Action_identity_user_created" xml:space="preserve">
+    <value>User created</value>
+  </data>
+  <data name="Action_identity_user_updated" xml:space="preserve">
+    <value>User updated</value>
+  </data>
+  <data name="Action_identity_user_deleted" xml:space="preserve">
+    <value>User deleted</value>
+  </data>
+  <data name="Action_identity_security_settings_changed" xml:space="preserve">
+    <value>Security settings changed</value>
+  </data>
+  <data name="Action_identity_customer_created" xml:space="preserve">
+    <value>Contact created</value>
+  </data>
+  <data name="Action_identity_customer_updated" xml:space="preserve">
+    <value>Contact updated</value>
+  </data>
+  <data name="Action_identity_customer_deleted" xml:space="preserve">
+    <value>Contact deleted</value>
+  </data>
+  <data name="Action_identity_customers_exported" xml:space="preserve">
+    <value>Contacts exported</value>
+  </data>
+  <data name="Action_identity_subscription_changed" xml:space="preserve">
+    <value>Subscription changed</value>
+  </data>
+  <data name="Action_identity_license_plan_saved" xml:space="preserve">
+    <value>License plan saved</value>
+  </data>
+  <data name="Action_identity_contract_uploaded" xml:space="preserve">
+    <value>Contract uploaded</value>
+  </data>
+  <data name="Action_identity_contract_published" xml:space="preserve">
+    <value>Contract published</value>
+  </data>
+  <data name="Action_identity_contract_acceptance_changed" xml:space="preserve">
+    <value>Contract acceptance changed</value>
+  </data>
+  <data name="Action_identity_owner_created" xml:space="preserve">
+    <value>Owner created</value>
+  </data>
+  <data name="Action_identity_owner_updated" xml:space="preserve">
+    <value>Owner updated</value>
+  </data>
+  <data name="Action_identity_impersonation_started" xml:space="preserve">
+    <value>Access as manager started</value>
+  </data>
+  <data name="Action_identity_impersonation_session_opened" xml:space="preserve">
+    <value>Session as manager opened</value>
+  </data>
+  <data name="Action_identity_external_token_issued" xml:space="preserve">
+    <value>Token issued to a partner</value>
+  </data>
+  <data name="Action_identity_external_token_denied" xml:space="preserve">
+    <value>Token denied to a partner</value>
+  </data>
+  <data name="Action_audit_entries_exported" xml:space="preserve">
+    <value>Activity log exported</value>
+  </data>
+  <data name="Action_audit_platform_entries_exported" xml:space="preserve">
+    <value>Platform log exported</value>
+  </data>
+</root>

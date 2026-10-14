@@ -1,0 +1,144 @@
+# Tabella `contact_list`
+
+> Fonti: schema e dati reali del DB dev `summer_booking_dev` (**51 righe**, `AUTO_INCREMENT=259`, dati
+> dal 2025-08-12 al 2026-05-07, tutte `propertyId = 96`), model
+> [`back-pre/app/models/contactList.js`](../../back-pre/app/models/contactList.js)
+> (`sequelize.define("contact_list", …, { freezeTableName: true, timestamps: false })` → nome
+> invariato, timestamp `created_at`/`updated_at` **gestiti a mano** con `defaultValue: Sequelize.NOW`),
+> registrato come `db.contact_list` in [`models/index.js`](../../back-pre/app/models/index.js) (riga
+> 182). Referenziata (FK reale) da
+> [`marketing_email_campaign`](marketing_email_campaign.md)`.contactListId` e
+> [`marketing_automation`](marketing_automation.md)`.contactListId` (`ON DELETE SET NULL`); nessuna FK
+> in uscita. Associazioni ORM `belongsTo`/`hasMany` con `marketing_email_campaign` e
+> `marketing_automation` in [`models/index.js:381-393`](../../back-pre/app/models/index.js).
+>
+> **Scrittori** —
+> [`Service/marketingContactListService.js`](../../back-pre/app/Service/marketingContactListService.js)
+> via [`controllers/marketingContactList.controller.js`](../../back-pre/app/controllers/marketingContactList.controller.js)
+> (route in [`routes/marketing.routes.js`](../../back-pre/app/routes/marketing.routes.js), **senza
+> alcun middleware di auth**):
+> - `createContactList` (`POST /api/sb/create-contact-list`) — crea la lista + i
+>   [`contact_list_member`](contact_list_member.md) (`bulkCreate`).
+> - `updateContactList` (`PUT /api/sb/update-contact-list`) — aggiorna **solo `name`**; se
+>   `contactIds` è presente, `destroy` di tutti i membri e `bulkCreate` dei nuovi.
+> - `deleteContactList` (`DELETE /api/sb/delete-contact-list/:id`) — **hard delete**:
+>   `ContactListMember.destroy({ where: { contactListId } })` + `contactList.destroy()`.
+> - `duplicateContactList` (`POST /api/sb/contact-list/duplicate`) — copia con nome `…_copy[_N]`.
+> - `createDefaultContactListAndAutomation` (`POST /api/sb/create-default-contact-list`) — crea la
+>   lista `name: "Marketing"`, `isDefaultList: 1` + due [`marketing_automation`](marketing_automation.md)
+>   ("Welcome", "Goodbye") via `bulkCreate`.
+> - [`Service/marketingContactListService.js`](../../back-pre/app/Service/marketingContactListService.js)
+>   `addCustomer(propertyId, customerId)` — chiamata da
+>   [`booking.controller.js`](../../back-pre/app/controllers/booking.controller.js) quando
+>   `req.body.data[0].isMarketingCampaign == true`: trova la lista `isDefaultList: 1, status: 1` della
+>   property e vi aggiunge il cliente (solo lettura di `contact_list`, scrive
+>   `contact_list_member`).
+>
+> **Lettori**:
+> - `getAllContactLists` (`POST /api/sb/get-contact-lists`) — raw SQL `WHERE propertyId = :propertyId
+>   AND status = 1` (opzionale `AND isDefaultList = :isDefaultList`).
+> - `getContactList` (`GET /api/sb/get-contact-list/:id`) — raw SQL join
+>   `contact_list_member` + `customers`, `cl.status = 1` (`id` **interpolato**, non parametrizzato).
+> - `getCampaignById` / `getAutomationById` — join `cl.status = 1`.
+>
+> **Frontend** (`front-pre`, copia `front-customer-pre`): sezione **Marketing → Contatti**
+> ([`components/Marketing/Component/Contact/ContactsList.js`](../../front-pre/src/components/Marketing/Component/Contact/ContactsList.js),
+> `Filter.js`), via
+> [`data/actions/marketingActions.js`](../../front-pre/src/data/actions/marketingActions.js)
+> (`sb/get-contact-lists`, `sb/create-contact-list`, `sb/update-contact-list`,
+> `sb/delete-contact-list/:id`, `sb/contact-list/duplicate`, `sb/create-default-contact-list`,
+> `sb/customer-list`). Esiste una copia dell'intera sezione in
+> `components/newsLetter/Marketing/…`.
+
+---
+
+## Nota di contesto
+
+**Liste di contatti** (segmenti di clientela) per l'invio di campagne email e automazioni marketing di
+uno stabilimento. Una lista raccoglie N clienti ([`customers`](customers.md)) tramite la tabella ponte
+[`contact_list_member`](contact_list_member.md). Ogni property ha (o dovrebbe avere) **una** lista
+`isDefaultList: 1` chiamata "Marketing", creata insieme alle automazioni Welcome/Goodbye, in cui i
+clienti confluiscono automaticamente al momento della prenotazione se il flag
+`bookings.isMarketingCampaign` è attivo.
+
+Nei dati: 51 liste, **tutte** `propertyId = 96`, **tutte** `status = 1`, **1** con `isDefaultList = 1`;
+molte con nome di prova (`"test_2"`, `"xyz1"`, `"test sendgrid"`). `AUTO_INCREMENT = 259` con 51 righe
+→ ~200 liste create e **hard-deleted** nel tempo.
+
+**Dominio nella riscrittura**: **C6 — Comunicazione**, sotto-area Marketing. Il segmento va modellato
+come lista + membri con FK reali e soft-delete coerente; la "lista di default" e l'auto-iscrizione da
+prenotazione sono regole del modulo Marketing, non della prenotazione.
+
+---
+
+## Campi
+
+### id
+- **Tipo**: `int(11)`, `AUTO_INCREMENT`, `NOT NULL` — chiave primaria
+- **Nullabile**: No
+- **Esempio di valori**: 1, 2, 3, ..
+
+### name
+- **Tipo**: `varchar(255)` `COLLATE utf8mb4_unicode_ci`
+- **Nullabile**: Sì (model `allowNull: true`; il frontend lo invia sempre)
+- **Descrizione**: nome della lista. Il duplicato genera `"<name>_copy"`, `"<name>_copy_1"`, …
+  (`generateCopyName`). La lista di default è creata con `name: "Marketing"`.
+- **Esempio di valori**: `"Marketing"`, `"dev 2026"`, `"test sendgrid"`, `"test_123"`
+
+### propertyId
+- **Tipo**: `int(11)`
+- **Nullabile**: Sì (model `allowNull: true`; sempre valorizzato nei dati)
+- **Relazioni**: [`properties`](properties.md)`.id` — **nessuna FK**. Scoping di tutte le query.
+- **Esempio di valori**: `96`
+
+### status
+- **Tipo**: `int(11)`, `DEFAULT 1`
+- **Nullabile**: Sì
+- **Descrizione**: pensato come flag attivo/eliminato (i lettori filtrano `status = 1`), ma
+  **nessun percorso lo porta a un valore diverso da `1`**: `deleteContactList` fa `destroy()`
+  (hard delete), non `update({ status: 0 })`. Nei dati: sempre `1`.
+- **Enumeratore**: no — `enum ActiveState` teorico, oggi inutilizzato.
+- **Esempio di valori**: `1`
+- **Deprecato**: **parzialmente** — filtrato in lettura ma mai scritto ≠ `1`; il delete è fisico.
+
+### created_at / updated_at
+- **Tipo**: `datetime`, `DEFAULT NULL` a schema; il model imposta `defaultValue: Sequelize.NOW` (con
+  `timestamps: false`, quindi valorizzati **solo alla create**, mai aggiornati sugli update).
+- **Nullabile**: Sì (a schema) — nei dati sempre valorizzati (`cnull = 0`)
+- **Descrizione**: `updated_at` **non viene aggiornato** su `updateContactList` (timestamps disattivati
+  e nessun set manuale) → resta uguale a `created_at`.
+- **Esempio di valori**: `2026-05-07 10:35:04`
+
+### isDefaultList
+- **Tipo**: `int(11)`, `DEFAULT 0`
+- **Nullabile**: Sì
+- **Descrizione**: `1` = lista "Marketing" predefinita della property, bersaglio dell'auto-iscrizione
+  da prenotazione (`addCustomer`) e creata da `createDefaultContactListAndAutomation`. Nessun vincolo
+  di unicità: teoricamente una property potrebbe averne più di una.
+- **Enumeratore**: no — booleano (`bool is_default`).
+- **Esempio di valori**: `0` (50 righe), `1` (1 riga)
+
+---
+
+## Osservazioni verificate nel codice (criticità)
+
+- **Route senza autenticazione**: `marketing.routes.js` non applica alcun `authJwt.*` alle route
+  contact-list (né `optionalAuth`). `propertyId` arriva dal body/query → chiunque può creare, leggere
+  (con i contatti: nome, email, telefono dei clienti), modificare o cancellare liste di qualsiasi
+  stabilimento.
+- **Hard delete + churn**: `deleteContactList` e `updateContactList` distruggono fisicamente i membri;
+  `AUTO_INCREMENT` di [`contact_list_member`](contact_list_member.md) è a **231 812** per 7 626 righe
+  vive. Nessuna storicizzazione di chi era in quale lista.
+- **`updated_at` mai aggiornato** (timestamps disattivati, nessun set manuale sugli update).
+- **`status` non usato per il delete** → colonna semi-morta; il concetto "lista archiviata" non esiste.
+- **SQL injection**: `getContactList` e `duplicateContactList` interpolano `id` nella query raw;
+  `getFilteredCustomers` interpola `searchName`, `propertyId`, età, date.
+- **Nessun vincolo di unicità** su `(propertyId, isDefaultList = 1)`.
+- **FK in ingresso `ON DELETE SET NULL`** da campagne/automazioni: cancellare una lista lascia le
+  campagne collegate con `contactListId = NULL` (ma l'invio usa comunque lo snapshot `recipientList`,
+  vedi [`marketing_email_campaign`](marketing_email_campaign.md)).
+
+### Campi candidati a enumeratore
+
+Nessun campo di questa tabella è un enumeratore: `status` → `bool`/`enum ActiveState` (concetto
+condiviso, oggi non usato); `isDefaultList` → `bool`.

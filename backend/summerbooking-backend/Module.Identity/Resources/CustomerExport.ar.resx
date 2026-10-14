@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>contacts</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>جهات الاتصال</value>
+  </data>
+  <data name="Column_FullName" xml:space="preserve">
+    <value>الاسم الكامل</value>
+  </data>
+  <data name="Column_PhoneCountryCode" xml:space="preserve">
+    <value>رمز الدولة</value>
+  </data>
+  <data name="Column_Phone" xml:space="preserve">
+    <value>رقم الجوال</value>
+  </data>
+  <data name="Column_PhoneSecondary" xml:space="preserve">
+    <value>هاتف آخر</value>
+  </data>
+  <data name="Column_Email" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="Column_FiscalCode" xml:space="preserve">
+    <value>الرمز الضريبي</value>
+  </data>
+  <data name="Column_VatNumber" xml:space="preserve">
+    <value>رقم ضريبة القيمة المضافة</value>
+  </data>
+  <data name="Column_Address" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="Column_City" xml:space="preserve">
+    <value>المدينة</value>
+  </data>
+  <data name="Column_PostalCode" xml:space="preserve">
+    <value>الرمز البريدي</value>
+  </data>
+  <data name="Column_DateOfBirth" xml:space="preserve">
+    <value>تاريخ الميلاد</value>
+  </data>
+  <data name="Column_Blacklist" xml:space="preserve">
+    <value>القائمة السوداء</value>
+  </data>
+  <data name="Column_Note" xml:space="preserve">
+    <value>ملاحظات</value>
+  </data>
+  <data name="Column_CreatedAt" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="Value_Yes" xml:space="preserve">
+    <value>نعم</value>
+  </data>
+  <data name="Value_No" xml:space="preserve">
+    <value>لا</value>
+  </data>
+</root>

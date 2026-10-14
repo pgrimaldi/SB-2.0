@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>3577c946-4859-4537-88c8-cf10f80793d2</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <!-- Boot e' il composition root del monolite modulare: referenzia TUTTI i moduli applicativi.
+       Escluso Module._Template (scheletro per crearne di nuovi) e Module.ZTest (sandbox di esempio,
+       con repository in memoria e un punto di composizione che non prende nemmeno IConfiguration). -->
+  <ItemGroup>
+    <ProjectReference Include="..\Module.Audit\Module.Audit.csproj" />
+    <ProjectReference Include="..\Module.Booking\Module.Booking.csproj" />
+    <ProjectReference Include="..\Module.Catalog\Module.Catalog.csproj" />
+    <ProjectReference Include="..\Module.Chatbot\Module.Chatbot.csproj" />
+    <ProjectReference Include="..\Module.FiscalPrint\Module.FiscalPrint.csproj" />
+    <ProjectReference Include="..\Module.Fiskaly\Module.Fiskaly.csproj" />
+    <ProjectReference Include="..\Module.Identity\Module.Identity.csproj" />
+    <ProjectReference Include="..\Module.Infra\Module.Infra.csproj" />
+    <ProjectReference Include="..\Module.Notification\Module.Notification.csproj" />
+    <ProjectReference Include="..\Module.Payment\Module.Payment.csproj" />
+    <ProjectReference Include="..\Module.Privacy\Module.Privacy.csproj" />
+    <ProjectReference Include="..\Module.Switchboard\Module.Switchboard.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,2 +1,12 @@
 # Local configuration of Claude Code (dev server of the Browser pane)
 /.claude/launch.json
+
+# .NET backend: build output and local IDE state
+/backend/**/bin/
+/backend/**/obj/
+/backend/**/.vs/
+/backend/**/TestResults/
+*.user
+
+# Real production rows (personal data, password hashes) produced by the migration utility: never in the repo
+/shared documentation/backend/analisi-pre/db-no-copied/dati/

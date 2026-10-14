@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Implementazioni tecniche riusate da piu' moduli:
+       qui le dipendenze pesanti, che Shared non deve imporre a tutti. La referenziano solo i moduli che
+       ne hanno bisogno, e solo la loro Infrastructure puo' usarla (regola negli ArchitectureTests). -->
+  <ItemGroup>
+    <!-- Esportazione CSV/XLSX (Export/TabularExportWriter.cs). -->
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Plumbing EF Core/Npgsql comune (converter, interceptor, query filter) usata da ogni Module.*,
+         che la riceve dalla ProjectReference a BuildingBlocks.Infrastructure. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <!-- Npgsql.EntityFrameworkCore.PostgreSQL dichiara solo il floor "10.0.4" per questo pacchetto:
+         senza un pin esplicito, NuGet risolve la versione piu' bassa compatibile invece di allinearla
+         a Microsoft.EntityFrameworkCore sopra, causando un conflitto di assembly (MSB3277) rilevato
+         nella build della solution intera (Boot/ArchitectureTests, che vedono entrambe le versioni). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <!-- UseSnakeCaseNamingConvention(): converte PascalCase -> snake_case per tabelle/colonne non
+         mappate esplicitamente, cosi created_at/updated_at/deleted_at non vanno
+         ripetuti in ogni IEntityTypeConfiguration<T>. -->
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <!-- ModuleConnectionStrings legge la connection string da IConfiguration (appsettings.json/
+         appsettings.{Environment}.json + variabili d'ambiente) sia a runtime sia da ConfigurationBuilder
+         nel percorso design-time (dotnet ef, dove non c'e un host che costruisce gia la configurazione:
+         serve quindi anche il provider Json, oltre a quello per le variabili d'ambiente, per leggere
+         Boot/appsettings*.json). -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
+    <!-- .Bind(oggetto): serve ai moduli che leggono una sezione di configurazione in un POCO
+         (Retention:Deletion in Module.Privacy). Microsoft.Extensions.Configuration da solo non
+         porta il binder. -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
+    <!-- Archivio delle righe scadute dalle policy archive_cold (Retention/S3ArchiveStore.cs).
+         Sta qui e non in un modulo perche' il motore di retention serve tutti gli schemi. -->
+    <PackageReference Include="AWSSDK.S3" Version="4.0.104.1" />
+    <!-- AWSSDK.Core pinnato: la versione che AWSSDK.S3 tira da sola ha un avviso NU1901
+         (vulnerabilita' nota di gravita' bassa) e la build del progetto pretende zero avvisi. -->
+    <PackageReference Include="AWSSDK.Core" Version="4.0.102.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+</Project>

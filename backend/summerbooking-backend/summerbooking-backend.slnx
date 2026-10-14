@@ -1,0 +1,23 @@
+﻿<Solution>
+  <Project Path="ArchitectureTests/ArchitectureTests.csproj" />
+  <Project Path="Boot/Boot.csproj" />
+  <Project Path="BuildingBlocks.Application/BuildingBlocks.Application.csproj" />
+  <Project Path="BuildingBlocks.Infrastructure/BuildingBlocks.Infrastructure.csproj" />
+  <Project Path="Module.Audit/Module.Audit.csproj" />
+  <Project Path="Module.Booking/Module.Booking.csproj" />
+  <Project Path="Module.Catalog/Module.Catalog.csproj" />
+  <Project Path="Module.Catalog.Tests/Module.Catalog.Tests.csproj" />
+  <Project Path="Module.Chatbot/Module.Chatbot.csproj" />
+  <Project Path="Module.FiscalPrint/Module.FiscalPrint.csproj" />
+  <Project Path="Module.Fiskaly/Module.Fiskaly.csproj" />
+  <Project Path="Module.Identity/Module.Identity.csproj" Id="0e37a9b4-f5f6-4055-8e8c-efe43bb51d5c" />
+  <Project Path="Module.Infra/Module.Infra.csproj" />
+  <Project Path="Module.Notification/Module.Notification.csproj" />
+  <Project Path="Module.Payment/Module.Payment.csproj" />
+  <Project Path="Module.Privacy/Module.Privacy.csproj" />
+  <Project Path="Module.Switchboard/Module.Switchboard.csproj" />
+  <Project Path="Module.ZTest/Module.ZTest.csproj" Id="0bca0924-5109-4197-b4b3-c8124c4d750b" />
+  <Project Path="Module/Module._Template.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+  <Project Path="BuildingBlocks.Infrastructure.Tests/BuildingBlocks.Infrastructure.Tests.csproj" />
+</Solution>

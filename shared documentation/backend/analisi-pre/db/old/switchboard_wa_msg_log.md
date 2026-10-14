@@ -1,0 +1,240 @@
+# Tabella `switchboard_wa_msg_log`
+
+> Fonti: schema del DB `local_sb` (**0 righe**, `AUTO_INCREMENT = 1`, `CREATE_TIME 2026-07-27`); model
+> [`back-pre/app/models/switchboardWaMsgLog.model.js`](../../back-pre/app/models/switchboardWaMsgLog.model.js)
+> (`sequelize.define("switchboard_wa_msg_log", …, { freezeTableName: true, timestamps: false, underscored: true })`),
+> registrato come `db.switchboardWaMsgLog` in [`models/index.js`](../../back-pre/app/models/index.js) (riga 276).
+>
+> **Nessuna FK**; **4 indici non unici** (dichiarati nel model, presenti a schema): `wamid`, `status`,
+> `event_type`, `received_at`. Nessuna associazione ORM.
+>
+> **Scrittore** — unico: [`switchboard.controller.js`](../../back-pre/app/controllers/switchboard.controller.js)
+> `handleWaWebhook` — `POST /api/public/switchboard/webhook/wa` (**no auth sul POST**; l'handshake
+> `GET` verifica `hub.verify_token`, ma il POST **non** valida `X-Hub-Signature-256` pur avendo
+> `WHATSAPP_APP_SECRET` — vedi [§9 di 01-…backend.md](../../docs/01-criticita-e-indicazioni-backend.md)).
+> Per ogni `entry.changes[].value` con `field = "messages"` inserisce:
+> - una riga `event_type = "status"` per ogni elemento di `value.statuses[]` (aggiornamenti di
+>   consegna: sent/delivered/read/failed);
+> - una riga `event_type = "message_in"` per ogni elemento di `value.messages[]` (messaggi in arrivo
+>   dagli utenti finali).
+> Ogni insert è in `try/catch` con `console.error`; l'endpoint risponde **sempre `200`
+> `EVENT_RECEIVED`** per evitare i retry di Meta.
+>
+> **Lettori**: **nessuno** in tutto `back-pre` (grep su `app/`, `cronjob/`, `server.js`). Tabella
+> **puramente forensica** (il commento del model: *"useful for forensics"*).
+>
+> **Frontend**: nessun consumo.
+
+---
+
+## Verdetto: tabella di sola forensica, nessun lettore
+
+**0 righe**, `AUTO_INCREMENT = 1`. Nessun processo legge queste righe (nessun aggancio a
+prenotazioni, nessuna notifica in-app, nessun cron). Nella riscrittura: se serve la tracciabilità
+degli eventi WhatsApp va nell'outbox/inbox del modulo `Notification` (C6) con un contratto stabile,
+non in questa tabella-log grezza del centralino. Valori sotto = campi del payload webhook Meta Cloud
+API letti da `handleWaWebhook`.
+
+---
+
+## Campi
+
+### id
+- **Tipo**: `int`, `AUTO_INCREMENT`, `NOT NULL` — chiave primaria
+- **Nullabile**: No
+- **Esempio di valori**: 1, 2, 3, ..
+
+### event_type
+- **Tipo**: `varchar(20)`, `NOT NULL`, indice non unico
+- **Nullabile**: No
+- **Descrizione**: discrimina le due tipologie di riga: `"status"` (da `value.statuses[]`) o
+  `"message_in"` (da `value.messages[]`).
+- **Esempio di valori**: `"status"`, `"message_in"`
+- **Enumeratore**: **sì** — `enum WaWebhookEventType { Status, MessageIn }`.
+
+### wamid
+- **Tipo**: `varchar(255)`, indice non unico
+- **Nullabile**: Sì
+- **Descrizione**: id del messaggio Meta (`st.id` per gli status — corrisponde all'id restituito da
+  `POST /messages` all'invio; `m.id` per gli inbound).
+- **Esempio di valori**: `"wamid.HBgLMzkz...=="`
+
+### waba_id
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: id del WhatsApp Business Account che possiede la conversazione (`entry.id` del
+  payload).
+- **Esempio di valori**: teorico id numerico Meta come stringa
+
+### phone_number_id
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: id del numero (Meta) che ha inviato/ricevuto il messaggio
+  (`value.metadata.phone_number_id`).
+- **Esempio di valori**: teorico id numerico Meta come stringa
+
+### display_phone_number
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: numero in formato leggibile associato a `phone_number_id`
+  (`value.metadata.display_phone_number`).
+- **Esempio di valori**: `"39 051 0000000"`, `"+390510000000"`
+
+### from
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: mittente del messaggio in arrivo (E.164 senza `+`), popolato solo per
+  `event_type = "message_in"` (`m.from`).
+- **Esempio di valori**: `"393514648861"`
+
+### recipient_id
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: per gli `status`, l'utente finale che ha ricevuto il nostro messaggio
+  (`st.recipient_id`). `null` per gli inbound.
+- **Esempio di valori**: `"393514648861"`
+
+### status
+- **Tipo**: `varchar(20)`, indice non unico
+- **Nullabile**: Sì
+- **Descrizione**: stato di consegna (`st.status`); `null` per gli inbound.
+- **Esempio di valori**: `"sent"`, `"delivered"`, `"read"`, `"failed"`
+- **Enumeratore**: **sì** — `enum WaMessageStatus { Sent, Delivered, Read, Failed }`.
+
+### error_code
+- **Tipo**: `int`
+- **Nullabile**: Sì
+- **Descrizione**: codice errore Meta del primo elemento di `st.errors[]` (presente quando
+  `status = "failed"`).
+- **Esempio di valori**: teorico `131047`, `470`
+
+### error_title
+- **Tipo**: `varchar(255)`
+- **Nullabile**: Sì
+- **Descrizione**: titolo errore Meta (`err.title`).
+- **Esempio di valori**: teorico `"Re-engagement message"`
+
+### error_message
+- **Tipo**: `text`
+- **Nullabile**: Sì
+- **Descrizione**: messaggio errore Meta (`err.message`), con fallback su `err.error_data.details`.
+- **Esempio di valori**: teorico `"Message failed to send because more than 24 hours have passed…"`
+
+### conversation_id
+- **Tipo**: `varchar(100)`
+- **Nullabile**: Sì
+- **Descrizione**: id della conversazione ai fini della fatturazione Meta (`st.conversation.id`).
+- **Esempio di valori**: teorico stringa esadecimale Meta
+
+### conversation_origin
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: origine/categoria della conversazione (`st.conversation.origin.type`).
+- **Esempio di valori**: `"marketing"`, `"utility"`, `"service"`, `"authentication"`,
+  `"referral_conversion"`
+- **Enumeratore**: **sì** — `enum WaConversationOrigin { Marketing, Utility, Service, Authentication,
+  ReferralConversion }` (vocabolario Meta).
+
+### pricing_billable
+- **Tipo**: `tinyint(1)` (model `BOOLEAN`)
+- **Nullabile**: Sì
+- **Descrizione**: se la conversazione è fatturabile (`st.pricing.billable`), copiato solo se
+  booleano.
+- **Esempio di valori**: `1`, `0`, `null`
+- **Enumeratore**: no — booleano (`bool?`).
+
+### pricing_category
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: categoria di pricing Meta (`st.pricing.category`).
+- **Esempio di valori**: `"marketing"`, `"utility"`, `"authentication"`, `"service"`
+- **Enumeratore**: candidato `enum WaPricingCategory { Marketing, Utility, Authentication, Service }`
+  (vocabolario Meta, evolve con la loro tariffazione — valutare passthrough).
+
+### pricing_model
+- **Tipo**: `varchar(50)`
+- **Nullabile**: Sì
+- **Descrizione**: modello di pricing Meta (`st.pricing.pricing_model`).
+- **Esempio di valori**: `"CBP"` (conversation-based), `"PMP"` *(valori Meta)*
+
+### message_type
+- **Tipo**: `varchar(30)`
+- **Nullabile**: Sì
+- **Descrizione**: tipo del messaggio in arrivo (`m.type`), per `event_type = "message_in"`.
+- **Esempio di valori**: `"text"`, `"button"`, `"interactive"`, `"reaction"`, `"image"`, `"document"`,
+  `"audio"`, `"video"`, `"location"`, `"sticker"`, `"contacts"`
+- **Enumeratore**: candidato `enum WaInboundMessageType { Text, Button, Interactive, Reaction, Image,
+  Document, Audio, Video, Location, Sticker, Contacts, Unknown }` — passthrough Meta con fallback.
+
+### message_body
+- **Tipo**: `text`
+- **Nullabile**: Sì
+- **Descrizione**: testo del messaggio in arrivo. Regole di `handleWaWebhook`:
+  - `text` → `m.text.body`
+  - `button` → `m.button.text` o `m.button.payload`
+  - `interactive` → titolo di `button_reply`/`list_reply` o `JSON.stringify(m.interactive)`
+  - `reaction` → `` `${emoji} → ${message_id}` ``
+  - tipi media → `JSON.stringify(m[m.type])` (riassunto JSON)
+- **Esempio di valori**: `"Buongiorno, avete disponibilità?"`, `"👍 → wamid.HBg…"`,
+  `"{\"id\":\"...\",\"mime_type\":\"image/jpeg\",\"sha256\":\"...\"}"`
+
+### contact_name
+- **Tipo**: `varchar(100)`
+- **Nullabile**: Sì
+- **Descrizione**: nome profilo del contatto (`contact.profile.name`) associato a `m.from` in
+  `value.contacts[]`.
+- **Esempio di valori**: teorico `"Mario Rossi"`
+
+### meta_timestamp
+- **Tipo**: `datetime`
+- **Nullabile**: Sì
+- **Descrizione**: istante dell'evento lato Meta (`st.timestamp` / `m.timestamp` in secondi Unix,
+  convertito in `Date`).
+- **Esempio di valori**: teorico `2026-07-28 15:42:10`
+
+### received_at
+- **Tipo**: `datetime`, `NOT NULL`, indice non unico (a schema **nessun default**; model
+  `defaultValue: Sequelize.NOW`)
+- **Nullabile**: No
+- **Descrizione**: istante in cui **il nostro** server ha ricevuto il webhook.
+- **Esempio di valori**: teorico `2026-07-28 15:42:11`
+
+### raw_payload
+- **Tipo**: `json` (`longtext` `utf8mb4_bin`)
+- **Nullabile**: Sì
+- **Descrizione**: per gli `status`, l'oggetto `st` completo; per gli inbound, l'oggetto `m` completo
+  (**non** l'intero payload del webhook). Serve per forensica quando i campi estratti non bastano.
+- **Esempio di valori** (sotto-valori):
+  - status: `{ "id": "wamid.…", "status": "delivered", "timestamp": "1722180130", "recipient_id":
+    "393514648861", "conversation": { "id": "…", "origin": { "type": "utility" } }, "pricing": {
+    "billable": true, "category": "utility", "pricing_model": "CBP" } }`
+  - message_in: `{ "from": "393514648861", "id": "wamid.…", "timestamp": "1722180130", "type":
+    "text", "text": { "body": "Ciao" } }`
+
+---
+
+## Osservazioni verificate nel codice (criticità)
+
+- **Webhook POST senza verifica firma** `X-Hub-Signature-256` (pur avendo `WHATSAPP_APP_SECRET`):
+  chiunque può iniettare righe forgiate — [§9 di 01-…backend.md](../../docs/01-criticita-e-indicazioni-backend.md).
+- **Nessun lettore** → dato non di dominio; se serve tracciare la messaggistica va nell'outbox del
+  modulo `Notification` (C6) con contratto stabile.
+- **`message_body` mescola concetti** (testo puro, payload bottone, dump JSON media) → colonna non
+  interrogabile in modo affidabile.
+- **Nessun collegamento** a `switchboard_config` / `property` / prenotazione: impossibile sapere a
+  quale stabilimento appartiene una riga senancarla via `phone_number_id`.
+- **Dati personali senza retention** (numeri, nomi, testo messaggi, payload grezzo).
+- **Insert best-effort** (`try/catch` + `console.error`, risposta sempre `200`): eventi persi in
+  silenzio in caso di errore DB.
+- **Non ripulita da `deleteConfig`**.
+
+### Campi candidati a enumeratore
+
+| Campo | Oggi | Target |
+|---|---|---|
+| `event_type` | `varchar(20)` | `enum WaWebhookEventType { Status, MessageIn }` |
+| `status` | `varchar(20)` | `enum WaMessageStatus { Sent, Delivered, Read, Failed }` |
+| `conversation_origin` | `varchar(50)` | `enum WaConversationOrigin { Marketing, Utility, Service, Authentication, ReferralConversion }` |
+| `pricing_category` | `varchar(50)` | `enum WaPricingCategory { Marketing, Utility, Authentication, Service }` (passthrough Meta) |
+| `message_type` | `varchar(30)` | `enum WaInboundMessageType { Text, Button, Interactive, Reaction, Image, Document, Audio, Video, Location, Sticker, Contacts, Unknown }` |
+| `pricing_billable` | `tinyint(1)` | `bool?` (non enum) |

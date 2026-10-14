@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>contacts</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>联系人</value>
+  </data>
+  <data name="Column_FullName" xml:space="preserve">
+    <value>姓名</value>
+  </data>
+  <data name="Column_PhoneCountryCode" xml:space="preserve">
+    <value>国际区号</value>
+  </data>
+  <data name="Column_Phone" xml:space="preserve">
+    <value>手机号码</value>
+  </data>
+  <data name="Column_PhoneSecondary" xml:space="preserve">
+    <value>其他电话</value>
+  </data>
+  <data name="Column_Email" xml:space="preserve">
+    <value>电子邮件</value>
+  </data>
+  <data name="Column_FiscalCode" xml:space="preserve">
+    <value>税号</value>
+  </data>
+  <data name="Column_VatNumber" xml:space="preserve">
+    <value>增值税号</value>
+  </data>
+  <data name="Column_Address" xml:space="preserve">
+    <value>地址</value>
+  </data>
+  <data name="Column_City" xml:space="preserve">
+    <value>城市</value>
+  </data>
+  <data name="Column_PostalCode" xml:space="preserve">
+    <value>邮政编码</value>
+  </data>
+  <data name="Column_DateOfBirth" xml:space="preserve">
+    <value>出生日期</value>
+  </data>
+  <data name="Column_Blacklist" xml:space="preserve">
+    <value>黑名单</value>
+  </data>
+  <data name="Column_Note" xml:space="preserve">
+    <value>备注</value>
+  </data>
+  <data name="Column_CreatedAt" xml:space="preserve">
+    <value>创建日期</value>
+  </data>
+  <data name="Value_Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="Value_No" xml:space="preserve">
+    <value>否</value>
+  </data>
+</root>

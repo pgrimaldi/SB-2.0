@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>activity-log</value>
+  </data>
+  <data name="PlatformFileName" xml:space="preserve">
+    <value>platform-log</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>السجل</value>
+  </data>
+  <data name="Column_OccurredAt" xml:space="preserve">
+    <value>التاريخ والوقت (بتوقيت إيطاليا)</value>
+  </data>
+  <data name="Column_Operator" xml:space="preserve">
+    <value>المشغّل</value>
+  </data>
+  <data name="Column_OperatorId" xml:space="preserve">
+    <value>معرّف المشغّل</value>
+  </data>
+  <data name="Column_Role" xml:space="preserve">
+    <value>الدور</value>
+  </data>
+  <data name="Column_Action" xml:space="preserve">
+    <value>الإجراء</value>
+  </data>
+  <data name="Column_Outcome" xml:space="preserve">
+    <value>النتيجة</value>
+  </data>
+  <data name="Column_BookingNumber" xml:space="preserve">
+    <value>الحجز</value>
+  </data>
+  <data name="Column_Spot" xml:space="preserve">
+    <value>الموقع</value>
+  </data>
+  <data name="Column_Impersonated" xml:space="preserve">
+    <value>نفّذها الدعم</value>
+  </data>
+  <data name="Column_Property" xml:space="preserve">
+    <value>المنشأة</value>
+  </data>
+  <data name="Column_Category" xml:space="preserve">
+    <value>الفئة</value>
+  </data>
+  <data name="Column_Impersonator" xml:space="preserve">
+    <value>الدعم (المعرّف)</value>
+  </data>
+  <data name="Column_ClientIp" xml:space="preserve">
+    <value>عنوان IP</value>
+  </data>
+  <data name="Column_UserAgent" xml:space="preserve">
+    <value>وكيل المستخدم</value>
+  </data>
+  <data name="Column_TraceId" xml:space="preserve">
+    <value>معرّف التتبع</value>
+  </data>
+  <data name="Value_Yes" xml:space="preserve">
+    <value>نعم</value>
+  </data>
+  <data name="Value_No" xml:space="preserve">
+    <value>لا</value>
+  </data>
+  <data name="Outcome_succeeded" xml:space="preserve">
+    <value>نجح</value>
+  </data>
+  <data name="Outcome_failed" xml:space="preserve">
+    <value>فشل</value>
+  </data>
+  <data name="Category_operator" xml:space="preserve">
+    <value>المشغّل</value>
+  </data>
+  <data name="Category_security" xml:space="preserve">
+    <value>الأمان</value>
+  </data>
+  <data name="Category_platform" xml:space="preserve">
+    <value>المنصة</value>
+  </data>
+  <data name="Action_identity_login_succeeded" xml:space="preserve">
+    <value>تسجيل دخول ناجح</value>
+  </data>
+  <data name="Action_identity_login_failed" xml:space="preserve">
+    <value>فشل تسجيل الدخول</value>
+  </data>
+  <data name="Action_identity_login_locked" xml:space="preserve">
+    <value>تم قفل تسجيل الدخول بعد محاولات كثيرة</value>
+  </data>
+  <data name="Action_identity_login_app_denied" xml:space="preserve">
+    <value>تم رفض الدخول في هذا التطبيق</value>
+  </data>
+  <data name="Action_identity_second_factor_requested" xml:space="preserve">
+    <value>تم إرسال رمز التحقق</value>
+  </data>
+  <data name="Action_identity_second_factor_failed" xml:space="preserve">
+    <value>رمز التحقق غير صحيح</value>
+  </data>
+  <data name="Action_identity_refresh_reuse_detected" xml:space="preserve">
+    <value>تم اكتشاف إعادة استخدام الجلسة: أُغلقت جميع الجلسات</value>
+  </data>
+  <data name="Action_identity_logout" xml:space="preserve">
+    <value>تسجيل الخروج</value>
+  </data>
+  <data name="Action_identity_password_reset_requested" xml:space="preserve">
+    <value>تم طلب إعادة تعيين كلمة المرور</value>
+  </data>
+  <data name="Action_identity_password_reset_completed" xml:space="preserve">
+    <value>تمت إعادة تعيين كلمة المرور</value>
+  </data>
+  <data name="Action_identity_password_changed" xml:space="preserve">
+    <value>تم تغيير كلمة المرور</value>
+  </data>
+  <data name="Action_identity_account_registered" xml:space="preserve">
+    <value>تم تسجيل الحساب</value>
+  </data>
+  <data name="Action_identity_account_deleted" xml:space="preserve">
+    <value>تم حذف الحساب</value>
+  </data>
+  <data name="Action_identity_session_revoked" xml:space="preserve">
+    <value>تم إغلاق الجلسة</value>
+  </data>
+  <data name="Action_identity_user_created" xml:space="preserve">
+    <value>تم إنشاء المستخدم</value>
+  </data>
+  <data name="Action_identity_user_updated" xml:space="preserve">
+    <value>تم تعديل المستخدم</value>
+  </data>
+  <data name="Action_identity_user_deleted" xml:space="preserve">
+    <value>تم حذف المستخدم</value>
+  </data>
+  <data name="Action_identity_security_settings_changed" xml:space="preserve">
+    <value>تم تغيير إعدادات الأمان</value>
+  </data>
+  <data name="Action_identity_customer_created" xml:space="preserve">
+    <value>تم إنشاء جهة الاتصال</value>
+  </data>
+  <data name="Action_identity_customer_updated" xml:space="preserve">
+    <value>تم تعديل جهة الاتصال</value>
+  </data>
+  <data name="Action_identity_customer_deleted" xml:space="preserve">
+    <value>تم حذف جهة الاتصال</value>
+  </data>
+  <data name="Action_identity_customers_exported" xml:space="preserve">
+    <value>تم تصدير جهات الاتصال</value>
+  </data>
+  <data name="Action_identity_subscription_changed" xml:space="preserve">
+    <value>تم تغيير الاشتراك</value>
+  </data>
+  <data name="Action_identity_license_plan_saved" xml:space="preserve">
+    <value>تم حفظ خطة الترخيص</value>
+  </data>
+  <data name="Action_identity_contract_uploaded" xml:space="preserve">
+    <value>تم رفع العقد</value>
+  </data>
+  <data name="Action_identity_contract_published" xml:space="preserve">
+    <value>تم نشر العقد</value>
+  </data>
+  <data name="Action_identity_contract_acceptance_changed" xml:space="preserve">
+    <value>تم تغيير قبول العقد</value>
+  </data>
+  <data name="Action_identity_owner_created" xml:space="preserve">
+    <value>تم إنشاء المالك</value>
+  </data>
+  <data name="Action_identity_owner_updated" xml:space="preserve">
+    <value>تم تعديل المالك</value>
+  </data>
+  <data name="Action_identity_impersonation_started" xml:space="preserve">
+    <value>بدء الدخول بصفة المدير</value>
+  </data>
+  <data name="Action_identity_impersonation_session_opened" xml:space="preserve">
+    <value>تم فتح جلسة بصفة المدير</value>
+  </data>
+  <data name="Action_identity_external_token_issued" xml:space="preserve">
+    <value>تم إصدار رمز لشريك</value>
+  </data>
+  <data name="Action_identity_external_token_denied" xml:space="preserve">
+    <value>تم رفض رمز لشريك</value>
+  </data>
+  <data name="Action_audit_entries_exported" xml:space="preserve">
+    <value>تم تصدير سجل النشاط</value>
+  </data>
+  <data name="Action_audit_platform_entries_exported" xml:space="preserve">
+    <value>تم تصدير سجل المنصة</value>
+  </data>
+</root>

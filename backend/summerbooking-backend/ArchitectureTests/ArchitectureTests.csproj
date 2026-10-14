@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NetArchTest.Rules" Version="1.3.2" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Boot\Boot.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Application\BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\Module.Audit\Module.Audit.csproj" />
+    <ProjectReference Include="..\Module.Booking\Module.Booking.csproj" />
+    <ProjectReference Include="..\Module.Catalog\Module.Catalog.csproj" />
+    <ProjectReference Include="..\Module.Chatbot\Module.Chatbot.csproj" />
+    <ProjectReference Include="..\Module.FiscalPrint\Module.FiscalPrint.csproj" />
+    <ProjectReference Include="..\Module.Fiskaly\Module.Fiskaly.csproj" />
+    <ProjectReference Include="..\Module.Identity\Module.Identity.csproj" />
+    <ProjectReference Include="..\Module.Infra\Module.Infra.csproj" />
+    <ProjectReference Include="..\Module.Notification\Module.Notification.csproj" />
+    <ProjectReference Include="..\Module.Payment\Module.Payment.csproj" />
+    <ProjectReference Include="..\Module.Privacy\Module.Privacy.csproj" />
+    <ProjectReference Include="..\Module.Switchboard\Module.Switchboard.csproj" />
+    <ProjectReference Include="..\Module.ZTest\Module.ZTest.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+</Project>

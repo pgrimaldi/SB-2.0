@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Codice di Application riusato da più moduli: regole di validazione comuni e conversione degli
+       errori di FluentValidation nei codici dello standard API. Solo librerie che l'Application può
+       usare (niente EF Core, AWS, ClosedXML: quelle stanno in BuildingBlocks.Infrastructure). -->
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+</Project>

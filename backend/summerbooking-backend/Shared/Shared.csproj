@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="Dtos\" />
+    <Folder Include="ExternalApi\" />
+    <Folder Include="Infrastructure\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Resources\" />
+    <Folder Include="Utils\" />
+  </ItemGroup>
+
+  <!-- Nessun pacchetto: Shared è il kernel dei contratti fra i moduli (interfacce, eventi, errori, ruoli),
+       referenziato anche dal Domain. Le implementazioni con librerie (EF Core, Npgsql, AWS, ClosedXML) stanno
+       in BuildingBlocks.Infrastructure. -->
+
+</Project>

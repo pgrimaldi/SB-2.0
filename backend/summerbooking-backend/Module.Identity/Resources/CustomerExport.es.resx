@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>contactos</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>Contactos</value>
+  </data>
+  <data name="Column_FullName" xml:space="preserve">
+    <value>Apellidos y nombre</value>
+  </data>
+  <data name="Column_PhoneCountryCode" xml:space="preserve">
+    <value>Prefijo</value>
+  </data>
+  <data name="Column_Phone" xml:space="preserve">
+    <value>Móvil</value>
+  </data>
+  <data name="Column_PhoneSecondary" xml:space="preserve">
+    <value>Otro teléfono</value>
+  </data>
+  <data name="Column_Email" xml:space="preserve">
+    <value>Correo electrónico</value>
+  </data>
+  <data name="Column_FiscalCode" xml:space="preserve">
+    <value>Código fiscal</value>
+  </data>
+  <data name="Column_VatNumber" xml:space="preserve">
+    <value>Número de IVA</value>
+  </data>
+  <data name="Column_Address" xml:space="preserve">
+    <value>Dirección</value>
+  </data>
+  <data name="Column_City" xml:space="preserve">
+    <value>Ciudad</value>
+  </data>
+  <data name="Column_PostalCode" xml:space="preserve">
+    <value>Código postal</value>
+  </data>
+  <data name="Column_DateOfBirth" xml:space="preserve">
+    <value>Fecha de nacimiento</value>
+  </data>
+  <data name="Column_Blacklist" xml:space="preserve">
+    <value>Lista negra</value>
+  </data>
+  <data name="Column_Note" xml:space="preserve">
+    <value>Notas</value>
+  </data>
+  <data name="Column_CreatedAt" xml:space="preserve">
+    <value>Creado el</value>
+  </data>
+  <data name="Value_Yes" xml:space="preserve">
+    <value>Sí</value>
+  </data>
+  <data name="Value_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+</root>

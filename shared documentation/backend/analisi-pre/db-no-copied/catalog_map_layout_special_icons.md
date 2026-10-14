@@ -1,0 +1,332 @@
+# Righe non migrate — `catalog.map_layout_special_icons`
+
+> Modulo **catalog** · sorgente legacy **`configure_maps`** · **1060 righe** non arrivate a destinazione.
+>
+> Dati grezzi completi, mai troncati: [`dati/catalog_map_layout_special_icons.jsonl`](dati/catalog_map_layout_special_icons.jsonl).
+
+## Diagnosi
+
+### Esclusa da una regola — 1060 righe
+
+**Regola applicata** (`exclude_row_if` nella spec di mapping):
+
+```
+nessuna icona speciale configurata per questa variante e stato
+```
+*(1059 righe su 1060)*
+
+**Regola applicata** (`exclude_row_if` nella spec di mapping):
+
+```
+il layout della mappa non e' stato migrato: l'icona non ha un layout a cui appartenere
+```
+*(1 righe su 1060)*
+
+> **Diagnosi non disponibile** per questa combinazione: e' comparsa dopo l'ultima revisione di `app/diagnosi_scarti.py`. Il messaggio qui sopra e' il dato grezzo; il verdetto va stabilito a mano.
+
+## Righe
+
+| id legacy | motivo | `id` | `templateImg` | `isCustomTemplate` | `rows` | `items` | `umbrellaImg` |
+|---|---|---|---|---|---|---|---|
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `4` | Esclusa da una regola | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `5` | Esclusa da una regola | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 4 | 4 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `6` | Esclusa da una regola | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `7` | Esclusa da una regola | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 22 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `8` | Esclusa da una regola | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 43 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `10` | Esclusa da una regola | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `11` | Esclusa da una regola | 11 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 11 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `12` | Esclusa da una regola | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/5361… | 1 | 14 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… |
+| `12` | Esclusa da una regola | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/5361… | 1 | 14 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… |
+| `12` | Esclusa da una regola | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/5361… | 1 | 14 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… |
+| `12` | Esclusa da una regola | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/5361… | 1 | 14 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… |
+| `12` | Esclusa da una regola | 12 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/5361… | 1 | 14 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `13` | Esclusa da una regola | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `14` | Esclusa da una regola | 14 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 16 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `15` | Esclusa da una regola | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `17` | Esclusa da una regola | 17 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `18` | Esclusa da una regola | 18 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 10 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `19` | Esclusa da una regola | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `20` | Esclusa da una regola | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `21` | Esclusa da una regola | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 8 | 8 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `23` | Esclusa da una regola | 23 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 9 | 19 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `24` | Esclusa da una regola | 24 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 0 | 7 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `24` | Esclusa da una regola | 24 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 0 | 7 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `24` | Esclusa da una regola | 24 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 0 | 7 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `24` | Esclusa da una regola | 24 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 0 | 7 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `24` | Esclusa da una regola | 24 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 0 | 7 | 21 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `25` | Esclusa da una regola | 25 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 6 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `26` | Esclusa da una regola | 26 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 13 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `27` | Esclusa da una regola | 27 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 15 | 56 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `28` | Esclusa da una regola | 28 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 12 | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `29` | Esclusa da una regola | 29 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 7 | 7 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `30` | Esclusa da una regola | 30 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 5 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `32` | Esclusa da una regola | 32 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 5 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `33` | Esclusa da una regola | 33 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 6 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `34` | Esclusa da una regola | 34 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 16 | 62 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `35` | Esclusa da una regola | 35 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 15 | 15 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `36` | Esclusa da una regola | 36 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 10 | 50 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `37` | Esclusa da una regola | 37 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… | 0 | 34 | 22 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `38` | Esclusa da una regola | 38 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/bzaa… | 1 | 9 | 20 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `39` | Esclusa da una regola | 39 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 0 | 0 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+| `39` | Esclusa da una regola | 39 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/3br3… | 1 | 0 | 0 | https://d26kxhigi9o4u2.cloudfront.net/images/configure/2yja… |
+
+> Mostrate le prime **300** di **1060**. Le restanti 760 sono in [`dati/catalog_map_layout_special_icons.jsonl`](dati/catalog_map_layout_special_icons.jsonl), con tutte le colonne sorgente.

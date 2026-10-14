@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>activity-log</value>
+  </data>
+  <data name="PlatformFileName" xml:space="preserve">
+    <value>platform-log</value>
+  </data>
+  <data name="SheetName" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="Column_OccurredAt" xml:space="preserve">
+    <value>日期和时间（意大利时间）</value>
+  </data>
+  <data name="Column_Operator" xml:space="preserve">
+    <value>操作员</value>
+  </data>
+  <data name="Column_OperatorId" xml:space="preserve">
+    <value>操作员 ID</value>
+  </data>
+  <data name="Column_Role" xml:space="preserve">
+    <value>角色</value>
+  </data>
+  <data name="Column_Action" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="Column_Outcome" xml:space="preserve">
+    <value>结果</value>
+  </data>
+  <data name="Column_BookingNumber" xml:space="preserve">
+    <value>预订</value>
+  </data>
+  <data name="Column_Spot" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="Column_Impersonated" xml:space="preserve">
+    <value>由支持人员执行</value>
+  </data>
+  <data name="Column_Property" xml:space="preserve">
+    <value>场所</value>
+  </data>
+  <data name="Column_Category" xml:space="preserve">
+    <value>类别</value>
+  </data>
+  <data name="Column_Impersonator" xml:space="preserve">
+    <value>支持人员 ID</value>
+  </data>
+  <data name="Column_ClientIp" xml:space="preserve">
+    <value>IP 地址</value>
+  </data>
+  <data name="Column_UserAgent" xml:space="preserve">
+    <value>用户代理</value>
+  </data>
+  <data name="Column_TraceId" xml:space="preserve">
+    <value>跟踪 ID</value>
+  </data>
+  <data name="Value_Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="Value_No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="Outcome_succeeded" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="Outcome_failed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="Category_operator" xml:space="preserve">
+    <value>操作员</value>
+  </data>
+  <data name="Category_security" xml:space="preserve">
+    <value>安全</value>
+  </data>
+  <data name="Category_platform" xml:space="preserve">
+    <value>平台</value>
+  </data>
+  <data name="Action_identity_login_succeeded" xml:space="preserve">
+    <value>登录成功</value>
+  </data>
+  <data name="Action_identity_login_failed" xml:space="preserve">
+    <value>登录失败</value>
+  </data>
+  <data name="Action_identity_login_locked" xml:space="preserve">
+    <value>尝试次数过多，登录已锁定</value>
+  </data>
+  <data name="Action_identity_login_app_denied" xml:space="preserve">
+    <value>此应用拒绝登录</value>
+  </data>
+  <data name="Action_identity_second_factor_requested" xml:space="preserve">
+    <value>已发送验证码</value>
+  </data>
+  <data name="Action_identity_second_factor_failed" xml:space="preserve">
+    <value>验证码错误</value>
+  </data>
+  <data name="Action_identity_refresh_reuse_detected" xml:space="preserve">
+    <value>检测到会话重复使用：已关闭所有会话</value>
+  </data>
+  <data name="Action_identity_logout" xml:space="preserve">
+    <value>退出登录</value>
+  </data>
+  <data name="Action_identity_password_reset_requested" xml:space="preserve">
+    <value>已请求重置密码</value>
+  </data>
+  <data name="Action_identity_password_reset_completed" xml:space="preserve">
+    <value>密码已重置</value>
+  </data>
+  <data name="Action_identity_password_changed" xml:space="preserve">
+    <value>密码已更改</value>
+  </data>
+  <data name="Action_identity_account_registered" xml:space="preserve">
+    <value>账户已注册</value>
+  </data>
+  <data name="Action_identity_account_deleted" xml:space="preserve">
+    <value>账户已删除</value>
+  </data>
+  <data name="Action_identity_session_revoked" xml:space="preserve">
+    <value>会话已关闭</value>
+  </data>
+  <data name="Action_identity_user_created" xml:space="preserve">
+    <value>用户已创建</value>
+  </data>
+  <data name="Action_identity_user_updated" xml:space="preserve">
+    <value>用户已修改</value>
+  </data>
+  <data name="Action_identity_user_deleted" xml:space="preserve">
+    <value>用户已删除</value>
+  </data>
+  <data name="Action_identity_security_settings_changed" xml:space="preserve">
+    <value>安全设置已更改</value>
+  </data>
+  <data name="Action_identity_customer_created" xml:space="preserve">
+    <value>联系人已创建</value>
+  </data>
+  <data name="Action_identity_customer_updated" xml:space="preserve">
+    <value>联系人已修改</value>
+  </data>
+  <data name="Action_identity_customer_deleted" xml:space="preserve">
+    <value>联系人已删除</value>
+  </data>
+  <data name="Action_identity_customers_exported" xml:space="preserve">
+    <value>联系人已导出</value>
+  </data>
+  <data name="Action_identity_subscription_changed" xml:space="preserve">
+    <value>订阅已更改</value>
+  </data>
+  <data name="Action_identity_license_plan_saved" xml:space="preserve">
+    <value>许可方案已保存</value>
+  </data>
+  <data name="Action_identity_contract_uploaded" xml:space="preserve">
+    <value>合同已上传</value>
+  </data>
+  <data name="Action_identity_contract_published" xml:space="preserve">
+    <value>合同已发布</value>
+  </data>
+  <data name="Action_identity_contract_acceptance_changed" xml:space="preserve">
+    <value>合同接受状态已更改</value>
+  </data>
+  <data name="Action_identity_owner_created" xml:space="preserve">
+    <value>负责人已创建</value>
+  </data>
+  <data name="Action_identity_owner_updated" xml:space="preserve">
+    <value>负责人已修改</value>
+  </data>
+  <data name="Action_identity_impersonation_started" xml:space="preserve">
+    <value>已开始以管理者身份访问</value>
+  </data>
+  <data name="Action_identity_impersonation_session_opened" xml:space="preserve">
+    <value>已打开管理者会话</value>
+  </data>
+  <data name="Action_identity_external_token_issued" xml:space="preserve">
+    <value>已向合作伙伴签发令牌</value>
+  </data>
+  <data name="Action_identity_external_token_denied" xml:space="preserve">
+    <value>已拒绝向合作伙伴签发令牌</value>
+  </data>
+  <data name="Action_audit_entries_exported" xml:space="preserve">
+    <value>活动日志已导出</value>
+  </data>
+  <data name="Action_audit_platform_entries_exported" xml:space="preserve">
+    <value>平台日志已导出</value>
+  </data>
+</root>
