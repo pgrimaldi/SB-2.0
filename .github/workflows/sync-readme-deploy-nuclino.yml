@@ -7,9 +7,18 @@ on:
       - "**/*.md"
       - .github/nuclino-docs.json
       - .github/workflows/sync-readme-deploy-nuclino.yml
+      - .github/scripts/nuclino-mirror.js
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Rewrite every mirrored document, not only the ones changed since the last successful run
+        type: boolean
+        default: false
 
 permissions:
   contents: read
+  # Finds the last successful run, so the mirror rewrites only the documents changed since then.
+  actions: read
 
 concurrency:
   group: nuclino-docs
@@ -18,7 +27,7 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: Read documentation from dev
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -26,6 +35,8 @@ jobs:
           # Queued runs use the latest document, not an older triggering commit.
           ref: dev
           persist-credentials: false
+          # The mirror compares with the commit of the last successful run.
+          fetch-depth: 0
 
       - name: Update the configured Nuclino items
         env:
@@ -101,3 +112,16 @@ jobs:
             process.exitCode = 1;
           });
           NODE
+
+      - name: Mirror the configured folders
+        env:
+          NUCLINO_API_KEY: ${{ secrets.NUCLINO_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          SYNC_FULL: ${{ inputs.full }}
+        shell: bash
+        run: |
+          # Head commit of the last successful run: every run reads the latest dev, so the
+          # documents changed since then are a superset of what that run has not written.
+          SYNC_BASE=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow sync-readme-deploy-nuclino.yml             --branch dev --status success --limit 1 --json headSha --jq '.[0].headSha // empty')
+          export SYNC_BASE
+          node .github/scripts/nuclino-mirror.js

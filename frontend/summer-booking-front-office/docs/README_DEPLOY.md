@@ -384,11 +384,33 @@ Configurazione e primo test:
 2. Pubblicare il workflow sul branch `dev` con commit e push: il primo caricamento del workflow avvia anche la prima sincronizzazione.
 3. Aprire **Actions → Sync docs to Nuclino**, verificare che l'esecuzione sia riuscita e controllare il contenuto degli item Nuclino.
 
-I push su `dev` avviano la sincronizzazione se cambia un file `.md`, l'elenco JSON o il workflow. Si aggiornano tutti e soltanto i documenti elencati; un Markdown non elencato non viene pubblicato. Le esecuzioni non si sovrappongono e leggono la versione più recente di `dev`.
+I push su `dev` avviano la sincronizzazione se cambia un file `.md`, l'elenco JSON o il workflow. Si aggiornano tutti e soltanto i documenti elencati e quelli delle cartelle rispecchiate (vedi sotto); un Markdown fuori da entrambi non viene pubblicato. Le esecuzioni non si sovrappongono e leggono la versione più recente di `dev`.
 
 Prima di inviare qualsiasi documento si controllano tutte le associazioni: liste di lunghezze diverse, ID non validi, duplicati, file mancanti, vuoti, non Markdown o esterni al repository bloccano l'intera sincronizzazione. Anche un secret mancante blocca l'invio. Gli aggiornamenti API sono sequenziali: se una chiamata fallisce, il workflow si ferma, ma gli item già aggiornati restano aggiornati; il successivo push che attiva il workflow risincronizza l'elenco. La chiave e il contenuto delle risposte non vengono stampati nei log.
 
 Il workflow non installa dipendenze dell'applicazione, non esegue build e non accede ad AWS. Non modifica `buildspec.yml` né CodePipeline; gli eventuali deploy avviati dallo stesso push dipendono dai trigger già configurati in AWS.
+
+### Cartelle rispecchiate
+
+Per le cartelle con molti documenti, come `shared documentation/backend`, non si abbinano i file uno per uno: la lista `mirrors` di `.github/nuclino-docs.json` indica la cartella, la collection Nuclino che la ospita e le sottocartelle da escludere (percorsi relativi alla cartella):
+
+```json
+"mirrors": [
+  {
+    "path": "shared documentation/backend",
+    "collectionId": "<ID della collection Nuclino>",
+    "exclude": ["analisi-pre/db/old", "analisi-pre/db-no-copied"]
+  }
+]
+```
+
+Dopo il passo dei file elencati, lo script `.github/scripts/nuclino-mirror.js` ricrea sotto la collection l'albero della cartella: ogni sottocartella diventa una collection e ogni `.md` un item con il nome del file senza estensione. Ciò che manca viene creato, quindi un documento nuovo compare su Nuclino al primo push senza toccare il JSON. Nulla viene cancellato: un file rimosso o rinominato lascia il vecchio item, da archiviare a mano. Gli item si riconoscono dal titolo dentro la collection: un item rinominato su Nuclino viene ricreato con il nome originale.
+
+I link relativi vengono riscritti: verso un documento rispecchiato diventano link all'item Nuclino, verso un altro file del repository diventano link a GitHub sul branch `dev`, verso cartelle che non sono nel repository (sorgenti legacy, utility locali) restano solo come testo. In testa a ogni item c'è il rimando al file d'origine.
+
+Per non riscrivere centinaia di item a ogni push, lo script aggiorna solo i documenti cambiati dall'ultima esecuzione riuscita del workflow, più quelli appena creati. Riscrive tutto quando cambia qualcosa in `.github/`, quando non c'è un'esecuzione riuscita precedente o quando si avvia a mano **Actions → Sync docs to Nuclino → Run workflow** con l'opzione *full*. L'API concede 150 richieste al minuto: la prima sincronizzazione della cartella backend (circa 380 creazioni e 350 aggiornamenti) dura qualche minuto. Se un documento non viene accettato, gli altri proseguono e il workflow termina con l'elenco degli errori.
+
+Per attivare uno specchio: creare la collection su Nuclino, copiarne l'ID dall'URL in `collectionId` e fare push su `dev`. Con `collectionId` vuoto lo specchio viene saltato con un avviso. In locale lo script si prova senza chiave con `NUCLINO_DRY_RUN=1 node .github/scripts/nuclino-mirror.js` (serve un `collectionId` qualsiasi purché valido): stampa cosa creerebbe, senza chiamare Nuclino.
 
 Riferimenti: [aggiornamento di un item Nuclino](https://help.nuclino.com/fa38d15f-items-and-collections), [autenticazione e diritti della chiave](https://help.nuclino.com/8090bb76-authentication), [repository secrets GitHub](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
 

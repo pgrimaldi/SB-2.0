@@ -2,7 +2,14 @@
   "files": ["frontend/summer-booking-front-office/docs/README_DEPLOY.md",
   "frontend/summer-booking-front-office/docs/API_CONTRACTS.md"],
   "idsNuclino": [
-    "aec3346f-8065-47f6-a699-a1f591067b43", 
+    "aec3346f-8065-47f6-a699-a1f591067b43",
     "96244f97-18fa-4602-85fc-41b40b5372f2"
+  ],
+  "mirrors": [
+    {
+      "path": "shared documentation/backend",
+      "collectionId": "",
+      "exclude": ["analisi-pre/db/old", "analisi-pre/db-no-copied"]
+    }
   ]
 }

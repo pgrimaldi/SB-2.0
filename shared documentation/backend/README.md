@@ -56,4 +56,11 @@ Il nuovo sistema, per come è stato deciso.
 Molti documenti, soprattutto in `analisi-pre`, citano il codice del sistema legacy (`back-pre`,
 `front-pre` e gli altri frontend), i mockup e le utility di migrazione. Quelle cartelle non fanno
 parte di questo repository: i link funzionano solo nella copia di lavoro locale, dove il repo si trova in
-`repo/SB-2.0/` accanto a esse.
+`repo/SB-2.0/` accanto a esse. Su Nuclino compaiono come testo semplice.
+
+## Copia su Nuclino
+
+Questa cartella è copiata su Nuclino a ogni push su `dev`, esclusi `analisi-pre/db/old` e
+`analisi-pre/db-no-copied`. Il file nel repository è l'originale: le modifiche fatte su Nuclino
+vengono sovrascritte. Funzionamento e configurazione sono descritti nella guida
+[README_DEPLOY.md](../../frontend/summer-booking-front-office/docs/README_DEPLOY.md), §11.
