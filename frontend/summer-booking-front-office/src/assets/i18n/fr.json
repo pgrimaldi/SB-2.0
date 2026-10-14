@@ -124,7 +124,7 @@
     },
     "login": {
       "title": "Se connecter",
-      "email": "E-mail",
+      "username": "E-mail ou identifiant",
       "password": "Mot de passe",
       "remember": "Se souvenir de moi",
       "forgot": "Mot de passe oublié ?",

@@ -124,7 +124,7 @@
     },
     "login": {
       "title": "登录",
-      "email": "电子邮件",
+      "username": "电子邮件或用户名",
       "password": "密码",
       "remember": "记住我的登录信息",
       "forgot": "忘记密码？",

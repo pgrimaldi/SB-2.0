@@ -124,7 +124,7 @@
     },
     "login": {
       "title": "Iniciar sesión",
-      "email": "Correo electrónico",
+      "username": "Correo o usuario",
       "password": "Contraseña",
       "remember": "Recordar mis credenciales",
       "forgot": "¿Has olvidado la contraseña?",

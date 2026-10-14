@@ -124,7 +124,7 @@
     },
     "login": {
       "title": "Anmelden",
-      "email": "E-Mail",
+      "username": "E-Mail oder Benutzername",
       "password": "Passwort",
       "remember": "Angemeldet bleiben",
       "forgot": "Passwort vergessen?",

@@ -10,9 +10,8 @@
     <form class="login__dialog__form" (submit)="login($event)">
       <app-text-field
         [attr.inert]="pending() ? '' : null"
-        [isEmailField]="true"
-        autocomplete="email"
-        [label]="'hub.login.email' | translate"
+        autocomplete="username"
+        [label]="'hub.login.username' | translate"
         [formField]="credentialsForm.username"
         [error]="usernameError()"
       />
