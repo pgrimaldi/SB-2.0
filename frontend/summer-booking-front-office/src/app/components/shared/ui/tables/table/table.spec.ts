@@ -188,7 +188,7 @@ describe('Table', () => {
     next().click();
     await fixture.whenStable();
 
-    host.filters.set([{ field: 'bookingDayType', value: 'Morning' }]);
+    host.filters.set([{ field: 'bookingDayType', value: ['Morning'] }]);
     await fixture.whenStable();
 
     expect(host.requests.at(-1)).toEqual({
@@ -196,7 +196,7 @@ describe('Table', () => {
       page: 1,
       pageSize: 10,
       search: '',
-      filters: [{ field: 'bookingDayType', value: 'Morning' }],
+      filters: [{ field: 'bookingDayType', value: ['Morning'] }],
       sortField: '',
       sortDirection: 'Ascending',
     });

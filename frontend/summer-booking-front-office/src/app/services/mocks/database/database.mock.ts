@@ -466,7 +466,8 @@ function filterValue(filters: unknown, field: string): string | null {
   const filter = Array.isArray(filters)
     ? (filters as Partial<PageFilter>[]).find((item) => item.field === field)
     : undefined;
-  return typeof filter?.value === 'string' ? filter.value : null;
+  const [value] = Array.isArray(filter?.value) ? filter.value : [];
+  return typeof value === 'string' ? value : null;
 }
 
 function positiveInteger(value: unknown, fallback: number): number {

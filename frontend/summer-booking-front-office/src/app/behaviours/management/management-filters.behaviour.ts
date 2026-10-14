@@ -38,9 +38,9 @@ export class ManagementFiltersBehaviour {
   readonly filters = computed<PageFilter[]>(() => {
     const { start, end } = this.settledDates();
     return [
-      { field: 'datetimeFrom', value: utcDayStart(start) },
-      { field: 'datetimeTo', value: utcDayEnd(end) },
-      { field: 'bookingDayType', value: this.period() },
+      { field: 'datetimeFrom', value: [utcDayStart(start)] },
+      { field: 'datetimeTo', value: [utcDayEnd(end)] },
+      { field: 'bookingDayType', value: [this.period()] },
     ];
   });
 }

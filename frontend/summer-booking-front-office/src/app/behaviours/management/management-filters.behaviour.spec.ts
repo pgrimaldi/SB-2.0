@@ -24,9 +24,9 @@ describe('ManagementFiltersBehaviour', () => {
     vi.advanceTimersByTime(DATES_DEBOUNCE);
 
     expect(filters.filters()).toEqual([
-      { field: 'datetimeFrom', value: '2026-07-01T00:00:00.000Z' },
-      { field: 'datetimeTo', value: '2026-07-03T23:59:59.999Z' },
-      { field: 'bookingDayType', value: BookingDayType.Morning },
+      { field: 'datetimeFrom', value: ['2026-07-01T00:00:00.000Z'] },
+      { field: 'datetimeTo', value: ['2026-07-03T23:59:59.999Z'] },
+      { field: 'bookingDayType', value: [BookingDayType.Morning] },
     ]);
   });
 
@@ -43,9 +43,9 @@ describe('ManagementFiltersBehaviour', () => {
     expect(filters.filters()).toBe(first); // still moving: nothing asked yet
 
     vi.advanceTimersByTime(1);
-    expect(value('datetimeTo')).toBe(`${end.getFullYear()}-01-15T23:59:59.999Z`);
+    expect(value('datetimeTo')).toEqual([`${end.getFullYear()}-01-15T23:59:59.999Z`]);
 
     filters.period.set(BookingDayType.Afternoon);
-    expect(value('bookingDayType')).toBe(BookingDayType.Afternoon);
+    expect(value('bookingDayType')).toEqual([BookingDayType.Afternoon]);
   });
 });

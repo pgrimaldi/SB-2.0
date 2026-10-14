@@ -118,10 +118,13 @@ const SELECT_CONFIG: MatPaginatorSelectConfig = { panelClass: 'select__panel' };
 /** .NET enum names, as the API expects them. */
 export type TableSortDirection = 'Ascending' | 'Descending';
 
-/** A filter chosen by the page, e.g. `{ field: 'bookingDayType', value: 'FullDay' }`. */
+/**
+ * A filter chosen by the page: one per field, with the chosen values as alternatives, e.g.
+ * `{ field: 'bookingTypology', value: ['Daily', 'SevenDays'] }`.
+ */
 export interface TableFilter {
   field: string;
-  value: string;
+  value: string[];
 }
 
 /**

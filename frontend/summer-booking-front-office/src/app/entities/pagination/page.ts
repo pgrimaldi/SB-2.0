@@ -4,7 +4,7 @@ export type SortDirection = 'Ascending' | 'Descending';
 
 export interface PageFilter {
   field: string;
-  value: string;
+  value: string[];
 }
 
 export interface PageRequest {

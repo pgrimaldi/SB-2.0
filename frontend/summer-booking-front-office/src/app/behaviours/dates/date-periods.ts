@@ -16,8 +16,8 @@ export function utcDayEnd(day: Date): string {
 export function dateRangeFilters(range: DateRange | null): PageFilter[] {
   return range
     ? [
-        { field: 'datetimeFrom', value: utcDayStart(range.start) },
-        { field: 'datetimeTo', value: utcDayEnd(range.end) },
+        { field: 'datetimeFrom', value: [utcDayStart(range.start)] },
+        { field: 'datetimeTo', value: [utcDayEnd(range.end)] },
       ]
     : [];
 }

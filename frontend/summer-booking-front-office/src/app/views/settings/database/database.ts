@@ -459,12 +459,13 @@ export class Database {
   }
 }
 
-/** One filter for each chosen value: values of the same field are alternatives. */
+/** One filter per field with its chosen values (alternatives); a field with no choice is left out. */
 function pageFiltersOf(filters: ExistingBookingFilters): PageFilter[] {
-  return [
-    ...filters.bookingTypologies.map((value) => ({ field: 'bookingTypology', value })),
-    ...filters.agreementBookings.map((value) => ({ field: 'agreementBooking', value })),
-    ...filters.affiliatedHotels.map(({ id }) => ({ field: 'idAffiliatedHotel', value: id })),
-    ...filters.paymentStatuses.map((value) => ({ field: 'paymentStatus', value })),
+  const all: PageFilter[] = [
+    { field: 'bookingTypology', value: [...filters.bookingTypologies] },
+    { field: 'agreementBooking', value: [...filters.agreementBookings] },
+    { field: 'idAffiliatedHotel', value: filters.affiliatedHotels.map(({ id }) => id) },
+    { field: 'paymentStatus', value: [...filters.paymentStatuses] },
   ];
+  return all.filter(({ value }) => value.length);
 }

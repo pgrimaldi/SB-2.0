@@ -49,7 +49,7 @@ Stato: 200 OK.
 |---|---|---|
 | `accessToken` | string | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio` |
 | `expiresIn` | number (intero) | `900` |
-| `user` | AuthUser (oggetto) | (oggetto, righe sotto) |
+| `user` | AuthUser (oggetto) | `{"email": "mario.rossi@example.com", "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d", "roles": ["Manager"], "isElectronicReceiptAccepted": false}` |
 | `user.email` | string | `mario.rossi@example.com` |
 | `user.idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `user.roles` | string[] (array di stringhe) | `["Manager"]` |
@@ -87,7 +87,7 @@ Stato: 200 OK.
 |---|---|---|
 | `accessToken` | string | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio` |
 | `expiresIn` | number (intero) | `900` |
-| `user` | AuthUser (oggetto) | (oggetto, righe sotto) |
+| `user` | AuthUser (oggetto) | `{"email": "mario.rossi@example.com", "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d", "roles": ["Manager"], "isElectronicReceiptAccepted": false}` |
 | `user.email` | string | `mario.rossi@example.com` |
 | `user.idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `user.roles` | string[] (array di stringhe) | `["Manager"]` |
@@ -126,7 +126,26 @@ Magazzino: elenco articoli.
   "page": 1,
   "pageSize": 10,
   "search": "lettino",
-  "filters": [],
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-07-01T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-07-31T23:59:59.999Z"
+      ]
+    },
+    {
+      "field": "bookingDayType",
+      "value": [
+        "FullDay"
+      ]
+    }
+  ],
   "sortField": "name",
   "sortDirection": "Ascending"
 }
@@ -138,9 +157,9 @@ Magazzino: elenco articoli.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lettino` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[]` (vuoto in questa API; sotto un elemento di esempio) |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-07-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-07-31T23:59:59.999Z"]}, {"field": "bookingDayType", "value": ["FullDay"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-07-01T00:00:00.000Z"]` |
 | `sortField` | string | `name` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -165,7 +184,7 @@ Stato: 200 OK.
       "name": "Lettino XL",
       "totalQuantity": 16,
       "availableQuantity": 16,
-      "thresholdQuantity": null,
+      "thresholdQuantity": 4,
       "isThresholdWarningActive": false
     }
   ]
@@ -175,7 +194,7 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | WarehouseItem[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `rows[]` | WarehouseItem[] (array di oggetti) | `[{"idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "name": "Lettino", "totalQuantity": 120, "availableQuantity": 84, "thresholdQuantity": 10, "isThresholdWarningActive": true}, {"idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b", "name": "Lettino XL", "totalQuantity": 16, "availableQuantity": 16, "thresholdQuantity": 4, "isThresholdWarningActive": false}]` |
 | `rows[].idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `rows[].name` | string | `Lettino` |
 | `rows[].totalQuantity` | number (intero) | `120` |
@@ -239,9 +258,9 @@ Magazzino: aggiunta di un articolo.
 {
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
-  "name": null,
+  "name": "Lettino",
   "totalQuantity": 10,
-  "availableQuantity": null,
+  "availableQuantity": 120,
   "thresholdQuantity": 5,
   "isThresholdWarningActive": true
 }
@@ -251,9 +270,9 @@ Magazzino: aggiunta di un articolo.
 |---|---|---|
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
-| `name` | string \| null | `null` |
+| `name` | string \| null | `Lettino` |
 | `totalQuantity` | number (intero > 0) | `10` |
-| `availableQuantity` | number (intero) \| null | `null` |
+| `availableQuantity` | number (intero) \| null | `120` |
 | `thresholdQuantity` | number (intero ≥ 0) \| null | `5` |
 | `isThresholdWarningActive` | boolean | `true` |
 
@@ -367,19 +386,43 @@ Database: elenco prenotazioni.
   "filters": [
     {
       "field": "datetimeFrom",
-      "value": "2026-07-01T00:00:00.000Z"
+      "value": [
+        "2026-07-01T00:00:00.000Z"
+      ]
     },
     {
       "field": "datetimeTo",
-      "value": "2026-08-31T23:59:59.999Z"
+      "value": [
+        "2026-08-31T23:59:59.999Z"
+      ]
+    },
+    {
+      "field": "bookingTypology",
+      "value": [
+        "Daily",
+        "SevenDays"
+      ]
+    },
+    {
+      "field": "agreementBooking",
+      "value": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "field": "idAffiliatedHotel",
+      "value": [
+        "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41",
+        "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42"
+      ]
     },
     {
       "field": "paymentStatus",
-      "value": "FullyPaid"
-    },
-    {
-      "field": "paymentStatus",
-      "value": "PartiallyPaid"
+      "value": [
+        "FullyPaid",
+        "PartiallyPaid"
+      ]
     }
   ],
   "sortField": "dateFrom",
@@ -393,9 +436,9 @@ Database: elenco prenotazioni.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `rossi` |
-| `filters[]` | PageFilter[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-07-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-08-31T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["Daily", "SevenDays"]}, {"field": "agreementBooking", "value": ["Yes", "No"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41", "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42"]}, {"field": "paymentStatus", "value": ["FullyPaid", "PartiallyPaid"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-07-01T00:00:00.000Z"]` |
 | `sortField` | string | `dateFrom` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -423,7 +466,7 @@ Stato: 200 OK.
       "reservationKind": "Service",
       "dateFrom": "2026-08-02T00:00:00.000Z",
       "dateTo": "2026-08-02T00:00:00.000Z",
-      "agreementName": null,
+      "agreementName": "Hotel Miramare",
       "reservationStatus": "Pending",
       "isTrashed": false
     }
@@ -434,7 +477,7 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | ExistingBookingItem[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "customerName": "Mario Rossi", "reservationKind": "Spot", "dateFrom": "2026-07-05T00:00:00.000Z", "dateTo": "2026-07-12T00:00:00.000Z", "agreementName": "Hotel Esempio", "reservationStatus": "Confirmed", "isTrashed": false}, {"idBooking": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "customerName": "Anna Rossi", "reservationKind": "Service", "dateFrom": "2026-08-02T00:00:00.000Z", "dateTo": "2026-08-02T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "Pending", "isTrashed": false}]` |
 | `rows[].idBooking` | string (UUID) | `3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70` |
 | `rows[].customerName` | string \| null | `Mario Rossi` |
 | `rows[].reservationKind` | string (enum ReservationKind) \| null | `Spot` |
@@ -530,9 +573,46 @@ Database: elenco del cestino.
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
-  "search": "",
-  "filters": [],
-  "sortField": "",
+  "search": "lilla",
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-06-01T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-06-30T23:59:59.999Z"
+      ]
+    },
+    {
+      "field": "bookingTypology",
+      "value": [
+        "MultiDay"
+      ]
+    },
+    {
+      "field": "agreementBooking",
+      "value": [
+        "Yes"
+      ]
+    },
+    {
+      "field": "idAffiliatedHotel",
+      "value": [
+        "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41"
+      ]
+    },
+    {
+      "field": "paymentStatus",
+      "value": [
+        "AwaitingPayment"
+      ]
+    }
+  ],
+  "sortField": "customerName",
   "sortDirection": "Ascending"
 }
 ```
@@ -542,11 +622,11 @@ Database: elenco del cestino.
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
-| `search` | string | `` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[]` (vuoto in questa API; sotto un elemento di esempio) |
+| `search` | string | `lilla` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-06-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-06-30T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["MultiDay"]}, {"field": "agreementBooking", "value": ["Yes"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41"]}, {"field": "paymentStatus", "value": ["AwaitingPayment"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
-| `sortField` | string | `` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-06-01T00:00:00.000Z"]` |
+| `sortField` | string | `customerName` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
 #### Response
@@ -563,7 +643,7 @@ Stato: 200 OK.
       "reservationKind": "Spot",
       "dateFrom": "2026-06-05T00:00:00.000Z",
       "dateTo": "2026-06-07T00:00:00.000Z",
-      "agreementName": null,
+      "agreementName": "Hotel Miramare",
       "reservationStatus": "Cancelled",
       "isTrashed": true
     }
@@ -574,13 +654,13 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `1` |
-| `rows[]` | ExistingBookingItem[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d", "customerName": "Roberto Lilla", "reservationKind": "Spot", "dateFrom": "2026-06-05T00:00:00.000Z", "dateTo": "2026-06-07T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "Cancelled", "isTrashed": true}]` |
 | `rows[].idBooking` | string (UUID) | `9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d` |
 | `rows[].customerName` | string \| null | `Roberto Lilla` |
 | `rows[].reservationKind` | string (enum ReservationKind) \| null | `Spot` |
 | `rows[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-05T00:00:00.000Z` |
 | `rows[].dateTo` | string (ISO 8601, UTC) \| null | `2026-06-07T00:00:00.000Z` |
-| `rows[].agreementName` | string \| null | `null` |
+| `rows[].agreementName` | string \| null | `Hotel Miramare` |
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Cancelled` |
 | `rows[].isTrashed` | boolean | `true` |
 
@@ -671,9 +751,17 @@ Fiscalizzazione: stampanti.
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 5,
-  "search": "",
-  "filters": [],
-  "sortField": "",
+  "search": "epson",
+  "filters": [
+    {
+      "field": "isEnabled",
+      "value": [
+        "true",
+        "false"
+      ]
+    }
+  ],
+  "sortField": "printerName",
   "sortDirection": "Ascending"
 }
 ```
@@ -683,11 +771,11 @@ Fiscalizzazione: stampanti.
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `5` |
-| `search` | string | `` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[]` (vuoto in questa API; sotto un elemento di esempio) |
-| `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
-| `sortField` | string | `` |
+| `search` | string | `epson` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "isEnabled", "value": ["true", "false"]}]` |
+| `filters[].field` | string | `isEnabled` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["true", "false"]` |
+| `sortField` | string | `printerName` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
 #### Response
@@ -717,7 +805,7 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | PrinterItemListResponse[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `rows[]` | PrinterItemListResponse[] (array di oggetti) | `[{"idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60", "printerName": "EPSON - 1", "printerIP": "192.0.2.10", "isEnabled": false}, {"idPrinter": "9a4e6b2c-1d3f-4e5a-8b7c-2f6d1e3a4b50", "printerName": "EPSON - 2", "printerIP": "192.0.2.11", "isEnabled": true}]` |
 | `rows[].idPrinter` | string (UUID) | `5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60` |
 | `rows[].printerName` | string | `EPSON - 1` |
 | `rows[].printerIP` | string | `192.0.2.10` |
@@ -982,11 +1070,11 @@ Stato: 200 OK.
   "isScheduledAbsenceSharing": true,
   "isManualCreditAssignmentEnabled": false,
   "resoldDayCreditQuantity": 1,
-  "manualCreditValue": null,
+  "manualCreditValue": 2.5,
   "isAutomaticVoucherEnabled": true,
   "voucherCreditValue": 5.5,
   "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": null
+  "prepaidCardCreditValue": 10
 }
 ```
 
@@ -1000,11 +1088,11 @@ Stato: 200 OK.
 | `isScheduledAbsenceSharing` | boolean | `true` |
 | `isManualCreditAssignmentEnabled` | boolean | `false` |
 | `resoldDayCreditQuantity` | number (intero) \| null | `1` |
-| `manualCreditValue` | number (decimale, €) \| null | `null` |
+| `manualCreditValue` | number (decimale, €) \| null | `2.5` |
 | `isAutomaticVoucherEnabled` | boolean | `true` |
 | `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
 | `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €) \| null | `null` |
+| `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
 
 ### POST `/api/sharing/save-information`
 
@@ -1022,11 +1110,11 @@ Sharing: salvataggio delle impostazioni.
   "isScheduledAbsenceSharing": true,
   "isManualCreditAssignmentEnabled": false,
   "resoldDayCreditQuantity": 1,
-  "manualCreditValue": null,
+  "manualCreditValue": 2.5,
   "isAutomaticVoucherEnabled": true,
   "voucherCreditValue": 5.5,
   "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": null,
+  "prepaidCardCreditValue": 10,
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
 }
 ```
@@ -1041,11 +1129,11 @@ Sharing: salvataggio delle impostazioni.
 | `isScheduledAbsenceSharing` | boolean | `true` |
 | `isManualCreditAssignmentEnabled` | boolean | `false` |
 | `resoldDayCreditQuantity` | number (intero) \| null | `1` |
-| `manualCreditValue` | number (decimale, €) \| null | `null` |
+| `manualCreditValue` | number (decimale, €) \| null | `2.5` |
 | `isAutomaticVoucherEnabled` | boolean | `true` |
 | `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
 | `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €) \| null | `null` |
+| `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 
 #### Response
@@ -1067,8 +1155,16 @@ Sconti e voucher: elenco.
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
-  "search": "",
-  "filters": [],
+  "search": "g",
+  "filters": [
+    {
+      "field": "discountType",
+      "value": [
+        "Percentage",
+        "Fixed"
+      ]
+    }
+  ],
   "sortField": "validFrom",
   "sortDirection": "Ascending"
 }
@@ -1079,10 +1175,10 @@ Sconti e voucher: elenco.
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
-| `search` | string | `` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[]` (vuoto in questa API; sotto un elemento di esempio) |
-| `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
+| `search` | string | `g` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "discountType", "value": ["Percentage", "Fixed"]}]` |
+| `filters[].field` | string | `discountType` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Percentage", "Fixed"]` |
 | `sortField` | string | `validFrom` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -1117,7 +1213,7 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | VoucherItem[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `rows[]` | VoucherItem[] (array di oggetti) | `[{"idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01", "voucherName": "Giugno", "validFrom": "2026-06-01T00:00:00.000Z", "validTo": "2026-06-30T00:00:00.000Z", "discountType": "Percentage", "discountValue": 10}, {"idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02", "voucherName": "Ferragosto", "validFrom": "2026-08-12T00:00:00.000Z", "validTo": "2026-08-16T00:00:00.000Z", "discountType": "Fixed", "discountValue": 5}]` |
 | `rows[].idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01` |
 | `rows[].voucherName` | string \| null | `Giugno` |
 | `rows[].validFrom` | string (data ISO 8601 UTC) \| null | `2026-06-01T00:00:00.000Z` |
@@ -1236,7 +1332,7 @@ Configurazione email: invio di prova.
   "smtpServerAddress": "smtp.lido-demo.example",
   "smtpPort": 587,
   "smtpUsername": "prenotazioni@lido-demo.example",
-  "smtpPassword": null,
+  "smtpPassword": "password-smtp-digitata",
   "smtpSecurity": "Tls"
 }
 ```
@@ -1249,7 +1345,7 @@ Configurazione email: invio di prova.
 | `smtpServerAddress` | string | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero 1–65535) | `587` |
 | `smtpUsername` | string | `prenotazioni@lido-demo.example` |
-| `smtpPassword` | string \| null | `null` |
+| `smtpPassword` | string \| null | `password-smtp-digitata` |
 | `smtpSecurity` | string (enum SmtpSecurity) \| null | `Tls` |
 
 #### Response
@@ -1272,7 +1368,7 @@ Configurazione email: salvataggio.
   "smtpServerAddress": "smtp.lido-demo.example",
   "smtpPort": 465,
   "smtpUsername": "prenotazioni@lido-demo.example",
-  "smtpPassword": null,
+  "smtpPassword": "password-smtp-digitata",
   "smtpSecurity": "Ssl"
 }
 ```
@@ -1285,7 +1381,7 @@ Configurazione email: salvataggio.
 | `smtpServerAddress` | string | `smtp.lido-demo.example` |
 | `smtpPort` | number (intero 1–65535) | `465` |
 | `smtpUsername` | string | `prenotazioni@lido-demo.example` |
-| `smtpPassword` | string \| null | `null` |
+| `smtpPassword` | string \| null | `password-smtp-digitata` |
 | `smtpSecurity` | string (enum SmtpSecurity) \| null | `Ssl` |
 
 #### Response
@@ -1329,7 +1425,7 @@ Stato: 200 OK.
 |---|---|---|
 | `phoneNumber` | string | `050 7916620` |
 | `mailAddress` | string | `info@summerbooking.it` |
-| `supportHour` | string[] | `["1 maggio - 30 settembre, dal lunedì alla domenica: dalle 8:30 alle 20:00", …` |
+| `supportHour` | string[] | `["1 maggio - 30 settembre, dal lunedì alla domenica: dalle 8:30 alle 20:00", "1 ottobre - 30 aprile, dal lunedì al venerdì: dalle 9:00 alle 18:00"]` |
 
 ### POST `/api/system/contact-support`
 
@@ -1343,7 +1439,7 @@ Assistenza: messaggio al supporto.
   "firstName": "Mario",
   "lastName": "Rossi",
   "email": "mario.rossi@example.com",
-  "mobilePhone": null,
+  "mobilePhone": "+39 333 123 4567",
   "message": "Buongiorno, vorrei sapere come esportare il listino."
 }
 ```
@@ -1354,7 +1450,7 @@ Assistenza: messaggio al supporto.
 | `firstName` | string | `Mario` |
 | `lastName` | string | `Rossi` |
 | `email` | string | `mario.rossi@example.com` |
-| `mobilePhone` | string \| null | `null` |
+| `mobilePhone` | string \| null | `+39 333 123 4567` |
 | `message` | string | `Buongiorno, vorrei sapere come esportare il listino.` |
 
 #### Response

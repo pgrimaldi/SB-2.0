@@ -16,7 +16,26 @@
   "page": 1,
   "pageSize": 10,
   "search": "lettino",
-  "filters": [],
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-07-01T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-07-31T23:59:59.999Z"
+      ]
+    },
+    {
+      "field": "bookingDayType",
+      "value": [
+        "FullDay"
+      ]
+    }
+  ],
   "sortField": "name",
   "sortDirection": "Ascending"
 }
@@ -28,9 +47,9 @@
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lettino` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-07-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-07-31T23:59:59.999Z"]}, {"field": "bookingDayType", "value": ["FullDay"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-07-01T00:00:00.000Z"]` |
 | `sortField` | string | `name` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -55,7 +74,7 @@
       "name": "Lettino XL",
       "totalQuantity": 16,
       "availableQuantity": 16,
-      "thresholdQuantity": null,
+      "thresholdQuantity": 4,
       "isThresholdWarningActive": false
     }
   ]
@@ -65,7 +84,7 @@
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | WarehouseItem[] (array di oggetti) | — |
+| `rows[]` | WarehouseItem[] (array di oggetti) | `[{"idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "name": "Lettino", "totalQuantity": 120, "availableQuantity": 84, "thresholdQuantity": 10, "isThresholdWarningActive": true}, {"idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b", "name": "Lettino XL", "totalQuantity": 16, "availableQuantity": 16, "thresholdQuantity": 4, "isThresholdWarningActive": false}]` |
 | `rows[].idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `rows[].name` | string | `Lettino` |
 | `rows[].totalQuantity` | number (intero) | `120` |
@@ -133,9 +152,9 @@
 {
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
-  "name": null,
+  "name": "Lettino",
   "totalQuantity": 10,
-  "availableQuantity": null,
+  "availableQuantity": 120,
   "thresholdQuantity": 5,
   "isThresholdWarningActive": true
 }
@@ -145,9 +164,9 @@
 |---|---|---|
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
-| `name` | string \| null | `null` |
+| `name` | string \| null | `Lettino` |
 | `totalQuantity` | number (intero > 0) | `10` |
-| `availableQuantity` | number (intero) \| null | `null` |
+| `availableQuantity` | number (intero) \| null | `120` |
 | `thresholdQuantity` | number (intero ≥ 0) \| null | `5` |
 | `isThresholdWarningActive` | boolean | `true` |
 
@@ -261,19 +280,43 @@
   "filters": [
     {
       "field": "datetimeFrom",
-      "value": "2026-07-01T00:00:00.000Z"
+      "value": [
+        "2026-07-01T00:00:00.000Z"
+      ]
     },
     {
       "field": "datetimeTo",
-      "value": "2026-08-31T23:59:59.999Z"
+      "value": [
+        "2026-08-31T23:59:59.999Z"
+      ]
+    },
+    {
+      "field": "bookingTypology",
+      "value": [
+        "Daily",
+        "SevenDays"
+      ]
+    },
+    {
+      "field": "agreementBooking",
+      "value": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "field": "idAffiliatedHotel",
+      "value": [
+        "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41",
+        "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42"
+      ]
     },
     {
       "field": "paymentStatus",
-      "value": "FullyPaid"
-    },
-    {
-      "field": "paymentStatus",
-      "value": "PartiallyPaid"
+      "value": [
+        "FullyPaid",
+        "PartiallyPaid"
+      ]
     }
   ],
   "sortField": "dateFrom",
@@ -287,9 +330,9 @@
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `rossi` |
-| `filters[]` | PageFilter[] (array di oggetti) | — |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-07-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-08-31T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["Daily", "SevenDays"]}, {"field": "agreementBooking", "value": ["Yes", "No"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41", "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a42"]}, {"field": "paymentStatus", "value": ["FullyPaid", "PartiallyPaid"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-07-01T00:00:00.000Z"]` |
 | `sortField` | string | `dateFrom` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -317,7 +360,7 @@
       "reservationKind": "Service",
       "dateFrom": "2026-08-02T00:00:00.000Z",
       "dateTo": "2026-08-02T00:00:00.000Z",
-      "agreementName": null,
+      "agreementName": "Hotel Miramare",
       "reservationStatus": "Pending",
       "isTrashed": false
     }
@@ -328,7 +371,7 @@
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | ExistingBookingItem[] (array di oggetti) | — |
+| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "customerName": "Mario Rossi", "reservationKind": "Spot", "dateFrom": "2026-07-05T00:00:00.000Z", "dateTo": "2026-07-12T00:00:00.000Z", "agreementName": "Hotel Esempio", "reservationStatus": "Confirmed", "isTrashed": false}, {"idBooking": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01", "customerName": "Anna Rossi", "reservationKind": "Service", "dateFrom": "2026-08-02T00:00:00.000Z", "dateTo": "2026-08-02T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "Pending", "isTrashed": false}]` |
 | `rows[].idBooking` | string (UUID) | `3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70` |
 | `rows[].customerName` | string \| null | `Mario Rossi` |
 | `rows[].reservationKind` | string (enum ReservationKind) \| null | `Spot` |
@@ -428,9 +471,46 @@
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
-  "search": "",
-  "filters": [],
-  "sortField": "",
+  "search": "lilla",
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-06-01T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-06-30T23:59:59.999Z"
+      ]
+    },
+    {
+      "field": "bookingTypology",
+      "value": [
+        "MultiDay"
+      ]
+    },
+    {
+      "field": "agreementBooking",
+      "value": [
+        "Yes"
+      ]
+    },
+    {
+      "field": "idAffiliatedHotel",
+      "value": [
+        "5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41"
+      ]
+    },
+    {
+      "field": "paymentStatus",
+      "value": [
+        "AwaitingPayment"
+      ]
+    }
+  ],
+  "sortField": "customerName",
   "sortDirection": "Ascending"
 }
 ```
@@ -440,11 +520,11 @@
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
-| `search` | string | `` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `search` | string | `lilla` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-06-01T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-06-30T23:59:59.999Z"]}, {"field": "bookingTypology", "value": ["MultiDay"]}, {"field": "agreementBooking", "value": ["Yes"]}, {"field": "idAffiliatedHotel", "value": ["5b1d2c3e-4f50-4a61-8b72-9c0d1e2f3a41"]}, {"field": "paymentStatus", "value": ["AwaitingPayment"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
-| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
-| `sortField` | string | `` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-06-01T00:00:00.000Z"]` |
+| `sortField` | string | `customerName` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
 #### Response
@@ -461,7 +541,7 @@
       "reservationKind": "Spot",
       "dateFrom": "2026-06-05T00:00:00.000Z",
       "dateTo": "2026-06-07T00:00:00.000Z",
-      "agreementName": null,
+      "agreementName": "Hotel Miramare",
       "reservationStatus": "Cancelled",
       "isTrashed": true
     }
@@ -472,13 +552,13 @@
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `1` |
-| `rows[]` | ExistingBookingItem[] (array di oggetti) | — |
+| `rows[]` | ExistingBookingItem[] (array di oggetti) | `[{"idBooking": "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d", "customerName": "Roberto Lilla", "reservationKind": "Spot", "dateFrom": "2026-06-05T00:00:00.000Z", "dateTo": "2026-06-07T00:00:00.000Z", "agreementName": "Hotel Miramare", "reservationStatus": "Cancelled", "isTrashed": true}]` |
 | `rows[].idBooking` | string (UUID) | `9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d` |
 | `rows[].customerName` | string \| null | `Roberto Lilla` |
 | `rows[].reservationKind` | string (enum ReservationKind) \| null | `Spot` |
 | `rows[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-05T00:00:00.000Z` |
 | `rows[].dateTo` | string (ISO 8601, UTC) \| null | `2026-06-07T00:00:00.000Z` |
-| `rows[].agreementName` | string \| null | `null` |
+| `rows[].agreementName` | string \| null | `Hotel Miramare` |
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Cancelled` |
 | `rows[].isTrashed` | boolean | `true` |
 
