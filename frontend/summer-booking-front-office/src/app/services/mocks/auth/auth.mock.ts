@@ -147,7 +147,7 @@ function storage(remember: boolean): Storage | undefined {
   try {
     return remember ? localStorage : sessionStorage;
   } catch {
-    return undefined;
+    return;
   }
 }
 

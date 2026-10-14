@@ -66,7 +66,7 @@ function isCode(value: unknown): value is string {
 
 function readArgs(value: unknown): ApiProblemArgs | undefined {
   if (!isRecord(value)) {
-    return undefined;
+    return;
   }
   const entries = Object.entries(value).filter(
     ([name, arg]) =>
@@ -79,7 +79,7 @@ function readArgs(value: unknown): ApiProblemArgs | undefined {
 
 function readFieldErrors(value: unknown): readonly ApiFieldError[] | undefined {
   if (!Array.isArray(value)) {
-    return undefined;
+    return;
   }
   const errors = value
     .filter(

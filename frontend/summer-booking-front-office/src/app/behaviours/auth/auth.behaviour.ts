@@ -364,7 +364,7 @@ export class AuthBehaviour implements OnDestroy {
     try {
       return this.window?.localStorage;
     } catch {
-      return undefined;
+      return;
     }
   }
 
@@ -373,7 +373,7 @@ export class AuthBehaviour implements OnDestroy {
     try {
       return this.window?.sessionStorage;
     } catch {
-      return undefined;
+      return;
     }
   }
 
