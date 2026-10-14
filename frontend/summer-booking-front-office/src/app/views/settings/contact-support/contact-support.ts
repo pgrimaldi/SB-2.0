@@ -61,9 +61,9 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     ),
     { initialValue: null },
   );
-  protected readonly phoneIcon = '/assets/images/phone.svg';
-  protected readonly emailIcon = '/assets/images/email.svg';
-  protected readonly clockIcon = '/assets/images/clock.svg';
+  protected readonly phoneIcon = '/assets/images/ContactSupport_Phone.svg';
+  protected readonly emailIcon = '/assets/images/ContactSupport_Email.svg';
+  protected readonly clockIcon = '/assets/images/ContactSupport_Clock.svg';
 
   private readonly contact = signal(new ContactSupportRequest());
   protected readonly contactForm = form(this.contact, (path) => {

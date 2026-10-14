@@ -1,0 +1,31 @@
+<main class="vouchers">
+  <app-page-title
+    class="vouchers__title"
+    [text]="'management.settings.vouchers.title' | translate"
+    [pathIcon]="titleIcon"
+  />
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="params()"
+    [load]="load"
+    idField="idVoucher"
+    [texts]="'table' | translate"
+    [useAppTheme]="false"
+    [areMassiveActionsHidden]="false"
+    [isCreateButtonHidden]="false"
+    [createLabel]="'management.settings.vouchers.create' | translate"
+    [rowActions]="rowActions()"
+    [(selection)]="idSelectedVouchers"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+  />
+</main>
+
+<app-table-error-popup
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

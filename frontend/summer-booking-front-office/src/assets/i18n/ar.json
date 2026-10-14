@@ -516,6 +516,21 @@
           "text": "تم الحفظ بنجاح.",
           "close": "إغلاق"
         }
+      },
+      "vouchers": {
+        "title": "الخصومات والقسائم",
+        "create": "إضافة خصم/قسيمة",
+        "table": {
+          "voucher_name": "الخصم",
+          "valid_from": "صالح من",
+          "valid_to": "إلى",
+          "discount_type": "نوع الخصم",
+          "discount_value": "القيمة"
+        },
+        "discount_type": {
+          "percentage": "نسبة مئوية",
+          "fixed": "ثابت"
+        }
       }
     }
   },

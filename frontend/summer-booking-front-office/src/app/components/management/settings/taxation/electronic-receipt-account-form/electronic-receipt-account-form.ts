@@ -43,10 +43,10 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
-  protected readonly backIcon = '/assets/images/PanelChevron_setting.svg';
+  protected readonly backIcon = '/assets/images/Taxation_PanelChevron.svg';
   protected readonly eyeIcons = [
-    '/assets/images/EyeClose_setting.svg',
-    '/assets/images/EyeStart_setting.svg',
+    '/assets/images/Taxation_EyeClose.svg',
+    '/assets/images/Taxation_EyeStart.svg',
   ] as const;
   private readonly account = signal(new ElectronicReceiptAccount());
   private savedAccount = new ElectronicReceiptAccount();
@@ -143,7 +143,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   ];
 
   protected readonly isLoading = signal(false);
-  protected readonly savedIcon = '/assets/images/AccountSaved_setting.svg';
+  protected readonly savedIcon = '/assets/images/Taxation_AccountSaved.svg';
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(

@@ -1054,6 +1054,77 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+## /vouchers
+
+### POST `/api/vouchers/voucher-list`
+
+Sconti e voucher: elenco.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "",
+  "filters": [],
+  "sortField": "validFrom",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` (vuoto in questa API; sotto un elemento di esempio) |
+| `filters[].field` | string | `datetimeFrom` |
+| `filters[].value` | string | `2026-07-01T00:00:00.000Z` |
+| `sortField` | string | `validFrom` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01",
+      "voucherName": "Giugno",
+      "validFrom": "2026-06-01T00:00:00.000Z",
+      "validTo": "2026-06-30T00:00:00.000Z",
+      "discountType": "Percentage",
+      "discountValue": 10
+    },
+    {
+      "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
+      "voucherName": "Ferragosto",
+      "validFrom": "2026-08-12T00:00:00.000Z",
+      "validTo": "2026-08-16T00:00:00.000Z",
+      "discountType": "Fixed",
+      "discountValue": 5
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | VoucherItem[] (array di oggetti) | (array di oggetti, righe sotto) |
+| `rows[].idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01` |
+| `rows[].voucherName` | string \| null | `Giugno` |
+| `rows[].validFrom` | string (data ISO 8601 UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `rows[].validTo` | string (data ISO 8601 UTC) \| null | `2026-06-30T00:00:00.000Z` |
+| `rows[].discountType` | string (enum DiscountType) \| null | `Percentage` |
+| `rows[].discountValue` | number (decimale) \| null | `10` |
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

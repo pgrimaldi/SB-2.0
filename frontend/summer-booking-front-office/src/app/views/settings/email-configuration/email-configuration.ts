@@ -84,12 +84,12 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
 
   protected readonly maskedFields = EMAIL_CONFIGURATION_MASKED_FIELDS;
-  protected readonly sendTestIcon = ['/assets/images/mail-send-white.svg'] as const;
-  protected readonly resetIcon = ['/assets/images/trash-white.svg'] as const;
+  protected readonly sendTestIcon = ['/assets/images/EmailConfiguration_MailSend.svg'] as const;
+  protected readonly resetIcon = ['/assets/images/EmailConfiguration_Trash.svg'] as const;
   /** [content shown, content hidden]: the eye icons (Eye_close once open, Eye_start at first). */
   protected readonly eyeIcons = [
-    '/assets/images/eye-close.svg',
-    '/assets/images/eye-start.svg',
+    '/assets/images/EmailConfiguration_EyeClose.svg',
+    '/assets/images/EmailConfiguration_EyeStart.svg',
   ] as const;
   /** No currency: only the eye. */
   protected readonly portIcons = ['', ...this.eyeIcons] as const;

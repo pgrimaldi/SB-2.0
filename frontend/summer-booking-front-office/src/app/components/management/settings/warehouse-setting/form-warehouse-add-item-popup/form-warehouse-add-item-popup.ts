@@ -98,7 +98,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     ),
     { initialValue: null },
   );
-  protected readonly closeIcon = '/assets/images/close.svg';
+  protected readonly closeIcon = '/assets/images/WarehouseSetting_Close.svg';
 
   constructor() {
     super();

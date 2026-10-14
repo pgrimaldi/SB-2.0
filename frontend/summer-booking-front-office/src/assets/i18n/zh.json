@@ -516,6 +516,21 @@
           "text": "设置已成功保存。",
           "close": "关闭"
         }
+      },
+      "vouchers": {
+        "title": "折扣和代金券",
+        "create": "添加折扣/代金券",
+        "table": {
+          "voucher_name": "折扣",
+          "valid_from": "有效期自",
+          "valid_to": "至",
+          "discount_type": "折扣类型",
+          "discount_value": "数值"
+        },
+        "discount_type": {
+          "percentage": "百分比",
+          "fixed": "固定"
+        }
       }
     }
   },

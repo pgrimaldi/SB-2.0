@@ -11,6 +11,7 @@ import {
   trashItemListMock,
 } from './database/database.mock';
 import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
+import { voucherListMock } from './vouchers/vouchers.mock';
 import {
   contactSupportMock,
   emailConfigurationMock,
@@ -242,6 +243,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/sharing/save-information`
   ) {
     return saveSharingInformationMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/voucher-list`
+  ) {
+    return voucherListMock(request);
   }
 
   return next(request);

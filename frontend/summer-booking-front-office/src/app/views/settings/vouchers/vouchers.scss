@@ -1,0 +1,3 @@
+@use '../../../styles/table-page' as page;
+
+@include page.table-page(vouchers);

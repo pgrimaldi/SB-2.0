@@ -516,6 +516,21 @@
           "text": "Salvataggio avvenuto correttamente.",
           "close": "Chiudi"
         }
+      },
+      "vouchers": {
+        "title": "Sconti e voucher",
+        "create": "Aggiungi sconto/voucher",
+        "table": {
+          "voucher_name": "Sconto",
+          "valid_from": "Valido dal",
+          "valid_to": "al",
+          "discount_type": "Tipo di sconto",
+          "discount_value": "Valore"
+        },
+        "discount_type": {
+          "percentage": "Percentuale",
+          "fixed": "Fisso"
+        }
       }
     }
   },

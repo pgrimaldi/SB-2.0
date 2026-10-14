@@ -21,7 +21,7 @@ export class ManagementMenu {
   protected readonly links = [
     {
       route: '/warehouse',
-      icon: '/assets/images/warehouse.svg',
+      icon: '/assets/images/Manager_Menu_Warehouse.svg',
       label: 'management.menu.warehouse',
     },
   ] as const;

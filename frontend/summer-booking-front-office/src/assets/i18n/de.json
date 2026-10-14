@@ -516,6 +516,21 @@
           "text": "Die Einstellungen wurden gespeichert.",
           "close": "Schließen"
         }
+      },
+      "vouchers": {
+        "title": "Rabatte und Gutscheine",
+        "create": "Rabatt/Gutschein hinzufügen",
+        "table": {
+          "voucher_name": "Rabatt",
+          "valid_from": "Gültig ab",
+          "valid_to": "bis",
+          "discount_type": "Rabattart",
+          "discount_value": "Wert"
+        },
+        "discount_type": {
+          "percentage": "Prozent",
+          "fixed": "Fest"
+        }
       }
     }
   },

@@ -52,7 +52,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
-  protected readonly closeIcon = '/assets/images/CloseDatabaseFilters_setting.svg';
+  protected readonly closeIcon = '/assets/images/Database_Close.svg';
   protected readonly bookingTypologies = signal<readonly BookingTypologyFilter[]>([]);
   protected readonly agreementBookings = signal<readonly AgreementBookingFilter[]>([]);
   protected readonly idAffiliatedHotels = signal<readonly string[]>([]);

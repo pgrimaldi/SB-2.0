@@ -516,6 +516,21 @@
           "text": "The settings have been saved.",
           "close": "Close"
         }
+      },
+      "vouchers": {
+        "title": "Discounts and vouchers",
+        "create": "Add discount/voucher",
+        "table": {
+          "voucher_name": "Discount",
+          "valid_from": "Valid from",
+          "valid_to": "to",
+          "discount_type": "Discount type",
+          "discount_value": "Value"
+        },
+        "discount_type": {
+          "percentage": "Percentage",
+          "fixed": "Fixed"
+        }
       }
     }
   },

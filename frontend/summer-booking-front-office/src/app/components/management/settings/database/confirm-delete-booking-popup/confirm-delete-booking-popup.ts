@@ -43,10 +43,10 @@ export class ConfirmDeleteBookingPopup {
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
-  protected readonly closeIcon = ['/assets/images/CloseDatabaseFilters_setting.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/Database_Close.svg'] as const;
   protected readonly eyeIcons = [
-    '/assets/images/EyeClose_setting.svg',
-    '/assets/images/EyeStart_setting.svg',
+    '/assets/images/Database_EyeClose.svg',
+    '/assets/images/Database_EyeStart.svg',
   ] as const;
   protected readonly username = computed(() => this.auth.user()?.email ?? '');
   protected readonly isLoading = signal(false);

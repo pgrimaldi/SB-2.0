@@ -92,7 +92,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     ),
     { initialValue: null },
   );
-  protected readonly closeIcon = '/assets/images/close.svg';
+  protected readonly closeIcon = '/assets/images/WarehouseSetting_Close.svg';
 
   constructor() {
     super();

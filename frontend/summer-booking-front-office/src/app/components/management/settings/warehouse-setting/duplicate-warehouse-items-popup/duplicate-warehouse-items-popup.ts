@@ -37,7 +37,7 @@ export class DuplicateWarehouseItemsPopup {
 
   protected readonly isLoading = signal(false);
   protected readonly isErrorShown = signal(false);
-  protected readonly errorIcon = ['/assets/images/WarehouseWarning_setting.svg'] as const;
+  protected readonly errorIcon = ['/assets/images/WarehouseSetting_Warning.svg'] as const;
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(

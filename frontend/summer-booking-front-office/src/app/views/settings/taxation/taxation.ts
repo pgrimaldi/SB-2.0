@@ -79,17 +79,17 @@ export class Taxation {
 
   /** [before the title, arrow]. */
   protected readonly printerPanelIcons = [
-    '/assets/images/Printer_setting.svg',
-    '/assets/images/PanelChevron_setting.svg',
+    '/assets/images/Taxation_Printer.svg',
+    '/assets/images/Taxation_PanelChevron.svg',
   ] as const;
   /** [before the title, arrow]. */
   protected readonly receiptPanelIcons = [
-    '/assets/images/ElectronicReceipt_setting.svg',
-    '/assets/images/PanelChevron_setting.svg',
+    '/assets/images/Taxation_ElectronicReceipt.svg',
+    '/assets/images/Taxation_PanelChevron.svg',
   ] as const;
-  protected readonly addPrinterIcon = ['/assets/images/AddPrinter_setting.svg'] as const;
-  private readonly deletePrinterIcon = '/assets/images/DeletePrinter_setting.svg';
-  protected readonly downloadGuideIcon = ['/assets/images/DownloadGuide_setting.svg'] as const;
+  protected readonly addPrinterIcon = ['/assets/images/Taxation_AddPrinter.svg'] as const;
+  private readonly deletePrinterIcon = '/assets/images/Taxation_DeletePrinter.svg';
+  protected readonly downloadGuideIcon = ['/assets/images/Taxation_DownloadGuide.svg'] as const;
 
   protected readonly printersExpanded = signal(true);
   protected readonly receiptExpanded = signal(false);
@@ -142,12 +142,12 @@ export class Taxation {
     () => this.isReceiptActivated() || this.isAcceptChosen(),
   );
   protected readonly isReceiptAccountShown = signal(true);
-  protected readonly toAccountIcon = '/assets/images/PanelChevron_setting.svg';
+  protected readonly toAccountIcon = '/assets/images/Taxation_PanelChevron.svg';
   protected readonly isSendingReceiptChoice = signal(false);
   /** The error of an action (switch, delete, guide) goes in a popup. */
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly isActionErrorShown = signal(false);
-  protected readonly actionErrorIcon = ['/assets/images/Warning_setting.svg'] as const;
+  protected readonly actionErrorIcon = ['/assets/images/Taxation_Warning.svg'] as const;
   private readonly receiptError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = this.messageOf(this.actionError);
   protected readonly receiptErrorMessage = this.messageOf(this.receiptError);

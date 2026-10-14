@@ -516,6 +516,21 @@
           "text": "Les paramètres ont été enregistrés.",
           "close": "Fermer"
         }
+      },
+      "vouchers": {
+        "title": "Remises et bons",
+        "create": "Ajouter remise/bon",
+        "table": {
+          "voucher_name": "Remise",
+          "valid_from": "Valable du",
+          "valid_to": "au",
+          "discount_type": "Type de remise",
+          "discount_value": "Valeur"
+        },
+        "discount_type": {
+          "percentage": "Pourcentage",
+          "fixed": "Fixe"
+        }
       }
     }
   },

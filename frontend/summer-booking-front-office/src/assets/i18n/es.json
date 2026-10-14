@@ -516,6 +516,21 @@
           "text": "Los ajustes se han guardado.",
           "close": "Cerrar"
         }
+      },
+      "vouchers": {
+        "title": "Descuentos y vales",
+        "create": "Añadir descuento/vale",
+        "table": {
+          "voucher_name": "Descuento",
+          "valid_from": "Válido del",
+          "valid_to": "al",
+          "discount_type": "Tipo de descuento",
+          "discount_value": "Valor"
+        },
+        "discount_type": {
+          "percentage": "Porcentaje",
+          "fixed": "Fijo"
+        }
       }
     }
   },

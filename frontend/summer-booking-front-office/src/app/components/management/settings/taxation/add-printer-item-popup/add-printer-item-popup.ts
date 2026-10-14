@@ -94,7 +94,7 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
     ),
     { initialValue: null },
   );
-  protected readonly closeIcon = '/assets/images/CloseAddPrinter_setting.svg';
+  protected readonly closeIcon = '/assets/images/Taxation_CloseAddPrinter.svg';
 
   constructor() {
     super();

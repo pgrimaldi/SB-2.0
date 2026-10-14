@@ -11,9 +11,9 @@
     <!--
     <app-datepicker
       [pathIcon]="[
-        '/assets/images/calendar.svg',
-        '/assets/images/arrow-left.svg',
-        '/assets/images/arrow-right.svg',
+        '/assets/images/Manager_Header_Calendar.svg',
+        '/assets/images/Manager_Header_ArrowLeft.svg',
+        '/assets/images/Manager_Header_ArrowRight.svg',
       ]"
       [(start)]="filters.startDate"
       [(end)]="filters.endDate"
@@ -27,10 +27,10 @@
       (click)="resetToToday()"
     >
       @if (showsToday()) {
-        <img src="/assets/images/today.svg" width="19" height="20" alt="" />
+        <img src="/assets/images/Manager_Header_Today.svg" width="19" height="20" alt="" />
         <span appI18nText="management.header.today.today"></span>
       } @else {
-        <img src="/assets/images/not-today.svg" width="18" height="20" alt="" />
+        <img src="/assets/images/Manager_Header_NotToday.svg" width="18" height="20" alt="" />
         <span appI18nText="management.header.today.other"></span>
       }
     </button>
@@ -44,27 +44,27 @@
     <!-- Not wired for now: typing does not filter anything. -->
     <app-search-field
       [placeholder]="'management.header.search.placeholder' | translate"
-      [pathIcon]="['/assets/images/search.svg', '/assets/images/clear.svg']"
+      [pathIcon]="['/assets/images/Manager_Header_Search.svg', '/assets/images/Manager_Header_Clear.svg']"
     />
   </div>
 
   <div class="management__header__actions">
     <app-icon-button
       [label]="'management.header.actions.configuration' | translate"
-      [pathIcon]="['/assets/images/configuration.svg']"
+      [pathIcon]="['/assets/images/Manager_Header_Configuration.svg']"
     />
     <app-icon-button
       [label]="'management.header.actions.settings' | translate"
-      [pathIcon]="['/assets/images/settings.svg']"
+      [pathIcon]="['/assets/images/Manager_Header_Settings.svg']"
       (click)="openSettings()"
     />
     <app-icon-button
       [label]="'management.header.actions.assistant' | translate"
-      [pathIcon]="['/assets/images/assistant.svg']"
+      [pathIcon]="['/assets/images/Manager_Header_Assistant.svg']"
     />
     <app-icon-button
       [label]="'management.header.actions.notifications' | translate"
-      [pathIcon]="['/assets/images/notifications.svg']"
+      [pathIcon]="['/assets/images/Manager_Header_Notifications.svg']"
     />
     <app-icon-button [label]="'management.header.actions.account' | translate">
       {{ initial() }}

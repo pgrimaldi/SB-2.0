@@ -61,17 +61,17 @@ export class WarehouseSetting {
   protected readonly duplicating = signal(false);
   protected readonly idItemsToDuplicate = signal<readonly string[]>([]);
   protected readonly itemNameToDuplicate = signal<string | null>(null);
-  protected readonly titleIcon = ['/assets/images/warehouse-dark.svg'] as const;
+  protected readonly titleIcon = ['/assets/images/WarehouseSetting_Title.svg'] as const;
   /**
    * In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create].
    * No title icon: the page has its own title. The row button icons come from `rowActions`.
    */
   protected readonly tableIcons = [
-    '/assets/images/search.svg',
-    '/assets/images/clear.svg',
-    '/assets/images/duplicate-selected.svg',
-    '/assets/images/delete-selected.svg',
-    '/assets/images/add.svg',
+    '/assets/images/WarehouseSetting_Search.svg',
+    '/assets/images/WarehouseSetting_Clear.svg',
+    '/assets/images/WarehouseSetting_DuplicateSelected.svg',
+    '/assets/images/WarehouseSetting_DeleteSelected.svg',
+    '/assets/images/WarehouseSetting_Add.svg',
   ] as const;
   private readonly headers = toSignal(
     this.translateService.stream(
