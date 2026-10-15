@@ -24,6 +24,7 @@ import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { requiredText } from '../../../components/shared/forms/validators';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
+import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -34,7 +35,15 @@ import { SystemService } from '../../../services/api/system/system.service';
 
 @Component({
   selector: 'app-contact-support',
-  imports: [Button, FilledTextField, FilledTextarea, FormField, MessagePopup, TranslatePipe],
+  imports: [
+    Button,
+    FilledTextField,
+    FilledTextarea,
+    FormField,
+    MessagePopup,
+    SectionTitle,
+    TranslatePipe,
+  ],
   templateUrl: './contact-support.html',
   styleUrl: './contact-support.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

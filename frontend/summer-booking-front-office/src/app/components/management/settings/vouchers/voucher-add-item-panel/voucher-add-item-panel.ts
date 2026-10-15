@@ -52,6 +52,7 @@ import { FilledTimeField } from '../../../../shared/ui/inputs/filled-time-field/
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 /** ISO 8601 numbers: 1 is Monday, 7 is Sunday. */
@@ -84,6 +85,7 @@ interface OptionsTexts {
     FilledTextField,
     FilledTimeField,
     FormField,
+    SectionTitle,
     Toggle,
     TranslatePipe,
   ],

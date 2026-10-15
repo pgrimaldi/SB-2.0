@@ -571,7 +571,7 @@
           "name": "Nombre del descuento",
           "periods": {
             "title": "Periodos de validez",
-            "add": "Añadir periodo de validez",
+            "add": "Añadir periodo",
             "period": "Periodo",
             "from": "Del",
             "to": "al",

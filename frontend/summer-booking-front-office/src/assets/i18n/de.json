@@ -571,7 +571,7 @@
           "name": "Rabattname",
           "periods": {
             "title": "Gültigkeitszeiträume",
-            "add": "Gültigkeitszeitraum hinzufügen",
+            "add": "Zeitraum hinzufügen",
             "period": "Zeitraum",
             "from": "Vom",
             "to": "bis",

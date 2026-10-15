@@ -13,10 +13,7 @@
       />
 
       <section class="voucher__add__item__panel__section">
-        <div class="voucher__add__item__panel__section__header">
-          <h3 class="voucher__add__item__panel__section__title">
-            {{ 'management.settings.vouchers.form.periods.title' | translate }}
-          </h3>
+        <app-section-title [text]="'management.settings.vouchers.form.periods.title' | translate">
           <app-button
             class="voucher__add__item__panel__add"
             [size]="ButtonSize.Small"
@@ -25,7 +22,7 @@
           >
             {{ 'management.settings.vouchers.form.periods.add' | translate }}
           </app-button>
-        </div>
+        </app-section-title>
 
         @for (period of draftForm.validityPeriods; track period; let periodIndex = $index) {
           <div class="voucher__add__item__panel__period">
@@ -144,11 +141,7 @@
       }
 
       <section class="voucher__add__item__panel__section">
-        <div class="voucher__add__item__panel__section__header">
-          <h3 class="voucher__add__item__panel__section__title">
-            {{ 'management.settings.vouchers.form.options.title' | translate }}
-          </h3>
-        </div>
+        <app-section-title [text]="'management.settings.vouchers.form.options.title' | translate" />
 
         <div class="voucher__add__item__panel__options">
           <div class="voucher__add__item__panel__row">

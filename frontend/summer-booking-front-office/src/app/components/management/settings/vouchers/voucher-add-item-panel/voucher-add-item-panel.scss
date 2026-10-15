@@ -64,26 +64,12 @@ app-voucher-add-item-panel {
 }
 
 .voucher__add__item__panel__section {
+  --section-title-text-size: 0.8125rem;
+  --section-title-text-weight: 500;
+  --section-title-padding-bottom: 0.5625rem;
+
   margin-top: 1.375rem;
   padding: 1.625rem 1.5625rem 1.5625rem;
-}
-
-.voucher__add__item__panel__section__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  padding-bottom: 0.5625rem;
-  border-bottom: 0.0625rem solid var(--color__layout__border);
-}
-
-.voucher__add__item__panel__section__title {
-  margin: 0;
-  color: var(--color__main__theme__one);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.25rem;
 }
 
 .voucher__add__item__panel .voucher__add__item__panel__add {

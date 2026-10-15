@@ -571,7 +571,7 @@
           "name": "Nom de la remise",
           "periods": {
             "title": "Périodes de validité",
-            "add": "Ajouter une période de validité",
+            "add": "Ajouter une période",
             "period": "Période",
             "from": "Du",
             "to": "au",

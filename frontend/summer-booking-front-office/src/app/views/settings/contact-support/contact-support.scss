@@ -27,10 +27,13 @@
   text-align: center;
 }
 
-.contact__support__title__underlined {
+// Centred and a little bigger than the other section titles.
+.contact__support__section__title {
+  --section-title-text-size: 1rem;
+  --section-title-line-height: 1.5rem;
+  --section-title-align: center;
+
   margin-bottom: 1.25rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 0.0625rem solid var(--color__layout__border);
 }
 
 .contact__support__boxes {

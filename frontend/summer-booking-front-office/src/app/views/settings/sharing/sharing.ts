@@ -27,6 +27,7 @@ import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/chec
 import { greaterThan } from '../../../components/shared/forms/validators';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
+import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { Toggle } from '../../../components/shared/ui/toggles/toggle/toggle';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -43,6 +44,7 @@ import { SharingService } from '../../../services/api/sharing/sharing.service';
     FormField,
     I18nText,
     MessagePopup,
+    SectionTitle,
     Toggle,
     TranslatePipe,
   ],
