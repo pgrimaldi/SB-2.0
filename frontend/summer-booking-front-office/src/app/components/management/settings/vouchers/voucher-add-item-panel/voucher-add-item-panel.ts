@@ -43,8 +43,11 @@ import { toApiProblem } from '../../../../../services/api/errors/to-api-problem'
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
 import { minItems, requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
+import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
+import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
@@ -85,6 +88,9 @@ interface OptionsTexts {
     FilledTextField,
     FilledTimeField,
     FormField,
+    FormRow,
+    FormRowLabel,
+    IconButton,
     SectionTitle,
     Toggle,
     TranslatePipe,
@@ -149,11 +155,11 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
     ),
     { initialValue: null },
   );
-  protected readonly removePeriodIcon = '/assets/images/Vouchers_Close.svg';
+  protected readonly removePeriodIcon = ['/assets/images/Vouchers_Close.svg'] as const;
   protected readonly addPeriodIcon = ['/assets/images/Vouchers_Add.svg'] as const;
   protected readonly calendarIcon = ['/assets/images/Vouchers_Calendar.svg'] as const;
   protected readonly clockIcon = ['/assets/images/Vouchers_Clock.svg'] as const;
-  protected readonly deleteTimeSlotIcon = '/assets/images/Vouchers_DeleteTimeSlot.svg';
+  protected readonly deleteTimeSlotIcon = ['/assets/images/Vouchers_DeleteTimeSlot.svg'] as const;
   protected readonly addTimeSlotIcon = ['/assets/images/Vouchers_AddTimeSlot.svg'] as const;
   private readonly dayNames = toSignal(
     this.translateService.stream('management.settings.vouchers.form.periods.days') as Observable<

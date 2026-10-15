@@ -18,14 +18,14 @@ app-existing-booking-filters-popup {
 }
 
 .existing__booking__filters__popup {
-  position: relative;
   display: flex;
   flex-direction: column;
   padding: 0.5625rem 1.5rem 1.5rem;
 }
 
 .existing__booking__filters__popup__title {
-  margin: 0 2rem 1rem 0;
+  margin: 0 0 1rem;
+  margin-inline-end: 2rem;
   color: var(--color__main__theme__one);
   font-size: 0.875rem;
   font-weight: 600;

@@ -14,31 +14,24 @@
 
       <section class="voucher__add__item__panel__section">
         <app-section-title [text]="'management.settings.vouchers.form.periods.title' | translate">
-          <app-button
-            class="voucher__add__item__panel__add"
-            [size]="ButtonSize.Small"
-            [pathIcon]="addPeriodIcon"
-            (clicked)="addPeriod()"
-          >
+          <app-button [size]="ButtonSize.Small" [pathIcon]="addPeriodIcon" (clicked)="addPeriod()">
             {{ 'management.settings.vouchers.form.periods.add' | translate }}
           </app-button>
         </app-section-title>
 
         @for (period of draftForm.validityPeriods; track period; let periodIndex = $index) {
           <div class="voucher__add__item__panel__period">
-            <button
+            <app-icon-button
               class="voucher__add__item__panel__period__remove"
-              type="button"
+              [pathIcon]="removePeriodIcon"
               (click)="removePeriod(periodIndex)"
-            >
-              <img [src]="removePeriodIcon" width="12" height="12" alt="" />
-            </button>
+            />
 
-            <div class="voucher__add__item__panel__row">
-              <span class="voucher__add__item__panel__row__label">
+            <app-form-row>
+              <span appFormRowLabel>
                 {{ 'management.settings.vouchers.form.periods.period' | translate }}
               </span>
-              <div class="voucher__add__item__panel__row__controls">
+              <div class="voucher__add__item__panel__pair">
                 <span class="voucher__add__item__panel__word">
                   {{ 'management.settings.vouchers.form.periods.from' | translate }}
                 </span>
@@ -48,6 +41,8 @@
                   [formField]="period.validFrom"
                   [error]="validationText.text(period.validFrom)"
                 />
+              </div>
+              <div class="voucher__add__item__panel__pair">
                 <span class="voucher__add__item__panel__word">
                   {{ 'management.settings.vouchers.form.periods.to' | translate }}
                 </span>
@@ -58,13 +53,13 @@
                   [error]="validationText.text(period.validTo)"
                 />
               </div>
-            </div>
+            </app-form-row>
 
-            <div class="voucher__add__item__panel__row">
-              <span class="voucher__add__item__panel__row__label">
+            <app-form-row>
+              <span appFormRowLabel>
                 {{ 'management.settings.vouchers.form.periods.days_of_week' | translate }}
               </span>
-              <div class="voucher__add__item__panel__row__controls voucher__add__item__panel__days">
+              <div class="voucher__add__item__panel__days">
                 <app-filled-multi-select
                   class="voucher__add__item__panel__days__select"
                   [placeholder]="
@@ -88,38 +83,40 @@
                   {{ 'management.settings.vouchers.form.periods.all_days' | translate }}
                 </app-checkbox>
               </div>
-            </div>
+            </app-form-row>
 
-            <div class="voucher__add__item__panel__row">
-              <span class="voucher__add__item__panel__row__label">
+            <app-form-row>
+              <span appFormRowLabel>
                 {{ 'management.settings.vouchers.form.periods.time_slots' | translate }}
               </span>
               <div class="voucher__add__item__panel__slots">
                 @for (timeSlot of period.timeSlots; track timeSlot; let slotIndex = $index) {
-                  <div class="voucher__add__item__panel__row__controls">
-                    <span class="voucher__add__item__panel__word">
-                      {{ 'management.settings.vouchers.form.periods.time_from' | translate }}
-                    </span>
-                    <app-filled-time-field
-                      class="voucher__add__item__panel__field"
-                      [pathIcon]="clockIcon"
-                      [formField]="timeSlot.from"
-                    />
-                    <span class="voucher__add__item__panel__word">
-                      {{ 'management.settings.vouchers.form.periods.time_to' | translate }}
-                    </span>
-                    <app-filled-time-field
-                      class="voucher__add__item__panel__field"
-                      [pathIcon]="clockIcon"
-                      [formField]="timeSlot.to"
-                    />
-                    <button
+                  <div class="voucher__add__item__panel__slot">
+                    <div class="voucher__add__item__panel__pair">
+                      <span class="voucher__add__item__panel__word">
+                        {{ 'management.settings.vouchers.form.periods.time_from' | translate }}
+                      </span>
+                      <app-filled-time-field
+                        class="voucher__add__item__panel__field"
+                        [pathIcon]="clockIcon"
+                        [formField]="timeSlot.from"
+                      />
+                    </div>
+                    <div class="voucher__add__item__panel__pair">
+                      <span class="voucher__add__item__panel__word">
+                        {{ 'management.settings.vouchers.form.periods.time_to' | translate }}
+                      </span>
+                      <app-filled-time-field
+                        class="voucher__add__item__panel__field"
+                        [pathIcon]="clockIcon"
+                        [formField]="timeSlot.to"
+                      />
+                    </div>
+                    <app-icon-button
                       class="voucher__add__item__panel__slot__remove"
-                      type="button"
+                      [pathIcon]="deleteTimeSlotIcon"
                       (click)="removeTimeSlot(period, slotIndex)"
-                    >
-                      <img [src]="deleteTimeSlotIcon" width="12" height="17" alt="" />
-                    </button>
+                    />
                   </div>
                 }
                 <app-button
@@ -132,7 +129,7 @@
                   {{ 'management.settings.vouchers.form.periods.add_time_slot' | translate }}
                 </app-button>
               </div>
-            </div>
+            </app-form-row>
           </div>
         }
       </section>
@@ -144,8 +141,8 @@
         <app-section-title [text]="'management.settings.vouchers.form.options.title' | translate" />
 
         <div class="voucher__add__item__panel__options">
-          <div class="voucher__add__item__panel__row">
-            <span class="voucher__add__item__panel__row__label">
+          <app-form-row>
+            <span appFormRowLabel>
               {{ 'management.settings.vouchers.form.options.type' | translate }}
             </span>
             <app-filled-select
@@ -154,26 +151,24 @@
               [formField]="draftForm.discountType"
               [error]="discountTypeError()"
             />
-          </div>
+          </app-form-row>
 
-          <div class="voucher__add__item__panel__row">
-            <span class="voucher__add__item__panel__row__label">
+          <app-form-row>
+            <span appFormRowLabel>
               {{ 'management.settings.vouchers.form.options.value' | translate }}
             </span>
-            <div class="voucher__add__item__panel__row__controls">
-              <app-filled-number-field
-                class="voucher__add__item__panel__value"
-                [isDecimal]="!isPercentage()"
-                [isCurrency]="!isPercentage()"
-                [formField]="draftForm.discountValue"
-                [error]="discountValueError()"
-              />
-              <span class="voucher__add__item__panel__word">{{ isPercentage() ? '%' : '€' }}</span>
-            </div>
-          </div>
+            <app-filled-number-field
+              class="voucher__add__item__panel__value"
+              [isDecimal]="!isPercentage()"
+              [isCurrency]="!isPercentage()"
+              [formField]="draftForm.discountValue"
+              [error]="discountValueError()"
+            />
+            <span class="voucher__add__item__panel__word">{{ isPercentage() ? '%' : '€' }}</span>
+          </app-form-row>
 
-          <div class="voucher__add__item__panel__row">
-            <span class="voucher__add__item__panel__row__label">
+          <app-form-row>
+            <span appFormRowLabel>
               {{ 'management.settings.vouchers.form.options.applies_to' | translate }}
             </span>
             <app-filled-select
@@ -182,10 +177,10 @@
               [formField]="draftForm.discountScope"
               [error]="discountScopeError()"
             />
-          </div>
+          </app-form-row>
 
-          <div class="voucher__add__item__panel__row">
-            <span class="voucher__add__item__panel__row__label">
+          <app-form-row>
+            <span appFormRowLabel>
               {{ 'management.settings.vouchers.form.options.max_uses' | translate }}
             </span>
             <app-filled-number-field
@@ -193,7 +188,7 @@
               [formField]="draftForm.maxUseQuantity"
               [error]="maxUseQuantityError()"
             />
-          </div>
+          </app-form-row>
         </div>
       </section>
 

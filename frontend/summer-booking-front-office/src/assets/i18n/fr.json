@@ -594,7 +594,7 @@
           },
           "field_names": {
             "validity_period": "période de validité",
-            "day_of_week": "jour de la semaine"
+            "day_of_week": "jour"
           },
           "options": {
             "title": "Options",

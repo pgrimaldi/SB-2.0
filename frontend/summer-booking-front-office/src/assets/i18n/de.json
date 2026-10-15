@@ -594,7 +594,7 @@
           },
           "field_names": {
             "validity_period": "Gültigkeitszeitraum",
-            "day_of_week": "Wochentag"
+            "day_of_week": "Tag"
           },
           "options": {
             "title": "Optionen",
@@ -730,7 +730,7 @@
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
       }
     },
-    "min_items": "Mindestens {{count}} {{field}} muss festgelegt werden"
+    "min_items": "Mindestens {{count}} {{field}} erforderlich"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",
