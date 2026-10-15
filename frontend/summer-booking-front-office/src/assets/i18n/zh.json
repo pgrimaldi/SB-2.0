@@ -381,6 +381,7 @@
             "city": "城市",
             "country": "国家",
             "tax_code": "税号",
+            "revenue_agency_code": "税务局代码",
             "vat_number": "增值税号",
             "pin": "PIN",
             "password": "密码",

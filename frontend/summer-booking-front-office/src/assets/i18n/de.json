@@ -381,6 +381,7 @@
             "city": "Stadt",
             "country": "Land",
             "tax_code": "Steuernummer",
+            "revenue_agency_code": "Code Steuerbehörde",
             "vat_number": "USt-IdNr.",
             "pin": "PIN",
             "password": "Passwort",
@@ -724,7 +725,7 @@
     "greater_than": "Der Wert {{field}} muss größer als {{limit}} sein",
     "max": "Der Höchstwert ist {{max}}",
     "min": "Der Mindestwert ist {{min}}",
-    "required": "Dieses Feld ist ein Pflichtfeld",
+    "required": "Pflichtfeld",
     "email_configuration": {
       "smtp_password": {
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."

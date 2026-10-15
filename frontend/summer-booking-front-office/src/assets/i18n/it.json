@@ -381,6 +381,7 @@
             "city": "Città",
             "country": "Nazione",
             "tax_code": "Codice fiscale",
+            "revenue_agency_code": "Codice Agenzia Entrate",
             "vat_number": "Partita IVA",
             "pin": "PIN",
             "password": "Password",
@@ -724,7 +725,7 @@
     "greater_than": "Il valore {{field}} deve essere superiore a {{limit}}",
     "max": "Il valore massimo è {{max}}",
     "min": "Il valore minimo è {{min}}",
-    "required": "Questo campo è obbligatorio",
+    "required": "Campo obbligatorio",
     "email_configuration": {
       "smtp_password": {
         "retype": "Hai cambiato i parametri di connessione: riscrivi la password o inseriscine una nuova."

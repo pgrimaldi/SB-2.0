@@ -381,6 +381,7 @@
             "city": "المدينة",
             "country": "الدولة",
             "tax_code": "الرقم الضريبي",
+            "revenue_agency_code": "رمز مصلحة الضرائب",
             "vat_number": "رقم ض.ق.م",
             "pin": "PIN",
             "password": "كلمة المرور",

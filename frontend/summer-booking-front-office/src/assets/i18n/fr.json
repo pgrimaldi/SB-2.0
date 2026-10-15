@@ -381,6 +381,7 @@
             "city": "Ville",
             "country": "Pays",
             "tax_code": "Code fiscal",
+            "revenue_agency_code": "Code Agence du revenu",
             "vat_number": "Numéro de TVA",
             "pin": "PIN",
             "password": "Mot de passe",
@@ -724,7 +725,7 @@
     "greater_than": "La valeur {{field}} doit être supérieure à {{limit}}",
     "max": "La valeur maximale est {{max}}",
     "min": "La valeur minimale est {{min}}",
-    "required": "Ce champ est obligatoire",
+    "required": "Champ obligatoire",
     "email_configuration": {
       "smtp_password": {
         "retype": "Vous avez modifié les paramètres de connexion : saisissez de nouveau le mot de passe ou entrez-en un nouveau."

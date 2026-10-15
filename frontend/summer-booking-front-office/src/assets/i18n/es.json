@@ -381,6 +381,7 @@
             "city": "Ciudad",
             "country": "País",
             "tax_code": "Código fiscal",
+            "revenue_agency_code": "Código Agencia Tributaria",
             "vat_number": "NIF/IVA",
             "pin": "PIN",
             "password": "Contraseña",
@@ -724,7 +725,7 @@
     "greater_than": "El valor {{field}} debe ser mayor que {{limit}}",
     "max": "El valor máximo es {{max}}",
     "min": "El valor mínimo es {{min}}",
-    "required": "Este campo es obligatorio",
+    "required": "Campo obligatorio",
     "email_configuration": {
       "smtp_password": {
         "retype": "Has cambiado los parámetros de conexión: vuelve a escribir la contraseña o introduce una nueva."

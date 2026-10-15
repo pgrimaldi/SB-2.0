@@ -980,6 +980,7 @@ Fiscalizzazione: account dello scontrino elettronico.
   "city": "Roma",
   "country": "Italia",
   "taxCode": "XXXXXXXXXXXXXXXX",
+  "revenueAgencyCode": "AE00000000",
   "vatNumber": "00000000000",
   "pin": "00000",
   "password": "password-digitata"
@@ -996,6 +997,7 @@ Fiscalizzazione: account dello scontrino elettronico.
 | `city` | string \| null | `Roma` |
 | `country` | string \| null | `Italia` |
 | `taxCode` | string \| null | `XXXXXXXXXXXXXXXX` |
+| `revenueAgencyCode` | string \| null | `AE00000000` |
 | `vatNumber` | string \| null | `00000000000` |
 | `pin` | string \| null | `00000` |
 | `password` | string \| null | `password-digitata` |

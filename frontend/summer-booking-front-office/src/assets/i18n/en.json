@@ -381,6 +381,7 @@
             "city": "City",
             "country": "Country",
             "tax_code": "Tax code",
+            "revenue_agency_code": "Revenue Agency code",
             "vat_number": "VAT number",
             "pin": "PIN",
             "password": "Password",

@@ -7,7 +7,14 @@ import {
   signal,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  applyWhen,
+  form,
+  readonly,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
@@ -22,6 +29,7 @@ import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { ElectronicReceiptAccount } from '../../../../../entities/settings/taxation/electronic-receipt-account';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
+import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 
@@ -58,6 +66,26 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   protected readonly accountForm = form(this.account, (path) => {
     readonly(path, () => this.isSaved() && !this.isEditing());
     readonly(path.password, () => this.isSaved());
+    requiredText(path.companyName);
+    requiredText(path.companyAddress);
+    requiredText(path.streetNumber);
+    requiredText(path.postalCode);
+    requiredText(path.city);
+    requiredText(path.country);
+    requiredText(path.taxCode);
+    requiredText(path.revenueAgencyCode);
+    requiredText(path.vatNumber);
+    // Empty once one is saved on the server: empty then means "keep the saved one".
+    applyWhen(
+      path.pin,
+      () => !this.isPinSaved(),
+      (pin) => requiredText(pin),
+    );
+    applyWhen(
+      path.password,
+      () => !this.isPasswordSaved(),
+      (password) => requiredText(password),
+    );
   });
   protected readonly fields = [
     {
@@ -66,7 +94,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.companyName),
       isSecret: false,
       isSecretSaved: null,
-      columns: 6,
+      columns: 18,
     },
     {
       key: 'company_address',
@@ -74,7 +102,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.companyAddress),
       isSecret: false,
       isSecretSaved: null,
-      columns: 11,
+      columns: 33,
     },
     {
       key: 'street_number',
@@ -82,7 +110,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.streetNumber),
       isSecret: false,
       isSecretSaved: null,
-      columns: 3,
+      columns: 9,
     },
     {
       key: 'postal_code',
@@ -90,7 +118,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.postalCode),
       isSecret: false,
       isSecretSaved: null,
-      columns: 4,
+      columns: 12,
     },
     {
       key: 'city',
@@ -98,7 +126,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.city),
       isSecret: false,
       isSecretSaved: null,
-      columns: 8,
+      columns: 24,
     },
     {
       key: 'country',
@@ -106,7 +134,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.country),
       isSecret: false,
       isSecretSaved: null,
-      columns: 8,
+      columns: 24,
     },
     {
       key: 'tax_code',
@@ -114,7 +142,15 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.taxCode),
       isSecret: false,
       isSecretSaved: null,
-      columns: 10,
+      columns: 20,
+    },
+    {
+      key: 'revenue_agency_code',
+      field: this.accountForm.revenueAgencyCode,
+      error: this.validationText.message(this.accountForm.revenueAgencyCode),
+      isSecret: false,
+      isSecretSaved: null,
+      columns: 20,
     },
     {
       key: 'vat_number',
@@ -122,7 +158,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.vatNumber),
       isSecret: false,
       isSecretSaved: null,
-      columns: 10,
+      columns: 20,
     },
     {
       key: 'pin',
@@ -130,7 +166,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.pin),
       isSecret: true,
       isSecretSaved: this.isPinSaved,
-      columns: 10,
+      columns: 30,
     },
     {
       key: 'password',
@@ -138,7 +174,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       error: this.validationText.message(this.accountForm.password),
       isSecret: true,
       isSecretSaved: this.isPasswordSaved,
-      columns: 10,
+      columns: 30,
     },
   ];
 
