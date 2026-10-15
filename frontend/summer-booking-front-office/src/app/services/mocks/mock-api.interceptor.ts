@@ -15,6 +15,8 @@ import {
   addVoucherItemMock,
   deleteVoucherItemsMock,
   duplicateVoucherItemsMock,
+  selectedVoucherItemMock,
+  updateVoucherItemMock,
   voucherListMock,
 } from './vouchers/vouchers.mock';
 import {
@@ -285,6 +287,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/vouchers/add-voucher-item`
   ) {
     return addVoucherItemMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/update-voucher-item`
+  ) {
+    return updateVoucherItemMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/get-selected-item`
+  ) {
+    return selectedVoucherItemMock(request);
   }
 
   return next(request);

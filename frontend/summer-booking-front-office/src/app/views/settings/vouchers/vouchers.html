@@ -26,6 +26,12 @@
 </main>
 
 <app-voucher-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" (added)="table.reload()" />
+<app-voucher-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idVoucher]="idVoucherToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idVouchersToDelete()"

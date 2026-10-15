@@ -7,7 +7,9 @@ import { DeleteVoucherItemsRequest } from '../../../entities/settings/vouchers/d
 import { DuplicateVoucherItemsRequest } from '../../../entities/settings/vouchers/duplicate-voucher-items-request';
 import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
+import { VoucherSelectedItem } from '../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherTimeSlot } from '../../../entities/settings/vouchers/voucher-time-slot';
+import { VoucherUpdateItemRequest } from '../../../entities/settings/vouchers/voucher-update-item-request';
 import { VoucherValidityPeriod } from '../../../entities/settings/vouchers/voucher-validity-period';
 import { onlyFieldsOf } from '../only-fields-of';
 
@@ -40,5 +42,25 @@ export class VoucherService {
         timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
       })),
       idProperty,
+    });
+
+  /** Answers 204 with no body. */
+  readonly updateVoucherItem = (
+    idProperty: string,
+    request: VoucherUpdateItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-voucher-item`, {
+      ...onlyFieldsOf(VoucherUpdateItemRequest, request),
+      maxUseQuantity: request.maxUseQuantity ?? 1,
+      validityPeriods: request.validityPeriods.map((period) => ({
+        ...onlyFieldsOf(VoucherValidityPeriod, period),
+        timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
+      })),
+      idProperty,
+    });
+
+  readonly selectedItem = (idVoucher: string): Observable<VoucherSelectedItem> =>
+    this.httpClient.get<VoucherSelectedItem>(`${this.endpoint}/get-selected-item`, {
+      params: { idVoucher },
     });
 }
