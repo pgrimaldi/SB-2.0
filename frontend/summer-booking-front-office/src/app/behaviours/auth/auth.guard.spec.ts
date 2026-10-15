@@ -50,7 +50,7 @@ describe('authGuard', () => {
     expect(TestBed.inject(Router).url).toBe('/it/home');
   });
 
-  it('should open the management area with a session, while "/" still goes to the home', async () => {
+  it('should open the management area with a session, also from the hub', async () => {
     login();
     const harness = await RouterTestingHarness.create();
 
@@ -58,7 +58,10 @@ describe('authGuard', () => {
     expect(TestBed.inject(Router).url).toBe('/beachmap');
 
     await harness.navigateByUrl('/');
-    expect(TestBed.inject(Router).url).toBe('/it/home');
+    expect(TestBed.inject(Router).url).toBe('/beachmap');
+
+    await harness.navigateByUrl('/en/home');
+    expect(TestBed.inject(Router).url).toBe('/beachmap');
   });
 
   it('should close the management area after logout, also going back to a private page', async () => {
