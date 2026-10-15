@@ -591,6 +591,26 @@
             },
             "all_days": "全部",
             "choose_days": "请选择"
+          },
+          "field_names": {
+            "validity_period": "有效期",
+            "day_of_week": "星期"
+          },
+          "options": {
+            "title": "选项",
+            "type": "折扣/优惠券类型",
+            "types": {
+              "percentage": "百分比",
+              "fixed": "金额"
+            },
+            "value": "折扣/优惠券值",
+            "applies_to": "折扣/优惠券适用于",
+            "scopes": {
+              "all": "全部",
+              "services": "服务"
+            },
+            "max_uses": "最大使用次数",
+            "enabled": "启用折扣/优惠券"
           }
         }
       }
@@ -709,7 +729,8 @@
       "smtp_password": {
         "retype": "您更改了连接参数：请重新输入密码或输入新密码。"
       }
-    }
+    },
+    "min_items": "必须至少定义 {{count}} 个{{field}}"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

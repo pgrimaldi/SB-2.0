@@ -591,6 +591,26 @@
             },
             "all_days": "Tutti",
             "choose_days": "Seleziona"
+          },
+          "field_names": {
+            "validity_period": "periodo di validità",
+            "day_of_week": "giorno della settimana"
+          },
+          "options": {
+            "title": "Opzioni",
+            "type": "Tipo di sconto/voucher",
+            "types": {
+              "percentage": "Percentuale",
+              "fixed": "Valore"
+            },
+            "value": "Valore sconto/voucher",
+            "applies_to": "Applica sconto/voucher a",
+            "scopes": {
+              "all": "Tutto",
+              "services": "Servizi"
+            },
+            "max_uses": "Numero massimo di utilizzi",
+            "enabled": "Abilita sconto/voucher"
           }
         }
       }
@@ -709,7 +729,8 @@
       "smtp_password": {
         "retype": "Hai cambiato i parametri di connessione: riscrivi la password o inseriscine una nuova."
       }
-    }
+    },
+    "min_items": "Deve essere definito almeno {{count}} {{field}}"
   },
   "unsaved_changes": {
     "title": "Modifiche non salvate",

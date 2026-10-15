@@ -5,18 +5,24 @@
   class="filled__multi__select__control"
   appearance="fill"
   subscriptSizing="dynamic"
+  [class.filled__multi__select__invalid]="!!error()"
   [class.filled__multi__select__locked]="disabled()"
 >
   <mat-select
     panelClass="select__panel"
     multiple
     [disabled]="disabled()"
+    [errorStateMatcher]="errorMatcher"
     [placeholder]="placeholder() ?? ''"
     [value]="value()"
     (valueChange)="value.set($event)"
+    (closed)="touch.emit()"
   >
     @for (option of options(); track option.value) {
       <mat-option [value]="option.value">{{ option.label }}</mat-option>
     }
   </mat-select>
 </mat-form-field>
+@if (error(); as error) {
+  <p class="filled__multi__select__error">{{ error }}</p>
+}

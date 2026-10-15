@@ -15,6 +15,11 @@ export interface RequiredTextError extends ValidationError {
   readonly kind: 'required';
 }
 
+export interface MinItemsError extends ValidationError {
+  readonly kind: 'min_items';
+  readonly count: number;
+}
+
 /** Unlike Angular's `required`, a text made only of spaces is empty too. */
 export function requiredText<TPathKind extends PathKind = PathKind.Root>(
   path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
@@ -33,4 +38,14 @@ export function greaterThan<TPathKind extends PathKind = PathKind.Root>(
     const number = value();
     return number !== null && number > limit ? undefined : { kind: 'greater_than', limit };
   });
+}
+
+/** A list with fewer than `count` items, e.g. a voucher without validity periods. */
+export function minItems<TItem, TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<readonly TItem[], SchemaPathRules.Supported, TPathKind>,
+  count: number,
+): void {
+  validate(path, ({ value }): MinItemsError | undefined =>
+    value().length >= count ? undefined : { kind: 'min_items', count },
+  );
 }

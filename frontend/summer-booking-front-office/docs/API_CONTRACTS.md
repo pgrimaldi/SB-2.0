@@ -1272,6 +1272,82 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### POST `/api/vouchers/add-voucher-item`
+
+Sconti e voucher: aggiunta.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "voucherName": "Estate",
+  "validityPeriods": [
+    {
+      "validFrom": "2026-08-01T00:00:00.000Z",
+      "validTo": "2026-08-31T00:00:00.000Z",
+      "daysOfWeek": [
+        1,
+        2,
+        3
+      ],
+      "timeSlots": [
+        {
+          "from": "09:00",
+          "to": "12:00"
+        },
+        {
+          "from": "15:00",
+          "to": "17:00"
+        }
+      ]
+    },
+    {
+      "validFrom": "2026-09-01T00:00:00.000Z",
+      "validTo": "2026-09-15T00:00:00.000Z",
+      "daysOfWeek": [
+        6,
+        7
+      ],
+      "timeSlots": [
+        {
+          "from": "10:00",
+          "to": "18:00"
+        }
+      ]
+    }
+  ],
+  "discountType": "Percentage",
+  "discountValue": 15,
+  "discountScope": "All",
+  "maxUseQuantity": 1,
+  "isEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `voucherName` | string | `Estate` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
+| `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-01T00:00:00.000Z` |
+| `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-31T00:00:00.000Z` |
+| `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
+| `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
+| `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `12:00` |
+| `discountType` | string (enum DiscountType) | `Percentage` |
+| `discountValue` | number (decimale) | `15` |
+| `discountScope` | string (enum DiscountScope) | `All` |
+| `maxUseQuantity` | number (intero ≥ 1) | `1` |
+| `isEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

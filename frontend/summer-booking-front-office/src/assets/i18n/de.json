@@ -591,6 +591,26 @@
             },
             "all_days": "Alle",
             "choose_days": "Auswählen"
+          },
+          "field_names": {
+            "validity_period": "Gültigkeitszeitraum",
+            "day_of_week": "Wochentag"
+          },
+          "options": {
+            "title": "Optionen",
+            "type": "Rabatt-/Gutscheintyp",
+            "types": {
+              "percentage": "Prozent",
+              "fixed": "Betrag"
+            },
+            "value": "Rabatt-/Gutscheinwert",
+            "applies_to": "Rabatt/Gutschein anwenden auf",
+            "scopes": {
+              "all": "Alles",
+              "services": "Leistungen"
+            },
+            "max_uses": "Maximale Anzahl der Nutzungen",
+            "enabled": "Rabatt/Gutschein aktivieren"
           }
         }
       }
@@ -709,7 +729,8 @@
       "smtp_password": {
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
       }
-    }
+    },
+    "min_items": "Mindestens {{count}} {{field}} muss festgelegt werden"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

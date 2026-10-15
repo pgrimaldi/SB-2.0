@@ -591,6 +591,26 @@
             },
             "all_days": "All",
             "choose_days": "Select"
+          },
+          "field_names": {
+            "validity_period": "validity period",
+            "day_of_week": "day of the week"
+          },
+          "options": {
+            "title": "Options",
+            "type": "Discount/voucher type",
+            "types": {
+              "percentage": "Percentage",
+              "fixed": "Amount"
+            },
+            "value": "Discount/voucher value",
+            "applies_to": "Apply discount/voucher to",
+            "scopes": {
+              "all": "Everything",
+              "services": "Services"
+            },
+            "max_uses": "Maximum number of uses",
+            "enabled": "Enable discount/voucher"
           }
         }
       }
@@ -709,7 +729,8 @@
       "smtp_password": {
         "retype": "You changed the connection settings: type the password again or enter a new one."
       }
-    }
+    },
+    "min_items": "At least {{count}} {{field}} must be defined"
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

@@ -591,6 +591,26 @@
             },
             "all_days": "Tous",
             "choose_days": "Sélectionner"
+          },
+          "field_names": {
+            "validity_period": "période de validité",
+            "day_of_week": "jour de la semaine"
+          },
+          "options": {
+            "title": "Options",
+            "type": "Type de remise/bon",
+            "types": {
+              "percentage": "Pourcentage",
+              "fixed": "Montant"
+            },
+            "value": "Valeur de la remise/du bon",
+            "applies_to": "Appliquer la remise/le bon à",
+            "scopes": {
+              "all": "Tout",
+              "services": "Services"
+            },
+            "max_uses": "Nombre maximal d'utilisations",
+            "enabled": "Activer la remise/le bon"
           }
         }
       }
@@ -709,7 +729,8 @@
       "smtp_password": {
         "retype": "Vous avez modifié les paramètres de connexion : saisissez de nouveau le mot de passe ou entrez-en un nouveau."
       }
-    }
+    },
+    "min_items": "Il faut définir au moins {{count}} {{field}}"
   },
   "unsaved_changes": {
     "title": "Modifications non enregistrées",

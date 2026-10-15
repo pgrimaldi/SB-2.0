@@ -1,15 +1,18 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { DiscountScope } from '../../../entities/enums/discount-scope';
 import { DiscountType } from '../../../entities/enums/discount-type';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { DeleteVoucherItemsRequest } from '../../../entities/settings/vouchers/delete-voucher-items-request';
 import { DuplicateVoucherItemsRequest } from '../../../entities/settings/vouchers/duplicate-voucher-items-request';
+import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden, resourceNotFound } from '../errors/problem.mock';
+import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 type VoucherRow = VoucherItem & { propertyId: number };
+type AddVoucherBody = Partial<VoucherAddItemRequest> & { idProperty?: unknown };
 
 const VOUCHERS: VoucherRow[] = [
   {
@@ -33,6 +36,7 @@ const VOUCHERS: VoucherRow[] = [
 ];
 
 const MAX_PAGE_SIZE = 100;
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const SORT_FIELDS = [
   'voucherName',
   'validFrom',
@@ -125,6 +129,111 @@ export const duplicateVoucherItemsMock = (
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/**
+ * `POST /api/vouchers/add-voucher-item` with `VoucherAddItemRequest` and `idProperty`: a new voucher
+ * with the name, the validity periods and the options; in the list it shows from the first day to
+ * the last one. 204 without a body; 401 without a valid access token; 403 for an
+ * unknown property; 400 with one error per wrong field (see `voucherErrors`).
+ */
+export const addVoucherItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as AddVoucherBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const errors = voucherErrors(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const periods = body.validityPeriods ?? [];
+  const days = periods.flatMap(({ validFrom, validTo }) => [
+    validFrom as string,
+    validTo as string,
+  ]);
+  days.sort();
+  VOUCHERS.push({
+    propertyId: property.id,
+    idVoucher: crypto.randomUUID(),
+    voucherName: (body.voucherName as string).trim(),
+    validFrom: days[0] ?? null,
+    validTo: days.at(-1) ?? null,
+    discountType: body.discountType as DiscountType,
+    discountValue: body.discountValue as number,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * As the backend checks it: a name, at least one period, and in each period both days (the last not
+ * before the first), at least one day of the week from 1 to 7 and time slots `HH:mm` (none is fine);
+ * a known type and scope, a value from 1 (up to 100 for a percentage), at least 1 use, the switch.
+ */
+function voucherErrors(body: AddVoucherBody): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  if (typeof body.voucherName !== 'string' || !body.voucherName.trim()) {
+    errors.push({ field: 'voucherName', code: 'validation.required' });
+  }
+  const periods = Array.isArray(body.validityPeriods) ? body.validityPeriods : [];
+  if (!periods.length) {
+    errors.push({ field: 'validityPeriods', code: 'validation.required' });
+  }
+  periods.forEach((period, index) => {
+    const at = `validityPeriods[${index}]`;
+    const isFromDay = isDay(period.validFrom);
+    const isToDay = isDay(period.validTo);
+    if (!isFromDay) {
+      errors.push({ field: `${at}.validFrom`, code: 'validation.required' });
+    }
+    if (!isToDay) {
+      errors.push({ field: `${at}.validTo`, code: 'validation.required' });
+    }
+    if (isFromDay && isToDay && (period.validTo as string) < (period.validFrom as string)) {
+      errors.push({ field: `${at}.validTo`, code: 'validation.end_before_start' });
+    }
+    const days = Array.isArray(period.daysOfWeek) ? period.daysOfWeek : [];
+    if (!days.length || days.some((day) => !Number.isInteger(day) || day < 1 || day > 7)) {
+      errors.push({ field: `${at}.daysOfWeek`, code: 'validation.required' });
+    }
+    (Array.isArray(period.timeSlots) ? period.timeSlots : []).forEach((timeSlot, slotIndex) => {
+      for (const side of ['from', 'to'] as const) {
+        if (typeof timeSlot[side] !== 'string' || !TIME.test(timeSlot[side])) {
+          errors.push({
+            field: `${at}.timeSlots[${slotIndex}].${side}`,
+            code: 'validation.invalid',
+          });
+        }
+      }
+    });
+  });
+  if (!Object.values(DiscountType).includes(body.discountType as DiscountType)) {
+    errors.push({ field: 'discountType', code: 'validation.required' });
+  }
+  const value = body.discountValue;
+  const highest = body.discountType === DiscountType.Percentage ? 100 : Infinity;
+  if (typeof value !== 'number' || value < 1 || value > highest) {
+    errors.push({ field: 'discountValue', code: 'validation.out_of_range' });
+  }
+  if (!Object.values(DiscountScope).includes(body.discountScope as DiscountScope)) {
+    errors.push({ field: 'discountScope', code: 'validation.required' });
+  }
+  if (!Number.isInteger(body.maxUseQuantity) || (body.maxUseQuantity as number) < 1) {
+    errors.push({ field: 'maxUseQuantity', code: 'validation.out_of_range' });
+  }
+  if (typeof body.isEnabled !== 'boolean') {
+    errors.push({ field: 'isEnabled', code: 'validation.invalid' });
+  }
+  return errors;
+}
+
+function isDay(value: unknown): boolean {
+  return typeof value === 'string' && !Number.isNaN(Date.parse(value));
+}
 
 /**
  * The vouchers of the property for `idVouchers` (repeated ids once); null when one id is not one of

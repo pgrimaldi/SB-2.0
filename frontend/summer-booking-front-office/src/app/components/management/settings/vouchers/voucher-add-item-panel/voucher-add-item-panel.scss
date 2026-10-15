@@ -135,7 +135,7 @@ app-voucher-add-item-panel {
 .voucher__add__item__panel__row__controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-end;
   gap: 0.5rem;
   margin-inline-start: auto;
@@ -149,11 +149,12 @@ app-voucher-add-item-panel {
   margin-inline-start: auto;
 }
 
+// As high as a field: the words stay on the line of the fields, also with an error under one of them.
 .voucher__add__item__panel__word {
   margin-inline-start: 0.25rem;
   color: var(--color__main__theme__one);
   font-size: 0.6875rem;
-  line-height: 1rem;
+  line-height: var(--filled-field-height, 1.625rem);
 }
 
 .voucher__add__item__panel__field {
@@ -188,6 +189,33 @@ app-voucher-add-item-panel {
     width: 0.625rem;
     height: 0.625rem;
   }
+}
+
+.voucher__add__item__panel__options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.3125rem;
+}
+
+.voucher__add__item__panel__option {
+  width: 17.375rem;
+}
+
+.voucher__add__item__panel__value {
+  width: 7.1875rem;
+}
+
+.voucher__add__item__panel__enabled {
+  margin-top: 1.375rem;
+}
+
+// Under the section, like the error of a field under the field.
+.voucher__add__item__panel__error {
+  margin: 0.375rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 .voucher__add__item__panel__buttons {
@@ -230,10 +258,15 @@ app-voucher-add-item-panel {
     align-items: stretch;
   }
 
-  .voucher__add__item__panel__field {
+  .voucher__add__item__panel__field,
+  .voucher__add__item__panel__value {
     width: auto;
     min-width: 0;
     flex: 1;
+  }
+
+  .voucher__add__item__panel__option {
+    width: auto;
   }
 
   .voucher__add__item__panel__word:first-child {

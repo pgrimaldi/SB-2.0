@@ -591,6 +591,26 @@
             },
             "all_days": "Todos",
             "choose_days": "Seleccionar"
+          },
+          "field_names": {
+            "validity_period": "periodo de validez",
+            "day_of_week": "día de la semana"
+          },
+          "options": {
+            "title": "Opciones",
+            "type": "Tipo de descuento/vale",
+            "types": {
+              "percentage": "Porcentaje",
+              "fixed": "Importe"
+            },
+            "value": "Valor del descuento/vale",
+            "applies_to": "Aplicar descuento/vale a",
+            "scopes": {
+              "all": "Todo",
+              "services": "Servicios"
+            },
+            "max_uses": "Número máximo de usos",
+            "enabled": "Activar descuento/vale"
           }
         }
       }
@@ -709,7 +729,8 @@
       "smtp_password": {
         "retype": "Has cambiado los parámetros de conexión: vuelve a escribir la contraseña o introduce una nueva."
       }
-    }
+    },
+    "min_items": "Debe definirse al menos {{count}} {{field}}"
   },
   "unsaved_changes": {
     "title": "Cambios sin guardar",

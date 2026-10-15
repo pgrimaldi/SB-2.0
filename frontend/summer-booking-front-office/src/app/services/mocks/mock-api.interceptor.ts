@@ -12,6 +12,7 @@ import {
 } from './database/database.mock';
 import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
 import {
+  addVoucherItemMock,
   deleteVoucherItemsMock,
   duplicateVoucherItemsMock,
   voucherListMock,
@@ -277,6 +278,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/vouchers/duplicate-voucher-item`
   ) {
     return duplicateVoucherItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/add-voucher-item`
+  ) {
+    return addVoucherItemMock(request);
   }
 
   return next(request);
