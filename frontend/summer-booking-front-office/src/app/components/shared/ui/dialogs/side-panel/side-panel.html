@@ -2,20 +2,6 @@
   <div class="side__panel">
     <div class="side__panel__header">
       <h2 class="side__panel__title">{{ title() }}</h2>
-      @if (icons().list[0]; as icon) {
-        <button
-          class="side__panel__close"
-          type="button"
-          [disabled]="isLoading()"
-          (click)="requestClose()"
-        >
-          @if (icons().material) {
-            <mat-icon>{{ icon }}</mat-icon>
-          } @else {
-            <img [src]="icon" width="12" height="12" alt="" />
-          }
-        </button>
-      }
     </div>
 
     <div class="side__panel__body" [attr.inert]="isLoading() ? '' : null">

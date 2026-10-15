@@ -37,6 +37,7 @@ export class Warehouse {
     return idProperty ? { idProperty } : null;
   });
   protected readonly titleIcon = ['/assets/images/Warehouse_Title.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/Warehouse_Close.svg'] as const;
   /**
    * In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create].
    * No title icon: the page has its own title.

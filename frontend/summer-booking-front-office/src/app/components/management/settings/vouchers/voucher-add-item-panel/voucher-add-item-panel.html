@@ -3,9 +3,6 @@
     <h2 class="voucher__add__item__panel__title">
       {{ 'management.settings.vouchers.form.title' | translate }}
     </h2>
-    <button class="voucher__add__item__panel__close" type="button" (click)="leave()">
-      <img [src]="closeIcon" width="12" height="12" alt="" />
-    </button>
 
     <app-filled-text-field
       [label]="'management.settings.vouchers.form.name' | translate"
@@ -34,7 +31,7 @@
             type="button"
             (click)="removePeriod(periodIndex)"
           >
-            <img [src]="closeIcon" width="12" height="12" alt="" />
+            <img [src]="removePeriodIcon" width="12" height="12" alt="" />
           </button>
 
           <div class="voucher__add__item__panel__row">
@@ -75,7 +72,6 @@
                 (valueChange)="setDays(period, $event)"
               />
               <app-checkbox
-                class="voucher__add__item__panel__day"
                 [checked]="hasAllDays(period)"
                 (checkedChange)="setAllDays(period, $event)"
               >

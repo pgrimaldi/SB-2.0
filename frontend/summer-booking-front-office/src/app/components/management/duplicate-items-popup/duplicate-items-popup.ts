@@ -34,7 +34,7 @@ export class DuplicateItemsPopup {
   readonly itemName = input<string | null>(null);
   readonly translationKey = input.required<string>();
   readonly action = input.required<(idProperty: string, idItems: string[]) => Observable<void>>();
-  /** [error icon of the alert]. */
+  /** [X of both popups, warning of the error popup]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly duplicated = output<readonly string[]>();
 

@@ -85,7 +85,12 @@ export class Vouchers {
     return idProperty ? { idProperty } : null;
   });
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;
-  protected readonly errorIcon = ['/assets/images/Vouchers_Warning.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/Vouchers_Close.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/Vouchers_Close.svg',
+    '/assets/images/Vouchers_Warning.svg',
+  ] as const;
   /** In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create]. */
   protected readonly tableIcons = [
     '',

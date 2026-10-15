@@ -4,15 +4,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
-  computed,
   inject,
   input,
   output,
 } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { Button, ButtonAppearance, ButtonSize } from '../../buttons/button/button';
-import { resolveIcons } from '../../icons/icons';
 import { BasePopup } from '../base-popup/base-popup';
 
 export interface SidePanelTexts {
@@ -27,7 +24,7 @@ export interface SidePanelTexts {
  */
 @Component({
   selector: 'app-side-panel',
-  imports: [Button, MatIconModule],
+  imports: [Button],
   templateUrl: './side-panel.html',
   styleUrl: './side-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,10 +36,6 @@ export class SidePanel extends BasePopup {
   readonly texts = input<SidePanelTexts | null>();
   readonly isLoading = input(false);
   readonly isSaveDisabled = input(false);
-  /** Icons as Material icon names (Material Symbols font): [close]. Without it, no X. */
-  readonly matIcon = input<readonly string[] | null>();
-  /** Icons as image paths, used when `matIcon` is not given: [close]. Without it, no X. */
-  readonly pathIcon = input<readonly string[] | null>();
   readonly closeRequest = output<void>();
   readonly save = output<void>();
 
@@ -51,7 +44,6 @@ export class SidePanel extends BasePopup {
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
-  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
 
   protected requestClose(): void {
     if (!this.isLoading()) {
@@ -61,6 +53,10 @@ export class SidePanel extends BasePopup {
 
   protected override closeRequested(): void {
     this.requestClose();
+  }
+
+  protected override isCloseDisabled(): boolean {
+    return this.isLoading();
   }
 
   protected dialogConfig(): MatDialogConfig {

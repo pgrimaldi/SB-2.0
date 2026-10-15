@@ -98,7 +98,6 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     ),
     { initialValue: null },
   );
-  protected readonly closeIcon = '/assets/images/WarehouseSetting_Close.svg';
 
   constructor() {
     super();
@@ -157,6 +156,10 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
       this.close();
     }
+  }
+
+  protected override isCloseDisabled(): boolean {
+    return this.isLoading();
   }
 
   protected override closeRequested(): void {

@@ -145,7 +145,13 @@ export class Taxation {
   /** The error of an action (switch, delete, guide) goes in a popup. */
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly isActionErrorShown = signal(false);
-  protected readonly actionErrorIcon = ['/assets/images/Taxation_Warning.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/Taxation_Close.svg'] as const;
+  protected readonly addPrinterCloseIcon = ['/assets/images/Taxation_CloseAddPrinter.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/Taxation_Close.svg',
+    '/assets/images/Taxation_Warning.svg',
+  ] as const;
   private readonly receiptError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = this.messageOf(this.actionError);
   protected readonly receiptErrorMessage = this.messageOf(this.receiptError);

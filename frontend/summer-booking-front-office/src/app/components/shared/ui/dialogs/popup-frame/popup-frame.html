@@ -1,0 +1,15 @@
+<ng-container [ngTemplateOutlet]="data.content" />
+@if (data.icons().list[0]; as icon) {
+  <button
+    class="popup__frame__close"
+    type="button"
+    [disabled]="data.isCloseDisabled()"
+    (click)="data.close()"
+  >
+    @if (data.icons().material) {
+      <mat-icon>{{ icon }}</mat-icon>
+    } @else {
+      <img [src]="icon" width="12" height="12" alt="" />
+    }
+  </button>
+}

@@ -70,7 +70,7 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
 
   private readonly draft = signal(new VoucherAddItemRequest());
   protected readonly draftForm = form(this.draft);
-  protected readonly closeIcon = '/assets/images/Vouchers_Close.svg';
+  protected readonly removePeriodIcon = '/assets/images/Vouchers_Close.svg';
   protected readonly addPeriodIcon = ['/assets/images/Vouchers_Add.svg'] as const;
   protected readonly calendarIcon = ['/assets/images/Vouchers_Calendar.svg'] as const;
   protected readonly clockIcon = ['/assets/images/Vouchers_Clock.svg'] as const;

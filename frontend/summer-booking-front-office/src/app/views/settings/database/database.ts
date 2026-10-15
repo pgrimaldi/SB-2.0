@@ -170,7 +170,11 @@ export class Database {
   protected readonly isDeletingForever = signal(false);
   protected readonly closeIcon = ['/assets/images/Database_Close.svg'] as const;
   protected readonly isActionErrorShown = signal(false);
-  protected readonly actionErrorIcon = ['/assets/images/Database_Warning.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/Database_Close.svg',
+    '/assets/images/Database_Warning.svg',
+  ] as const;
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = toSignal(
     toObservable(this.actionError).pipe(

@@ -57,7 +57,9 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+
   protected readonly ButtonSize = ButtonSize;
+  protected readonly closeIcon = ['/assets/images/Sharing_Close.svg'] as const;
 
   private readonly information = signal(new SharingGeneralInformation());
   private readonly loaded = signal(false);

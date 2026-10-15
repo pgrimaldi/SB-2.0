@@ -2,26 +2,36 @@ import {
   Directive,
   OnDestroy,
   TemplateRef,
+  computed,
   effect,
   inject,
+  input,
   model,
   untracked,
   viewChild,
 } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { resolveIcons } from '../../icons/icons';
+import { PopupFrame, PopupFrameData } from '../popup-frame/popup-frame';
 
 /**
  * A popup extends it, puts its content in an `<ng-template #content>` of its template and gives the
- * dialog options (`dialogConfig`).
+ * dialog options (`dialogConfig`). The X in the top corner is drawn here for every popup: it is the
+ * first icon of `matIcon` / `pathIcon`, and the popup's own icons follow it.
  */
 @Directive()
 export abstract class BasePopup implements OnDestroy {
   readonly open = model(false);
+  /** Icons as Material icon names (Material Symbols font): [X, then the popup's own icons]. */
+  readonly matIcon = input<readonly string[] | null>();
+  /** Icons as image paths, used when `matIcon` is not given: [X, then the popup's own icons]. */
+  readonly pathIcon = input<readonly string[] | null>();
 
   private readonly dialog = inject(MatDialog);
 
+  protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   private readonly content = viewChild.required<TemplateRef<unknown>>('content');
-  private dialogRef?: MatDialogRef<unknown>;
+  private dialogRef?: MatDialogRef<PopupFrame>;
 
   constructor() {
     effect(() => {
@@ -44,11 +54,16 @@ export abstract class BasePopup implements OnDestroy {
   }
 
   /**
-   * Esc or a click outside while they do not close the popup (`disableClose`, `setClosable(false)`):
-   * the popup may close after asking (e.g. unsaved changes). Nothing by default.
+   * Esc, a click outside or the X while they do not close the popup (`disableClose`,
+   * `setClosable(false)`): the popup may close after asking (e.g. unsaved changes). Nothing by default.
    */
   protected closeRequested(): void {
     // Blocked: e.g. while saving.
+  }
+
+  /** The X cannot be pressed, e.g. while saving. */
+  protected isCloseDisabled(): boolean {
+    return false;
   }
 
   /** Blocks only Esc and a click outside (e.g. while saving): the popup blocks its own buttons. */
@@ -62,7 +77,13 @@ export abstract class BasePopup implements OnDestroy {
     if (this.dialogRef) {
       return;
     }
-    const dialogRef = this.dialog.open(this.content(), this.dialogConfig());
+    const data: PopupFrameData = {
+      content: this.content(),
+      icons: () => this.icons(),
+      isCloseDisabled: () => this.isCloseDisabled(),
+      close: () => this.closeByX(),
+    };
+    const dialogRef = this.dialog.open(PopupFrame, { ...this.dialogConfig(), data });
     this.dialogRef = dialogRef;
     dialogRef.afterClosed().subscribe(() => this.closed(dialogRef));
     // Both end when the popup closes.
@@ -74,14 +95,27 @@ export abstract class BasePopup implements OnDestroy {
     });
   }
 
-  private blockedClose(dialogRef: MatDialogRef<unknown>): void {
+  /** The X does what Esc does. */
+  private closeByX(): void {
+    const dialogRef = this.dialogRef;
+    if (!dialogRef || this.isCloseDisabled()) {
+      return;
+    }
+    if (dialogRef.disableClose) {
+      this.closeRequested();
+    } else {
+      this.close();
+    }
+  }
+
+  private blockedClose(dialogRef: MatDialogRef<PopupFrame>): void {
     if (dialogRef.disableClose && this.dialogRef === dialogRef) {
       this.closeRequested();
     }
   }
 
   /** The popup finished closing: by Esc or a click outside it is still the current one. */
-  private closed(dialogRef: MatDialogRef<unknown>): void {
+  private closed(dialogRef: MatDialogRef<PopupFrame>): void {
     if (this.dialogRef === dialogRef) {
       this.close();
     }

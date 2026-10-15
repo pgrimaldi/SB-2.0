@@ -53,7 +53,8 @@ app-side-panel {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1.5rem 1.5rem 1.375rem;
+  padding-block: 1.5rem 1.375rem;
+  padding-inline: 1.5rem 2.5rem;
 }
 
 .side__panel__title {
@@ -63,33 +64,6 @@ app-side-panel {
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.25rem;
-}
-
-.side__panel__close {
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  flex: none;
-  place-items: center;
-  margin-block-start: -0.125rem;
-  margin-inline-end: -0.25rem;
-  padding: 0;
-  border: 0;
-  border-radius: 0.25rem;
-  background: none;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.5;
-  }
-
-  img,
-  mat-icon {
-    width: 0.75rem;
-    height: 0.75rem;
-    font-size: 0.75rem;
-  }
 }
 
 .side__panel__body {

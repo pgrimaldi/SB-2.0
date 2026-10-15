@@ -94,7 +94,6 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
     ),
     { initialValue: null },
   );
-  protected readonly closeIcon = '/assets/images/Taxation_CloseAddPrinter.svg';
 
   constructor() {
     super();
@@ -139,6 +138,10 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
     if (!this.isLoading() && (await this.unsaved.confirmDiscard(this))) {
       this.close();
     }
+  }
+
+  protected override isCloseDisabled(): boolean {
+    return this.isLoading();
   }
 
   protected override closeRequested(): void {

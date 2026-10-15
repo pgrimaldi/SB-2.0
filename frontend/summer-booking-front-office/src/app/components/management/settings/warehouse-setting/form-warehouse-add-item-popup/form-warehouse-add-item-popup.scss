@@ -32,31 +32,6 @@ app-form-warehouse-add-item-popup {
   line-height: 1.25rem;
 }
 
-.form__warehouse__add__item__popup__close {
-  position: absolute;
-  top: 0.25rem;
-  inset-inline-end: 0.25rem;
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 0.25rem;
-  background: none;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.5;
-  }
-
-  img {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
-}
-
 .form__warehouse__add__item__popup__fields {
   display: flex;
   flex-direction: column;

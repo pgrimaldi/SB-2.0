@@ -32,7 +32,6 @@ app-voucher-add-item-panel {
   line-height: 1.25rem;
 }
 
-.voucher__add__item__panel__close,
 .voucher__add__item__panel__period__remove,
 .voucher__add__item__panel__slot__remove {
   display: grid;
@@ -45,12 +44,6 @@ app-voucher-add-item-panel {
   border-radius: 0.25rem;
   background: none;
   cursor: pointer;
-}
-
-.voucher__add__item__panel__close {
-  position: absolute;
-  top: 0.5rem;
-  inset-inline-end: 0.5rem;
 }
 
 .voucher__add__item__panel__period__remove {
@@ -178,34 +171,6 @@ app-voucher-add-item-panel {
 .voucher__add__item__panel__days__select {
   flex: 1;
   min-width: 0;
-}
-
-// Smaller boxes and labels than the standard checkbox, as in the period of the voucher.
-.voucher__add__item__panel__days .voucher__add__item__panel__day {
-  @include mat.checkbox-overrides(
-    (
-      label-text-size: 0.6875rem,
-      label-text-line-height: 1rem,
-    )
-  );
-
-  .mdc-checkbox {
-    flex-basis: 0.875rem;
-    width: 0.875rem;
-    height: 0.875rem;
-    padding: 0.3125rem;
-  }
-
-  .mdc-checkbox__background {
-    top: 0.3125rem;
-    left: 0.3125rem;
-    width: 0.875rem;
-    height: 0.875rem;
-  }
-
-  .mdc-label {
-    padding-inline-start: 0;
-  }
 }
 
 .voucher__add__item__panel .voucher__add__item__panel__add__slot {

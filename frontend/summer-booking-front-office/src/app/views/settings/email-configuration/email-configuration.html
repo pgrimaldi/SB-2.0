@@ -113,12 +113,14 @@
 </main>
 
 <app-message-popup
+  [pathIcon]="closeIcon"
   [title]="'management.settings.email_configuration.test_sent.title' | translate"
   [text]="'management.settings.email_configuration.test_sent.text' | translate"
   [texts]="'management.settings.email_configuration.test_sent' | translate"
   [(open)]="testSent"
 />
 <app-message-popup
+  [pathIcon]="closeIcon"
   [title]="'management.settings.email_configuration.saved.title' | translate"
   [text]="'management.settings.email_configuration.saved.text' | translate"
   [texts]="'management.settings.email_configuration.saved' | translate"
