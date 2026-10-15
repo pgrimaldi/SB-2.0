@@ -1,0 +1,111 @@
+@use '@angular/material' as mat;
+
+// The panel renders in an overlay outside the component: these styles are global.
+.side__panel__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+
+  .mat-mdc-dialog-container {
+    animation: side-panel-in 250ms ease-out;
+  }
+}
+
+[dir='rtl'] .side__panel__panel .mat-mdc-dialog-container {
+  animation-name: side-panel-in-rtl;
+}
+
+@keyframes side-panel-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes side-panel-in-rtl {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side__panel__panel .mat-mdc-dialog-container {
+    animation: none;
+  }
+}
+
+// The element in the page only holds the panel template: Material draws the panel above the page.
+app-side-panel {
+  display: contents;
+}
+
+.side__panel {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.side__panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 1.375rem;
+}
+
+.side__panel__title {
+  flex: 1;
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.side__panel__close {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  place-items: center;
+  margin-block-start: -0.125rem;
+  margin-inline-end: -0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  img,
+  mat-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+.side__panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1.5rem;
+}
+
+// The border of Annulla stays inside the 1.75rem height.
+.side__panel__buttons {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.5rem;
+}

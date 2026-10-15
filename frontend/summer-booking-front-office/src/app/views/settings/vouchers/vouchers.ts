@@ -9,6 +9,7 @@ import {
 } from '../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { VoucherAddItemPanel } from '../../../components/management/settings/vouchers/voucher-add-item-panel/voucher-add-item-panel';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -58,6 +59,7 @@ const DISCOUNT_TYPE_KEYS: Record<DiscountType, keyof VouchersTexts['discount_typ
     Table,
     TableErrorPopup,
     TranslatePipe,
+    VoucherAddItemPanel,
   ],
   templateUrl: './vouchers.html',
   styleUrl: './vouchers.scss',
@@ -70,6 +72,7 @@ export class Vouchers {
   private readonly dateLanguage = inject(DateLanguageBehaviour);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
   protected readonly idSelectedVouchers = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idVouchersToDelete = signal<readonly string[]>([]);

@@ -563,6 +563,35 @@
             "title": "Duplicate discounts/vouchers",
             "text": "Do you want to duplicate the {{count}} selected discounts/vouchers?"
           }
+        },
+        "form": {
+          "title": "Add new discount/voucher",
+          "cancel": "Cancel",
+          "save": "Save",
+          "name": "Discount name",
+          "periods": {
+            "title": "Validity periods",
+            "add": "Add validity period",
+            "period": "Period",
+            "from": "From",
+            "to": "to",
+            "days_of_week": "Days of the week",
+            "time_slots": "Time slots",
+            "time_from": "From",
+            "time_to": "to",
+            "add_time_slot": "Add time slot",
+            "days": {
+              "monday": "Monday",
+              "tuesday": "Tuesday",
+              "wednesday": "Wednesday",
+              "thursday": "Thursday",
+              "friday": "Friday",
+              "saturday": "Saturday",
+              "sunday": "Sunday"
+            },
+            "all_days": "All",
+            "choose_days": "Select"
+          }
         }
       }
     }

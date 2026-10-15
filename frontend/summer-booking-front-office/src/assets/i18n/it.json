@@ -563,6 +563,35 @@
             "title": "Duplica sconti/voucher",
             "text": "Vuoi duplicare i {{count}} sconti/voucher selezionati?"
           }
+        },
+        "form": {
+          "title": "Aggiungi nuovo sconto/voucher",
+          "cancel": "Annulla",
+          "save": "Salva",
+          "name": "Nome sconto",
+          "periods": {
+            "title": "Periodi di validità",
+            "add": "Aggiungi periodo di validità",
+            "period": "Periodo",
+            "from": "Dal",
+            "to": "al",
+            "days_of_week": "Giorni della settimana",
+            "time_slots": "Fasce orarie",
+            "time_from": "Dalle",
+            "time_to": "alle",
+            "add_time_slot": "Aggiungi fascia oraria",
+            "days": {
+              "monday": "Lunedì",
+              "tuesday": "Martedì",
+              "wednesday": "Mercoledì",
+              "thursday": "Giovedì",
+              "friday": "Venerdì",
+              "saturday": "Sabato",
+              "sunday": "Domenica"
+            },
+            "all_days": "Tutti",
+            "choose_days": "Seleziona"
+          }
         }
       }
     }

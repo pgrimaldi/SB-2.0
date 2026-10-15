@@ -563,6 +563,35 @@
             "title": "Dupliquer remises/bons",
             "text": "Voulez-vous dupliquer les {{count}} remises/bons sélectionnés ?"
           }
+        },
+        "form": {
+          "title": "Ajouter une remise/un bon",
+          "cancel": "Annuler",
+          "save": "Enregistrer",
+          "name": "Nom de la remise",
+          "periods": {
+            "title": "Périodes de validité",
+            "add": "Ajouter une période de validité",
+            "period": "Période",
+            "from": "Du",
+            "to": "au",
+            "days_of_week": "Jours de la semaine",
+            "time_slots": "Plages horaires",
+            "time_from": "De",
+            "time_to": "à",
+            "add_time_slot": "Ajouter une plage horaire",
+            "days": {
+              "monday": "Lundi",
+              "tuesday": "Mardi",
+              "wednesday": "Mercredi",
+              "thursday": "Jeudi",
+              "friday": "Vendredi",
+              "saturday": "Samedi",
+              "sunday": "Dimanche"
+            },
+            "all_days": "Tous",
+            "choose_days": "Sélectionner"
+          }
         }
       }
     }

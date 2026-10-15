@@ -1,0 +1,26 @@
+@use '../filled-field' as field;
+
+@include field.filled-field(filled__time__field);
+
+.filled__time__field__icon {
+  display: inline-flex;
+  margin-inline-end: 0.5rem;
+
+  img,
+  mat-icon {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+  }
+}
+
+// Only the anchor of the list, which opens in an overlay: it must take no room under the field.
+mat-timepicker {
+  display: none;
+}
+
+// Material gives the field a fixed width of 180px: here it follows the room it is given.
+.filled__time__field__control ::ng-deep .mat-mdc-form-field-infix {
+  width: auto;
+  min-width: 0;
+}

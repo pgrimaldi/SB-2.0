@@ -563,6 +563,35 @@
             "title": "Rabatte/Gutscheine duplizieren",
             "text": "Möchtest du die {{count}} ausgewählten Rabatte/Gutscheine duplizieren?"
           }
+        },
+        "form": {
+          "title": "Neuer Rabatt/Gutschein",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "name": "Rabattname",
+          "periods": {
+            "title": "Gültigkeitszeiträume",
+            "add": "Gültigkeitszeitraum hinzufügen",
+            "period": "Zeitraum",
+            "from": "Vom",
+            "to": "bis",
+            "days_of_week": "Wochentage",
+            "time_slots": "Zeitfenster",
+            "time_from": "Von",
+            "time_to": "bis",
+            "add_time_slot": "Zeitfenster hinzufügen",
+            "days": {
+              "monday": "Montag",
+              "tuesday": "Dienstag",
+              "wednesday": "Mittwoch",
+              "thursday": "Donnerstag",
+              "friday": "Freitag",
+              "saturday": "Samstag",
+              "sunday": "Sonntag"
+            },
+            "all_days": "Alle",
+            "choose_days": "Auswählen"
+          }
         }
       }
     }

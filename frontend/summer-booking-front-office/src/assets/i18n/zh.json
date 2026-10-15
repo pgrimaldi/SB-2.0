@@ -563,6 +563,35 @@
             "title": "复制折扣/代金券",
             "text": "要复制所选的 {{count}} 个折扣/代金券吗？"
           }
+        },
+        "form": {
+          "title": "添加新折扣/优惠券",
+          "cancel": "取消",
+          "save": "保存",
+          "name": "折扣名称",
+          "periods": {
+            "title": "有效期",
+            "add": "添加有效期",
+            "period": "期间",
+            "from": "从",
+            "to": "至",
+            "days_of_week": "星期",
+            "time_slots": "时间段",
+            "time_from": "从",
+            "time_to": "至",
+            "add_time_slot": "添加时间段",
+            "days": {
+              "monday": "星期一",
+              "tuesday": "星期二",
+              "wednesday": "星期三",
+              "thursday": "星期四",
+              "friday": "星期五",
+              "saturday": "星期六",
+              "sunday": "星期日"
+            },
+            "all_days": "全部",
+            "choose_days": "请选择"
+          }
         }
       }
     }

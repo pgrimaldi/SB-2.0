@@ -1,10 +1,16 @@
 @if (label()) {
   <label class="filled__multi__select__label">{{ label() }}</label>
 }
-<mat-form-field class="filled__multi__select__control" appearance="fill" subscriptSizing="dynamic">
+<mat-form-field
+  class="filled__multi__select__control"
+  appearance="fill"
+  subscriptSizing="dynamic"
+  [class.filled__multi__select__locked]="disabled()"
+>
   <mat-select
     panelClass="select__panel"
     multiple
+    [disabled]="disabled()"
     [placeholder]="placeholder() ?? ''"
     [value]="value()"
     (valueChange)="value.set($event)"

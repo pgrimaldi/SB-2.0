@@ -1,0 +1,281 @@
+@use '@angular/material' as mat;
+
+// The popup renders in an overlay outside the component: these styles are global.
+.voucher__add__item__panel__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0.125rem,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+}
+
+// The element in the page only holds the popup template: Material draws the popup above the page.
+app-voucher-add-item-panel {
+  display: contents;
+}
+
+.voucher__add__item__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.0625rem 1.25rem 1.625rem;
+}
+
+.voucher__add__item__panel__title {
+  margin: 0 2rem 1.1875rem 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.voucher__add__item__panel__close,
+.voucher__add__item__panel__period__remove,
+.voucher__add__item__panel__slot__remove {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  cursor: pointer;
+}
+
+.voucher__add__item__panel__close {
+  position: absolute;
+  top: 0.5rem;
+  inset-inline-end: 0.5rem;
+}
+
+.voucher__add__item__panel__period__remove {
+  position: absolute;
+  top: 0.3125rem;
+  inset-inline-end: 0.3125rem;
+}
+
+.voucher__add__item__panel__slot__remove img {
+  width: 0.75rem;
+  height: 1.0625rem;
+}
+
+.voucher__add__item__panel__section,
+.voucher__add__item__panel__period {
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+.voucher__add__item__panel__section {
+  margin-top: 1.375rem;
+  padding: 1.625rem 1.5625rem 1.5625rem;
+}
+
+.voucher__add__item__panel__section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding-bottom: 0.5625rem;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+}
+
+.voucher__add__item__panel__section__title {
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+.voucher__add__item__panel .voucher__add__item__panel__add {
+  --button-text-size: 0.6875rem;
+  --button-height: 1.625rem;
+  --button-padding: 0.75rem;
+
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--color__layout__text__soft),
+      filled-container-shape: 0.1875rem,
+    )
+  );
+
+  .button__icon {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+}
+
+.voucher__add__item__panel__period {
+  --filled-field-height: 1.5rem;
+  --filled-field-text-size: 0.6875rem;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.875rem;
+  margin-top: 1.25rem;
+  padding: 2rem 1.5625rem 1.625rem 1.25rem;
+}
+
+.voucher__add__item__panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.voucher__add__item__panel__row__label {
+  padding-top: 0.25rem;
+  color: var(--color__layout__text__soft);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.voucher__add__item__panel__row__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+.voucher__add__item__panel__slots {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.875rem;
+  margin-inline-start: auto;
+}
+
+.voucher__add__item__panel__word {
+  margin-inline-start: 0.25rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.voucher__add__item__panel__field {
+  width: 7.3125rem;
+}
+
+.voucher__add__item__panel__days {
+  flex: 1;
+  flex-wrap: nowrap;
+  gap: 1rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.voucher__add__item__panel__days__select {
+  flex: 1;
+  min-width: 0;
+}
+
+// Smaller boxes and labels than the standard checkbox, as in the period of the voucher.
+.voucher__add__item__panel__days .voucher__add__item__panel__day {
+  @include mat.checkbox-overrides(
+    (
+      label-text-size: 0.6875rem,
+      label-text-line-height: 1rem,
+    )
+  );
+
+  .mdc-checkbox {
+    flex-basis: 0.875rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    padding: 0.3125rem;
+  }
+
+  .mdc-checkbox__background {
+    top: 0.3125rem;
+    left: 0.3125rem;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .mdc-label {
+    padding-inline-start: 0;
+  }
+}
+
+.voucher__add__item__panel .voucher__add__item__panel__add__slot {
+  --button-text-size: 0.6875rem;
+  --button-height: 1.25rem;
+  --button-padding: 0;
+
+  margin-top: -0.75rem;
+
+  button {
+    min-width: 0;
+  }
+
+  .button__icon {
+    width: 0.625rem;
+    height: 0.625rem;
+  }
+}
+
+.voucher__add__item__panel__buttons {
+  --button-text-size: 0.6875rem;
+  --button-height: 1.625rem;
+  --button-border-color: var(--color__main__theme__one);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4375rem;
+  margin-top: 1.5rem;
+}
+
+// Phones: each label on its own line, its controls fill the whole row under it.
+@media (width < 36rem) {
+  .voucher__add__item__panel {
+    padding-inline: 1rem;
+  }
+
+  .voucher__add__item__panel__section {
+    padding-inline: 0.75rem;
+  }
+
+  .voucher__add__item__panel__period {
+    padding-inline: 0.75rem;
+  }
+
+  .voucher__add__item__panel__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .voucher__add__item__panel__row__controls,
+  .voucher__add__item__panel__slots {
+    flex-wrap: nowrap;
+    margin-inline-start: 0;
+  }
+
+  .voucher__add__item__panel__slots {
+    align-items: stretch;
+  }
+
+  .voucher__add__item__panel__field {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .voucher__add__item__panel__word:first-child {
+    margin-inline-start: 0;
+  }
+
+  .voucher__add__item__panel .voucher__add__item__panel__add__slot {
+    align-self: flex-end;
+  }
+}

@@ -14,5 +14,6 @@ export class FilledMultiSelect<K extends string = string> {
   readonly label = input<string>();
   readonly placeholder = input<string>();
   readonly options = input<readonly SelectOption<K>[]>([]);
+  readonly disabled = input(false);
   readonly value = model<readonly K[]>([]);
 }

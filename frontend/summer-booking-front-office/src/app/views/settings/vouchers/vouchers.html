@@ -21,8 +21,11 @@
     (loadError)="loadFailed.set(true)"
     (deleteSelected)="askDelete($event)"
     (duplicateSelected)="askDuplicate($event)"
+    (create)="adding.set(true)"
   />
 </main>
+
+<app-voucher-add-item-panel [(open)]="adding" />
 
 <app-delete-items-popup
   [idItems]="idVouchersToDelete()"

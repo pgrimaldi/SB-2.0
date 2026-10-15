@@ -563,6 +563,35 @@
             "title": "Duplicar descuentos/vales",
             "text": "¿Quieres duplicar los {{count}} descuentos/vales seleccionados?"
           }
+        },
+        "form": {
+          "title": "Añadir descuento/vale",
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "name": "Nombre del descuento",
+          "periods": {
+            "title": "Periodos de validez",
+            "add": "Añadir periodo de validez",
+            "period": "Periodo",
+            "from": "Del",
+            "to": "al",
+            "days_of_week": "Días de la semana",
+            "time_slots": "Franjas horarias",
+            "time_from": "De",
+            "time_to": "a",
+            "add_time_slot": "Añadir franja horaria",
+            "days": {
+              "monday": "Lunes",
+              "tuesday": "Martes",
+              "wednesday": "Miércoles",
+              "thursday": "Jueves",
+              "friday": "Viernes",
+              "saturday": "Sábado",
+              "sunday": "Domingo"
+            },
+            "all_days": "Todos",
+            "choose_days": "Seleccionar"
+          }
         }
       }
     }
