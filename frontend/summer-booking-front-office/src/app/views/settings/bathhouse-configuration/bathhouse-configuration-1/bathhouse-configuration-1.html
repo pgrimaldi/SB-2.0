@@ -45,6 +45,44 @@
       [formField]="informationForm.country"
     />
   </div>
+  <div class="bathhouse__configuration__1__contacts__row">
+    <app-filled-text-field
+      [label]="'management.settings.bathhouse_configuration.general_information.phone' | translate"
+      [isPhoneField]="true"
+      [formField]="informationForm.phone"
+    />
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.whatsapp' | translate
+      "
+      [isPhoneField]="true"
+      [formField]="informationForm.whatsapp"
+    />
+    <app-filled-text-field
+      [label]="'management.settings.bathhouse_configuration.general_information.email' | translate"
+      [formField]="informationForm.email"
+    />
+  </div>
+  <div class="bathhouse__configuration__1__web__row">
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.website' | translate
+      "
+      [formField]="informationForm.website"
+    />
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.facebook' | translate
+      "
+      [formField]="informationForm.facebook"
+    />
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.instagram' | translate
+      "
+      [formField]="informationForm.instagram"
+    />
+  </div>
   @if (errorMessage(); as errorMessage) {
     <p class="bathhouse__configuration__1__error">{{ errorMessage }}</p>
   }

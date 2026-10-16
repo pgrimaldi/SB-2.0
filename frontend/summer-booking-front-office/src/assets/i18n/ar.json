@@ -216,7 +216,13 @@
           "province": "المحافظة",
           "region": "المنطقة",
           "country": "الدولة",
-          "choose": "اختر"
+          "choose": "اختر",
+          "phone": "الهاتف",
+          "whatsapp": "واتساب",
+          "email": "البريد الإلكتروني",
+          "website": "الموقع الإلكتروني",
+          "facebook": "فيسبوك",
+          "instagram": "إنستغرام"
         }
       },
       "warehouse": {

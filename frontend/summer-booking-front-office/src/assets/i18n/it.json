@@ -216,7 +216,13 @@
           "province": "Provincia",
           "region": "Regione",
           "country": "Nazione",
-          "choose": "Seleziona"
+          "choose": "Seleziona",
+          "phone": "Telefono",
+          "whatsapp": "Whatsapp",
+          "email": "Email",
+          "website": "Sito web",
+          "facebook": "Facebook",
+          "instagram": "Instagram"
         }
       },
       "warehouse": {

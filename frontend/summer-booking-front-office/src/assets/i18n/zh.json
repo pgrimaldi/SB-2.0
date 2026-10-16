@@ -216,7 +216,13 @@
           "province": "省份",
           "region": "大区",
           "country": "国家",
-          "choose": "请选择"
+          "choose": "请选择",
+          "phone": "电话",
+          "whatsapp": "Whatsapp",
+          "email": "电子邮件",
+          "website": "网站",
+          "facebook": "Facebook",
+          "instagram": "Instagram"
         }
       },
       "warehouse": {

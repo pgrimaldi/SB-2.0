@@ -5,7 +5,9 @@
 }
 
 .bathhouse__configuration__1__name__row,
-.bathhouse__configuration__1__area__row {
+.bathhouse__configuration__1__area__row,
+.bathhouse__configuration__1__contacts__row,
+.bathhouse__configuration__1__web__row {
   display: grid;
   gap: 1rem;
 }
@@ -17,6 +19,11 @@
 
 .bathhouse__configuration__1__area__row {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.bathhouse__configuration__1__contacts__row,
+.bathhouse__configuration__1__web__row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .bathhouse__configuration__1__error {
