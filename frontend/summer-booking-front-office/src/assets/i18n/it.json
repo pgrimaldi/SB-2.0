@@ -202,6 +202,23 @@
         "database": "Database",
         "help": "Assistenza e guide"
       },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "Informazioni Generali",
+          "services": "Servizi",
+          "media": "Media"
+        },
+        "general_information": {
+          "bathhouse_name": "Nome stabilimento",
+          "address": "Indirizzo",
+          "postal_code": "Cap",
+          "city": "Città",
+          "province": "Provincia",
+          "region": "Regione",
+          "country": "Nazione",
+          "choose": "Seleziona"
+        }
+      },
       "warehouse": {
         "title": "Impostazioni magazzino",
         "create": "Aggiungi articolo",

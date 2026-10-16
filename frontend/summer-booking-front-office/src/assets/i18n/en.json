@@ -202,6 +202,23 @@
         "database": "Database",
         "help": "Help and guides"
       },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "General Information",
+          "services": "Services",
+          "media": "Media"
+        },
+        "general_information": {
+          "bathhouse_name": "Property name",
+          "address": "Address",
+          "postal_code": "Postal code",
+          "city": "City",
+          "province": "Province",
+          "region": "Region",
+          "country": "Country",
+          "choose": "Select"
+        }
+      },
       "warehouse": {
         "title": "Warehouse settings",
         "create": "Add item",

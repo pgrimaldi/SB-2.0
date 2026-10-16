@@ -1,0 +1,34 @@
+@use '@angular/material' as mat;
+
+// Blue label and line under the open tab, grey labels for the others, a thin line under all of them.
+:host {
+  display: block;
+
+  @include mat.tabs-overrides(
+    (
+      active-indicator-color: var(--color__main__theme__one),
+      active-focus-indicator-color: var(--color__main__theme__one),
+      active-hover-indicator-color: var(--color__main__theme__one),
+      active-label-text-color: var(--color__main__theme__one),
+      active-focus-label-text-color: var(--color__main__theme__one),
+      active-hover-label-text-color: var(--color__main__theme__one),
+      inactive-label-text-color: var(--color__layout__text__soft),
+      inactive-focus-label-text-color: var(--color__layout__text__soft),
+      inactive-hover-label-text-color: var(--color__main__theme__one),
+      label-text-font: inherit,
+      label-text-size: 0.875rem,
+      label-text-weight: 600,
+      divider-color: var(--color__layout__border),
+    )
+  );
+}
+
+// A tab narrower than its label grows to fit it: when the tabs no longer fit, Material shows its arrows.
+.tab__nav__link {
+  min-width: max-content;
+}
+
+.tab__nav__panel {
+  display: block;
+  padding: var(--tab-nav-panel-padding, 1.25rem 0 0);
+}

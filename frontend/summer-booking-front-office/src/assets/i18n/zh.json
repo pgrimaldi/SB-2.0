@@ -202,6 +202,23 @@
         "database": "数据库",
         "help": "帮助和指南"
       },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "基本信息",
+          "services": "服务",
+          "media": "媒体"
+        },
+        "general_information": {
+          "bathhouse_name": "浴场名称",
+          "address": "地址",
+          "postal_code": "邮政编码",
+          "city": "城市",
+          "province": "省份",
+          "region": "大区",
+          "country": "国家",
+          "choose": "请选择"
+        }
+      },
       "warehouse": {
         "title": "仓库设置",
         "create": "添加物品",

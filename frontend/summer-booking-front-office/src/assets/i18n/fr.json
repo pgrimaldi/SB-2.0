@@ -202,6 +202,23 @@
         "database": "Base de données",
         "help": "Assistance et guides"
       },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "Informations générales",
+          "services": "Services",
+          "media": "Médias"
+        },
+        "general_information": {
+          "bathhouse_name": "Nom de l'établissement",
+          "address": "Adresse",
+          "postal_code": "Code postal",
+          "city": "Ville",
+          "province": "Province",
+          "region": "Région",
+          "country": "Pays",
+          "choose": "Sélectionner"
+        }
+      },
       "warehouse": {
         "title": "Paramètres du stock",
         "create": "Ajouter un article",

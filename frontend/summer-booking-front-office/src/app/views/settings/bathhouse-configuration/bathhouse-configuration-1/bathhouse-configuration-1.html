@@ -1,0 +1,51 @@
+<div class="bathhouse__configuration__1" [attr.inert]="isLoading() ? '' : null">
+  <div class="bathhouse__configuration__1__name__row">
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.bathhouse_name' | translate
+      "
+      [formField]="informationForm.bathhouseName"
+    />
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.address' | translate
+      "
+      [formField]="informationForm.address"
+    />
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.postal_code' | translate
+      "
+      [formField]="informationForm.postalCode"
+    />
+  </div>
+  <div class="bathhouse__configuration__1__area__row">
+    <app-filled-text-field
+      [label]="'management.settings.bathhouse_configuration.general_information.city' | translate"
+      [formField]="informationForm.city"
+    />
+    <app-filled-text-field
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.province' | translate
+      "
+      [formField]="informationForm.province"
+    />
+    <app-filled-text-field
+      [label]="'management.settings.bathhouse_configuration.general_information.region' | translate"
+      [formField]="informationForm.region"
+    />
+    <app-filled-select
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.country' | translate
+      "
+      [placeholder]="
+        'management.settings.bathhouse_configuration.general_information.choose' | translate
+      "
+      [options]="countryOptions()"
+      [formField]="informationForm.country"
+    />
+  </div>
+  @if (errorMessage(); as errorMessage) {
+    <p class="bathhouse__configuration__1__error">{{ errorMessage }}</p>
+  }
+</div>

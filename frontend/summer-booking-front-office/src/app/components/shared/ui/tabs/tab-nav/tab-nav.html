@@ -1,0 +1,18 @@
+<nav mat-tab-nav-bar [tabPanel]="panel">
+  @for (tab of tabs(); track tab.path) {
+    <a
+      class="tab__nav__link"
+      mat-tab-link
+      [style.flex]="tab.widthPercent === undefined ? null : '0 0 ' + tab.widthPercent + '%'"
+      [routerLink]="tab.path"
+      routerLinkActive
+      #link="routerLinkActive"
+      [active]="link.isActive"
+    >
+      {{ tab.label }}
+    </a>
+  }
+</nav>
+<mat-tab-nav-panel #panel class="tab__nav__panel">
+  <router-outlet />
+</mat-tab-nav-panel>

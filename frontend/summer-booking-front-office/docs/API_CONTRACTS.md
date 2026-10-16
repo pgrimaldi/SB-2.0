@@ -1500,6 +1500,88 @@ Stato: 200 OK.
 | `maxUseQuantity` | number (intero) \| null | `50` |
 | `isEnabled` | boolean \| null | `false` |
 
+## /catalog
+
+### GET `/api/catalog/countries-combobox`
+
+Catalogo: nazioni per le tendine.
+
+#### Payload
+
+Nessun corpo e nessun parametro: è una GET. La lingua dei nomi è quella dell'header Accept-Language.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "IT",
+    "value": "Italia"
+  },
+  {
+    "id": "FR",
+    "value": "Francia"
+  },
+  {
+    "id": "DE",
+    "value": "Germania"
+  },
+  {
+    "id": "CN",
+    "value": "Cina"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (ISO 3166-1 alpha-2) | `IT` |
+| `value` | string | `Italia` |
+
+### GET `/api/catalog/bathhouse-configuration-general?idProperty={idProperty}`
+
+Informazioni stabilimento: informazioni generali.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bathhouse-configuration-general?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "bathhouseName": "Lido Demo",
+  "address": "Lungomare dei Pini 12",
+  "postalCode": "00100",
+  "city": "Roma",
+  "province": "Roma",
+  "region": "Lazio",
+  "country": "IT"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `bathhouseName` | string \| null | `Lido Demo` |
+| `address` | string \| null | `Lungomare dei Pini 12` |
+| `postalCode` | string \| null | `00100` |
+| `city` | string \| null | `Roma` |
+| `province` | string \| null | `Roma` |
+| `region` | string \| null | `Lazio` |
+| `country` | string (ISO 3166-1 alpha-2) \| null | `IT` |
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

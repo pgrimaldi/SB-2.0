@@ -202,6 +202,23 @@
         "database": "قاعدة البيانات",
         "help": "الدعم والأدلة"
       },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "معلومات عامة",
+          "services": "الخدمات",
+          "media": "الوسائط"
+        },
+        "general_information": {
+          "bathhouse_name": "اسم المنشأة",
+          "address": "العنوان",
+          "postal_code": "الرمز البريدي",
+          "city": "المدينة",
+          "province": "المحافظة",
+          "region": "المنطقة",
+          "country": "الدولة",
+          "choose": "اختر"
+        }
+      },
       "warehouse": {
         "title": "إعدادات المخزن",
         "create": "إضافة صنف",
