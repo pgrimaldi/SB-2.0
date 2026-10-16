@@ -1574,7 +1574,13 @@ Stato: 200 OK.
   "email": "info@lidodemo.example",
   "website": "https://www.lidodemo.example",
   "facebook": "https://www.facebook.com/lidodemo.example",
-  "instagram": "https://www.instagram.com/lidodemo.example"
+  "instagram": "https://www.instagram.com/lidodemo.example",
+  "description": "<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>",
+  "openingTime": "08:30",
+  "closingTime": "19:00",
+  "cancellationPolicy": "FreeUntil48Hours",
+  "petPolicy": "Allowed",
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>"
 }
 ```
 
@@ -1593,6 +1599,12 @@ Stato: 200 OK.
 | `website` | string \| null | `https://www.lidodemo.example` |
 | `facebook` | string \| null | `https://www.facebook.com/lidodemo.example` |
 | `instagram` | string \| null | `https://www.instagram.com/lidodemo.example` |
+| `description` | string (HTML) \| null | `<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>` |
+| `openingTime` | string (HH:mm) \| null | `08:30` |
+| `closingTime` | string (HH:mm) \| null | `19:00` |
+| `cancellationPolicy` | string (enum CancellationPolicy) \| null | `FreeUntil48Hours` |
+| `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
+| `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
 
 ## /system
 

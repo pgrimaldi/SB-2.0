@@ -25,6 +25,16 @@
     "comparison_range": "比较日期范围",
     "year_range": "从{{start}}到{{end}}"
   },
+  "rich_text": {
+    "bold": "粗体",
+    "italic": "斜体",
+    "underline": "下划线",
+    "bullet_list": "项目符号列表",
+    "ordered_list": "编号列表",
+    "link": "链接",
+    "link_placeholder": "https://…",
+    "insert_link": "插入"
+  },
   "table": {
     "empty": "表格中没有内容",
     "paginator": {
@@ -222,7 +232,25 @@
           "email": "电子邮件",
           "website": "网站",
           "facebook": "Facebook",
-          "instagram": "Instagram"
+          "instagram": "Instagram",
+          "description": "描述",
+          "opening_hours": "营业时间",
+          "opening_time": "从",
+          "closing_time": "至",
+          "cancellation": "取消政策",
+          "cancellation_policies": {
+            "free_until_48_hours": "提前48小时免费取消",
+            "free_until_24_hours": "提前24小时免费取消"
+          },
+          "pets": "宠物",
+          "pets_options": {
+            "allowed": "允许",
+            "not_allowed": "不允许"
+          },
+          "regulation": "规章制度",
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存"
         }
       },
       "warehouse": {

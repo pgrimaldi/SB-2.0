@@ -25,6 +25,16 @@
     "comparison_range": "نطاق المقارنة",
     "year_range": "من {{start}} إلى {{end}}"
   },
+  "rich_text": {
+    "bold": "غامق",
+    "italic": "مائل",
+    "underline": "تسطير",
+    "bullet_list": "قائمة نقطية",
+    "ordered_list": "قائمة مرقمة",
+    "link": "رابط",
+    "link_placeholder": "https://…",
+    "insert_link": "إدراج"
+  },
   "table": {
     "empty": "لا توجد عناصر في الجدول",
     "paginator": {
@@ -222,7 +232,25 @@
           "email": "البريد الإلكتروني",
           "website": "الموقع الإلكتروني",
           "facebook": "فيسبوك",
-          "instagram": "إنستغرام"
+          "instagram": "إنستغرام",
+          "description": "الوصف",
+          "opening_hours": "ساعات العمل",
+          "opening_time": "من",
+          "closing_time": "إلى",
+          "cancellation": "الإلغاء",
+          "cancellation_policies": {
+            "free_until_48_hours": "مجاني حتى 48 ساعة قبل",
+            "free_until_24_hours": "مجاني حتى 24 ساعة قبل"
+          },
+          "pets": "الحيوانات الأليفة",
+          "pets_options": {
+            "allowed": "مسموح",
+            "not_allowed": "غير مسموح"
+          },
+          "regulation": "اللوائح",
+          "edit": "تعديل",
+          "cancel": "إلغاء",
+          "save": "حفظ"
         }
       },
       "warehouse": {

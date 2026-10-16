@@ -12,3 +12,9 @@
 
   @include panel.settings-panel;
 }
+
+@media (width < 48rem) {
+  .bathhouse__configuration__panel {
+    --tab-nav-panel-padding: 1rem;
+  }
+}

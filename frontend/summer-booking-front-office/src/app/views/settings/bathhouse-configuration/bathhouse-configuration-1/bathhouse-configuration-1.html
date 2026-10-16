@@ -13,6 +13,7 @@
       [formField]="informationForm.address"
     />
     <app-filled-text-field
+      class="bathhouse__configuration__1__postal__code"
       [label]="
         'management.settings.bathhouse_configuration.general_information.postal_code' | translate
       "
@@ -21,20 +22,24 @@
   </div>
   <div class="bathhouse__configuration__1__area__row">
     <app-filled-text-field
+      class="bathhouse__configuration__1__city"
       [label]="'management.settings.bathhouse_configuration.general_information.city' | translate"
       [formField]="informationForm.city"
     />
     <app-filled-text-field
+      class="bathhouse__configuration__1__province"
       [label]="
         'management.settings.bathhouse_configuration.general_information.province' | translate
       "
       [formField]="informationForm.province"
     />
     <app-filled-text-field
+      class="bathhouse__configuration__1__region"
       [label]="'management.settings.bathhouse_configuration.general_information.region' | translate"
       [formField]="informationForm.region"
     />
     <app-filled-select
+      class="bathhouse__configuration__1__country"
       [label]="
         'management.settings.bathhouse_configuration.general_information.country' | translate
       "
@@ -82,6 +87,85 @@
       "
       [formField]="informationForm.instagram"
     />
+  </div>
+  <app-rich-text-field
+    [label]="
+      'management.settings.bathhouse_configuration.general_information.description' | translate
+    "
+    [texts]="'rich_text' | translate"
+    [pathIcon]="richTextIcons"
+    [formField]="informationForm.description"
+  />
+  <div class="bathhouse__configuration__1__rules__row">
+    <div class="bathhouse__configuration__1__opening">
+      <span class="bathhouse__configuration__1__opening__label">
+        {{
+          'management.settings.bathhouse_configuration.general_information.opening_hours'
+            | translate
+        }}
+      </span>
+      <div class="bathhouse__configuration__1__opening__times">
+        <app-filled-time-field
+          [placeholder]="
+            'management.settings.bathhouse_configuration.general_information.opening_time'
+              | translate
+          "
+          [formField]="informationForm.openingTime"
+        />
+        <app-filled-time-field
+          [placeholder]="
+            'management.settings.bathhouse_configuration.general_information.closing_time'
+              | translate
+          "
+          [formField]="informationForm.closingTime"
+        />
+      </div>
+    </div>
+    <app-filled-select
+      [label]="
+        'management.settings.bathhouse_configuration.general_information.cancellation' | translate
+      "
+      [placeholder]="
+        'management.settings.bathhouse_configuration.general_information.choose' | translate
+      "
+      [options]="cancellationOptions()"
+      [formField]="informationForm.cancellationPolicy"
+    />
+    <app-filled-select
+      [label]="'management.settings.bathhouse_configuration.general_information.pets' | translate"
+      [placeholder]="
+        'management.settings.bathhouse_configuration.general_information.choose' | translate
+      "
+      [options]="petOptions()"
+      [formField]="informationForm.petPolicy"
+    />
+  </div>
+  <app-rich-text-field
+    [label]="
+      'management.settings.bathhouse_configuration.general_information.regulation' | translate
+    "
+    [texts]="'rich_text' | translate"
+    [pathIcon]="richTextIcons"
+    [formField]="informationForm.regulation"
+  />
+  <div class="bathhouse__configuration__1__actions">
+    @if (isEditing()) {
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="cancel()"
+      >
+        {{ 'management.settings.bathhouse_configuration.general_information.cancel' | translate }}
+      </app-button>
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+        {{ 'management.settings.bathhouse_configuration.general_information.save' | translate }}
+      </app-button>
+    } @else {
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+        {{ 'management.settings.bathhouse_configuration.general_information.edit' | translate }}
+      </app-button>
+    }
   </div>
   @if (errorMessage(); as errorMessage) {
     <p class="bathhouse__configuration__1__error">{{ errorMessage }}</p>

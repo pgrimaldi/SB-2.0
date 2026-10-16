@@ -25,6 +25,16 @@
     "comparison_range": "Intervallo di confronto",
     "year_range": "Da {{start}} a {{end}}"
   },
+  "rich_text": {
+    "bold": "Grassetto",
+    "italic": "Corsivo",
+    "underline": "Sottolineato",
+    "bullet_list": "Elenco puntato",
+    "ordered_list": "Elenco numerato",
+    "link": "Link",
+    "link_placeholder": "https://…",
+    "insert_link": "Inserisci"
+  },
   "table": {
     "empty": "La tabella non contiene elementi",
     "paginator": {
@@ -222,7 +232,25 @@
           "email": "Email",
           "website": "Sito web",
           "facebook": "Facebook",
-          "instagram": "Instagram"
+          "instagram": "Instagram",
+          "description": "Descrizione",
+          "opening_hours": "Orario di apertura",
+          "opening_time": "Dalle",
+          "closing_time": "Alle",
+          "cancellation": "Cancellazione",
+          "cancellation_policies": {
+            "free_until_48_hours": "Gratuita entro 48 ore",
+            "free_until_24_hours": "Gratuita entro 24 ore"
+          },
+          "pets": "Animali",
+          "pets_options": {
+            "allowed": "Ammessi",
+            "not_allowed": "Non ammessi"
+          },
+          "regulation": "Regolamento",
+          "edit": "Modifica",
+          "cancel": "Annulla",
+          "save": "Salva"
         }
       },
       "warehouse": {

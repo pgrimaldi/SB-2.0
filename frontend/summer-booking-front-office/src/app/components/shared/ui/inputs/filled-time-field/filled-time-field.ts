@@ -36,6 +36,7 @@ export class FilledTimeField {
   readonly disabled = input(false);
   readonly value = model<string | null>(null);
   readonly name = input<string>();
+  readonly placeholder = input<string>();
   readonly error = input<string | null>();
   /** Icons as Material icon names (Material Symbols font): [clock, before the time]. */
   readonly matIcon = input<readonly string[] | null>();

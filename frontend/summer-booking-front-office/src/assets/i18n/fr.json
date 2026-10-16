@@ -25,6 +25,16 @@
     "comparison_range": "Période de comparaison",
     "year_range": "De {{start}} à {{end}}"
   },
+  "rich_text": {
+    "bold": "Gras",
+    "italic": "Italique",
+    "underline": "Souligné",
+    "bullet_list": "Liste à puces",
+    "ordered_list": "Liste numérotée",
+    "link": "Lien",
+    "link_placeholder": "https://…",
+    "insert_link": "Insérer"
+  },
   "table": {
     "empty": "Le tableau ne contient aucun élément",
     "paginator": {
@@ -222,7 +232,25 @@
           "email": "E-mail",
           "website": "Site web",
           "facebook": "Facebook",
-          "instagram": "Instagram"
+          "instagram": "Instagram",
+          "description": "Description",
+          "opening_hours": "Horaires d'ouverture",
+          "opening_time": "De",
+          "closing_time": "À",
+          "cancellation": "Annulation",
+          "cancellation_policies": {
+            "free_until_48_hours": "Gratuite jusqu'à 48 h avant",
+            "free_until_24_hours": "Gratuite jusqu'à 24 h avant"
+          },
+          "pets": "Animaux",
+          "pets_options": {
+            "allowed": "Acceptés",
+            "not_allowed": "Non acceptés"
+          },
+          "regulation": "Règlement",
+          "edit": "Modifier",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
         }
       },
       "warehouse": {

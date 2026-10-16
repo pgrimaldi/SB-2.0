@@ -25,6 +25,16 @@
     "comparison_range": "Comparison range",
     "year_range": "From {{start}} to {{end}}"
   },
+  "rich_text": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bullet_list": "Bulleted list",
+    "ordered_list": "Numbered list",
+    "link": "Link",
+    "link_placeholder": "https://…",
+    "insert_link": "Insert"
+  },
   "table": {
     "empty": "The table contains no items",
     "paginator": {
@@ -222,7 +232,25 @@
           "email": "Email",
           "website": "Website",
           "facebook": "Facebook",
-          "instagram": "Instagram"
+          "instagram": "Instagram",
+          "description": "Description",
+          "opening_hours": "Opening hours",
+          "opening_time": "From",
+          "closing_time": "To",
+          "cancellation": "Cancellation",
+          "cancellation_policies": {
+            "free_until_48_hours": "Free up to 48 hours before",
+            "free_until_24_hours": "Free up to 24 hours before"
+          },
+          "pets": "Pets",
+          "pets_options": {
+            "allowed": "Allowed",
+            "not_allowed": "Not allowed"
+          },
+          "regulation": "Rules",
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save"
         }
       },
       "warehouse": {

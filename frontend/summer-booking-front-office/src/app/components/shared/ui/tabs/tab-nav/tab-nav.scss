@@ -28,6 +28,43 @@
   min-width: max-content;
 }
 
+// Phones: a dropdown with the names of the tabs takes the place of the tab bar, as wide and as high
+// (about 3rem), with the text of the open tab and the same thin line under it. The options open in the
+// shared `select__panel` of the theme.
+.tab__nav__select {
+  --focus-ring-offset: -0.125rem;
+
+  @include mat.select-overrides(
+    (
+      trigger-text-size: 0.875rem,
+      trigger-text-line-height: 1.25rem,
+      trigger-text-tracking: normal,
+      trigger-text-weight: 600,
+      enabled-trigger-text-color: var(--color__main__theme__one),
+      enabled-arrow-color: var(--color__main__theme__one),
+      focused-arrow-color: var(--color__main__theme__one),
+    )
+  );
+
+  display: none;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+
+  // The room is inside the trigger: Material opens the options under it, as wide as it.
+  ::ng-deep .mat-mdc-select-trigger {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (width < 48rem) {
+  .tab__nav__bar {
+    display: none;
+  }
+
+  .tab__nav__select {
+    display: block;
+  }
+}
+
 .tab__nav__panel {
   display: block;
   padding: var(--tab-nav-panel-padding, 1.25rem 0 0);

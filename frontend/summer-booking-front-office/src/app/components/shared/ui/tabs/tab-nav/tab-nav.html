@@ -1,4 +1,15 @@
-<nav mat-tab-nav-bar [tabPanel]="panel">
+<mat-select
+  class="tab__nav__select"
+  panelClass="select__panel"
+  hideSingleSelectionIndicator
+  [value]="chosenPath()"
+  (valueChange)="choose($event)"
+>
+  @for (tab of tabs(); track tab.path) {
+    <mat-option [value]="tab.path">{{ tab.label }}</mat-option>
+  }
+</mat-select>
+<nav class="tab__nav__bar" mat-tab-nav-bar [tabPanel]="panel">
   @for (tab of tabs(); track tab.path) {
     <a
       class="tab__nav__link"
@@ -8,6 +19,7 @@
       routerLinkActive
       #link="routerLinkActive"
       [active]="link.isActive"
+      (isActiveChange)="setActive(tab.path, $event)"
     >
       {{ tab.label }}
     </a>
