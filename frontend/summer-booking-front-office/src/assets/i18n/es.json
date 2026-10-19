@@ -196,7 +196,7 @@
     },
     "settings": {
       "menu": {
-        "property": "Información del establecimiento",
+        "property": "Ficha del establecimiento",
         "users": "Gestión de usuarios",
         "seasons": "Temporadas y periodos",
         "sectors": "Sectores y filas",

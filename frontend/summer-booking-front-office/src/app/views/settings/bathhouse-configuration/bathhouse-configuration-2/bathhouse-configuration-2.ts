@@ -44,6 +44,7 @@ export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   private readonly services = signal<BathhouseServiceItem[]>([]);
+  private loadedSelection = selectionOf([]);
   protected readonly servicesForm = form(this.services);
   protected readonly sections = signal<readonly ServiceSection[]>([]);
   protected readonly isLoading = signal(false);
@@ -68,6 +69,7 @@ export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
         return this.cache.services(idProperty).subscribe({
           next: (services) => {
             const loaded = services.map((service) => onlyFieldsOf(BathhouseServiceItem, service));
+            this.loadedSelection = selectionOf(loaded);
             this.services.set(loaded);
             this.servicesForm().reset();
             this.sections.set(sectionsOf(loaded));
@@ -84,12 +86,18 @@ export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.servicesForm().dirty();
+    return selectionOf(this.services()) !== this.loadedSelection;
   }
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+function selectionOf(services: readonly BathhouseServiceItem[]): string {
+  return JSON.stringify(
+    services.filter(({ isSelected }) => isSelected).map(({ idService }) => idService),
+  );
 }
 
 function sectionsOf(services: readonly BathhouseServiceItem[]): ServiceSection[] {
