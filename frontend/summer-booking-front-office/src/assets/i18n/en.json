@@ -254,8 +254,14 @@
         },
         "services": {
           "categories": {
-            "accessibility_comfort": "Accessibility and comfort"
-          }
+            "accessibility_comfort": "Accessibility and comfort",
+            "sport_activities": "Sports and activities",
+            "food_extra": "Food and extras",
+            "beach": "Beach"
+          },
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save"
         }
       },
       "warehouse": {

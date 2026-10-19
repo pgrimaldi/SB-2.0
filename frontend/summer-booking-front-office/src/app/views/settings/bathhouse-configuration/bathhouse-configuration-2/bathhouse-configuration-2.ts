@@ -8,7 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form } from '@angular/forms/signals';
+import { FormField, disabled, form } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
@@ -18,6 +18,11 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
+import {
+  Button,
+  ButtonAppearance,
+  ButtonSize,
+} from '../../../../components/shared/ui/buttons/button/button';
 import { Checkbox } from '../../../../components/shared/ui/checkboxes/checkbox/checkbox';
 import { SectionTitle } from '../../../../components/shared/ui/titles/section-title/section-title';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
@@ -32,7 +37,7 @@ interface ServiceSection {
 
 @Component({
   selector: 'app-bathhouse-configuration-2',
-  imports: [Checkbox, FormField, SectionTitle, TranslatePipe],
+  imports: [Button, Checkbox, FormField, SectionTitle, TranslatePipe],
   templateUrl: './bathhouse-configuration-2.html',
   styleUrl: './bathhouse-configuration-2.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,9 +48,16 @@ export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
 
+  protected readonly ButtonAppearance = ButtonAppearance;
+  protected readonly ButtonSize = ButtonSize;
+
+  protected readonly isEditing = signal(false);
   private readonly services = signal<BathhouseServiceItem[]>([]);
+  private loaded: BathhouseServiceItem[] = [];
   private loadedSelection = selectionOf([]);
-  protected readonly servicesForm = form(this.services);
+  protected readonly servicesForm = form(this.services, (path) => {
+    disabled(path, () => !this.isEditing());
+  });
   protected readonly sections = signal<readonly ServiceSection[]>([]);
   protected readonly isLoading = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
@@ -69,6 +81,7 @@ export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
         return this.cache.services(idProperty).subscribe({
           next: (services) => {
             const loaded = services.map((service) => onlyFieldsOf(BathhouseServiceItem, service));
+            this.loaded = loaded;
             this.loadedSelection = selectionOf(loaded);
             this.services.set(loaded);
             this.servicesForm().reset();
@@ -87,6 +100,16 @@ export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return selectionOf(this.services()) !== this.loadedSelection;
+  }
+
+  protected edit(): void {
+    this.isEditing.set(true);
+  }
+
+  protected cancel(): void {
+    this.services.set(this.loaded);
+    this.servicesForm().reset();
+    this.isEditing.set(false);
   }
 
   ngOnDestroy(): void {

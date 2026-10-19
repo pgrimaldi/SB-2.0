@@ -21,6 +21,25 @@
       </div>
     </section>
   }
+  <div class="bathhouse__configuration__2__actions">
+    @if (isEditing()) {
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="cancel()"
+      >
+        {{ 'management.settings.bathhouse_configuration.services.cancel' | translate }}
+      </app-button>
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+        {{ 'management.settings.bathhouse_configuration.services.save' | translate }}
+      </app-button>
+    } @else {
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+        {{ 'management.settings.bathhouse_configuration.services.edit' | translate }}
+      </app-button>
+    }
+  </div>
   @if (errorMessage(); as errorMessage) {
     <p class="bathhouse__configuration__2__error">{{ errorMessage }}</p>
   }

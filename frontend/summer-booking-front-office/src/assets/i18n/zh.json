@@ -254,8 +254,14 @@
         },
         "services": {
           "categories": {
-            "accessibility_comfort": "无障碍与舒适"
-          }
+            "accessibility_comfort": "无障碍与舒适",
+            "sport_activities": "运动与活动",
+            "food_extra": "餐饮与其他",
+            "beach": "海滩"
+          },
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存"
         }
       },
       "warehouse": {
