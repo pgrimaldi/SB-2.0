@@ -251,6 +251,11 @@
           "edit": "编辑",
           "cancel": "取消",
           "save": "保存"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "无障碍与舒适"
+          }
         }
       },
       "warehouse": {

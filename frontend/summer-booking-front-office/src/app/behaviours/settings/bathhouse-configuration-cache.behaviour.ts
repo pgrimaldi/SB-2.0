@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, of, shareReplay } from 'rxjs';
 import { ComboboxItem } from '../../entities/combobox/combobox-item';
 import { BathhouseGeneralInformation } from '../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseServiceItem } from '../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { CatalogService } from '../../services/api/catalog/catalog.service';
 
 /**
@@ -14,6 +15,7 @@ export class BathhouseConfigurationCacheBehaviour {
   private readonly catalog = inject(CatalogService);
 
   private generalInformationAnswer: Observable<BathhouseGeneralInformation> | null = null;
+  private servicesAnswer: Observable<BathhouseServiceItem[]> | null = null;
   private countriesAnswer: Observable<ComboboxItem[]> | null = null;
 
   generalInformation(idProperty: string): Observable<BathhouseGeneralInformation> {
@@ -21,6 +23,18 @@ export class BathhouseConfigurationCacheBehaviour {
       .bathhouseConfigurationGeneral(idProperty)
       .pipe(shareReplay(1));
     return this.generalInformationAnswer;
+  }
+
+  /** After a save: going back to the tab shows what was saved, without asking again. */
+  keepGeneralInformation(information: BathhouseGeneralInformation): void {
+    this.generalInformationAnswer = of(information);
+  }
+
+  services(idProperty: string): Observable<BathhouseServiceItem[]> {
+    this.servicesAnswer ??= this.catalog
+      .bathhouseConfigurationServices(idProperty)
+      .pipe(shareReplay(1));
+    return this.servicesAnswer;
   }
 
   countries(): Observable<ComboboxItem[]> {

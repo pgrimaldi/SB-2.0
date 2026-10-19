@@ -4,12 +4,14 @@
       [label]="
         'management.settings.bathhouse_configuration.general_information.bathhouse_name' | translate
       "
+      [error]="fieldErrors.bathhouseName()"
       [formField]="informationForm.bathhouseName"
     />
     <app-filled-text-field
       [label]="
         'management.settings.bathhouse_configuration.general_information.address' | translate
       "
+      [error]="fieldErrors.address()"
       [formField]="informationForm.address"
     />
     <app-filled-text-field
@@ -17,6 +19,7 @@
       [label]="
         'management.settings.bathhouse_configuration.general_information.postal_code' | translate
       "
+      [error]="fieldErrors.postalCode()"
       [formField]="informationForm.postalCode"
     />
   </div>
@@ -24,6 +27,7 @@
     <app-filled-text-field
       class="bathhouse__configuration__1__city"
       [label]="'management.settings.bathhouse_configuration.general_information.city' | translate"
+      [error]="fieldErrors.city()"
       [formField]="informationForm.city"
     />
     <app-filled-text-field
@@ -31,11 +35,13 @@
       [label]="
         'management.settings.bathhouse_configuration.general_information.province' | translate
       "
+      [error]="fieldErrors.province()"
       [formField]="informationForm.province"
     />
     <app-filled-text-field
       class="bathhouse__configuration__1__region"
       [label]="'management.settings.bathhouse_configuration.general_information.region' | translate"
+      [error]="fieldErrors.region()"
       [formField]="informationForm.region"
     />
     <app-filled-select
@@ -47,6 +53,7 @@
         'management.settings.bathhouse_configuration.general_information.choose' | translate
       "
       [options]="countryOptions()"
+      [error]="fieldErrors.country()"
       [formField]="informationForm.country"
     />
   </div>
@@ -54,6 +61,7 @@
     <app-filled-text-field
       [label]="'management.settings.bathhouse_configuration.general_information.phone' | translate"
       [isPhoneField]="true"
+      [error]="fieldErrors.phone()"
       [formField]="informationForm.phone"
     />
     <app-filled-text-field
@@ -61,10 +69,12 @@
         'management.settings.bathhouse_configuration.general_information.whatsapp' | translate
       "
       [isPhoneField]="true"
+      [error]="fieldErrors.whatsapp()"
       [formField]="informationForm.whatsapp"
     />
     <app-filled-text-field
       [label]="'management.settings.bathhouse_configuration.general_information.email' | translate"
+      [error]="fieldErrors.email()"
       [formField]="informationForm.email"
     />
   </div>
@@ -73,18 +83,21 @@
       [label]="
         'management.settings.bathhouse_configuration.general_information.website' | translate
       "
+      [error]="fieldErrors.website()"
       [formField]="informationForm.website"
     />
     <app-filled-text-field
       [label]="
         'management.settings.bathhouse_configuration.general_information.facebook' | translate
       "
+      [error]="fieldErrors.facebook()"
       [formField]="informationForm.facebook"
     />
     <app-filled-text-field
       [label]="
         'management.settings.bathhouse_configuration.general_information.instagram' | translate
       "
+      [error]="fieldErrors.instagram()"
       [formField]="informationForm.instagram"
     />
   </div>
@@ -94,6 +107,7 @@
     "
     [texts]="'rich_text' | translate"
     [pathIcon]="richTextIcons"
+    [error]="fieldErrors.description()"
     [formField]="informationForm.description"
   />
   <div class="bathhouse__configuration__1__rules__row">
@@ -110,6 +124,7 @@
             'management.settings.bathhouse_configuration.general_information.opening_time'
               | translate
           "
+          [error]="fieldErrors.openingTime()"
           [formField]="informationForm.openingTime"
         />
         <app-filled-time-field
@@ -117,6 +132,7 @@
             'management.settings.bathhouse_configuration.general_information.closing_time'
               | translate
           "
+          [error]="fieldErrors.closingTime()"
           [formField]="informationForm.closingTime"
         />
       </div>
@@ -129,6 +145,7 @@
         'management.settings.bathhouse_configuration.general_information.choose' | translate
       "
       [options]="cancellationOptions()"
+      [error]="fieldErrors.cancellationPolicy()"
       [formField]="informationForm.cancellationPolicy"
     />
     <app-filled-select
@@ -137,6 +154,7 @@
         'management.settings.bathhouse_configuration.general_information.choose' | translate
       "
       [options]="petOptions()"
+      [error]="fieldErrors.petPolicy()"
       [formField]="informationForm.petPolicy"
     />
   </div>
@@ -146,6 +164,7 @@
     "
     [texts]="'rich_text' | translate"
     [pathIcon]="richTextIcons"
+    [error]="fieldErrors.regulation()"
     [formField]="informationForm.regulation"
   />
   <div class="bathhouse__configuration__1__actions">
@@ -154,11 +173,17 @@
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
+        [disabled]="isSaving()"
         (clicked)="cancel()"
       >
         {{ 'management.settings.bathhouse_configuration.general_information.cancel' | translate }}
       </app-button>
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [isLoading]="isSaving()"
+        (clicked)="save()"
+      >
         {{ 'management.settings.bathhouse_configuration.general_information.save' | translate }}
       </app-button>
     } @else {

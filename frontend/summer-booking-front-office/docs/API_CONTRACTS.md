@@ -1606,6 +1606,120 @@ Stato: 200 OK.
 | `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
 
+### POST `/api/catalog/save-bathhouse-configuration-general`
+
+Informazioni stabilimento: salvataggio delle informazioni generali.
+
+#### Payload
+
+```json
+{
+  "bathhouseName": "Lido Demo",
+  "address": "Lungomare dei Pini 12",
+  "postalCode": "00100",
+  "city": "Roma",
+  "province": "Roma",
+  "region": "Lazio",
+  "country": "IT",
+  "phone": "+39 06 1234567",
+  "whatsapp": "+39 333 1234567",
+  "email": "info@lidodemo.example",
+  "website": "https://www.lidodemo.example",
+  "facebook": "https://www.facebook.com/lidodemo.example",
+  "instagram": "https://www.instagram.com/lidodemo.example",
+  "description": "<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>",
+  "openingTime": "08:30",
+  "closingTime": "19:00",
+  "cancellationPolicy": "FreeUntil48Hours",
+  "petPolicy": "Allowed",
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `bathhouseName` | string \| null | `Lido Demo` |
+| `address` | string \| null | `Lungomare dei Pini 12` |
+| `postalCode` | string \| null | `00100` |
+| `city` | string \| null | `Roma` |
+| `province` | string \| null | `Roma` |
+| `region` | string \| null | `Lazio` |
+| `country` | string (ISO 3166-1 alpha-2) \| null | `IT` |
+| `phone` | string \| null | `+39 06 1234567` |
+| `whatsapp` | string \| null | `+39 333 1234567` |
+| `email` | string \| null | `info@lidodemo.example` |
+| `website` | string \| null | `https://www.lidodemo.example` |
+| `facebook` | string \| null | `https://www.facebook.com/lidodemo.example` |
+| `instagram` | string \| null | `https://www.instagram.com/lidodemo.example` |
+| `description` | string (HTML) \| null | `<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>` |
+| `openingTime` | string (HH:mm) \| null | `08:30` |
+| `closingTime` | string (HH:mm) \| null | `19:00` |
+| `cancellationPolicy` | string (enum CancellationPolicy) \| null | `FreeUntil48Hours` |
+| `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
+| `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/bathhouse-configuration-services?idProperty={idProperty}`
+
+Informazioni stabilimento: servizi.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bathhouse-configuration-services?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "idService": 1,
+    "name": "Accesso disabili",
+    "categoryCode": "accessibility_comfort",
+    "iconUrl": "/media/icons/accesso-disabili.svg",
+    "isSelected": true
+  },
+  {
+    "idService": 3,
+    "name": "Doccia",
+    "categoryCode": "accessibility_comfort",
+    "iconUrl": "/media/icons/doccia.svg",
+    "isSelected": true
+  },
+  {
+    "idService": 6,
+    "name": "Wifi",
+    "categoryCode": "accessibility_comfort",
+    "iconUrl": null,
+    "isSelected": false
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idService` | number (intero) | `1` |
+| `name` | string | `Accesso disabili` |
+| `categoryCode` | string | `accessibility_comfort` |
+| `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
+| `isSelected` | boolean | `true` |
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

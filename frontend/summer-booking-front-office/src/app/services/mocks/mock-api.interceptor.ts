@@ -1,7 +1,12 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
-import { bathhouseConfigurationGeneralMock, countriesComboboxMock } from './catalog/catalog.mock';
+import {
+  bathhouseConfigurationGeneralMock,
+  bathhouseConfigurationServicesMock,
+  countriesComboboxMock,
+  saveBathhouseConfigurationGeneralMock,
+} from './catalog/catalog.mock';
 import {
   affiliatedHotelComboboxMock,
   deleteSelectedItemMock,
@@ -316,6 +321,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-general`
   ) {
     return bathhouseConfigurationGeneralMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-services`
+  ) {
+    return bathhouseConfigurationServicesMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-general`
+  ) {
+    return saveBathhouseConfigurationGeneralMock(request);
   }
 
   return next(request);

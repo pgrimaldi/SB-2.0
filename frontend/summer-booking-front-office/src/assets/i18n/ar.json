@@ -251,6 +251,11 @@
           "edit": "تعديل",
           "cancel": "إلغاء",
           "save": "حفظ"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "إمكانية الوصول والراحة"
+          }
         }
       },
       "warehouse": {

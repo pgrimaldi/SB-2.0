@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
@@ -21,4 +23,26 @@ export class CatalogService {
       `${this.endpoint}/bathhouse-configuration-general`,
       { params: { idProperty } },
     );
+
+  /**
+   * Every service of the catalogue, with the name in the language of the request (Accept-Language)
+   * and whether the property offers it.
+   */
+  readonly bathhouseConfigurationServices = (
+    idProperty: string,
+  ): Observable<BathhouseServiceItem[]> =>
+    this.httpClient.get<BathhouseServiceItem[]>(
+      `${this.endpoint}/bathhouse-configuration-services`,
+      { params: { idProperty } },
+    );
+
+  /** Every field of the tab, changed or not. Answers 204 with no body. */
+  readonly saveBathhouseConfigurationGeneral = (
+    idProperty: string,
+    information: BathhouseGeneralInformation,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-general`, {
+      ...onlyFieldsOf(BathhouseGeneralInformation, information),
+      idProperty,
+    });
 }

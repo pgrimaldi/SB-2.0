@@ -1,0 +1,27 @@
+<div class="bathhouse__configuration__2" [attr.inert]="isLoading() ? '' : null">
+  @for (section of sections(); track section.categoryCode) {
+    <section class="bathhouse__configuration__2__section">
+      <app-section-title
+        [text]="
+          'management.settings.bathhouse_configuration.services.categories.' + section.categoryCode
+            | translate
+        "
+      />
+      <div class="bathhouse__configuration__2__services">
+        @for (item of section.services; track item.service.idService) {
+          <app-checkbox [formField]="servicesForm[item.index].isSelected">
+            <span class="bathhouse__configuration__2__service">
+              @if (item.service.iconUrl; as iconUrl) {
+                <img [src]="iconUrl" width="20" height="20" alt="" />
+              }
+              {{ item.service.name }}
+            </span>
+          </app-checkbox>
+        }
+      </div>
+    </section>
+  }
+  @if (errorMessage(); as errorMessage) {
+    <p class="bathhouse__configuration__2__error">{{ errorMessage }}</p>
+  }
+</div>

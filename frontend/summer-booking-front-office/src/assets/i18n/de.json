@@ -251,6 +251,11 @@
           "edit": "Bearbeiten",
           "cancel": "Abbrechen",
           "save": "Speichern"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "Barrierefreiheit und Komfort"
+          }
         }
       },
       "warehouse": {

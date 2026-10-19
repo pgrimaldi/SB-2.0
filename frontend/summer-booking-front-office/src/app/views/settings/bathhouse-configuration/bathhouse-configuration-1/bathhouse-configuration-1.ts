@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  Signal,
   computed,
   effect,
   inject,
@@ -9,9 +10,9 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, form, readonly } from '@angular/forms/signals';
+import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, forkJoin, of, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -19,6 +20,8 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../behaviours/validation/api-field-errors';
+import { ValidationTextBehaviour } from '../../../../behaviours/validation/validation-text.behaviour';
 import {
   Button,
   ButtonAppearance,
@@ -34,6 +37,7 @@ import { CancellationPolicy } from '../../../../entities/enums/cancellation-poli
 import { PetPolicy } from '../../../../entities/enums/pet-policy';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { BathhouseGeneralInformation } from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 
@@ -60,19 +64,28 @@ interface GeneralInformationTexts {
 export class BathhouseConfiguration1 implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
+  private readonly catalog = inject(CatalogService);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly translateService = inject(TranslateService);
+  private readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
 
   protected readonly isEditing = signal(false);
+  protected readonly isSaving = signal(false);
   private readonly information = signal(new BathhouseGeneralInformation());
   private loaded = new BathhouseGeneralInformation();
   protected readonly informationForm = form(this.information, (path) => {
-    readonly(path, () => !this.isEditing());
+    readonly(path, () => !this.isEditing() || this.isSaving());
   });
+  protected readonly fieldErrors = Object.fromEntries(
+    (Object.keys(this.information()) as (keyof BathhouseGeneralInformation)[]).map((name) => [
+      name,
+      this.validationText.message(this.informationForm[name]),
+    ]),
+  ) as Readonly<Record<keyof BathhouseGeneralInformation, Signal<string | null>>>;
   private readonly countries = signal<readonly ComboboxItem[]>([]);
   protected readonly countryOptions = computed<readonly SelectOption[]>(() =>
     this.countries().map(({ id, value }) => ({ value: id, label: value })),
@@ -162,7 +175,33 @@ export class BathhouseConfiguration1 implements UnsavedChanges, OnDestroy {
   protected cancel(): void {
     this.information.set(this.loaded);
     this.informationForm().reset();
+    this.error.set(null);
     this.isEditing.set(false);
+  }
+
+  protected save(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    if (this.isSaving() || !idProperty) {
+      return;
+    }
+    void submit(this.informationForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        const sent = this.information();
+        await firstValueFrom(this.catalog.saveBathhouseConfigurationGeneral(idProperty, sent));
+        this.loaded = sent;
+        this.cache.keepGeneralInformation(sent);
+        this.informationForm().reset();
+        this.isEditing.set(false);
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.informationForm, (general) =>
+          this.error.set(general),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
   }
 
   ngOnDestroy(): void {
