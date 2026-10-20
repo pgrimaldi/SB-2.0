@@ -52,6 +52,25 @@ export const emailConfigurationMock = (
   ).pipe(delay(150));
 };
 
+/**
+ * `GET /api/system/get-stripe-information?idProperty=…`: the id of the Stripe account connected to
+ * the property, the body is the string alone. 401 without a valid access token; 403 for a missing or
+ * unknown property.
+ */
+export const stripeInformationMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  if (!propertyOf(request.params.get('idProperty'))) {
+    return forbidden(request);
+  }
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: 'acct_1QmDemo4Fz8Lw2Xc' }),
+  ).pipe(delay(150));
+};
+
 const SUPPORT_HOURS: Record<'it' | 'en', string[]> = {
   it: [
     '1 maggio - 30 settembre, dal lunedì alla domenica: dalle 8:30 alle 20:00',

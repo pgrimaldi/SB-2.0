@@ -1,9 +1,18 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
+import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { Button, ButtonAppearance } from '../../../components/shared/ui/buttons/button/button';
 import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
+import { SystemService } from '../../../services/api/system/system.service';
 
 const STRIPE_CONNECT_URL = 'https://connect.stripe.com/oauth/authorize';
 /** The random `state` sent to Stripe: the return page checks that Stripe gives back the same one. */
@@ -17,6 +26,8 @@ export const STRIPE_CONNECT_STATE_KEY = 'sb.stripe-connect-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OnlineBookingConfiguration {
+  private readonly auth = inject(AuthBehaviour);
+  private readonly system = inject(SystemService);
   private readonly window = inject(DOCUMENT).defaultView;
 
   protected readonly ButtonAppearance = ButtonAppearance;
@@ -28,6 +39,23 @@ export class OnlineBookingConfiguration {
   protected readonly copyIcon = ['/assets/images/OnlineBookingConfiguration_Copy.svg'] as const;
   protected readonly iframeCode =
     '<iframe src="https://summerbooking.it/property-details/demo/iframe" width="300px" height="350px"></iframe>';
+  protected readonly stripeAccountId = signal<string | null>(null);
+
+  constructor() {
+    effect((onCleanup) => {
+      const idProperty = this.auth.user()?.propertyId;
+      if (!idProperty) {
+        return;
+      }
+      const subscription = untracked(() =>
+        this.system.stripeInformation(idProperty).subscribe({
+          next: (stripeAccountId) => this.stripeAccountId.set(stripeAccountId),
+          error: () => this.stripeAccountId.set(null),
+        }),
+      );
+      onCleanup(() => subscription.unsubscribe());
+    });
+  }
 
   protected openStripePage(): void {
     const window = this.window;

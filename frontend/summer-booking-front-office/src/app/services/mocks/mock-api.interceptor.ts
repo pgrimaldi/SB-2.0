@@ -30,6 +30,7 @@ import {
   emailConfigurationMock,
   saveEmailConfigurationMock,
   sendTestEmailMock,
+  stripeInformationMock,
   supportInfoMock,
 } from './system/system.mock';
 import {
@@ -146,6 +147,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/system/contact-support`
   ) {
     return contactSupportMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/system/get-stripe-information`
+  ) {
+    return stripeInformationMock(request);
   }
 
   if (

@@ -1904,3 +1904,29 @@ Assistenza: messaggio al supporto.
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
+
+### GET `/api/system/get-stripe-information?idProperty={idProperty}`
+
+Prenotazioni online: conto Stripe collegato.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/system/get-stripe-information?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgolette, Content-Type application/json): acct_…. null se lo stabilimento non ha ancora collegato Stripe.
+
+```json
+"acct_1QmDemo4Fz8Lw2Xc"
+```
