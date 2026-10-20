@@ -264,6 +264,31 @@
           "save": "保存"
         }
       },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "关联您的 Stripe 账户",
+          "subtitle": "简单、安全地接收在线预订付款。",
+          "description": "Summer Booking 使用 Stripe 管理您预订的在线付款，确保交易快速安全，并保护个人数据和支付数据。",
+          "configure_title": "配置您的 Stripe 账户",
+          "configure_text": "关联现有的 Stripe 账户或创建新账户，开始接收在线预订付款。",
+          "configure": "配置您的 Stripe 账户",
+          "how_it_works": "使用方法：",
+          "step_1": "登录或注册 Stripe",
+          "step_2": "轻松开始收款和付款"
+        },
+        "options": {
+          "title": "管理选项",
+          "online_bookings": "在线预订选项",
+          "online_booking_services": "服务在线预订选项"
+        },
+        "iframe": {
+          "title": "您网站的 iframe 代码",
+          "subtitle": "让您的客人只需点击几下，即可直接在您的网站上预订遮阳伞、躺椅和服务。",
+          "description": "将嵌入代码复制并粘贴到您网站的所需位置。该小部件会与管理系统的地图实时同步可用情况。",
+          "direct_link": "直接链接",
+          "copy": "复制链接"
+        }
+      },
       "warehouse": {
         "title": "仓库设置",
         "create": "添加物品",

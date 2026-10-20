@@ -264,6 +264,31 @@
           "save": "Enregistrer"
         }
       },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Connectez votre compte Stripe",
+          "subtitle": "Recevez les paiements des réservations en ligne simplement et en toute sécurité.",
+          "description": "Summer Booking utilise Stripe pour gérer les paiements en ligne de vos réservations, avec des transactions rapides et sûres et la protection des données personnelles et de paiement.",
+          "configure_title": "Configurez votre compte Stripe",
+          "configure_text": "Connectez votre compte Stripe existant ou créez-en un nouveau pour commencer à recevoir les paiements des réservations en ligne.",
+          "configure": "Configurer le compte Stripe",
+          "how_it_works": "Comment ça marche :",
+          "step_1": "Connectez-vous ou inscrivez-vous sur Stripe",
+          "step_2": "Recevez et effectuez des paiements facilement"
+        },
+        "options": {
+          "title": "Gérer les options",
+          "online_bookings": "Options réservations en ligne",
+          "online_booking_services": "Options réservation des services"
+        },
+        "iframe": {
+          "title": "Code iframe pour votre site web",
+          "subtitle": "Permettez à vos clients de réserver parasols, transats et services directement depuis votre site en quelques clics.",
+          "description": "Copiez et collez le code d'intégration dans la section souhaitée de votre site. Le widget synchronise les disponibilités en temps réel avec le plan du logiciel.",
+          "direct_link": "Lien direct",
+          "copy": "Copier le lien"
+        }
+      },
       "warehouse": {
         "title": "Paramètres du stock",
         "create": "Ajouter un article",

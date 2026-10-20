@@ -264,6 +264,31 @@
           "save": "Salva"
         }
       },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Collega il tuo account Stripe",
+          "subtitle": "Ricevi i pagamenti delle prenotazioni online in modo semplice e sicuro.",
+          "description": "Summer Booking utilizza Stripe per gestire i pagamenti online delle tue prenotazioni, garantendo transazioni rapide e sicure e la protezione dei dati personali e di pagamento.",
+          "configure_title": "Configura il tuo account Stripe",
+          "configure_text": "Collega il tuo account Stripe esistente oppure crea un nuovo account per iniziare a ricevere i pagamenti delle prenotazioni online.",
+          "configure": "Configura il tuo account Stripe",
+          "how_it_works": "Come funziona:",
+          "step_1": "Accedi o registrati su Stripe",
+          "step_2": "Inizia a ricevere ed effettuare pagamenti facilmente"
+        },
+        "options": {
+          "title": "Gestisci opzioni",
+          "online_bookings": "Opzioni prenotazioni online",
+          "online_booking_services": "Opzioni prenotazioni online servizi"
+        },
+        "iframe": {
+          "title": "Codice iframe per il tuo sito web",
+          "subtitle": "Permetti ai tuoi ospiti di prenotare ombrelloni, lettini e servizi direttamente dal tuo sito web in pochi clic.",
+          "description": "Copia e incolla il codice incorporabile nella sezione desiderata del tuo sito. Il widget sincronizza le disponibilità in tempo reale con la mappa del gestionale.",
+          "direct_link": "Link Diretto",
+          "copy": "Copia Link"
+        }
+      },
       "warehouse": {
         "title": "Impostazioni magazzino",
         "create": "Aggiungi articolo",

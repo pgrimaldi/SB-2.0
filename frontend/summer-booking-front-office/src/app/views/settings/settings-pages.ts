@@ -46,7 +46,14 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
     label: 'management.settings.menu.sharing',
     loadComponent: () => import('./sharing/sharing').then((component) => component.Sharing),
   },
-  { path: 'online-bookings', label: 'management.settings.menu.online_bookings' },
+  {
+    path: 'online-booking-configuration',
+    label: 'management.settings.menu.online_bookings',
+    loadComponent: () =>
+      import('./online-booking-configuration/online-booking-configuration').then(
+        (component) => component.OnlineBookingConfiguration,
+      ),
+  },
   {
     path: 'taxation',
     label: 'management.settings.menu.fiscalization',

@@ -1,0 +1,97 @@
+<main class="online__booking__configuration">
+  <section class="online__booking__configuration__panel">
+    <header class="online__booking__configuration__heading">
+      <h2 class="online__booking__configuration__title">
+        {{ 'management.settings.online_booking_configuration.stripe.title' | translate }}
+      </h2>
+      <p class="online__booking__configuration__subtitle">
+        {{ 'management.settings.online_booking_configuration.stripe.subtitle' | translate }}
+      </p>
+    </header>
+    <p class="online__booking__configuration__text">
+      {{ 'management.settings.online_booking_configuration.stripe.description' | translate }}
+    </p>
+    <div class="online__booking__configuration__stripe">
+      <div class="online__booking__configuration__stripe__text">
+        <h3 class="online__booking__configuration__stripe__title">
+          {{
+            'management.settings.online_booking_configuration.stripe.configure_title' | translate
+          }}
+        </h3>
+        <p class="online__booking__configuration__text">
+          {{ 'management.settings.online_booking_configuration.stripe.configure_text' | translate }}
+        </p>
+      </div>
+      <app-button [pathIcon]="configureStripeIcon">
+        {{ 'management.settings.online_booking_configuration.stripe.configure' | translate }}
+      </app-button>
+    </div>
+    <div class="online__booking__configuration__steps">
+      <p class="online__booking__configuration__steps__label">
+        {{ 'management.settings.online_booking_configuration.stripe.how_it_works' | translate }}
+      </p>
+      <ol class="online__booking__configuration__steps__list">
+        <li class="online__booking__configuration__step">
+          <span class="online__booking__configuration__step__number">1</span>
+          {{ 'management.settings.online_booking_configuration.stripe.step_1' | translate }}
+        </li>
+        <li class="online__booking__configuration__step__arrow">
+          <img [src]="stepIcon" width="14" height="14" alt="" />
+        </li>
+        <li class="online__booking__configuration__step">
+          <span class="online__booking__configuration__step__number">2</span>
+          {{ 'management.settings.online_booking_configuration.stripe.step_2' | translate }}
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="online__booking__configuration__panel">
+    <app-section-title
+      class="online__booking__configuration__section__title"
+      [text]="'management.settings.online_booking_configuration.options.title' | translate"
+    />
+    <div class="online__booking__configuration__options">
+      <app-button [isFullWidth]="true">
+        {{ 'management.settings.online_booking_configuration.options.online_bookings' | translate }}
+      </app-button>
+      <app-button [isFullWidth]="true">
+        {{
+          'management.settings.online_booking_configuration.options.online_booking_services'
+            | translate
+        }}
+      </app-button>
+    </div>
+  </section>
+
+  <section class="online__booking__configuration__panel">
+    <header class="online__booking__configuration__heading">
+      <h2 class="online__booking__configuration__title">
+        {{ 'management.settings.online_booking_configuration.iframe.title' | translate }}
+      </h2>
+      <p class="online__booking__configuration__subtitle">
+        {{ 'management.settings.online_booking_configuration.iframe.subtitle' | translate }}
+      </p>
+    </header>
+    <p class="online__booking__configuration__text">
+      {{ 'management.settings.online_booking_configuration.iframe.description' | translate }}
+    </p>
+    <div class="online__booking__configuration__iframe">
+      <span class="online__booking__configuration__iframe__icon">
+        <img [src]="iframeIcon" width="14" height="14" alt="" />
+      </span>
+      <div class="online__booking__configuration__iframe__text">
+        <h3 class="online__booking__configuration__iframe__title">
+          {{ 'management.settings.online_booking_configuration.iframe.direct_link' | translate }}
+        </h3>
+      </div>
+      <app-button
+        class="online__booking__configuration__iframe__copy"
+        [appearance]="ButtonAppearance.Light"
+        [pathIcon]="copyIcon"
+      >
+        {{ 'management.settings.online_booking_configuration.iframe.copy' | translate }}
+      </app-button>
+    </div>
+  </section>
+</main>

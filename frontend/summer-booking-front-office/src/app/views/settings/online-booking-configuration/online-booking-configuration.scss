@@ -1,0 +1,195 @@
+@use '../../../styles/settings-panel' as panel;
+
+.online__booking__configuration {
+  --button-text-size: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 0.8125rem 2rem;
+  color: var(--color__main__theme__two);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.online__booking__configuration__panel {
+  @include panel.settings-panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 1.5rem;
+}
+
+.online__booking__configuration__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+}
+
+.online__booking__configuration__title,
+.online__booking__configuration__subtitle,
+.online__booking__configuration__text,
+.online__booking__configuration__stripe__title,
+.online__booking__configuration__steps__label,
+.online__booking__configuration__iframe__title {
+  margin: 0;
+}
+
+.online__booking__configuration__title {
+  color: var(--color__main__theme__one);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+
+.online__booking__configuration__subtitle {
+  color: var(--color__layout__text__soft);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.online__booking__configuration__stripe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding: 1.25rem;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__highlight);
+}
+
+.online__booking__configuration__stripe__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 19rem;
+}
+
+.online__booking__configuration__stripe__title {
+  color: var(--color__main__theme__one);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+}
+
+.online__booking__configuration__steps,
+.online__booking__configuration__steps__list,
+.online__booking__configuration__step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.online__booking__configuration__steps {
+  gap: 0.75rem 2.5rem;
+  padding-top: 1rem;
+  border-top: 0.0625rem solid var(--color__layout__border);
+}
+
+.online__booking__configuration__steps__label {
+  color: var(--color__main__theme__one);
+  font-weight: 600;
+}
+
+.online__booking__configuration__steps__list {
+  gap: 0.75rem 2.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.online__booking__configuration__step {
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+}
+
+.online__booking__configuration__step__number {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--color__layout__highlight);
+  color: var(--color__main__theme__one);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.online__booking__configuration__step__arrow {
+  display: flex;
+}
+
+:host-context([dir='rtl']) .online__booking__configuration__step__arrow img {
+  transform: scaleX(-1);
+}
+
+.online__booking__configuration__section__title {
+  --section-title-text-size: 1rem;
+  --section-title-text-weight: 500;
+  --section-title-line-height: 1.5rem;
+  --section-title-padding-bottom: 0.5rem;
+}
+
+.online__booking__configuration__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.3125rem;
+}
+
+.online__booking__configuration__iframe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.5rem;
+  background: color-mix(
+    in srgb,
+    var(--color__layout__highlight) 35%,
+    var(--color__layout__surface)
+  );
+}
+
+.online__booking__configuration__iframe__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__highlight);
+}
+
+.online__booking__configuration__iframe__text {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.online__booking__configuration__iframe__title {
+  color: var(--color__main__theme__one);
+  font-weight: 600;
+}
+
+.online__booking__configuration__iframe__copy {
+  --button-border-color: var(--color__main__theme__one);
+}
+
+@media (width < 48rem) {
+  .online__booking__configuration__options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

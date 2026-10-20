@@ -264,6 +264,31 @@
           "save": "Save"
         }
       },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Connect your Stripe account",
+          "subtitle": "Receive online booking payments simply and securely.",
+          "description": "Summer Booking uses Stripe to handle the online payments of your bookings, ensuring fast and secure transactions and the protection of personal and payment data.",
+          "configure_title": "Set up your Stripe account",
+          "configure_text": "Connect your existing Stripe account or create a new one to start receiving online booking payments.",
+          "configure": "Set up your Stripe account",
+          "how_it_works": "How it works:",
+          "step_1": "Sign in or sign up on Stripe",
+          "step_2": "Start receiving and making payments easily"
+        },
+        "options": {
+          "title": "Manage options",
+          "online_bookings": "Online booking options",
+          "online_booking_services": "Service booking options"
+        },
+        "iframe": {
+          "title": "Iframe code for your website",
+          "subtitle": "Let your guests book umbrellas, sunbeds and services directly from your website in a few clicks.",
+          "description": "Copy and paste the embed code into the section you want on your site. The widget syncs availability in real time with the map of the management system.",
+          "direct_link": "Direct link",
+          "copy": "Copy link"
+        }
+      },
       "warehouse": {
         "title": "Warehouse settings",
         "create": "Add item",

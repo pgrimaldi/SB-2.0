@@ -264,6 +264,31 @@
           "save": "Speichern"
         }
       },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Verbinden Sie Ihr Stripe-Konto",
+          "subtitle": "Erhalten Sie Zahlungen für Online-Buchungen einfach und sicher.",
+          "description": "Summer Booking nutzt Stripe für die Online-Zahlungen Ihrer Buchungen, mit schnellen und sicheren Transaktionen und dem Schutz persönlicher Daten und Zahlungsdaten.",
+          "configure_title": "Stripe-Konto einrichten",
+          "configure_text": "Verbinden Sie Ihr bestehendes Stripe-Konto oder erstellen Sie ein neues, um Zahlungen für Online-Buchungen zu erhalten.",
+          "configure": "Stripe-Konto einrichten",
+          "how_it_works": "So funktioniert es:",
+          "step_1": "Bei Stripe anmelden oder registrieren",
+          "step_2": "Zahlungen einfach empfangen und tätigen"
+        },
+        "options": {
+          "title": "Optionen verwalten",
+          "online_bookings": "Optionen Online-Buchungen",
+          "online_booking_services": "Optionen Service-Buchungen"
+        },
+        "iframe": {
+          "title": "Iframe-Code für Ihre Website",
+          "subtitle": "Ihre Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf Ihrer Website.",
+          "description": "Kopieren Sie den Einbettungscode an die gewünschte Stelle Ihrer Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
+          "direct_link": "Direkter Link",
+          "copy": "Link kopieren"
+        }
+      },
       "warehouse": {
         "title": "Lagereinstellungen",
         "create": "Artikel hinzufügen",
