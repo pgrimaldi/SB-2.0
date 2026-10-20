@@ -4,7 +4,6 @@ import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/paginati
 import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
 import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
 import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
-import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -137,8 +136,9 @@ export const electronicReceiptMock = (
     return forbidden(request);
   }
   const language = request.headers.get('Accept-Language')?.startsWith('en') ? 'en' : 'it';
-  const body: ElectronicReceiptResponse = { termsAndConditions: TERMS[language] };
-  return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(150));
+  return of(new HttpResponse({ status: 200, url: request.url, body: TERMS[language] })).pipe(
+    delay(150),
+  );
 };
 
 /**

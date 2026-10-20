@@ -74,7 +74,7 @@
       @if (receiptErrorMessage(); as receiptErrorMessage) {
         <p class="taxation__error">{{ receiptErrorMessage }}</p>
       } @else {
-        <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
+        <div class="taxation__terms" [innerHTML]="termsAndConditions()"></div>
       }
       <div class="taxation__choices">
         <app-checkbox

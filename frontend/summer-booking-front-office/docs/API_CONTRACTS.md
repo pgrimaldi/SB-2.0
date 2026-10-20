@@ -1028,15 +1028,11 @@ Nessun corpo: è una GET, lo stabilimento va nella query string.
 
 Stato: 200 OK.
 
-```json
-{
-  "termsAndConditions": "<h4>Generale</h4><p>Testo dei termini e condizioni…</p>"
-}
-```
+Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (tra virgolette, Content-Type application/json), nella lingua dell'header Accept-Language.
 
-| Property | Tipo | Esempio |
-|---|---|---|
-| `termsAndConditions` | string (HTML) | `<h4>Generale</h4><p>Testo dei termini e condizioni…</p>` |
+```json
+"<h4>Generale</h4><p>Testo dei termini e condizioni…</p>"
+```
 
 ## /sharing
 

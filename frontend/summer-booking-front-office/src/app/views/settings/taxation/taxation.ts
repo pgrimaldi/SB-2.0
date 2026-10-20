@@ -34,7 +34,6 @@ import {
   TableRowToggle,
 } from '../../../components/shared/ui/tables/table/table';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
@@ -131,7 +130,7 @@ export class Taxation {
       },
     ],
   );
-  protected readonly receipt = signal(new ElectronicReceiptResponse());
+  protected readonly termsAndConditions = signal<string | null>(null);
   protected readonly printersLoadFailed = signal(false);
   protected readonly isGuideDownloading = signal(false);
   protected readonly isAcceptChosen = signal(false);
@@ -166,12 +165,12 @@ export class Taxation {
       }
       const subscription = untracked(() =>
         this.taxation.electronicReceipt(idProperty).subscribe({
-          next: (receipt) => {
-            this.receipt.set(receipt);
+          next: (termsAndConditions) => {
+            this.termsAndConditions.set(termsAndConditions);
             this.receiptError.set(null);
           },
           error: (error: unknown) => {
-            this.receipt.set(new ElectronicReceiptResponse());
+            this.termsAndConditions.set(null);
             this.receiptError.set(toApiProblem(error));
           },
         }),

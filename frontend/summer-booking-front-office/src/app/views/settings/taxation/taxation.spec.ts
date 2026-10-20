@@ -35,7 +35,7 @@ describe('Taxation', () => {
         })),
       ),
     );
-    const electronicReceipt = vi.fn(() => of({ termsAndConditions }));
+    const electronicReceipt = vi.fn(() => of(termsAndConditions));
     const answer = new Subject<void>();
     const setPrinterIsActive = vi.fn(() => answer);
     const deletePrinter = vi.fn(() => answer);
