@@ -287,6 +287,11 @@
           "description": "Copia e incolla il codice incorporabile nella sezione desiderata del tuo sito. Il widget sincronizza le disponibilità in tempo reale con la mappa del gestionale.",
           "direct_link": "Link Diretto",
           "copy": "Copia Link"
+        },
+        "services_options": {
+          "title": "Opzioni prenotazioni online servizi",
+          "cancel": "Annulla",
+          "save": "Salva"
         }
       },
       "warehouse": {

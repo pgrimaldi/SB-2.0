@@ -287,6 +287,11 @@
           "description": "Copy and paste the embed code into the section you want on your site. The widget syncs availability in real time with the map of the management system.",
           "direct_link": "Direct link",
           "copy": "Copy link"
+        },
+        "services_options": {
+          "title": "Service booking options",
+          "cancel": "Cancel",
+          "save": "Save"
         }
       },
       "warehouse": {

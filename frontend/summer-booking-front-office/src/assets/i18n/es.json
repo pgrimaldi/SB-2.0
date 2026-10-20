@@ -287,6 +287,11 @@
           "description": "Copia y pega el código para insertar en la sección que quieras de tu web. El widget sincroniza la disponibilidad en tiempo real con el mapa del programa de gestión.",
           "direct_link": "Enlace directo",
           "copy": "Copiar enlace"
+        },
+        "services_options": {
+          "title": "Opciones de reserva de servicios",
+          "cancel": "Cancelar",
+          "save": "Guardar"
         }
       },
       "warehouse": {

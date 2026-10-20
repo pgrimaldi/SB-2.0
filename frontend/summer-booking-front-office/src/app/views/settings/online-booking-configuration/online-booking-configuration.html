@@ -55,7 +55,7 @@
       <app-button [isFullWidth]="true">
         {{ 'management.settings.online_booking_configuration.options.online_bookings' | translate }}
       </app-button>
-      <app-button [isFullWidth]="true">
+      <app-button [isFullWidth]="true" (clicked)="isServicesOptionsOpen.set(true)">
         {{
           'management.settings.online_booking_configuration.options.online_booking_services'
             | translate
@@ -96,3 +96,8 @@
     </div>
   </section>
 </main>
+
+<app-online-booking-services-options-popup
+  [pathIcon]="closeIcon"
+  [(open)]="isServicesOptionsOpen"
+/>

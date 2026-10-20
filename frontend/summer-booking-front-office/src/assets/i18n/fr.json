@@ -287,6 +287,11 @@
           "description": "Copiez et collez le code d'intégration dans la section souhaitée de votre site. Le widget synchronise les disponibilités en temps réel avec le plan du logiciel.",
           "direct_link": "Lien direct",
           "copy": "Copier le lien"
+        },
+        "services_options": {
+          "title": "Options réservation des services",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
         }
       },
       "warehouse": {

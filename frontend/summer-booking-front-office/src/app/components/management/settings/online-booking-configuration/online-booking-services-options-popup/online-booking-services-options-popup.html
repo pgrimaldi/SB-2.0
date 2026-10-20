@@ -1,0 +1,21 @@
+<ng-template #content>
+  <div class="online__booking__services__options__popup">
+    <h2 class="online__booking__services__options__popup__title">
+      {{ 'management.settings.online_booking_configuration.services_options.title' | translate }}
+    </h2>
+
+    <div class="online__booking__services__options__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="close()"
+      >
+        {{ 'management.settings.online_booking_configuration.services_options.cancel' | translate }}
+      </app-button>
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+        {{ 'management.settings.online_booking_configuration.services_options.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

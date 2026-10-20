@@ -287,6 +287,11 @@
           "description": "Kopieren Sie den Einbettungscode an die gewünschte Stelle Ihrer Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
           "direct_link": "Direkter Link",
           "copy": "Link kopieren"
+        },
+        "services_options": {
+          "title": "Optionen Service-Buchungen",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
         }
       },
       "warehouse": {

@@ -10,6 +10,7 @@ import {
 import { TranslatePipe } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { OnlineBookingServicesOptionsPopup } from '../../../components/management/settings/online-booking-configuration/online-booking-services-options-popup/online-booking-services-options-popup';
 import { Button, ButtonAppearance } from '../../../components/shared/ui/buttons/button/button';
 import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { SystemService } from '../../../services/api/system/system.service';
@@ -20,7 +21,7 @@ export const STRIPE_CONNECT_STATE_KEY = 'sb.stripe-connect-state';
 
 @Component({
   selector: 'app-online-booking-configuration',
-  imports: [Button, SectionTitle, TranslatePipe],
+  imports: [Button, OnlineBookingServicesOptionsPopup, SectionTitle, TranslatePipe],
   templateUrl: './online-booking-configuration.html',
   styleUrl: './online-booking-configuration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,9 +38,11 @@ export class OnlineBookingConfiguration {
   protected readonly stepIcon = '/assets/images/OnlineBookingConfiguration_StepChevron.svg';
   protected readonly iframeIcon = '/assets/images/OnlineBookingConfiguration_IframeLink.svg';
   protected readonly copyIcon = ['/assets/images/OnlineBookingConfiguration_Copy.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/OnlineBookingConfiguration_Close.svg'] as const;
   protected readonly iframeCode =
     '<iframe src="https://summerbooking.it/property-details/demo/iframe" width="300px" height="350px"></iframe>';
   protected readonly stripeAccountId = signal<string | null>(null);
+  protected readonly isServicesOptionsOpen = signal(false);
 
   constructor() {
     effect((onCleanup) => {

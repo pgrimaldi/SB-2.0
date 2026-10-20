@@ -287,6 +287,11 @@
           "description": "将嵌入代码复制并粘贴到您网站的所需位置。该小部件会与管理系统的地图实时同步可用情况。",
           "direct_link": "直接链接",
           "copy": "复制链接"
+        },
+        "services_options": {
+          "title": "服务在线预订选项",
+          "cancel": "取消",
+          "save": "保存"
         }
       },
       "warehouse": {
