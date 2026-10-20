@@ -291,7 +291,34 @@
         "services_options": {
           "title": "Optionen Service-Buchungen",
           "cancel": "Abbrechen",
-          "save": "Speichern"
+          "save": "Speichern",
+          "enabled": "Online-Buchung von Services aktivieren",
+          "supplement_type": "Zuschlagsart",
+          "supplement_types": {
+            "none": "Kein Zuschlag",
+            "percentage": "Prozentsatz",
+            "fixed": "Fest"
+          },
+          "supplement_value": "Zuschlagswert",
+          "confirmation_required": "Bestätigung anfordern",
+          "field_names": {
+            "supplement_value": "des Zuschlags"
+          },
+          "payment_methods": {
+            "title": "Akzeptierte Zahlungsarten",
+            "pay_now": "Jetzt bezahlen",
+            "pay_at_property": "Vor Ort bezahlen (nur für Buchungen innerhalb von 7 Tagen)",
+            "pay_at_property_without_card": "Vor Ort ohne Kreditkarte bezahlen",
+            "deposit": "50 % Anzahlung jetzt, Rest vor Ort",
+            "prepaid_card": "Mit der Prepaid-Karte des Strandbads bezahlen"
+          },
+          "panel_title": {
+            "title": "Titel des Buchungsbereichs für Services"
+          },
+          "useful_information": {
+            "title": "Nützliche Informationen",
+            "description": "Die hier eingegebenen Informationen sehen die Kunden auf der Seite des Strandbads."
+          }
         }
       },
       "warehouse": {

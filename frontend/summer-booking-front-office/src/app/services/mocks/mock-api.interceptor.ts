@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
+import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationServicesMock,
@@ -154,6 +155,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/system/get-stripe-information`
   ) {
     return stripeInformationMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/booking/get-online-services-options`
+  ) {
+    return onlineServicesOptionsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/booking/update-online-services-options`
+  ) {
+    return updateOnlineServicesOptionsMock(request);
   }
 
   if (

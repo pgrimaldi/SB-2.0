@@ -1716,6 +1716,102 @@ Stato: 200 OK.
 | `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
 | `isSelected` | boolean | `true` |
 
+## /booking
+
+### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
+
+Prenotazioni online: opzioni dei servizi.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/booking/get-online-services-options?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isServicesOnlineBookingEnabled": true,
+  "supplementType": "Percentage",
+  "supplementValue": 10,
+  "isBookingConfirmationRequired": false,
+  "isPayNowAccepted": true,
+  "isPayAtPropertyAccepted": true,
+  "isPayAtPropertyWithoutCardAccepted": false,
+  "isDepositAccepted": false,
+  "isPrepaidCardAccepted": true,
+  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isServicesOnlineBookingEnabled` | boolean | `true` |
+| `supplementType` | string (enum SupplementType) | `Percentage` |
+| `supplementValue` | number (decimale) \| null | `10` |
+| `isBookingConfirmationRequired` | boolean | `false` |
+| `isPayNowAccepted` | boolean | `true` |
+| `isPayAtPropertyAccepted` | boolean | `true` |
+| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
+| `isDepositAccepted` | boolean | `false` |
+| `isPrepaidCardAccepted` | boolean | `true` |
+| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+
+### POST `/api/booking/update-online-services-options`
+
+Prenotazioni online: salvataggio delle opzioni dei servizi.
+
+#### Payload
+
+```json
+{
+  "isServicesOnlineBookingEnabled": true,
+  "supplementType": "Percentage",
+  "supplementValue": 10,
+  "isBookingConfirmationRequired": false,
+  "isPayNowAccepted": true,
+  "isPayAtPropertyAccepted": true,
+  "isPayAtPropertyWithoutCardAccepted": false,
+  "isDepositAccepted": false,
+  "isPrepaidCardAccepted": true,
+  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isServicesOnlineBookingEnabled` | boolean | `true` |
+| `supplementType` | string (enum SupplementType) | `Percentage` |
+| `supplementValue` | number (decimale) \| null | `10` |
+| `isBookingConfirmationRequired` | boolean | `false` |
+| `isPayNowAccepted` | boolean | `true` |
+| `isPayAtPropertyAccepted` | boolean | `true` |
+| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
+| `isDepositAccepted` | boolean | `false` |
+| `isPrepaidCardAccepted` | boolean | `true` |
+| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`

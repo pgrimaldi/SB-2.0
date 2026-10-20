@@ -291,7 +291,34 @@
         "services_options": {
           "title": "Opzioni prenotazioni online servizi",
           "cancel": "Annulla",
-          "save": "Salva"
+          "save": "Salva",
+          "enabled": "Abilita prenotazioni online dei servizi",
+          "supplement_type": "Tipo di supplemento",
+          "supplement_types": {
+            "none": "Nessun supplemento",
+            "percentage": "Percentuale",
+            "fixed": "Fisso"
+          },
+          "supplement_value": "Valore supplemento",
+          "confirmation_required": "Richiedi conferma prenotazione",
+          "field_names": {
+            "supplement_value": "del supplemento"
+          },
+          "payment_methods": {
+            "title": "Metodi di pagamento accettati",
+            "pay_now": "Paga ora",
+            "pay_at_property": "Paga in struttura (disponibile solo per prenotazioni entro 7 giorni)",
+            "pay_at_property_without_card": "Paga in struttura senza carta di credito",
+            "deposit": "Acconto ora del 50% e saldo in struttura",
+            "prepaid_card": "Paga con tessera prepagata della struttura"
+          },
+          "panel_title": {
+            "title": "Titolo del pannello prenotazione servizi"
+          },
+          "useful_information": {
+            "title": "Informazioni utili",
+            "description": "Le informazioni inserite in questo campo saranno visibili ai clienti sulla pagina dello stabilimento."
+          }
         }
       },
       "warehouse": {

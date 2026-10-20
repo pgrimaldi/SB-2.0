@@ -291,7 +291,34 @@
         "services_options": {
           "title": "خيارات حجز الخدمات",
           "cancel": "إلغاء",
-          "save": "حفظ"
+          "save": "حفظ",
+          "enabled": "تفعيل الحجز عبر الإنترنت للخدمات",
+          "supplement_type": "نوع الرسوم الإضافية",
+          "supplement_types": {
+            "none": "بدون رسوم إضافية",
+            "percentage": "نسبة مئوية",
+            "fixed": "ثابت"
+          },
+          "supplement_value": "قيمة الرسوم الإضافية",
+          "confirmation_required": "طلب تأكيد الحجز",
+          "field_names": {
+            "supplement_value": "الرسوم الإضافية"
+          },
+          "payment_methods": {
+            "title": "طرق الدفع المقبولة",
+            "pay_now": "ادفع الآن",
+            "pay_at_property": "الدفع في المنشأة (فقط للحجوزات خلال 7 أيام)",
+            "pay_at_property_without_card": "الدفع في المنشأة بدون بطاقة ائتمان",
+            "deposit": "دفعة مقدمة 50% الآن والباقي في المنشأة",
+            "prepaid_card": "الدفع بالبطاقة المسبقة الدفع الخاصة بالمنشأة"
+          },
+          "panel_title": {
+            "title": "عنوان لوحة حجز الخدمات"
+          },
+          "useful_information": {
+            "title": "معلومات مفيدة",
+            "description": "ستظهر المعلومات المدخلة في هذا الحقل للعملاء على صفحة المنشأة."
+          }
         }
       },
       "warehouse": {

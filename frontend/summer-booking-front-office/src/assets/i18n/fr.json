@@ -291,7 +291,34 @@
         "services_options": {
           "title": "Options réservation des services",
           "cancel": "Annuler",
-          "save": "Enregistrer"
+          "save": "Enregistrer",
+          "enabled": "Activer la réservation en ligne des services",
+          "supplement_type": "Type de supplément",
+          "supplement_types": {
+            "none": "Aucun supplément",
+            "percentage": "Pourcentage",
+            "fixed": "Fixe"
+          },
+          "supplement_value": "Valeur du supplément",
+          "confirmation_required": "Exiger une confirmation",
+          "field_names": {
+            "supplement_value": "du supplément"
+          },
+          "payment_methods": {
+            "title": "Moyens de paiement acceptés",
+            "pay_now": "Payer maintenant",
+            "pay_at_property": "Payer sur place (uniquement pour les réservations sous 7 jours)",
+            "pay_at_property_without_card": "Payer sur place sans carte de crédit",
+            "deposit": "Acompte de 50 % maintenant et solde sur place",
+            "prepaid_card": "Payer avec la carte prépayée de l'établissement"
+          },
+          "panel_title": {
+            "title": "Titre du panneau de réservation des services"
+          },
+          "useful_information": {
+            "title": "Informations utiles",
+            "description": "Les informations saisies dans ce champ seront visibles par les clients sur la page de l'établissement."
+          }
         }
       },
       "warehouse": {

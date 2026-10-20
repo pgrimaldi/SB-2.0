@@ -291,7 +291,34 @@
         "services_options": {
           "title": "Opciones de reserva de servicios",
           "cancel": "Cancelar",
-          "save": "Guardar"
+          "save": "Guardar",
+          "enabled": "Activar reservas online de servicios",
+          "supplement_type": "Tipo de suplemento",
+          "supplement_types": {
+            "none": "Sin suplemento",
+            "percentage": "Porcentaje",
+            "fixed": "Fijo"
+          },
+          "supplement_value": "Valor del suplemento",
+          "confirmation_required": "Requerir confirmación",
+          "field_names": {
+            "supplement_value": "del suplemento"
+          },
+          "payment_methods": {
+            "title": "Métodos de pago aceptados",
+            "pay_now": "Pagar ahora",
+            "pay_at_property": "Pagar en el establecimiento (solo para reservas en los próximos 7 días)",
+            "pay_at_property_without_card": "Pagar en el establecimiento sin tarjeta de crédito",
+            "deposit": "Anticipo del 50 % ahora y resto en el establecimiento",
+            "prepaid_card": "Pagar con la tarjeta prepago del establecimiento"
+          },
+          "panel_title": {
+            "title": "Título del panel de reserva de servicios"
+          },
+          "useful_information": {
+            "title": "Información útil",
+            "description": "La información introducida en este campo será visible para los clientes en la página del establecimiento."
+          }
         }
       },
       "warehouse": {

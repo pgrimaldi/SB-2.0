@@ -291,7 +291,34 @@
         "services_options": {
           "title": "服务在线预订选项",
           "cancel": "取消",
-          "save": "保存"
+          "save": "保存",
+          "enabled": "启用服务在线预订",
+          "supplement_type": "附加费类型",
+          "supplement_types": {
+            "none": "无附加费",
+            "percentage": "百分比",
+            "fixed": "固定"
+          },
+          "supplement_value": "附加费金额",
+          "confirmation_required": "需要确认预订",
+          "field_names": {
+            "supplement_value": "附加费"
+          },
+          "payment_methods": {
+            "title": "接受的付款方式",
+            "pay_now": "立即付款",
+            "pay_at_property": "到店付款（仅限 7 天内的预订）",
+            "pay_at_property_without_card": "到店付款，无需信用卡",
+            "deposit": "现付 50% 定金，余款到店支付",
+            "prepaid_card": "使用本店预付卡付款"
+          },
+          "panel_title": {
+            "title": "服务预订面板标题"
+          },
+          "useful_information": {
+            "title": "实用信息",
+            "description": "在此填写的信息将在本店页面上向客户显示。"
+          }
         }
       },
       "warehouse": {
