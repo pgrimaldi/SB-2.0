@@ -5,13 +5,20 @@
 
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   width: min(100% - 2rem, 60.5rem);
   margin-inline: auto;
-  padding-block: 0.8125rem 2rem;
+  padding-block: 0.8125rem 1.5rem;
   color: var(--color__main__theme__two);
   font-size: 0.75rem;
   line-height: 1.125rem;
+}
+
+h2,
+h3,
+p,
+ol {
+  margin: 0;
 }
 
 .online__booking__configuration__panel {
@@ -19,25 +26,15 @@
 
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
-  padding: 1.5rem;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .online__booking__configuration__heading {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-bottom: 1rem;
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.75rem;
   border-bottom: 0.0625rem solid var(--color__layout__border);
-}
-
-.online__booking__configuration__title,
-.online__booking__configuration__subtitle,
-.online__booking__configuration__text,
-.online__booking__configuration__stripe__title,
-.online__booking__configuration__steps__label,
-.online__booking__configuration__iframe__title {
-  margin: 0;
 }
 
 .online__booking__configuration__title {
@@ -53,21 +50,28 @@
   line-height: 1.25rem;
 }
 
-.online__booking__configuration__stripe {
+// The light blue box of Stripe and the bordered boxes of the options and of the direct link.
+.online__booking__configuration__stripe,
+.online__booking__configuration__options,
+.online__booking__configuration__iframe {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem 2rem;
-  padding: 1.25rem;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 0.0625rem solid var(--color__layout__border);
   border-radius: 0.3125rem;
+}
+
+.online__booking__configuration__stripe {
+  justify-content: space-between;
+  border-color: transparent;
   background: var(--color__layout__highlight);
 }
 
 .online__booking__configuration__stripe__text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  gap: 0.25rem;
   max-width: 19rem;
 }
 
@@ -78,52 +82,58 @@
   line-height: 1.5rem;
 }
 
+// "Come funziona:" and the numbered steps, on one line while there is room.
 .online__booking__configuration__steps,
 .online__booking__configuration__steps__list,
-.online__booking__configuration__step {
+.online__booking__configuration__step,
+.online__booking__configuration__step__arrow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 0.5rem 2.5rem;
 }
 
 .online__booking__configuration__steps {
-  gap: 0.75rem 2.5rem;
-  padding-top: 1rem;
+  padding-top: 0.75rem;
   border-top: 0.0625rem solid var(--color__layout__border);
 }
 
-.online__booking__configuration__steps__label {
-  color: var(--color__main__theme__one);
-  font-weight: 600;
-}
-
 .online__booking__configuration__steps__list {
-  gap: 0.75rem 2.5rem;
-  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .online__booking__configuration__step {
-  flex-wrap: nowrap;
   gap: 0.75rem;
 }
 
-.online__booking__configuration__step__number {
+.online__booking__configuration__steps__label,
+.online__booking__configuration__iframe__title {
+  color: var(--color__main__theme__one);
+  font-weight: 600;
+}
+
+.online__booking__configuration__step__number,
+.online__booking__configuration__iframe__icon {
   display: grid;
   flex: none;
   place-items: center;
-  width: 1.25rem;
-  height: 1.25rem;
   border-radius: 50%;
   background: var(--color__layout__highlight);
+}
+
+.online__booking__configuration__step__number {
+  width: 1.25rem;
+  height: 1.25rem;
   color: var(--color__main__theme__one);
   font-size: 0.625rem;
   font-weight: 600;
 }
 
-.online__booking__configuration__step__arrow {
-  display: flex;
+.online__booking__configuration__iframe__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3125rem;
 }
 
 :host-context([dir='rtl']) .online__booking__configuration__step__arrow img {
@@ -133,63 +143,18 @@
 .online__booking__configuration__section__title {
   --section-title-text-size: 1rem;
   --section-title-text-weight: 500;
-  --section-title-line-height: 1.5rem;
-  --section-title-padding-bottom: 0.5rem;
 }
 
-.online__booking__configuration__options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  padding: 0.75rem;
-  border: 0.0625rem solid var(--color__layout__border);
-  border-radius: 0.3125rem;
-}
-
-.online__booking__configuration__iframe {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border: 0.0625rem solid var(--color__layout__border);
-  border-radius: 0.5rem;
-  background: color-mix(
-    in srgb,
-    var(--color__layout__highlight) 35%,
-    var(--color__layout__surface)
-  );
-}
-
-.online__booking__configuration__iframe__icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.3125rem;
-  background: var(--color__layout__highlight);
+// Side by side, one under the other when there is no room for both.
+.online__booking__configuration__options app-button {
+  flex: 1 1 14rem;
 }
 
 .online__booking__configuration__iframe__text {
-  display: flex;
   flex: 1 1 16rem;
-  flex-direction: column;
-  gap: 0.375rem;
   min-width: 0;
-}
-
-.online__booking__configuration__iframe__title {
-  color: var(--color__main__theme__one);
-  font-weight: 600;
 }
 
 .online__booking__configuration__iframe__copy {
   --button-border-color: var(--color__main__theme__one);
-}
-
-@media (width < 48rem) {
-  .online__booking__configuration__options {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
