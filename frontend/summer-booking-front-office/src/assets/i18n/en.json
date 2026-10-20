@@ -288,6 +288,11 @@
           "direct_link": "Direct link",
           "copy": "Copy link"
         },
+        "booking_options": {
+          "title": "Online booking options",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
         "services_options": {
           "title": "Service booking options",
           "cancel": "Cancel",

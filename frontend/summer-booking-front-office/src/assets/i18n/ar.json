@@ -288,6 +288,11 @@
           "direct_link": "رابط مباشر",
           "copy": "نسخ الرابط"
         },
+        "booking_options": {
+          "title": "خيارات الحجز عبر الإنترنت",
+          "cancel": "إلغاء",
+          "save": "حفظ"
+        },
         "services_options": {
           "title": "خيارات حجز الخدمات",
           "cancel": "إلغاء",

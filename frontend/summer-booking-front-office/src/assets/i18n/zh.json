@@ -288,6 +288,11 @@
           "direct_link": "直接链接",
           "copy": "复制链接"
         },
+        "booking_options": {
+          "title": "在线预订选项",
+          "cancel": "取消",
+          "save": "保存"
+        },
         "services_options": {
           "title": "服务在线预订选项",
           "cancel": "取消",
