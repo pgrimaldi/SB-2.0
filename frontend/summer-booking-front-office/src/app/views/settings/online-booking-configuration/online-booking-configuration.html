@@ -8,7 +8,7 @@
         {{ 'management.settings.online_booking_configuration.stripe.subtitle' | translate }}
       </p>
     </header>
-    <p class="online__booking__configuration__text">
+    <p>
       {{ 'management.settings.online_booking_configuration.stripe.description' | translate }}
     </p>
     <div class="online__booking__configuration__stripe">
@@ -18,11 +18,11 @@
             'management.settings.online_booking_configuration.stripe.configure_title' | translate
           }}
         </h3>
-        <p class="online__booking__configuration__text">
+        <p>
           {{ 'management.settings.online_booking_configuration.stripe.configure_text' | translate }}
         </p>
       </div>
-      <app-button [pathIcon]="configureStripeIcon">
+      <app-button [pathIcon]="configureStripeIcon" (clicked)="openStripePage()">
         {{ 'management.settings.online_booking_configuration.stripe.configure' | translate }}
       </app-button>
     </div>
@@ -73,7 +73,7 @@
         {{ 'management.settings.online_booking_configuration.iframe.subtitle' | translate }}
       </p>
     </header>
-    <p class="online__booking__configuration__text">
+    <p>
       {{ 'management.settings.online_booking_configuration.iframe.description' | translate }}
     </p>
     <div class="online__booking__configuration__iframe">
@@ -84,6 +84,7 @@
         <h3 class="online__booking__configuration__iframe__title">
           {{ 'management.settings.online_booking_configuration.iframe.direct_link' | translate }}
         </h3>
+        <p>{{ iframeCode }}</p>
       </div>
       <app-button
         class="online__booking__configuration__iframe__copy"

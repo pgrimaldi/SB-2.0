@@ -168,7 +168,7 @@
 
     <tr *matHeaderRowDef="fields()" mat-header-row class="table__header"></tr>
     <tr *matRowDef="let row; columns: fields()" mat-row class="table__row"></tr>
-    <tr *matNoDataRow class="table__empty">
+    <tr *matNoDataRow>
       <td class="table__empty__cell" [attr.colspan]="fields().length">
         @if (empty()) {
           {{ texts()?.empty }}
