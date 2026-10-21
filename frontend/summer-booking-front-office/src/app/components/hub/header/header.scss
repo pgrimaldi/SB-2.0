@@ -94,9 +94,12 @@ $motion: $motion-duration $motion-easing;
 }
 
 .header__nav {
+  --button-padding: 1.25rem;
+  --button-text-size: 0.875rem;
+
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
   margin-top: 3rem;
   transition: margin-top $motion;
 }
@@ -107,7 +110,7 @@ $motion: $motion-duration $motion-easing;
 
 .header__links {
   display: flex;
-  gap: 1.25rem;
+  gap: 1rem;
   margin: 0;
   padding: 0;
   list-style: none;
