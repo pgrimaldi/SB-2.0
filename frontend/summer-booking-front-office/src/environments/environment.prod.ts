@@ -4,5 +4,7 @@ export const environment = {
   apiBaseUrl: '/api',
   authApp: 'hub',
   stripeClientId: '',
-  stripeConnectReturnUrl: ''
+  stripeConnectReturnUrl: '',
+  googleMapsApiKey: '',
+  googleMapsMapId: ''
 } as const;

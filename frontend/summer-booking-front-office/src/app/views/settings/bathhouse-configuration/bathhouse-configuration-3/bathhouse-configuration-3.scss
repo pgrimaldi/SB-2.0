@@ -1,0 +1,114 @@
+@use '@angular/material' as mat;
+
+// The buttons of the management pages; the text ones in the blue of the theme.
+.bathhouse__configuration__3 {
+  @include mat.button-overrides(
+    (
+      text-label-text-color: var(--color__main__theme__one),
+    )
+  );
+
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bathhouse__configuration__3__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// Grey until the map is drawn, without moving what is under it.
+.bathhouse__configuration__3__map {
+  display: grid;
+  height: 16rem;
+  overflow: hidden;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__highlight);
+
+  google-map {
+    display: block;
+  }
+}
+
+.bathhouse__configuration__3__map__error {
+  place-self: center;
+  margin: 0;
+  padding: 1rem;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-align: center;
+}
+
+.bathhouse__configuration__3__label {
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.bathhouse__configuration__3__main__image {
+  height: 12rem;
+}
+
+.bathhouse__configuration__3__gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+
+  app-file-drop-zone {
+    height: 7rem;
+  }
+}
+
+@media (width < 48rem) {
+  .bathhouse__configuration__3__gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.bathhouse__configuration__3__document {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.3125rem;
+  background: var(--color__layout__highlight);
+
+  p {
+    margin: 0;
+  }
+}
+
+.bathhouse__configuration__3__document__name {
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.bathhouse__configuration__3__document__file {
+  color: var(--color__layout__text__soft);
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
+
+.bathhouse__configuration__3__actions {
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  app-button {
+    width: 8rem;
+  }
+}

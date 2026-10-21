@@ -1,0 +1,23 @@
+<div class="period__calendar" [attr.inert]="isLocked() ? '' : null">
+  <mat-calendar
+    class="period__calendar__calendar"
+    [headerComponent]="Header"
+    [selected]="draft()"
+    [dateClass]="dateClass()"
+    (selectedChange)="pick($event)"
+  />
+  @if (texts()?.hint; as hint) {
+    <p class="period__calendar__hint">{{ hint }}</p>
+  }
+  @if (chips().length) {
+    @if (texts()?.selected; as selected) {
+      <p class="period__calendar__selected">{{ selected }}</p>
+    }
+    <app-filter-chips
+      [chips]="chips()"
+      [matIcon]="icons().material ? removeIcon() : null"
+      [pathIcon]="icons().material ? null : removeIcon()"
+      (removed)="remove($event)"
+    />
+  }
+</div>

@@ -42,9 +42,12 @@ export class FilledTextField {
   /** Browser autofill hint, e.g. `given-name`, `email`, `tel`. */
   readonly autocomplete = input<string>();
   readonly error = input<string | null>();
-  /** With `isPasswordField`, the eye after the text: [content shown, content hidden]. */
+  /**
+   * [content shown, content hidden, icon before the text]: the eye after the text only with
+   * `isPasswordField`; a position not used is ''.
+   */
   readonly matIcon = input<readonly string[] | null>();
-  /** Image paths, used when `matIcon` is not given: [content shown, content hidden]. */
+  /** Image paths, used when `matIcon` is not given: same order. */
   readonly pathIcon = input<readonly string[] | null>();
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */
   readonly touch = output<void>();

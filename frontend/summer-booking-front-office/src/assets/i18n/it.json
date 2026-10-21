@@ -262,6 +262,34 @@
           "edit": "Modifica",
           "cancel": "Annulla",
           "save": "Salva"
+        },
+        "media": {
+          "edit": "Modifica",
+          "cancel": "Annulla",
+          "save": "Salva",
+          "position": {
+            "title": "Posizione",
+            "edit": "Modifica",
+            "map_error": "Impossibile caricare la mappa"
+          },
+          "images": {
+            "title": "Immagini",
+            "main": "Immagine principale",
+            "main_hint": "Trascina qui l'immagine principale o clicca per caricare",
+            "gallery": "Galleria immagini",
+            "add": "Aggiungi immagine"
+          },
+          "virtual_tour": {
+            "title": "Link Tour virtuale",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "Documenti PDF",
+            "price_list": "Listino Prezzi",
+            "menu": "Menù",
+            "no_file": "Nessun file selezionato",
+            "upload": "Carica"
+          }
         }
       },
       "online_booking_configuration": {
@@ -291,7 +319,16 @@
         "booking_options": {
           "title": "Opzioni prenotazioni online",
           "cancel": "Annulla",
-          "save": "Salva"
+          "save": "Salva",
+          "online_booking_enabled": "Abilita le prenotazioni online",
+          "map_spot_choice_enabled": "Abilita la scelta del posto sulla mappa",
+          "selected_periods_only_enabled": "Abilita le prenotazioni online solo nei periodi selezionati",
+          "selected_spots_only_enabled": "Abilita le prenotazioni online solo per le postazioni selezionate",
+          "view_spots": "Vedi postazioni",
+          "periods": {
+            "hint": "Clicca due date per selezionare un intervallo",
+            "selected": "Intervalli di date selezionati:"
+          }
         },
         "services_options": {
           "title": "Opzioni prenotazioni online servizi",

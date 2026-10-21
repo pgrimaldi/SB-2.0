@@ -262,6 +262,34 @@
           "edit": "تعديل",
           "cancel": "إلغاء",
           "save": "حفظ"
+        },
+        "media": {
+          "edit": "تعديل",
+          "cancel": "إلغاء",
+          "save": "حفظ",
+          "position": {
+            "title": "الموقع",
+            "edit": "تعديل",
+            "map_error": "تعذّر تحميل الخريطة"
+          },
+          "images": {
+            "title": "الصور",
+            "main": "الصورة الرئيسية",
+            "main_hint": "اسحب الصورة الرئيسية إلى هنا أو انقر للتحميل",
+            "gallery": "معرض الصور",
+            "add": "إضافة صورة"
+          },
+          "virtual_tour": {
+            "title": "رابط الجولة الافتراضية",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "مستندات PDF",
+            "price_list": "قائمة الأسعار",
+            "menu": "قائمة الطعام",
+            "no_file": "لم يتم اختيار ملف",
+            "upload": "تحميل"
+          }
         }
       },
       "online_booking_configuration": {
@@ -291,7 +319,16 @@
         "booking_options": {
           "title": "خيارات الحجز عبر الإنترنت",
           "cancel": "إلغاء",
-          "save": "حفظ"
+          "save": "حفظ",
+          "online_booking_enabled": "تفعيل الحجز عبر الإنترنت",
+          "map_spot_choice_enabled": "تفعيل اختيار المكان على الخريطة",
+          "selected_periods_only_enabled": "تفعيل الحجز عبر الإنترنت في الفترات المحددة فقط",
+          "selected_spots_only_enabled": "تفعيل الحجز عبر الإنترنت للأماكن المحددة فقط",
+          "view_spots": "عرض الأماكن",
+          "periods": {
+            "hint": "انقر على تاريخين لتحديد فترة",
+            "selected": "فترات التواريخ المحددة:"
+          }
         },
         "services_options": {
           "title": "خيارات حجز الخدمات",

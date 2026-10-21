@@ -2,7 +2,49 @@
   [title]="'management.settings.online_booking_configuration.booking_options.title' | translate"
   [texts]="'management.settings.online_booking_configuration.booking_options' | translate"
   [pathIcon]="pathIcon()"
-  [widthPercent]="80"
   [(open)]="open"
-  (closeRequest)="open.set(false)"
-/>
+  (closeRequest)="leave()"
+>
+  <section class="online__booking__options__panel__section">
+    <app-toggle [formField]="draftForm.isOnlineBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.online_booking_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isMapSpotChoiceEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.map_spot_choice_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isSelectedPeriodsOnlyEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.selected_periods_only_enabled'
+          | translate
+      }}
+    </app-toggle>
+    @if (draftForm.isSelectedPeriodsOnlyEnabled().value()) {
+      <app-period-calendar
+        [texts]="
+          'management.settings.online_booking_configuration.booking_options.periods' | translate
+        "
+        [pathIcon]="calendarIcons"
+        [formField]="draftForm.selectedPeriods"
+      />
+    }
+    <div class="online__booking__options__panel__row">
+      <app-toggle [formField]="draftForm.isSelectedSpotsOnlyEnabled">
+        {{
+          'management.settings.online_booking_configuration.booking_options.selected_spots_only_enabled'
+            | translate
+        }}
+      </app-toggle>
+      <app-button>
+        {{
+          'management.settings.online_booking_configuration.booking_options.view_spots' | translate
+        }}
+      </app-button>
+    </div>
+  </section>
+</app-side-panel>

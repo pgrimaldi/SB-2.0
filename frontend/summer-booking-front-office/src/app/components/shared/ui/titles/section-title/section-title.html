@@ -1,4 +1,13 @@
 <div class="section__title">
-  <h2 class="section__title__text">{{ text() }}</h2>
+  <h2 class="section__title__text">
+    @if (icons().list[0]; as icon) {
+      @if (icons().material) {
+        <mat-icon class="section__title__icon">{{ icon }}</mat-icon>
+      } @else {
+        <img class="section__title__icon" [src]="icon" width="18" height="18" alt="" />
+      }
+    }
+    {{ text() }}
+  </h2>
   <div class="section__title__action"><ng-content /></div>
 </div>

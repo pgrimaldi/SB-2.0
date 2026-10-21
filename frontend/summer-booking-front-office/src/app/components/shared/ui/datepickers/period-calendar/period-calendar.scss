@@ -1,0 +1,143 @@
+@use '@angular/material' as mat;
+
+// A page can change the box with --period-calendar-background and the calendar's width with
+// --period-calendar-width (28rem).
+app-period-calendar {
+  display: block;
+}
+
+.period__calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border-radius: 0.3125rem;
+  background: var(--period-calendar-background, var(--color__layout__highlight));
+}
+
+.period__calendar__calendar {
+  @include mat.datepicker-overrides(
+    (
+      calendar-container-background-color: transparent,
+      calendar-text-size: 0.75rem,
+      calendar-body-label-text-size: 0.75rem,
+      calendar-header-text-size: 0.75rem,
+      calendar-header-text-weight: 600,
+      calendar-header-text-color: var(--color__main__theme__one),
+      calendar-header-divider-color: transparent,
+      calendar-date-text-color: var(--color__main__theme__one),
+      calendar-date-hover-state-background-color: var(--color__layout__surface),
+      calendar-date-focus-state-background-color: var(--color__layout__surface),
+      calendar-date-selected-state-background-color: var(--color__main__theme__one),
+      calendar-date-selected-state-text-color: var(--color__layout__on__main),
+      calendar-date-today-outline-color: transparent,
+      calendar-date-preview-state-outline-color: var(--color__main__theme__one),
+    )
+  );
+
+  width: min(100%, var(--period-calendar-width, 28rem));
+  align-self: center;
+
+  .mat-calendar-content {
+    padding: 0 0.25rem;
+  }
+
+  .mat-calendar-table-header-divider {
+    display: none;
+  }
+
+  // Rows lower than wide.
+  .mat-calendar-body-cell-container {
+    padding-top: 8% !important;
+    padding-bottom: 0 !important;
+  }
+
+  // No month name inside the grid: the header already says it.
+  .mat-calendar-body-label {
+    visibility: hidden;
+  }
+
+  tr:has(> .mat-calendar-body-label:only-child) {
+    display: none;
+  }
+}
+
+// The chosen periods: one light blue band from the first to the last day.
+.period__calendar__chosen::before {
+  background: color-mix(in srgb, var(--color__secondary__theme) 30%, var(--color__layout__surface));
+}
+
+.period__calendar__chosen__start::before {
+  border-start-start-radius: 1rem;
+  border-end-start-radius: 1rem;
+}
+
+.period__calendar__chosen__end::before {
+  border-start-end-radius: 1rem;
+  border-end-end-radius: 1rem;
+}
+
+.period__calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.25rem 0.75rem 0.5rem;
+  color: var(--color__main__theme__one);
+}
+
+.period__calendar__period {
+  min-width: 7rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.period__calendar__month {
+  display: flex;
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 0.375rem;
+    height: 0.625rem;
+  }
+
+  mat-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Right to left (Arabic): the previous month is on the right, so the arrows point the other way.
+[dir='rtl'] .period__calendar__month {
+  img,
+  mat-icon {
+    transform: scaleX(-1);
+  }
+}
+
+.period__calendar__hint,
+.period__calendar__selected {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.period__calendar__hint {
+  color: var(--color__layout__text__soft);
+  text-align: center;
+}
+
+.period__calendar__selected {
+  color: var(--color__main__theme__one);
+  font-weight: 600;
+}

@@ -25,6 +25,15 @@
   text-align: var(--section-title-align, start);
 }
 
+// In the line of the text, wherever the title is aligned.
+.section__title__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-inline-end: 0.375rem;
+  font-size: 1.125rem;
+  vertical-align: -0.25rem;
+}
+
 .section__title__action {
   display: flex;
   flex: none;

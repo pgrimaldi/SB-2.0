@@ -262,6 +262,34 @@
           "edit": "Edit",
           "cancel": "Cancel",
           "save": "Save"
+        },
+        "media": {
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save",
+          "position": {
+            "title": "Location",
+            "edit": "Edit",
+            "map_error": "The map could not be loaded"
+          },
+          "images": {
+            "title": "Images",
+            "main": "Main image",
+            "main_hint": "Drag the main image here or click to upload",
+            "gallery": "Image gallery",
+            "add": "Add image"
+          },
+          "virtual_tour": {
+            "title": "Virtual tour link",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "PDF documents",
+            "price_list": "Price list",
+            "menu": "Menu",
+            "no_file": "No file selected",
+            "upload": "Upload"
+          }
         }
       },
       "online_booking_configuration": {
@@ -291,7 +319,16 @@
         "booking_options": {
           "title": "Online booking options",
           "cancel": "Cancel",
-          "save": "Save"
+          "save": "Save",
+          "online_booking_enabled": "Enable online bookings",
+          "map_spot_choice_enabled": "Enable spot choice on the map",
+          "selected_periods_only_enabled": "Enable online bookings only in the selected periods",
+          "selected_spots_only_enabled": "Enable online bookings only for the selected spots",
+          "view_spots": "View spots",
+          "periods": {
+            "hint": "Click two dates to select a range",
+            "selected": "Selected date ranges:"
+          }
         },
         "services_options": {
           "title": "Service booking options",

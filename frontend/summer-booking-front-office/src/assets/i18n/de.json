@@ -262,6 +262,34 @@
           "edit": "Bearbeiten",
           "cancel": "Abbrechen",
           "save": "Speichern"
+        },
+        "media": {
+          "edit": "Bearbeiten",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "position": {
+            "title": "Standort",
+            "edit": "Bearbeiten",
+            "map_error": "Die Karte konnte nicht geladen werden"
+          },
+          "images": {
+            "title": "Bilder",
+            "main": "Hauptbild",
+            "main_hint": "Hauptbild hierher ziehen oder zum Hochladen klicken",
+            "gallery": "Bildergalerie",
+            "add": "Bild hinzufügen"
+          },
+          "virtual_tour": {
+            "title": "Link zur virtuellen Tour",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "PDF-Dokumente",
+            "price_list": "Preisliste",
+            "menu": "Speisekarte",
+            "no_file": "Keine Datei ausgewählt",
+            "upload": "Hochladen"
+          }
         }
       },
       "online_booking_configuration": {
@@ -291,7 +319,16 @@
         "booking_options": {
           "title": "Optionen Online-Buchungen",
           "cancel": "Abbrechen",
-          "save": "Speichern"
+          "save": "Speichern",
+          "online_booking_enabled": "Online-Buchungen aktivieren",
+          "map_spot_choice_enabled": "Platzwahl auf dem Plan aktivieren",
+          "selected_periods_only_enabled": "Online-Buchungen nur in den gewählten Zeiträumen aktivieren",
+          "selected_spots_only_enabled": "Online-Buchungen nur für die gewählten Plätze aktivieren",
+          "view_spots": "Plätze anzeigen",
+          "periods": {
+            "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
+            "selected": "Gewählte Zeiträume:"
+          }
         },
         "services_options": {
           "title": "Optionen Service-Buchungen",

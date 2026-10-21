@@ -262,6 +262,34 @@
           "edit": "编辑",
           "cancel": "取消",
           "save": "保存"
+        },
+        "media": {
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存",
+          "position": {
+            "title": "位置",
+            "edit": "编辑",
+            "map_error": "无法加载地图"
+          },
+          "images": {
+            "title": "图片",
+            "main": "主图",
+            "main_hint": "将主图拖到此处或点击上传",
+            "gallery": "图片库",
+            "add": "添加图片"
+          },
+          "virtual_tour": {
+            "title": "虚拟游览链接",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "PDF 文档",
+            "price_list": "价目表",
+            "menu": "菜单",
+            "no_file": "未选择文件",
+            "upload": "上传"
+          }
         }
       },
       "online_booking_configuration": {
@@ -291,7 +319,16 @@
         "booking_options": {
           "title": "在线预订选项",
           "cancel": "取消",
-          "save": "保存"
+          "save": "保存",
+          "online_booking_enabled": "启用在线预订",
+          "map_spot_choice_enabled": "启用在地图上选择位置",
+          "selected_periods_only_enabled": "仅在所选期间启用在线预订",
+          "selected_spots_only_enabled": "仅为所选位置启用在线预订",
+          "view_spots": "查看位置",
+          "periods": {
+            "hint": "点击两个日期以选择一个时间段",
+            "selected": "已选日期区间："
+          }
         },
         "services_options": {
           "title": "服务在线预订选项",
