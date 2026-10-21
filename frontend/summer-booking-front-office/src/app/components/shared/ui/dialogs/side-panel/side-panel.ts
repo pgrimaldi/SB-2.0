@@ -36,6 +36,8 @@ export class SidePanel extends BasePopup {
   readonly texts = input<SidePanelTexts | null>();
   readonly isLoading = input(false);
   readonly isSaveDisabled = input(false);
+  /** Width on landscape screens, as a percentage of the page; on portrait screens it takes it all. */
+  readonly widthPercent = input(60);
   readonly closeRequest = output<void>();
   readonly save = output<void>();
 
@@ -62,7 +64,7 @@ export class SidePanel extends BasePopup {
   protected dialogConfig(): MatDialogConfig {
     const isPortrait = this.document.defaultView?.matchMedia('(orientation: portrait)').matches;
     return {
-      width: isPortrait ? '100vw' : '60vw',
+      width: isPortrait ? '100vw' : `${this.widthPercent()}vw`,
       maxWidth: 'none',
       height: '100%',
       maxHeight: 'none',
