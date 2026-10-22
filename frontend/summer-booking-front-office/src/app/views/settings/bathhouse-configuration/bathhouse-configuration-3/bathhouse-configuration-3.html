@@ -1,4 +1,4 @@
-<div class="bathhouse__configuration__3">
+<div class="bathhouse__configuration__3" [attr.inert]="isLoading() ? '' : null">
   <section class="bathhouse__configuration__3__section">
     <app-section-title
       [text]="'management.settings.bathhouse_configuration.media.position.title' | translate"
@@ -43,13 +43,17 @@
       accept="image/*"
       [text]="'management.settings.bathhouse_configuration.media.images.main_hint' | translate"
       [pathIcon]="addImageIcon"
+      [previewUrl]="mainPhoto()?.url"
       [disabled]="!isEditing()"
     />
     <h3 class="bathhouse__configuration__3__label">
       {{ 'management.settings.bathhouse_configuration.media.images.gallery' | translate }}
     </h3>
     <div class="bathhouse__configuration__3__gallery">
-      @for (slot of gallerySlots; track slot) {
+      @for (photo of galleryPhotos(); track photo.idPhoto) {
+        <app-file-drop-zone accept="image/*" [previewUrl]="photo.url" [disabled]="!isEditing()" />
+      }
+      @for (slot of emptyGallerySlots(); track slot) {
         <app-file-drop-zone
           accept="image/*"
           [text]="'management.settings.bathhouse_configuration.media.images.add' | translate"
@@ -81,13 +85,26 @@
       [text]="'management.settings.bathhouse_configuration.media.documents.title' | translate"
       [pathIcon]="documentsIcon"
     />
-    @for (document of documents; track document) {
+    @for (document of documents(); track document.name) {
       <div class="bathhouse__configuration__3__document">
         <div>
-          <p class="bathhouse__configuration__3__document__name">{{ document | translate }}</p>
-          <p class="bathhouse__configuration__3__document__file">
-            {{ 'management.settings.bathhouse_configuration.media.documents.no_file' | translate }}
-          </p>
+          <p class="bathhouse__configuration__3__document__name">{{ document.name | translate }}</p>
+          @if (document.url; as url) {
+            <a
+              class="bathhouse__configuration__3__document__file bathhouse__configuration__3__document__link"
+              target="_blank"
+              rel="noopener noreferrer"
+              [href]="url"
+            >
+              {{ 'management.settings.bathhouse_configuration.media.documents.open' | translate }}
+            </a>
+          } @else {
+            <p class="bathhouse__configuration__3__document__file">
+              {{
+                'management.settings.bathhouse_configuration.media.documents.no_file' | translate
+              }}
+            </p>
+          }
         </div>
         <app-button [size]="ButtonSize.Small" [pathIcon]="uploadIcon" [disabled]="!isEditing()">
           {{ 'management.settings.bathhouse_configuration.media.documents.upload' | translate }}
@@ -115,4 +132,7 @@
       </app-button>
     }
   </div>
+  @if (errorMessage(); as errorMessage) {
+    <p class="bathhouse__configuration__3__error">{{ errorMessage }}</p>
+  }
 </div>

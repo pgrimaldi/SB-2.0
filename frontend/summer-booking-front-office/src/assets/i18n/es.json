@@ -288,6 +288,7 @@
             "price_list": "Lista de precios",
             "menu": "Menú",
             "no_file": "Ningún archivo seleccionado",
+            "open": "Abrir el documento",
             "upload": "Subir"
           }
         }

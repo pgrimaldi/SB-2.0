@@ -4,6 +4,7 @@ import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   bathhouseConfigurationGeneralMock,
+  bathhouseConfigurationMediaMock,
   bathhouseConfigurationServicesMock,
   countriesComboboxMock,
   saveBathhouseConfigurationGeneralMock,
@@ -352,6 +353,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-services`
   ) {
     return bathhouseConfigurationServicesMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-media`
+  ) {
+    return bathhouseConfigurationMediaMock(request);
   }
 
   if (

@@ -2,6 +2,7 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -670,3 +671,31 @@ function isServiceId(value: unknown): value is number {
     typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= SERVICES.length
   );
 }
+
+/**
+ * `GET /api/catalog/bathhouse-configuration-media?idProperty=…`: links of the photos (the main one
+ * and the gallery, in order), of the virtual tour and of the two PDF documents. Example data until
+ * the backend decides how files are kept. 401 without a valid access token; 403 for a missing or
+ * unknown property.
+ */
+export const bathhouseConfigurationMediaMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  if (!propertyOf(request.params.get('idProperty'))) {
+    return forbidden(request);
+  }
+  const media: BathhouseMedia = {
+    photos: [
+      { idPhoto: 1, url: '/assets/images/hub/hero-beach-desktop.webp', isMain: true },
+      { idPhoto: 2, url: '/assets/images/hub/hero-beach-mobile-863.webp', isMain: false },
+      { idPhoto: 3, url: '/assets/images/hub/hero-beach-mobile-1290.webp', isMain: false },
+    ],
+    virtualTourUrl: 'https://tour.example.com/lido-demo',
+    priceListPdfUrl: 'https://files.example.com/lido-demo/listino-prezzi.pdf',
+    menuPdfUrl: null,
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: media })).pipe(delay(300));
+};

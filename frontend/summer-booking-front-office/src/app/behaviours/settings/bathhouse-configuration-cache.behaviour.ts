@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of, shareReplay } from 'rxjs';
 import { ComboboxItem } from '../../entities/combobox/combobox-item';
 import { BathhouseGeneralInformation } from '../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseMedia } from '../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { CatalogService } from '../../services/api/catalog/catalog.service';
 
@@ -16,6 +17,7 @@ export class BathhouseConfigurationCacheBehaviour {
 
   private generalInformationAnswer: Observable<BathhouseGeneralInformation> | null = null;
   private servicesAnswer: Observable<BathhouseServiceItem[]> | null = null;
+  private mediaAnswer: Observable<BathhouseMedia> | null = null;
   private countriesAnswer: Observable<ComboboxItem[]> | null = null;
 
   generalInformation(idProperty: string): Observable<BathhouseGeneralInformation> {
@@ -39,6 +41,11 @@ export class BathhouseConfigurationCacheBehaviour {
 
   keepServices(services: BathhouseServiceItem[]): void {
     this.servicesAnswer = of(services);
+  }
+
+  media(idProperty: string): Observable<BathhouseMedia> {
+    this.mediaAnswer ??= this.catalog.bathhouseConfigurationMedia(idProperty).pipe(shareReplay(1));
+    return this.mediaAnswer;
   }
 
   countries(): Observable<ComboboxItem[]> {

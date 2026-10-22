@@ -1760,6 +1760,56 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### GET `/api/catalog/bathhouse-configuration-media?idProperty={idProperty}`
+
+Informazioni stabilimento: media.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bathhouse-configuration-media?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "photos": [
+    {
+      "idPhoto": 41,
+      "url": "https://media.example.com/lido-demo/spiaggia.webp",
+      "isMain": true
+    },
+    {
+      "idPhoto": 42,
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "isMain": false
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "priceListPdfUrl": "https://media.example.com/lido-demo/listino-prezzi.pdf",
+  "menuPdfUrl": "https://media.example.com/lido-demo/menu.pdf"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `photos[]` | BathhousePhoto[] (array di oggetti) | `[{"idPhoto": 41, "url": "https://media.example.com/lido-demo/spiaggia.webp", "isMain": true}, {"idPhoto": 42, "url": "https://media.example.com/lido-demo/bar.webp", "isMain": false}]` |
+| `photos[].idPhoto` | number (intero) | `41` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[].isMain` | boolean | `true` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `priceListPdfUrl` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdfUrl` | string \| null | `https://media.example.com/lido-demo/menu.pdf` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

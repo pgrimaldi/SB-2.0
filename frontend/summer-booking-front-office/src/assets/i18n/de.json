@@ -288,6 +288,7 @@
             "price_list": "Preisliste",
             "menu": "Speisekarte",
             "no_file": "Keine Datei ausgewählt",
+            "open": "Dokument öffnen",
             "upload": "Hochladen"
           }
         }

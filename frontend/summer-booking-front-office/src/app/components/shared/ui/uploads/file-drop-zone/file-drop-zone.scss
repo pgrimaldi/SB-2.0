@@ -4,12 +4,14 @@
 }
 
 .file__drop__zone {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   box-sizing: border-box;
+  overflow: hidden;
   height: 100%;
   padding: 1rem;
   border: 0.0625rem dashed var(--color__layout__text__soft);
@@ -32,8 +34,12 @@
 
 .file__drop__zone__disabled {
   cursor: default;
-  opacity: 0.5;
   pointer-events: none;
+
+  // A photo keeps its colours.
+  &:not(:has(.file__drop__zone__preview)) {
+    opacity: 0.5;
+  }
 }
 
 // Out of sight but still reached with the keyboard.
@@ -47,8 +53,17 @@
 
 // Dragging over them would count as leaving the box.
 .file__drop__zone__icon,
-.file__drop__zone__text {
+.file__drop__zone__text,
+.file__drop__zone__preview {
   pointer-events: none;
+}
+
+.file__drop__zone__preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .file__drop__zone__icon {

@@ -62,6 +62,21 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
+  it('should ask for the media of the property in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.bathhouseConfigurationMedia('p1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-media` &&
+        params.get('idProperty') === 'p1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
   it('should save every field of the general information with the property in the body', () => {
     const { catalog, controller } = setup();
     const information = Object.assign(new BathhouseGeneralInformation(), {

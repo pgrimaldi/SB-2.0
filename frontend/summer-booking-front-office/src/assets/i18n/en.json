@@ -288,6 +288,7 @@
             "price_list": "Price list",
             "menu": "Menu",
             "no_file": "No file selected",
+            "open": "Open document",
             "upload": "Upload"
           }
         }

@@ -288,6 +288,7 @@
             "price_list": "价目表",
             "menu": "菜单",
             "no_file": "未选择文件",
+            "open": "打开文档",
             "upload": "上传"
           }
         }

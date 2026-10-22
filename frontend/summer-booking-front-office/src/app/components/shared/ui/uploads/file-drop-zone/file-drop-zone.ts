@@ -17,6 +17,7 @@ import { resolveIcons } from '../../icons/icons';
 })
 export class FileDropZone {
   readonly text = input<string>();
+  readonly previewUrl = input<string | null>();
   /** File types, as in `<input accept>`: MIME types (`image/*`, `application/pdf`) or extensions. */
   readonly accept = input<string>();
   readonly isMultiple = input(false);

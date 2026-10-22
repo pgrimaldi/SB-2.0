@@ -101,6 +101,10 @@
   line-height: 0.875rem;
 }
 
+.bathhouse__configuration__3__document__link {
+  color: var(--color__main__theme__one);
+}
+
 .bathhouse__configuration__3__actions {
   --button-border-color: var(--color__layout__text__soft);
 
@@ -111,4 +115,11 @@
   app-button {
     width: 8rem;
   }
+}
+
+.bathhouse__configuration__3__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
