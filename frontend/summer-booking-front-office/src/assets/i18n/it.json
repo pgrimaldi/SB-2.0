@@ -332,6 +332,19 @@
           "time_from": "Dalle",
           "time_to": "alle",
           "afternoon_conversion_enabled": "Orario di inizio conversione in prenotazione pomeridiana",
+          "current_day_booking_enabled": "Abilita giorno corrente prenotabile",
+          "seasonal_booking_enabled": "Abilita prenotazioni stagionali",
+          "sharing_enabled": "Abilita Sharing",
+          "supplement_type": "Tipo di supplemento",
+          "supplement_types": {
+            "none": "Nessun supplemento",
+            "percentage": "Percentuale",
+            "fixed": "Fisso"
+          },
+          "supplement_value": "Valore supplemento",
+          "field_names": {
+            "supplement_value": "del supplemento"
+          },
           "periods": {
             "hint": "Clicca due date per selezionare un intervallo",
             "selected": "Intervalli di date selezionati:"

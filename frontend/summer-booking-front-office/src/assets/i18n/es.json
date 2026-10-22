@@ -332,6 +332,19 @@
           "time_from": "De",
           "time_to": "a",
           "afternoon_conversion_enabled": "Hora de inicio de la conversión en reserva de tarde",
+          "current_day_booking_enabled": "Activar la reserva para el día actual",
+          "seasonal_booking_enabled": "Activar las reservas de temporada",
+          "sharing_enabled": "Activar Sharing",
+          "supplement_type": "Tipo de suplemento",
+          "supplement_types": {
+            "none": "Sin suplemento",
+            "percentage": "Porcentaje",
+            "fixed": "Fijo"
+          },
+          "supplement_value": "Valor del suplemento",
+          "field_names": {
+            "supplement_value": "del suplemento"
+          },
           "periods": {
             "hint": "Haz clic en dos fechas para elegir un intervalo",
             "selected": "Intervalos de fechas seleccionados:"

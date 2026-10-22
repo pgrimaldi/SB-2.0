@@ -332,6 +332,19 @@
           "time_from": "从",
           "time_to": "至",
           "afternoon_conversion_enabled": "转为下午预订的开始时间",
+          "current_day_booking_enabled": "启用当天预订",
+          "seasonal_booking_enabled": "启用季节预订",
+          "sharing_enabled": "启用 Sharing",
+          "supplement_type": "附加费类型",
+          "supplement_types": {
+            "none": "无附加费",
+            "percentage": "百分比",
+            "fixed": "固定"
+          },
+          "supplement_value": "附加费金额",
+          "field_names": {
+            "supplement_value": "附加费"
+          },
           "periods": {
             "hint": "点击两个日期以选择一个时间段",
             "selected": "已选日期区间："

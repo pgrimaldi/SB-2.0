@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  computed,
   effect,
   inject,
   input,
@@ -9,25 +10,39 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { FormField, form } from '@angular/forms/signals';
-import { TranslatePipe } from '@ngx-translate/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormField, applyWhen, form, max } from '@angular/forms/signals';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
+import { greaterThan } from '../../../../shared/forms/validators';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
+import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTimeField } from '../../../../shared/ui/inputs/filled-time-field/filled-time-field';
+import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
+import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+
+interface BookingOptionsTexts {
+  supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
+}
 
 @Component({
   selector: 'app-online-booking-options-panel',
   imports: [
     Button,
+    FilledNumberField,
+    FilledSelect,
     FilledTimeField,
     FormField,
     FormRow,
@@ -46,7 +61,9 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
 
+  private readonly translateService = inject(TranslateService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonSize = ButtonSize;
   /** [previous month, next month, remove a period]. */
@@ -58,7 +75,16 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   protected readonly clockIcon = ['/assets/images/OnlineBookingConfiguration_Clock.svg'] as const;
 
   private readonly draft = signal(new OnlineBookingOptions());
-  protected readonly draftForm = form(this.draft);
+  protected readonly draftForm = form(this.draft, (path) => {
+    applyWhen(
+      path.supplementValue,
+      ({ valueOf }) => valueOf(path.supplementType) !== SupplementType.None,
+      (supplementValue) => greaterThan(supplementValue, 0),
+    );
+    max(path.supplementValue, ({ valueOf }) =>
+      valueOf(path.supplementType) === SupplementType.Percentage ? 100 : undefined,
+    );
+  });
   protected readonly halfDays = [
     {
       label: 'management.settings.online_booking_configuration.booking_options.morning',
@@ -71,6 +97,29 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
       end: this.draftForm.afternoonEndTime,
     },
   ];
+  protected readonly hasSupplement = computed(
+    () => this.draftForm.supplementType().value() !== SupplementType.None,
+  );
+  protected readonly isPercentage = computed(
+    () => this.draftForm.supplementType().value() === SupplementType.Percentage,
+  );
+  protected readonly supplementValueError = this.validationText.message(
+    this.draftForm.supplementValue,
+    'management.settings.online_booking_configuration.booking_options.field_names.supplement_value',
+  );
+  private readonly texts = toSignal(
+    this.translateService.stream(
+      'management.settings.online_booking_configuration.booking_options',
+    ) as Observable<BookingOptionsTexts>,
+    { initialValue: null },
+  );
+  protected readonly supplementTypeOptions = computed<readonly SelectOption<SupplementType>[]>(
+    () => [
+      { value: SupplementType.None, label: this.texts()?.supplement_types.none ?? '' },
+      { value: SupplementType.Percentage, label: this.texts()?.supplement_types.percentage ?? '' },
+      { value: SupplementType.Fixed, label: this.texts()?.supplement_types.fixed ?? '' },
+    ],
+  );
 
   constructor() {
     this.unsaved.watch(this);
@@ -100,6 +149,11 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
             .filter((time) => time().value() !== null)
             .forEach((time) => time().value.set(null)),
         );
+      }
+    });
+    effect(() => {
+      if (!this.hasSupplement()) {
+        untracked(() => this.draftForm.supplementValue().value.set(null));
       }
     });
   }

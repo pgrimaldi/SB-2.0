@@ -7,7 +7,8 @@
   border: 0.0625rem solid var(--color__layout__border);
   box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
 
-  app-period-calendar {
+  app-period-calendar,
+  > app-form-row {
     align-self: stretch;
   }
 
@@ -60,4 +61,21 @@
   align-self: stretch;
   justify-content: space-between;
   gap: 0.75rem 2.5rem;
+}
+
+.online__booking__options__panel__field,
+.online__booking__options__panel__value {
+  flex: var(--form-row-fill) 1 17.375rem;
+  min-width: 0;
+}
+
+.online__booking__options__panel__value {
+  flex-basis: calc(17.375rem - 1.25rem);
+}
+
+.online__booking__options__panel__unit {
+  min-width: 0.75rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: var(--filled-field-height, 1.625rem);
 }

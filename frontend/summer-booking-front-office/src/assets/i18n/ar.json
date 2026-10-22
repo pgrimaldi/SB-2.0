@@ -332,6 +332,19 @@
           "time_from": "من",
           "time_to": "إلى",
           "afternoon_conversion_enabled": "وقت بدء التحويل إلى حجز بعد الظهر",
+          "current_day_booking_enabled": "تفعيل الحجز في اليوم نفسه",
+          "seasonal_booking_enabled": "تفعيل الحجوزات الموسمية",
+          "sharing_enabled": "تفعيل Sharing",
+          "supplement_type": "نوع الرسوم الإضافية",
+          "supplement_types": {
+            "none": "بدون رسوم إضافية",
+            "percentage": "نسبة مئوية",
+            "fixed": "ثابت"
+          },
+          "supplement_value": "قيمة الرسوم الإضافية",
+          "field_names": {
+            "supplement_value": "الرسوم الإضافية"
+          },
           "periods": {
             "hint": "انقر على تاريخين لتحديد فترة",
             "selected": "فترات التواريخ المحددة:"

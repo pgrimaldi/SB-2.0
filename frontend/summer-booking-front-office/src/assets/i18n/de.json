@@ -332,6 +332,19 @@
           "time_from": "Von",
           "time_to": "bis",
           "afternoon_conversion_enabled": "Startzeit der Umwandlung in eine Nachmittagsbuchung",
+          "current_day_booking_enabled": "Buchung am selben Tag aktivieren",
+          "seasonal_booking_enabled": "Saisonbuchungen aktivieren",
+          "sharing_enabled": "Sharing aktivieren",
+          "supplement_type": "Zuschlagsart",
+          "supplement_types": {
+            "none": "Kein Zuschlag",
+            "percentage": "Prozentsatz",
+            "fixed": "Fest"
+          },
+          "supplement_value": "Zuschlagswert",
+          "field_names": {
+            "supplement_value": "des Zuschlags"
+          },
           "periods": {
             "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
             "selected": "Gewählte Zeiträume:"

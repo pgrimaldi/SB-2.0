@@ -98,5 +98,56 @@
           | translate
       }}
     </app-toggle>
+    <app-toggle [formField]="draftForm.isCurrentDayBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.current_day_booking_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isSeasonalBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.seasonal_booking_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isSharingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.sharing_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.supplement_type'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [options]="supplementTypeOptions()"
+        [formField]="draftForm.supplementType"
+      />
+    </app-form-row>
+    @if (hasSupplement()) {
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.supplement_value'
+              | translate
+          }}
+        </span>
+        <app-filled-number-field
+          class="online__booking__options__panel__value"
+          [isDecimal]="!isPercentage()"
+          [isCurrency]="!isPercentage()"
+          [formField]="draftForm.supplementValue"
+          [error]="supplementValueError()"
+        />
+        <span class="online__booking__options__panel__unit">
+          {{ isPercentage() ? '%' : '€' }}
+        </span>
+      </app-form-row>
+    }
   </section>
 </app-side-panel>

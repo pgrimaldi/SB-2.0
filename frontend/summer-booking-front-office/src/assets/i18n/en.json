@@ -332,6 +332,19 @@
           "time_from": "From",
           "time_to": "to",
           "afternoon_conversion_enabled": "Start time of the conversion to afternoon booking",
+          "current_day_booking_enabled": "Enable booking for the current day",
+          "seasonal_booking_enabled": "Enable seasonal bookings",
+          "sharing_enabled": "Enable Sharing",
+          "supplement_type": "Supplement type",
+          "supplement_types": {
+            "none": "No supplement",
+            "percentage": "Percentage",
+            "fixed": "Fixed"
+          },
+          "supplement_value": "Supplement value",
+          "field_names": {
+            "supplement_value": "of the supplement"
+          },
           "periods": {
             "hint": "Click two dates to select a range",
             "selected": "Selected date ranges:"

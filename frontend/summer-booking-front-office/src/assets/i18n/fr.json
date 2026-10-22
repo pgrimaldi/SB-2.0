@@ -332,6 +332,19 @@
           "time_from": "De",
           "time_to": "à",
           "afternoon_conversion_enabled": "Heure de début de la conversion en réservation de l'après-midi",
+          "current_day_booking_enabled": "Activer la réservation le jour même",
+          "seasonal_booking_enabled": "Activer les réservations saisonnières",
+          "sharing_enabled": "Activer le Sharing",
+          "supplement_type": "Type de supplément",
+          "supplement_types": {
+            "none": "Aucun supplément",
+            "percentage": "Pourcentage",
+            "fixed": "Fixe"
+          },
+          "supplement_value": "Valeur du supplément",
+          "field_names": {
+            "supplement_value": "du supplément"
+          },
           "periods": {
             "hint": "Cliquez sur deux dates pour choisir une période",
             "selected": "Périodes sélectionnées :"
