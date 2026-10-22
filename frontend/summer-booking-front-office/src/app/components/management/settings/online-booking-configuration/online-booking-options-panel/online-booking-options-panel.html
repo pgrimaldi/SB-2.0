@@ -40,7 +40,10 @@
             | translate
         }}
       </app-toggle>
-      <app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [disabled]="!draftForm.isSelectedSpotsOnlyEnabled().value()"
+      >
         {{
           'management.settings.online_booking_configuration.booking_options.view_spots' | translate
         }}

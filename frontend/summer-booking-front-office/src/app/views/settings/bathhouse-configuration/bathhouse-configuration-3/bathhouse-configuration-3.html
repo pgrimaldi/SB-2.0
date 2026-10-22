@@ -10,18 +10,12 @@
     </app-section-title>
     <div class="bathhouse__configuration__3__map">
       @if (isMapReady()) {
-        <google-map
-          height="100%"
-          width="100%"
+        <app-location-map
           [mapId]="mapId"
           [center]="center()"
           [zoom]="zoom()"
-          [options]="mapOptions"
-        >
-          @if (position(); as position) {
-            <map-advanced-marker [position]="position" />
-          }
-        </google-map>
+          [markerPosition]="position()"
+        />
       } @else if (isMapFailed()) {
         <p class="bathhouse__configuration__3__map__error">
           {{ 'management.settings.bathhouse_configuration.media.position.map_error' | translate }}

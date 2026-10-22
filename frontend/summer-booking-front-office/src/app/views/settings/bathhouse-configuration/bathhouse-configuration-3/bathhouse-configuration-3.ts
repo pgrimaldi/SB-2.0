@@ -10,7 +10,6 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { GoogleMap, MapAdvancedMarker } from '@angular/google-maps';
 import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
@@ -28,6 +27,10 @@ import {
   ButtonSize,
 } from '../../../../components/shared/ui/buttons/button/button';
 import { FilledTextField } from '../../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
+import {
+  LocationMap,
+  MapPosition,
+} from '../../../../components/shared/ui/maps/location-map/location-map';
 import { SectionTitle } from '../../../../components/shared/ui/titles/section-title/section-title';
 import { FileDropZone } from '../../../../components/shared/ui/uploads/file-drop-zone/file-drop-zone';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
@@ -36,22 +39,14 @@ import { BathhousePhoto } from '../../../../entities/settings/bathhouse-configur
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 
-const CENTER_OF_ITALY: google.maps.LatLngLiteral = { lat: 41.87194, lng: 12.56738 };
+const CENTER_OF_ITALY: MapPosition = { latitude: 41.87194, longitude: 12.56738 };
 const ITALY_ZOOM = 5;
 const POSITION_ZOOM = 15;
 const GALLERY_ROW_SLOT_QUANTITY = 4;
 
 @Component({
   selector: 'app-bathhouse-configuration-3',
-  imports: [
-    Button,
-    FileDropZone,
-    FilledTextField,
-    GoogleMap,
-    MapAdvancedMarker,
-    SectionTitle,
-    TranslatePipe,
-  ],
+  imports: [Button, FileDropZone, FilledTextField, LocationMap, SectionTitle, TranslatePipe],
   templateUrl: './bathhouse-configuration-3.html',
   styleUrl: './bathhouse-configuration-3.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,14 +78,9 @@ export class BathhouseConfiguration3 implements UnsavedChanges, OnDestroy {
   ] as const;
   protected readonly uploadIcon = ['/assets/images/BathhouseConfiguration_Upload.svg'] as const;
   protected readonly mapId = environment.googleMapsMapId;
-  protected readonly mapOptions: google.maps.MapOptions = {
-    disableDefaultUI: true,
-    fullscreenControl: true,
-    clickableIcons: false,
-  };
   protected readonly isMapReady = signal(false);
   protected readonly isMapFailed = signal(false);
-  protected readonly position = signal<google.maps.LatLngLiteral | null>(null);
+  protected readonly position = signal<MapPosition | null>(null);
   protected readonly center = computed(() => this.position() ?? CENTER_OF_ITALY);
   protected readonly zoom = computed(() => (this.position() ? POSITION_ZOOM : ITALY_ZOOM));
   private readonly media = signal(new BathhouseMedia());

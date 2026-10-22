@@ -12,7 +12,12 @@
   }
 }
 
+// The buttons of the management pages.
 .online__booking__options__panel__row {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;

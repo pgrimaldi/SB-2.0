@@ -79,15 +79,17 @@ Lasciare **CORS disabilitato**: questa distribuzione serve il frontend statico e
 La build non mette più script né stili inline in `index.html` (`optimization.styles.inlineCritical: false` in `angular.json`), quindi la policy può vietare ogni script che non arrivi dal nostro dominio. Valore della policy, su una riga:
 
 ```text
-default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+default-src 'self'; script-src 'self' https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.ggpht.com https://*.googleusercontent.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.gstatic.com data: blob:; frame-src https://*.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 ```
 
-Stato: su DEV la `Content-Security-Policy` è attiva dal 07/10/2026; su PROD va fatta con gli stessi passi.
+I domini di Google servono alla mappa della tab Media di Informazioni stabilimento (Maps JavaScript API, dal 21/10/2026): sono quelli della guida ufficiale di Google ([Content Security Policy Guide](https://developers.google.com/maps/documentation/javascript/content-security-policy)), senza `'unsafe-inline'` e `'unsafe-eval'` in `script-src`, che la guida mette ma la nostra build non usa: se la fase Report-Only segnala `eval`, decidere con l'utente prima di aggiungerlo. Senza Google la policy è quella del 07/10/2026: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests`.
+
+Stato: su DEV la `Content-Security-Policy` è attiva dal 07/10/2026 nella versione senza Google: finché non si aggiorna (prima in Report-Only, poi attiva) la mappa della tab Media su DEV resta bloccata. Su PROD va fatta con gli stessi passi.
 
 Si attiva in due fasi, prima su DEV e poi su PROD:
 
 1. **Report-Only (solo segnalazioni)**. CloudFront non ha questa variante tra i *Security headers*: nella stessa policy aprire **Custom headers → Add header**, nome `Content-Security-Policy-Report-Only`, valore la policy qui sopra, **Origin override** attivo. Il browser esegue tutto ma scrive in console ogni violazione (`[Report Only] Refused to …`).
-2. **Verifica**. Con la console del browser aperta, aprire ogni pagina in IT e in EN, anche dopo il login: home, popup di accesso, gestionale, magazzino con i suoi popup, datepicker, impostazioni, aggiornamento del service worker. Nessun messaggio `Refused` deve comparire. Ripetere nei giorni successivi durante l'uso normale.
+2. **Verifica**. Con la console del browser aperta, aprire ogni pagina in IT e in EN, anche dopo il login: home, popup di accesso, gestionale, magazzino con i suoi popup, datepicker, impostazioni (anche la tab Media di Informazioni stabilimento, con la mappa di Google), aggiornamento del service worker. Nessun messaggio `Refused` deve comparire. Ripetere nei giorni successivi durante l'uso normale.
 3. **Attivazione**. Togliere il custom header `Content-Security-Policy-Report-Only` e, nei **Security headers**, attivare `Content-Security-Policy` con lo stesso valore e **Origin override** attivo. Da qui il browser blocca davvero ciò che la policy non permette.
 4. **Controllo**. `curl -I https://<dominio>/` deve mostrare `content-security-policy` con il valore atteso (e non più `content-security-policy-report-only`).
 

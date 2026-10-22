@@ -2,7 +2,7 @@
 
 Attività di sicurezza ancora da fare. Le voci si decidono insieme prima di implementarle; una volta completate si rimuovono da questo file.
 
-Aggiornato al 08/10/2026.
+Aggiornato al 22/10/2026.
 
 ## Content Security Policy severa (difesa contro XSS)
 
@@ -48,9 +48,13 @@ Aggiornato al 08/10/2026.
 
 - **CSS critico inline**: deciso il 07/10/2026, inlining disattivato (vedi "Stato"). Le alternative scartate erano `security.autoCsp` (hash degli script inline calcolati in build; l'header CloudFront non dovrebbe contenere `default-src` né `script-src`) e un nonce per risposta (`ngCspNonce`, richiede Lambda@Edge). Se in futuro si riattiva l'inlining, la build torna a mettere uno script inline e la policy va rivista.
 - **`style-src 'unsafe-inline'`**: accettato consapevolmente il 07/10/2026; l'alternativa sarebbe il nonce per risposta.
-- **Trusted Types** (`require-trusted-types-for 'script'`): Angular li supporta. Vanno provati in Report-Only perché bloccano anche le librerie che scrivono HTML nel DOM. Nei browser che non li supportano l'app funziona comunque.
+- **Trusted Types** (`require-trusted-types-for 'script'`): Angular li supporta. Vanno provati in Report-Only perché bloccano anche le librerie che scrivono HTML nel DOM. Nei browser che non li supportano l'app funziona comunque. Va provato anche il caricamento della mappa: `GoogleMapsBehaviour` scrive l'indirizzo di uno `<script>`, che con i Trusted Types attivi richiede una policy apposita.
 - **Endpoint dei report**: serve un indirizzo che raccolga le violazioni (backend nostro o servizio esterno).
-- **Servizi esterni futuri** (pagamenti Stripe, mappe, analytics, font esterni…): ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
+- **Servizi esterni**: ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
+  - **Google Maps** (dal 21/10/2026, tab Media di Informazioni stabilimento): domini aggiunti alla policy di `README_DEPLOY.md` secondo la guida di Google, da attivare su DEV passando dal Report-Only. L'elenco di Google indebolisce la difesa (domini con caratteri jolly, alcuni con contenuti caricati dagli utenti, e `blob:` negli script): dopo qualche giorno di Report-Only si può restringere ai domini che compaiono davvero; la difesa più forte sarebbe una CSP con nonce (Lambda@Edge). La chiave è pubblica per natura: va protetta nella console Google con le restrizioni (solo i nostri domini, solo Maps JavaScript API) e un tetto di spesa.
+  - **Stripe Connect**: il bottone della pagina Prenotazioni online porta a `connect.stripe.com` cambiando pagina, senza script né chiamate di Stripe: nessuna direttiva da aggiungere.
+  - **Foto e PDF della tab Media**: se arriveranno da un dominio diverso dal nostro (S3/CloudFront, SharePoint), le foto richiedono quel dominio in `img-src`; i PDF si aprono in una nuova scheda e non richiedono direttive. Il frontend accetta solo link https o del nostro dominio.
+  - **Analytics, font esterni e altri**: da aggiungere quando serviranno, con lo stesso criterio.
 
 ### Altri header di sicurezza (response headers policy di CloudFront)
 

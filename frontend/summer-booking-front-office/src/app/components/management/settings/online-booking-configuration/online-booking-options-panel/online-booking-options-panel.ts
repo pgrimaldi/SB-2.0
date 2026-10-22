@@ -16,7 +16,7 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
-import { Button } from '../../../../shared/ui/buttons/button/button';
+import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
@@ -36,6 +36,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   /** [previous month, next month, remove a period]. */
+  protected readonly ButtonSize = ButtonSize;
   protected readonly calendarIcons = [
     '/assets/images/OnlineBookingConfiguration_PreviousMonth.svg',
     '/assets/images/OnlineBookingConfiguration_NextMonth.svg',
