@@ -226,7 +226,36 @@ Non aggiungere uno stage Deploy: il caricamento su S3 lo fa già la build.
   - `S3_BUCKET`: nome del bucket;
   - `CLOUDFRONT_DISTRIBUTION_ID`: ID della distribuzione.
 
-  Non sono dati segreti. Eventuali secret futuri vanno in Secrets Manager, mai in chiaro.
+  Queste tre variabili non sono dati segreti. La chiave Maps va invece configurata come descritto sotto.
+
+### Chiave Google Maps tramite Secrets Manager
+
+Dal 22/10/2026 la chiave non è più scritta nei file `environment`: CodeBuild la legge da Secrets Manager e la passa al compilatore Angular attraverso `--define`, senza generare file sorgenti con il valore. Non viene stampata dallo script di build. **Rimane visibile nel bundle e nelle richieste del browser**: Secrets Manager evita di versionarla, non la rende segreta sul client. In Google Cloud sono obbligatorie entrambe le restrizioni: siti web autorizzati e sola **Maps JavaScript API**; usare chiavi separate per ambiente, quote e avvisi di budget.
+
+1. Nella regione del progetto CodeBuild creare un segreto di tipo **Other type of secret**, con proprietà JSON `GOOGLE_MAPS_API_KEY_DEV` e valore della nuova chiave; cifratura predefinita `aws/secretsmanager`. Nome DEV: `summerbooking/dev/frontend/google-maps`.
+2. Nel progetto CodeBuild aggiungere una variabile: nome **`GOOGLE_MAPS_API_KEY_DEV`**, tipo **Secrets Manager**, valore **`summerbooking/dev/frontend/google-maps:GOOGLE_MAPS_API_KEY_DEV`**. Per un altro ambiente cambiare il nome del segreto. Non usare tipo Testo normale e non incollare il valore nel buildspec.
+3. Al ruolo di servizio **della build**, senza rimuovere i permessi di deploy, aggiungere una policy inline (DEV: `summerbooking-dev-read-google-maps`):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Action": "secretsmanager:GetSecretValue",
+         "Resource": "ARN_COMPLETO_DEL_SOLO_SEGRETO_DELL_AMBIENTE"
+       }
+     ]
+   }
+   ```
+
+   L'ARN completo include il suffisso generato da AWS. Con una chiave KMS gestita dal cliente servono anche i relativi permessi di decrittazione; non sono necessari con la chiave predefinita `aws/secretsmanager`.
+4. Pubblicare le modifiche al codice tramite il flusso Git abituale. La build fallisce senza pubblicare se la chiave è assente o malformata. Per PROD configurare un segreto e una chiave propri; impostare anche il Map ID di produzione in `environment.prod.ts`.
+5. Dopo il deploy verificare la mappa nella tab Media di Informazioni stabilimento, gli errori nella console Google/browser e la CSP. Solo dopo aver verificato che nessun altro servizio la usi, eliminare la vecchia chiave in Google Cloud. Togliere la stringa dal codice non la revoca: rimane nella cronologia Git e nei bundle precedenti.
+
+In DEV l'unico sito autorizzato per la nuova chiave è `https://d3nn1cfmv1ald2.cloudfront.net/*`. Le normali build senza lo script CodeBuild non ricevono una chiave: l'app funziona ma mostra il messaggio di mappa non disponibile, senza contattare Google. Non aggiungere la chiave a file versionati per aggirare questa scelta.
+
+Riferimenti: [CodeBuild e valori da Secrets Manager](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.secrets-manager), [permessi sul singolo segreto](https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_iam-policies.html), [Angular: sostituzioni di valori in build](https://angular.dev/tools/cli/build-system-migration#build-time-value-replacement-with-define), [Google Maps: protezione delle chiavi](https://developers.google.com/maps/api-security-best-practices).
 
 **Specifiche di compilazione**
 
@@ -297,8 +326,8 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
 ## 7. Cosa fa il deploy (`buildspec.yml`)
 
 1. **install**: installa la versione di Node indicata in `.nvmrc` ed esegue `npm ci`.
-2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` siano impostate.
-3. **build**: prima `npm run verify` (lint, controllo dei tipi dei test con `tsc -p tsconfig.spec.json --noEmit`, test unitari con `ng test --no-watch`): se una verifica fallisce la build non parte e nel passo successivo non si pubblica nulla, il sito online resta quello precedente (dal 07/10/2026, Q03 dell'audit esterno; prima si pubblicava anche con test rotti). Poi `ng build --configuration $BUILD_CONFIGURATION`, che controlla anche i tipi dell'app e dei template. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
+2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID` e `GOOGLE_MAPS_API_KEY_DEV` siano impostate.
+3. **build**: prima `npm run verify` (lint, controllo dei tipi dei test con `tsc -p tsconfig.spec.json --noEmit`, test unitari con `ng test --no-watch`): se una verifica fallisce la build non parte e nel passo successivo non si pubblica nulla, il sito online resta quello precedente (dal 07/10/2026, Q03 dell'audit esterno; prima si pubblicava anche con test rotti). Poi `npm run build:codebuild` controlla la chiave e avvia Angular con la configurazione scelta e il valore Maps definito in build, controllando anche i tipi dell'app e dei template. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
 4. **post_build**: se la build è fallita si ferma senza toccare il bucket e il sito online resta quello precedente. Altrimenti carica i file con intestazioni `Cache-Control` diverse, che CloudFront inoltra al browser:
    - bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
@@ -425,7 +454,8 @@ npm ci
 ```
 
 ```bash
-npm run build:prod
+npm run verify
+npm run build:codebuild
 ```
 
-Per DEV usare `npm run build:dev-env` (configurazione `dev`, API mock attive). Poi eseguire gli stessi comandi di caricamento e invalidazione del `post_build` in `buildspec.yml`, sostituendo `$DIST`, `$S3_BUCKET` e `$CLOUDFRONT_DISTRIBUTION_ID`. Un semplice `aws s3 sync` non imposta le intestazioni di cache. Verificare sempre il nome del bucket prima di eseguire comandi con `--delete`.
+Prima della build impostare nell'ambiente del processo `BUILD_CONFIGURATION` (`dev` o `production`) e `GOOGLE_MAPS_API_KEY_DEV`, recuperata dal segreto con strumenti autorizzati, senza stamparla né salvarla in file versionati o nella cronologia dei comandi. I comandi `build:prod` e `build:dev-env` da soli non iniettano la chiave Maps. Poi eseguire gli stessi comandi di caricamento e invalidazione del `post_build` in `buildspec.yml`, sostituendo `$DIST`, `$S3_BUCKET` e `$CLOUDFRONT_DISTRIBUTION_ID`. Un semplice `aws s3 sync` non imposta le intestazioni di cache. Verificare sempre il nome del bucket prima di eseguire comandi con `--delete`.

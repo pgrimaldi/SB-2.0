@@ -6,6 +6,7 @@
     "start": "ng serve",
     "start:backend": "ng serve --configuration local-backend",
     "build": "ng build",
+    "build:codebuild": "node scripts/build-codebuild.mjs",
     "build:dev": "ng build --configuration development",
     "build:prod": "ng build --configuration production",
     "build:dev-env": "ng build --configuration dev",

@@ -20,6 +20,10 @@ export class GoogleMapsBehaviour {
   private loading: Promise<void> | null = null;
 
   load(): Promise<void> {
+    if (!environment.googleMapsApiKey) {
+      return Promise.reject(new Error('Google Maps API key not configured'));
+    }
+
     this.loading ??= new Promise<void>((resolve, reject) => {
       const view = this.document.defaultView as GoogleMapsWindow;
       const language = this.language.current();

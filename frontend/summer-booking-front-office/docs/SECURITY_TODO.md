@@ -4,6 +4,12 @@ Attività di sicurezza ancora da fare. Le voci si decidono insieme prima di impl
 
 Aggiornato al 22/10/2026.
 
+## Revoca della vecchia chiave Google Maps (22/10/2026)
+
+La chiave precedentemente nei file `environment` è stata pubblicata anche nella cronologia Git. Il codice ora riceve una nuova chiave da Secrets Manager attraverso CodeBuild, senza salvarla nei sorgenti; la chiave resta necessariamente visibile nel browser. La nuova chiave è stata creata dall'utente con restrizioni al dominio CloudFront DEV e alla Maps JavaScript API; configurati anche riferimento del segreto e permesso IAM di lettura.
+
+Ancora da verificare sull'ambiente AWS: deploy del codice aggiornato, caricamento della mappa (CSP compresa), poi eliminazione della vecchia chiave dopo aver escluso altri utilizzatori. Non riscrivere la cronologia al posto della revoca. Monitorare utilizzo, quote e avvisi di budget (un avviso non è un blocco automatico della spesa). Procedura in `README_DEPLOY.md`, sezione "Chiave Google Maps tramite Secrets Manager". Fonte: [Google Maps API security best practices](https://developers.google.com/maps/api-security-best-practices).
+
 ## Content Security Policy severa (difesa contro XSS)
 
 ### Perché serve
@@ -51,7 +57,7 @@ Aggiornato al 22/10/2026.
 - **Trusted Types** (`require-trusted-types-for 'script'`): Angular li supporta. Vanno provati in Report-Only perché bloccano anche le librerie che scrivono HTML nel DOM. Nei browser che non li supportano l'app funziona comunque. Va provato anche il caricamento della mappa: `GoogleMapsBehaviour` scrive l'indirizzo di uno `<script>`, che con i Trusted Types attivi richiede una policy apposita.
 - **Endpoint dei report**: serve un indirizzo che raccolga le violazioni (backend nostro o servizio esterno).
 - **Servizi esterni**: ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
-  - **Google Maps** (dal 21/10/2026, tab Media di Informazioni stabilimento): domini aggiunti alla policy di `README_DEPLOY.md` secondo la guida di Google, da attivare su DEV passando dal Report-Only. L'elenco di Google indebolisce la difesa (domini con caratteri jolly, alcuni con contenuti caricati dagli utenti, e `blob:` negli script): dopo qualche giorno di Report-Only si può restringere ai domini che compaiono davvero; la difesa più forte sarebbe una CSP con nonce (Lambda@Edge). La chiave è pubblica per natura: va protetta nella console Google con le restrizioni (solo i nostri domini, solo Maps JavaScript API) e un tetto di spesa.
+  - **Google Maps** (dal 21/10/2026, tab Media di Informazioni stabilimento): domini aggiunti alla policy di `README_DEPLOY.md` secondo la guida di Google, da attivare su DEV passando dal Report-Only. L'elenco di Google indebolisce la difesa (domini con caratteri jolly, alcuni con contenuti caricati dagli utenti, e `blob:` negli script): dopo qualche giorno di Report-Only si può restringere ai domini che compaiono davvero; la difesa più forte sarebbe una CSP con nonce (Lambda@Edge). La chiave è pubblica per natura: va protetta nella console Google con le restrizioni (solo i nostri domini, solo Maps JavaScript API), quote e avvisi di budget.
   - **Stripe Connect**: il bottone della pagina Prenotazioni online porta a `connect.stripe.com` cambiando pagina, senza script né chiamate di Stripe: nessuna direttiva da aggiungere.
   - **Foto e PDF della tab Media**: se arriveranno da un dominio diverso dal nostro (S3/CloudFront, SharePoint), le foto richiedono quel dominio in `img-src`; i PDF si aprono in una nuova scheda e non richiedono direttive. Il frontend accetta solo link https o del nostro dominio.
   - **Analytics, font esterni e altri**: da aggiungere quando serviranno, con lo stesso criterio.
