@@ -356,6 +356,15 @@
           "choose": "اختر",
           "max_spot_per_booking": "الحد الأقصى لعدد الأماكن في الحجز الواحد",
           "max_advance_booking_days": "منع الحجز بعد n يوم من اليوم الحالي",
+          "booking_confirmation_required": "طلب تأكيد الحجز",
+          "yes": "نعم",
+          "no": "لا",
+          "online_booking_audience": "السماح بالحجز عبر الإنترنت لـ",
+          "online_booking_audiences": {
+            "all": "الجميع",
+            "contacts_only": "جهات الاتصال فقط"
+          },
+          "max_bookings_per_day": "الحد الأقصى للحجوزات في اليوم",
           "field_names": {
             "supplement_value": "الرسوم الإضافية"
           },

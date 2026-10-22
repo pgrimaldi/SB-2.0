@@ -356,6 +356,15 @@
           "choose": "Select",
           "max_spot_per_booking": "Maximum number of spots bookable in the same booking",
           "max_advance_booking_days": "Block bookings beyond n days from the current day",
+          "booking_confirmation_required": "Require booking confirmation",
+          "yes": "Yes",
+          "no": "No",
+          "online_booking_audience": "Allow online bookings to",
+          "online_booking_audiences": {
+            "all": "Everyone",
+            "contacts_only": "Contacts only"
+          },
+          "max_bookings_per_day": "Max bookings per day",
           "field_names": {
             "supplement_value": "of the supplement"
           },

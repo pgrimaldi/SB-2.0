@@ -19,6 +19,7 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { OnlineBookingAudience } from '../../../../../entities/enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
@@ -37,6 +38,15 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 interface BookingOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
   online_booking_blocks: Record<OnlineBookingBlockKey, string>;
+  online_booking_audiences: Record<'all' | 'contacts_only', string>;
+  yes: string;
+  no: string;
+}
+
+/** The select wants text keys: the answer it shows for a yes/no field. */
+enum Answer {
+  Yes = 'Yes',
+  No = 'No',
 }
 
 type OnlineBookingBlockKey =
@@ -143,6 +153,25 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
       { value: SupplementType.Fixed, label: this.texts()?.supplement_types.fixed ?? '' },
     ],
   );
+  protected readonly answerOptions = computed<readonly SelectOption<Answer>[]>(() => [
+    { value: Answer.Yes, label: this.texts()?.yes ?? '' },
+    { value: Answer.No, label: this.texts()?.no ?? '' },
+  ]);
+  protected readonly bookingConfirmation = computed(() =>
+    this.draftForm.isBookingConfirmationRequired().value() ? Answer.Yes : Answer.No,
+  );
+  protected readonly onlineBookingAudienceOptions = computed<
+    readonly SelectOption<OnlineBookingAudience>[]
+  >(() => [
+    {
+      value: OnlineBookingAudience.All,
+      label: this.texts()?.online_booking_audiences.all ?? '',
+    },
+    {
+      value: OnlineBookingAudience.ContactsOnly,
+      label: this.texts()?.online_booking_audiences.contacts_only ?? '',
+    },
+  ]);
   protected readonly onlineBookingBlockOptions = computed<
     readonly SelectOption<OnlineBookingBlock>[]
   >(() =>
@@ -193,6 +222,10 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     return (
       this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new OnlineBookingOptions())
     );
+  }
+
+  protected setBookingConfirmation(answer: Answer | null): void {
+    this.draftForm.isBookingConfirmationRequired().value.set(answer === Answer.Yes);
   }
 
   protected async leave(): Promise<void> {

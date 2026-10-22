@@ -1,3 +1,4 @@
+import { OnlineBookingAudience } from '../../enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../enums/online-booking-block';
 import { SupplementType } from '../../enums/supplement-type';
 import { OnlineBookingPeriod } from './online-booking-period';
@@ -22,4 +23,7 @@ export class OnlineBookingOptions {
   onlineBookingBlock: OnlineBookingBlock | null = null;
   maxSpotPerBookingQuantity: number | null = null;
   maxAdvanceBookingDayQuantity: number | null = null;
+  isBookingConfirmationRequired = false;
+  onlineBookingAudience = OnlineBookingAudience.All;
+  maxBookingPerDayQuantity: number | null = null;
 }

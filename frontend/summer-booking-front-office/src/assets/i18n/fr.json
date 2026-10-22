@@ -356,6 +356,15 @@
           "choose": "Sélectionner",
           "max_spot_per_booking": "Nombre maximum de places réservables dans une même réservation",
           "max_advance_booking_days": "Bloquer les réservations au-delà de n jours à partir d'aujourd'hui",
+          "booking_confirmation_required": "Exiger une confirmation",
+          "yes": "Oui",
+          "no": "Non",
+          "online_booking_audience": "Autoriser les réservations en ligne à",
+          "online_booking_audiences": {
+            "all": "Tous",
+            "contacts_only": "Contacts uniquement"
+          },
+          "max_bookings_per_day": "Réservations max. par jour",
           "field_names": {
             "supplement_value": "du supplément"
           },

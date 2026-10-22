@@ -189,5 +189,44 @@
         [formField]="draftForm.maxAdvanceBookingDayQuantity"
       />
     </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.booking_confirmation_required'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [options]="answerOptions()"
+        [value]="bookingConfirmation()"
+        (valueChange)="setBookingConfirmation($event)"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.online_booking_audience'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [options]="onlineBookingAudienceOptions()"
+        [formField]="draftForm.onlineBookingAudience"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.max_bookings_per_day'
+            | translate
+        }}
+      </span>
+      <app-filled-number-field
+        class="online__booking__options__panel__field"
+        [formField]="draftForm.maxBookingPerDayQuantity"
+      />
+    </app-form-row>
   </section>
 </app-side-panel>

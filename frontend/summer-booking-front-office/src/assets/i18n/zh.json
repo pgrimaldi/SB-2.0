@@ -356,6 +356,15 @@
           "choose": "请选择",
           "max_spot_per_booking": "同一预订中可预订的最大位置数",
           "max_advance_booking_days": "禁止预订距今天超过 n 天的日期",
+          "booking_confirmation_required": "需要确认预订",
+          "yes": "是",
+          "no": "否",
+          "online_booking_audience": "允许在线预订的对象",
+          "online_booking_audiences": {
+            "all": "所有人",
+            "contacts_only": "仅限联系人"
+          },
+          "max_bookings_per_day": "每天最多预订数",
           "field_names": {
             "supplement_value": "附加费"
           },
