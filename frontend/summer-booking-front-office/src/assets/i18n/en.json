@@ -365,6 +365,24 @@
             "contacts_only": "Contacts only"
           },
           "max_bookings_per_day": "Max bookings per day",
+          "payment_methods": {
+            "title": "Accepted payment methods",
+            "pay_now": "Pay now",
+            "pay_at_property": "Pay at the property (only for bookings within 7 days)",
+            "pay_at_property_without_card": "Pay at the property without a credit card",
+            "deposit": "50% deposit now, balance at the property",
+            "prepaid_card": "Pay with the property's prepaid card"
+          },
+          "booking_limits": {
+            "title": "Booking limits",
+            "add": "Add new rule",
+            "description": "Create booking rules to set a minimum and maximum number of bookable spots in a given period and in a given row/sector.",
+            "sector": "Row/sector",
+            "date_from": "From",
+            "date_to": "To",
+            "min": "Min",
+            "max": "Max"
+          },
           "field_names": {
             "supplement_value": "of the supplement"
           },

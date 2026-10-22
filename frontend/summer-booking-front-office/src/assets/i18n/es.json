@@ -365,6 +365,24 @@
             "contacts_only": "Solo contactos"
           },
           "max_bookings_per_day": "Máx. reservas por día",
+          "payment_methods": {
+            "title": "Métodos de pago aceptados",
+            "pay_now": "Pagar ahora",
+            "pay_at_property": "Pagar en el establecimiento (solo para reservas en los próximos 7 días)",
+            "pay_at_property_without_card": "Pagar en el establecimiento sin tarjeta de crédito",
+            "deposit": "Anticipo del 50 % ahora y resto en el establecimiento",
+            "prepaid_card": "Pagar con la tarjeta prepago del establecimiento"
+          },
+          "booking_limits": {
+            "title": "Límites de reserva",
+            "add": "Añadir nueva regla",
+            "description": "Crea reglas de reserva para fijar un número mínimo y máximo de puestos reservables en un periodo y en una fila/sector determinados.",
+            "sector": "Fila/sector",
+            "date_from": "Desde",
+            "date_to": "Hasta",
+            "min": "Mín",
+            "max": "Máx"
+          },
           "field_names": {
             "supplement_value": "del suplemento"
           },

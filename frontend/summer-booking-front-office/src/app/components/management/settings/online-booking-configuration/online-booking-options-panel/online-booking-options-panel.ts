@@ -22,17 +22,22 @@ import { ValidationTextBehaviour } from '../../../../../behaviours/validation/va
 import { OnlineBookingAudience } from '../../../../../entities/enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
+import { BookingLimitRule } from '../../../../../entities/settings/online-booking-configuration/booking-limit-rule';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { greaterThan } from '../../../../shared/forms/validators';
-import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
+import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
+import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTimeField } from '../../../../shared/ui/inputs/filled-time-field/filled-time-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 interface BookingOptionsTexts {
@@ -74,13 +79,17 @@ const ONLINE_BOOKING_BLOCK_KEYS: Readonly<Record<OnlineBookingBlock, OnlineBooki
   selector: 'app-online-booking-options-panel',
   imports: [
     Button,
+    Checkbox,
+    FilledDateField,
     FilledNumberField,
     FilledSelect,
     FilledTimeField,
     FormField,
     FormRow,
     FormRowLabel,
+    IconButton,
     PeriodCalendar,
+    SectionTitle,
     SidePanel,
     Toggle,
     TranslatePipe,
@@ -98,6 +107,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
+  protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   /** [previous month, next month, remove a period]. */
   protected readonly calendarIcons = [
@@ -106,6 +116,21 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     '/assets/images/OnlineBookingConfiguration_RemovePeriod.svg',
   ] as const;
   protected readonly clockIcon = ['/assets/images/OnlineBookingConfiguration_Clock.svg'] as const;
+  protected readonly calendarIcon = [
+    '/assets/images/OnlineBookingConfiguration_Calendar.svg',
+  ] as const;
+  protected readonly addRuleIcon = [
+    '/assets/images/OnlineBookingConfiguration_AddRule.svg',
+  ] as const;
+  protected readonly removeRuleIcon = [
+    '/assets/images/OnlineBookingConfiguration_DeleteRule.svg',
+  ] as const;
+  /** Example rows until an API gives the rows and sectors of the property. */
+  protected readonly sectorOptions: readonly SelectOption[] = [
+    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01', label: 'Fila 1' },
+    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e02', label: 'Fila 2' },
+    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e03', label: 'Fila 3' },
+  ];
 
   private readonly draft = signal(new OnlineBookingOptions());
   protected readonly draftForm = form(this.draft, (path) => {
@@ -222,6 +247,16 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     return (
       this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new OnlineBookingOptions())
     );
+  }
+
+  protected addBookingLimitRule(): void {
+    this.draftForm.bookingLimitRules().value.update((rules) => [...rules, new BookingLimitRule()]);
+  }
+
+  protected removeBookingLimitRule(index: number): void {
+    this.draftForm
+      .bookingLimitRules()
+      .value.update((rules) => rules.filter((_, ruleIndex) => ruleIndex !== index));
   }
 
   protected setBookingConfirmation(answer: Answer | null): void {

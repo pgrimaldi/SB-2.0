@@ -365,6 +365,24 @@
             "contacts_only": "仅限联系人"
           },
           "max_bookings_per_day": "每天最多预订数",
+          "payment_methods": {
+            "title": "接受的付款方式",
+            "pay_now": "立即付款",
+            "pay_at_property": "到店付款（仅限 7 天内的预订）",
+            "pay_at_property_without_card": "到店付款，无需信用卡",
+            "deposit": "现付 50% 定金，余款到店支付",
+            "prepaid_card": "使用本店预付卡付款"
+          },
+          "booking_limits": {
+            "title": "预订限制配置",
+            "add": "添加新规则",
+            "description": "创建预订规则，为指定期间和指定排/区域设置可预订位置的最小和最大数量。",
+            "sector": "排/区域",
+            "date_from": "从",
+            "date_to": "至",
+            "min": "最少",
+            "max": "最多"
+          },
           "field_names": {
             "supplement_value": "附加费"
           },

@@ -365,6 +365,24 @@
             "contacts_only": "Nur Kontakte"
           },
           "max_bookings_per_day": "Max. Buchungen pro Tag",
+          "payment_methods": {
+            "title": "Akzeptierte Zahlungsarten",
+            "pay_now": "Jetzt bezahlen",
+            "pay_at_property": "Vor Ort bezahlen (nur für Buchungen innerhalb von 7 Tagen)",
+            "pay_at_property_without_card": "Vor Ort ohne Kreditkarte bezahlen",
+            "deposit": "50 % Anzahlung jetzt, Rest vor Ort",
+            "prepaid_card": "Mit der Prepaid-Karte des Strandbads bezahlen"
+          },
+          "booking_limits": {
+            "title": "Buchungslimits",
+            "add": "Neue Regel hinzufügen",
+            "description": "Lege Buchungsregeln fest, um eine minimale und maximale Anzahl buchbarer Plätze in einem bestimmten Zeitraum und in einer bestimmten Reihe bzw. einem Sektor festzulegen.",
+            "sector": "Reihe/Sektor",
+            "date_from": "Vom",
+            "date_to": "Bis",
+            "min": "Min",
+            "max": "Max"
+          },
           "field_names": {
             "supplement_value": "des Zuschlags"
           },

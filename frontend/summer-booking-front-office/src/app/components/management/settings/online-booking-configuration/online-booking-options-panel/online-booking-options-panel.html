@@ -229,4 +229,128 @@
       />
     </app-form-row>
   </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.booking_limits.title'
+          | translate
+      "
+    >
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [pathIcon]="addRuleIcon"
+        (clicked)="addBookingLimitRule()"
+      >
+        {{
+          'management.settings.online_booking_configuration.booking_options.booking_limits.add'
+            | translate
+        }}
+      </app-button>
+    </app-section-title>
+    <p class="online__booking__options__panel__description">
+      {{
+        'management.settings.online_booking_configuration.booking_options.booking_limits.description'
+          | translate
+      }}
+    </p>
+    @for (rule of draftForm.bookingLimitRules; track rule; let ruleIndex = $index) {
+      <div class="online__booking__options__panel__rule">
+        <app-filled-select
+          class="online__booking__options__panel__sector"
+          [label]="
+            'management.settings.online_booking_configuration.booking_options.booking_limits.sector'
+              | translate
+          "
+          [placeholder]="
+            'management.settings.online_booking_configuration.booking_options.choose' | translate
+          "
+          [options]="sectorOptions"
+          [formField]="rule.idSector"
+        />
+        <div class="online__booking__options__panel__rule__dates">
+          <app-filled-date-field
+            class="online__booking__options__panel__date"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.date_from'
+                | translate
+            "
+            [pathIcon]="calendarIcon"
+            [formField]="rule.dateFrom"
+          />
+          <app-filled-date-field
+            class="online__booking__options__panel__date"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.date_to'
+                | translate
+            "
+            [pathIcon]="calendarIcon"
+            [formField]="rule.dateTo"
+          />
+        </div>
+        <div class="online__booking__options__panel__rule__quantities">
+          <app-filled-number-field
+            class="online__booking__options__panel__quantity"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.min'
+                | translate
+            "
+            [formField]="rule.minSpotQuantity"
+          />
+          <app-filled-number-field
+            class="online__booking__options__panel__quantity"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.max'
+                | translate
+            "
+            [formField]="rule.maxSpotQuantity"
+          />
+          <app-icon-button
+            [pathIcon]="removeRuleIcon"
+            (click)="removeBookingLimitRule(ruleIndex)"
+          />
+        </div>
+      </div>
+    }
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.payment_methods.title'
+          | translate
+      "
+    />
+    <div class="online__booking__options__panel__choices">
+      <app-checkbox [formField]="draftForm.isPayNowAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_now'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isPayAtPropertyAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_at_property'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isPayAtPropertyWithoutCardAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_at_property_without_card'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isDepositAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.deposit'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isPrepaidCardAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.prepaid_card'
+            | translate
+        }}
+      </app-checkbox>
+    </div>
+  </section>
 </app-side-panel>

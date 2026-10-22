@@ -1,6 +1,7 @@
 import { OnlineBookingAudience } from '../../enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../enums/online-booking-block';
 import { SupplementType } from '../../enums/supplement-type';
+import { BookingLimitRule } from './booking-limit-rule';
 import { OnlineBookingPeriod } from './online-booking-period';
 
 export class OnlineBookingOptions {
@@ -26,4 +27,10 @@ export class OnlineBookingOptions {
   isBookingConfirmationRequired = false;
   onlineBookingAudience = OnlineBookingAudience.All;
   maxBookingPerDayQuantity: number | null = null;
+  bookingLimitRules: BookingLimitRule[] = [];
+  isPayNowAccepted = false;
+  isPayAtPropertyAccepted = false;
+  isPayAtPropertyWithoutCardAccepted = false;
+  isDepositAccepted = false;
+  isPrepaidCardAccepted = false;
 }

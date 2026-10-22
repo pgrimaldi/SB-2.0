@@ -365,6 +365,24 @@
             "contacts_only": "Solo contatti"
           },
           "max_bookings_per_day": "Max prenotazioni per giorno",
+          "payment_methods": {
+            "title": "Metodi di pagamento accettati",
+            "pay_now": "Paga ora",
+            "pay_at_property": "Paga in struttura (disponibile solo per prenotazioni entro 7 giorni)",
+            "pay_at_property_without_card": "Paga in struttura senza carta di credito",
+            "deposit": "Acconto ora del 50% e saldo in struttura",
+            "prepaid_card": "Paga con tessera prepagata della struttura"
+          },
+          "booking_limits": {
+            "title": "Configurazione limiti di booking",
+            "add": "Aggiungi nuova regola",
+            "description": "Crea regole di prenotazione per impostare un limite minimo e massimo di postazioni prenotabili in un determinato periodo e in una determinata fila/settore.",
+            "sector": "Fila/settore",
+            "date_from": "Dal",
+            "date_to": "Al",
+            "min": "Min",
+            "max": "Max"
+          },
           "field_names": {
             "supplement_value": "del supplemento"
           },
