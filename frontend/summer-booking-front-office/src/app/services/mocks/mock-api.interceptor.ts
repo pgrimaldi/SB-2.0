@@ -7,6 +7,7 @@ import {
   bathhouseConfigurationServicesMock,
   countriesComboboxMock,
   saveBathhouseConfigurationGeneralMock,
+  saveBathhouseConfigurationServicesMock,
 } from './catalog/catalog.mock';
 import {
   affiliatedHotelComboboxMock,
@@ -358,6 +359,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-general`
   ) {
     return saveBathhouseConfigurationGeneralMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-services`
+  ) {
+    return saveBathhouseConfigurationServicesMock(request);
   }
 
   return next(request);

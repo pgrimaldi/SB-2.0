@@ -27,11 +27,17 @@
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
+        [disabled]="isSaving()"
         (clicked)="cancel()"
       >
         {{ 'management.settings.bathhouse_configuration.services.cancel' | translate }}
       </app-button>
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [isLoading]="isSaving()"
+        (clicked)="save()"
+      >
         {{ 'management.settings.bathhouse_configuration.services.save' | translate }}
       </app-button>
     } @else {

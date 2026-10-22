@@ -5,7 +5,7 @@ import { BathhouseGeneralInformation } from '../../../entities/settings/bathhous
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden } from '../errors/problem.mock';
+import { forbidden, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
@@ -566,6 +566,7 @@ const SERVICES: readonly {
 ];
 
 let generalInformation = new BathhouseGeneralInformation();
+let idOfferedServices = new Set<number>();
 
 /**
  * `GET /api/catalog/bathhouse-configuration-general?idProperty=…`: the general information of the
@@ -590,8 +591,8 @@ export const bathhouseConfigurationGeneralMock = (
 /**
  * `GET /api/catalog/bathhouse-configuration-services?idProperty=…`: every service of the catalogue,
  * in the order of the categories and then of the services, with the name in the language of
- * `Accept-Language`; none offered yet. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `Accept-Language`; offered as last saved, none at the start. 401 without a valid access token;
+ * 403 for a missing or unknown property.
  */
 export const bathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -610,7 +611,7 @@ export const bathhouseConfigurationServicesMock = (
     name: names[Math.max(language, 0)],
     categoryCode,
     iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
-    isSelected: false,
+    isSelected: idOfferedServices.has(index + 1),
   }));
   return of(new HttpResponse({ status: 200, url: request.url, body: services })).pipe(delay(300));
 };
@@ -638,3 +639,34 @@ export const saveBathhouseConfigurationGeneralMock = (
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/**
+ * `POST /api/catalog/save-bathhouse-configuration-services` with `idProperty` and `services`, the
+ * services the property offers: keeps them (until the page is reloaded). 204 without a body; 401
+ * without a valid access token; 403 for a missing or unknown property; 404 for a service that does
+ * not exist.
+ */
+export const saveBathhouseConfigurationServicesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as { idProperty?: unknown; services?: unknown };
+  if (!propertyOf(body.idProperty)) {
+    return forbidden(request);
+  }
+  const services = Array.isArray(body.services) ? (body.services as BathhouseServiceItem[]) : [];
+  const idServices = services.map(({ idService }) => idService);
+  if (!idServices.every(isServiceId)) {
+    return resourceNotFound(request);
+  }
+  idOfferedServices = new Set(idServices);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+function isServiceId(value: unknown): value is number {
+  return (
+    typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= SERVICES.length
+  );
+}

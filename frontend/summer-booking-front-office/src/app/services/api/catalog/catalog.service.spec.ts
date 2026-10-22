@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { CatalogService } from './catalog.service';
 
 describe('CatalogService', () => {
@@ -79,6 +80,29 @@ describe('CatalogService', () => {
     expect(request.body).toEqual({
       ...new BathhouseGeneralInformation(),
       bathhouseName: 'Lido Sole',
+      idProperty: 'p1',
+    });
+    controller.verify();
+  });
+
+  it('should save the offered services as entities with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const service = Object.assign(new BathhouseServiceItem(), {
+      idService: 3,
+      name: 'Doccia',
+      isSelected: true,
+      unexpectedFlag: 'extra-field',
+    });
+
+    catalog.saveBathhouseConfigurationServices('p1', [service]).subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-services`,
+    ).request;
+    expect(request.body).toEqual({
+      services: [{ ...new BathhouseServiceItem(), idService: 3, name: 'Doccia', isSelected: true }],
       idProperty: 'p1',
     });
     controller.verify();

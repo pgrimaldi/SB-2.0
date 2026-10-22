@@ -45,4 +45,14 @@ export class CatalogService {
       ...onlyFieldsOf(BathhouseGeneralInformation, information),
       idProperty,
     });
+
+  /** Only the services the property offers. Answers 204 with no body. */
+  readonly saveBathhouseConfigurationServices = (
+    idProperty: string,
+    services: readonly BathhouseServiceItem[],
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-services`, {
+      services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
+      idProperty,
+    });
 }

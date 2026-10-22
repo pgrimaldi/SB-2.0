@@ -37,6 +37,10 @@ export class BathhouseConfigurationCacheBehaviour {
     return this.servicesAnswer;
   }
 
+  keepServices(services: BathhouseServiceItem[]): void {
+    this.servicesAnswer = of(services);
+  }
+
   countries(): Observable<ComboboxItem[]> {
     this.countriesAnswer ??= this.catalog.countriesCombobox().pipe(shareReplay(1));
     return this.countriesAnswer;

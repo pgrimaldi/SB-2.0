@@ -1716,6 +1716,50 @@ Stato: 200 OK.
 | `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
 | `isSelected` | boolean | `true` |
 
+### POST `/api/catalog/save-bathhouse-configuration-services`
+
+Informazioni stabilimento: salvataggio dei servizi.
+
+#### Payload
+
+```json
+{
+  "services": [
+    {
+      "idService": 1,
+      "name": "Accesso disabili",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "/media/icons/accesso-disabili.svg",
+      "isSelected": true
+    },
+    {
+      "idService": 3,
+      "name": "Doccia",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "/media/icons/doccia.svg",
+      "isSelected": true
+    }
+  ],
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 1, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 3, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/doccia.svg", "isSelected": true}]` |
+| `services[].idService` | number (intero) | `1` |
+| `services[].name` | string | `Accesso disabili` |
+| `services[].categoryCode` | string | `accessibility_comfort` |
+| `services[].iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
+| `services[].isSelected` | boolean | `true` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
