@@ -326,6 +326,12 @@
           "selected_periods_only_enabled": "Activar las reservas online solo en los periodos seleccionados",
           "selected_spots_only_enabled": "Activar las reservas online solo para los puestos seleccionados",
           "view_spots": "Ver puestos",
+          "half_day_enabled": "Activar la reserva de medio día",
+          "morning": "Mañana",
+          "afternoon": "Tarde",
+          "time_from": "De",
+          "time_to": "a",
+          "afternoon_conversion_enabled": "Hora de inicio de la conversión en reserva de tarde",
           "periods": {
             "hint": "Haz clic en dos fechas para elegir un intervalo",
             "selected": "Intervalos de fechas seleccionados:"

@@ -326,6 +326,12 @@
           "selected_periods_only_enabled": "Enable online bookings only in the selected periods",
           "selected_spots_only_enabled": "Enable online bookings only for the selected spots",
           "view_spots": "View spots",
+          "half_day_enabled": "Enable half-day booking",
+          "morning": "Morning",
+          "afternoon": "Afternoon",
+          "time_from": "From",
+          "time_to": "to",
+          "afternoon_conversion_enabled": "Start time of the conversion to afternoon booking",
           "periods": {
             "hint": "Click two dates to select a range",
             "selected": "Selected date ranges:"

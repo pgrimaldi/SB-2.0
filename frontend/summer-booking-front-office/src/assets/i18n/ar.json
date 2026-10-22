@@ -326,6 +326,12 @@
           "selected_periods_only_enabled": "تفعيل الحجز عبر الإنترنت في الفترات المحددة فقط",
           "selected_spots_only_enabled": "تفعيل الحجز عبر الإنترنت للأماكن المحددة فقط",
           "view_spots": "عرض الأماكن",
+          "half_day_enabled": "تفعيل الحجز لنصف يوم",
+          "morning": "الصباح",
+          "afternoon": "بعد الظهر",
+          "time_from": "من",
+          "time_to": "إلى",
+          "afternoon_conversion_enabled": "وقت بدء التحويل إلى حجز بعد الظهر",
           "periods": {
             "hint": "انقر على تاريخين لتحديد فترة",
             "selected": "فترات التواريخ المحددة:"

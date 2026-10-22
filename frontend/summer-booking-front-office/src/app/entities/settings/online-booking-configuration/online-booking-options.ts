@@ -6,4 +6,10 @@ export class OnlineBookingOptions {
   isSelectedPeriodsOnlyEnabled = false;
   selectedPeriods: OnlineBookingPeriod[] = [];
   isSelectedSpotsOnlyEnabled = false;
+  isHalfDayBookingEnabled = false;
+  morningStartTime: string | null = null;
+  morningEndTime: string | null = null;
+  afternoonStartTime: string | null = null;
+  afternoonEndTime: string | null = null;
+  isAfternoonConversionTimeEnabled = false;
 }

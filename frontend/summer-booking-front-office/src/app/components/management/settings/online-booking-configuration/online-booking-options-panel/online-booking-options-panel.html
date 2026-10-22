@@ -50,4 +50,53 @@
       </app-button>
     </div>
   </section>
+  <section class="online__booking__options__panel__section">
+    <app-toggle [formField]="draftForm.isHalfDayBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.half_day_enabled'
+          | translate
+      }}
+    </app-toggle>
+    @if (draftForm.isHalfDayBookingEnabled().value()) {
+      <div class="online__booking__options__panel__times">
+        @for (halfDay of halfDays; track halfDay.label) {
+          <app-form-row>
+            <span appFormRowLabel>{{ halfDay.label | translate }}</span>
+            <div class="online__booking__options__panel__pair">
+              <span class="online__booking__options__panel__word">
+                {{
+                  'management.settings.online_booking_configuration.booking_options.time_from'
+                    | translate
+                }}
+              </span>
+              <app-filled-time-field
+                class="online__booking__options__panel__time"
+                [pathIcon]="clockIcon"
+                [formField]="halfDay.start"
+              />
+            </div>
+            <div class="online__booking__options__panel__pair">
+              <span class="online__booking__options__panel__word">
+                {{
+                  'management.settings.online_booking_configuration.booking_options.time_to'
+                    | translate
+                }}
+              </span>
+              <app-filled-time-field
+                class="online__booking__options__panel__time"
+                [pathIcon]="clockIcon"
+                [formField]="halfDay.end"
+              />
+            </div>
+          </app-form-row>
+        }
+      </div>
+    }
+    <app-toggle [formField]="draftForm.isAfternoonConversionTimeEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.afternoon_conversion_enabled'
+          | translate
+      }}
+    </app-toggle>
+  </section>
 </app-side-panel>

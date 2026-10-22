@@ -326,6 +326,12 @@
           "selected_periods_only_enabled": "Abilita le prenotazioni online solo nei periodi selezionati",
           "selected_spots_only_enabled": "Abilita le prenotazioni online solo per le postazioni selezionate",
           "view_spots": "Vedi postazioni",
+          "half_day_enabled": "Abilita prenotazione mezza giornata",
+          "morning": "Mattina",
+          "afternoon": "Pomeriggio",
+          "time_from": "Dalle",
+          "time_to": "alle",
+          "afternoon_conversion_enabled": "Orario di inizio conversione in prenotazione pomeridiana",
           "periods": {
             "hint": "Clicca due date per selezionare un intervallo",
             "selected": "Intervalli di date selezionati:"

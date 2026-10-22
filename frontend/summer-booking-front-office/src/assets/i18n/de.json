@@ -326,6 +326,12 @@
           "selected_periods_only_enabled": "Online-Buchungen nur in den gewählten Zeiträumen aktivieren",
           "selected_spots_only_enabled": "Online-Buchungen nur für die gewählten Plätze aktivieren",
           "view_spots": "Plätze anzeigen",
+          "half_day_enabled": "Halbtagesbuchung aktivieren",
+          "morning": "Vormittag",
+          "afternoon": "Nachmittag",
+          "time_from": "Von",
+          "time_to": "bis",
+          "afternoon_conversion_enabled": "Startzeit der Umwandlung in eine Nachmittagsbuchung",
           "periods": {
             "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
             "selected": "Gewählte Zeiträume:"

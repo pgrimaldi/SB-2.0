@@ -326,6 +326,12 @@
           "selected_periods_only_enabled": "仅在所选期间启用在线预订",
           "selected_spots_only_enabled": "仅为所选位置启用在线预订",
           "view_spots": "查看位置",
+          "half_day_enabled": "启用半天预订",
+          "morning": "上午",
+          "afternoon": "下午",
+          "time_from": "从",
+          "time_to": "至",
+          "afternoon_conversion_enabled": "转为下午预订的开始时间",
           "periods": {
             "hint": "点击两个日期以选择一个时间段",
             "selected": "已选日期区间："
