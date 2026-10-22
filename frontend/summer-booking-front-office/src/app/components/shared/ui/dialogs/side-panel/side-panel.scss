@@ -20,6 +20,23 @@
   animation-name: side-panel-in-rtl;
 }
 
+// On small screens: a popup in the middle, like the other popups with a form.
+.side__panel__panel.side__panel__popup {
+  @include mat.dialog-overrides(
+    (
+      container-shape: 0.25rem,
+    )
+  );
+
+  .mat-mdc-dialog-container {
+    animation: none;
+  }
+
+  .side__panel {
+    max-height: 90vh;
+  }
+}
+
 @keyframes side-panel-in {
   from {
     transform: translateX(100%);
@@ -68,6 +85,7 @@ app-side-panel {
 
 .side__panel__body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 0 1.5rem;
 }

@@ -12,15 +12,19 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { Button, ButtonAppearance, ButtonSize } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
 
+/** Portrait screens and phones, also held sideways: there the panel is a popup in the middle. */
+const SMALL_SCREEN = '(orientation: portrait), (max-width: 47.99rem), (max-height: 29.99rem)';
+
 export interface SidePanelTexts {
   cancel?: string;
   save?: string;
 }
 
 /**
- * Panel sliding in from the side of the page, for forms with many fields. It never closes by itself:
- * X, Annulla, Esc and a click outside send `closeRequest`, and the caller closes it (e.g. after asking
- * about unsaved changes). What is put inside scrolls between the title and the buttons.
+ * Panel sliding in from the side of the page, for forms with many fields; on small screens a popup in
+ * the middle. It never closes by itself: X, Annulla, Esc and a click outside send `closeRequest`, and
+ * the caller closes it (e.g. after asking about unsaved changes). What is put inside scrolls between
+ * the title and the buttons.
  */
 @Component({
   selector: 'app-side-panel',
@@ -36,7 +40,7 @@ export class SidePanel extends BasePopup {
   readonly texts = input<SidePanelTexts | null>();
   readonly isLoading = input(false);
   readonly isSaveDisabled = input(false);
-  /** Width on landscape screens, as a percentage of the page; on portrait screens it takes it all. */
+  /** Width of the panel, as a percentage of the page; on small screens it is a popup instead. */
   readonly widthPercent = input(60);
   readonly closeRequest = output<void>();
   readonly save = output<void>();
@@ -62,9 +66,18 @@ export class SidePanel extends BasePopup {
   }
 
   protected dialogConfig(): MatDialogConfig {
-    const isPortrait = this.document.defaultView?.matchMedia('(orientation: portrait)').matches;
+    if (this.document.defaultView?.matchMedia(SMALL_SCREEN).matches) {
+      return {
+        width: 'min(44rem, 90vw)',
+        maxWidth: 'none',
+        maxHeight: '90vh',
+        panelClass: ['side__panel__panel', 'side__panel__popup'],
+        disableClose: true,
+        autoFocus: 'dialog',
+      };
+    }
     return {
-      width: isPortrait ? '100vw' : `${this.widthPercent()}vw`,
+      width: `${this.widthPercent()}vw`,
       maxWidth: 'none',
       height: '100%',
       maxHeight: 'none',
