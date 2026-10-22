@@ -342,6 +342,20 @@
             "fixed": "Fest"
           },
           "supplement_value": "Zuschlagswert",
+          "online_booking_block": "Sperre der Online-Buchungen",
+          "online_booking_blocks": {
+            "disabled": "Deaktiviert",
+            "three_hours_before": "3 Stunden vorher",
+            "five_hours_before": "5 Stunden vorher",
+            "eight_hours_before": "8 Stunden vorher",
+            "twelve_hours_before": "12 Stunden vorher",
+            "twenty_four_hours_before": "24 Stunden vorher",
+            "forty_eight_hours_before": "48 Stunden vorher",
+            "seventy_two_hours_before": "72 Stunden vorher"
+          },
+          "choose": "Auswählen",
+          "max_spot_per_booking": "Maximale Anzahl buchbarer Plätze pro Buchung",
+          "max_advance_booking_days": "Buchungen über n Tage ab heute hinaus sperren",
           "field_names": {
             "supplement_value": "des Zuschlags"
           },

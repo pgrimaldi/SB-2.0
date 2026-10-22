@@ -149,5 +149,45 @@
         </span>
       </app-form-row>
     }
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.online_booking_block'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [placeholder]="
+          'management.settings.online_booking_configuration.booking_options.choose' | translate
+        "
+        [options]="onlineBookingBlockOptions()"
+        [formField]="draftForm.onlineBookingBlock"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.max_spot_per_booking'
+            | translate
+        }}
+      </span>
+      <app-filled-number-field
+        class="online__booking__options__panel__field"
+        [formField]="draftForm.maxSpotPerBookingQuantity"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.max_advance_booking_days'
+            | translate
+        }}
+      </span>
+      <app-filled-number-field
+        class="online__booking__options__panel__field"
+        [formField]="draftForm.maxAdvanceBookingDayQuantity"
+      />
+    </app-form-row>
   </section>
 </app-side-panel>

@@ -342,6 +342,20 @@
             "fixed": "ثابت"
           },
           "supplement_value": "قيمة الرسوم الإضافية",
+          "online_booking_block": "إيقاف الحجز عبر الإنترنت",
+          "online_booking_blocks": {
+            "disabled": "معطّل",
+            "three_hours_before": "قبل 3 ساعات",
+            "five_hours_before": "قبل 5 ساعات",
+            "eight_hours_before": "قبل 8 ساعات",
+            "twelve_hours_before": "قبل 12 ساعة",
+            "twenty_four_hours_before": "قبل 24 ساعة",
+            "forty_eight_hours_before": "قبل 48 ساعة",
+            "seventy_two_hours_before": "قبل 72 ساعة"
+          },
+          "choose": "اختر",
+          "max_spot_per_booking": "الحد الأقصى لعدد الأماكن في الحجز الواحد",
+          "max_advance_booking_days": "منع الحجز بعد n يوم من اليوم الحالي",
           "field_names": {
             "supplement_value": "الرسوم الإضافية"
           },

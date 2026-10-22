@@ -342,6 +342,20 @@
             "fixed": "Fisso"
           },
           "supplement_value": "Valore supplemento",
+          "online_booking_block": "Blocco prenotazioni online",
+          "online_booking_blocks": {
+            "disabled": "Disabilitato",
+            "three_hours_before": "3 ore prima",
+            "five_hours_before": "5 ore prima",
+            "eight_hours_before": "8 ore prima",
+            "twelve_hours_before": "12 ore prima",
+            "twenty_four_hours_before": "24 ore prima",
+            "forty_eight_hours_before": "48 ore prima",
+            "seventy_two_hours_before": "72 ore prima"
+          },
+          "choose": "Seleziona",
+          "max_spot_per_booking": "Numero massimo di postazioni prenotabili nella stessa prenotazione",
+          "max_advance_booking_days": "Blocca prenotazioni oltre n° giorni dal giorno corrente",
           "field_names": {
             "supplement_value": "del supplemento"
           },

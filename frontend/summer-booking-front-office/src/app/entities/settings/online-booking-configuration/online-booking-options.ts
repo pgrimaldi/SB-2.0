@@ -1,3 +1,4 @@
+import { OnlineBookingBlock } from '../../enums/online-booking-block';
 import { SupplementType } from '../../enums/supplement-type';
 import { OnlineBookingPeriod } from './online-booking-period';
 
@@ -18,4 +19,7 @@ export class OnlineBookingOptions {
   isSharingEnabled = false;
   supplementType = SupplementType.None;
   supplementValue: number | null = null;
+  onlineBookingBlock: OnlineBookingBlock | null = null;
+  maxSpotPerBookingQuantity: number | null = null;
+  maxAdvanceBookingDayQuantity: number | null = null;
 }

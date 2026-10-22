@@ -342,6 +342,20 @@
             "fixed": "Fixed"
           },
           "supplement_value": "Supplement value",
+          "online_booking_block": "Online booking cut-off",
+          "online_booking_blocks": {
+            "disabled": "Disabled",
+            "three_hours_before": "3 hours before",
+            "five_hours_before": "5 hours before",
+            "eight_hours_before": "8 hours before",
+            "twelve_hours_before": "12 hours before",
+            "twenty_four_hours_before": "24 hours before",
+            "forty_eight_hours_before": "48 hours before",
+            "seventy_two_hours_before": "72 hours before"
+          },
+          "choose": "Select",
+          "max_spot_per_booking": "Maximum number of spots bookable in the same booking",
+          "max_advance_booking_days": "Block bookings beyond n days from the current day",
           "field_names": {
             "supplement_value": "of the supplement"
           },

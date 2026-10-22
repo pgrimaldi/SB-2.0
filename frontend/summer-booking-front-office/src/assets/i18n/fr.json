@@ -342,6 +342,20 @@
             "fixed": "Fixe"
           },
           "supplement_value": "Valeur du supplément",
+          "online_booking_block": "Blocage des réservations en ligne",
+          "online_booking_blocks": {
+            "disabled": "Désactivé",
+            "three_hours_before": "3 heures avant",
+            "five_hours_before": "5 heures avant",
+            "eight_hours_before": "8 heures avant",
+            "twelve_hours_before": "12 heures avant",
+            "twenty_four_hours_before": "24 heures avant",
+            "forty_eight_hours_before": "48 heures avant",
+            "seventy_two_hours_before": "72 heures avant"
+          },
+          "choose": "Sélectionner",
+          "max_spot_per_booking": "Nombre maximum de places réservables dans une même réservation",
+          "max_advance_booking_days": "Bloquer les réservations au-delà de n jours à partir d'aujourd'hui",
           "field_names": {
             "supplement_value": "du supplément"
           },

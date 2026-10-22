@@ -19,6 +19,7 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { greaterThan } from '../../../../shared/forms/validators';
@@ -35,7 +36,29 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 interface BookingOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
+  online_booking_blocks: Record<OnlineBookingBlockKey, string>;
 }
+
+type OnlineBookingBlockKey =
+  | 'disabled'
+  | 'three_hours_before'
+  | 'five_hours_before'
+  | 'eight_hours_before'
+  | 'twelve_hours_before'
+  | 'twenty_four_hours_before'
+  | 'forty_eight_hours_before'
+  | 'seventy_two_hours_before';
+
+const ONLINE_BOOKING_BLOCK_KEYS: Readonly<Record<OnlineBookingBlock, OnlineBookingBlockKey>> = {
+  [OnlineBookingBlock.Disabled]: 'disabled',
+  [OnlineBookingBlock.ThreeHoursBefore]: 'three_hours_before',
+  [OnlineBookingBlock.FiveHoursBefore]: 'five_hours_before',
+  [OnlineBookingBlock.EightHoursBefore]: 'eight_hours_before',
+  [OnlineBookingBlock.TwelveHoursBefore]: 'twelve_hours_before',
+  [OnlineBookingBlock.TwentyFourHoursBefore]: 'twenty_four_hours_before',
+  [OnlineBookingBlock.FortyEightHoursBefore]: 'forty_eight_hours_before',
+  [OnlineBookingBlock.SeventyTwoHoursBefore]: 'seventy_two_hours_before',
+};
 
 @Component({
   selector: 'app-online-booking-options-panel',
@@ -119,6 +142,14 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
       { value: SupplementType.Percentage, label: this.texts()?.supplement_types.percentage ?? '' },
       { value: SupplementType.Fixed, label: this.texts()?.supplement_types.fixed ?? '' },
     ],
+  );
+  protected readonly onlineBookingBlockOptions = computed<
+    readonly SelectOption<OnlineBookingBlock>[]
+  >(() =>
+    Object.values(OnlineBookingBlock).map((value) => ({
+      value,
+      label: this.texts()?.online_booking_blocks[ONLINE_BOOKING_BLOCK_KEYS[value]] ?? '',
+    })),
   );
 
   constructor() {

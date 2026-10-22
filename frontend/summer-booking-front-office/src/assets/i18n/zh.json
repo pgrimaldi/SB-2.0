@@ -342,6 +342,20 @@
             "fixed": "固定"
           },
           "supplement_value": "附加费金额",
+          "online_booking_block": "在线预订截止",
+          "online_booking_blocks": {
+            "disabled": "已停用",
+            "three_hours_before": "提前 3 小时",
+            "five_hours_before": "提前 5 小时",
+            "eight_hours_before": "提前 8 小时",
+            "twelve_hours_before": "提前 12 小时",
+            "twenty_four_hours_before": "提前 24 小时",
+            "forty_eight_hours_before": "提前 48 小时",
+            "seventy_two_hours_before": "提前 72 小时"
+          },
+          "choose": "请选择",
+          "max_spot_per_booking": "同一预订中可预订的最大位置数",
+          "max_advance_booking_days": "禁止预订距今天超过 n 天的日期",
           "field_names": {
             "supplement_value": "附加费"
           },
