@@ -364,6 +364,14 @@
             "contacts_only": "Solo contactos"
           },
           "max_bookings_per_day": "Máx. reservas por día",
+          "good_to_know": {
+            "title": "Conviene saber",
+            "description": "La información introducida en este campo será visible para el cliente antes de reservar."
+          },
+          "useful_information": {
+            "title": "Información útil",
+            "description": "La información introducida en este campo será visible para los clientes en la página del establecimiento."
+          },
           "legend": {
             "title": "Configurar leyenda",
             "add": "Añadir elemento",

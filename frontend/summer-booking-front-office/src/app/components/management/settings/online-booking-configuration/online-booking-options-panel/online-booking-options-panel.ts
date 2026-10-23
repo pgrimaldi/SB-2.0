@@ -37,6 +37,7 @@ import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTimeField } from '../../../../shared/ui/inputs/filled-time-field/filled-time-field';
+import { RichTextField } from '../../../../shared/ui/inputs/rich-text-field/rich-text-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
@@ -92,6 +93,7 @@ const ONLINE_BOOKING_BLOCK_KEYS: Readonly<Record<OnlineBookingBlock, OnlineBooki
     FormRowLabel,
     IconButton,
     PeriodCalendar,
+    RichTextField,
     SectionTitle,
     SidePanel,
     Toggle,
@@ -125,6 +127,15 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   protected readonly addIcon = ['/assets/images/OnlineBookingConfiguration_AddRule.svg'] as const;
   protected readonly removeIcon = [
     '/assets/images/OnlineBookingConfiguration_DeleteRule.svg',
+  ] as const;
+  /** [bold, italic, underline, bulleted list, numbered list, link]. */
+  protected readonly richTextIcons = [
+    '/assets/images/OnlineBookingConfiguration_Bold.svg',
+    '/assets/images/OnlineBookingConfiguration_Italic.svg',
+    '/assets/images/OnlineBookingConfiguration_Underline.svg',
+    '/assets/images/OnlineBookingConfiguration_BulletList.svg',
+    '/assets/images/OnlineBookingConfiguration_OrderedList.svg',
+    '/assets/images/OnlineBookingConfiguration_TextLink.svg',
   ] as const;
   /** Example rows until an API gives the rows and sectors of the property. */
   protected readonly sectorOptions: readonly SelectOption[] = [

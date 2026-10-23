@@ -364,6 +364,14 @@
             "contacts_only": "Nur Kontakte"
           },
           "max_bookings_per_day": "Max. Buchungen pro Tag",
+          "good_to_know": {
+            "title": "Gut zu wissen",
+            "description": "Die hier eingegebenen Informationen sieht der Kunde vor der Buchung."
+          },
+          "useful_information": {
+            "title": "Nützliche Informationen",
+            "description": "Die hier eingegebenen Informationen sehen die Kunden auf der Seite des Strandbads."
+          },
           "legend": {
             "title": "Legende festlegen",
             "add": "Element hinzufügen",

@@ -364,6 +364,14 @@
             "contacts_only": "Solo contatti"
           },
           "max_bookings_per_day": "Max prenotazioni per giorno",
+          "good_to_know": {
+            "title": "Da sapere",
+            "description": "Le informazioni inserite in questo campo saranno visibili al cliente prima di effettuare la prenotazione."
+          },
+          "useful_information": {
+            "title": "Informazioni utili",
+            "description": "Le informazioni inserite in questo campo saranno visibili ai clienti sulla pagina dello stabilimento."
+          },
           "legend": {
             "title": "Imposta legenda",
             "add": "Aggiungi elemento",

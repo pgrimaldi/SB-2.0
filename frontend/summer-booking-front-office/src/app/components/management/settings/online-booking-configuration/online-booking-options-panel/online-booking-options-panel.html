@@ -402,4 +402,42 @@
       </div>
     }
   </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.good_to_know.title'
+          | translate
+      "
+    />
+    <p class="online__booking__options__panel__description">
+      {{
+        'management.settings.online_booking_configuration.booking_options.good_to_know.description'
+          | translate
+      }}
+    </p>
+    <app-rich-text-field
+      [texts]="'rich_text' | translate"
+      [pathIcon]="richTextIcons"
+      [formField]="draftForm.goodToKnow"
+    />
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.useful_information.title'
+          | translate
+      "
+    />
+    <p class="online__booking__options__panel__description">
+      {{
+        'management.settings.online_booking_configuration.booking_options.useful_information.description'
+          | translate
+      }}
+    </p>
+    <app-rich-text-field
+      [texts]="'rich_text' | translate"
+      [pathIcon]="richTextIcons"
+      [formField]="draftForm.usefulInformation"
+    />
+  </section>
 </app-side-panel>

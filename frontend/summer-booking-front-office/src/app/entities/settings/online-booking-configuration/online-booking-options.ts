@@ -35,4 +35,6 @@ export class OnlineBookingOptions {
   isDepositAccepted = false;
   isPrepaidCardAccepted = false;
   legendItems: LegendItem[] = [];
+  goodToKnow: string | null = null;
+  usefulInformation: string | null = null;
 }
