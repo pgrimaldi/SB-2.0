@@ -24,6 +24,7 @@ import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { requiredText } from '../../../components/shared/forms/validators';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
+import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -34,7 +35,15 @@ import { SystemService } from '../../../services/api/system/system.service';
 
 @Component({
   selector: 'app-contact-support',
-  imports: [Button, FilledTextField, FilledTextarea, FormField, MessagePopup, TranslatePipe],
+  imports: [
+    Button,
+    FilledTextField,
+    FilledTextarea,
+    FormField,
+    MessagePopup,
+    SectionTitle,
+    TranslatePipe,
+  ],
   templateUrl: './contact-support.html',
   styleUrl: './contact-support.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +73,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   protected readonly phoneIcon = '/assets/images/ContactSupport_Phone.svg';
   protected readonly emailIcon = '/assets/images/ContactSupport_Email.svg';
   protected readonly clockIcon = '/assets/images/ContactSupport_Clock.svg';
+  protected readonly closeIcon = ['/assets/images/ContactSupport_Close.svg'] as const;
 
   private readonly contact = signal(new ContactSupportRequest());
   protected readonly contactForm = form(this.contact, (path) => {
@@ -94,7 +104,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     // Loaded again when the language changes: the support hours come translated by the server.
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.auth.user()?.propertyId;
       if (!idProperty) {
         return;
       }
@@ -120,7 +130,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
 
   protected send(event: Event): void {
     event.preventDefault();
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isLoading() || !idProperty) {
       return;
     }

@@ -17,10 +17,10 @@ describe('readBlobError', () => {
   it('should give the code of a Problem Details sent as a file', async () => {
     const error = new HttpErrorResponse({
       status: 403,
-      error: new Blob([JSON.stringify({ status: 403, code: 'operation.not_allowed' })]),
+      error: new Blob([JSON.stringify({ status: 403, code: 'auth.forbidden' })]),
     });
 
-    expect(await problemOf(error)).toEqual({ status: 403, code: 'operation.not_allowed' });
+    expect(await problemOf(error)).toEqual({ status: 403, code: 'auth.forbidden' });
   });
 
   it('should treat a body that is not JSON as an answer in another format', async () => {

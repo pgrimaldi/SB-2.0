@@ -1,0 +1,44 @@
+@if (label()) {
+  <label class="filled__date__field__label" [for]="id"
+    >{{ label() }}
+    @if (isMandatory()) {
+      <span class="filled__date__field__mandatory">*</span>
+    }
+  </label>
+}
+<mat-form-field
+  class="filled__date__field__control"
+  appearance="fill"
+  subscriptSizing="dynamic"
+  [class.filled__date__field__invalid]="!!error()"
+  [class.filled__date__field__locked]="isLocked()"
+>
+  @if (icons().list[0]; as icon) {
+    <span matIconPrefix class="filled__date__field__icon">
+      @if (icons().material) {
+        <mat-icon>{{ icon }}</mat-icon>
+      } @else {
+        <img [src]="icon" width="16" height="16" alt="" />
+      }
+    </span>
+  }
+  <input
+    matInput
+    readonly
+    [required]="isMandatory()"
+    [disabled]="disabled()"
+    [id]="id"
+    [name]="name() ?? ''"
+    [matDatepicker]="calendar"
+    [value]="day()"
+    [errorStateMatcher]="errorMatcher"
+    (click)="openCalendar(calendar)"
+    (keydown.enter)="openCalendar(calendar)"
+    (dateChange)="choose($event.value)"
+    (blur)="touch.emit()"
+  />
+</mat-form-field>
+<mat-datepicker #calendar />
+@if (error(); as error) {
+  <p class="filled__date__field__error">{{ error }}</p>
+}

@@ -1,0 +1,103 @@
+@use '@angular/material' as mat;
+
+// The popup renders in an overlay outside the component: these styles are global.
+.online__booking__services__options__popup__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0.25rem,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+}
+
+// The element in the page only holds the popup template: Material draws the popup above the page.
+app-online-booking-services-options-popup {
+  display: contents;
+}
+
+.online__booking__services__options__popup {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5625rem 1.5rem 1.75rem;
+}
+
+.online__booking__services__options__popup__title {
+  margin: 0;
+  margin-inline-end: 2rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.online__booking__services__options__popup__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.online__booking__services__options__popup__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+.online__booking__services__options__popup__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// A title: two lines high.
+.online__booking__services__options__popup__panel__title {
+  --rich-text-field-height: 3.5rem;
+}
+
+.online__booking__services__options__popup__description {
+  margin: 0;
+  color: var(--color__main__theme__two);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+// The select, and the value with its unit, as wide as each other on the right.
+.online__booking__services__options__popup__field,
+.online__booking__services__options__popup__value {
+  flex: var(--form-row-fill) 1 17.375rem;
+  min-width: 0;
+}
+
+.online__booking__services__options__popup__value {
+  flex-basis: calc(17.375rem - 1.25rem);
+}
+
+.online__booking__services__options__popup__unit {
+  min-width: 0.75rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: var(--filled-field-height, 1.625rem);
+}
+
+.online__booking__services__options__popup__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// The border of Annulla stays inside the 1.75rem height.
+.online__booking__services__options__popup__buttons {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}

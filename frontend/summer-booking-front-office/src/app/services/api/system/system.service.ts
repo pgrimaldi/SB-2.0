@@ -36,6 +36,12 @@ export class SystemService {
       onlyFieldsOf(EmailConfigurationRequest, request),
     );
 
+  /** The id of the Stripe account connected to the property; null while none is connected. */
+  readonly stripeInformation = (idProperty: string): Observable<string | null> =>
+    this.httpClient.get<string | null>(`${this.endpoint}/get-stripe-information`, {
+      params: { idProperty },
+    });
+
   /** The backend sends the message to the support team. Answers 204 with no body. */
   readonly contactSupport = (request: ContactSupportRequest): Observable<void> =>
     this.httpClient.post<void>(

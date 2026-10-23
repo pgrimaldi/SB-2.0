@@ -14,11 +14,13 @@ phases:
       - test "$BUILD_CONFIGURATION" = "dev" -o "$BUILD_CONFIGURATION" = "production"
       - test -n "$S3_BUCKET"
       - test -n "$CLOUDFRONT_DISTRIBUTION_ID"
+      # Resolved by CodeBuild from Secrets Manager. Never echo its value.
+      - test -n "$GOOGLE_MAPS_API_KEY_DEV"
   build:
     commands:
       # Lint, types of the tests and unit tests first: when one fails nothing is built or published.
       - npm run verify --prefix frontend/summer-booking-front-office
-      - npm run build --prefix frontend/summer-booking-front-office -- --configuration "$BUILD_CONFIGURATION"
+      - npm run build:codebuild --prefix frontend/summer-booking-front-office
   post_build:
     commands:
       # CodeBuild runs post_build even when the build fails: never publish a broken or partial build.

@@ -31,9 +31,11 @@ function gregorianWithWesternDigits(tag: string): string {
 
 /** For Material's native date adapter: the browser (Intl) writes dates as each language does. */
 export const DATE_FORMATS: MatDateFormats = {
-  parse: { dateInput: null },
+  parse: { dateInput: null, timeInput: null },
   display: {
     dateInput: { day: '2-digit', month: '2-digit', year: 'numeric' },
+    timeInput: { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' },
+    timeOptionLabel: { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' },
     monthLabel: { month: 'short' },
     monthYearLabel: { month: 'short', year: 'numeric' },
     dateA11yLabel: { day: 'numeric', month: 'long', year: 'numeric' },

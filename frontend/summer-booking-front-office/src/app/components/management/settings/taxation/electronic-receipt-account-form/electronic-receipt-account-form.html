@@ -25,6 +25,7 @@
     <app-filled-text-field
       [style.grid-column]="'span ' + item.columns"
       [label]="'management.settings.taxation.receipt.account.' + item.key | translate"
+      [isMandatory]="!item.isSecretSaved?.()"
       [isPasswordField]="item.isSecret"
       [pathIcon]="item.isSecret ? eyeIcons : null"
       [autocomplete]="item.isSecret ? 'new-password' : undefined"
@@ -68,6 +69,7 @@
       class="electronic__receipt__account__form__save"
       [size]="ButtonSize.Small"
       [isLoading]="isLoading()"
+      [disabled]="accountForm().invalid()"
       (clicked)="save()"
     >
       {{ 'management.settings.taxation.receipt.account.save' | translate }}

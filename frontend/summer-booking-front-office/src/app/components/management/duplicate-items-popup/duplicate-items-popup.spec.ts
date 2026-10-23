@@ -32,7 +32,7 @@ describe('DuplicateItemsPopup', () => {
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(DuplicateItemsPopupHost);
@@ -78,7 +78,7 @@ describe('DuplicateItemsPopup', () => {
           () =>
             new HttpErrorResponse({
               status: 400,
-              error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+              error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
             }),
         );
     });

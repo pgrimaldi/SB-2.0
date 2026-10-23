@@ -18,38 +18,18 @@ app-add-printer-item-popup {
 }
 
 .add__printer__item__popup {
-  position: relative;
   display: flex;
   flex-direction: column;
   padding: 0.5625rem 1.5rem 1.75rem;
 }
 
 .add__printer__item__popup__title {
-  margin: 0 2rem 1.375rem 0;
+  margin: 0 0 1.375rem;
+  margin-inline-end: 2rem;
   color: var(--color__main__theme__one);
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.25rem;
-}
-
-.add__printer__item__popup__close {
-  position: absolute;
-  top: 0.25rem;
-  inset-inline-end: 0.25rem;
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 0.25rem;
-  background: none;
-  cursor: pointer;
-
-  img {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
 }
 
 .add__printer__item__popup__fields {

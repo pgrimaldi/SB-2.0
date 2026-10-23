@@ -22,24 +22,27 @@ export class ValidationTextBehaviour {
   private readonly language = toSignal(this.translate.onLangChange, { initialValue: null });
 
   message(field: FieldTree<unknown>, fieldNameKey?: string): Signal<string | null> {
-    return computed(() => {
-      const state = field();
-      const [error] = state.errors();
-      if (!error || !(state.dirty() || state.touched())) {
-        return null;
-      }
-      this.language();
-      if (isApiError(error)) {
-        return this.errorText.instant(error.code, error.args);
-      }
-      const values = Object.fromEntries(
-        Object.entries(error).filter(([property]) => !NOT_VALUES.has(property)),
-      );
-      return this.translate.instant(`invalidate.${error.kind}`, {
-        ...values,
-        ...(fieldNameKey ? { field: this.translate.instant(fieldNameKey) } : {}),
-      }) as string;
-    });
+    return computed(() => this.text(field, fieldNameKey));
+  }
+
+  /** The same text, read where a signal per field cannot be kept (e.g. the items of a list). */
+  text(field: FieldTree<unknown>, fieldNameKey?: string): string | null {
+    const state = field();
+    const [error] = state.errors();
+    if (!error || !(state.dirty() || state.touched())) {
+      return null;
+    }
+    this.language();
+    if (isApiError(error)) {
+      return this.errorText.instant(error.code, error.args);
+    }
+    const values = Object.fromEntries(
+      Object.entries(error).filter(([property]) => !NOT_VALUES.has(property)),
+    );
+    return this.translate.instant(`invalidate.${error.kind}`, {
+      ...values,
+      ...(fieldNameKey ? { field: this.translate.instant(fieldNameKey) } : {}),
+    }) as string;
   }
 }
 

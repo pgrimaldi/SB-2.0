@@ -2,55 +2,47 @@
 
 Attività di sicurezza ancora da fare. Le voci si decidono insieme prima di implementarle; una volta completate si rimuovono da questo file.
 
-Aggiornato al 08/10/2026.
+Aggiornato al 22/10/2026.
+
+## Revoca della vecchia chiave Google Maps (22/10/2026)
+
+La chiave precedentemente nei file `environment` è stata pubblicata anche nella cronologia Git. Il codice ora riceve una nuova chiave da Secrets Manager attraverso CodeBuild, senza salvarla nei sorgenti; la chiave resta necessariamente visibile nel browser. La nuova chiave è stata creata dall'utente con restrizioni al dominio CloudFront DEV e alla Maps JavaScript API; configurati anche riferimento del segreto e permesso IAM di lettura.
+
+Deploy completato e funzionamento della mappa confermato dall'utente il 22/10/2026, dopo l'aggiornamento CSP descritto in `README_DEPLOY.md`. Resta da confermare l'eliminazione della vecchia chiave, dopo aver escluso altri utilizzatori: non considerarla revocata solo perché è stata rimossa dal codice. Non riscrivere la cronologia al posto della revoca. Monitorare utilizzo, quote e avvisi di budget (un avviso non è un blocco automatico della spesa). Procedura in `README_DEPLOY.md`, sezione "Chiave Google Maps tramite Secrets Manager". Fonte: [Google Maps API security best practices](https://developers.google.com/maps/api-security-best-practices).
 
 ## Content Security Policy severa (difesa contro XSS)
 
 ### Perché serve
 
-- Con la gestione dei token prevista un attacco XSS (script iniettato nella pagina) **non può leggere il refresh token**: l'access token è solo in memoria e il refresh token sarà in un cookie `HttpOnly` che JavaScript non legge (oggi il cookie reale non esiste ancora: lo creerà il backend; i mock lo simulano).
+- Con la gestione dei token prevista un attacco XSS (script iniettato nella pagina) **non può leggere il refresh token**: l'access token è solo in memoria e il refresh token è nel cookie `HttpOnly` che JavaScript non legge (dal 14/10/2026 lo crea il backend reale: `sb_rt` in sviluppo, `__Secure-sb_rt` in produzione, `SameSite=Strict`, Path `/api/identity`; in locale con i mock è simulato).
 - Questo non basta a proteggere la sessione: **finché la pagina è aperta**, uno script iniettato gira con gli stessi poteri dell'app, quindi può usare l'access token in memoria e anche chiedere nuovi token con il refresh (il browser allega il cookie da solo), chiamando le nostre API a nome dell'utente. `HttpOnly` impedisce la lettura del cookie, non le azioni di uno script nella stessa pagina.
 - Angular già protegge dall'XSS (escape delle interpolazioni, sanitizzazione di `[innerHTML]`, che usiamo in `app-i18n-text` per le traduzioni e nella pagina Fiscalizzazione per i termini HTML che arrivano dal backend). La CSP è la **seconda linea di difesa**: se per un errore nostro o di una dipendenza entrasse uno script, il browser si rifiuterebbe di eseguirlo o di mandare dati altrove.
 
-### Stato (07/10/2026, audit S04)
+### Stato (aggiornato al 22/10/2026, audit S04)
 
-- **Fatto nel frontend**: la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesa circa 9 KB, il costo sulla prima visualizzazione è minimo). La policy qui sotto, senza le due righe dei Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home in tutte le lingue, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): l'ha verificata l'utente su DEV in Report-Only.
+- **Fatto nel frontend** (07/10/2026): la build non inserisce più CSS critico e script inline in `index.html` (`optimization.styles.inlineCritical: false` nelle opzioni di build di `angular.json`; il CSS globale pesava circa 9 KB, il costo sulla prima visualizzazione è minimo). La baseline dell'epoca, senza Google né Trusted Types, è stata provata in locale sulla build di produzione con l'header attivo (non Report-Only): home in tutte le lingue, popup di accesso, chiamata a `/api`, traduzioni con HTML, service worker, nessuna violazione. L'area gestionale non era raggiungibile in quella prova (la build di produzione non ha i mock): l'ha verificata l'utente su DEV in Report-Only.
 - **Fatto su DEV** (07/10/2026): Report-Only senza violazioni (area gestionale compresa, verificata dall'utente), poi CSP attiva in CloudFront. **Da fare**: PROD, con la procedura di `README_DEPLOY.md` (sezione "Content Security Policy").
+- **Google Maps su DEV** (22/10/2026): policy attiva aggiornata, con script limitati a `maps.googleapis.com` e `maps.gstatic.com`, font Google, origini immagini Maps e worker `blob:`. `connect-src` include anche `fonts.googleapis.com` e `fonts.gstatic.com` per i `fetch` del service worker. L'utente ha confermato il funzionamento; header finali verificati con richieste `HEAD` su pagina e worker. Valore da usare e procedura di verifica in `README_DEPLOY.md`: la precedente policy solo `'self'` non basta più.
 - **Decisioni prese**: niente `autoCsp` né nonce (policy semplice, senza hash da ricalcolare); `style-src 'unsafe-inline'` accettato, perché Angular e Material inseriscono gli stili a runtime; Trusted Types e raccolta dei report rimandati (vedi sotto).
 
 ### Cosa fare
 
 1. **Inviare la CSP come header HTTP** da CloudFront, nella stessa *response headers policy* già usata per gli altri header (vedi sotto), non con un tag `<meta>`: alcune direttive (`frame-ancestors`, report) nel `<meta>` non funzionano.
 2. **Partire in sola osservazione**: prima `Content-Security-Policy-Report-Only` (violazioni lette nella console del browser; l'endpoint dei report è ancora aperto, vedi sotto), poi, dopo qualche giorno senza violazioni inattese, passare a `Content-Security-Policy`.
-3. **Policy di partenza** pensata per l'app di oggi. Tutto viene dal nostro dominio: script, stili, font (`@font-face` locale), immagini, traduzioni JSON, API `/api`, service worker e manifest.
-
-   ```text
-   default-src 'self';
-   script-src 'self';
-   style-src 'self' 'unsafe-inline';
-   img-src 'self' data:;
-   font-src 'self';
-   connect-src 'self';
-   worker-src 'self';
-   manifest-src 'self';
-   object-src 'none';
-   base-uri 'self';
-   form-action 'self';
-   frame-ancestors 'none';
-   upgrade-insecure-requests;
-   require-trusted-types-for 'script';
-   trusted-types angular angular#bundler;
-   ```
-
+3. **Valore di riferimento**: usare la policy completa nella sezione "Content Security Policy" di `README_DEPLOY.md`, che include le eccezioni Maps confermate su DEV il 22/10/2026. Non ripristinare la vecchia baseline solo `'self'` e non copiare senza verifica l'allowlist generica di Google. Le direttive Trusted Types (`require-trusted-types-for 'script'` e `trusted-types`) sono proposte ancora da testare, non parte della policy attiva.
 4. **Verificare** ogni pagina in IT/EN (home, login, gestionale, magazzino, datepicker, service worker) con la console del browser aperta, e la policy con CSP Evaluator.
 
 ### Ancora aperto
 
 - **CSS critico inline**: deciso il 07/10/2026, inlining disattivato (vedi "Stato"). Le alternative scartate erano `security.autoCsp` (hash degli script inline calcolati in build; l'header CloudFront non dovrebbe contenere `default-src` né `script-src`) e un nonce per risposta (`ngCspNonce`, richiede Lambda@Edge). Se in futuro si riattiva l'inlining, la build torna a mettere uno script inline e la policy va rivista.
 - **`style-src 'unsafe-inline'`**: accettato consapevolmente il 07/10/2026; l'alternativa sarebbe il nonce per risposta.
-- **Trusted Types** (`require-trusted-types-for 'script'`): Angular li supporta. Vanno provati in Report-Only perché bloccano anche le librerie che scrivono HTML nel DOM. Nei browser che non li supportano l'app funziona comunque.
+- **Trusted Types** (`require-trusted-types-for 'script'`): Angular li supporta. Vanno provati in Report-Only perché bloccano anche le librerie che scrivono HTML nel DOM. Nei browser che non li supportano l'app funziona comunque. Va provato anche il caricamento della mappa: `GoogleMapsBehaviour` scrive l'indirizzo di uno `<script>`, che con i Trusted Types attivi richiede una policy apposita.
 - **Endpoint dei report**: serve un indirizzo che raccolga le violazioni (backend nostro o servizio esterno).
-- **Servizi esterni futuri** (pagamenti Stripe, mappe, analytics, font esterni…): ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
+- **Servizi esterni**: ognuno va aggiunto esplicitamente alla policy, solo con i domini che la sua documentazione indica.
+  - **Google Maps** (dal 21/10/2026, tab Media di Informazioni stabilimento): eccezioni attive su DEV dal 22/10/2026, valore esatto in `README_DEPLOY.md`. Non sono stati autorizzati domini con caratteri jolly, `blob:`, `'unsafe-inline'` o `'unsafe-eval'` in `script-src`; restano i caratteri jolly nelle sole immagini e `blob:` nei worker. Ancora da valutare: restringere le origini delle immagini a quelle effettivamente usate e una CSP strict con nonce per risposta, raccomandata da Google; nuove funzioni Maps possono richiedere ulteriori origini, da verificare senza allargamenti generici. La chiave resta pubblica per natura: restrizioni sui nostri domini e sulla sola Maps JavaScript API, quote e avvisi di budget. Fonti: [guida CSP Maps](https://developers.google.com/maps/documentation/javascript/content-security-policy), [domini Maps](https://developers.google.com/maps/domains), [connect-src e fetch](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src).
+  - **Stripe Connect**: il bottone della pagina Prenotazioni online porta a `connect.stripe.com` cambiando pagina, senza script né chiamate di Stripe: nessuna direttiva da aggiungere.
+  - **Foto e PDF della tab Media**: se arriveranno da un dominio diverso dal nostro (S3/CloudFront, SharePoint), le foto richiedono quel dominio in `img-src`; i PDF si aprono in una nuova scheda e non richiedono direttive. Il frontend accetta solo link https o del nostro dominio.
+  - **Analytics, font esterni e altri**: da aggiungere quando serviranno, con lo stesso criterio.
 
 ### Altri header di sicurezza (response headers policy di CloudFront)
 

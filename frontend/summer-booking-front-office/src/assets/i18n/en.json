@@ -25,6 +25,16 @@
     "comparison_range": "Comparison range",
     "year_range": "From {{start}} to {{end}}"
   },
+  "rich_text": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bullet_list": "Bulleted list",
+    "ordered_list": "Numbered list",
+    "link": "Link",
+    "link_placeholder": "https://…",
+    "insert_link": "Insert"
+  },
   "table": {
     "empty": "The table contains no items",
     "paginator": {
@@ -70,20 +80,29 @@
     },
     "auth": {
       "invalid_credentials": "Invalid credentials",
-      "invalid_token": "Your session is no longer valid. Please sign in again.",
-      "session_expired": "Your session has expired. Please sign in again."
+      "session_expired": "Your session has expired. Please sign in again.",
+      "app_not_allowed": "Not authorized",
+      "too_many_attempts": "Too many attempts",
+      "unauthenticated": "The session is no longer valid. Sign in again.",
+      "forbidden": "You are not allowed to do this."
     },
     "validation": {
-      "invalid_request": "Some data are not valid. Please check and try again.",
-      "invalid_date": "The date is not valid.",
       "end_before_start": "The end date comes before the start date.",
-      "invalid_value": "The chosen value is not valid."
+      "failed": "Invalid request",
+      "required": "This field is required",
+      "invalid": "The value is not valid.",
+      "email": "The email address is not valid.",
+      "max_length": "At most {{max}} characters.",
+      "min_length": "At least {{min}} characters.",
+      "length": "From {{min}} to {{max}} characters.",
+      "out_of_range": "The value is out of the allowed range.",
+      "phone": "The phone number is not valid.",
+      "phone_prefix": "The phone prefix is not valid.",
+      "must_accept": "You must accept to continue.",
+      "invalid_file_type": "This file type is not allowed."
     },
     "resource": {
       "not_found": "This item no longer exists."
-    },
-    "operation": {
-      "not_allowed": "This operation is not allowed."
     }
   },
   "alert": {
@@ -121,7 +140,7 @@
     },
     "login": {
       "title": "Sign in",
-      "email": "Email",
+      "username": "Email or username",
       "password": "Password",
       "remember": "Remember me",
       "forgot": "Forgot password?",
@@ -192,6 +211,218 @@
         "email": "Email setup",
         "database": "Database",
         "help": "Help and guides"
+      },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "General Information",
+          "services": "Services",
+          "media": "Media"
+        },
+        "general_information": {
+          "bathhouse_name": "Property name",
+          "address": "Address",
+          "postal_code": "Postal code",
+          "city": "City",
+          "province": "Province",
+          "region": "Region",
+          "country": "Country",
+          "choose": "Select",
+          "phone": "Phone",
+          "whatsapp": "Whatsapp",
+          "email": "Email",
+          "website": "Website",
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "description": "Description",
+          "opening_hours": "Opening hours",
+          "opening_time": "From",
+          "closing_time": "To",
+          "cancellation": "Cancellation",
+          "cancellation_policies": {
+            "free_until_48_hours": "Free up to 48 hours before",
+            "free_until_24_hours": "Free up to 24 hours before"
+          },
+          "pets": "Pets",
+          "pets_options": {
+            "allowed": "Allowed",
+            "not_allowed": "Not allowed"
+          },
+          "regulation": "Rules",
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "Accessibility and comfort",
+            "sport_activities": "Sports and activities",
+            "food_extra": "Food and extras",
+            "beach": "Beach"
+          },
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "media": {
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save",
+          "position": {
+            "title": "Location",
+            "edit": "Edit",
+            "map_error": "The map could not be loaded"
+          },
+          "images": {
+            "title": "Images",
+            "main": "Main image",
+            "main_hint": "Drag the main image here or click to upload",
+            "gallery": "Image gallery",
+            "add": "Add image"
+          },
+          "virtual_tour": {
+            "title": "Virtual tour link",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "PDF documents",
+            "price_list": "Price list",
+            "menu": "Menu",
+            "no_file": "No file selected",
+            "open": "Open document",
+            "upload": "Upload"
+          }
+        }
+      },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Connect your Stripe account",
+          "subtitle": "Receive online booking payments simply and securely.",
+          "description": "Summer Booking uses Stripe to handle the online payments of your bookings, ensuring fast and secure transactions and the protection of personal and payment data.",
+          "configure_title": "Set up your Stripe account",
+          "configure_text": "Connect your existing Stripe account or create a new one to start receiving online booking payments.",
+          "configure": "Set up your Stripe account",
+          "how_it_works": "How it works:",
+          "step_1": "Sign in or sign up on Stripe",
+          "step_2": "Start receiving and making payments easily"
+        },
+        "options": {
+          "title": "Manage options",
+          "online_bookings": "Online booking options",
+          "online_booking_services": "Service booking options"
+        },
+        "iframe": {
+          "title": "Iframe code for your website",
+          "subtitle": "Let your guests book umbrellas, sunbeds and services directly from your website in a few clicks.",
+          "description": "Copy and paste the embed code into the section you want on your site. The widget syncs availability in real time with the map of the management system.",
+          "direct_link": "Direct link",
+          "copy": "Copy link"
+        },
+        "booking_options": {
+          "title": "Online booking options",
+          "cancel": "Cancel",
+          "save": "Save",
+          "online_booking_enabled": "Enable online bookings",
+          "map_spot_choice_enabled": "Enable spot choice on the map",
+          "selected_periods_only_enabled": "Enable online bookings only in the selected periods",
+          "selected_spots_only_enabled": "Enable online bookings only for the selected spots",
+          "view_spots": "View spots",
+          "half_day_enabled": "Enable half-day booking",
+          "morning": "Morning",
+          "afternoon": "Afternoon",
+          "time_from": "From",
+          "time_to": "to",
+          "afternoon_conversion_enabled": "Start time of the conversion to afternoon booking",
+          "current_day_booking_enabled": "Enable booking for the current day",
+          "seasonal_booking_enabled": "Enable seasonal bookings",
+          "sharing_enabled": "Enable Sharing",
+          "supplement_type": "Supplement type",
+          "supplement_types": {
+            "none": "No supplement",
+            "percentage": "Percentage",
+            "fixed": "Fixed"
+          },
+          "supplement_value": "Supplement value",
+          "online_booking_block": "Online booking cut-off",
+          "online_booking_blocks": {
+            "disabled": "Disabled",
+            "three_hours_before": "3 hours before",
+            "five_hours_before": "5 hours before",
+            "eight_hours_before": "8 hours before",
+            "twelve_hours_before": "12 hours before",
+            "twenty_four_hours_before": "24 hours before",
+            "forty_eight_hours_before": "48 hours before",
+            "seventy_two_hours_before": "72 hours before"
+          },
+          "choose": "Select",
+          "max_spot_per_booking": "Maximum number of spots bookable in the same booking",
+          "max_advance_booking_days": "Block bookings beyond n days from the current day",
+          "booking_confirmation_required": "Require booking confirmation",
+          "yes": "Yes",
+          "no": "No",
+          "online_booking_audience": "Allow online bookings to",
+          "online_booking_audiences": {
+            "all": "Everyone",
+            "contacts_only": "Contacts only"
+          },
+          "max_bookings_per_day": "Max bookings per day",
+          "payment_methods": {
+            "title": "Accepted payment methods",
+            "pay_now": "Pay now",
+            "pay_at_property": "Pay at the property (only for bookings within 7 days)",
+            "pay_at_property_without_card": "Pay at the property without a credit card",
+            "deposit": "50% deposit now, balance at the property",
+            "prepaid_card": "Pay with the property's prepaid card"
+          },
+          "booking_limits": {
+            "title": "Booking limits",
+            "add": "Add new rule",
+            "description": "Create booking rules to set a minimum and maximum number of bookable spots in a given period and in a given row/sector.",
+            "sector": "Row/sector",
+            "date_from": "From",
+            "date_to": "To",
+            "min": "Min",
+            "max": "Max"
+          },
+          "field_names": {
+            "supplement_value": "of the supplement"
+          },
+          "periods": {
+            "hint": "Click two dates to select a range",
+            "selected": "Selected date ranges:"
+          }
+        },
+        "services_options": {
+          "title": "Service booking options",
+          "cancel": "Cancel",
+          "save": "Save",
+          "enabled": "Enable online booking of services",
+          "supplement_type": "Supplement type",
+          "supplement_types": {
+            "none": "No supplement",
+            "percentage": "Percentage",
+            "fixed": "Fixed"
+          },
+          "supplement_value": "Supplement value",
+          "confirmation_required": "Require booking confirmation",
+          "field_names": {
+            "supplement_value": "of the supplement"
+          },
+          "payment_methods": {
+            "title": "Accepted payment methods",
+            "pay_now": "Pay now",
+            "pay_at_property": "Pay at the property (only for bookings within 7 days)",
+            "pay_at_property_without_card": "Pay at the property without a credit card",
+            "deposit": "50% deposit now, balance at the property",
+            "prepaid_card": "Pay with the property's prepaid card"
+          },
+          "panel_title": {
+            "title": "Title of the service booking panel"
+          },
+          "useful_information": {
+            "title": "Useful information",
+            "description": "The information entered in this field will be visible to customers on the property page."
+          }
+        }
       },
       "warehouse": {
         "title": "Warehouse settings",
@@ -372,6 +603,7 @@
             "city": "City",
             "country": "Country",
             "tax_code": "Tax code",
+            "revenue_agency_code": "Revenue Agency code",
             "vat_number": "VAT number",
             "pin": "PIN",
             "password": "Password",
@@ -554,6 +786,55 @@
             "title": "Duplicate discounts/vouchers",
             "text": "Do you want to duplicate the {{count}} selected discounts/vouchers?"
           }
+        },
+        "form": {
+          "title": "Add new discount/voucher",
+          "cancel": "Cancel",
+          "save": "Save",
+          "name": "Discount name",
+          "periods": {
+            "title": "Validity periods",
+            "add": "Add validity period",
+            "period": "Period",
+            "from": "From",
+            "to": "to",
+            "days_of_week": "Days of the week",
+            "time_slots": "Time slots",
+            "time_from": "From",
+            "time_to": "to",
+            "add_time_slot": "Add time slot",
+            "days": {
+              "monday": "Monday",
+              "tuesday": "Tuesday",
+              "wednesday": "Wednesday",
+              "thursday": "Thursday",
+              "friday": "Friday",
+              "saturday": "Saturday",
+              "sunday": "Sunday"
+            },
+            "all_days": "All",
+            "choose_days": "Select"
+          },
+          "field_names": {
+            "validity_period": "validity period",
+            "day_of_week": "day"
+          },
+          "options": {
+            "title": "Options",
+            "type": "Discount/voucher type",
+            "types": {
+              "percentage": "Percentage",
+              "fixed": "Amount"
+            },
+            "value": "Discount/voucher value",
+            "applies_to": "Apply discount/voucher to",
+            "scopes": {
+              "all": "Everything",
+              "services": "Services"
+            },
+            "max_uses": "Maximum number of uses",
+            "enabled": "Enable discount/voucher"
+          }
         }
       }
     }
@@ -671,7 +952,8 @@
       "smtp_password": {
         "retype": "You changed the connection settings: type the password again or enter a new one."
       }
-    }
+    },
+    "min_items": "At least {{count}} {{field}} must be defined"
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

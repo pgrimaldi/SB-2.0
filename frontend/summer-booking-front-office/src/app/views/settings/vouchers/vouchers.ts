@@ -9,6 +9,8 @@ import {
 } from '../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { VoucherAddItemPanel } from '../../../components/management/settings/vouchers/voucher-add-item-panel/voucher-add-item-panel';
+import { VoucherEditItemPanel } from '../../../components/management/settings/vouchers/voucher-edit-item-panel/voucher-edit-item-panel';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -58,6 +60,8 @@ const DISCOUNT_TYPE_KEYS: Record<DiscountType, keyof VouchersTexts['discount_typ
     Table,
     TableErrorPopup,
     TranslatePipe,
+    VoucherAddItemPanel,
+    VoucherEditItemPanel,
   ],
   templateUrl: './vouchers.html',
   styleUrl: './vouchers.scss',
@@ -70,6 +74,9 @@ export class Vouchers {
   private readonly dateLanguage = inject(DateLanguageBehaviour);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idVoucherToEdit = signal<string | null>(null);
   protected readonly idSelectedVouchers = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idVouchersToDelete = signal<readonly string[]>([]);
@@ -78,11 +85,16 @@ export class Vouchers {
   protected readonly idVouchersToDuplicate = signal<readonly string[]>([]);
   protected readonly voucherNameToDuplicate = signal<string | null>(null);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;
-  protected readonly errorIcon = ['/assets/images/Vouchers_Warning.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/Vouchers_Close.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/Vouchers_Close.svg',
+    '/assets/images/Vouchers_Warning.svg',
+  ] as const;
   /** In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create]. */
   protected readonly tableIcons = [
     '',
@@ -116,7 +128,7 @@ export class Vouchers {
     delete: ({ idVoucher, voucherName }) => idVoucher && this.askDelete([idVoucher], voucherName),
     duplicate: ({ idVoucher, voucherName }) =>
       idVoucher && this.askDuplicate([idVoucher], voucherName),
-    edit: () => {},
+    edit: ({ idVoucher }) => idVoucher && this.openEdit(idVoucher),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, VoucherRow> = (request) =>
@@ -181,6 +193,11 @@ export class Vouchers {
     this.idVouchersToDuplicate.set(idVouchers.map(String));
     this.voucherNameToDuplicate.set(voucherName);
     this.duplicating.set(true);
+  }
+
+  protected openEdit(idVoucher: string): void {
+    this.idVoucherToEdit.set(idVoucher);
+    this.editing.set(true);
   }
 
   /** Only after "Duplica selezione" (no name): the chosen rows are done with. */

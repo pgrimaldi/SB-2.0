@@ -21,15 +21,24 @@
     (loadError)="loadFailed.set(true)"
     (deleteSelected)="askDelete($event)"
     (duplicateSelected)="askDuplicate($event)"
+    (create)="adding.set(true)"
   />
 </main>
+
+<app-voucher-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" (added)="table.reload()" />
+<app-voucher-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idVoucher]="idVoucherToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idVouchersToDelete()"
   [itemName]="voucherNameToDelete()"
   translationKey="management.settings.vouchers.delete"
   [action]="deleteVouchers"
-  [pathIcon]="errorIcon"
+  [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
 />
@@ -38,12 +47,13 @@
   [itemName]="voucherNameToDuplicate()"
   translationKey="management.settings.vouchers.duplicate"
   [action]="duplicateVouchers"
-  [pathIcon]="errorIcon"
+  [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup
+  [pathIcon]="closeIcon"
   [title]="'table.load_error.title' | translate"
   [text]="'table.load_error.text' | translate"
   [texts]="'table.load_error' | translate"

@@ -1,22 +1,17 @@
 <ng-template #content>
   <div class="login__dialog">
-    <button
-      class="login__dialog__close"
-      type="button"
-      (click)="close()"
-    >
+    <button class="login__dialog__close" type="button" (click)="close()">
       <!-- Heroicons (MIT): x-mark. -->
       <svg viewBox="0 0 24 24"><path d="M6 18 18 6M6 6l12 12" /></svg>
     </button>
 
     <h2 class="login__dialog__title" appI18nText="hub.login.title"></h2>
 
-    <form class="login__dialog__form" (submit)="signIn($event)">
+    <form class="login__dialog__form" (submit)="login($event)">
       <app-text-field
         [attr.inert]="pending() ? '' : null"
-        [isEmailField]="true"
-        autocomplete="email"
-        [label]="'hub.login.email' | translate"
+        autocomplete="username"
+        [label]="'hub.login.username' | translate"
         [formField]="credentialsForm.username"
         [error]="usernameError()"
       />
@@ -37,11 +32,7 @@
       </div>
 
       @if (errorKey(); as errorKey) {
-        <p
-          class="login__dialog__error"
-          [appI18nText]="errorKey"
-          [params]="error()?.args"
-        ></p>
+        <p class="login__dialog__error" [appI18nText]="errorKey" [params]="error()?.args"></p>
       }
 
       <app-button

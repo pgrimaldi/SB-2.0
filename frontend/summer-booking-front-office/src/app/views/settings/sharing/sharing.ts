@@ -27,6 +27,7 @@ import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/chec
 import { greaterThan } from '../../../components/shared/forms/validators';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
+import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { Toggle } from '../../../components/shared/ui/toggles/toggle/toggle';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -43,6 +44,7 @@ import { SharingService } from '../../../services/api/sharing/sharing.service';
     FormField,
     I18nText,
     MessagePopup,
+    SectionTitle,
     Toggle,
     TranslatePipe,
   ],
@@ -57,7 +59,9 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
+
   protected readonly ButtonSize = ButtonSize;
+  protected readonly closeIcon = ['/assets/images/Sharing_Close.svg'] as const;
 
   private readonly information = signal(new SharingGeneralInformation());
   private readonly loaded = signal(false);
@@ -101,7 +105,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
     });
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.auth.user()?.propertyId;
       if (!idProperty) {
         return;
       }
@@ -128,7 +132,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!this.canSave() || !idProperty) {
       return;
     }

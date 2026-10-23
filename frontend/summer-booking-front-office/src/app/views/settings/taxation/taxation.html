@@ -74,7 +74,7 @@
       @if (receiptErrorMessage(); as receiptErrorMessage) {
         <p class="taxation__error">{{ receiptErrorMessage }}</p>
       } @else {
-        <div class="taxation__terms" [innerHTML]="receipt().termsAndConditions"></div>
+        <div class="taxation__terms" [innerHTML]="termsAndConditions()"></div>
       }
       <div class="taxation__choices">
         <app-checkbox
@@ -119,6 +119,7 @@
 </main>
 
 <app-confirm-popup
+  [pathIcon]="closeIcon"
   [title]="'management.settings.taxation.printer.delete.title' | translate"
   [text]="
     'management.settings.taxation.printer.delete.text'
@@ -129,8 +130,13 @@
   [(open)]="isDeletePrinterAsked"
   (confirmed)="deletePrinter()"
 />
-<app-add-printer-item-popup [(open)]="isAddPrinterOpen" (added)="printersTable.reload()" />
+<app-add-printer-item-popup
+  [pathIcon]="addPrinterCloseIcon"
+  [(open)]="isAddPrinterOpen"
+  (added)="printersTable.reload()"
+/>
 <app-table-error-popup
+  [pathIcon]="closeIcon"
   [title]="'table.load_error.title' | translate"
   [text]="'table.load_error.text' | translate"
   [texts]="'table.load_error' | translate"
@@ -142,6 +148,6 @@
   [title]="'alert.error_title' | translate"
   [text]="actionErrorMessage() ?? ''"
   [texts]="'alert' | translate"
-  [pathIcon]="actionErrorIcon"
+  [pathIcon]="alertIcons"
   [(open)]="isActionErrorShown"
 />

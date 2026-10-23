@@ -1,0 +1,356 @@
+<app-side-panel
+  [title]="'management.settings.online_booking_configuration.booking_options.title' | translate"
+  [texts]="'management.settings.online_booking_configuration.booking_options' | translate"
+  [pathIcon]="pathIcon()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <section class="online__booking__options__panel__section">
+    <app-toggle [formField]="draftForm.isOnlineBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.online_booking_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isMapSpotChoiceEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.map_spot_choice_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isSelectedPeriodsOnlyEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.selected_periods_only_enabled'
+          | translate
+      }}
+    </app-toggle>
+    @if (draftForm.isSelectedPeriodsOnlyEnabled().value()) {
+      <app-period-calendar
+        [texts]="
+          'management.settings.online_booking_configuration.booking_options.periods' | translate
+        "
+        [pathIcon]="calendarIcons"
+        [formField]="draftForm.selectedPeriods"
+      />
+    }
+    <div class="online__booking__options__panel__row">
+      <app-toggle [formField]="draftForm.isSelectedSpotsOnlyEnabled">
+        {{
+          'management.settings.online_booking_configuration.booking_options.selected_spots_only_enabled'
+            | translate
+        }}
+      </app-toggle>
+      <app-button
+        [size]="ButtonSize.Small"
+        [disabled]="!draftForm.isSelectedSpotsOnlyEnabled().value()"
+      >
+        {{
+          'management.settings.online_booking_configuration.booking_options.view_spots' | translate
+        }}
+      </app-button>
+    </div>
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-toggle [formField]="draftForm.isHalfDayBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.half_day_enabled'
+          | translate
+      }}
+    </app-toggle>
+    @if (draftForm.isHalfDayBookingEnabled().value()) {
+      <div class="online__booking__options__panel__times">
+        @for (halfDay of halfDays; track halfDay.label) {
+          <app-form-row>
+            <span appFormRowLabel>{{ halfDay.label | translate }}</span>
+            <div class="online__booking__options__panel__pair">
+              <span class="online__booking__options__panel__word">
+                {{
+                  'management.settings.online_booking_configuration.booking_options.time_from'
+                    | translate
+                }}
+              </span>
+              <app-filled-time-field
+                class="online__booking__options__panel__time"
+                [pathIcon]="clockIcon"
+                [formField]="halfDay.start"
+              />
+            </div>
+            <div class="online__booking__options__panel__pair">
+              <span class="online__booking__options__panel__word">
+                {{
+                  'management.settings.online_booking_configuration.booking_options.time_to'
+                    | translate
+                }}
+              </span>
+              <app-filled-time-field
+                class="online__booking__options__panel__time"
+                [pathIcon]="clockIcon"
+                [formField]="halfDay.end"
+              />
+            </div>
+          </app-form-row>
+        }
+      </div>
+    }
+    <app-toggle [formField]="draftForm.isAfternoonConversionTimeEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.afternoon_conversion_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isCurrentDayBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.current_day_booking_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isSeasonalBookingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.seasonal_booking_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-toggle [formField]="draftForm.isSharingEnabled">
+      {{
+        'management.settings.online_booking_configuration.booking_options.sharing_enabled'
+          | translate
+      }}
+    </app-toggle>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.supplement_type'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [options]="supplementTypeOptions()"
+        [formField]="draftForm.supplementType"
+      />
+    </app-form-row>
+    @if (hasSupplement()) {
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.online_booking_configuration.booking_options.supplement_value'
+              | translate
+          }}
+        </span>
+        <app-filled-number-field
+          class="online__booking__options__panel__value"
+          [isDecimal]="!isPercentage()"
+          [isCurrency]="!isPercentage()"
+          [formField]="draftForm.supplementValue"
+          [error]="supplementValueError()"
+        />
+        <span class="online__booking__options__panel__unit">
+          {{ isPercentage() ? '%' : '€' }}
+        </span>
+      </app-form-row>
+    }
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.online_booking_block'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [placeholder]="
+          'management.settings.online_booking_configuration.booking_options.choose' | translate
+        "
+        [options]="onlineBookingBlockOptions()"
+        [formField]="draftForm.onlineBookingBlock"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.max_spot_per_booking'
+            | translate
+        }}
+      </span>
+      <app-filled-number-field
+        class="online__booking__options__panel__field"
+        [formField]="draftForm.maxSpotPerBookingQuantity"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.max_advance_booking_days'
+            | translate
+        }}
+      </span>
+      <app-filled-number-field
+        class="online__booking__options__panel__field"
+        [formField]="draftForm.maxAdvanceBookingDayQuantity"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.booking_confirmation_required'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [options]="answerOptions()"
+        [value]="bookingConfirmation()"
+        (valueChange)="setBookingConfirmation($event)"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.online_booking_audience'
+            | translate
+        }}
+      </span>
+      <app-filled-select
+        class="online__booking__options__panel__field"
+        [options]="onlineBookingAudienceOptions()"
+        [formField]="draftForm.onlineBookingAudience"
+      />
+    </app-form-row>
+    <app-form-row>
+      <span appFormRowLabel>
+        {{
+          'management.settings.online_booking_configuration.booking_options.max_bookings_per_day'
+            | translate
+        }}
+      </span>
+      <app-filled-number-field
+        class="online__booking__options__panel__field"
+        [formField]="draftForm.maxBookingPerDayQuantity"
+      />
+    </app-form-row>
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.booking_limits.title'
+          | translate
+      "
+    >
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [pathIcon]="addRuleIcon"
+        (clicked)="addBookingLimitRule()"
+      >
+        {{
+          'management.settings.online_booking_configuration.booking_options.booking_limits.add'
+            | translate
+        }}
+      </app-button>
+    </app-section-title>
+    <p class="online__booking__options__panel__description">
+      {{
+        'management.settings.online_booking_configuration.booking_options.booking_limits.description'
+          | translate
+      }}
+    </p>
+    @for (rule of draftForm.bookingLimitRules; track rule; let ruleIndex = $index) {
+      <div class="online__booking__options__panel__rule">
+        <app-filled-select
+          class="online__booking__options__panel__sector"
+          [label]="
+            'management.settings.online_booking_configuration.booking_options.booking_limits.sector'
+              | translate
+          "
+          [placeholder]="
+            'management.settings.online_booking_configuration.booking_options.choose' | translate
+          "
+          [options]="sectorOptions"
+          [formField]="rule.idSector"
+        />
+        <div class="online__booking__options__panel__rule__dates">
+          <app-filled-date-field
+            class="online__booking__options__panel__date"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.date_from'
+                | translate
+            "
+            [pathIcon]="calendarIcon"
+            [formField]="rule.dateFrom"
+          />
+          <app-filled-date-field
+            class="online__booking__options__panel__date"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.date_to'
+                | translate
+            "
+            [pathIcon]="calendarIcon"
+            [formField]="rule.dateTo"
+          />
+        </div>
+        <div class="online__booking__options__panel__rule__quantities">
+          <app-filled-number-field
+            class="online__booking__options__panel__quantity"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.min'
+                | translate
+            "
+            [formField]="rule.minSpotQuantity"
+          />
+          <app-filled-number-field
+            class="online__booking__options__panel__quantity"
+            [label]="
+              'management.settings.online_booking_configuration.booking_options.booking_limits.max'
+                | translate
+            "
+            [formField]="rule.maxSpotQuantity"
+          />
+          <app-icon-button
+            [pathIcon]="removeRuleIcon"
+            (click)="removeBookingLimitRule(ruleIndex)"
+          />
+        </div>
+      </div>
+    }
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.payment_methods.title'
+          | translate
+      "
+    />
+    <div class="online__booking__options__panel__choices">
+      <app-checkbox [formField]="draftForm.isPayNowAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_now'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isPayAtPropertyAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_at_property'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isPayAtPropertyWithoutCardAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.pay_at_property_without_card'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isDepositAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.deposit'
+            | translate
+        }}
+      </app-checkbox>
+      <app-checkbox [formField]="draftForm.isPrepaidCardAccepted">
+        {{
+          'management.settings.online_booking_configuration.booking_options.payment_methods.prepaid_card'
+            | translate
+        }}
+      </app-checkbox>
+    </div>
+  </section>
+</app-side-panel>

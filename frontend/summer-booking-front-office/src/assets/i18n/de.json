@@ -25,6 +25,16 @@
     "comparison_range": "Vergleichszeitraum",
     "year_range": "Von {{start}} bis {{end}}"
   },
+  "rich_text": {
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "underline": "Unterstrichen",
+    "bullet_list": "Aufzählung",
+    "ordered_list": "Nummerierte Liste",
+    "link": "Link",
+    "link_placeholder": "https://…",
+    "insert_link": "Einfügen"
+  },
   "table": {
     "empty": "Die Tabelle enthält keine Einträge",
     "paginator": {
@@ -70,20 +80,29 @@
     },
     "auth": {
       "invalid_credentials": "Ungültige Zugangsdaten",
-      "invalid_token": "Ihre Sitzung ist nicht mehr gültig. Bitte melden Sie sich erneut an.",
-      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+      "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "app_not_allowed": "Nicht berechtigt",
+      "too_many_attempts": "Zu viele Versuche",
+      "unauthenticated": "Die Sitzung ist nicht mehr gültig. Bitte erneut anmelden.",
+      "forbidden": "Du hast keine Berechtigung für diesen Vorgang."
     },
     "validation": {
-      "invalid_request": "Einige Daten sind ungültig. Bitte prüfen Sie sie und versuchen Sie es erneut.",
-      "invalid_date": "Das Datum ist ungültig.",
       "end_before_start": "Das Enddatum liegt vor dem Startdatum.",
-      "invalid_value": "Der gewählte Wert ist ungültig."
+      "failed": "Ungültige Anfrage",
+      "required": "Dieses Feld ist erforderlich",
+      "invalid": "Der Wert ist ungültig.",
+      "email": "Die E-Mail-Adresse ist ungültig.",
+      "max_length": "Höchstens {{max}} Zeichen.",
+      "min_length": "Mindestens {{min}} Zeichen.",
+      "length": "{{min}} bis {{max}} Zeichen.",
+      "out_of_range": "Der Wert liegt außerhalb des zulässigen Bereichs.",
+      "phone": "Die Telefonnummer ist ungültig.",
+      "phone_prefix": "Die Vorwahl ist ungültig.",
+      "must_accept": "Du musst zustimmen, um fortzufahren.",
+      "invalid_file_type": "Dieser Dateityp ist nicht erlaubt."
     },
     "resource": {
       "not_found": "Dieser Eintrag existiert nicht mehr."
-    },
-    "operation": {
-      "not_allowed": "Vorgang nicht erlaubt."
     }
   },
   "alert": {
@@ -121,7 +140,7 @@
     },
     "login": {
       "title": "Anmelden",
-      "email": "E-Mail",
+      "username": "E-Mail oder Benutzername",
       "password": "Passwort",
       "remember": "Angemeldet bleiben",
       "forgot": "Passwort vergessen?",
@@ -177,7 +196,7 @@
     },
     "settings": {
       "menu": {
-        "property": "Informationen zum Betrieb",
+        "property": "Infos zum Strandbad",
         "users": "Benutzerverwaltung",
         "seasons": "Saisons und Zeiträume",
         "sectors": "Sektoren und Reihen",
@@ -192,6 +211,218 @@
         "email": "E-Mail-Konfiguration",
         "database": "Datenbank",
         "help": "Support und Anleitungen"
+      },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "Allgemeine Informationen",
+          "services": "Leistungen",
+          "media": "Medien"
+        },
+        "general_information": {
+          "bathhouse_name": "Name des Betriebs",
+          "address": "Adresse",
+          "postal_code": "Postleitzahl",
+          "city": "Stadt",
+          "province": "Provinz",
+          "region": "Region",
+          "country": "Land",
+          "choose": "Auswählen",
+          "phone": "Telefon",
+          "whatsapp": "Whatsapp",
+          "email": "E-Mail",
+          "website": "Website",
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "description": "Beschreibung",
+          "opening_hours": "Öffnungszeiten",
+          "opening_time": "Von",
+          "closing_time": "Bis",
+          "cancellation": "Stornierung",
+          "cancellation_policies": {
+            "free_until_48_hours": "Kostenlos bis 48 Std. vorher",
+            "free_until_24_hours": "Kostenlos bis 24 Std. vorher"
+          },
+          "pets": "Haustiere",
+          "pets_options": {
+            "allowed": "Erlaubt",
+            "not_allowed": "Nicht erlaubt"
+          },
+          "regulation": "Hausordnung",
+          "edit": "Bearbeiten",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "Barrierefreiheit und Komfort",
+            "sport_activities": "Sport und Aktivitäten",
+            "food_extra": "Gastronomie und Extras",
+            "beach": "Strand"
+          },
+          "edit": "Bearbeiten",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "media": {
+          "edit": "Bearbeiten",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "position": {
+            "title": "Standort",
+            "edit": "Bearbeiten",
+            "map_error": "Die Karte konnte nicht geladen werden"
+          },
+          "images": {
+            "title": "Bilder",
+            "main": "Hauptbild",
+            "main_hint": "Hauptbild hierher ziehen oder zum Hochladen klicken",
+            "gallery": "Bildergalerie",
+            "add": "Bild hinzufügen"
+          },
+          "virtual_tour": {
+            "title": "Link zur virtuellen Tour",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "PDF-Dokumente",
+            "price_list": "Preisliste",
+            "menu": "Speisekarte",
+            "no_file": "Keine Datei ausgewählt",
+            "open": "Dokument öffnen",
+            "upload": "Hochladen"
+          }
+        }
+      },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Verbinden Sie Ihr Stripe-Konto",
+          "subtitle": "Erhalten Sie Zahlungen für Online-Buchungen einfach und sicher.",
+          "description": "Summer Booking nutzt Stripe für die Online-Zahlungen Ihrer Buchungen, mit schnellen und sicheren Transaktionen und dem Schutz persönlicher Daten und Zahlungsdaten.",
+          "configure_title": "Stripe-Konto einrichten",
+          "configure_text": "Verbinden Sie Ihr bestehendes Stripe-Konto oder erstellen Sie ein neues, um Zahlungen für Online-Buchungen zu erhalten.",
+          "configure": "Stripe-Konto einrichten",
+          "how_it_works": "So funktioniert es:",
+          "step_1": "Bei Stripe anmelden oder registrieren",
+          "step_2": "Zahlungen einfach empfangen und tätigen"
+        },
+        "options": {
+          "title": "Optionen verwalten",
+          "online_bookings": "Optionen Online-Buchungen",
+          "online_booking_services": "Optionen Service-Buchungen"
+        },
+        "iframe": {
+          "title": "Iframe-Code für Ihre Website",
+          "subtitle": "Ihre Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf Ihrer Website.",
+          "description": "Kopieren Sie den Einbettungscode an die gewünschte Stelle Ihrer Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
+          "direct_link": "Direkter Link",
+          "copy": "Link kopieren"
+        },
+        "booking_options": {
+          "title": "Optionen Online-Buchungen",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "online_booking_enabled": "Online-Buchungen aktivieren",
+          "map_spot_choice_enabled": "Platzwahl auf dem Plan aktivieren",
+          "selected_periods_only_enabled": "Online-Buchungen nur in den gewählten Zeiträumen aktivieren",
+          "selected_spots_only_enabled": "Online-Buchungen nur für die gewählten Plätze aktivieren",
+          "view_spots": "Plätze anzeigen",
+          "half_day_enabled": "Halbtagesbuchung aktivieren",
+          "morning": "Vormittag",
+          "afternoon": "Nachmittag",
+          "time_from": "Von",
+          "time_to": "bis",
+          "afternoon_conversion_enabled": "Startzeit der Umwandlung in eine Nachmittagsbuchung",
+          "current_day_booking_enabled": "Buchung am selben Tag aktivieren",
+          "seasonal_booking_enabled": "Saisonbuchungen aktivieren",
+          "sharing_enabled": "Sharing aktivieren",
+          "supplement_type": "Zuschlagsart",
+          "supplement_types": {
+            "none": "Kein Zuschlag",
+            "percentage": "Prozentsatz",
+            "fixed": "Fest"
+          },
+          "supplement_value": "Zuschlagswert",
+          "online_booking_block": "Sperre der Online-Buchungen",
+          "online_booking_blocks": {
+            "disabled": "Deaktiviert",
+            "three_hours_before": "3 Stunden vorher",
+            "five_hours_before": "5 Stunden vorher",
+            "eight_hours_before": "8 Stunden vorher",
+            "twelve_hours_before": "12 Stunden vorher",
+            "twenty_four_hours_before": "24 Stunden vorher",
+            "forty_eight_hours_before": "48 Stunden vorher",
+            "seventy_two_hours_before": "72 Stunden vorher"
+          },
+          "choose": "Auswählen",
+          "max_spot_per_booking": "Maximale Anzahl buchbarer Plätze pro Buchung",
+          "max_advance_booking_days": "Buchungen über n Tage ab heute hinaus sperren",
+          "booking_confirmation_required": "Bestätigung anfordern",
+          "yes": "Ja",
+          "no": "Nein",
+          "online_booking_audience": "Online-Buchungen erlauben für",
+          "online_booking_audiences": {
+            "all": "Alle",
+            "contacts_only": "Nur Kontakte"
+          },
+          "max_bookings_per_day": "Max. Buchungen pro Tag",
+          "payment_methods": {
+            "title": "Akzeptierte Zahlungsarten",
+            "pay_now": "Jetzt bezahlen",
+            "pay_at_property": "Vor Ort bezahlen (nur für Buchungen innerhalb von 7 Tagen)",
+            "pay_at_property_without_card": "Vor Ort ohne Kreditkarte bezahlen",
+            "deposit": "50 % Anzahlung jetzt, Rest vor Ort",
+            "prepaid_card": "Mit der Prepaid-Karte des Strandbads bezahlen"
+          },
+          "booking_limits": {
+            "title": "Buchungslimits",
+            "add": "Neue Regel hinzufügen",
+            "description": "Lege Buchungsregeln fest, um eine minimale und maximale Anzahl buchbarer Plätze in einem bestimmten Zeitraum und in einer bestimmten Reihe bzw. einem Sektor festzulegen.",
+            "sector": "Reihe/Sektor",
+            "date_from": "Vom",
+            "date_to": "Bis",
+            "min": "Min",
+            "max": "Max"
+          },
+          "field_names": {
+            "supplement_value": "des Zuschlags"
+          },
+          "periods": {
+            "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
+            "selected": "Gewählte Zeiträume:"
+          }
+        },
+        "services_options": {
+          "title": "Optionen Service-Buchungen",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "enabled": "Online-Buchung von Services aktivieren",
+          "supplement_type": "Zuschlagsart",
+          "supplement_types": {
+            "none": "Kein Zuschlag",
+            "percentage": "Prozentsatz",
+            "fixed": "Fest"
+          },
+          "supplement_value": "Zuschlagswert",
+          "confirmation_required": "Bestätigung anfordern",
+          "field_names": {
+            "supplement_value": "des Zuschlags"
+          },
+          "payment_methods": {
+            "title": "Akzeptierte Zahlungsarten",
+            "pay_now": "Jetzt bezahlen",
+            "pay_at_property": "Vor Ort bezahlen (nur für Buchungen innerhalb von 7 Tagen)",
+            "pay_at_property_without_card": "Vor Ort ohne Kreditkarte bezahlen",
+            "deposit": "50 % Anzahlung jetzt, Rest vor Ort",
+            "prepaid_card": "Mit der Prepaid-Karte des Strandbads bezahlen"
+          },
+          "panel_title": {
+            "title": "Titel des Buchungsbereichs für Services"
+          },
+          "useful_information": {
+            "title": "Nützliche Informationen",
+            "description": "Die hier eingegebenen Informationen sehen die Kunden auf der Seite des Strandbads."
+          }
+        }
       },
       "warehouse": {
         "title": "Lagereinstellungen",
@@ -372,6 +603,7 @@
             "city": "Stadt",
             "country": "Land",
             "tax_code": "Steuernummer",
+            "revenue_agency_code": "Code Steuerbehörde",
             "vat_number": "USt-IdNr.",
             "pin": "PIN",
             "password": "Passwort",
@@ -554,6 +786,55 @@
             "title": "Rabatte/Gutscheine duplizieren",
             "text": "Möchtest du die {{count}} ausgewählten Rabatte/Gutscheine duplizieren?"
           }
+        },
+        "form": {
+          "title": "Neuer Rabatt/Gutschein",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "name": "Rabattname",
+          "periods": {
+            "title": "Gültigkeitszeiträume",
+            "add": "Zeitraum hinzufügen",
+            "period": "Zeitraum",
+            "from": "Vom",
+            "to": "bis",
+            "days_of_week": "Wochentage",
+            "time_slots": "Zeitfenster",
+            "time_from": "Von",
+            "time_to": "bis",
+            "add_time_slot": "Zeitfenster hinzufügen",
+            "days": {
+              "monday": "Montag",
+              "tuesday": "Dienstag",
+              "wednesday": "Mittwoch",
+              "thursday": "Donnerstag",
+              "friday": "Freitag",
+              "saturday": "Samstag",
+              "sunday": "Sonntag"
+            },
+            "all_days": "Alle",
+            "choose_days": "Auswählen"
+          },
+          "field_names": {
+            "validity_period": "Gültigkeitszeitraum",
+            "day_of_week": "Tag"
+          },
+          "options": {
+            "title": "Optionen",
+            "type": "Rabatt-/Gutscheintyp",
+            "types": {
+              "percentage": "Prozent",
+              "fixed": "Betrag"
+            },
+            "value": "Rabatt-/Gutscheinwert",
+            "applies_to": "Rabatt/Gutschein anwenden auf",
+            "scopes": {
+              "all": "Alles",
+              "services": "Leistungen"
+            },
+            "max_uses": "Maximale Anzahl der Nutzungen",
+            "enabled": "Rabatt/Gutschein aktivieren"
+          }
         }
       }
     }
@@ -666,12 +947,13 @@
     "greater_than": "Der Wert {{field}} muss größer als {{limit}} sein",
     "max": "Der Höchstwert ist {{max}}",
     "min": "Der Mindestwert ist {{min}}",
-    "required": "Dieses Feld ist ein Pflichtfeld",
+    "required": "Pflichtfeld",
     "email_configuration": {
       "smtp_password": {
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
       }
-    }
+    },
+    "min_items": "Mindestens {{count}} {{field}} erforderlich"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

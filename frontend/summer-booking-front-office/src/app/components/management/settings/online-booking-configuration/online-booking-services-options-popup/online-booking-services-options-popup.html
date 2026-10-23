@@ -1,0 +1,190 @@
+<ng-template #content>
+  <div class="online__booking__services__options__popup">
+    <h2 class="online__booking__services__options__popup__title">
+      {{ 'management.settings.online_booking_configuration.services_options.title' | translate }}
+    </h2>
+
+    <div
+      class="online__booking__services__options__popup__form"
+      [attr.inert]="isLoading() || isSaving() ? '' : null"
+    >
+      <section class="online__booking__services__options__popup__section">
+        <app-toggle
+          [formField]="draftForm.isServicesOnlineBookingEnabled"
+          [error]="fieldErrors.isServicesOnlineBookingEnabled()"
+        >
+          {{
+            'management.settings.online_booking_configuration.services_options.enabled' | translate
+          }}
+        </app-toggle>
+
+        <app-form-row>
+          <span appFormRowLabel>
+            {{
+              'management.settings.online_booking_configuration.services_options.supplement_type'
+                | translate
+            }}
+          </span>
+          <app-filled-select
+            class="online__booking__services__options__popup__field"
+            [options]="supplementTypeOptions()"
+            [formField]="draftForm.supplementType"
+            [error]="fieldErrors.supplementType()"
+          />
+        </app-form-row>
+
+        @if (hasSupplement()) {
+          <app-form-row>
+            <span appFormRowLabel>
+              {{
+                'management.settings.online_booking_configuration.services_options.supplement_value'
+                  | translate
+              }}
+            </span>
+            <app-filled-number-field
+              class="online__booking__services__options__popup__value"
+              [isDecimal]="!isPercentage()"
+              [isCurrency]="!isPercentage()"
+              [formField]="draftForm.supplementValue"
+              [error]="fieldErrors.supplementValue()"
+            />
+            <span class="online__booking__services__options__popup__unit">
+              {{ isPercentage() ? '%' : '€' }}
+            </span>
+          </app-form-row>
+        }
+
+        <app-form-row>
+          <span appFormRowLabel>
+            {{
+              'management.settings.online_booking_configuration.services_options.confirmation_required'
+                | translate
+            }}
+          </span>
+          <app-toggle
+            [formField]="draftForm.isBookingConfirmationRequired"
+            [error]="fieldErrors.isBookingConfirmationRequired()"
+          />
+        </app-form-row>
+      </section>
+
+      <section class="online__booking__services__options__popup__section">
+        <app-section-title
+          [text]="
+            'management.settings.online_booking_configuration.services_options.payment_methods.title'
+              | translate
+          "
+        />
+        <div class="online__booking__services__options__popup__choices">
+          <app-checkbox
+            [formField]="draftForm.isPayNowAccepted"
+            [error]="fieldErrors.isPayNowAccepted()"
+          >
+            {{
+              'management.settings.online_booking_configuration.services_options.payment_methods.pay_now'
+                | translate
+            }}
+          </app-checkbox>
+          <app-checkbox
+            [formField]="draftForm.isPayAtPropertyAccepted"
+            [error]="fieldErrors.isPayAtPropertyAccepted()"
+          >
+            {{
+              'management.settings.online_booking_configuration.services_options.payment_methods.pay_at_property'
+                | translate
+            }}
+          </app-checkbox>
+          <app-checkbox
+            [formField]="draftForm.isPayAtPropertyWithoutCardAccepted"
+            [error]="fieldErrors.isPayAtPropertyWithoutCardAccepted()"
+          >
+            {{
+              'management.settings.online_booking_configuration.services_options.payment_methods.pay_at_property_without_card'
+                | translate
+            }}
+          </app-checkbox>
+          <app-checkbox
+            [formField]="draftForm.isDepositAccepted"
+            [error]="fieldErrors.isDepositAccepted()"
+          >
+            {{
+              'management.settings.online_booking_configuration.services_options.payment_methods.deposit'
+                | translate
+            }}
+          </app-checkbox>
+          <app-checkbox
+            [formField]="draftForm.isPrepaidCardAccepted"
+            [error]="fieldErrors.isPrepaidCardAccepted()"
+          >
+            {{
+              'management.settings.online_booking_configuration.services_options.payment_methods.prepaid_card'
+                | translate
+            }}
+          </app-checkbox>
+        </div>
+      </section>
+
+      <section class="online__booking__services__options__popup__section">
+        <app-section-title
+          [text]="
+            'management.settings.online_booking_configuration.services_options.panel_title.title'
+              | translate
+          "
+        />
+        <app-rich-text-field
+          class="online__booking__services__options__popup__panel__title"
+          [texts]="'rich_text' | translate"
+          [pathIcon]="richTextIcons"
+          [formField]="draftForm.bookingPanelTitle"
+          [error]="fieldErrors.bookingPanelTitle()"
+        />
+      </section>
+
+      <section class="online__booking__services__options__popup__section">
+        <app-section-title
+          [text]="
+            'management.settings.online_booking_configuration.services_options.useful_information.title'
+              | translate
+          "
+        />
+        <p class="online__booking__services__options__popup__description">
+          {{
+            'management.settings.online_booking_configuration.services_options.useful_information.description'
+              | translate
+          }}
+        </p>
+        <app-rich-text-field
+          [texts]="'rich_text' | translate"
+          [pathIcon]="richTextIcons"
+          [formField]="draftForm.usefulInformation"
+          [error]="fieldErrors.usefulInformation()"
+        />
+      </section>
+    </div>
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="online__booking__services__options__popup__error">{{ errorMessage }}</p>
+    }
+
+    <div class="online__booking__services__options__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaving()"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.online_booking_configuration.services_options.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading() || draftForm().invalid()"
+        [isLoading]="isSaving()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.online_booking_configuration.services_options.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

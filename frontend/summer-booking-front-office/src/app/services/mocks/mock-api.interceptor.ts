@@ -1,6 +1,15 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { logoutMock, refreshMock, signInMock } from './auth/auth.mock';
+import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
+import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
+import {
+  bathhouseConfigurationGeneralMock,
+  bathhouseConfigurationMediaMock,
+  bathhouseConfigurationServicesMock,
+  countriesComboboxMock,
+  saveBathhouseConfigurationGeneralMock,
+  saveBathhouseConfigurationServicesMock,
+} from './catalog/catalog.mock';
 import {
   affiliatedHotelComboboxMock,
   deleteSelectedItemMock,
@@ -12,8 +21,11 @@ import {
 } from './database/database.mock';
 import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
 import {
+  addVoucherItemMock,
   deleteVoucherItemsMock,
   duplicateVoucherItemsMock,
+  selectedVoucherItemMock,
+  updateVoucherItemMock,
   voucherListMock,
 } from './vouchers/vouchers.mock';
 import {
@@ -21,6 +33,7 @@ import {
   emailConfigurationMock,
   saveEmailConfigurationMock,
   sendTestEmailMock,
+  stripeInformationMock,
   supportInfoMock,
 } from './system/system.mock';
 import {
@@ -44,15 +57,24 @@ import {
 
 /** Answers the mocked endpoints; included only in builds with mocks (see `mock-interceptors.ts`). */
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
-  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/auth/signin`) {
-    return signInMock(request);
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/auth/login`
+  ) {
+    return loginMock(request);
   }
 
-  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/auth/refresh`) {
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/auth/refresh`
+  ) {
     return refreshMock(request);
   }
 
-  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/auth/logout`) {
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/auth/logout`
+  ) {
     return logoutMock(request);
   }
 
@@ -128,6 +150,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/system/contact-support`
   ) {
     return contactSupportMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/system/get-stripe-information`
+  ) {
+    return stripeInformationMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/booking/get-online-services-options`
+  ) {
+    return onlineServicesOptionsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/booking/update-online-services-options`
+  ) {
+    return updateOnlineServicesOptionsMock(request);
   }
 
   if (
@@ -268,6 +311,69 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/vouchers/duplicate-voucher-item`
   ) {
     return duplicateVoucherItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/add-voucher-item`
+  ) {
+    return addVoucherItemMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/update-voucher-item`
+  ) {
+    return updateVoucherItemMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/vouchers/get-selected-item`
+  ) {
+    return selectedVoucherItemMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/countries-combobox`
+  ) {
+    return countriesComboboxMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-general`
+  ) {
+    return bathhouseConfigurationGeneralMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-services`
+  ) {
+    return bathhouseConfigurationServicesMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-media`
+  ) {
+    return bathhouseConfigurationMediaMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-general`
+  ) {
+    return saveBathhouseConfigurationGeneralMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-services`
+  ) {
+    return saveBathhouseConfigurationServicesMock(request);
   }
 
   return next(request);

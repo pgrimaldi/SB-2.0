@@ -1,0 +1,47 @@
+// A page can change the row with --form-row-columns (label and controls columns, default
+// `auto minmax(0, 1fr)`), --form-row-gap (between them, 1rem), --form-row-label-size (0.75rem) and
+// --form-row-label-offset (space above the label, 0, to centre it on the first field).
+// --form-row-fill is 0 side by side and 1 stacked: a control that should take the whole row when
+// stacked uses it as its flex-grow (e.g. `flex: var(--form-row-fill) 1 7rem`).
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
+.form__row {
+  --form-row-fill: 0;
+
+  display: grid;
+  grid-template-columns: var(--form-row-columns, auto minmax(0, 1fr));
+  align-items: start;
+  gap: 0.5rem var(--form-row-gap, 1rem);
+}
+
+.form__row__label {
+  padding-top: var(--form-row-label-offset, 0);
+  color: var(--color__layout__text__soft);
+  font-size: var(--form-row-label-size, 0.75rem);
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.form__row__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+@container (width < 30rem) {
+  .form__row {
+    --form-row-fill: 1;
+
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form__row__controls {
+    justify-content: flex-start;
+  }
+}

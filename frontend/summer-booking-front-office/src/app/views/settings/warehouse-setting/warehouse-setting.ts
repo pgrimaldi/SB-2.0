@@ -48,7 +48,7 @@ export class WarehouseSetting {
 
   protected readonly loadFailed = signal(false);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly adding = signal(false);
@@ -62,7 +62,12 @@ export class WarehouseSetting {
   protected readonly idItemsToDuplicate = signal<readonly string[]>([]);
   protected readonly itemNameToDuplicate = signal<string | null>(null);
   protected readonly titleIcon = ['/assets/images/WarehouseSetting_Title.svg'] as const;
-  protected readonly errorIcon = ['/assets/images/WarehouseSetting_Warning.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/WarehouseSetting_Close.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/WarehouseSetting_Close.svg',
+    '/assets/images/WarehouseSetting_Warning.svg',
+  ] as const;
   /**
    * In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create].
    * No title icon: the page has its own title. The row button icons come from `rowActions`.

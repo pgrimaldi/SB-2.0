@@ -52,7 +52,6 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
-  protected readonly closeIcon = '/assets/images/Database_Close.svg';
   protected readonly bookingTypologies = signal<readonly BookingTypologyFilter[]>([]);
   protected readonly agreementBookings = signal<readonly AgreementBookingFilter[]>([]);
   protected readonly idAffiliatedHotels = signal<readonly string[]>([]);
@@ -131,7 +130,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
   private loadAffiliatedHotels(): void {
     // A slower answer of an earlier opening must not replace the list of this one.
     this.affiliatedHotelsSubscription?.unsubscribe();
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
     }

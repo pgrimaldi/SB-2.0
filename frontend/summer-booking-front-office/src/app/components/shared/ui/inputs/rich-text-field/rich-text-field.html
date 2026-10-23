@@ -1,0 +1,46 @@
+@if (label()) {
+  <label class="rich__text__field__label" [for]="id" (click)="focus()"
+    >{{ label() }}
+    @if (isMandatory()) {
+      <span class="rich__text__field__mandatory">*</span>
+    }
+  </label>
+}
+<div
+  class="rich__text__field__box"
+  [class.rich__text__field__invalid]="!!error()"
+  [class.rich__text__field__locked]="isLocked()"
+>
+  @if (!isLocked()) {
+    <div class="rich__text__field__toolbar">
+      @for (button of buttons(); track button.action) {
+        <app-icon-button
+          class="rich__text__field__button"
+          [class.rich__text__field__button__active]="isActive(button.mark)"
+          [label]="button.label"
+          [matIcon]="button.matIcon"
+          [pathIcon]="button.pathIcon"
+          (mousedown)="$event.preventDefault()"
+          (click)="run(button.action)"
+        />
+      }
+    </div>
+    @if (isLinkOpen()) {
+      <div class="rich__text__field__link">
+        <app-filled-text-field
+          class="rich__text__field__link__url"
+          [placeholder]="texts()?.link_placeholder ?? ''"
+          [(value)]="linkUrl"
+          (keydown.enter)="insertLink()"
+        />
+        <app-button [size]="ButtonSize.Small" (clicked)="insertLink()">
+          {{ texts()?.insert_link }}
+        </app-button>
+      </div>
+    }
+  }
+  <div #content class="rich__text__field__content" [id]="id"></div>
+</div>
+@if (error(); as error) {
+  <p class="rich__text__field__error">{{ error }}</p>
+}

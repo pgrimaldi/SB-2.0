@@ -54,8 +54,8 @@ export function problem(
 }
 
 /** The property is not one the user may work on: the operation is cancelled. */
-export function operationNotAllowed(request: HttpRequest<unknown>): Observable<never> {
-  return problem(request, 403, 'operation.not_allowed', { title: 'Operation not allowed' });
+export function forbidden(request: HttpRequest<unknown>): Observable<never> {
+  return problem(request, 403, 'auth.forbidden', { title: 'Operation not allowed' });
 }
 
 /** An article that does not exist, or no longer: the operation is cancelled. */

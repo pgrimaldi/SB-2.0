@@ -1,0 +1,9 @@
+// The page gives the size to the element (e.g. `height`); the map fills it.
+:host {
+  display: block;
+}
+
+google-map {
+  display: block;
+  height: 100%;
+}

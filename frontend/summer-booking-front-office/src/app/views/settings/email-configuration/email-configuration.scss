@@ -10,6 +10,8 @@
   --filled-field-height: 2.25rem;
   --filled-field-text-size: 0.875rem;
   --filled-field-line-height: 1.25rem;
+  --form-row-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  --form-row-gap: 3rem;
 
   display: flex;
   flex-direction: column;
@@ -28,11 +30,9 @@
   padding: 2rem;
 }
 
-.email__configuration__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
-  align-items: start;
-  gap: 3rem;
+.email__configuration__field {
+  flex: 1;
+  min-width: 0;
 }
 
 .email__configuration__title,
@@ -41,6 +41,10 @@
   color: var(--color__main__theme__one);
   font-size: 0.8125rem;
   line-height: 1.125rem;
+}
+
+.email__configuration__description {
+  font-weight: 400;
 }
 
 .email__configuration__title {
@@ -93,11 +97,6 @@
 }
 
 @media (width < 48rem) {
-  .email__configuration__row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.5rem;
-  }
-
   .email__configuration__actions {
     flex-wrap: wrap;
 

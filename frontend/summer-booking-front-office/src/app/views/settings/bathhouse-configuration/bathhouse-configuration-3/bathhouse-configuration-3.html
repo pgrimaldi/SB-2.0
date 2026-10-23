@@ -1,0 +1,132 @@
+<div class="bathhouse__configuration__3" [attr.inert]="isLoading() ? '' : null">
+  <section class="bathhouse__configuration__3__section">
+    <app-section-title
+      [text]="'management.settings.bathhouse_configuration.media.position.title' | translate"
+      [pathIcon]="positionIcon"
+    >
+      <app-button [appearance]="ButtonAppearance.Secondary" [size]="ButtonSize.Small">
+        {{ 'management.settings.bathhouse_configuration.media.position.edit' | translate }}
+      </app-button>
+    </app-section-title>
+    <div class="bathhouse__configuration__3__map">
+      @if (isMapReady()) {
+        <app-location-map
+          [mapId]="mapId"
+          [center]="center()"
+          [zoom]="zoom()"
+          [markerPosition]="position()"
+        />
+      } @else if (isMapFailed()) {
+        <p class="bathhouse__configuration__3__map__error">
+          {{ 'management.settings.bathhouse_configuration.media.position.map_error' | translate }}
+        </p>
+      }
+    </div>
+  </section>
+
+  <section class="bathhouse__configuration__3__section">
+    <app-section-title
+      [text]="'management.settings.bathhouse_configuration.media.images.title' | translate"
+      [pathIcon]="imagesIcon"
+    />
+    <h3 class="bathhouse__configuration__3__label">
+      {{ 'management.settings.bathhouse_configuration.media.images.main' | translate }}
+    </h3>
+    <app-file-drop-zone
+      class="bathhouse__configuration__3__main__image"
+      accept="image/*"
+      [text]="'management.settings.bathhouse_configuration.media.images.main_hint' | translate"
+      [pathIcon]="addImageIcon"
+      [previewUrl]="mainPhoto()?.url"
+      [disabled]="!isEditing()"
+    />
+    <h3 class="bathhouse__configuration__3__label">
+      {{ 'management.settings.bathhouse_configuration.media.images.gallery' | translate }}
+    </h3>
+    <div class="bathhouse__configuration__3__gallery">
+      @for (photo of galleryPhotos(); track photo.idPhoto) {
+        <app-file-drop-zone accept="image/*" [previewUrl]="photo.url" [disabled]="!isEditing()" />
+      }
+      @for (slot of emptyGallerySlots(); track slot) {
+        <app-file-drop-zone
+          accept="image/*"
+          [text]="'management.settings.bathhouse_configuration.media.images.add' | translate"
+          [pathIcon]="addImageIcon"
+          [disabled]="!isEditing()"
+        />
+      }
+    </div>
+  </section>
+
+  <section class="bathhouse__configuration__3__section">
+    <app-section-title
+      [text]="'management.settings.bathhouse_configuration.media.virtual_tour.title' | translate"
+      [pathIcon]="virtualTourIcon"
+    />
+    <app-filled-text-field
+      autocomplete="url"
+      [placeholder]="
+        'management.settings.bathhouse_configuration.media.virtual_tour.placeholder' | translate
+      "
+      [pathIcon]="virtualTourFieldIcons"
+      [readonly]="!isEditing()"
+      [(value)]="virtualTourUrl"
+    />
+  </section>
+
+  <section class="bathhouse__configuration__3__section">
+    <app-section-title
+      [text]="'management.settings.bathhouse_configuration.media.documents.title' | translate"
+      [pathIcon]="documentsIcon"
+    />
+    @for (document of documents(); track document.name) {
+      <div class="bathhouse__configuration__3__document">
+        <div>
+          <p class="bathhouse__configuration__3__document__name">{{ document.name | translate }}</p>
+          @if (document.url; as url) {
+            <a
+              class="bathhouse__configuration__3__document__file bathhouse__configuration__3__document__link"
+              target="_blank"
+              rel="noopener noreferrer"
+              [href]="url"
+            >
+              {{ 'management.settings.bathhouse_configuration.media.documents.open' | translate }}
+            </a>
+          } @else {
+            <p class="bathhouse__configuration__3__document__file">
+              {{
+                'management.settings.bathhouse_configuration.media.documents.no_file' | translate
+              }}
+            </p>
+          }
+        </div>
+        <app-button [size]="ButtonSize.Small" [pathIcon]="uploadIcon" [disabled]="!isEditing()">
+          {{ 'management.settings.bathhouse_configuration.media.documents.upload' | translate }}
+        </app-button>
+      </div>
+    }
+  </section>
+
+  <div class="bathhouse__configuration__3__actions">
+    @if (isEditing()) {
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="cancel()"
+      >
+        {{ 'management.settings.bathhouse_configuration.media.cancel' | translate }}
+      </app-button>
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+        {{ 'management.settings.bathhouse_configuration.media.save' | translate }}
+      </app-button>
+    } @else {
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+        {{ 'management.settings.bathhouse_configuration.media.edit' | translate }}
+      </app-button>
+    }
+  </div>
+  @if (errorMessage(); as errorMessage) {
+    <p class="bathhouse__configuration__3__error">{{ errorMessage }}</p>
+  }
+</div>

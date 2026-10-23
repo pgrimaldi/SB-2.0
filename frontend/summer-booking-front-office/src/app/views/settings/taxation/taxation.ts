@@ -34,7 +34,6 @@ import {
   TableRowToggle,
 } from '../../../components/shared/ui/tables/table/table';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
@@ -101,7 +100,7 @@ export class Taxation {
   protected readonly printerToDelete = signal<PrinterItemListResponse | null>(null);
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
-  private readonly idProperty = computed(() => this.auth.user()?.idProperty ?? null);
+  private readonly idProperty = computed(() => this.auth.user()?.propertyId ?? null);
   protected readonly printerParams = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.idProperty();
     return idProperty ? { idProperty } : null;
@@ -131,13 +130,11 @@ export class Taxation {
       },
     ],
   );
-  protected readonly receipt = signal(new ElectronicReceiptResponse());
+  protected readonly termsAndConditions = signal<string | null>(null);
   protected readonly printersLoadFailed = signal(false);
   protected readonly isGuideDownloading = signal(false);
   protected readonly isAcceptChosen = signal(false);
-  protected readonly isReceiptActivated = computed(
-    () => this.auth.user()?.isElectronicReceiptAccepted ?? false,
-  );
+  protected readonly isReceiptActivated = signal(false);
   protected readonly isReceiptAccepted = computed(
     () => this.isReceiptActivated() || this.isAcceptChosen(),
   );
@@ -147,7 +144,13 @@ export class Taxation {
   /** The error of an action (switch, delete, guide) goes in a popup. */
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly isActionErrorShown = signal(false);
-  protected readonly actionErrorIcon = ['/assets/images/Taxation_Warning.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/Taxation_Close.svg'] as const;
+  protected readonly addPrinterCloseIcon = ['/assets/images/Taxation_CloseAddPrinter.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/Taxation_Close.svg',
+    '/assets/images/Taxation_Warning.svg',
+  ] as const;
   private readonly receiptError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = this.messageOf(this.actionError);
   protected readonly receiptErrorMessage = this.messageOf(this.receiptError);
@@ -162,12 +165,12 @@ export class Taxation {
       }
       const subscription = untracked(() =>
         this.taxation.electronicReceipt(idProperty).subscribe({
-          next: (receipt) => {
-            this.receipt.set(receipt);
+          next: (termsAndConditions) => {
+            this.termsAndConditions.set(termsAndConditions);
             this.receiptError.set(null);
           },
           error: (error: unknown) => {
-            this.receipt.set(new ElectronicReceiptResponse());
+            this.termsAndConditions.set(null);
             this.receiptError.set(toApiProblem(error));
           },
         }),
@@ -202,7 +205,7 @@ export class Taxation {
   }
 
   protected async downloadGuide(): Promise<void> {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty || this.isGuideDownloading()) {
       return;
     }
@@ -222,7 +225,7 @@ export class Taxation {
   }
 
   protected async sendReceiptChoice(): Promise<void> {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (!idProperty || this.isSendingReceiptChoice() || !this.isAcceptChosen()) {
       return;
     }
@@ -234,7 +237,7 @@ export class Taxation {
           isElectronicReceiptAccepted: this.isAcceptChosen(),
         }),
       );
-      this.auth.markElectronicReceiptAccepted();
+      this.isReceiptActivated.set(true);
       this.isReceiptAccountShown.set(true);
     } catch (error: unknown) {
       this.showActionError(error);
@@ -256,7 +259,7 @@ export class Taxation {
     idPrinter: string | null,
     call: (idProperty: string, idPrinter: string) => Observable<void>,
   ): Promise<void> {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (idProperty && idPrinter && !this.isPrinterActionRunning()) {
       this.isPrinterActionRunning.set(true);
       try {

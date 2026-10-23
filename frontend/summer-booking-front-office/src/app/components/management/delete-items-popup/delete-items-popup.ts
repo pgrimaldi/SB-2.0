@@ -34,7 +34,7 @@ export class DeleteItemsPopup {
   readonly itemName = input<string | null>(null);
   readonly translationKey = input.required<string>();
   readonly action = input.required<(idProperty: string, idItems: string[]) => Observable<void>>();
-  /** [error icon of the alert]. */
+  /** [X of both popups, warning of the error popup]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly deleted = output<readonly string[]>();
 
@@ -52,7 +52,7 @@ export class DeleteItemsPopup {
   );
 
   protected deleteItems(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     const idItems = [...this.idItems()];
     if (this.isLoading() || !idProperty || !idItems.length) {
       return;

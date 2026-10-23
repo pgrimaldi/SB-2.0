@@ -5,15 +5,26 @@
  */
 export const API_ERROR_CODES = [
   'auth.invalid_credentials',
-  'auth.invalid_token',
+  'auth.unauthenticated',
   'auth.session_expired',
-  'validation.invalid_request',
-  'validation.invalid_date',
+  'auth.app_not_allowed',
+  'auth.too_many_attempts',
+  'validation.failed',
   'validation.end_before_start',
-  'validation.invalid_value',
+  'validation.invalid',
   'resource.not_found',
-  'operation.not_allowed',
+  'auth.forbidden',
   'server.unexpected',
+  'validation.required',
+  'validation.email',
+  'validation.max_length',
+  'validation.min_length',
+  'validation.length',
+  'validation.out_of_range',
+  'validation.phone',
+  'validation.phone_prefix',
+  'validation.must_accept',
+  'validation.invalid_file_type',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

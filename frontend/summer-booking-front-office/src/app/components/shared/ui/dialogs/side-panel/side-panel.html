@@ -1,0 +1,32 @@
+<ng-template #content>
+  <div class="side__panel">
+    <div class="side__panel__header">
+      <h2 class="side__panel__title">{{ title() }}</h2>
+    </div>
+
+    <div class="side__panel__body" [attr.inert]="isLoading() ? '' : null">
+      <ng-content />
+    </div>
+
+    <div class="side__panel__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="requestClose()"
+      >
+        {{ texts()?.cancel }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaveDisabled()"
+        [isLoading]="isLoading()"
+        (clicked)="save.emit()"
+      >
+        {{ texts()?.save }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

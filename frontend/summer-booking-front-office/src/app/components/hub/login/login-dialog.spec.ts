@@ -44,7 +44,7 @@ describe('LoginDialog', () => {
   };
 
   /** Email and password are required: without them Accedi sends nothing. */
-  const signInWithCredentials = async (fixture: ComponentFixture<unknown>) => {
+  const loginWithCredentials = async (fixture: ComponentFixture<unknown>) => {
     const [email, password] = document.querySelectorAll<HTMLInputElement>(
       'mat-dialog-container input:not([type="checkbox"])',
     );
@@ -60,8 +60,8 @@ describe('LoginDialog', () => {
     await fixture.whenStable();
   };
 
-  const signInError = async (answer: () => Observable<never>) => {
-    TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: answer } });
+  const loginError = async (answer: () => Observable<never>) => {
+    TestBed.overrideProvider(AuthBehaviour, { useValue: { login: answer } });
     const { fixture } = await setup(false);
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('it', {
@@ -69,13 +69,14 @@ describe('LoginDialog', () => {
         unknown: 'Si è verificato un errore. Riprova.',
         network: { unavailable: 'Connessione assente. Controlla la rete e riprova.' },
         auth: { invalid_credentials: 'Credenziali non valide' },
+        validation: { failed: 'Richiesta non valida', max_length: 'Al massimo {{max}} caratteri.' },
       },
     });
     translate.use('it');
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
 
-    await signInWithCredentials(fixture);
+    await loginWithCredentials(fixture);
     return document.querySelector('.login__dialog__error')?.textContent?.trim();
   };
 
@@ -89,14 +90,35 @@ describe('LoginDialog', () => {
           }),
       );
 
-    expect(await signInError(wrongCredentials)).toBe('Credenziali non valide');
+    expect(await loginError(wrongCredentials)).toBe('Credenziali non valide');
+  });
+
+  it('should show an error of the backend on a field under that field, not as a general message', async () => {
+    const tooLong = () =>
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              status: 400,
+              code: 'validation.failed',
+              title: 'validation.failed',
+              errors: [{ field: 'username', code: 'validation.max_length', args: { max: 255 } }],
+            },
+          }),
+      );
+
+    expect(await loginError(tooLong)).toBeUndefined();
+    expect(document.querySelector('mat-dialog-container app-text-field')?.textContent).toContain(
+      'Al massimo 255 caratteri.',
+    );
   });
 
   it('should show its own message when there is no connection, and a generic one for unknown codes', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const offline = () => throwError(() => new HttpErrorResponse({ status: 0 }));
 
-    expect(await signInError(offline)).toBe('Connessione assente. Controlla la rete e riprova.');
+    expect(await loginError(offline)).toBe('Connessione assente. Controlla la rete e riprova.');
     TestBed.resetTestingModule();
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
 
@@ -104,19 +126,19 @@ describe('LoginDialog', () => {
       throwError(
         () => new HttpErrorResponse({ status: 423, error: { code: 'auth.account_locked' } }),
       );
-    expect(await signInError(brandNew)).toBe('Si è verificato un errore. Riprova.');
+    expect(await loginError(brandNew)).toBe('Si è verificato un errore. Riprova.');
   });
 
   it('should keep the spinner when closed and opened again during a sign-in, without the error of that attempt', async () => {
     const answer = new Subject<void>();
-    TestBed.overrideProvider(AuthBehaviour, { useValue: { signIn: () => answer } });
+    TestBed.overrideProvider(AuthBehaviour, { useValue: { login: () => answer } });
     const { fixture } = await setup(false);
     const host = fixture.componentInstance;
     const submit = () =>
       document.querySelector<HTMLButtonElement>('mat-dialog-container button[type="submit"]')!;
     host.open.set(true);
     await fixture.whenStable();
-    await signInWithCredentials(fixture);
+    await loginWithCredentials(fixture);
 
     host.open.set(false); // closed while the server has not answered yet
     await fixture.whenStable();
@@ -129,6 +151,7 @@ describe('LoginDialog', () => {
     ).toBe(true);
 
     answer.error(new HttpErrorResponse({ status: 401 }));
+    await Promise.resolve();
     await fixture.whenStable();
     expect(document.querySelector('.login__dialog__error')).toBeNull();
     expect(submit().disabled).toBe(false);

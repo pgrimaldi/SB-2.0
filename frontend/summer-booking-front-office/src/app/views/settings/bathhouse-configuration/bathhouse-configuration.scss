@@ -1,0 +1,20 @@
+@use '../../../styles/settings-panel' as panel;
+
+.bathhouse__configuration {
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 0.8125rem 2rem;
+}
+
+// The tabs head the white panel of the settings pages; the open tab shows its page inside it.
+.bathhouse__configuration__panel {
+  --tab-nav-panel-padding: 1.5rem;
+
+  @include panel.settings-panel;
+}
+
+@media (width < 48rem) {
+  .bathhouse__configuration__panel {
+    --tab-nav-panel-padding: 1rem;
+  }
+}

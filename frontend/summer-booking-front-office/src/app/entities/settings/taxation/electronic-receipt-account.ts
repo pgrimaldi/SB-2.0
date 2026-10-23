@@ -6,6 +6,7 @@ export class ElectronicReceiptAccount {
   city: string | null = null;
   country: string | null = null;
   taxCode: string | null = null;
+  revenueAgencyCode: string | null = null;
   vatNumber: string | null = null;
   pin: string | null = null;
   password: string | null = null;

@@ -25,6 +25,16 @@
     "comparison_range": "Intervalo de comparación",
     "year_range": "De {{start}} a {{end}}"
   },
+  "rich_text": {
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "underline": "Subrayado",
+    "bullet_list": "Lista con viñetas",
+    "ordered_list": "Lista numerada",
+    "link": "Enlace",
+    "link_placeholder": "https://…",
+    "insert_link": "Insertar"
+  },
   "table": {
     "empty": "La tabla no contiene elementos",
     "paginator": {
@@ -70,20 +80,29 @@
     },
     "auth": {
       "invalid_credentials": "Credenciales no válidas",
-      "invalid_token": "La sesión ya no es válida. Vuelve a iniciar sesión.",
-      "session_expired": "La sesión ha caducado. Vuelve a iniciar sesión."
+      "session_expired": "La sesión ha caducado. Vuelve a iniciar sesión.",
+      "app_not_allowed": "No autorizado",
+      "too_many_attempts": "Demasiados intentos",
+      "unauthenticated": "La sesión ya no es válida. Vuelve a acceder.",
+      "forbidden": "No tienes permisos para esta operación."
     },
     "validation": {
-      "invalid_request": "Algunos datos no son válidos. Revísalos e inténtalo de nuevo.",
-      "invalid_date": "La fecha no es válida.",
       "end_before_start": "La fecha de fin es anterior a la fecha de inicio.",
-      "invalid_value": "El valor elegido no es válido."
+      "failed": "Solicitud no válida",
+      "required": "Este campo es obligatorio",
+      "invalid": "El valor no es válido.",
+      "email": "La dirección de correo no es válida.",
+      "max_length": "Como máximo {{max}} caracteres.",
+      "min_length": "Al menos {{min}} caracteres.",
+      "length": "De {{min}} a {{max}} caracteres.",
+      "out_of_range": "El valor está fuera del intervalo permitido.",
+      "phone": "El número de teléfono no es válido.",
+      "phone_prefix": "El prefijo telefónico no es válido.",
+      "must_accept": "Debes aceptar para continuar.",
+      "invalid_file_type": "Este tipo de archivo no está permitido."
     },
     "resource": {
       "not_found": "Este elemento ya no existe."
-    },
-    "operation": {
-      "not_allowed": "Operación no permitida."
     }
   },
   "alert": {
@@ -121,7 +140,7 @@
     },
     "login": {
       "title": "Iniciar sesión",
-      "email": "Correo electrónico",
+      "username": "Correo o usuario",
       "password": "Contraseña",
       "remember": "Recordar mis credenciales",
       "forgot": "¿Has olvidado la contraseña?",
@@ -177,7 +196,7 @@
     },
     "settings": {
       "menu": {
-        "property": "Información del establecimiento",
+        "property": "Ficha del establecimiento",
         "users": "Gestión de usuarios",
         "seasons": "Temporadas y periodos",
         "sectors": "Sectores y filas",
@@ -192,6 +211,218 @@
         "email": "Configuración del correo",
         "database": "Base de datos",
         "help": "Asistencia y guías"
+      },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "Información general",
+          "services": "Servicios",
+          "media": "Multimedia"
+        },
+        "general_information": {
+          "bathhouse_name": "Nombre del establecimiento",
+          "address": "Dirección",
+          "postal_code": "Código postal",
+          "city": "Ciudad",
+          "province": "Provincia",
+          "region": "Región",
+          "country": "País",
+          "choose": "Seleccionar",
+          "phone": "Teléfono",
+          "whatsapp": "Whatsapp",
+          "email": "Correo electrónico",
+          "website": "Sitio web",
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "description": "Descripción",
+          "opening_hours": "Horario de apertura",
+          "opening_time": "Desde",
+          "closing_time": "Hasta",
+          "cancellation": "Cancelación",
+          "cancellation_policies": {
+            "free_until_48_hours": "Gratuita hasta 48 h antes",
+            "free_until_24_hours": "Gratuita hasta 24 h antes"
+          },
+          "pets": "Animales",
+          "pets_options": {
+            "allowed": "Admitidos",
+            "not_allowed": "No admitidos"
+          },
+          "regulation": "Reglamento",
+          "edit": "Editar",
+          "cancel": "Cancelar",
+          "save": "Guardar"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "Accesibilidad y comodidad",
+            "sport_activities": "Deportes y actividades",
+            "food_extra": "Restauración y extras",
+            "beach": "Playa"
+          },
+          "edit": "Editar",
+          "cancel": "Cancelar",
+          "save": "Guardar"
+        },
+        "media": {
+          "edit": "Editar",
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "position": {
+            "title": "Ubicación",
+            "edit": "Editar",
+            "map_error": "No se pudo cargar el mapa"
+          },
+          "images": {
+            "title": "Imágenes",
+            "main": "Imagen principal",
+            "main_hint": "Arrastra aquí la imagen principal o haz clic para subirla",
+            "gallery": "Galería de imágenes",
+            "add": "Añadir imagen"
+          },
+          "virtual_tour": {
+            "title": "Enlace tour virtual",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "Documentos PDF",
+            "price_list": "Lista de precios",
+            "menu": "Menú",
+            "no_file": "Ningún archivo seleccionado",
+            "open": "Abrir el documento",
+            "upload": "Subir"
+          }
+        }
+      },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "Conecta tu cuenta de Stripe",
+          "subtitle": "Recibe los pagos de las reservas online de forma sencilla y segura.",
+          "description": "Summer Booking utiliza Stripe para gestionar los pagos online de tus reservas, garantizando transacciones rápidas y seguras y la protección de los datos personales y de pago.",
+          "configure_title": "Configura tu cuenta de Stripe",
+          "configure_text": "Conecta tu cuenta de Stripe existente o crea una nueva para empezar a recibir los pagos de las reservas online.",
+          "configure": "Configura tu cuenta de Stripe",
+          "how_it_works": "Cómo funciona:",
+          "step_1": "Inicia sesión o regístrate en Stripe",
+          "step_2": "Empieza a recibir y realizar pagos fácilmente"
+        },
+        "options": {
+          "title": "Gestionar opciones",
+          "online_bookings": "Opciones de reservas online",
+          "online_booking_services": "Opciones de reserva de servicios"
+        },
+        "iframe": {
+          "title": "Código iframe para tu sitio web",
+          "subtitle": "Permite a tus huéspedes reservar sombrillas, tumbonas y servicios directamente desde tu web en pocos clics.",
+          "description": "Copia y pega el código para insertar en la sección que quieras de tu web. El widget sincroniza la disponibilidad en tiempo real con el mapa del programa de gestión.",
+          "direct_link": "Enlace directo",
+          "copy": "Copiar enlace"
+        },
+        "booking_options": {
+          "title": "Opciones de reservas online",
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "online_booking_enabled": "Activar las reservas online",
+          "map_spot_choice_enabled": "Activar la elección del puesto en el mapa",
+          "selected_periods_only_enabled": "Activar las reservas online solo en los periodos seleccionados",
+          "selected_spots_only_enabled": "Activar las reservas online solo para los puestos seleccionados",
+          "view_spots": "Ver puestos",
+          "half_day_enabled": "Activar la reserva de medio día",
+          "morning": "Mañana",
+          "afternoon": "Tarde",
+          "time_from": "De",
+          "time_to": "a",
+          "afternoon_conversion_enabled": "Hora de inicio de la conversión en reserva de tarde",
+          "current_day_booking_enabled": "Activar la reserva para el día actual",
+          "seasonal_booking_enabled": "Activar las reservas de temporada",
+          "sharing_enabled": "Activar Sharing",
+          "supplement_type": "Tipo de suplemento",
+          "supplement_types": {
+            "none": "Sin suplemento",
+            "percentage": "Porcentaje",
+            "fixed": "Fijo"
+          },
+          "supplement_value": "Valor del suplemento",
+          "online_booking_block": "Bloqueo de reservas online",
+          "online_booking_blocks": {
+            "disabled": "Desactivado",
+            "three_hours_before": "3 horas antes",
+            "five_hours_before": "5 horas antes",
+            "eight_hours_before": "8 horas antes",
+            "twelve_hours_before": "12 horas antes",
+            "twenty_four_hours_before": "24 horas antes",
+            "forty_eight_hours_before": "48 horas antes",
+            "seventy_two_hours_before": "72 horas antes"
+          },
+          "choose": "Seleccionar",
+          "max_spot_per_booking": "Número máximo de puestos reservables en la misma reserva",
+          "max_advance_booking_days": "Bloquear reservas más allá de n días desde el día actual",
+          "booking_confirmation_required": "Requerir confirmación",
+          "yes": "Sí",
+          "no": "No",
+          "online_booking_audience": "Permitir reservas online a",
+          "online_booking_audiences": {
+            "all": "Todos",
+            "contacts_only": "Solo contactos"
+          },
+          "max_bookings_per_day": "Máx. reservas por día",
+          "payment_methods": {
+            "title": "Métodos de pago aceptados",
+            "pay_now": "Pagar ahora",
+            "pay_at_property": "Pagar en el establecimiento (solo para reservas en los próximos 7 días)",
+            "pay_at_property_without_card": "Pagar en el establecimiento sin tarjeta de crédito",
+            "deposit": "Anticipo del 50 % ahora y resto en el establecimiento",
+            "prepaid_card": "Pagar con la tarjeta prepago del establecimiento"
+          },
+          "booking_limits": {
+            "title": "Límites de reserva",
+            "add": "Añadir nueva regla",
+            "description": "Crea reglas de reserva para fijar un número mínimo y máximo de puestos reservables en un periodo y en una fila/sector determinados.",
+            "sector": "Fila/sector",
+            "date_from": "Desde",
+            "date_to": "Hasta",
+            "min": "Mín",
+            "max": "Máx"
+          },
+          "field_names": {
+            "supplement_value": "del suplemento"
+          },
+          "periods": {
+            "hint": "Haz clic en dos fechas para elegir un intervalo",
+            "selected": "Intervalos de fechas seleccionados:"
+          }
+        },
+        "services_options": {
+          "title": "Opciones de reserva de servicios",
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "enabled": "Activar reservas online de servicios",
+          "supplement_type": "Tipo de suplemento",
+          "supplement_types": {
+            "none": "Sin suplemento",
+            "percentage": "Porcentaje",
+            "fixed": "Fijo"
+          },
+          "supplement_value": "Valor del suplemento",
+          "confirmation_required": "Requerir confirmación",
+          "field_names": {
+            "supplement_value": "del suplemento"
+          },
+          "payment_methods": {
+            "title": "Métodos de pago aceptados",
+            "pay_now": "Pagar ahora",
+            "pay_at_property": "Pagar en el establecimiento (solo para reservas en los próximos 7 días)",
+            "pay_at_property_without_card": "Pagar en el establecimiento sin tarjeta de crédito",
+            "deposit": "Anticipo del 50 % ahora y resto en el establecimiento",
+            "prepaid_card": "Pagar con la tarjeta prepago del establecimiento"
+          },
+          "panel_title": {
+            "title": "Título del panel de reserva de servicios"
+          },
+          "useful_information": {
+            "title": "Información útil",
+            "description": "La información introducida en este campo será visible para los clientes en la página del establecimiento."
+          }
+        }
       },
       "warehouse": {
         "title": "Ajustes del almacén",
@@ -372,6 +603,7 @@
             "city": "Ciudad",
             "country": "País",
             "tax_code": "Código fiscal",
+            "revenue_agency_code": "Código Agencia Tributaria",
             "vat_number": "NIF/IVA",
             "pin": "PIN",
             "password": "Contraseña",
@@ -554,6 +786,55 @@
             "title": "Duplicar descuentos/vales",
             "text": "¿Quieres duplicar los {{count}} descuentos/vales seleccionados?"
           }
+        },
+        "form": {
+          "title": "Añadir descuento/vale",
+          "cancel": "Cancelar",
+          "save": "Guardar",
+          "name": "Nombre del descuento",
+          "periods": {
+            "title": "Periodos de validez",
+            "add": "Añadir periodo",
+            "period": "Periodo",
+            "from": "Del",
+            "to": "al",
+            "days_of_week": "Días de la semana",
+            "time_slots": "Franjas horarias",
+            "time_from": "De",
+            "time_to": "a",
+            "add_time_slot": "Añadir franja horaria",
+            "days": {
+              "monday": "Lunes",
+              "tuesday": "Martes",
+              "wednesday": "Miércoles",
+              "thursday": "Jueves",
+              "friday": "Viernes",
+              "saturday": "Sábado",
+              "sunday": "Domingo"
+            },
+            "all_days": "Todos",
+            "choose_days": "Seleccionar"
+          },
+          "field_names": {
+            "validity_period": "periodo de validez",
+            "day_of_week": "día"
+          },
+          "options": {
+            "title": "Opciones",
+            "type": "Tipo de descuento/vale",
+            "types": {
+              "percentage": "Porcentaje",
+              "fixed": "Importe"
+            },
+            "value": "Valor del descuento/vale",
+            "applies_to": "Aplicar descuento/vale a",
+            "scopes": {
+              "all": "Todo",
+              "services": "Servicios"
+            },
+            "max_uses": "Número máximo de usos",
+            "enabled": "Activar descuento/vale"
+          }
         }
       }
     }
@@ -666,12 +947,13 @@
     "greater_than": "El valor {{field}} debe ser mayor que {{limit}}",
     "max": "El valor máximo es {{max}}",
     "min": "El valor mínimo es {{min}}",
-    "required": "Este campo es obligatorio",
+    "required": "Campo obligatorio",
     "email_configuration": {
       "smtp_password": {
         "retype": "Has cambiado los parámetros de conexión: vuelve a escribir la contraseña o introduce una nueva."
       }
-    }
+    },
+    "min_items": "Debe definirse al menos {{count}} {{field}}"
   },
   "unsaved_changes": {
     "title": "Cambios sin guardar",

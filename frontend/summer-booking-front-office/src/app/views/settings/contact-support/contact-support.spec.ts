@@ -25,7 +25,7 @@ describe('ContactSupport', () => {
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         { provide: SystemService, useValue: { contactSupport, supportInfo } },
         { provide: DATA_RELOAD, useValue: language },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(ContactSupport);
@@ -180,9 +180,9 @@ describe('ContactSupport', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
-              errors: [{ field: 'email', code: 'validation.invalid_value' }],
+              errors: [{ field: 'email', code: 'validation.invalid' }],
             },
           }),
       ),

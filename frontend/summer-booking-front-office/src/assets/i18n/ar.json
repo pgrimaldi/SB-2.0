@@ -25,6 +25,16 @@
     "comparison_range": "نطاق المقارنة",
     "year_range": "من {{start}} إلى {{end}}"
   },
+  "rich_text": {
+    "bold": "غامق",
+    "italic": "مائل",
+    "underline": "تسطير",
+    "bullet_list": "قائمة نقطية",
+    "ordered_list": "قائمة مرقمة",
+    "link": "رابط",
+    "link_placeholder": "https://…",
+    "insert_link": "إدراج"
+  },
   "table": {
     "empty": "لا توجد عناصر في الجدول",
     "paginator": {
@@ -70,20 +80,29 @@
     },
     "auth": {
       "invalid_credentials": "بيانات الدخول غير صحيحة",
-      "invalid_token": "الجلسة لم تعد صالحة. سجّل الدخول مجددًا.",
-      "session_expired": "انتهت الجلسة. سجّل الدخول مجددًا."
+      "session_expired": "انتهت الجلسة. سجّل الدخول مجددًا.",
+      "app_not_allowed": "غير مصرح",
+      "too_many_attempts": "محاولات كثيرة جدًا",
+      "unauthenticated": "لم تعد الجلسة صالحة. سجّل الدخول مرة أخرى.",
+      "forbidden": "ليست لديك صلاحية لهذه العملية."
     },
     "validation": {
-      "invalid_request": "بعض البيانات غير صالحة. تحقق منها وأعد المحاولة.",
-      "invalid_date": "التاريخ غير صالح.",
       "end_before_start": "تاريخ النهاية قبل تاريخ البداية.",
-      "invalid_value": "القيمة المختارة غير صالحة."
+      "failed": "طلب غير صالح",
+      "required": "هذا الحقل مطلوب",
+      "invalid": "القيمة غير صالحة.",
+      "email": "عنوان البريد الإلكتروني غير صالح.",
+      "max_length": "{{max}} حرفًا كحد أقصى.",
+      "min_length": "{{min}} أحرف على الأقل.",
+      "length": "من {{min}} إلى {{max}} حرفًا.",
+      "out_of_range": "القيمة خارج النطاق المسموح.",
+      "phone": "رقم الهاتف غير صالح.",
+      "phone_prefix": "رمز الاتصال غير صالح.",
+      "must_accept": "يجب الموافقة للمتابعة.",
+      "invalid_file_type": "نوع الملف غير مسموح."
     },
     "resource": {
       "not_found": "هذا العنصر لم يعد موجودًا."
-    },
-    "operation": {
-      "not_allowed": "العملية غير مسموح بها."
     }
   },
   "alert": {
@@ -121,7 +140,7 @@
     },
     "login": {
       "title": "تسجيل الدخول",
-      "email": "البريد الإلكتروني",
+      "username": "البريد الإلكتروني أو اسم المستخدم",
       "password": "كلمة المرور",
       "remember": "تذكّرني",
       "forgot": "نسيت كلمة المرور؟",
@@ -192,6 +211,218 @@
         "email": "إعداد البريد",
         "database": "قاعدة البيانات",
         "help": "الدعم والأدلة"
+      },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "معلومات عامة",
+          "services": "الخدمات",
+          "media": "الوسائط"
+        },
+        "general_information": {
+          "bathhouse_name": "اسم المنشأة",
+          "address": "العنوان",
+          "postal_code": "الرمز البريدي",
+          "city": "المدينة",
+          "province": "المحافظة",
+          "region": "المنطقة",
+          "country": "الدولة",
+          "choose": "اختر",
+          "phone": "الهاتف",
+          "whatsapp": "واتساب",
+          "email": "البريد الإلكتروني",
+          "website": "الموقع الإلكتروني",
+          "facebook": "فيسبوك",
+          "instagram": "إنستغرام",
+          "description": "الوصف",
+          "opening_hours": "ساعات العمل",
+          "opening_time": "من",
+          "closing_time": "إلى",
+          "cancellation": "الإلغاء",
+          "cancellation_policies": {
+            "free_until_48_hours": "مجاني حتى 48 ساعة قبل",
+            "free_until_24_hours": "مجاني حتى 24 ساعة قبل"
+          },
+          "pets": "الحيوانات الأليفة",
+          "pets_options": {
+            "allowed": "مسموح",
+            "not_allowed": "غير مسموح"
+          },
+          "regulation": "اللوائح",
+          "edit": "تعديل",
+          "cancel": "إلغاء",
+          "save": "حفظ"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "إمكانية الوصول والراحة",
+            "sport_activities": "الرياضة والأنشطة",
+            "food_extra": "المطاعم والإضافات",
+            "beach": "الشاطئ"
+          },
+          "edit": "تعديل",
+          "cancel": "إلغاء",
+          "save": "حفظ"
+        },
+        "media": {
+          "edit": "تعديل",
+          "cancel": "إلغاء",
+          "save": "حفظ",
+          "position": {
+            "title": "الموقع",
+            "edit": "تعديل",
+            "map_error": "تعذّر تحميل الخريطة"
+          },
+          "images": {
+            "title": "الصور",
+            "main": "الصورة الرئيسية",
+            "main_hint": "اسحب الصورة الرئيسية إلى هنا أو انقر للتحميل",
+            "gallery": "معرض الصور",
+            "add": "إضافة صورة"
+          },
+          "virtual_tour": {
+            "title": "رابط الجولة الافتراضية",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "مستندات PDF",
+            "price_list": "قائمة الأسعار",
+            "menu": "قائمة الطعام",
+            "no_file": "لم يتم اختيار ملف",
+            "open": "فتح المستند",
+            "upload": "تحميل"
+          }
+        }
+      },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "اربط حساب Stripe الخاص بك",
+          "subtitle": "استلم مدفوعات الحجوزات عبر الإنترنت بطريقة بسيطة وآمنة.",
+          "description": "يستخدم Summer Booking خدمة Stripe لإدارة المدفوعات عبر الإنترنت لحجوزاتك، مما يضمن معاملات سريعة وآمنة وحماية البيانات الشخصية وبيانات الدفع.",
+          "configure_title": "إعداد حساب Stripe",
+          "configure_text": "اربط حساب Stripe الحالي أو أنشئ حسابًا جديدًا لبدء استلام مدفوعات الحجوزات عبر الإنترنت.",
+          "configure": "إعداد حساب Stripe",
+          "how_it_works": "كيف يعمل:",
+          "step_1": "سجّل الدخول أو أنشئ حسابًا على Stripe",
+          "step_2": "ابدأ باستلام المدفوعات وإجرائها بسهولة"
+        },
+        "options": {
+          "title": "إدارة الخيارات",
+          "online_bookings": "خيارات الحجز عبر الإنترنت",
+          "online_booking_services": "خيارات حجز الخدمات"
+        },
+        "iframe": {
+          "title": "رمز iframe لموقعك الإلكتروني",
+          "subtitle": "اسمح لضيوفك بحجز المظلات والأسرّة الشمسية والخدمات مباشرة من موقعك ببضع نقرات.",
+          "description": "انسخ رمز التضمين والصقه في القسم المطلوب من موقعك. تزامن الأداة التوفر في الوقت الفعلي مع خريطة نظام الإدارة.",
+          "direct_link": "رابط مباشر",
+          "copy": "نسخ الرابط"
+        },
+        "booking_options": {
+          "title": "خيارات الحجز عبر الإنترنت",
+          "cancel": "إلغاء",
+          "save": "حفظ",
+          "online_booking_enabled": "تفعيل الحجز عبر الإنترنت",
+          "map_spot_choice_enabled": "تفعيل اختيار المكان على الخريطة",
+          "selected_periods_only_enabled": "تفعيل الحجز عبر الإنترنت في الفترات المحددة فقط",
+          "selected_spots_only_enabled": "تفعيل الحجز عبر الإنترنت للأماكن المحددة فقط",
+          "view_spots": "عرض الأماكن",
+          "half_day_enabled": "تفعيل الحجز لنصف يوم",
+          "morning": "الصباح",
+          "afternoon": "بعد الظهر",
+          "time_from": "من",
+          "time_to": "إلى",
+          "afternoon_conversion_enabled": "وقت بدء التحويل إلى حجز بعد الظهر",
+          "current_day_booking_enabled": "تفعيل الحجز في اليوم نفسه",
+          "seasonal_booking_enabled": "تفعيل الحجوزات الموسمية",
+          "sharing_enabled": "تفعيل Sharing",
+          "supplement_type": "نوع الرسوم الإضافية",
+          "supplement_types": {
+            "none": "بدون رسوم إضافية",
+            "percentage": "نسبة مئوية",
+            "fixed": "ثابت"
+          },
+          "supplement_value": "قيمة الرسوم الإضافية",
+          "online_booking_block": "إيقاف الحجز عبر الإنترنت",
+          "online_booking_blocks": {
+            "disabled": "معطّل",
+            "three_hours_before": "قبل 3 ساعات",
+            "five_hours_before": "قبل 5 ساعات",
+            "eight_hours_before": "قبل 8 ساعات",
+            "twelve_hours_before": "قبل 12 ساعة",
+            "twenty_four_hours_before": "قبل 24 ساعة",
+            "forty_eight_hours_before": "قبل 48 ساعة",
+            "seventy_two_hours_before": "قبل 72 ساعة"
+          },
+          "choose": "اختر",
+          "max_spot_per_booking": "الحد الأقصى لعدد الأماكن في الحجز الواحد",
+          "max_advance_booking_days": "منع الحجز بعد n يوم من اليوم الحالي",
+          "booking_confirmation_required": "طلب تأكيد الحجز",
+          "yes": "نعم",
+          "no": "لا",
+          "online_booking_audience": "السماح بالحجز عبر الإنترنت لـ",
+          "online_booking_audiences": {
+            "all": "الجميع",
+            "contacts_only": "جهات الاتصال فقط"
+          },
+          "max_bookings_per_day": "الحد الأقصى للحجوزات في اليوم",
+          "payment_methods": {
+            "title": "طرق الدفع المقبولة",
+            "pay_now": "ادفع الآن",
+            "pay_at_property": "الدفع في المنشأة (فقط للحجوزات خلال 7 أيام)",
+            "pay_at_property_without_card": "الدفع في المنشأة بدون بطاقة ائتمان",
+            "deposit": "دفعة مقدمة 50% الآن والباقي في المنشأة",
+            "prepaid_card": "الدفع بالبطاقة المسبقة الدفع الخاصة بالمنشأة"
+          },
+          "booking_limits": {
+            "title": "إعداد حدود الحجز",
+            "add": "إضافة قاعدة جديدة",
+            "description": "أنشئ قواعد حجز لتحديد الحد الأدنى والأقصى لعدد الأماكن القابلة للحجز في فترة معينة وفي صف/قطاع معين.",
+            "sector": "الصف/القطاع",
+            "date_from": "من",
+            "date_to": "إلى",
+            "min": "الحد الأدنى",
+            "max": "الحد الأقصى"
+          },
+          "field_names": {
+            "supplement_value": "الرسوم الإضافية"
+          },
+          "periods": {
+            "hint": "انقر على تاريخين لتحديد فترة",
+            "selected": "فترات التواريخ المحددة:"
+          }
+        },
+        "services_options": {
+          "title": "خيارات حجز الخدمات",
+          "cancel": "إلغاء",
+          "save": "حفظ",
+          "enabled": "تفعيل الحجز عبر الإنترنت للخدمات",
+          "supplement_type": "نوع الرسوم الإضافية",
+          "supplement_types": {
+            "none": "بدون رسوم إضافية",
+            "percentage": "نسبة مئوية",
+            "fixed": "ثابت"
+          },
+          "supplement_value": "قيمة الرسوم الإضافية",
+          "confirmation_required": "طلب تأكيد الحجز",
+          "field_names": {
+            "supplement_value": "الرسوم الإضافية"
+          },
+          "payment_methods": {
+            "title": "طرق الدفع المقبولة",
+            "pay_now": "ادفع الآن",
+            "pay_at_property": "الدفع في المنشأة (فقط للحجوزات خلال 7 أيام)",
+            "pay_at_property_without_card": "الدفع في المنشأة بدون بطاقة ائتمان",
+            "deposit": "دفعة مقدمة 50% الآن والباقي في المنشأة",
+            "prepaid_card": "الدفع بالبطاقة المسبقة الدفع الخاصة بالمنشأة"
+          },
+          "panel_title": {
+            "title": "عنوان لوحة حجز الخدمات"
+          },
+          "useful_information": {
+            "title": "معلومات مفيدة",
+            "description": "ستظهر المعلومات المدخلة في هذا الحقل للعملاء على صفحة المنشأة."
+          }
+        }
       },
       "warehouse": {
         "title": "إعدادات المخزن",
@@ -372,6 +603,7 @@
             "city": "المدينة",
             "country": "الدولة",
             "tax_code": "الرقم الضريبي",
+            "revenue_agency_code": "رمز مصلحة الضرائب",
             "vat_number": "رقم ض.ق.م",
             "pin": "PIN",
             "password": "كلمة المرور",
@@ -554,6 +786,55 @@
             "title": "نسخ الخصومات/القسائم",
             "text": "هل تريد نسخ {{count}} من الخصومات/القسائم المحددة؟"
           }
+        },
+        "form": {
+          "title": "إضافة خصم/قسيمة جديدة",
+          "cancel": "إلغاء",
+          "save": "حفظ",
+          "name": "اسم الخصم",
+          "periods": {
+            "title": "فترات الصلاحية",
+            "add": "إضافة فترة صلاحية",
+            "period": "الفترة",
+            "from": "من",
+            "to": "إلى",
+            "days_of_week": "أيام الأسبوع",
+            "time_slots": "الفترات الزمنية",
+            "time_from": "من",
+            "time_to": "إلى",
+            "add_time_slot": "إضافة فترة زمنية",
+            "days": {
+              "monday": "الاثنين",
+              "tuesday": "الثلاثاء",
+              "wednesday": "الأربعاء",
+              "thursday": "الخميس",
+              "friday": "الجمعة",
+              "saturday": "السبت",
+              "sunday": "الأحد"
+            },
+            "all_days": "الكل",
+            "choose_days": "اختر"
+          },
+          "field_names": {
+            "validity_period": "فترة صلاحية",
+            "day_of_week": "يوم من أيام الأسبوع"
+          },
+          "options": {
+            "title": "الخيارات",
+            "type": "نوع الخصم/القسيمة",
+            "types": {
+              "percentage": "نسبة مئوية",
+              "fixed": "مبلغ"
+            },
+            "value": "قيمة الخصم/القسيمة",
+            "applies_to": "تطبيق الخصم/القسيمة على",
+            "scopes": {
+              "all": "الكل",
+              "services": "الخدمات"
+            },
+            "max_uses": "الحد الأقصى لعدد الاستخدامات",
+            "enabled": "تفعيل الخصم/القسيمة"
+          }
         }
       }
     }
@@ -671,7 +952,8 @@
       "smtp_password": {
         "retype": "غيّرت إعدادات الاتصال: أعد كتابة كلمة المرور أو أدخل كلمة جديدة."
       }
-    }
+    },
+    "min_items": "يجب تحديد {{count}} {{field}} على الأقل"
   },
   "unsaved_changes": {
     "title": "تغييرات غير محفوظة",

@@ -1,6 +1,6 @@
 <main class="sharing">
   <section class="sharing__panel">
-    <h2 class="sharing__title" appI18nText="management.settings.sharing.title"></h2>
+    <app-section-title [text]="'management.settings.sharing.title' | translate" />
     <app-toggle
       [formField]="informationForm.isSharingEnabled"
       [error]="fieldErrors.isSharingEnabled()"
@@ -44,7 +44,7 @@
   </section>
 
   <section class="sharing__panel">
-    <h2 class="sharing__title" appI18nText="management.settings.sharing.credits.title"></h2>
+    <app-section-title [text]="'management.settings.sharing.credits.title' | translate" />
     <div class="sharing__credits">
       <div class="sharing__credit__option">
         <app-checkbox
@@ -154,6 +154,7 @@
 </main>
 
 <app-message-popup
+  [pathIcon]="closeIcon"
   [title]="'management.settings.sharing.saved.title' | translate"
   [text]="'management.settings.sharing.saved.text' | translate"
   [texts]="'management.settings.sharing.saved' | translate"

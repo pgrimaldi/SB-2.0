@@ -1,6 +1,7 @@
 @let name = itemName();
 @let key = translationKey();
 <app-confirm-popup
+  [pathIcon]="pathIcon()"
   [title]="(name ? key + '.one.title' : key + '.many.title') | translate"
   [text]="
     name

@@ -6,12 +6,7 @@ import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-
 import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import {
-  MockFieldError,
-  operationNotAllowed,
-  problem,
-  resourceNotFound,
-} from '../errors/problem.mock';
+import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 /**
@@ -215,7 +210,7 @@ export const warehouseComboboxMock = (
   }
   const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const items: ComboboxItem[] = INVENTORY_ITEMS.filter(
     (item) => item.propertyId === property.id && item.isActive && item.deletedAt === null,
@@ -238,7 +233,7 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
   const body = (request.body ?? {}) as ItemBody;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const item = articleOf(property.id, body.idArticle);
   if (!item) {
@@ -246,7 +241,7 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
   }
   const errors = itemErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
+    return problem(request, 400, 'validation.failed', {
       title: 'Invalid request',
       errors,
     });
@@ -272,7 +267,7 @@ export const warehouseEditMock = (
   const body = (request.body ?? {}) as ItemBody;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const item = articleOf(property.id, body.idArticle);
   if (!item) {
@@ -280,7 +275,7 @@ export const warehouseEditMock = (
   }
   const errors = itemErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.invalid_request', {
+    return problem(request, 400, 'validation.failed', {
       title: 'Invalid request',
       errors,
     });
@@ -307,7 +302,7 @@ export const warehouseDeleteMock = (
   const body = (request.body ?? {}) as Partial<DeleteWarehouseItemsRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const items = itemsOf(property.id, body.idItems);
   if (!items) {
@@ -337,7 +332,7 @@ export const warehouseDuplicateMock = (
   const body = (request.body ?? {}) as Partial<DuplicateWarehouseItemsRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const items = itemsOf(property.id, body.idItems);
   if (!items) {
@@ -397,17 +392,17 @@ function itemErrors(body: ItemBody): MockFieldError[] {
   const thresholdQuantity = body.thresholdQuantity;
   const errors: MockFieldError[] = [];
   if (!wholeNumber(body.totalQuantity) || body.totalQuantity === 0) {
-    errors.push({ field: 'totalQuantity', code: 'validation.invalid_value' });
+    errors.push({ field: 'totalQuantity', code: 'validation.invalid' });
   }
   if (thresholdQuantity !== null && !wholeNumber(thresholdQuantity)) {
-    errors.push({ field: 'thresholdQuantity', code: 'validation.invalid_value' });
+    errors.push({ field: 'thresholdQuantity', code: 'validation.invalid' });
   }
   if (
     typeof body.isThresholdWarningActive !== 'boolean' ||
     (body.isThresholdWarningActive &&
       !(typeof thresholdQuantity === 'number' && thresholdQuantity > 0))
   ) {
-    errors.push({ field: 'isThresholdWarningActive', code: 'validation.invalid_value' });
+    errors.push({ field: 'isThresholdWarningActive', code: 'validation.invalid' });
   }
   return errors;
 }
@@ -432,7 +427,7 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   const body = (request.body ?? {}) as Partial<PageRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);

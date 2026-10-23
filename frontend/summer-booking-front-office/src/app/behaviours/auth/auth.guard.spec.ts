@@ -9,16 +9,16 @@ import { mockApiInterceptor } from '../../services/mocks/mock-api.interceptor';
 import { AuthBehaviour } from './auth.behaviour';
 
 describe('authGuard', () => {
-  const signIn = () =>
+  const login = () =>
     TestBed.inject(AuthBehaviour).start(
       {
         accessToken: 'token',
         expiresIn: 900,
         user: {
           email: 'u@e.it',
-          idProperty: 'property-1',
-          roles: [],
-          isElectronicReceiptAccepted: false,
+          id: 'user-1',
+          role: 'manager',
+          propertyId: 'property-1',
         },
       },
       false,
@@ -50,19 +50,22 @@ describe('authGuard', () => {
     expect(TestBed.inject(Router).url).toBe('/it/home');
   });
 
-  it('should open the management area with a session, while "/" still goes to the home', async () => {
-    signIn();
+  it('should open the management area with a session, also from the hub', async () => {
+    login();
     const harness = await RouterTestingHarness.create();
 
     await harness.navigateByUrl('/beachmap');
     expect(TestBed.inject(Router).url).toBe('/beachmap');
 
     await harness.navigateByUrl('/');
-    expect(TestBed.inject(Router).url).toBe('/it/home');
+    expect(TestBed.inject(Router).url).toBe('/beachmap');
+
+    await harness.navigateByUrl('/en/home');
+    expect(TestBed.inject(Router).url).toBe('/beachmap');
   });
 
   it('should close the management area after logout, also going back to a private page', async () => {
-    signIn();
+    login();
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/beachmap');
 

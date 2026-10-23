@@ -7,7 +7,6 @@ import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-p
 import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
 import { ElectronicReceiptAccount } from '../../../entities/settings/taxation/electronic-receipt-account';
 import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
-import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
 import { readBlobError } from '../errors/read-blob-error';
@@ -22,8 +21,9 @@ export class TaxationService {
   readonly printerList = (request: PageRequest): Observable<Page<PrinterItemListResponse>> =>
     this.httpClient.post<Page<PrinterItemListResponse>>(`${this.endpoint}/printer-list`, request);
 
-  readonly electronicReceipt = (idProperty: string): Observable<ElectronicReceiptResponse> =>
-    this.httpClient.get<ElectronicReceiptResponse>(`${this.endpoint}/electronic-receipt`, {
+  /** The terms and conditions of the electronic receipt as HTML, the body is the text alone. */
+  readonly electronicReceipt = (idProperty: string): Observable<string | null> =>
+    this.httpClient.get<string | null>(`${this.endpoint}/electronic-receipt`, {
       params: { idProperty },
     });
 

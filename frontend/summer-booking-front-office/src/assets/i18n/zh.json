@@ -25,6 +25,16 @@
     "comparison_range": "比较日期范围",
     "year_range": "从{{start}}到{{end}}"
   },
+  "rich_text": {
+    "bold": "粗体",
+    "italic": "斜体",
+    "underline": "下划线",
+    "bullet_list": "项目符号列表",
+    "ordered_list": "编号列表",
+    "link": "链接",
+    "link_placeholder": "https://…",
+    "insert_link": "插入"
+  },
   "table": {
     "empty": "表格中没有内容",
     "paginator": {
@@ -70,20 +80,29 @@
     },
     "auth": {
       "invalid_credentials": "凭据无效",
-      "invalid_token": "会话已失效，请重新登录。",
-      "session_expired": "会话已过期，请重新登录。"
+      "session_expired": "会话已过期，请重新登录。",
+      "app_not_allowed": "未授权",
+      "too_many_attempts": "尝试次数过多",
+      "unauthenticated": "会话已失效，请重新登录。",
+      "forbidden": "你无权执行此操作。"
     },
     "validation": {
-      "invalid_request": "部分数据无效，请检查后重试。",
-      "invalid_date": "日期无效。",
       "end_before_start": "结束日期早于开始日期。",
-      "invalid_value": "所选值无效。"
+      "failed": "请求无效",
+      "required": "此字段为必填项",
+      "invalid": "值无效。",
+      "email": "电子邮件地址无效。",
+      "max_length": "最多 {{max}} 个字符。",
+      "min_length": "至少 {{min}} 个字符。",
+      "length": "{{min}} 到 {{max}} 个字符。",
+      "out_of_range": "值超出允许范围。",
+      "phone": "电话号码无效。",
+      "phone_prefix": "电话区号无效。",
+      "must_accept": "必须同意才能继续。",
+      "invalid_file_type": "不允许此文件类型。"
     },
     "resource": {
       "not_found": "该项目已不存在。"
-    },
-    "operation": {
-      "not_allowed": "不允许此操作。"
     }
   },
   "alert": {
@@ -121,7 +140,7 @@
     },
     "login": {
       "title": "登录",
-      "email": "电子邮件",
+      "username": "电子邮件或用户名",
       "password": "密码",
       "remember": "记住我的登录信息",
       "forgot": "忘记密码？",
@@ -192,6 +211,218 @@
         "email": "邮件配置",
         "database": "数据库",
         "help": "帮助和指南"
+      },
+      "bathhouse_configuration": {
+        "tabs": {
+          "general_information": "基本信息",
+          "services": "服务",
+          "media": "媒体"
+        },
+        "general_information": {
+          "bathhouse_name": "浴场名称",
+          "address": "地址",
+          "postal_code": "邮政编码",
+          "city": "城市",
+          "province": "省份",
+          "region": "大区",
+          "country": "国家",
+          "choose": "请选择",
+          "phone": "电话",
+          "whatsapp": "Whatsapp",
+          "email": "电子邮件",
+          "website": "网站",
+          "facebook": "Facebook",
+          "instagram": "Instagram",
+          "description": "描述",
+          "opening_hours": "营业时间",
+          "opening_time": "从",
+          "closing_time": "至",
+          "cancellation": "取消政策",
+          "cancellation_policies": {
+            "free_until_48_hours": "提前48小时免费取消",
+            "free_until_24_hours": "提前24小时免费取消"
+          },
+          "pets": "宠物",
+          "pets_options": {
+            "allowed": "允许",
+            "not_allowed": "不允许"
+          },
+          "regulation": "规章制度",
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "services": {
+          "categories": {
+            "accessibility_comfort": "无障碍与舒适",
+            "sport_activities": "运动与活动",
+            "food_extra": "餐饮与其他",
+            "beach": "海滩"
+          },
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "media": {
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存",
+          "position": {
+            "title": "位置",
+            "edit": "编辑",
+            "map_error": "无法加载地图"
+          },
+          "images": {
+            "title": "图片",
+            "main": "主图",
+            "main_hint": "将主图拖到此处或点击上传",
+            "gallery": "图片库",
+            "add": "添加图片"
+          },
+          "virtual_tour": {
+            "title": "虚拟游览链接",
+            "placeholder": "https://example.com/virtual-tour"
+          },
+          "documents": {
+            "title": "PDF 文档",
+            "price_list": "价目表",
+            "menu": "菜单",
+            "no_file": "未选择文件",
+            "open": "打开文档",
+            "upload": "上传"
+          }
+        }
+      },
+      "online_booking_configuration": {
+        "stripe": {
+          "title": "关联您的 Stripe 账户",
+          "subtitle": "简单、安全地接收在线预订付款。",
+          "description": "Summer Booking 使用 Stripe 管理您预订的在线付款，确保交易快速安全，并保护个人数据和支付数据。",
+          "configure_title": "配置您的 Stripe 账户",
+          "configure_text": "关联现有的 Stripe 账户或创建新账户，开始接收在线预订付款。",
+          "configure": "配置您的 Stripe 账户",
+          "how_it_works": "使用方法：",
+          "step_1": "登录或注册 Stripe",
+          "step_2": "轻松开始收款和付款"
+        },
+        "options": {
+          "title": "管理选项",
+          "online_bookings": "在线预订选项",
+          "online_booking_services": "服务在线预订选项"
+        },
+        "iframe": {
+          "title": "您网站的 iframe 代码",
+          "subtitle": "让您的客人只需点击几下，即可直接在您的网站上预订遮阳伞、躺椅和服务。",
+          "description": "将嵌入代码复制并粘贴到您网站的所需位置。该小部件会与管理系统的地图实时同步可用情况。",
+          "direct_link": "直接链接",
+          "copy": "复制链接"
+        },
+        "booking_options": {
+          "title": "在线预订选项",
+          "cancel": "取消",
+          "save": "保存",
+          "online_booking_enabled": "启用在线预订",
+          "map_spot_choice_enabled": "启用在地图上选择位置",
+          "selected_periods_only_enabled": "仅在所选期间启用在线预订",
+          "selected_spots_only_enabled": "仅为所选位置启用在线预订",
+          "view_spots": "查看位置",
+          "half_day_enabled": "启用半天预订",
+          "morning": "上午",
+          "afternoon": "下午",
+          "time_from": "从",
+          "time_to": "至",
+          "afternoon_conversion_enabled": "转为下午预订的开始时间",
+          "current_day_booking_enabled": "启用当天预订",
+          "seasonal_booking_enabled": "启用季节预订",
+          "sharing_enabled": "启用 Sharing",
+          "supplement_type": "附加费类型",
+          "supplement_types": {
+            "none": "无附加费",
+            "percentage": "百分比",
+            "fixed": "固定"
+          },
+          "supplement_value": "附加费金额",
+          "online_booking_block": "在线预订截止",
+          "online_booking_blocks": {
+            "disabled": "已停用",
+            "three_hours_before": "提前 3 小时",
+            "five_hours_before": "提前 5 小时",
+            "eight_hours_before": "提前 8 小时",
+            "twelve_hours_before": "提前 12 小时",
+            "twenty_four_hours_before": "提前 24 小时",
+            "forty_eight_hours_before": "提前 48 小时",
+            "seventy_two_hours_before": "提前 72 小时"
+          },
+          "choose": "请选择",
+          "max_spot_per_booking": "同一预订中可预订的最大位置数",
+          "max_advance_booking_days": "禁止预订距今天超过 n 天的日期",
+          "booking_confirmation_required": "需要确认预订",
+          "yes": "是",
+          "no": "否",
+          "online_booking_audience": "允许在线预订的对象",
+          "online_booking_audiences": {
+            "all": "所有人",
+            "contacts_only": "仅限联系人"
+          },
+          "max_bookings_per_day": "每天最多预订数",
+          "payment_methods": {
+            "title": "接受的付款方式",
+            "pay_now": "立即付款",
+            "pay_at_property": "到店付款（仅限 7 天内的预订）",
+            "pay_at_property_without_card": "到店付款，无需信用卡",
+            "deposit": "现付 50% 定金，余款到店支付",
+            "prepaid_card": "使用本店预付卡付款"
+          },
+          "booking_limits": {
+            "title": "预订限制配置",
+            "add": "添加新规则",
+            "description": "创建预订规则，为指定期间和指定排/区域设置可预订位置的最小和最大数量。",
+            "sector": "排/区域",
+            "date_from": "从",
+            "date_to": "至",
+            "min": "最少",
+            "max": "最多"
+          },
+          "field_names": {
+            "supplement_value": "附加费"
+          },
+          "periods": {
+            "hint": "点击两个日期以选择一个时间段",
+            "selected": "已选日期区间："
+          }
+        },
+        "services_options": {
+          "title": "服务在线预订选项",
+          "cancel": "取消",
+          "save": "保存",
+          "enabled": "启用服务在线预订",
+          "supplement_type": "附加费类型",
+          "supplement_types": {
+            "none": "无附加费",
+            "percentage": "百分比",
+            "fixed": "固定"
+          },
+          "supplement_value": "附加费金额",
+          "confirmation_required": "需要确认预订",
+          "field_names": {
+            "supplement_value": "附加费"
+          },
+          "payment_methods": {
+            "title": "接受的付款方式",
+            "pay_now": "立即付款",
+            "pay_at_property": "到店付款（仅限 7 天内的预订）",
+            "pay_at_property_without_card": "到店付款，无需信用卡",
+            "deposit": "现付 50% 定金，余款到店支付",
+            "prepaid_card": "使用本店预付卡付款"
+          },
+          "panel_title": {
+            "title": "服务预订面板标题"
+          },
+          "useful_information": {
+            "title": "实用信息",
+            "description": "在此填写的信息将在本店页面上向客户显示。"
+          }
+        }
       },
       "warehouse": {
         "title": "仓库设置",
@@ -372,6 +603,7 @@
             "city": "城市",
             "country": "国家",
             "tax_code": "税号",
+            "revenue_agency_code": "税务局代码",
             "vat_number": "增值税号",
             "pin": "PIN",
             "password": "密码",
@@ -554,6 +786,55 @@
             "title": "复制折扣/代金券",
             "text": "要复制所选的 {{count}} 个折扣/代金券吗？"
           }
+        },
+        "form": {
+          "title": "添加新折扣/优惠券",
+          "cancel": "取消",
+          "save": "保存",
+          "name": "折扣名称",
+          "periods": {
+            "title": "有效期",
+            "add": "添加有效期",
+            "period": "期间",
+            "from": "从",
+            "to": "至",
+            "days_of_week": "星期",
+            "time_slots": "时间段",
+            "time_from": "从",
+            "time_to": "至",
+            "add_time_slot": "添加时间段",
+            "days": {
+              "monday": "星期一",
+              "tuesday": "星期二",
+              "wednesday": "星期三",
+              "thursday": "星期四",
+              "friday": "星期五",
+              "saturday": "星期六",
+              "sunday": "星期日"
+            },
+            "all_days": "全部",
+            "choose_days": "请选择"
+          },
+          "field_names": {
+            "validity_period": "有效期",
+            "day_of_week": "星期"
+          },
+          "options": {
+            "title": "选项",
+            "type": "折扣/优惠券类型",
+            "types": {
+              "percentage": "百分比",
+              "fixed": "金额"
+            },
+            "value": "折扣/优惠券值",
+            "applies_to": "折扣/优惠券适用于",
+            "scopes": {
+              "all": "全部",
+              "services": "服务"
+            },
+            "max_uses": "最大使用次数",
+            "enabled": "启用折扣/优惠券"
+          }
         }
       }
     }
@@ -671,7 +952,8 @@
       "smtp_password": {
         "retype": "您更改了连接参数：请重新输入密码或输入新密码。"
       }
-    }
+    },
+    "min_items": "必须至少定义 {{count}} 个{{field}}"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

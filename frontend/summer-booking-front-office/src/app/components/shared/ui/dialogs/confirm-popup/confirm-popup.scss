@@ -7,32 +7,6 @@
   position: relative;
 }
 
-.confirm__popup__close {
-  position: absolute;
-  top: 0.5rem;
-  inset-inline-end: 0.5rem;
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: default;
-    opacity: 0.5;
-  }
-
-  img,
-  mat-icon {
-    width: 0.75rem;
-    height: 0.75rem;
-    font-size: 0.75rem;
-  }
-}
-
 .confirm__popup__title__danger {
   color: var(--color__layout__error);
 }

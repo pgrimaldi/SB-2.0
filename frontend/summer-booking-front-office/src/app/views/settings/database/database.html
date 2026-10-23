@@ -131,12 +131,14 @@
 />
 
 <app-message-popup
+  [pathIcon]="closeIcon"
   [text]="'management.settings.database.trashed.text' | translate"
   [texts]="'management.settings.database.trashed' | translate"
   [(open)]="isTrashedShown"
 />
 
 <app-existing-booking-filters-popup
+  [pathIcon]="closeIcon"
   [filters]="bookingFilters()"
   [(open)]="isFiltersOpen"
   (applied)="bookingFilters.set($event)"
@@ -167,11 +169,12 @@
   [title]="'alert.error_title' | translate"
   [text]="actionErrorMessage() ?? ''"
   [texts]="'alert' | translate"
-  [pathIcon]="actionErrorIcon"
+  [pathIcon]="alertIcons"
   [(open)]="isActionErrorShown"
 />
 
 <app-table-error-popup
+  [pathIcon]="closeIcon"
   [title]="'table.load_error.title' | translate"
   [text]="'table.load_error.text' | translate"
   [texts]="'table.load_error' | translate"

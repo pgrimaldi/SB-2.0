@@ -1,0 +1,79 @@
+// The page gives the size to the element (e.g. `height`); the box fills it.
+:host {
+  display: block;
+}
+
+.file__drop__zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: 100%;
+  padding: 1rem;
+  border: 0.0625rem dashed var(--color__layout__text__soft);
+  border-radius: 0.3125rem;
+  color: var(--color__layout__text__soft);
+  cursor: pointer;
+
+  &:hover,
+  &.file__drop__zone__dragging {
+    border-color: var(--color__main__theme__one);
+    background: var(--color__layout__highlight);
+  }
+
+  // The field cannot be seen: its focus shows on the box.
+  &:has(:focus-visible) {
+    outline: 0.125rem solid var(--focus-ring-color, var(--color__main__theme__one));
+    outline-offset: var(--focus-ring-offset, 0.125rem);
+  }
+}
+
+.file__drop__zone__disabled {
+  cursor: default;
+  pointer-events: none;
+
+  // A photo keeps its colours.
+  &:not(:has(.file__drop__zone__preview)) {
+    opacity: 0.5;
+  }
+}
+
+// Out of sight but still reached with the keyboard.
+.file__drop__zone__field {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+// Dragging over them would count as leaving the box.
+.file__drop__zone__icon,
+.file__drop__zone__text,
+.file__drop__zone__preview {
+  pointer-events: none;
+}
+
+.file__drop__zone__preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file__drop__zone__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 1.25rem;
+}
+
+.file__drop__zone__text {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  text-align: center;
+}

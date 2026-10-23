@@ -35,6 +35,8 @@ import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-fiel
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
+import { FormRow } from '../../../components/shared/ui/forms/form-row/form-row';
+import { FormRowLabel } from '../../../components/shared/ui/forms/form-row/form-row-label';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
@@ -65,6 +67,8 @@ interface SecurityTexts {
     FilledSelect,
     FilledTextField,
     FormField,
+    FormRow,
+    FormRowLabel,
     I18nText,
     MessagePopup,
     TranslatePipe,
@@ -86,6 +90,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly maskedFields = EMAIL_CONFIGURATION_MASKED_FIELDS;
   protected readonly sendTestIcon = ['/assets/images/EmailConfiguration_MailSend.svg'] as const;
   protected readonly resetIcon = ['/assets/images/EmailConfiguration_Trash.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/EmailConfiguration_Close.svg'] as const;
   /** [content shown, content hidden]: the eye icons (Eye_close once open, Eye_start at first). */
   protected readonly eyeIcons = [
     '/assets/images/EmailConfiguration_EyeClose.svg',
@@ -187,7 +192,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
-      const idProperty = this.auth.user()?.idProperty;
+      const idProperty = this.auth.user()?.propertyId;
       if (!idProperty) {
         return;
       }
@@ -266,7 +271,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     call: (request: EmailConfigurationRequest) => Observable<void>,
     done: (sent: EmailConfigurationRequest) => void,
   ): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isBusy() || !idProperty) {
       return;
     }

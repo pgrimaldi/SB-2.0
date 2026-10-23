@@ -8,11 +8,20 @@ export interface SettingsPage {
   loadComponent?: Route['loadComponent'];
   /** Other screens of the page, not in the menu (e.g. its trash); their paths are under the page's. */
   subPages?: readonly Route[];
+  /** A page with routes of its own (e.g. its tabs, `bathhouse-configuration/2`), loaded with it. */
+  loadChildren?: Route['loadChildren'];
 }
 
 /** In menu order. The single source of both the routes (app.routes.ts) and the side panel. */
 export const SETTINGS_PAGES: readonly SettingsPage[] = [
-  { path: 'property', label: 'management.settings.menu.property' },
+  {
+    path: 'bathhouse-configuration',
+    label: 'management.settings.menu.property',
+    loadChildren: () =>
+      import('./bathhouse-configuration/bathhouse-configuration.routes').then(
+        (routes) => routes.BATHHOUSE_CONFIGURATION_ROUTES,
+      ),
+  },
   { path: 'users', label: 'management.settings.menu.users' },
   { path: 'seasons', label: 'management.settings.menu.seasons' },
   { path: 'sectors', label: 'management.settings.menu.sectors' },
@@ -37,7 +46,14 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
     label: 'management.settings.menu.sharing',
     loadComponent: () => import('./sharing/sharing').then((component) => component.Sharing),
   },
-  { path: 'online-bookings', label: 'management.settings.menu.online_bookings' },
+  {
+    path: 'online-booking-configuration',
+    label: 'management.settings.menu.online_bookings',
+    loadComponent: () =>
+      import('./online-booking-configuration/online-booking-configuration').then(
+        (component) => component.OnlineBookingConfiguration,
+      ),
+  },
   {
     path: 'taxation',
     label: 'management.settings.menu.fiscalization',

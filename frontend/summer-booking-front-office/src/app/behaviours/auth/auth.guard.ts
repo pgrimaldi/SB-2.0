@@ -11,3 +11,7 @@ export const authGuard: CanActivateFn = () => {
 
   return inject(Router).parseUrl(`/${inject(LanguageBehaviour).preferred()}/home`);
 };
+
+// With a session open the hub is skipped: the user goes straight into the management area.
+export const guestGuard: CanActivateFn = () =>
+  inject(AuthBehaviour).isAuthenticated() ? inject(Router).parseUrl('/beachmap') : true;

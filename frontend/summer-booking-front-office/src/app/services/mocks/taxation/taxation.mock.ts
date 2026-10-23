@@ -4,11 +4,10 @@ import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/paginati
 import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
 import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
 import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
-import { ElectronicReceiptResponse } from '../../../entities/settings/taxation/electronic-receipt-response';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
-import { isAuthorized, setMockElectronicReceiptAccepted, unauthorized } from '../auth/auth.mock';
-import { operationNotAllowed, resourceNotFound } from '../errors/problem.mock';
+import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { forbidden, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 /** Invented printers, with documentation IP addresses (RFC 5737); changed by the mock calls. */
@@ -54,7 +53,7 @@ const TERMS: Record<'it' | 'en', string> = {
 /**
  * `POST /api/taxation/printer-list` with `PageRequest`: one page of the printers of the
  * property; search, filters and sorting are not read. 401 without a valid access token; 403
- * `operation.not_allowed` for a missing or unknown property.
+ * `auth.forbidden` for a missing or unknown property.
  */
 export const printerListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -62,7 +61,7 @@ export const printerListMock = (request: HttpRequest<unknown>): Observable<HttpE
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const page = positiveInteger(body.page, 1);
   const pageSize = positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE);
@@ -91,7 +90,7 @@ export const setPrinterIsActiveMock = (
   }
   const body = (request.body ?? {}) as Partial<SetPrinterIsActiveRequest>;
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const printer = printers.find(({ idPrinter }) => idPrinter === body.idPrinter);
   if (!printer) {
@@ -113,7 +112,7 @@ export const deletePrinterMock = (
   }
   const body = (request.body ?? {}) as Partial<DeletePrinterRequest>;
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   if (!printers.some(({ idPrinter }) => idPrinter === body.idPrinter)) {
     return resourceNotFound(request);
@@ -125,7 +124,7 @@ export const deletePrinterMock = (
 /**
  * `GET /api/taxation/electronic-receipt?idProperty=…`: the terms of the electronic receipt as HTML,
  * in the language of `Accept-Language` (Italian when it is not English). 401 without a valid access
- * token; 403 `operation.not_allowed` for a missing or unknown property.
+ * token; 403 `auth.forbidden` for a missing or unknown property.
  */
 export const electronicReceiptMock = (
   request: HttpRequest<unknown>,
@@ -134,11 +133,12 @@ export const electronicReceiptMock = (
     return unauthorized(request);
   }
   if (!propertyOf(request.params.get('idProperty'))) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const language = request.headers.get('Accept-Language')?.startsWith('en') ? 'en' : 'it';
-  const body: ElectronicReceiptResponse = { termsAndConditions: TERMS[language] };
-  return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(150));
+  return of(new HttpResponse({ status: 200, url: request.url, body: TERMS[language] })).pipe(
+    delay(150),
+  );
 };
 
 /**
@@ -155,7 +155,7 @@ export const downloadGuideElectronicReceiptMock = (
   }
   const body = (request.body ?? {}) as { idProperty?: unknown };
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const guide = new Blob(['Guida di prova dello scontrino elettronico.'], {
     type: 'text/plain',
@@ -180,7 +180,7 @@ export const addPrinterMock = (request: HttpRequest<unknown>): Observable<HttpEv
   }
   const body = (request.body ?? {}) as Partial<AddPrinterItemRequest> & { idProperty?: string };
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   printers = [
     ...printers,
@@ -206,9 +206,8 @@ export const electronicReceiptActivationMock = (
   }
   const body = (request.body ?? {}) as Partial<ElectronicReceiptActivationRequest>;
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
-  setMockElectronicReceiptAccepted(body.isElectronicReceiptAccepted === true);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
@@ -224,7 +223,7 @@ export const saveElectronicReceiptAccountMock = (
   }
   const body = (request.body ?? {}) as { idProperty?: string };
   if (!propertyOf(body.idProperty)) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };

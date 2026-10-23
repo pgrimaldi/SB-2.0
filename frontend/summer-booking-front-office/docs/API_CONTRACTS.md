@@ -2,11 +2,11 @@
 
 Elenco di tutte le API usate dal frontend, divise per sezione: rotta, payload e risposta, in JSON e in tabella con un esempio per ogni property. I dati degli esempi sono inventati. Errori, header e regole comuni sono in `API_CONTRACTS.docx`.
 
-Ogni chiamata, tranne `auth/signin`, `auth/refresh` e `auth/logout`, porta l'header `Authorization: Bearer <accessToken>`.
+Ogni chiamata, tranne `identity/auth/login`, `identity/auth/refresh` e `identity/auth/logout`, porta l'header `Authorization: Bearer <accessToken>`.
 
 ## /auth
 
-### POST `/api/auth/signin`
+### POST `/api/identity/auth/login`
 
 Accesso.
 
@@ -16,7 +16,8 @@ Accesso.
 {
   "username": "mario.rossi@example.com",
   "password": "password-digitata",
-  "remember": true
+  "remember": true,
+  "app": "hub"
 }
 ```
 
@@ -25,6 +26,7 @@ Accesso.
 | `username` | string | `mario.rossi@example.com` |
 | `password` | string | `password-digitata` |
 | `remember` | boolean | `true` |
+| `app` | string | `hub` |
 
 #### Response
 
@@ -33,14 +35,12 @@ Stato: 200 OK.
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio",
-  "expiresIn": 900,
+  "expiresIn": 604800,
   "user": {
+    "id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c",
     "email": "mario.rossi@example.com",
-    "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
-    "roles": [
-      "Manager"
-    ],
-    "isElectronicReceiptAccepted": false
+    "role": "manager",
+    "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
   }
 }
 ```
@@ -48,15 +48,15 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `accessToken` | string | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio` |
-| `expiresIn` | number (intero) | `900` |
-| `user` | AuthUser (oggetto) | `{"email": "mario.rossi@example.com", "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d", "roles": ["Manager"], "isElectronicReceiptAccepted": false}` |
+| `expiresIn` | number (intero) | `604800` |
+| `user` | AuthUser (oggetto) | `{"id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c", "email": "mario.rossi@example.com", "role": "manager", "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"}` |
+| `user.id` | string (UUID) | `0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c` |
 | `user.email` | string | `mario.rossi@example.com` |
-| `user.idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-| `user.roles` | string[] (array di stringhe) | `["Manager"]` |
-| `user.isElectronicReceiptAccepted` | boolean | `false` |
-| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=2592000` |
+| `user.role` | string | `manager` |
+| `user.propertyId` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `sb_rt=<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=2592000` |
 
-### POST `/api/auth/refresh`
+### POST `/api/identity/auth/refresh`
 
 Rinnovo del token.
 
@@ -71,14 +71,12 @@ Stato: 200 OK.
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio",
-  "expiresIn": 900,
+  "expiresIn": 604800,
   "user": {
+    "id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c",
     "email": "mario.rossi@example.com",
-    "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
-    "roles": [
-      "Manager"
-    ],
-    "isElectronicReceiptAccepted": false
+    "role": "manager",
+    "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
   }
 }
 ```
@@ -86,15 +84,15 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `accessToken` | string | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0In0.firma-di-esempio` |
-| `expiresIn` | number (intero) | `900` |
-| `user` | AuthUser (oggetto) | `{"email": "mario.rossi@example.com", "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d", "roles": ["Manager"], "isElectronicReceiptAccepted": false}` |
+| `expiresIn` | number (intero) | `604800` |
+| `user` | AuthUser (oggetto) | `{"id": "0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c", "email": "mario.rossi@example.com", "role": "manager", "propertyId": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"}` |
+| `user.id` | string (UUID) | `0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c` |
 | `user.email` | string | `mario.rossi@example.com` |
-| `user.idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-| `user.roles` | string[] (array di stringhe) | `["Manager"]` |
-| `user.isElectronicReceiptAccepted` | boolean | `false` |
-| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=2592000` |
+| `user.role` | string | `manager` |
+| `user.propertyId` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `Set-Cookie (header)` | cookie HttpOnly del refresh token | `sb_rt=<refresh-token>; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=2592000` |
 
-### POST `/api/auth/logout`
+### POST `/api/identity/auth/logout`
 
 Uscita.
 
@@ -110,7 +108,7 @@ Nessun corpo.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `Set-Cookie (header)` | cancella il cookie del refresh token | `<nome-cookie>=; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=0` |
+| `Set-Cookie (header)` | cancella il cookie del refresh token | `sb_rt=; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=0` |
 
 ## /warehouse
 
@@ -982,6 +980,7 @@ Fiscalizzazione: account dello scontrino elettronico.
   "city": "Roma",
   "country": "Italia",
   "taxCode": "XXXXXXXXXXXXXXXX",
+  "revenueAgencyCode": "AE00000000",
   "vatNumber": "00000000000",
   "pin": "00000",
   "password": "password-digitata"
@@ -998,6 +997,7 @@ Fiscalizzazione: account dello scontrino elettronico.
 | `city` | string \| null | `Roma` |
 | `country` | string \| null | `Italia` |
 | `taxCode` | string \| null | `XXXXXXXXXXXXXXXX` |
+| `revenueAgencyCode` | string \| null | `AE00000000` |
 | `vatNumber` | string \| null | `00000000000` |
 | `pin` | string \| null | `00000` |
 | `password` | string \| null | `password-digitata` |
@@ -1028,15 +1028,11 @@ Nessun corpo: è una GET, lo stabilimento va nella query string.
 
 Stato: 200 OK.
 
-```json
-{
-  "termsAndConditions": "<h4>Generale</h4><p>Testo dei termini e condizioni…</p>"
-}
-```
+Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (tra virgolette, Content-Type application/json), nella lingua dell'header Accept-Language.
 
-| Property | Tipo | Esempio |
-|---|---|---|
-| `termsAndConditions` | string (HTML) | `<h4>Generale</h4><p>Testo dei termini e condizioni…</p>` |
+```json
+"<h4>Generale</h4><p>Testo dei termini e condizioni…</p>"
+```
 
 ## /sharing
 
@@ -1274,6 +1270,642 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### POST `/api/vouchers/add-voucher-item`
+
+Sconti e voucher: aggiunta.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "voucherName": "Estate",
+  "validityPeriods": [
+    {
+      "validFrom": "2026-08-01T00:00:00.000Z",
+      "validTo": "2026-08-31T00:00:00.000Z",
+      "daysOfWeek": [
+        1,
+        2,
+        3
+      ],
+      "timeSlots": [
+        {
+          "from": "09:00",
+          "to": "12:00"
+        },
+        {
+          "from": "15:00",
+          "to": "17:00"
+        }
+      ]
+    },
+    {
+      "validFrom": "2026-09-01T00:00:00.000Z",
+      "validTo": "2026-09-15T00:00:00.000Z",
+      "daysOfWeek": [
+        6,
+        7
+      ],
+      "timeSlots": [
+        {
+          "from": "10:00",
+          "to": "18:00"
+        }
+      ]
+    }
+  ],
+  "discountType": "Percentage",
+  "discountValue": 15,
+  "discountScope": "All",
+  "maxUseQuantity": 1,
+  "isEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `voucherName` | string | `Estate` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
+| `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-01T00:00:00.000Z` |
+| `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-31T00:00:00.000Z` |
+| `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
+| `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
+| `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `12:00` |
+| `discountType` | string (enum DiscountType) | `Percentage` |
+| `discountValue` | number (decimale) | `15` |
+| `discountScope` | string (enum DiscountScope) | `All` |
+| `maxUseQuantity` | number (intero ≥ 1) | `1` |
+| `isEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/vouchers/update-voucher-item`
+
+Sconti e voucher: modifica.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
+  "voucherName": "Estate 2026",
+  "validityPeriods": [
+    {
+      "validFrom": "2026-08-01T00:00:00.000Z",
+      "validTo": "2026-08-31T00:00:00.000Z",
+      "daysOfWeek": [
+        1,
+        2,
+        3
+      ],
+      "timeSlots": [
+        {
+          "from": "09:00",
+          "to": "12:00"
+        },
+        {
+          "from": "15:00",
+          "to": "17:00"
+        }
+      ]
+    },
+    {
+      "validFrom": "2026-09-01T00:00:00.000Z",
+      "validTo": "2026-09-15T00:00:00.000Z",
+      "daysOfWeek": [
+        6,
+        7
+      ],
+      "timeSlots": [
+        {
+          "from": "10:00",
+          "to": "18:00"
+        }
+      ]
+    }
+  ],
+  "discountType": "Percentage",
+  "discountValue": 20,
+  "discountScope": "All",
+  "maxUseQuantity": 1,
+  "isEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02` |
+| `voucherName` | string | `Estate 2026` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
+| `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-01T00:00:00.000Z` |
+| `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-31T00:00:00.000Z` |
+| `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
+| `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
+| `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `12:00` |
+| `discountType` | string (enum DiscountType) | `Percentage` |
+| `discountValue` | number (decimale) | `20` |
+| `discountScope` | string (enum DiscountScope) | `All` |
+| `maxUseQuantity` | number (intero ≥ 1) | `1` |
+| `isEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/vouchers/get-selected-item?idVoucher={idVoucher}`
+
+Sconti e voucher: dati per la modifica.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id dello sconto/voucher va nella query string.
+
+```text
+/api/vouchers/get-selected-item?idVoucher=6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
+  "voucherName": "Ferragosto",
+  "validityPeriods": [
+    {
+      "validFrom": "2026-08-12T00:00:00.000Z",
+      "validTo": "2026-08-16T00:00:00.000Z",
+      "daysOfWeek": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "timeSlots": [
+        {
+          "from": "09:00",
+          "to": "13:00"
+        },
+        {
+          "from": "15:00",
+          "to": "19:00"
+        }
+      ]
+    }
+  ],
+  "discountType": "Fixed",
+  "discountValue": 5,
+  "discountScope": "Services",
+  "maxUseQuantity": 50,
+  "isEnabled": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02` |
+| `voucherName` | string \| null | `Ferragosto` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti) | `[{"validFrom": "2026-08-12T00:00:00.000Z", "validTo": "2026-08-16T00:00:00.000Z", "daysOfWeek": [1, 2, 3, 4, 5], "timeSlots": [{"from": "09:00", "to": "13:00"}, {"from": "15:00", "to": "19:00"}]}]` |
+| `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-12T00:00:00.000Z` |
+| `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-16T00:00:00.000Z` |
+| `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3, 4, 5]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "13:00"}, {"from": "15:00", "to": "19:00"}]` |
+| `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
+| `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `13:00` |
+| `discountType` | string (enum DiscountType) \| null | `Fixed` |
+| `discountValue` | number (decimale) \| null | `5` |
+| `discountScope` | string (enum DiscountScope) \| null | `Services` |
+| `maxUseQuantity` | number (intero) \| null | `50` |
+| `isEnabled` | boolean \| null | `false` |
+
+## /catalog
+
+### GET `/api/catalog/countries-combobox`
+
+Catalogo: nazioni per le tendine.
+
+#### Payload
+
+Nessun corpo e nessun parametro: è una GET. La lingua dei nomi è quella dell'header Accept-Language.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "IT",
+    "value": "Italia"
+  },
+  {
+    "id": "FR",
+    "value": "Francia"
+  },
+  {
+    "id": "DE",
+    "value": "Germania"
+  },
+  {
+    "id": "CN",
+    "value": "Cina"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (ISO 3166-1 alpha-2) | `IT` |
+| `value` | string | `Italia` |
+
+### GET `/api/catalog/bathhouse-configuration-general?idProperty={idProperty}`
+
+Informazioni stabilimento: informazioni generali.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bathhouse-configuration-general?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "bathhouseName": "Lido Demo",
+  "address": "Lungomare dei Pini 12",
+  "postalCode": "00100",
+  "city": "Roma",
+  "province": "Roma",
+  "region": "Lazio",
+  "country": "IT",
+  "phone": "+39 06 1234567",
+  "whatsapp": "+39 333 1234567",
+  "email": "info@lidodemo.example",
+  "website": "https://www.lidodemo.example",
+  "facebook": "https://www.facebook.com/lidodemo.example",
+  "instagram": "https://www.instagram.com/lidodemo.example",
+  "description": "<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>",
+  "openingTime": "08:30",
+  "closingTime": "19:00",
+  "cancellationPolicy": "FreeUntil48Hours",
+  "petPolicy": "Allowed",
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `bathhouseName` | string \| null | `Lido Demo` |
+| `address` | string \| null | `Lungomare dei Pini 12` |
+| `postalCode` | string \| null | `00100` |
+| `city` | string \| null | `Roma` |
+| `province` | string \| null | `Roma` |
+| `region` | string \| null | `Lazio` |
+| `country` | string (ISO 3166-1 alpha-2) \| null | `IT` |
+| `phone` | string \| null | `+39 06 1234567` |
+| `whatsapp` | string \| null | `+39 333 1234567` |
+| `email` | string \| null | `info@lidodemo.example` |
+| `website` | string \| null | `https://www.lidodemo.example` |
+| `facebook` | string \| null | `https://www.facebook.com/lidodemo.example` |
+| `instagram` | string \| null | `https://www.instagram.com/lidodemo.example` |
+| `description` | string (HTML) \| null | `<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>` |
+| `openingTime` | string (HH:mm) \| null | `08:30` |
+| `closingTime` | string (HH:mm) \| null | `19:00` |
+| `cancellationPolicy` | string (enum CancellationPolicy) \| null | `FreeUntil48Hours` |
+| `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
+| `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
+
+### POST `/api/catalog/save-bathhouse-configuration-general`
+
+Informazioni stabilimento: salvataggio delle informazioni generali.
+
+#### Payload
+
+```json
+{
+  "bathhouseName": "Lido Demo",
+  "address": "Lungomare dei Pini 12",
+  "postalCode": "00100",
+  "city": "Roma",
+  "province": "Roma",
+  "region": "Lazio",
+  "country": "IT",
+  "phone": "+39 06 1234567",
+  "whatsapp": "+39 333 1234567",
+  "email": "info@lidodemo.example",
+  "website": "https://www.lidodemo.example",
+  "facebook": "https://www.facebook.com/lidodemo.example",
+  "instagram": "https://www.instagram.com/lidodemo.example",
+  "description": "<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>",
+  "openingTime": "08:30",
+  "closingTime": "19:00",
+  "cancellationPolicy": "FreeUntil48Hours",
+  "petPolicy": "Allowed",
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `bathhouseName` | string \| null | `Lido Demo` |
+| `address` | string \| null | `Lungomare dei Pini 12` |
+| `postalCode` | string \| null | `00100` |
+| `city` | string \| null | `Roma` |
+| `province` | string \| null | `Roma` |
+| `region` | string \| null | `Lazio` |
+| `country` | string (ISO 3166-1 alpha-2) \| null | `IT` |
+| `phone` | string \| null | `+39 06 1234567` |
+| `whatsapp` | string \| null | `+39 333 1234567` |
+| `email` | string \| null | `info@lidodemo.example` |
+| `website` | string \| null | `https://www.lidodemo.example` |
+| `facebook` | string \| null | `https://www.facebook.com/lidodemo.example` |
+| `instagram` | string \| null | `https://www.instagram.com/lidodemo.example` |
+| `description` | string (HTML) \| null | `<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>` |
+| `openingTime` | string (HH:mm) \| null | `08:30` |
+| `closingTime` | string (HH:mm) \| null | `19:00` |
+| `cancellationPolicy` | string (enum CancellationPolicy) \| null | `FreeUntil48Hours` |
+| `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
+| `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/bathhouse-configuration-services?idProperty={idProperty}`
+
+Informazioni stabilimento: servizi.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bathhouse-configuration-services?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "idService": 1,
+    "name": "Accesso disabili",
+    "categoryCode": "accessibility_comfort",
+    "iconUrl": "/media/icons/accesso-disabili.svg",
+    "isSelected": true
+  },
+  {
+    "idService": 3,
+    "name": "Doccia",
+    "categoryCode": "accessibility_comfort",
+    "iconUrl": "/media/icons/doccia.svg",
+    "isSelected": true
+  },
+  {
+    "idService": 6,
+    "name": "Wifi",
+    "categoryCode": "accessibility_comfort",
+    "iconUrl": null,
+    "isSelected": false
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idService` | number (intero) | `1` |
+| `name` | string | `Accesso disabili` |
+| `categoryCode` | string | `accessibility_comfort` |
+| `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
+| `isSelected` | boolean | `true` |
+
+### POST `/api/catalog/save-bathhouse-configuration-services`
+
+Informazioni stabilimento: salvataggio dei servizi.
+
+#### Payload
+
+```json
+{
+  "services": [
+    {
+      "idService": 1,
+      "name": "Accesso disabili",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "/media/icons/accesso-disabili.svg",
+      "isSelected": true
+    },
+    {
+      "idService": 3,
+      "name": "Doccia",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "/media/icons/doccia.svg",
+      "isSelected": true
+    }
+  ],
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 1, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 3, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/doccia.svg", "isSelected": true}]` |
+| `services[].idService` | number (intero) | `1` |
+| `services[].name` | string | `Accesso disabili` |
+| `services[].categoryCode` | string | `accessibility_comfort` |
+| `services[].iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
+| `services[].isSelected` | boolean | `true` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/bathhouse-configuration-media?idProperty={idProperty}`
+
+Informazioni stabilimento: media.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bathhouse-configuration-media?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "photos": [
+    {
+      "idPhoto": 41,
+      "url": "https://media.example.com/lido-demo/spiaggia.webp",
+      "isMain": true
+    },
+    {
+      "idPhoto": 42,
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "isMain": false
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "priceListPdfUrl": "https://media.example.com/lido-demo/listino-prezzi.pdf",
+  "menuPdfUrl": "https://media.example.com/lido-demo/menu.pdf"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `photos[]` | BathhousePhoto[] (array di oggetti) | `[{"idPhoto": 41, "url": "https://media.example.com/lido-demo/spiaggia.webp", "isMain": true}, {"idPhoto": 42, "url": "https://media.example.com/lido-demo/bar.webp", "isMain": false}]` |
+| `photos[].idPhoto` | number (intero) | `41` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[].isMain` | boolean | `true` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `priceListPdfUrl` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdfUrl` | string \| null | `https://media.example.com/lido-demo/menu.pdf` |
+
+## /booking
+
+### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
+
+Prenotazioni online: opzioni dei servizi.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/booking/get-online-services-options?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isServicesOnlineBookingEnabled": true,
+  "supplementType": "Percentage",
+  "supplementValue": 10,
+  "isBookingConfirmationRequired": false,
+  "isPayNowAccepted": true,
+  "isPayAtPropertyAccepted": true,
+  "isPayAtPropertyWithoutCardAccepted": false,
+  "isDepositAccepted": false,
+  "isPrepaidCardAccepted": true,
+  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isServicesOnlineBookingEnabled` | boolean | `true` |
+| `supplementType` | string (enum SupplementType) | `Percentage` |
+| `supplementValue` | number (decimale) \| null | `10` |
+| `isBookingConfirmationRequired` | boolean | `false` |
+| `isPayNowAccepted` | boolean | `true` |
+| `isPayAtPropertyAccepted` | boolean | `true` |
+| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
+| `isDepositAccepted` | boolean | `false` |
+| `isPrepaidCardAccepted` | boolean | `true` |
+| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+
+### POST `/api/booking/update-online-services-options`
+
+Prenotazioni online: salvataggio delle opzioni dei servizi.
+
+#### Payload
+
+```json
+{
+  "isServicesOnlineBookingEnabled": true,
+  "supplementType": "Percentage",
+  "supplementValue": 10,
+  "isBookingConfirmationRequired": false,
+  "isPayNowAccepted": true,
+  "isPayAtPropertyAccepted": true,
+  "isPayAtPropertyWithoutCardAccepted": false,
+  "isDepositAccepted": false,
+  "isPrepaidCardAccepted": true,
+  "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
+  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isServicesOnlineBookingEnabled` | boolean | `true` |
+| `supplementType` | string (enum SupplementType) | `Percentage` |
+| `supplementValue` | number (decimale) \| null | `10` |
+| `isBookingConfirmationRequired` | boolean | `false` |
+| `isPayNowAccepted` | boolean | `true` |
+| `isPayAtPropertyAccepted` | boolean | `true` |
+| `isPayAtPropertyWithoutCardAccepted` | boolean | `false` |
+| `isDepositAccepted` | boolean | `false` |
+| `isPrepaidCardAccepted` | boolean | `true` |
+| `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
+| `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /system
 
 ### GET `/api/system/email-configuration?idProperty={idProperty}`
@@ -1458,3 +2090,29 @@ Assistenza: messaggio al supporto.
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
+
+### GET `/api/system/get-stripe-information?idProperty={idProperty}`
+
+Prenotazioni online: conto Stripe collegato.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/system/get-stripe-information?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+Il corpo è solo l'id del conto Stripe collegato, come stringa JSON (tra virgolette, Content-Type application/json): acct_…. null se lo stabilimento non ha ancora collegato Stripe.
+
+```json
+"acct_1QmDemo4Fz8Lw2Xc"
+```

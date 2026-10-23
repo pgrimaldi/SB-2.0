@@ -45,11 +45,10 @@
   </section>
 
   <section class="contact__support__panel">
-    <h2
-      class="contact__support__title contact__support__title__underlined"
-    >
-      {{ 'management.settings.contact_support.form.title' | translate }}
-    </h2>
+    <app-section-title
+      class="contact__support__section__title"
+      [text]="'management.settings.contact_support.form.title' | translate"
+    />
     <form class="contact__support__form" novalidate (submit)="send($event)">
       <app-filled-text-field
         autocomplete="given-name"
@@ -109,6 +108,7 @@
 </main>
 
 <app-message-popup
+  [pathIcon]="closeIcon"
   [title]="'management.settings.contact_support.sent.title' | translate"
   [text]="'management.settings.contact_support.sent.text' | translate"
   [texts]="'management.settings.contact_support.sent' | translate"

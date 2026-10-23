@@ -76,22 +76,36 @@ Lasciare **CORS disabilitato**: questa distribuzione serve il frontend statico e
 
 #### Content Security Policy
 
-La build non mette più script né stili inline in `index.html` (`optimization.styles.inlineCritical: false` in `angular.json`), quindi la policy può vietare ogni script che non arrivi dal nostro dominio. Valore della policy, su una riga:
+La build non mette più script né stili inline in `index.html` (`optimization.styles.inlineCritical: false` in `angular.json`). La policy consente gli script del nostro dominio e dei soli due host necessari al caricamento di Google Maps, senza `'unsafe-inline'` o `'unsafe-eval'` negli script. Valore completo dell'header `Content-Security-Policy`, su una riga (aggiornato il 22/10/2026):
 
 ```text
-default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://maps.googleapis.com https://mapsresources-pa.googleapis.com https://maps.gstatic.com https://fonts.googleapis.com https://fonts.gstatic.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 ```
 
-Stato: su DEV la `Content-Security-Policy` è attiva dal 07/10/2026; su PROD va fatta con gli stessi passi.
+I domini di Google servono alla mappa della tab Media di Informazioni stabilimento (Maps JavaScript API, dal 21/10/2026). La configurazione è basata sulla [guida CSP di Google Maps](https://developers.google.com/maps/documentation/javascript/content-security-policy) e sull'[elenco dei domini Maps](https://developers.google.com/maps/domains), limitando gli script a `maps.googleapis.com` e `maps.gstatic.com` e le connessioni ai cinque host espliciti sopra. I caratteri jolly restano solo nelle origini delle immagini; `blob:` è consentito solo ai worker, non agli script. Questa allowlist non equivale a una CSP strict con nonce: eventuali nuovi domini o richieste di `eval` vanno valutati prima di aggiungere eccezioni.
+
+`fonts.googleapis.com` deve essere in `style-src` e `connect-src`, `fonts.gstatic.com` in `font-src` e `connect-src`: il service worker Angular inoltra le richieste tramite `fetch()`, che è controllato da `connect-src` anche quando la risorsa richiesta è un foglio CSS o un font. Autorizzare solo stili e font non basta quando interviene il worker. Riferimento: [MDN, direttiva connect-src](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src).
+
+Stato: CSP attiva su DEV dal 07/10/2026, estesa a Maps il 22/10/2026 nella policy `summerbooking-dev-frontoffice-security-headers`. L'utente ha confermato il funzionamento dopo gli adeguamenti; richieste `HEAD` del 22/10/2026 hanno verificato il valore finale sia sulla pagina `/it/home` sia su `/ngsw-worker.js` del dominio CloudFront DEV. Su PROD resta da configurare e verificare.
 
 Si attiva in due fasi, prima su DEV e poi su PROD:
 
-1. **Report-Only (solo segnalazioni)**. CloudFront non ha questa variante tra i *Security headers*: nella stessa policy aprire **Custom headers → Add header**, nome `Content-Security-Policy-Report-Only`, valore la policy qui sopra, **Origin override** attivo. Il browser esegue tutto ma scrive in console ogni violazione (`[Report Only] Refused to …`).
-2. **Verifica**. Con la console del browser aperta, aprire ogni pagina in IT e in EN, anche dopo il login: home, popup di accesso, gestionale, magazzino con i suoi popup, datepicker, impostazioni, aggiornamento del service worker. Nessun messaggio `Refused` deve comparire. Ripetere nei giorni successivi durante l'uso normale.
+1. **Report-Only (solo segnalazioni)**. CloudFront non ha questa variante tra i *Security headers*: nella stessa policy aprire **Custom headers → Add header**, nome `Content-Security-Policy-Report-Only`, valore la policy qui sopra, **Origin override** attivo. Questo header segnala le violazioni (`[Report Only] Refused to …`) senza bloccare, ma **non allenta una CSP attiva**: se esiste già una `Content-Security-Policy` più restrittiva, questa continua a bloccare le risorse. L'assenza di nuove segnalazioni non dimostra quindi che un'integrazione già bloccata funzioni; la prova completa delle eccezioni va fatta su DEV prima del passaggio a PROD, senza disabilitare indiscriminatamente la protezione.
+2. **Verifica**. Con la console del browser aperta, aprire ogni pagina in IT e in EN, anche dopo il login: home, popup di accesso, gestionale, magazzino con i suoi popup, datepicker, impostazioni (anche la tab Media di Informazioni stabilimento, con la mappa di Google), aggiornamento del service worker. Nessun messaggio `Refused` deve comparire. Ripetere nei giorni successivi durante l'uso normale.
 3. **Attivazione**. Togliere il custom header `Content-Security-Policy-Report-Only` e, nei **Security headers**, attivare `Content-Security-Policy` con lo stesso valore e **Origin override** attivo. Da qui il browser blocca davvero ciò che la policy non permette.
 4. **Controllo**. `curl -I https://<dominio>/` deve mostrare `content-security-policy` con il valore atteso (e non più `content-security-policy-report-only`).
 
-La policy permette solo il nostro dominio: un servizio esterno futuro (API su un altro dominio, pagamenti, mappe, analytics, font esterni) va aggiunto alla direttiva giusta (es. `connect-src`) prima di usarlo, solo con i domini indicati dalla sua documentazione, ripassando dalla fase Report-Only. Il valore della CSP in CloudFront non può superare 1783 caratteri. Decisioni e punti ancora aperti (Trusted Types, raccolta dei report) sono in `SECURITY_TODO.md`.
+La policy permette il nostro dominio e le origini Google elencate: un servizio esterno futuro (API su un altro dominio, pagamenti, analytics, altri font) va aggiunto alla direttiva giusta (es. `connect-src`) prima di usarlo, solo con i domini indicati dalla sua documentazione, ripassando dalla fase Report-Only e verificando anche il service worker. Non aggiungere `*`, `https:` o `'unsafe-eval'` come soluzione generica a un blocco. Il valore della CSP in CloudFront non può superare 1783 caratteri. Decisioni e punti ancora aperti (Trusted Types, raccolta dei report) sono in `SECURITY_TODO.md`.
+
+Per modificare una policy esistente: **CloudFront → Policies → Response headers → summerbooking-dev-frontoffice-security-headers → Edit → Security headers → Content-Security-Policy**. Sostituire il valore completo, mantenere **Origin override** attivo e salvare. È una modifica CloudFront: non richiede commit o nuova build; se la policy è già associata al comportamento corretto, non richiede invalidazione della cache.
+
+#### Verifica della CSP con il service worker
+
+Controllare gli header sia di `/it/home` sia di `/ngsw-worker.js` con `curl -I https://DOMINIO/PERCORSO`: CloudFront applica la response headers policy anche alle risposte dalla cache. Una scheda o un service worker già attivi possono però mantenere la vecchia policy. Se la console cita ancora il vecchio valore, confrontarlo con gli header restituiti dalla rete e provare in una sessione incognito nuova, chiudendo prima quella precedente.
+
+Per isolare il problema in Chrome: **F12 → Application → Service Workers → Bypass for network**, poi ricaricare con gli strumenti aperti. È solo una prova diagnostica: togliere la spunta e verificare il normale funzionamento con il worker prima di considerare concluso il test. Non richiede modifiche al codice né alle protezioni CloudFront. Riferimenti: [Chrome, debug dei service worker](https://developer.chrome.com/docs/devtools/progressive-web-apps) e [Angular, versioni e cache del service worker](https://angular.dev/ecosystem/service-workers/devops).
+
+Se un errore CSP è seguito da `504 Gateway Timeout` in `ngsw-worker.js`, non concludere che Google sia in timeout: il metodo `safeFetch` del worker Angular restituisce 504 anche quando `fetch` fallisce per il blocco CSP. Correggere la direttiva indicata nel primo errore. Un eventuale 403 va invece ricondotto al suo URL effettivo prima di attribuirgli la stessa causa. Nei log condivisi oscurare sempre i valori delle chiavi negli URL.
 
 Non attivare `includeSubDomains` o `preload` e non aumentare la durata HSTS senza aver verificato che tutti i sottodomini interessati funzionino esclusivamente in HTTPS: un'impostazione errata resta memorizzata dai browser e può rendere irraggiungibili servizi ancora HTTP.
 
@@ -224,7 +238,36 @@ Non aggiungere uno stage Deploy: il caricamento su S3 lo fa già la build.
   - `S3_BUCKET`: nome del bucket;
   - `CLOUDFRONT_DISTRIBUTION_ID`: ID della distribuzione.
 
-  Non sono dati segreti. Eventuali secret futuri vanno in Secrets Manager, mai in chiaro.
+  Queste tre variabili non sono dati segreti. La chiave Maps va invece configurata come descritto sotto.
+
+### Chiave Google Maps tramite Secrets Manager
+
+Dal 22/10/2026 la chiave non è più scritta nei file `environment`: CodeBuild la legge da Secrets Manager e la passa al compilatore Angular attraverso `--define`, senza generare file sorgenti con il valore. Non viene stampata dallo script di build. **Rimane visibile nel bundle e nelle richieste del browser**: Secrets Manager evita di versionarla, non la rende segreta sul client. In Google Cloud sono obbligatorie entrambe le restrizioni: siti web autorizzati e sola **Maps JavaScript API**; usare chiavi separate per ambiente, quote e avvisi di budget.
+
+1. Nella regione del progetto CodeBuild creare un segreto di tipo **Other type of secret**, con proprietà JSON `GOOGLE_MAPS_API_KEY_DEV` e valore della nuova chiave; cifratura predefinita `aws/secretsmanager`. Nome DEV: `summerbooking/dev/frontend/google-maps`.
+2. Nel progetto CodeBuild aggiungere una variabile: nome **`GOOGLE_MAPS_API_KEY_DEV`**, tipo **Secrets Manager**, valore **`summerbooking/dev/frontend/google-maps:GOOGLE_MAPS_API_KEY_DEV`**. Per un altro ambiente cambiare il nome del segreto. Non usare tipo Testo normale e non incollare il valore nel buildspec.
+3. Al ruolo di servizio **della build**, senza rimuovere i permessi di deploy, aggiungere una policy inline (DEV: `summerbooking-dev-read-google-maps`):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Action": "secretsmanager:GetSecretValue",
+         "Resource": "ARN_COMPLETO_DEL_SOLO_SEGRETO_DELL_AMBIENTE"
+       }
+     ]
+   }
+   ```
+
+   L'ARN completo include il suffisso generato da AWS. Con una chiave KMS gestita dal cliente servono anche i relativi permessi di decrittazione; non sono necessari con la chiave predefinita `aws/secretsmanager`.
+4. Pubblicare le modifiche al codice tramite il flusso Git abituale. La build fallisce senza pubblicare se la chiave è assente o malformata. Per PROD configurare un segreto e una chiave propri; impostare anche il Map ID di produzione in `environment.prod.ts`.
+5. Dopo il deploy verificare la mappa nella tab Media di Informazioni stabilimento, gli errori nella console Google/browser e la CSP. Solo dopo aver verificato che nessun altro servizio la usi, eliminare la vecchia chiave in Google Cloud. Togliere la stringa dal codice non la revoca: rimane nella cronologia Git e nei bundle precedenti.
+
+In DEV l'unico sito autorizzato per la nuova chiave è `https://d3nn1cfmv1ald2.cloudfront.net/*`. Le normali build senza lo script CodeBuild non ricevono una chiave: l'app funziona ma mostra il messaggio di mappa non disponibile, senza contattare Google. Non aggiungere la chiave a file versionati per aggirare questa scelta.
+
+Riferimenti: [CodeBuild e valori da Secrets Manager](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html#build-spec.env.secrets-manager), [permessi sul singolo segreto](https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_iam-policies.html), [Angular: sostituzioni di valori in build](https://angular.dev/tools/cli/build-system-migration#build-time-value-replacement-with-define), [Google Maps: protezione delle chiavi](https://developers.google.com/maps/api-security-best-practices).
 
 **Specifiche di compilazione**
 
@@ -295,8 +338,8 @@ aws iam put-role-policy --role-name NOME_RUOLO --policy-name NOME_POLICY --polic
 ## 7. Cosa fa il deploy (`buildspec.yml`)
 
 1. **install**: installa la versione di Node indicata in `.nvmrc` ed esegue `npm ci`.
-2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET` e `CLOUDFRONT_DISTRIBUTION_ID` siano impostate.
-3. **build**: prima `npm run verify` (lint, controllo dei tipi dei test con `tsc -p tsconfig.spec.json --noEmit`, test unitari con `ng test --no-watch`): se una verifica fallisce la build non parte e nel passo successivo non si pubblica nulla, il sito online resta quello precedente (dal 07/10/2026, Q03 dell'audit esterno; prima si pubblicava anche con test rotti). Poi `ng build --configuration $BUILD_CONFIGURATION`, che controlla anche i tipi dell'app e dei template. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
+2. **pre_build**: verifica che `BUILD_CONFIGURATION` sia `dev` o `production` e che `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID` e `GOOGLE_MAPS_API_KEY_DEV` siano impostate.
+3. **build**: prima `npm run verify` (lint, controllo dei tipi dei test con `tsc -p tsconfig.spec.json --noEmit`, test unitari con `ng test --no-watch`): se una verifica fallisce la build non parte e nel passo successivo non si pubblica nulla, il sito online resta quello precedente (dal 07/10/2026, Q03 dell'audit esterno; prima si pubblicava anche con test rotti). Poi `npm run build:codebuild` controlla la chiave e avvia Angular con la configurazione scelta e il valore Maps definito in build, controllando anche i tipi dell'app e dei template. Entrambe le configurazioni sono ottimizzate; `dev` usa `environment.dev.ts` e include le API mock (es. login di test), `production` usa `environment.prod.ts` e sostituisce `src/app/services/mocks/mock-interceptors.ts` con `mock-interceptors.none.ts` (`fileReplacements` in `angular.json`): il codice dei mock, account di test compreso, non entra nel bundle di produzione.
 4. **post_build**: se la build è fallita si ferma senza toccare il bucket e il sito online resta quello precedente. Altrimenti carica i file con intestazioni `Cache-Control` diverse, che CloudFront inoltra al browser:
    - bundle con hash nel nome (`main-*.js`, `chunk-*.js`, `polyfills-*.js`, `styles-*.css`): `public, max-age=31536000, immutable`;
    - immagini e font in `assets/`: `public, max-age=86400`, perché mantengono lo stesso nome quando vengono sostituiti;
@@ -337,7 +380,9 @@ Risultati attesi:
   - `X-Content-Type-Options: nosniff`;
   - `X-Frame-Options: DENY`;
   - `Referrer-Policy: strict-origin-when-cross-origin`;
-- `Content-Security-Policy` con il valore della sezione "Content Security Policy" (su DEV dal 07/10/2026); `X-XSS-Protection` assente.
+- `Content-Security-Policy` con il valore della sezione "Content Security Policy" (su DEV dal 07/10/2026, estesa a Maps e ai font Google il 22/10/2026), verificata anche su `/ngsw-worker.js`; `X-XSS-Protection` assente.
+
+Aprire la tab Media di Informazioni stabilimento con il service worker attivo (nessun bypass): verificare mappa, immagini, font e assenza di violazioni CSP. Ripetere in una sessione nuova per distinguere gli header correnti dalle vecchie risposte conservate nel browser.
 
 Verificare le prestazioni con Lighthouse in una finestra in incognito: le estensioni del browser falsano i risultati.
 
@@ -423,7 +468,8 @@ npm ci
 ```
 
 ```bash
-npm run build:prod
+npm run verify
+npm run build:codebuild
 ```
 
-Per DEV usare `npm run build:dev-env` (configurazione `dev`, API mock attive). Poi eseguire gli stessi comandi di caricamento e invalidazione del `post_build` in `buildspec.yml`, sostituendo `$DIST`, `$S3_BUCKET` e `$CLOUDFRONT_DISTRIBUTION_ID`. Un semplice `aws s3 sync` non imposta le intestazioni di cache. Verificare sempre il nome del bucket prima di eseguire comandi con `--delete`.
+Prima della build impostare nell'ambiente del processo `BUILD_CONFIGURATION` (`dev` o `production`) e `GOOGLE_MAPS_API_KEY_DEV`, recuperata dal segreto con strumenti autorizzati, senza stamparla né salvarla in file versionati o nella cronologia dei comandi. I comandi `build:prod` e `build:dev-env` da soli non iniettano la chiave Maps. Poi eseguire gli stessi comandi di caricamento e invalidazione del `post_build` in `buildspec.yml`, sostituendo `$DIST`, `$S3_BUCKET` e `$CLOUDFRONT_DISTRIBUTION_ID`. Un semplice `aws s3 sync` non imposta le intestazioni di cache. Verificare sempre il nome del bucket prima di eseguire comandi con `--delete`.

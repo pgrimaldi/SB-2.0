@@ -1,0 +1,228 @@
+<ng-template #content>
+  <div class="voucher__add__item__panel">
+    <h2 class="voucher__add__item__panel__title">
+      {{ 'management.settings.vouchers.form.title' | translate }}
+    </h2>
+
+    <div [attr.inert]="isLoading() ? '' : null">
+      <app-filled-text-field
+        [label]="'management.settings.vouchers.form.name' | translate"
+        [isMandatory]="true"
+        [formField]="draftForm.voucherName"
+        [error]="voucherNameError()"
+      />
+
+      <section class="voucher__add__item__panel__section">
+        <app-section-title [text]="'management.settings.vouchers.form.periods.title' | translate">
+          <app-button [size]="ButtonSize.Small" [pathIcon]="addPeriodIcon" (clicked)="addPeriod()">
+            {{ 'management.settings.vouchers.form.periods.add' | translate }}
+          </app-button>
+        </app-section-title>
+
+        @for (period of draftForm.validityPeriods; track period; let periodIndex = $index) {
+          <div class="voucher__add__item__panel__period">
+            <app-icon-button
+              class="voucher__add__item__panel__period__remove"
+              [pathIcon]="removePeriodIcon"
+              (click)="removePeriod(periodIndex)"
+            />
+
+            <app-form-row>
+              <span appFormRowLabel>
+                {{ 'management.settings.vouchers.form.periods.period' | translate }}
+              </span>
+              <div class="voucher__add__item__panel__pair">
+                <span class="voucher__add__item__panel__word">
+                  {{ 'management.settings.vouchers.form.periods.from' | translate }}
+                </span>
+                <app-filled-date-field
+                  class="voucher__add__item__panel__field"
+                  [pathIcon]="calendarIcon"
+                  [formField]="period.validFrom"
+                  [error]="validationText.text(period.validFrom)"
+                />
+              </div>
+              <div class="voucher__add__item__panel__pair">
+                <span class="voucher__add__item__panel__word">
+                  {{ 'management.settings.vouchers.form.periods.to' | translate }}
+                </span>
+                <app-filled-date-field
+                  class="voucher__add__item__panel__field"
+                  [pathIcon]="calendarIcon"
+                  [formField]="period.validTo"
+                  [error]="validationText.text(period.validTo)"
+                />
+              </div>
+            </app-form-row>
+
+            <app-form-row>
+              <span appFormRowLabel>
+                {{ 'management.settings.vouchers.form.periods.days_of_week' | translate }}
+              </span>
+              <div class="voucher__add__item__panel__days">
+                <app-filled-multi-select
+                  class="voucher__add__item__panel__days__select"
+                  [placeholder]="
+                    'management.settings.vouchers.form.periods.choose_days' | translate
+                  "
+                  [options]="dayOptions()"
+                  [value]="chosenDays(period)"
+                  [disabled]="hasAllDays(period)"
+                  [error]="
+                    validationText.text(
+                      period.daysOfWeek,
+                      'management.settings.vouchers.form.field_names.day_of_week'
+                    )
+                  "
+                  (valueChange)="setDays(period, $event)"
+                />
+                <app-checkbox
+                  [checked]="hasAllDays(period)"
+                  (checkedChange)="setAllDays(period, $event)"
+                >
+                  {{ 'management.settings.vouchers.form.periods.all_days' | translate }}
+                </app-checkbox>
+              </div>
+            </app-form-row>
+
+            <app-form-row>
+              <span appFormRowLabel>
+                {{ 'management.settings.vouchers.form.periods.time_slots' | translate }}
+              </span>
+              <div class="voucher__add__item__panel__slots">
+                @for (timeSlot of period.timeSlots; track timeSlot; let slotIndex = $index) {
+                  <div class="voucher__add__item__panel__slot">
+                    <div class="voucher__add__item__panel__pair">
+                      <span class="voucher__add__item__panel__word">
+                        {{ 'management.settings.vouchers.form.periods.time_from' | translate }}
+                      </span>
+                      <app-filled-time-field
+                        class="voucher__add__item__panel__field"
+                        [pathIcon]="clockIcon"
+                        [formField]="timeSlot.from"
+                      />
+                    </div>
+                    <div class="voucher__add__item__panel__pair">
+                      <span class="voucher__add__item__panel__word">
+                        {{ 'management.settings.vouchers.form.periods.time_to' | translate }}
+                      </span>
+                      <app-filled-time-field
+                        class="voucher__add__item__panel__field"
+                        [pathIcon]="clockIcon"
+                        [formField]="timeSlot.to"
+                      />
+                    </div>
+                    <app-icon-button
+                      class="voucher__add__item__panel__slot__remove"
+                      [pathIcon]="deleteTimeSlotIcon"
+                      (click)="removeTimeSlot(period, slotIndex)"
+                    />
+                  </div>
+                }
+                <app-button
+                  class="voucher__add__item__panel__add__slot"
+                  [appearance]="ButtonAppearance.Secondary"
+                  [size]="ButtonSize.Small"
+                  [pathIcon]="addTimeSlotIcon"
+                  (clicked)="addTimeSlot(period)"
+                >
+                  {{ 'management.settings.vouchers.form.periods.add_time_slot' | translate }}
+                </app-button>
+              </div>
+            </app-form-row>
+          </div>
+        }
+      </section>
+      @if (validityPeriodsError(); as error) {
+        <p class="voucher__add__item__panel__error">{{ error }}</p>
+      }
+
+      <section class="voucher__add__item__panel__section">
+        <app-section-title [text]="'management.settings.vouchers.form.options.title' | translate" />
+
+        <div class="voucher__add__item__panel__options">
+          <app-form-row>
+            <span appFormRowLabel>
+              {{ 'management.settings.vouchers.form.options.type' | translate }}
+            </span>
+            <app-filled-select
+              class="voucher__add__item__panel__option"
+              [options]="typeOptions()"
+              [formField]="draftForm.discountType"
+              [error]="discountTypeError()"
+            />
+          </app-form-row>
+
+          <app-form-row>
+            <span appFormRowLabel>
+              {{ 'management.settings.vouchers.form.options.value' | translate }}
+            </span>
+            <app-filled-number-field
+              class="voucher__add__item__panel__value"
+              [isDecimal]="!isPercentage()"
+              [isCurrency]="!isPercentage()"
+              [formField]="draftForm.discountValue"
+              [error]="discountValueError()"
+            />
+            <span class="voucher__add__item__panel__word">{{ isPercentage() ? '%' : '€' }}</span>
+          </app-form-row>
+
+          <app-form-row>
+            <span appFormRowLabel>
+              {{ 'management.settings.vouchers.form.options.applies_to' | translate }}
+            </span>
+            <app-filled-select
+              class="voucher__add__item__panel__option"
+              [options]="scopeOptions()"
+              [formField]="draftForm.discountScope"
+              [error]="discountScopeError()"
+            />
+          </app-form-row>
+
+          <app-form-row>
+            <span appFormRowLabel>
+              {{ 'management.settings.vouchers.form.options.max_uses' | translate }}
+            </span>
+            <app-filled-number-field
+              class="voucher__add__item__panel__option"
+              [formField]="draftForm.maxUseQuantity"
+              [error]="maxUseQuantityError()"
+            />
+          </app-form-row>
+        </div>
+      </section>
+
+      <app-toggle
+        class="voucher__add__item__panel__enabled"
+        [formField]="draftForm.isEnabled"
+        [error]="isEnabledError()"
+      >
+        {{ 'management.settings.vouchers.form.options.enabled' | translate }}
+      </app-toggle>
+    </div>
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="voucher__add__item__panel__error">{{ errorMessage }}</p>
+    }
+
+    <div class="voucher__add__item__panel__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.vouchers.form.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [isLoading]="isLoading()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.vouchers.form.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

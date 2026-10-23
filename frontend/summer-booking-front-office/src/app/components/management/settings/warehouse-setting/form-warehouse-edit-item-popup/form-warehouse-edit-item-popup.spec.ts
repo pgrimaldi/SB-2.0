@@ -41,7 +41,7 @@ describe('FormWarehouseEditItemPopup', () => {
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         { provide: WarehouseService, useValue: { editWarehouseItem } },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(FormWarehouseEditItemPopupHost);
@@ -167,7 +167,7 @@ describe('FormWarehouseEditItemPopup', () => {
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+            error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
           }),
       ),
     );
@@ -208,9 +208,9 @@ describe('FormWarehouseEditItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
-              errors: [{ field: 'thresholdQuantity', code: 'validation.invalid_value' }],
+              errors: [{ field: 'thresholdQuantity', code: 'validation.invalid' }],
             },
           }),
       ),

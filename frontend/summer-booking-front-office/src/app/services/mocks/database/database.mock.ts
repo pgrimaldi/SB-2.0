@@ -11,7 +11,7 @@ import {
   PageRequest,
 } from '../../../entities/pagination/page';
 import { isAuthorized, isMockPassword, unauthorized } from '../auth/auth.mock';
-import { operationNotAllowed, problem, resourceNotFound } from '../errors/problem.mock';
+import { forbidden, problem, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 type ReservationRow = Omit<ExistingBookingItem, 'isTrashed'> & { propertyId: number };
@@ -263,7 +263,7 @@ function bookingPageMock(
   const body = (request.body ?? {}) as Partial<PageRequest>;
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
 
   const page = positiveInteger(body.page, 1);
@@ -316,7 +316,7 @@ export const affiliatedHotelComboboxMock = (
   }
   const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const hotels: ComboboxItem[] = AFFILIATED_HOTELS.filter(
     (hotel) => hotel.propertyId === property.id,
@@ -341,7 +341,7 @@ export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpE
   };
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
   const known = RESERVATIONS.filter(
@@ -357,7 +357,7 @@ export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpE
         ? of(trashBookings(idBookings as string[])).pipe(
             map(() => new HttpResponse({ status: 204, url: request.url })),
           )
-        : problem(request, 400, 'validation.invalid_request', {
+        : problem(request, 400, 'validation.failed', {
             title: 'Invalid request',
             errors: [{ field: 'password', code: 'auth.invalid_credentials' }],
           }),
@@ -376,7 +376,7 @@ export const emptyTrashMock = (request: HttpRequest<unknown>): Observable<HttpEv
   }
   const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   for (let index = RESERVATIONS.length - 1; index >= 0; index--) {
     const row = RESERVATIONS[index];
@@ -401,7 +401,7 @@ export const restoreBookingItemMock = (
   const body = (request.body ?? {}) as { idProperty?: unknown; idBookings?: unknown };
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
   const known = RESERVATIONS.filter(
@@ -430,7 +430,7 @@ export const deleteSelectedItemMock = (
   const body = (request.body ?? {}) as { idProperty?: unknown; idBookings?: unknown };
   const property = propertyOf(body.idProperty);
   if (!property) {
-    return operationNotAllowed(request);
+    return forbidden(request);
   }
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
   const known = RESERVATIONS.filter(

@@ -12,7 +12,11 @@ import { FormWarehouseAddItemPopup } from './form-warehouse-add-item-popup';
 
 @Component({
   imports: [FormWarehouseAddItemPopup],
-  template: `<app-form-warehouse-add-item-popup [(open)]="open" (added)="added = added + 1" />`,
+  template: `<app-form-warehouse-add-item-popup
+    [pathIcon]="['close.svg']"
+    [(open)]="open"
+    (added)="added = added + 1"
+  />`,
 })
 class FormWarehouseAddItemPopupHost {
   readonly open = signal(false);
@@ -33,7 +37,7 @@ describe('FormWarehouseAddItemPopup', () => {
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         { provide: WarehouseService, useValue: { comboboxList, addWarehouseItem } },
-        { provide: AuthBehaviour, useValue: { user: signal({ idProperty: 'p1' }) } },
+        { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
     const fixture = TestBed.createComponent(FormWarehouseAddItemPopupHost);
@@ -62,8 +66,7 @@ describe('FormWarehouseAddItemPopup', () => {
   it('should ask before the X drops what is typed, while Annulla drops it at once', async () => {
     const { fixture, host, popup } = await setup();
     const unsaved = TestBed.inject(UnsavedChangesBehaviour);
-    const closeX = () =>
-      popup()!.querySelector<HTMLButtonElement>('.form__warehouse__add__item__popup__close')!;
+    const closeX = () => document.querySelector<HTMLButtonElement>('.popup__frame__close')!;
     const cancel = () =>
       popup()!.querySelector<HTMLButtonElement>(
         '.form__warehouse__add__item__popup__buttons app-button button',
@@ -234,7 +237,7 @@ describe('FormWarehouseAddItemPopup', () => {
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.invalid_request', title: 'Invalid request' },
+            error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
           }),
       ),
     );
@@ -274,9 +277,9 @@ describe('FormWarehouseAddItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.invalid_request',
+              code: 'validation.failed',
               title: 'Invalid request',
-              errors: [{ field: 'totalQuantity', code: 'validation.invalid_value' }],
+              errors: [{ field: 'totalQuantity', code: 'validation.invalid' }],
             },
           }),
       ),

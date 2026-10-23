@@ -170,7 +170,11 @@ export class Database {
   protected readonly isDeletingForever = signal(false);
   protected readonly closeIcon = ['/assets/images/Database_Close.svg'] as const;
   protected readonly isActionErrorShown = signal(false);
-  protected readonly actionErrorIcon = ['/assets/images/Database_Warning.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/Database_Close.svg',
+    '/assets/images/Database_Warning.svg',
+  ] as const;
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = toSignal(
     toObservable(this.actionError).pipe(
@@ -179,7 +183,7 @@ export class Database {
     { initialValue: null },
   );
   protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly dateRange = signal<DateRange | null>(null);
@@ -369,7 +373,7 @@ export class Database {
 
   /** The page waits under a spinner; then the table is read again, whatever the answer. */
   protected emptyTrash(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isEmptyingTrash() || !idProperty) {
       return;
     }
@@ -391,7 +395,7 @@ export class Database {
   }
 
   protected restore(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isRestoring() || !idProperty) {
       return;
     }
@@ -413,7 +417,7 @@ export class Database {
   }
 
   protected deleteForever(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     if (this.isDeletingForever() || !idProperty) {
       return;
     }

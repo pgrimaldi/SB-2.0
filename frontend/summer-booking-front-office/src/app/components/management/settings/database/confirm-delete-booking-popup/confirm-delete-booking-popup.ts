@@ -74,7 +74,7 @@ export class ConfirmDeleteBookingPopup {
   }
 
   protected confirm(): void {
-    const idProperty = this.auth.user()?.idProperty;
+    const idProperty = this.auth.user()?.propertyId;
     const idBookings = [...this.idBookings()];
     if (this.isLoading() || !idProperty || !idBookings.length) {
       return;

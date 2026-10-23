@@ -1,0 +1,35 @@
+<label
+  class="file__drop__zone"
+  [class.file__drop__zone__dragging]="isDragging()"
+  [class.file__drop__zone__disabled]="disabled()"
+>
+  <input
+    #field
+    class="file__drop__zone__field"
+    type="file"
+    [accept]="accept() ?? ''"
+    [multiple]="isMultiple()"
+    [disabled]="disabled()"
+    (change)="choose(field)"
+  />
+  @if (previewUrl(); as previewUrl) {
+    <img
+      class="file__drop__zone__preview"
+      [src]="previewUrl"
+      alt=""
+      loading="lazy"
+      decoding="async"
+    />
+  } @else {
+    @if (icons().list[0]; as icon) {
+      @if (icons().material) {
+        <mat-icon class="file__drop__zone__icon">{{ icon }}</mat-icon>
+      } @else {
+        <img class="file__drop__zone__icon" [src]="icon" width="20" height="20" alt="" />
+      }
+    }
+    @if (text(); as text) {
+      <span class="file__drop__zone__text">{{ text }}</span>
+    }
+  }
+</label>

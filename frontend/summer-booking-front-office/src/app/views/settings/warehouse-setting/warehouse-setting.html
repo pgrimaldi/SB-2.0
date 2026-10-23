@@ -26,8 +26,13 @@
   />
 </main>
 
-<app-form-warehouse-add-item-popup [(open)]="adding" (added)="table.reload()" />
+<app-form-warehouse-add-item-popup
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (added)="table.reload()"
+/>
 <app-form-warehouse-edit-item-popup
+  [pathIcon]="closeIcon"
   [item]="editedItem()"
   [(open)]="editing"
   (saved)="table.reload()"
@@ -37,7 +42,7 @@
   [itemName]="itemNameToDelete()"
   translationKey="management.settings.warehouse.delete"
   [action]="deleteItems"
-  [pathIcon]="errorIcon"
+  [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
 />
@@ -46,12 +51,13 @@
   [itemName]="itemNameToDuplicate()"
   translationKey="management.settings.warehouse.duplicate"
   [action]="duplicateItems"
-  [pathIcon]="errorIcon"
+  [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup
+  [pathIcon]="closeIcon"
   [title]="'table.load_error.title' | translate"
   [text]="'table.load_error.text' | translate"
   [texts]="'table.load_error' | translate"

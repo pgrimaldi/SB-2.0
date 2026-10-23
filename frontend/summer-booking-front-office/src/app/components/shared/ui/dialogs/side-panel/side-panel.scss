@@ -1,0 +1,103 @@
+@use '@angular/material' as mat;
+
+// The panel renders in an overlay outside the component: these styles are global.
+.side__panel__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+
+  .mat-mdc-dialog-container {
+    animation: side-panel-in 250ms ease-out;
+  }
+}
+
+[dir='rtl'] .side__panel__panel .mat-mdc-dialog-container {
+  animation-name: side-panel-in-rtl;
+}
+
+// On small screens: a popup in the middle, like the other popups with a form.
+.side__panel__panel.side__panel__popup {
+  @include mat.dialog-overrides(
+    (
+      container-shape: 0.25rem,
+    )
+  );
+
+  .mat-mdc-dialog-container {
+    animation: none;
+  }
+
+  .side__panel {
+    max-height: 90vh;
+  }
+}
+
+@keyframes side-panel-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes side-panel-in-rtl {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side__panel__panel .mat-mdc-dialog-container {
+    animation: none;
+  }
+}
+
+// The element in the page only holds the panel template: Material draws the panel above the page.
+app-side-panel {
+  display: contents;
+}
+
+.side__panel {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.side__panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-block: 1.5rem 1.375rem;
+  padding-inline: 1.5rem 2.5rem;
+}
+
+.side__panel__title {
+  flex: 1;
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.side__panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 1.5rem;
+}
+
+// The border of Annulla stays inside the 1.75rem height.
+.side__panel__buttons {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.5rem;
+}

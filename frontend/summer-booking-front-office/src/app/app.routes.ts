@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './behaviours/auth/auth.guard';
+import { authGuard, guestGuard } from './behaviours/auth/auth.guard';
 import {
   languageActivateGuard,
   languageMatchGuard,
@@ -16,6 +16,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
+        canActivate: [guestGuard],
         loadComponent: () => import('./views/hub/home/home').then((component) => component.Home),
       },
       {
@@ -61,10 +62,12 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () =>
           import('./views/settings/settings').then((component) => component.Settings),
-        children: SETTINGS_PAGES.flatMap(({ path, loadComponent, subPages = [] }) => [
-          loadComponent
-            ? { path, loadComponent, canDeactivate: [unsavedChangesGuard] }
-            : { path, children: [] },
+        children: SETTINGS_PAGES.flatMap(({ path, loadComponent, loadChildren, subPages = [] }) => [
+          loadChildren
+            ? { path, loadChildren }
+            : loadComponent
+              ? { path, loadComponent, canDeactivate: [unsavedChangesGuard] }
+              : { path, children: [] },
           ...subPages.map((subPage) => ({ ...subPage, canDeactivate: [unsavedChangesGuard] })),
         ]),
       },

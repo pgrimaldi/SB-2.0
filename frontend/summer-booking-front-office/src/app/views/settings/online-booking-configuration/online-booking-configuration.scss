@@ -1,0 +1,168 @@
+@use '../../../styles/settings-panel' as panel;
+
+.online__booking__configuration {
+  --button-text-size: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 0.8125rem 1.5rem;
+  color: var(--color__main__theme__two);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+h2,
+h3,
+p,
+ol {
+  margin: 0;
+}
+
+.online__booking__configuration__panel {
+  @include panel.settings-panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.online__booking__configuration__heading {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+}
+
+.online__booking__configuration__title {
+  color: var(--color__main__theme__one);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+
+.online__booking__configuration__subtitle {
+  color: var(--color__layout__text__soft);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+// The light blue box of Stripe and the bordered boxes of the options and of the direct link.
+.online__booking__configuration__stripe,
+.online__booking__configuration__options,
+.online__booking__configuration__iframe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.3125rem;
+}
+
+.online__booking__configuration__stripe {
+  justify-content: space-between;
+  border-color: transparent;
+  background: #e2ecf8;
+}
+
+.online__booking__configuration__iframe {
+  background: var(--color__tertiary__theme);
+}
+
+.online__booking__configuration__stripe__text {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 19rem;
+}
+
+.online__booking__configuration__stripe__title {
+  color: var(--color__main__theme__one);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+}
+
+// "Come funziona:" and the numbered steps, on one line while there is room.
+.online__booking__configuration__steps,
+.online__booking__configuration__steps__list,
+.online__booking__configuration__step,
+.online__booking__configuration__step__arrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 2.5rem;
+}
+
+.online__booking__configuration__steps {
+  padding-top: 0.75rem;
+  border-top: 0.0625rem solid var(--color__layout__border);
+}
+
+.online__booking__configuration__steps__list {
+  padding: 0;
+  list-style: none;
+}
+
+.online__booking__configuration__step {
+  gap: 0.75rem;
+}
+
+.online__booking__configuration__steps__label,
+.online__booking__configuration__iframe__title {
+  color: var(--color__main__theme__one);
+  font-weight: 600;
+}
+
+.online__booking__configuration__step__number,
+.online__booking__configuration__iframe__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color__layout__highlight);
+}
+
+.online__booking__configuration__step__number {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.online__booking__configuration__iframe__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3125rem;
+}
+
+:host-context([dir='rtl']) .online__booking__configuration__step__arrow img {
+  transform: scaleX(-1);
+}
+
+.online__booking__configuration__section__title {
+  --section-title-text-size: 1rem;
+  --section-title-text-weight: 500;
+}
+
+// Side by side, one under the other when there is no room for both.
+.online__booking__configuration__options app-button {
+  flex: 1 1 14rem;
+}
+
+// The code is one long line: on narrow screens it wraps anywhere.
+.online__booking__configuration__iframe__text {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.online__booking__configuration__iframe__copy {
+  --button-border-color: var(--color__main__theme__one);
+}

@@ -1,0 +1,12 @@
+<google-map
+  height="100%"
+  width="100%"
+  [mapId]="mapId() ?? undefined"
+  [center]="googleCenter()"
+  [zoom]="zoom()"
+  [options]="options"
+>
+  @if (googleMarkerPosition(); as position) {
+    <map-advanced-marker [position]="position" />
+  }
+</google-map>
