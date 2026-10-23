@@ -51,10 +51,10 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
-  protected readonly backIcon = '/assets/images/Taxation_PanelChevron.svg';
+  protected readonly backIcon = '/assets/images/GeneralIcon_ChevronRight.svg';
   protected readonly eyeIcons = [
-    '/assets/images/Taxation_EyeClose.svg',
-    '/assets/images/Taxation_EyeStart.svg',
+    '/assets/images/GeneralIcon_EyeClose.svg',
+    '/assets/images/GeneralIcon_EyeStart.svg',
   ] as const;
   private readonly account = signal(new ElectronicReceiptAccount());
   private savedAccount = new ElectronicReceiptAccount();

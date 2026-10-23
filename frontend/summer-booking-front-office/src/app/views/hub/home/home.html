@@ -143,7 +143,10 @@
 
       <app-carousel
         class="home__information__carousel"
-        [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
+        [pathIcon]="[
+          '/assets/images/chevron-left.svg',
+          '/assets/images/GeneralIcon_ChevronRight.svg',
+        ]"
       >
         @for (review of aboutUsReviews; track review.key) {
           <app-card *appCarouselSlide [pathIcon]="['/assets/images/hub/' + review.icon + '.svg']">
@@ -170,7 +173,10 @@
 
       <app-carousel
         class="home__information__carousel"
-        [pathIcon]="['/assets/images/chevron-left.svg', '/assets/images/chevron-right.svg']"
+        [pathIcon]="[
+          '/assets/images/chevron-left.svg',
+          '/assets/images/GeneralIcon_ChevronRight.svg',
+        ]"
       >
         @for (outlet of mediaOutlets; track outlet.logo) {
           <app-card-logo

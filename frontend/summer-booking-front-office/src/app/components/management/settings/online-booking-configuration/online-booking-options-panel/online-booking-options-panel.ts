@@ -116,26 +116,22 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
   /** [previous month, next month, remove a period]. */
   protected readonly calendarIcons = [
-    '/assets/images/OnlineBookingConfiguration_PreviousMonth.svg',
-    '/assets/images/OnlineBookingConfiguration_NextMonth.svg',
-    '/assets/images/OnlineBookingConfiguration_RemovePeriod.svg',
+    '/assets/images/GeneralIcon_Previous.svg',
+    '/assets/images/GeneralIcon_Next.svg',
+    '/assets/images/GeneralIcon_Close.svg',
   ] as const;
-  protected readonly clockIcon = ['/assets/images/OnlineBookingConfiguration_Clock.svg'] as const;
-  protected readonly calendarIcon = [
-    '/assets/images/OnlineBookingConfiguration_Calendar.svg',
-  ] as const;
+  protected readonly clockIcon = ['/assets/images/GeneralIcon_Clock.svg'] as const;
+  protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
   protected readonly addIcon = ['/assets/images/OnlineBookingConfiguration_AddRule.svg'] as const;
-  protected readonly removeIcon = [
-    '/assets/images/OnlineBookingConfiguration_DeleteRule.svg',
-  ] as const;
+  protected readonly removeIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
   /** [bold, italic, underline, bulleted list, numbered list, link]. */
   protected readonly richTextIcons = [
-    '/assets/images/OnlineBookingConfiguration_Bold.svg',
-    '/assets/images/OnlineBookingConfiguration_Italic.svg',
-    '/assets/images/OnlineBookingConfiguration_Underline.svg',
-    '/assets/images/OnlineBookingConfiguration_BulletList.svg',
-    '/assets/images/OnlineBookingConfiguration_OrderedList.svg',
-    '/assets/images/OnlineBookingConfiguration_TextLink.svg',
+    '/assets/images/GeneralIcon_Bold.svg',
+    '/assets/images/GeneralIcon_Italic.svg',
+    '/assets/images/GeneralIcon_Underline.svg',
+    '/assets/images/GeneralIcon_BulletList.svg',
+    '/assets/images/GeneralIcon_OrderedList.svg',
+    '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
   /** Example rows until an API gives the rows and sectors of the property. */
   protected readonly sectorOptions: readonly SelectOption[] = [

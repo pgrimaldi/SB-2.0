@@ -87,12 +87,12 @@ export class OnlineBookingServicesOptionsPopup
   protected readonly ButtonSize = ButtonSize;
   /** [bold, italic, underline, bulleted list, numbered list, link]. */
   protected readonly richTextIcons = [
-    '/assets/images/OnlineBookingConfiguration_Bold.svg',
-    '/assets/images/OnlineBookingConfiguration_Italic.svg',
-    '/assets/images/OnlineBookingConfiguration_Underline.svg',
-    '/assets/images/OnlineBookingConfiguration_BulletList.svg',
-    '/assets/images/OnlineBookingConfiguration_OrderedList.svg',
-    '/assets/images/OnlineBookingConfiguration_TextLink.svg',
+    '/assets/images/GeneralIcon_Bold.svg',
+    '/assets/images/GeneralIcon_Italic.svg',
+    '/assets/images/GeneralIcon_Underline.svg',
+    '/assets/images/GeneralIcon_BulletList.svg',
+    '/assets/images/GeneralIcon_OrderedList.svg',
+    '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
 
   private readonly draft = signal(new OnlineBookingServicesOptions());

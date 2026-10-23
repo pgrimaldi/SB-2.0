@@ -20,7 +20,7 @@ export interface StandardRowActionHandlers<T> {
 
 /** Always shown in this order. */
 const STANDARD_ROW_ACTIONS = [
-  { name: 'delete', icon: '/assets/images/Manager_Table_Delete.svg' },
+  { name: 'delete', icon: '/assets/images/GeneralIcon_Delete.svg' },
   { name: 'duplicate', icon: '/assets/images/Manager_Table_Duplicate.svg' },
   { name: 'edit', icon: '/assets/images/Manager_Table_Edit.svg' },
 ] as const;
