@@ -1,0 +1,106 @@
+@use '../../../../styles/table-page' as page;
+
+@include page.table-page(user__management__logs);
+
+.user__management__logs__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user__management__logs__back {
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+
+  img {
+    width: 0.625rem;
+    height: 1rem;
+  }
+}
+
+.user__management__logs__heading {
+  margin: 0;
+  color: var(--color__main__theme__one);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 2rem;
+}
+
+.user__management__logs__filters {
+  display: inline-flex;
+  align-items: center;
+  height: var(--date-range-select-height, 1.625rem);
+  padding-inline: 1.5rem;
+  border: 0.0625rem solid var(--color__main__theme__one);
+  border-radius: 0.3125rem;
+  background: var(--color__layout__surface);
+  color: var(--color__main__theme__one);
+  font: inherit;
+  font-size: var(--date-range-select-text-size, 0.75rem);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+// At the end of the row of the search.
+.user__management__logs__export,
+.user__management__logs__print {
+  --button-height: var(--date-range-select-height, 1.625rem);
+  --button-text-size: var(--date-range-select-text-size, 0.75rem);
+  --button-padding: 2rem;
+  --button-border-color: var(--color__main__theme__one);
+
+  order: 1;
+}
+
+.user__management__logs__export {
+  margin-inline-start: auto;
+}
+
+// Phone: under the title one full row for the period with Filtri, one for the search and one for
+// Esporta with Stampa (half each).
+@media (width < 48rem) {
+  .user__management__logs {
+    padding-top: 1rem;
+  }
+
+  .user__management__logs app-date-range-select {
+    --date-range-select-width: 100%;
+
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user__management__logs ::ng-deep .table__search {
+    flex-basis: 100%;
+  }
+
+  .user__management__logs__export,
+  .user__management__logs__print {
+    flex: 1;
+    order: 2;
+
+    ::ng-deep button {
+      width: 100%;
+    }
+  }
+
+  .user__management__logs__export {
+    margin-inline-start: 0;
+  }
+}
+
+// From 1920px the search of the table grows: the date select and Filtri grow with it.
+@media (width >= 120rem) {
+  .user__management__logs__heading {
+    font-size: 1.75rem;
+    line-height: 2.5rem;
+  }
+
+  .user__management__logs {
+    --date-range-select-width: 16rem;
+    --date-range-select-height: 2.25rem;
+    --date-range-select-text-size: 0.875rem;
+  }
+}

@@ -37,9 +37,15 @@
 }
 
 // Panels that Material opens in an overlay, outside the components, so their styles are global:
-// the options of `app-select` and of the table page size selector (`panelClass: 'select__panel'`).
+// the options of `app-select` and of the table page size selector (`panelClass: 'select__panel'`), and
+// the tooltip of `app-icon-button`, where a line break of the text starts a new line (e.g. a list).
 // The app includes it once, next to the theme (`@include theme.overlays;` in styles.scss).
 @mixin overlays {
+  .icon__button__tooltip .mdc-tooltip__surface {
+    text-align: start;
+    white-space: pre-line;
+  }
+
   .select__panel {
     @include mat.select-overrides(
       (

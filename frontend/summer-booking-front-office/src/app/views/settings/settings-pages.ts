@@ -22,7 +22,21 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
         (routes) => routes.BATHHOUSE_CONFIGURATION_ROUTES,
       ),
   },
-  { path: 'users', label: 'management.settings.menu.users' },
+  {
+    path: 'user-management',
+    label: 'management.settings.menu.users',
+    loadComponent: () =>
+      import('./user-management/user-management').then((component) => component.UserManagement),
+    subPages: [
+      {
+        path: 'user-management/logs',
+        loadComponent: () =>
+          import('./user-management/user-management-logs/user-management-logs').then(
+            (component) => component.UserManagementLogs,
+          ),
+      },
+    ],
+  },
   { path: 'seasons', label: 'management.settings.menu.seasons' },
   { path: 'sectors', label: 'management.settings.menu.sectors' },
   { path: 'map', label: 'management.settings.menu.map' },

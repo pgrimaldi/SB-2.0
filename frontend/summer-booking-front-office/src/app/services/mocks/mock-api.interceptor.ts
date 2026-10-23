@@ -1,5 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { entriesListMock } from './audit/audit.mock';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
@@ -19,6 +20,13 @@ import {
   restoreBookingItemMock,
   trashItemListMock,
 } from './database/database.mock';
+import {
+  createUserMock,
+  deleteUserMock,
+  selectedUserMock,
+  updateUserMock,
+  usersListMock,
+} from './identity/identity.mock';
 import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
 import {
   addVoucherItemMock,
@@ -76,6 +84,45 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/identity/auth/logout`
   ) {
     return logoutMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/users-list`
+  ) {
+    return usersListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/create-user`
+  ) {
+    return createUserMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/delete-user`
+  ) {
+    return deleteUserMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/identity/get-selected-user`
+  ) {
+    return selectedUserMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/identity/update-user`
+  ) {
+    return updateUserMock(request);
+  }
+
+  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/audit/entries-list`) {
+    return entriesListMock(request);
   }
 
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/warehouse/list`) {

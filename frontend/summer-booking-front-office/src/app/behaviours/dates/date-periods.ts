@@ -45,6 +45,24 @@ export function nextMonthsPeriod(today: Date, months: number): DateRange {
   };
 }
 
+/** Today and the six days before. */
+export function lastSevenDaysPeriod(today: Date): DateRange {
+  return { start: day(today, -6), end: day(today, 0) };
+}
+
+/** From the same day some months ago (or the last day of that month, if shorter) to today. */
+export function lastMonthsPeriod(today: Date, months: number): DateRange {
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() - months + 1, 0);
+  return {
+    start: new Date(
+      monthEnd.getFullYear(),
+      monthEnd.getMonth(),
+      Math.min(today.getDate(), monthEnd.getDate()),
+    ),
+    end: day(today, 0),
+  };
+}
+
 function mondayOf(date: Date): Date {
   return day(date, -((date.getDay() + 6) % 7));
 }

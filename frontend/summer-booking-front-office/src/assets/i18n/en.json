@@ -99,10 +99,18 @@
       "phone": "The phone number is not valid.",
       "phone_prefix": "The phone prefix is not valid.",
       "must_accept": "You must accept to continue.",
-      "invalid_file_type": "This file type is not allowed."
+      "invalid_file_type": "This file type is not allowed.",
+      "password_too_short": "The password is too short: at least {{min}} characters.",
+      "password_too_long": "The password is too long: at most {{max}} characters.",
+      "password_too_common": "This password is too common: choose a safer one."
     },
     "resource": {
       "not_found": "This item no longer exists."
+    },
+    "account": {
+      "email_taken": "An account with this email already exists.",
+      "cannot_modify_self": "You cannot delete or change your own account here.",
+      "role_not_assignable": "This account cannot be managed from the panel."
     }
   },
   "alert": {
@@ -849,6 +857,86 @@
             "enabled": "Enable discount/voucher"
           }
         }
+      },
+      "user_management": {
+        "title": "User management - Active users list",
+        "create": "Add user",
+        "table": {
+          "email": "Email",
+          "mobile_phone": "Mobile phone",
+          "account_type": "Account type"
+        },
+        "role": {
+          "super_admin": "Owner",
+          "admin": "Administrator",
+          "lifeguard": "Lifeguard",
+          "manager": "Manager",
+          "cash_operator": "Cash operator",
+          "daily_cash_operator": "Daily cash operator",
+          "website_admin": "Website admin",
+          "user1": "user1",
+          "waiter": "Waiter",
+          "affiliate": "Affiliate",
+          "advanced_lifeguard": "Advanced lifeguard",
+          "marketing": "Marketing"
+        },
+        "view_logs": "View all logs",
+        "logs": {
+          "title": "Log",
+          "filters": "Filters",
+          "export": "Export",
+          "print": "Print",
+          "date_filter": {
+            "all": "All dates",
+            "today": "Today",
+            "this_week": "This week",
+            "last_seven_days": "Last seven days",
+            "last_month": "Last month",
+            "last_six_months": "Last six months",
+            "confirm": "Confirm"
+          },
+          "table": {
+            "booking_number": "Booking ID",
+            "user_number": "User ID",
+            "full_name": "Full name",
+            "spot": "Spot",
+            "action": "Action",
+            "occurred_at": "Date and time"
+          },
+          "actions": {
+            "booking": {
+              "spot_added": "Spot added",
+              "repeated": "Booking repeated",
+              "moved": "Booking moved",
+              "dates_changed": "Booking dates changed"
+            }
+          }
+        },
+        "form": {
+          "title": "Add new user",
+          "email": "Email",
+          "password": "Password",
+          "phone": "Mobile phone",
+          "account_type": "Account type",
+          "choose": "Select",
+          "enable": "Enable",
+          "password_rules": "At least 8 characters\nAt least 1 uppercase letter\nAt least 1 lowercase letter\nAt least 1 number",
+          "save": "Save",
+          "edit_title": "Edit user",
+          "password_saved": "Password set: type to change it"
+        },
+        "delete": {
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "one": {
+            "title": "Delete user",
+            "text": "Do you want to delete the user {{name}}?"
+          },
+          "many": {
+            "title": "Delete users",
+            "text": "Do you want to delete the {{count}} selected users?"
+          }
+        }
       }
     }
   },
@@ -966,7 +1054,11 @@
         "retype": "You changed the connection settings: type the password again or enter a new one."
       }
     },
-    "min_items": "At least {{count}} {{field}} must be defined"
+    "min_items": "At least {{count}} {{field}} must be defined",
+    "min_length": "At least {{min}} characters",
+    "missing_digit": "At least 1 number",
+    "missing_uppercase": "At least 1 uppercase letter",
+    "missing_lowercase": "At least 1 lowercase letter"
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

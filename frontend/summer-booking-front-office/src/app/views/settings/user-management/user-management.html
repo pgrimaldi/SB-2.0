@@ -1,0 +1,55 @@
+<main class="user__management">
+  <div class="user__management__title">
+    <app-page-title [text]="'management.settings.user_management.title' | translate" />
+    <app-button
+      class="user__management__view__logs"
+      [size]="ButtonSize.Small"
+      (clicked)="openLogs()"
+    >
+      {{ 'management.settings.user_management.view_logs' | translate }}
+    </app-button>
+  </div>
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="params()"
+    [load]="load"
+    idField="idUser"
+    [texts]="'table' | translate"
+    [isSearchable]="true"
+    [useAppTheme]="false"
+    [areMassiveActionsHidden]="true"
+    [isCreateButtonHidden]="false"
+    [createLabel]="'management.settings.user_management.create' | translate"
+    [rowActions]="rowActions()"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+    (create)="adding.set(true)"
+  />
+</main>
+
+<app-user-add-item-popup [pathIcon]="closeIcon" [(open)]="adding" (added)="table.reload()" />
+<app-user-edit-item-popup
+  [pathIcon]="closeIcon"
+  [idUser]="idUserToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
+<app-delete-items-popup
+  [idItems]="idUsersToDelete()"
+  [itemName]="userNameToDelete()"
+  translationKey="management.settings.user_management.delete"
+  [action]="deleteUser"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="table.reload()"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

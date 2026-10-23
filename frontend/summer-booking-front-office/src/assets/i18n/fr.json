@@ -99,10 +99,18 @@
       "phone": "Le numéro de téléphone n'est pas valide.",
       "phone_prefix": "L'indicatif téléphonique n'est pas valide.",
       "must_accept": "Vous devez accepter pour continuer.",
-      "invalid_file_type": "Ce type de fichier n'est pas autorisé."
+      "invalid_file_type": "Ce type de fichier n'est pas autorisé.",
+      "password_too_short": "Le mot de passe est trop court : au moins {{min}} caractères.",
+      "password_too_long": "Le mot de passe est trop long : au maximum {{max}} caractères.",
+      "password_too_common": "Ce mot de passe est trop courant : choisissez-en un plus sûr."
     },
     "resource": {
       "not_found": "Cet élément n'existe plus."
+    },
+    "account": {
+      "email_taken": "Un compte existe déjà avec cet e-mail.",
+      "cannot_modify_self": "Vous ne pouvez pas supprimer ou modifier votre propre compte ici.",
+      "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau."
     }
   },
   "alert": {
@@ -849,6 +857,86 @@
             "enabled": "Activer la remise/le bon"
           }
         }
+      },
+      "user_management": {
+        "title": "Gestion des utilisateurs - Liste des utilisateurs actifs",
+        "create": "Ajouter un utilisateur",
+        "table": {
+          "email": "E-mail",
+          "mobile_phone": "Téléphone portable",
+          "account_type": "Type de compte"
+        },
+        "role": {
+          "super_admin": "Propriétaire",
+          "admin": "Administrateur",
+          "lifeguard": "Maître-nageur",
+          "manager": "Manager",
+          "cash_operator": "Opérateur de caisse",
+          "daily_cash_operator": "Opérateur de caisse journalier",
+          "website_admin": "Admin du site web",
+          "user1": "user1",
+          "waiter": "Serveur",
+          "affiliate": "Affilié",
+          "advanced_lifeguard": "Maître-nageur avancé",
+          "marketing": "Marketing"
+        },
+        "view_logs": "Voir tous les logs",
+        "logs": {
+          "title": "Log",
+          "filters": "Filtres",
+          "export": "Exporter",
+          "print": "Imprimer",
+          "date_filter": {
+            "all": "Toutes les dates",
+            "today": "Aujourd'hui",
+            "this_week": "Cette semaine",
+            "last_seven_days": "Sept derniers jours",
+            "last_month": "Dernier mois",
+            "last_six_months": "Six derniers mois",
+            "confirm": "Confirmer"
+          },
+          "table": {
+            "booking_number": "ID réservation",
+            "user_number": "ID utilisateur",
+            "full_name": "Nom complet",
+            "spot": "Emplacement",
+            "action": "Action",
+            "occurred_at": "Date et heure"
+          },
+          "actions": {
+            "booking": {
+              "spot_added": "Emplacement ajouté",
+              "repeated": "Réservation répétée",
+              "moved": "Réservation déplacée",
+              "dates_changed": "Dates de réservation modifiées"
+            }
+          }
+        },
+        "form": {
+          "title": "Ajouter un nouvel utilisateur",
+          "email": "E-mail",
+          "password": "Mot de passe",
+          "phone": "Téléphone portable",
+          "account_type": "Type de compte",
+          "choose": "Sélectionner",
+          "enable": "Activer",
+          "password_rules": "Au moins 8 caractères\nAu moins 1 majuscule\nAu moins 1 minuscule\nAu moins 1 chiffre",
+          "save": "Enregistrer",
+          "edit_title": "Modifier l'utilisateur",
+          "password_saved": "Mot de passe défini : saisissez-en un pour le changer"
+        },
+        "delete": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "one": {
+            "title": "Supprimer l'utilisateur",
+            "text": "Voulez-vous supprimer l'utilisateur {{name}} ?"
+          },
+          "many": {
+            "title": "Supprimer les utilisateurs",
+            "text": "Voulez-vous supprimer les {{count}} utilisateurs sélectionnés ?"
+          }
+        }
       }
     }
   },
@@ -966,7 +1054,11 @@
         "retype": "Vous avez modifié les paramètres de connexion : saisissez de nouveau le mot de passe ou entrez-en un nouveau."
       }
     },
-    "min_items": "Il faut définir au moins {{count}} {{field}}"
+    "min_items": "Il faut définir au moins {{count}} {{field}}",
+    "min_length": "Au moins {{min}} caractères",
+    "missing_digit": "Au moins 1 chiffre",
+    "missing_uppercase": "Au moins 1 majuscule",
+    "missing_lowercase": "Au moins 1 minuscule"
   },
   "unsaved_changes": {
     "title": "Modifications non enregistrées",

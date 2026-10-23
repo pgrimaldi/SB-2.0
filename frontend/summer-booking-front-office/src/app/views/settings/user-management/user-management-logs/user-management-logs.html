@@ -1,0 +1,60 @@
+<main class="user__management__logs">
+  <div class="user__management__logs__title">
+    <a class="user__management__logs__back" routerLink="/settings/user-management">
+      <img [src]="backIcon" width="10" height="16" alt="" />
+    </a>
+    <h1 class="user__management__logs__heading">
+      {{ 'management.settings.user_management.logs.title' | translate }}
+    </h1>
+  </div>
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="params()"
+    [filters]="filters()"
+    [load]="load"
+    idField="idAuditEntry"
+    [texts]="'table' | translate"
+    [isSearchable]="true"
+    [areMassiveActionsHidden]="true"
+    [isCreateButtonHidden]="true"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+  >
+    <app-date-range-select
+      appTableHeadingAction
+      [options]="dateOptions()"
+      [(range)]="dateRange"
+      [texts]="'management.settings.user_management.logs.date_filter' | translate"
+      [pathIcon]="dateFilterIcons"
+    />
+    <button appTableHeadingAction class="user__management__logs__filters" type="button">
+      {{ 'management.settings.user_management.logs.filters' | translate }}
+    </button>
+    <app-button
+      appTableHeadingAction
+      class="user__management__logs__export"
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+    >
+      {{ 'management.settings.user_management.logs.export' | translate }}
+    </app-button>
+    <app-button
+      appTableHeadingAction
+      class="user__management__logs__print"
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+    >
+      {{ 'management.settings.user_management.logs.print' | translate }}
+    </app-button>
+  </app-table>
+</main>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

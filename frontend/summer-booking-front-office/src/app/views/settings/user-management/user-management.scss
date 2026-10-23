@@ -1,0 +1,16 @@
+@use '../../../styles/table-page' as page;
+
+@include page.table-page(user__management);
+
+.user__management__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.user__management__view__logs {
+  --button-height: 1.625rem;
+  --button-text-size: 0.75rem;
+  --button-padding: 1rem;
+}

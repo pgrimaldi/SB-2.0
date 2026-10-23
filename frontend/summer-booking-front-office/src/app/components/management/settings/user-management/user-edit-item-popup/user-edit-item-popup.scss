@@ -1,0 +1,90 @@
+@use '@angular/material' as mat;
+
+// The popup renders in an overlay outside the component: these styles are global.
+.user__edit__item__popup__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0.25rem,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+}
+
+app-user-edit-item-popup {
+  display: contents;
+}
+
+.user__edit__item__popup {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5625rem 1.5rem 1.75rem;
+
+  app-section-title {
+    margin-inline-end: 2rem;
+  }
+}
+
+.user__edit__item__popup__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  margin-top: 1.375rem;
+}
+
+// The field takes the line, "Abilita" stays beside it, on the line of the field.
+.user__edit__item__popup__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+
+  // Down by the label of the field (1rem) and its gap (0.625rem), so it stays on the line of the
+  // field also with an error under the field.
+  app-checkbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: var(--filled-field-height, 1.625rem);
+    margin-top: 1.625rem;
+  }
+}
+
+// Outlined in the light blue of the labels, as high as the label, the "i" in the middle.
+.user__edit__item__popup .user__edit__item__popup__info {
+  --icon-button-size: 1rem;
+  --icon-button-text-size: 0.6875rem;
+  --icon-button-background: var(--color__layout__surface);
+
+  .icon__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0.125rem solid var(--color__layout__text__soft);
+    color: var(--color__layout__text__soft);
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+.user__edit__item__popup__field {
+  flex: 1;
+  min-width: 0;
+}
+
+.user__edit__item__popup__error {
+  margin: 1.125rem 0 -0.5rem;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.user__edit__item__popup__buttons {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+
+  display: grid;
+  grid-template-columns: min(100%, 11.625rem);
+  justify-content: end;
+  margin-top: 1.625rem;
+}

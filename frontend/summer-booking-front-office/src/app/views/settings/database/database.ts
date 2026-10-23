@@ -257,7 +257,7 @@ export class Database {
   ]);
   /** In the select's order: [open, previous month, next month]. */
   protected readonly dateFilterIcons = [
-    '/assets/images/Database_DateFilterOpen.svg',
+    '/assets/images/GeneralIcon_DateFilterOpen.svg',
     '/assets/images/GeneralIcon_Previous.svg',
     '/assets/images/GeneralIcon_Next.svg',
   ] as const;

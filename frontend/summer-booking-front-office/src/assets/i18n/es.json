@@ -99,10 +99,18 @@
       "phone": "El número de teléfono no es válido.",
       "phone_prefix": "El prefijo telefónico no es válido.",
       "must_accept": "Debes aceptar para continuar.",
-      "invalid_file_type": "Este tipo de archivo no está permitido."
+      "invalid_file_type": "Este tipo de archivo no está permitido.",
+      "password_too_short": "La contraseña es demasiado corta: al menos {{min}} caracteres.",
+      "password_too_long": "La contraseña es demasiado larga: como máximo {{max}} caracteres.",
+      "password_too_common": "Esta contraseña es demasiado común: elige una más segura."
     },
     "resource": {
       "not_found": "Este elemento ya no existe."
+    },
+    "account": {
+      "email_taken": "Ya existe una cuenta con este correo electrónico.",
+      "cannot_modify_self": "No puedes eliminar ni modificar tu propia cuenta desde aquí.",
+      "role_not_assignable": "Esta cuenta no se puede gestionar desde el panel."
     }
   },
   "alert": {
@@ -849,6 +857,86 @@
             "enabled": "Activar descuento/vale"
           }
         }
+      },
+      "user_management": {
+        "title": "Gestión de usuarios - Lista de usuarios activos",
+        "create": "Añadir usuario",
+        "table": {
+          "email": "Correo electrónico",
+          "mobile_phone": "Móvil",
+          "account_type": "Tipo de cuenta"
+        },
+        "role": {
+          "super_admin": "Propietario",
+          "admin": "Administrador",
+          "lifeguard": "Socorrista",
+          "manager": "Gerente",
+          "cash_operator": "Operador de caja",
+          "daily_cash_operator": "Operador de caja diario",
+          "website_admin": "Admin. del sitio web",
+          "user1": "user1",
+          "waiter": "Camarero",
+          "affiliate": "Afiliado",
+          "advanced_lifeguard": "Socorrista avanzado",
+          "marketing": "Marketing"
+        },
+        "view_logs": "Ver todos los logs",
+        "logs": {
+          "title": "Log",
+          "filters": "Filtros",
+          "export": "Exportar",
+          "print": "Imprimir",
+          "date_filter": {
+            "all": "Todas las fechas",
+            "today": "Hoy",
+            "this_week": "Esta semana",
+            "last_seven_days": "Últimos siete días",
+            "last_month": "Último mes",
+            "last_six_months": "Últimos seis meses",
+            "confirm": "Confirmar"
+          },
+          "table": {
+            "booking_number": "ID reserva",
+            "user_number": "ID usuario",
+            "full_name": "Nombre completo",
+            "spot": "Puesto",
+            "action": "Acción",
+            "occurred_at": "Fecha y hora"
+          },
+          "actions": {
+            "booking": {
+              "spot_added": "Puesto añadido",
+              "repeated": "Reserva repetida",
+              "moved": "Reserva movida",
+              "dates_changed": "Fechas de reserva modificadas"
+            }
+          }
+        },
+        "form": {
+          "title": "Añadir nuevo usuario",
+          "email": "Correo electrónico",
+          "password": "Contraseña",
+          "phone": "Móvil",
+          "account_type": "Tipo de cuenta",
+          "choose": "Seleccionar",
+          "enable": "Habilitar",
+          "password_rules": "Al menos 8 caracteres\nAl menos 1 mayúscula\nAl menos 1 minúscula\nAl menos 1 número",
+          "save": "Guardar",
+          "edit_title": "Editar usuario",
+          "password_saved": "Contraseña establecida: escribe para cambiarla"
+        },
+        "delete": {
+          "cancel": "Cancelar",
+          "confirm": "Eliminar",
+          "one": {
+            "title": "Eliminar usuario",
+            "text": "¿Quieres eliminar el usuario {{name}}?"
+          },
+          "many": {
+            "title": "Eliminar usuarios",
+            "text": "¿Quieres eliminar los {{count}} usuarios seleccionados?"
+          }
+        }
       }
     }
   },
@@ -966,7 +1054,11 @@
         "retype": "Has cambiado los parámetros de conexión: vuelve a escribir la contraseña o introduce una nueva."
       }
     },
-    "min_items": "Debe definirse al menos {{count}} {{field}}"
+    "min_items": "Debe definirse al menos {{count}} {{field}}",
+    "min_length": "Al menos {{min}} caracteres",
+    "missing_digit": "Al menos 1 número",
+    "missing_uppercase": "Al menos 1 mayúscula",
+    "missing_lowercase": "Al menos 1 minúscula"
   },
   "unsaved_changes": {
     "title": "Cambios sin guardar",

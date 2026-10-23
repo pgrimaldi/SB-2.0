@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
-import { greaterThan, requiredText } from './validators';
+import { greaterThan, passwordRules, requiredText } from './validators';
 
 describe('greaterThan', () => {
   it('should accept only numbers above the limit, an empty field included in the errors', () => {
@@ -32,5 +32,27 @@ describe('requiredText', () => {
       model.set({ name });
       expect(nameForm.name().errors()).toEqual([expect.objectContaining({ kind: 'required' })]);
     }
+  });
+});
+
+describe('passwordRules', () => {
+  it('should ask for the length, a digit, an uppercase and a lowercase letter, leaving an empty field to requiredText', () => {
+    const model = signal<{ password: string | null }>({ password: 'Sabbia2026' });
+    const passwordForm = TestBed.runInInjectionContext(() =>
+      form(model, (path) => passwordRules(path.password, 8)),
+    );
+
+    expect(passwordForm.password().valid()).toBe(true);
+    for (const [password, kind] of [
+      ['Sab2026', 'min_length'],
+      ['Sabbiadoro', 'missing_digit'],
+      ['sabbia2026', 'missing_uppercase'],
+      ['SABBIA2026', 'missing_lowercase'],
+    ]) {
+      model.set({ password });
+      expect(passwordForm.password().errors()).toEqual([expect.objectContaining({ kind })]);
+    }
+    model.set({ password: null });
+    expect(passwordForm.password().valid()).toBe(true);
   });
 });

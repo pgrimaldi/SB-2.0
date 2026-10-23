@@ -25,6 +25,12 @@ export const API_ERROR_CODES = [
   'validation.phone_prefix',
   'validation.must_accept',
   'validation.invalid_file_type',
+  'validation.password_too_short',
+  'validation.password_too_long',
+  'validation.password_too_common',
+  'account.email_taken',
+  'account.cannot_modify_self',
+  'account.role_not_assignable',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

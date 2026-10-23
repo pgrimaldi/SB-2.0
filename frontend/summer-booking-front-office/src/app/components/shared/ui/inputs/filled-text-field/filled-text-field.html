@@ -1,10 +1,13 @@
 @if (label()) {
-  <label class="filled__text__field__label" [for]="id"
-    >{{ label() }}
-    @if (isMandatory()) {
-      <span class="filled__text__field__mandatory">*</span>
-    }
-  </label>
+  <div class="filled__text__field__heading">
+    <label class="filled__text__field__label" [for]="id"
+      >{{ label() }}
+      @if (isMandatory()) {
+        <span class="filled__text__field__mandatory">*</span>
+      }
+    </label>
+    <ng-content select="[appFilledTextFieldLabelAction]" />
+  </div>
 }
 <mat-form-field
   class="filled__text__field__control"

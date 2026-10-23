@@ -99,10 +99,18 @@
       "phone": "رقم الهاتف غير صالح.",
       "phone_prefix": "رمز الاتصال غير صالح.",
       "must_accept": "يجب الموافقة للمتابعة.",
-      "invalid_file_type": "نوع الملف غير مسموح."
+      "invalid_file_type": "نوع الملف غير مسموح.",
+      "password_too_short": "كلمة المرور قصيرة جدًا: {{min}} أحرف على الأقل.",
+      "password_too_long": "كلمة المرور طويلة جدًا: {{max}} حرفًا كحد أقصى.",
+      "password_too_common": "كلمة المرور هذه شائعة جدًا: اختر كلمة أكثر أمانًا."
     },
     "resource": {
       "not_found": "هذا العنصر لم يعد موجودًا."
+    },
+    "account": {
+      "email_taken": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+      "cannot_modify_self": "لا يمكنك حذف حسابك أو تعديله من هنا.",
+      "role_not_assignable": "لا يمكن إدارة هذا الحساب من اللوحة."
     }
   },
   "alert": {
@@ -849,6 +857,86 @@
             "enabled": "تفعيل الخصم/القسيمة"
           }
         }
+      },
+      "user_management": {
+        "title": "إدارة المستخدمين - قائمة المستخدمين النشطين",
+        "create": "إضافة مستخدم",
+        "table": {
+          "email": "البريد الإلكتروني",
+          "mobile_phone": "الجوال",
+          "account_type": "نوع الحساب"
+        },
+        "role": {
+          "super_admin": "المالك",
+          "admin": "المسؤول",
+          "lifeguard": "منقذ",
+          "manager": "مدير",
+          "cash_operator": "أمين الصندوق",
+          "daily_cash_operator": "أمين الصندوق اليومي",
+          "website_admin": "مسؤول الموقع",
+          "user1": "user1",
+          "waiter": "نادل",
+          "affiliate": "شريك",
+          "advanced_lifeguard": "منقذ متقدم",
+          "marketing": "التسويق"
+        },
+        "view_logs": "عرض كل السجلات",
+        "logs": {
+          "title": "السجل",
+          "filters": "تصفية",
+          "export": "تصدير",
+          "print": "طباعة",
+          "date_filter": {
+            "all": "كل التواريخ",
+            "today": "اليوم",
+            "this_week": "هذا الأسبوع",
+            "last_seven_days": "الأيام السبعة الماضية",
+            "last_month": "الشهر الماضي",
+            "last_six_months": "الأشهر الستة الماضية",
+            "confirm": "تأكيد"
+          },
+          "table": {
+            "booking_number": "رقم الحجز",
+            "user_number": "رقم المستخدم",
+            "full_name": "الاسم الكامل",
+            "spot": "الموقع",
+            "action": "الإجراء",
+            "occurred_at": "التاريخ والوقت"
+          },
+          "actions": {
+            "booking": {
+              "spot_added": "تمت إضافة موقع",
+              "repeated": "تم تكرار الحجز",
+              "moved": "تم نقل الحجز",
+              "dates_changed": "تم تعديل تواريخ الحجز"
+            }
+          }
+        },
+        "form": {
+          "title": "إضافة مستخدم جديد",
+          "email": "البريد الإلكتروني",
+          "password": "كلمة المرور",
+          "phone": "الجوال",
+          "account_type": "نوع الحساب",
+          "choose": "اختر",
+          "enable": "تفعيل",
+          "password_rules": "8 أحرف على الأقل\nحرف كبير واحد على الأقل\nحرف صغير واحد على الأقل\nرقم واحد على الأقل",
+          "save": "حفظ",
+          "edit_title": "تعديل المستخدم",
+          "password_saved": "تم تعيين كلمة المرور: اكتب لتغييرها"
+        },
+        "delete": {
+          "cancel": "إلغاء",
+          "confirm": "حذف",
+          "one": {
+            "title": "حذف المستخدم",
+            "text": "هل تريد حذف المستخدم {{name}}؟"
+          },
+          "many": {
+            "title": "حذف المستخدمين",
+            "text": "هل تريد حذف {{count}} من المستخدمين المحددين؟"
+          }
+        }
       }
     }
   },
@@ -966,7 +1054,11 @@
         "retype": "غيّرت إعدادات الاتصال: أعد كتابة كلمة المرور أو أدخل كلمة جديدة."
       }
     },
-    "min_items": "يجب تحديد {{count}} {{field}} على الأقل"
+    "min_items": "يجب تحديد {{count}} {{field}} على الأقل",
+    "min_length": "{{min}} أحرف على الأقل",
+    "missing_digit": "رقم واحد على الأقل",
+    "missing_uppercase": "حرف كبير واحد على الأقل",
+    "missing_lowercase": "حرف صغير واحد على الأقل"
   },
   "unsaved_changes": {
     "title": "تغييرات غير محفوظة",

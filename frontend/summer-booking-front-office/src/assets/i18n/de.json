@@ -99,10 +99,18 @@
       "phone": "Die Telefonnummer ist ungültig.",
       "phone_prefix": "Die Vorwahl ist ungültig.",
       "must_accept": "Du musst zustimmen, um fortzufahren.",
-      "invalid_file_type": "Dieser Dateityp ist nicht erlaubt."
+      "invalid_file_type": "Dieser Dateityp ist nicht erlaubt.",
+      "password_too_short": "Das Passwort ist zu kurz: mindestens {{min}} Zeichen.",
+      "password_too_long": "Das Passwort ist zu lang: höchstens {{max}} Zeichen.",
+      "password_too_common": "Dieses Passwort ist zu häufig: Wähle ein sichereres."
     },
     "resource": {
       "not_found": "Dieser Eintrag existiert nicht mehr."
+    },
+    "account": {
+      "email_taken": "Es gibt bereits ein Konto mit dieser E-Mail.",
+      "cannot_modify_self": "Du kannst dein eigenes Konto hier nicht löschen oder ändern.",
+      "role_not_assignable": "Dieses Konto kann nicht über das Panel verwaltet werden."
     }
   },
   "alert": {
@@ -849,6 +857,86 @@
             "enabled": "Rabatt/Gutschein aktivieren"
           }
         }
+      },
+      "user_management": {
+        "title": "Benutzerverwaltung - Liste der aktiven Benutzer",
+        "create": "Benutzer hinzufügen",
+        "table": {
+          "email": "E-Mail",
+          "mobile_phone": "Mobiltelefon",
+          "account_type": "Kontotyp"
+        },
+        "role": {
+          "super_admin": "Inhaber",
+          "admin": "Administrator",
+          "lifeguard": "Rettungsschwimmer",
+          "manager": "Manager",
+          "cash_operator": "Kassierer",
+          "daily_cash_operator": "Tageskassierer",
+          "website_admin": "Website-Admin",
+          "user1": "user1",
+          "waiter": "Kellner",
+          "affiliate": "Partner",
+          "advanced_lifeguard": "Erfahrener Rettungsschwimmer",
+          "marketing": "Marketing"
+        },
+        "view_logs": "Alle Logs anzeigen",
+        "logs": {
+          "title": "Log",
+          "filters": "Filter",
+          "export": "Exportieren",
+          "print": "Drucken",
+          "date_filter": {
+            "all": "Alle Daten",
+            "today": "Heute",
+            "this_week": "Diese Woche",
+            "last_seven_days": "Letzte sieben Tage",
+            "last_month": "Letzter Monat",
+            "last_six_months": "Letzte sechs Monate",
+            "confirm": "Bestätigen"
+          },
+          "table": {
+            "booking_number": "Buchungs-ID",
+            "user_number": "Benutzer-ID",
+            "full_name": "Vollständiger Name",
+            "spot": "Platz",
+            "action": "Aktion",
+            "occurred_at": "Datum und Uhrzeit"
+          },
+          "actions": {
+            "booking": {
+              "spot_added": "Platz hinzugefügt",
+              "repeated": "Buchung wiederholt",
+              "moved": "Buchung verschoben",
+              "dates_changed": "Buchungsdaten geändert"
+            }
+          }
+        },
+        "form": {
+          "title": "Neuen Benutzer hinzufügen",
+          "email": "E-Mail",
+          "password": "Passwort",
+          "phone": "Mobiltelefon",
+          "account_type": "Kontotyp",
+          "choose": "Auswählen",
+          "enable": "Aktivieren",
+          "password_rules": "Mindestens 8 Zeichen\nMindestens 1 Großbuchstabe\nMindestens 1 Kleinbuchstabe\nMindestens 1 Zahl",
+          "save": "Speichern",
+          "edit_title": "Benutzer bearbeiten",
+          "password_saved": "Passwort festgelegt: zum Ändern eingeben"
+        },
+        "delete": {
+          "cancel": "Abbrechen",
+          "confirm": "Löschen",
+          "one": {
+            "title": "Benutzer löschen",
+            "text": "Möchtest du den Benutzer {{name}} löschen?"
+          },
+          "many": {
+            "title": "Benutzer löschen",
+            "text": "Möchtest du die {{count}} ausgewählten Benutzer löschen?"
+          }
+        }
       }
     }
   },
@@ -966,7 +1054,11 @@
         "retype": "Sie haben die Verbindungsparameter geändert: Geben Sie das Passwort erneut ein oder legen Sie ein neues fest."
       }
     },
-    "min_items": "Mindestens {{count}} {{field}} erforderlich"
+    "min_items": "Mindestens {{count}} {{field}} erforderlich",
+    "min_length": "Mindestens {{min}} Zeichen",
+    "missing_digit": "Mindestens 1 Zahl",
+    "missing_uppercase": "Mindestens 1 Großbuchstabe",
+    "missing_lowercase": "Mindestens 1 Kleinbuchstabe"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

@@ -99,10 +99,18 @@
       "phone": "电话号码无效。",
       "phone_prefix": "电话区号无效。",
       "must_accept": "必须同意才能继续。",
-      "invalid_file_type": "不允许此文件类型。"
+      "invalid_file_type": "不允许此文件类型。",
+      "password_too_short": "密码太短：至少 {{min}} 个字符。",
+      "password_too_long": "密码太长：最多 {{max}} 个字符。",
+      "password_too_common": "此密码过于常见：请选择更安全的密码。"
     },
     "resource": {
       "not_found": "该项目已不存在。"
+    },
+    "account": {
+      "email_taken": "已存在使用此电子邮件的账户。",
+      "cannot_modify_self": "您不能在此删除或修改自己的账户。",
+      "role_not_assignable": "无法在面板中管理此账户。"
     }
   },
   "alert": {
@@ -849,6 +857,86 @@
             "enabled": "启用折扣/优惠券"
           }
         }
+      },
+      "user_management": {
+        "title": "用户管理 - 活跃用户列表",
+        "create": "添加用户",
+        "table": {
+          "email": "电子邮件",
+          "mobile_phone": "手机",
+          "account_type": "账户类型"
+        },
+        "role": {
+          "super_admin": "所有者",
+          "admin": "管理员",
+          "lifeguard": "救生员",
+          "manager": "经理",
+          "cash_operator": "收银员",
+          "daily_cash_operator": "当日收银员",
+          "website_admin": "网站管理员",
+          "user1": "user1",
+          "waiter": "服务员",
+          "affiliate": "合作伙伴",
+          "advanced_lifeguard": "高级救生员",
+          "marketing": "市场营销"
+        },
+        "view_logs": "查看所有日志",
+        "logs": {
+          "title": "日志",
+          "filters": "筛选",
+          "export": "导出",
+          "print": "打印",
+          "date_filter": {
+            "all": "所有日期",
+            "today": "今天",
+            "this_week": "本周",
+            "last_seven_days": "过去七天",
+            "last_month": "过去一个月",
+            "last_six_months": "过去六个月",
+            "confirm": "确认"
+          },
+          "table": {
+            "booking_number": "预订编号",
+            "user_number": "用户编号",
+            "full_name": "全名",
+            "spot": "位置",
+            "action": "操作",
+            "occurred_at": "日期和时间"
+          },
+          "actions": {
+            "booking": {
+              "spot_added": "已添加位置",
+              "repeated": "预订已重复",
+              "moved": "预订已移动",
+              "dates_changed": "预订日期已修改"
+            }
+          }
+        },
+        "form": {
+          "title": "添加新用户",
+          "email": "电子邮件",
+          "password": "密码",
+          "phone": "手机",
+          "account_type": "账户类型",
+          "choose": "请选择",
+          "enable": "启用",
+          "password_rules": "至少 8 个字符\n至少 1 个大写字母\n至少 1 个小写字母\n至少 1 个数字",
+          "save": "保存",
+          "edit_title": "编辑用户",
+          "password_saved": "已设置密码：输入以更改"
+        },
+        "delete": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除用户",
+            "text": "要删除用户 {{name}} 吗？"
+          },
+          "many": {
+            "title": "删除用户",
+            "text": "要删除所选的 {{count}} 个用户吗？"
+          }
+        }
       }
     }
   },
@@ -966,7 +1054,11 @@
         "retype": "您更改了连接参数：请重新输入密码或输入新密码。"
       }
     },
-    "min_items": "必须至少定义 {{count}} 个{{field}}"
+    "min_items": "必须至少定义 {{count}} 个{{field}}",
+    "min_length": "至少 {{min}} 个字符",
+    "missing_digit": "至少 1 个数字",
+    "missing_uppercase": "至少 1 个大写字母",
+    "missing_lowercase": "至少 1 个小写字母"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

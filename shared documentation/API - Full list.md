@@ -456,6 +456,280 @@ Nessun corpo (204).
 | `priceListPdfUrl` | string \| null |
 | `menuPdfUrl` | string \| null |
 
+## Gestione utenti
+
+### POST `/api/identity/users-list`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idUser": "string (UUID)",
+      "email": "string | null",
+      "phoneCountryCode": "string | null",
+      "phone": "string | null",
+      "role": "string (enum UserRole) | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | UserItem[] (array di oggetti) |
+| `rows[].idUser` | string (UUID) |
+| `rows[].email` | string \| null |
+| `rows[].phoneCountryCode` | string \| null |
+| `rows[].phone` | string \| null |
+| `rows[].role` | string (enum UserRole) \| null |
+
+### POST `/api/identity/create-user`
+
+**Payload JSON**
+
+```json
+{
+  "email": "string",
+  "isEmailActive": "boolean",
+  "password": "string",
+  "phone": "string | null",
+  "isPhoneActive": "boolean",
+  "role": "string (enum UserRole) | null",
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `email` | string |
+| `isEmailActive` | boolean |
+| `password` | string |
+| `phone` | string \| null |
+| `isPhoneActive` | boolean |
+| `role` | string (enum UserRole) \| null |
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### GET `/api/identity/get-selected-user?idUser={idUser}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idUser": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "idUser": "string (UUID)",
+  "email": "string",
+  "isEmailActive": "boolean",
+  "phone": "string | null",
+  "isPhoneActive": "boolean",
+  "role": "string (enum UserRole) | null"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+| `email` | string |
+| `isEmailActive` | boolean |
+| `phone` | string \| null |
+| `isPhoneActive` | boolean |
+| `role` | string (enum UserRole) \| null |
+
+### POST `/api/identity/update-user`
+
+**Payload JSON**
+
+```json
+{
+  "idUser": "string (UUID)",
+  "email": "string",
+  "isEmailActive": "boolean",
+  "password": "string | null",
+  "phone": "string | null",
+  "isPhoneActive": "boolean",
+  "role": "string (enum UserRole) | null",
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+| `email` | string |
+| `isEmailActive` | boolean |
+| `password` | string \| null |
+| `phone` | string \| null |
+| `isPhoneActive` | boolean |
+| `role` | string (enum UserRole) \| null |
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/identity/delete-user`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idUser": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idUser` | string (UUID) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/audit/entries-list`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idAuditEntry": "string (UUID)",
+      "bookingNumber": "string | null",
+      "userNumber": "string | null",
+      "actorName": "string | null",
+      "spotLabel": "string | null",
+      "actionCode": "string | null",
+      "occurredAt": "string (data e ora ISO 8601 UTC) | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | AuditEntryItem[] (array di oggetti) |
+| `rows[].idAuditEntry` | string (UUID) |
+| `rows[].bookingNumber` | string \| null |
+| `rows[].userNumber` | string \| null |
+| `rows[].actorName` | string \| null |
+| `rows[].spotLabel` | string \| null |
+| `rows[].actionCode` | string \| null |
+| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null |
+
 ## Impostazioni magazzino
 
 ### POST `/api/warehouse/list`

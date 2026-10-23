@@ -1,0 +1,73 @@
+<ng-template #content>
+  <div class="user__edit__item__popup">
+    <app-section-title [text]="'management.settings.user_management.form.edit_title' | translate" />
+
+    <div class="user__edit__item__popup__fields">
+      <div class="user__edit__item__popup__row">
+        <app-filled-text-field
+          class="user__edit__item__popup__field"
+          [label]="'management.settings.user_management.form.email' | translate"
+          [isMandatory]="true"
+          autocomplete="off"
+          [formField]="draftForm.email"
+          [error]="emailError()"
+        />
+        <app-checkbox [formField]="draftForm.isEmailActive" [error]="isEmailActiveError()">
+          {{ 'management.settings.user_management.form.enable' | translate }}
+        </app-checkbox>
+      </div>
+      <app-filled-text-field
+        [label]="'management.settings.user_management.form.password' | translate"
+        [placeholder]="'management.settings.user_management.form.password_saved' | translate"
+        [isPasswordField]="true"
+        autocomplete="new-password"
+        [pathIcon]="eyeIcons"
+        [formField]="draftForm.password"
+        [error]="passwordError()"
+      >
+        <app-icon-button
+          appFilledTextFieldLabelAction
+          class="user__edit__item__popup__info"
+          [label]="'management.settings.user_management.form.password_rules' | translate"
+          >i</app-icon-button
+        >
+      </app-filled-text-field>
+      <div class="user__edit__item__popup__row">
+        <app-filled-text-field
+          class="user__edit__item__popup__field"
+          [label]="'management.settings.user_management.form.phone' | translate"
+          [isPhoneField]="true"
+          autocomplete="off"
+          [formField]="draftForm.phone"
+          [error]="phoneError()"
+        />
+        <app-checkbox [formField]="draftForm.isPhoneActive" [error]="isPhoneActiveError()">
+          {{ 'management.settings.user_management.form.enable' | translate }}
+        </app-checkbox>
+      </div>
+      <app-filled-select
+        [label]="'management.settings.user_management.form.account_type' | translate"
+        [placeholder]="'management.settings.user_management.form.choose' | translate"
+        [options]="roleOptions()"
+        [formField]="draftForm.role"
+        [error]="roleError()"
+      />
+    </div>
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="user__edit__item__popup__error">{{ errorMessage }}</p>
+    }
+
+    <div class="user__edit__item__popup__buttons">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!canSave()"
+        [isLoading]="isLoading()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.user_management.form.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

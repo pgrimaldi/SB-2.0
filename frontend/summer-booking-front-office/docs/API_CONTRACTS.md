@@ -110,6 +110,303 @@ Nessun corpo.
 |---|---|---|
 | `Set-Cookie (header)` | cancella il cookie del refresh token | `sb_rt=; HttpOnly; Secure; SameSite=Strict; Path=/api/identity; Max-Age=0` |
 
+## /identity
+
+### POST `/api/identity/users-list`
+
+Gestione utenti: elenco.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "rossi",
+  "filters": [
+    {
+      "field": "role",
+      "value": [
+        "Admin",
+        "Manager"
+      ]
+    }
+  ],
+  "sortField": "lastName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `rossi` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "role", "value": ["Admin", "Manager"]}]` |
+| `filters[].field` | string | `role` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Admin", "Manager"]` |
+| `sortField` | string | `lastName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01",
+      "email": "giulia.ferri@example.com",
+      "phoneCountryCode": "+39",
+      "phone": "3401112201",
+      "role": "SuperAdmin"
+    },
+    {
+      "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02",
+      "email": "marco.bianchi@example.com",
+      "phoneCountryCode": "+39",
+      "phone": "3401112202",
+      "role": "Admin"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | UserItem[] (array di oggetti) | `[{"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01", "email": "giulia.ferri@example.com", "phoneCountryCode": "+39", "phone": "3401112201", "role": "SuperAdmin"}, {"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02", "email": "marco.bianchi@example.com", "phoneCountryCode": "+39", "phone": "3401112202", "role": "Admin"}]` |
+| `rows[].idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01` |
+| `rows[].email` | string \| null | `giulia.ferri@example.com` |
+| `rows[].phoneCountryCode` | string \| null | `+39` |
+| `rows[].phone` | string \| null | `3401112201` |
+| `rows[].role` | string (enum UserRole) \| null | `SuperAdmin` |
+
+### POST `/api/identity/create-user`
+
+Gestione utenti: nuovo utente.
+
+#### Payload
+
+```json
+{
+  "email": "nuovo.utente@example.com",
+  "isEmailActive": true,
+  "password": "Sabbia-2026",
+  "phone": "3401112299",
+  "isPhoneActive": false,
+  "role": "Waiter",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `email` | string | `nuovo.utente@example.com` |
+| `isEmailActive` | boolean | `true` |
+| `password` | string | `Sabbia-2026` |
+| `phone` | string \| null | `3401112299` |
+| `isPhoneActive` | boolean | `false` |
+| `role` | string (enum UserRole) \| null | `Waiter` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/identity/get-selected-user?idUser={idUser}`
+
+Gestione utenti: dati di un utente.
+
+#### Payload
+
+Nessun corpo: è una GET, l'utente va nella query string.
+
+```text
+/api/identity/get-selected-user?idUser=3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03",
+  "email": "sara.conti@example.com",
+  "isEmailActive": true,
+  "phone": "3401112203",
+  "isPhoneActive": true,
+  "role": "Manager"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03` |
+| `email` | string | `sara.conti@example.com` |
+| `isEmailActive` | boolean | `true` |
+| `phone` | string \| null | `3401112203` |
+| `isPhoneActive` | boolean | `true` |
+| `role` | string (enum UserRole) \| null | `Manager` |
+
+### POST `/api/identity/update-user`
+
+Gestione utenti: modifica utente.
+
+#### Payload
+
+```json
+{
+  "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03",
+  "email": "sara.conti@example.com",
+  "isEmailActive": true,
+  "password": "Spiaggia-2027",
+  "phone": "3401112203",
+  "isPhoneActive": false,
+  "role": "Manager",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03` |
+| `email` | string | `sara.conti@example.com` |
+| `isEmailActive` | boolean | `true` |
+| `password` | string \| null | `Spiaggia-2027` |
+| `phone` | string \| null | `3401112203` |
+| `isPhoneActive` | boolean | `false` |
+| `role` | string (enum UserRole) \| null | `Manager` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/identity/delete-user`
+
+Gestione utenti: elimina utente.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+## /audit
+
+### POST `/api/audit/entries-list`
+
+Gestione utenti: log.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "ferri",
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-10-17T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-10-23T23:59:59.999Z"
+      ]
+    }
+  ],
+  "sortField": "occurredAt",
+  "sortDirection": "Descending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `ferri` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-17T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-23T23:59:59.999Z"]}]` |
+| `filters[].field` | string | `datetimeFrom` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-10-17T00:00:00.000Z"]` |
+| `sortField` | string | `occurredAt` |
+| `sortDirection` | string (enum SortDirection) | `Descending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01",
+      "bookingNumber": "1234",
+      "userNumber": "123",
+      "actorName": "Giulia Ferri",
+      "spotLabel": "A1",
+      "actionCode": "booking.spot_added",
+      "occurredAt": "2026-10-23T11:11:00.000Z"
+    },
+    {
+      "idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11",
+      "bookingNumber": "2741",
+      "userNumber": "123",
+      "actorName": "Giulia Ferri",
+      "spotLabel": "D2",
+      "actionCode": "booking.dates_changed",
+      "occurredAt": "2026-10-17T14:05:00.000Z"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "booking.spot_added", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "booking.dates_changed", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
+| `rows[].idAuditEntry` | string (UUID) | `9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01` |
+| `rows[].bookingNumber` | string \| null | `1234` |
+| `rows[].userNumber` | string \| null | `123` |
+| `rows[].actorName` | string \| null | `Giulia Ferri` |
+| `rows[].spotLabel` | string \| null | `A1` |
+| `rows[].actionCode` | string \| null | `booking.spot_added` |
+| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null | `2026-10-23T11:11:00.000Z` |
+
 ## /warehouse
 
 ### POST `/api/warehouse/list`
