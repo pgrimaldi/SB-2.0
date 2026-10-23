@@ -430,6 +430,10 @@ La perdita della chiave è il modo più comune di perdere tutte le copie insieme
   apra (§11).
 - La rotazione della chiave è compatibile con le copie vecchie solo se le chiavi precedenti restano
   custodite: non si butta una chiave finché esiste una copia cifrata con essa.
+- **I pepper delle password** (`Auth:PasswordHash:Pepper`/`Peppers`) seguono la stessa regola, ed è
+  l'eccezione al principio 7: non stanno nella copia, ma senza di loro un DB ripristinato rifiuta il
+  login di tutti gli utenti già passati ad Argon2 (successo su sb-dev il 2026-10-19). Copia fuori da AWS
+  insieme alla chiave delle copie, e nessun pepper si elimina finché un hash o una copia lo usano.
 
 ---
 

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Module.Notification.Infrastructure.Outbound;
 using Shared.Contracts.Notification;
 
 namespace Module.Notification.Infrastructure.ExternalApi;
@@ -28,17 +29,26 @@ public sealed class SmtpOptions
 public sealed class SmtpTransactionalEmailSender : ITransactionalEmailSender
 {
 	private readonly SmtpOptions _options;
+	private readonly OutboundGuard _guard;
 	private readonly ILogger<SmtpTransactionalEmailSender> _logger;
 
-	public SmtpTransactionalEmailSender(IOptions<SmtpOptions> options, ILogger<SmtpTransactionalEmailSender> logger)
+	public SmtpTransactionalEmailSender(IOptions<SmtpOptions> options, OutboundGuard guard, ILogger<SmtpTransactionalEmailSender> logger)
 	{
 		_options = options.Value;
+		_guard = guard;
 		_logger = logger;
 	}
 
 	public async Task SendAsync(TransactionalEmail email, CancellationToken ct = default)
 	{
 		var (subject, body) = Render(email);
+
+		if (!_guard.Allows(email.ToEmail))
+		{
+			// Mai il corpo nel log: contiene codici e link monouso.
+			_logger.LogWarning("Email {Kind} soppressa (Notification:Outbound:Mode={Mode})", email.Kind, _guard.Mode);
+			return;
+		}
 
 		if (string.IsNullOrEmpty(_options.Host))
 		{
