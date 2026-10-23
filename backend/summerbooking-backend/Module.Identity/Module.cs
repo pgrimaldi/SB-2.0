@@ -2,6 +2,7 @@ using BuildingBlocks.Infrastructure.Storage;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Module.Identity.Application;
 using Module.Identity.Application.Abstractions;
 using Module.Identity.Application.Services;
@@ -27,7 +28,9 @@ public static class Module
 
 		services.Configure<IdentityAuthOptions>(configuration.GetSection(IdentityAuthOptions.Section));
 		services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.Section));
-		services.Configure<PasswordHashOptions>(configuration.GetSection(PasswordHashOptions.Section));
+		// I pepper si controllano all'avvio dell'host, non al primo login.
+		services.AddOptions<PasswordHashOptions>().Bind(configuration.GetSection(PasswordHashOptions.Section)).ValidateOnStart();
+		services.AddSingleton<IValidateOptions<PasswordHashOptions>, PasswordHashOptionsValidator>();
 		services.Configure<SocialAuthOptions>(configuration.GetSection(SocialAuthOptions.Section));
 		services.Configure<RefreshCookieOptions>(configuration.GetSection(RefreshCookieOptions.Section));
 

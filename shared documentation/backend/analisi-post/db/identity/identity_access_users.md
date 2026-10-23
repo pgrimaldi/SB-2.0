@@ -177,8 +177,12 @@ Rispetto alla legacy `users`:
     [`docs/pre/autenticazione-autorizzazione-dotnet.md` §5bis](../../../progettazione/pre/autenticazione-autorizzazione-dotnet.md))
     e si **rivedono periodicamente** (es. annualmente) alzando `m`/`t`/`cost` con l'evoluzione
     dell'hardware; l'aumento si propaga da solo al login successivo (re-hash sopra).
-  - **Pepper server-side** (chiave segreta unica dal secret manager, [`docs/17-secrets.md`](../../../progettazione/17-secrets.md))
-    applicato prima dell'hashing: un leak del **solo** DB non è attaccabile offline.
+  - **Pepper server-side** (dal secret manager, [`docs/17-secrets.md`](../../../progettazione/17-secrets.md))
+    applicato prima dell'hashing: un leak del **solo** DB non è attaccabile offline. Dal 2026-10-20 il pepper
+    ha una **versione**, scritta nell'hash come parametro `k=N` (assente = versione 0): si può sostituire
+    aggiungendone uno nuovo, gli hash vecchi si verificano col loro e vengono riscritti al login. Un pepper
+    che manca rende inutilizzabili gli hash che lo usano: va custodito come la chiave delle copie
+    ([`92-copie-sicurezza.md` §8.3](../../../progettazione/92-copie-sicurezza.md)).
   - Il **formato PHC** consente in futuro di **migrare algoritmo** (Argon2id → successore) con lo stesso
     meccanismo di re-hash al login, senza migrazione di schema.
   - Il flusso di reset **non** scrive più qui via endpoint non autenticato: passa da

@@ -286,7 +286,7 @@ regola sia nel frattempo cambiata:
 | Spostamento di prenotazione **già scontrinata** | **422** `booking.fiscalized_locked` |
 | Regole di cancellazione (finestra temporale, penale) su annulla/elimina | **422** `booking.cancellation_not_allowed` |
 | Contatto registrato con la property (solo se `bookingBy` ≠ operatore) | **422** `booking.contact_not_registered` |
-| **Validazione importo**: il server ricalcola il prezzo (`IPricingApi`, [pre/linee-guida-implementative-dotnet.md §6](pre/linee-guida-implementative-dotnet.md)) e lo confronta con quello inviato dal client | **422** `booking.price_mismatch` **oppure** accetta e segnala per revisione — **decisione A** |
+| **Validazione importo**: il server ricalcola il prezzo con lo **stesso motore** e la **stessa versione del listino** usati offline e lo confronta con quello inviato dal client (§12) | **422** `booking.price_mismatch` solo se a parità di motore e listino l'importo è diverso; un listino cambiato nel frattempo **non** è un conflitto (decisione A, chiusa il 2026-10-22) |
 
 - La validazione di input (campi obbligatori, `startDate` sui servizi, ecc.) resta **400** con
   `errors[]` (FluentValidation → `IExceptionHandler` globale).
@@ -349,8 +349,8 @@ ritardo di sincronizzazione. Retention breve (1–2 anni, [80-retention.md](80-r
 - Replay **duplicato** dello stesso `Idempotency-Key` → **una sola** scrittura, stessa risposta.
 - Due create offline sullo **stesso posto/periodo** → uno **409** `booking.location_overlap`, l'altro ok.
 - Update con `If-Match` **stale** → **409** `booking.version_conflict` con `currentVersion`.
-- Create con importo diverso dal ricalcolo server → **422** `booking.price_mismatch` (o flag, per
-  decisione A).
+- Create con importo diverso dal ricalcolo server a parità di motore e versione del listino → **422**
+  `booking.price_mismatch`; listino cambiato durante l'offline → accettata al prezzo offline (§12).
 - Magazzino esaurito tra offline e replay → **422** `booking.insufficient_inventory`.
 - Spostamento di prenotazione scontrinata → **422** `booking.fiscalized_locked`.
 - Token con ruolo revocato → **403** `auth.forbidden_on_replay`, comando scartato.
@@ -362,8 +362,9 @@ ritardo di sincronizzazione. Retention breve (1–2 anni, [80-retention.md](80-r
 
 ## 5. Contratto lato frontend — cosa deve fare per coordinarsi
 
-Il frontend è React ([front-modern-pre](../../../../../front-modern-pre)). Serve un livello offline (Service
-Worker + IndexedDB) che rispetti quanto segue.
+Il frontend è Angular (`frontend/summer-booking-front-office`, con il service worker di Angular già
+configurato in `ngsw-config.json`). Serve un livello offline (Service Worker + IndexedDB) che rispetti
+quanto segue; il motore di prezzo eseguito nel browser è descritto in §12.
 
 ### 5.1 Cosa mettere in cache (working set)
 
@@ -543,7 +544,8 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
 | `booking.fiscalized_locked` | 422 | Spostamento di prenotazione scontrinata | Messaggio: annullare prima lo scontrino (online) |
 | `booking.cancellation_not_allowed` | 422 | Fuori finestra / regole di cancellazione | Messaggio con la regola applicata |
 | `booking.contact_not_registered` | 422 | Regola "solo contatti registrati" | Messaggio |
-| `booking.price_mismatch` | 422 | Importo client ≠ ricalcolo server (decisione A) | Conflitto: ricalcola e riconferma |
+| `booking.price_mismatch` | 422 | Importo client ≠ ricalcolo server a parità di motore e listino (§12) | Conflitto: ricalcola e riconferma |
+| `pricing.catalog_version_unknown` | 422 | La versione del listino usata offline non è più conservata (§12.4) | Conflitto: ricalcola con il listino attuale e riconferma |
 | `booking.cancel_blocked_paid_online` | 422 | Annullo offline di prenotazione pagata online (decisione D) | Disabilita offline; rimanda al rientro |
 | `auth.forbidden_on_replay` | 403 | Permesso/scoping revocato mentre offline | Scarta il comando; avvisa l'operatore |
 | `sync.occurred_at_out_of_range` | 422 | Orologio dispositivo sballato | Messaggio "orologio non corretto" |
@@ -555,13 +557,10 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
 
 ## 9. Decisioni aperte (chiudere prima di implementare)
 
-- **A — Motore di prezzo.** Oggi il prezzo è calcolato **interamente nel client** e il server non
-  ricalcola ([01-mappa §2.8, §13](../analisi-pre/business-logic/stabilimento/01-mappa.md),
-  [_motore-di-prezzo-e-sconti.md](../analisi-pre/business-logic/stabilimento/_motore-di-prezzo-e-sconti.md)).
-  Se il refactoring sposta il calcolo lato server (fix di sicurezza), per creare prenotazioni da mappa
-  **offline** serve una copia del motore di prezzo eseguibile nel client, e il server lo **rivalida** al
-  replay (`booking.price_mismatch`, può rifiutare). Se resta client‑side, offline è più semplice ma il
-  server deve comunque validare l'importo. **È il bivio architetturale principale.**
+- **A — Motore di prezzo. ✅ Chiusa il 2026-10-22.** Il calcolo passa al server; il committente ha
+  stabilito che un prezzo calcolato offline **resta valido** anche se nel frattempo il listino cambia.
+  Soluzione scelta: un solo motore scritto in C#, eseguito dal server e, compilato in WebAssembly, dal
+  browser; al replay il server lo rivalida con la versione del listino usata offline. Dettaglio in §12.
 - **B — Perimetro pagamenti offline.** Confermare che carta (Stripe) e scontrino (Fiskaly) restano
   online‑only e che offline "mettere pagamenti" = **solo incasso manuale/contante**. Se sì, non serve
   altro lavoro su Stripe/Fiskaly per l'offline.
@@ -597,7 +596,9 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
 - [ ] `If-Match` / colonna `version` (rowversion `xmin`) sugli update di prenotazione.
 - [ ] Vincolo `EXCLUDE` posto × periodo su `booking_locations`.
 - [ ] Rivalidazione server‑side: blacklist, magazzino, scontrinata, regole di cancellazione, contatto
-      registrato, importo (`IPricingApi`).
+      registrato, importo (`IPricingApi` con versione del listino e del motore, §12.4).
+- [ ] Motore di prezzo come libreria pura condivisa + pacchetto WebAssembly + storico delle versioni del
+      listino (§12.3).
 - [ ] Colonna `occurred_at` sulle entità create offline + validazione range (`created_at` resta l'ora di scrittura server).
 - [ ] Ri‑autorizzazione per comando al replay (`auth.forbidden_on_replay`).
 - [ ] Annullo → evento `BookingCancelled` → rimborso Stripe **via outbox** (o blocco per decisione D).
@@ -621,6 +622,8 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
 - [ ] Disabilitazione esplicita offline delle operazioni fuori scope (§5.10).
 - [ ] Badge di stato per riga, contatore coda, schermata risoluzione conflitti.
 - [ ] Pulizia cache+coda al logout; gestione quota IndexedDB piena; TTL finestra offline.
+- [ ] Motore di prezzo WebAssembly in un Web Worker, scaricato e messo in cache per l'offline; blocco
+      `pricing` nel comando di creazione (§12.5).
 
 ---
 
@@ -632,3 +635,103 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
    check‑in/out, annullo, incasso manuale, assenze). Richiede tutte le voci "Backend — Fase 2".
 3. **Rifiniture** — sharing offline, eventuale cifratura del working set, tuning della finestra e delle
    retention in base ai dati d'uso reali.
+
+---
+
+## 12. Motore di prezzo condiviso tra server e browser (decisione A)
+
+### 12.1 Decisione e requisito
+
+- **Requisito del committente (2026-10-22)**: se durante il lavoro offline il listino cambia, la
+  prenotazione **mantiene il prezzo calcolato offline**.
+- **Conseguenza**: offline il prezzo va calcolato nel browser con le stesse regole del server, e al
+  replay il server non può confrontarlo con il listino *attuale* ma con quello che il browser aveva in
+  cache.
+- **Soluzione scelta**: il motore di prezzo è scritto **una sola volta in C#** come libreria pura. Il
+  server la usa direttamente; per il browser la stessa libreria è compilata in **WebAssembly**. Un solo
+  codice: le regole non possono divergere tra le due copie.
+- Alternative scartate: due implementazioni (C# + TypeScript), che richiederebbero di mantenere ogni
+  regola due volte e una batteria di casi comuni per tenerle allineate; prezzi precalcolati scaricati
+  prima di andare offline, impraticabili per il numero di combinazioni (postazioni × pacchetti × durate ×
+  articoli aggiuntivi).
+
+### 12.2 Il motore
+
+- **Libreria pura** in `Module.Catalog` (progetto o cartella dedicata, es. `Pricing`): nessuna
+  dipendenza da EF Core, ASP.NET, BuildingBlocks, file o rete. È l'implementazione di `IPricingApi`
+  ([pre/linee-guida-implementative-dotnet.md §6](pre/linee-guida-implementative-dotnet.md)) e del
+  preventivo `POST /api/catalog/pricing/quote`.
+- **Funzione deterministica**: `Quote(listino, richiesta) → preventivo`. Nessuna lettura dell'orologio
+  (la data di riferimento arriva nella richiesta), nessun numero casuale, aritmetica `decimal` con
+  arrotondamento definito al centesimo; nel prezzo cumulativo il centesimo residuo va all'ultima
+  postazione (risposta B2 del committente).
+- **Ingresso «listino»**: il contenuto degli snapshot di configurazione `PriceCatalog`, `ServicesCatalog`
+  e `AgreementCatalog` (tabella [`catalog_config_snapshots`](../analisi-post/db/catalog/catalog_config_snapshots.md)),
+  cioè pacchetti, articoli aggiuntivi, periodi e fasce, prezzi per settore, durata e data, sconti,
+  servizi, convenzioni. È lo stesso JSON che il browser riceve nel working set (§3.1, campo `catalog`).
+- **Ingresso «richiesta»**: segmenti (postazione, pacchetto, date, fascia giornata/mattina/pomeriggio,
+  stagionale, assenze), articoli aggiuntivi anche solo su alcune date, servizi, convenzione e voucher,
+  codice sconto, sconti e incrementi manuali, canale (gestionale/online), data di riferimento.
+- **Uscita «preventivo»**: totale, righe per postazione, voce e giorno, aliquota IVA per riga,
+  `catalogHash` (il `content_hash` degli snapshot usati) e `engineVersion` (versione della libreria).
+- Le regole sono quelle del motore legacy con le correzioni decise dal committente (risposte B1, B2:
+  niente prezzo a 0 oltre i 90 giorni, niente doppio conteggio della mezza giornata nel weekend; regola
+  del weekend invariata). La formalizzazione è nel resoconto dell'analisi del modulo Catalog.
+
+### 12.3 Cosa fa il backend
+
+1. **Libreria del motore** come in §12.2, usata da Catalog per il preventivo e da Booking (tramite
+   `IPricingApi`) quando crea o modifica una prenotazione.
+2. **Pacchetto WebAssembly**: la stessa libreria pubblicata con l'SDK WebAssembly di .NET
+   (`Microsoft.NET.Sdk.WebAssembly`), con una sola funzione esportata verso JavaScript
+   (`[JSExport]`): `quote(catalogJson, requestJson) → quoteJson`. Trimming attivo; dimensione da
+   misurare (ordine di qualche MB, scaricati una volta e poi in cache). Lo produce la pipeline del
+   backend, che lo pubblica come file statici versionati (es. `/pricing-engine/{engineVersion}/`) sullo
+   stesso CDN del frontend.
+3. **Working set**: `GET /api/hub/map/workset` (§3.1) include i tre snapshot con il loro `catalogHash` e
+   `pricingEngine: { version, url }`; `changes` (§3.2) segnala quando un hash cambia, così il client
+   riscarica solo lo snapshot interessato.
+4. **Storico delle versioni del listino**: oggi `catalog_config_snapshots` tiene una sola riga per
+   stabilimento e tipo. Serve una tabella che conservi i payload degli snapshot di prezzo per
+   `content_hash` (stabilimento, tipo, hash, payload, data) almeno per la finestra offline massima più un
+   margine (proposta 7 giorni), cancellati poi dal motore di retention ([80-retention.md](80-retention.md)).
+5. **Creazione prenotazione** (Booking): il corpo accetta un blocco `pricing` con `amount`, righe,
+   `catalogHash`, `engineVersion`, `computedOffline`. Online il prezzo lo decide il server con il
+   listino attuale; il blocco del client è ignorato.
+6. **Replay di un comando offline**: vedi §12.4. La prenotazione salva il preventivo applicato, l'origine
+   (`offline`) e `catalogHash`; il replay finisce nell'audit (§4.11).
+
+### 12.4 Rivalidazione al replay
+
+| Caso | Esito |
+|---|---|
+| `catalogHash` presente nello storico, stessa `engineVersion` del server, importo uguale al ricalcolo | Accettata al prezzo offline, anche se nel frattempo il listino è cambiato |
+| Come sopra ma importo diverso | **422** `booking.price_mismatch` (manomissione o difetto): conflitto, ricalcolo e riconferma |
+| `engineVersion` diversa da quella del server (aggiornamento rilasciato durante l'offline) | Il server ricalcola con il motore attuale sul listino storico; se l'importo coincide accetta, altrimenti accetta comunque il prezzo offline e lo segnala per revisione (il cliente non paga le conseguenze di un aggiornamento) |
+| `catalogHash` non più nello storico (offline oltre la finestra massima) | **422** `pricing.catalog_version_unknown`: conflitto, ricalcolo con il listino attuale e riconferma |
+
+Le altre regole (magazzino, blacklist, posto occupato…) restano quelle di §4.6: il prezzo offline vale,
+la disponibilità no.
+
+### 12.5 Cosa fa il frontend (Angular)
+
+1. **Servizio `PricingEngine`** che carica il pacchetto WebAssembly in un **Web Worker**, per non
+   bloccare l'interfaccia durante il calcolo; espone `quote(request)`.
+2. **Cache per l'offline**: il pacchetto della versione indicata dal working set va scaricato appena il
+   gestionale è online e messo in cache dal service worker (gruppo di asset con `installMode: prefetch` in
+   `ngsw-config.json`, o una cache dedicata per versione); i tre snapshot con il loro `catalogHash`
+   restano in IndexedDB insieme al working set (§5.1).
+3. **Online**: il prezzo mostrato e salvato è quello del server (`POST /api/catalog/pricing/quote`). Il
+   motore locale si può usare per un'anteprima istantanea, ma non è vincolante.
+4. **Offline**: il prezzo si calcola con il motore locale sul listino in cache; il comando
+   `booking.create` / `booking.move` (§5.5) porta nel payload il blocco `pricing` (`amount`, righe,
+   `catalogHash`, `engineVersion`, `computedOffline: true`).
+5. **Aggiornamenti**: se `changes` segnala un nuovo `catalogHash` o una nuova `engineVersion`, il client
+   scarica il nuovo snapshot o il nuovo pacchetto. I comandi già in coda tengono l'hash con cui sono
+   stati calcolati: non vanno ricalcolati.
+6. **Conflitti** (§5.6): `booking.price_mismatch` e `pricing.catalog_version_unknown` aprono la
+   schermata conflitti con l'azione «ricalcola e riconferma».
+7. **Interfaccia**: le prenotazioni create offline mostrano «prezzo calcolato offline» finché il replay
+   non è applicato.
+8. **Senza pacchetto in cache** (prima apertura senza rete, cache svuotata): la creazione di
+   prenotazioni offline va disabilitata con un messaggio, come le altre operazioni fuori scope (§5.10).

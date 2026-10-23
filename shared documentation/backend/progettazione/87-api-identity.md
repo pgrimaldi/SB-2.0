@@ -127,9 +127,15 @@ e Payment. Eventi pubblicati: `AccountRegistered`, `AccountDeleted`, `StaffConta
 ## Configurazione da fornire per ambiente
 
 Dal secret manager, mai committati: `Jwt:UserKeys`, `Jwt:ApiKeys` (base64, ≥ 256 bit, con `Kid`),
-`Auth:PasswordHash:Pepper`, `Auth:Social:*` (client id Google/Apple, app id e secret Facebook),
+`Auth:PasswordHash:Pepper` (versione 0, gli hash senza `k=`) e `Auth:PasswordHash:Peppers`
+(`[{ "Version": N, "Key": base64 }]`, ≥ 256 bit: gli hash nuovi usano la versione più alta e la scrivono
+come `k=N`; le precedenti restano per verificare e vengono sostituite al login), `Auth:Social:*` (client id
+Google/Apple, app id e secret Facebook),
 `Notification:Smtp:*`, `Secrets:<client_secret_ref>` dei partner. Da `appsettings.{env}.json`:
 `Auth:AllowedOrigins`, `Auth:FrontendUrls`, `Identity:Documents:Bucket`, `Storage:PublicBaseUrls`,
 `Hosting:TrustForwardedHeaders` dietro il load balancer.
+Fuori da Development il backend **non parte senza pepper** (controllo all'avvio, 2026-10-20), salvo
+`Auth:PasswordHash:AllowNoPepper=true`, da usare solo in un ambiente di prova che carica dati con hash
+scritti senza pepper (es. sb-dev, alimentato dal DB locale).
 `Jwt:Issuer` diverso per ogni ambiente (produzione: `summerbooking-identity-prod`, già in `appsettings.json`);
 fuori dallo sviluppo l'avvio fallisce se issuer o chiavi sono quelli di sviluppo o se un `kid` inizia con `dev-`.
