@@ -36,18 +36,18 @@ export class Warehouse {
     const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
-  protected readonly titleIcon = ['/assets/images/Warehouse_Title.svg'] as const;
-  protected readonly closeIcon = ['/assets/images/Warehouse_Close.svg'] as const;
+  protected readonly titleIcon = ['/assets/images/GeneralIcon_Warehouse.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /**
    * In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create].
    * No title icon: the page has its own title.
    */
   protected readonly tableIcons = [
-    '/assets/images/Warehouse_Search.svg',
-    '/assets/images/Warehouse_Clear.svg',
-    '/assets/images/Warehouse_DuplicateSelected.svg',
-    '/assets/images/Warehouse_DeleteSelected.svg',
-    '/assets/images/Warehouse_Add.svg',
+    '/assets/images/GeneralIcon_Search.svg',
+    '/assets/images/GeneralIcon_Clear.svg',
+    '/assets/images/GeneralIcon_DuplicateSelected.svg',
+    '/assets/images/GeneralIcon_DeleteSelected.svg',
+    '/assets/images/GeneralIcon_Add.svg',
   ] as const;
 
   private readonly headers = toSignal(

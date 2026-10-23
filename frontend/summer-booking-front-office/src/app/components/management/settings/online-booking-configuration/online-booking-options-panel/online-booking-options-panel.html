@@ -239,7 +239,7 @@
       <app-button
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
-        [pathIcon]="addRuleIcon"
+        [pathIcon]="addIcon"
         (clicked)="addBookingLimitRule()"
       >
         {{
@@ -305,10 +305,7 @@
             "
             [formField]="rule.maxSpotQuantity"
           />
-          <app-icon-button
-            [pathIcon]="removeRuleIcon"
-            (click)="removeBookingLimitRule(ruleIndex)"
-          />
+          <app-icon-button [pathIcon]="removeIcon" (click)="removeBookingLimitRule(ruleIndex)" />
         </div>
       </div>
     }
@@ -352,5 +349,95 @@
         }}
       </app-checkbox>
     </div>
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.legend.title' | translate
+      "
+    >
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [pathIcon]="addIcon"
+        (clicked)="addLegendItem()"
+      >
+        {{
+          'management.settings.online_booking_configuration.booking_options.legend.add' | translate
+        }}
+      </app-button>
+    </app-section-title>
+    @if (draftForm.legendItems().value().length) {
+      <div class="online__booking__options__panel__legend__list">
+        @for (item of draftForm.legendItems; track item; let itemIndex = $index) {
+          @let icon = item.iconUrl().value();
+          <div class="online__booking__options__panel__legend">
+            <app-filled-text-field
+              class="online__booking__options__panel__legend__name"
+              [placeholder]="
+                'management.settings.online_booking_configuration.booking_options.legend.name_placeholder'
+                  | translate
+              "
+              [formField]="item.name"
+            />
+            <app-button
+              class="online__booking__options__panel__legend__icon"
+              [appearance]="ButtonAppearance.Light"
+              [size]="ButtonSize.Small"
+              [isFullWidth]="true"
+              [pathIcon]="icon ? [icon] : null"
+            >
+              {{
+                'management.settings.online_booking_configuration.booking_options.legend.choose_icon'
+                  | translate
+              }}
+            </app-button>
+            <app-icon-button
+              class="online__booking__options__panel__legend__remove"
+              [pathIcon]="removeIcon"
+              (click)="removeLegendItem(itemIndex)"
+            />
+          </div>
+        }
+      </div>
+    }
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.good_to_know.title'
+          | translate
+      "
+    />
+    <p class="online__booking__options__panel__description">
+      {{
+        'management.settings.online_booking_configuration.booking_options.good_to_know.description'
+          | translate
+      }}
+    </p>
+    <app-rich-text-field
+      [texts]="'rich_text' | translate"
+      [pathIcon]="richTextIcons"
+      [formField]="draftForm.goodToKnow"
+    />
+  </section>
+  <section class="online__booking__options__panel__section">
+    <app-section-title
+      [text]="
+        'management.settings.online_booking_configuration.booking_options.useful_information.title'
+          | translate
+      "
+    />
+    <p class="online__booking__options__panel__description">
+      {{
+        'management.settings.online_booking_configuration.booking_options.useful_information.description'
+          | translate
+      }}
+    </p>
+    <app-rich-text-field
+      [texts]="'rich_text' | translate"
+      [pathIcon]="richTextIcons"
+      [formField]="draftForm.usefulInformation"
+    />
   </section>
 </app-side-panel>

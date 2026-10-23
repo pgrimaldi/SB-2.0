@@ -155,9 +155,9 @@ export class Database {
   protected readonly loadFailed = signal(false);
   /** The same page shows the trash too, on its own route (settings/database/trash). */
   protected readonly isTrash = inject(ActivatedRoute).snapshot.data['isTrash'] === true;
-  protected readonly trashIcon = ['/assets/images/Database_Trash.svg'] as const;
+  protected readonly trashIcon = ['/assets/images/GeneralIcon_DeleteWhite.svg'] as const;
   protected readonly restoreIcon = ['/assets/images/Database_Restore.svg'] as const;
-  protected readonly backIcon = '/assets/images/Database_TrashBack.svg';
+  protected readonly backIcon = '/assets/images/GeneralIcon_Previous.svg';
   protected readonly idSelectedBookings = signal<readonly TableRowId[]>([]);
   protected readonly idBookings = computed(() => this.idSelectedBookings().map(String));
   protected readonly isDeleteAsked = signal(false);
@@ -168,12 +168,12 @@ export class Database {
   protected readonly isRestoring = signal(false);
   protected readonly isDeleteForeverAsked = signal(false);
   protected readonly isDeletingForever = signal(false);
-  protected readonly closeIcon = ['/assets/images/Database_Close.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly isActionErrorShown = signal(false);
   /** [X, warning]. */
   protected readonly alertIcons = [
-    '/assets/images/Database_Close.svg',
-    '/assets/images/Database_Warning.svg',
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = toSignal(
@@ -189,7 +189,7 @@ export class Database {
   protected readonly dateRange = signal<DateRange | null>(null);
   protected readonly isFiltersOpen = signal(false);
   protected readonly bookingFilters = signal(new ExistingBookingFilters());
-  protected readonly chipIcons = ['/assets/images/Database_Close.svg'] as const;
+  protected readonly chipIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
   private readonly filterTexts = toSignal(
     this.translateService.stream(
       'management.settings.database.filters',
@@ -258,8 +258,8 @@ export class Database {
   /** In the select's order: [open, previous month, next month]. */
   protected readonly dateFilterIcons = [
     '/assets/images/Database_DateFilterOpen.svg',
-    '/assets/images/Database_DateFilterPrevious.svg',
-    '/assets/images/Database_DateFilterNext.svg',
+    '/assets/images/GeneralIcon_Previous.svg',
+    '/assets/images/GeneralIcon_Next.svg',
   ] as const;
   private readonly dateFilterTexts = toSignal(
     this.translateService.stream('management.settings.database.date_filter') as Observable<
@@ -290,8 +290,8 @@ export class Database {
   });
   /** In the table's order: [search magnifier, search X]. */
   protected readonly tableIcons = [
-    '/assets/images/Database_Search.svg',
-    '/assets/images/Database_Clear.svg',
+    '/assets/images/GeneralIcon_Search.svg',
+    '/assets/images/GeneralIcon_Clear.svg',
   ] as const;
   private readonly headers = toSignal(
     this.translateService.stream('management.settings.database.table') as Observable<

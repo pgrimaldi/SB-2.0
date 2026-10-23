@@ -45,7 +45,7 @@ export class OnlineBookingConfiguration {
   protected readonly stepIcon = '/assets/images/OnlineBookingConfiguration_StepChevron.svg';
   protected readonly iframeIcon = '/assets/images/OnlineBookingConfiguration_IframeLink.svg';
   protected readonly copyIcon = ['/assets/images/OnlineBookingConfiguration_Copy.svg'] as const;
-  protected readonly closeIcon = ['/assets/images/OnlineBookingConfiguration_Close.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly iframeCode =
     '<iframe src="https://summerbooking.it/property-details/demo/iframe" width="300px" height="350px"></iframe>';
   protected readonly stripeAccountId = signal<string | null>(null);

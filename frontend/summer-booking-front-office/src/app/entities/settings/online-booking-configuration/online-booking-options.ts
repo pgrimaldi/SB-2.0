@@ -2,6 +2,7 @@ import { OnlineBookingAudience } from '../../enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../enums/online-booking-block';
 import { SupplementType } from '../../enums/supplement-type';
 import { BookingLimitRule } from './booking-limit-rule';
+import { LegendItem } from './legend-item';
 import { OnlineBookingPeriod } from './online-booking-period';
 
 export class OnlineBookingOptions {
@@ -33,4 +34,7 @@ export class OnlineBookingOptions {
   isPayAtPropertyWithoutCardAccepted = false;
   isDepositAccepted = false;
   isPrepaidCardAccepted = false;
+  legendItems: LegendItem[] = [];
+  goodToKnow: string | null = null;
+  usefulInformation: string | null = null;
 }

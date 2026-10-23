@@ -23,6 +23,7 @@ import { OnlineBookingAudience } from '../../../../../entities/enums/online-book
 import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { BookingLimitRule } from '../../../../../entities/settings/online-booking-configuration/booking-limit-rule';
+import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { greaterThan } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
@@ -34,7 +35,9 @@ import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
+import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTimeField } from '../../../../shared/ui/inputs/filled-time-field/filled-time-field';
+import { RichTextField } from '../../../../shared/ui/inputs/rich-text-field/rich-text-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
@@ -83,12 +86,14 @@ const ONLINE_BOOKING_BLOCK_KEYS: Readonly<Record<OnlineBookingBlock, OnlineBooki
     FilledDateField,
     FilledNumberField,
     FilledSelect,
+    FilledTextField,
     FilledTimeField,
     FormField,
     FormRow,
     FormRowLabel,
     IconButton,
     PeriodCalendar,
+    RichTextField,
     SectionTitle,
     SidePanel,
     Toggle,
@@ -111,19 +116,22 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
   /** [previous month, next month, remove a period]. */
   protected readonly calendarIcons = [
-    '/assets/images/OnlineBookingConfiguration_PreviousMonth.svg',
-    '/assets/images/OnlineBookingConfiguration_NextMonth.svg',
-    '/assets/images/OnlineBookingConfiguration_RemovePeriod.svg',
+    '/assets/images/GeneralIcon_Previous.svg',
+    '/assets/images/GeneralIcon_Next.svg',
+    '/assets/images/GeneralIcon_Close.svg',
   ] as const;
-  protected readonly clockIcon = ['/assets/images/OnlineBookingConfiguration_Clock.svg'] as const;
-  protected readonly calendarIcon = [
-    '/assets/images/OnlineBookingConfiguration_Calendar.svg',
-  ] as const;
-  protected readonly addRuleIcon = [
-    '/assets/images/OnlineBookingConfiguration_AddRule.svg',
-  ] as const;
-  protected readonly removeRuleIcon = [
-    '/assets/images/OnlineBookingConfiguration_DeleteRule.svg',
+  protected readonly clockIcon = ['/assets/images/GeneralIcon_Clock.svg'] as const;
+  protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
+  protected readonly addIcon = ['/assets/images/OnlineBookingConfiguration_AddRule.svg'] as const;
+  protected readonly removeIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
+  /** [bold, italic, underline, bulleted list, numbered list, link]. */
+  protected readonly richTextIcons = [
+    '/assets/images/GeneralIcon_Bold.svg',
+    '/assets/images/GeneralIcon_Italic.svg',
+    '/assets/images/GeneralIcon_Underline.svg',
+    '/assets/images/GeneralIcon_BulletList.svg',
+    '/assets/images/GeneralIcon_OrderedList.svg',
+    '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
   /** Example rows until an API gives the rows and sectors of the property. */
   protected readonly sectorOptions: readonly SelectOption[] = [
@@ -257,6 +265,16 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.draftForm
       .bookingLimitRules()
       .value.update((rules) => rules.filter((_, ruleIndex) => ruleIndex !== index));
+  }
+
+  protected addLegendItem(): void {
+    this.draftForm.legendItems().value.update((items) => [...items, new LegendItem()]);
+  }
+
+  protected removeLegendItem(index: number): void {
+    this.draftForm
+      .legendItems()
+      .value.update((items) => items.filter((_, itemIndex) => itemIndex !== index));
   }
 
   protected setBookingConfirmation(answer: Answer | null): void {

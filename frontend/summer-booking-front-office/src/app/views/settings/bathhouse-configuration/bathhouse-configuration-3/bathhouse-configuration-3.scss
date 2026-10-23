@@ -1,13 +1,5 @@
-@use '@angular/material' as mat;
-
-// The buttons of the management pages; the text ones in the blue of the theme.
+// The buttons of the management pages.
 .bathhouse__configuration__3 {
-  @include mat.button-overrides(
-    (
-      text-label-text-color: var(--color__main__theme__one),
-    )
-  );
-
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
   --button-padding: 1rem;

@@ -89,19 +89,19 @@ export class Vouchers {
     return idProperty ? { idProperty } : null;
   });
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;
-  protected readonly closeIcon = ['/assets/images/Vouchers_Close.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
-    '/assets/images/Vouchers_Close.svg',
-    '/assets/images/Vouchers_Warning.svg',
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
   /** In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create]. */
   protected readonly tableIcons = [
     '',
     '',
-    '/assets/images/Vouchers_DuplicateSelected.svg',
-    '/assets/images/Vouchers_DeleteSelected.svg',
-    '/assets/images/Vouchers_Add.svg',
+    '/assets/images/GeneralIcon_DuplicateSelected.svg',
+    '/assets/images/GeneralIcon_DeleteSelected.svg',
+    '/assets/images/GeneralIcon_Add.svg',
   ] as const;
   private readonly headers = toSignal(
     this.translateService.stream('management.settings.vouchers.table') as Observable<

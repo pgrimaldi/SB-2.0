@@ -269,7 +269,6 @@
           "save": "保存",
           "position": {
             "title": "位置",
-            "edit": "编辑",
             "map_error": "无法加载地图"
           },
           "images": {
@@ -365,6 +364,20 @@
             "contacts_only": "仅限联系人"
           },
           "max_bookings_per_day": "每天最多预订数",
+          "good_to_know": {
+            "title": "须知",
+            "description": "此处输入的信息将在客户预订前显示。"
+          },
+          "useful_information": {
+            "title": "实用信息",
+            "description": "在此填写的信息将在本店页面上向客户显示。"
+          },
+          "legend": {
+            "title": "设置图例",
+            "add": "添加项目",
+            "name_placeholder": "项目名称",
+            "choose_icon": "选择图标"
+          },
           "payment_methods": {
             "title": "接受的付款方式",
             "pay_now": "立即付款",

@@ -115,12 +115,12 @@ export class BathhouseConfiguration1 implements UnsavedChanges, OnDestroy {
   protected readonly isLoading = signal(false);
   /** [bold, italic, underline, bulleted list, numbered list, link]. */
   protected readonly richTextIcons = [
-    '/assets/images/BathhouseConfiguration_Bold.svg',
-    '/assets/images/BathhouseConfiguration_Italic.svg',
-    '/assets/images/BathhouseConfiguration_Underline.svg',
-    '/assets/images/BathhouseConfiguration_BulletList.svg',
-    '/assets/images/BathhouseConfiguration_OrderedList.svg',
-    '/assets/images/BathhouseConfiguration_Link.svg',
+    '/assets/images/GeneralIcon_Bold.svg',
+    '/assets/images/GeneralIcon_Italic.svg',
+    '/assets/images/GeneralIcon_Underline.svg',
+    '/assets/images/GeneralIcon_BulletList.svg',
+    '/assets/images/GeneralIcon_OrderedList.svg',
+    '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(

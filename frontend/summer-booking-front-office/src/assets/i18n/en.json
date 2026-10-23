@@ -269,7 +269,6 @@
           "save": "Save",
           "position": {
             "title": "Location",
-            "edit": "Edit",
             "map_error": "The map could not be loaded"
           },
           "images": {
@@ -365,6 +364,20 @@
             "contacts_only": "Contacts only"
           },
           "max_bookings_per_day": "Max bookings per day",
+          "good_to_know": {
+            "title": "Good to know",
+            "description": "The information entered in this field will be shown to the customer before booking."
+          },
+          "useful_information": {
+            "title": "Useful information",
+            "description": "The information entered in this field will be visible to customers on the property page."
+          },
+          "legend": {
+            "title": "Set up legend",
+            "add": "Add item",
+            "name_placeholder": "Item name",
+            "choose_icon": "Choose icon"
+          },
           "payment_methods": {
             "title": "Accepted payment methods",
             "pay_now": "Pay now",

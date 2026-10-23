@@ -3,11 +3,7 @@
     <app-section-title
       [text]="'management.settings.bathhouse_configuration.media.position.title' | translate"
       [pathIcon]="positionIcon"
-    >
-      <app-button [appearance]="ButtonAppearance.Secondary" [size]="ButtonSize.Small">
-        {{ 'management.settings.bathhouse_configuration.media.position.edit' | translate }}
-      </app-button>
-    </app-section-title>
+    />
     <div class="bathhouse__configuration__3__map">
       @if (isMapReady()) {
         <app-location-map

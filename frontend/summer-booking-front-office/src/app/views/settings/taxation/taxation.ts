@@ -79,15 +79,15 @@ export class Taxation {
   /** [before the title, arrow]. */
   protected readonly printerPanelIcons = [
     '/assets/images/Taxation_Printer.svg',
-    '/assets/images/Taxation_PanelChevron.svg',
+    '/assets/images/GeneralIcon_ChevronRight.svg',
   ] as const;
   /** [before the title, arrow]. */
   protected readonly receiptPanelIcons = [
     '/assets/images/Taxation_ElectronicReceipt.svg',
-    '/assets/images/Taxation_PanelChevron.svg',
+    '/assets/images/GeneralIcon_ChevronRight.svg',
   ] as const;
-  protected readonly addPrinterIcon = ['/assets/images/Taxation_AddPrinter.svg'] as const;
-  private readonly deletePrinterIcon = '/assets/images/Taxation_DeletePrinter.svg';
+  protected readonly addPrinterIcon = ['/assets/images/GeneralIcon_Add.svg'] as const;
+  private readonly deletePrinterIcon = '/assets/images/GeneralIcon_Delete.svg';
   protected readonly downloadGuideIcon = ['/assets/images/Taxation_DownloadGuide.svg'] as const;
 
   protected readonly printersExpanded = signal(true);
@@ -139,17 +139,17 @@ export class Taxation {
     () => this.isReceiptActivated() || this.isAcceptChosen(),
   );
   protected readonly isReceiptAccountShown = signal(true);
-  protected readonly toAccountIcon = '/assets/images/Taxation_PanelChevron.svg';
+  protected readonly toAccountIcon = '/assets/images/GeneralIcon_ChevronRight.svg';
   protected readonly isSendingReceiptChoice = signal(false);
   /** The error of an action (switch, delete, guide) goes in a popup. */
   private readonly actionError = signal<ApiProblem | null>(null);
   protected readonly isActionErrorShown = signal(false);
-  protected readonly closeIcon = ['/assets/images/Taxation_Close.svg'] as const;
-  protected readonly addPrinterCloseIcon = ['/assets/images/Taxation_CloseAddPrinter.svg'] as const;
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
+  protected readonly addPrinterCloseIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
-    '/assets/images/Taxation_Close.svg',
-    '/assets/images/Taxation_Warning.svg',
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
   private readonly receiptError = signal<ApiProblem | null>(null);
   protected readonly actionErrorMessage = this.messageOf(this.actionError);

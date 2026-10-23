@@ -161,11 +161,11 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     ),
     { initialValue: null },
   );
-  protected readonly removePeriodIcon = ['/assets/images/Vouchers_Close.svg'] as const;
-  protected readonly addPeriodIcon = ['/assets/images/Vouchers_Add.svg'] as const;
-  protected readonly calendarIcon = ['/assets/images/Vouchers_Calendar.svg'] as const;
-  protected readonly clockIcon = ['/assets/images/Vouchers_Clock.svg'] as const;
-  protected readonly deleteTimeSlotIcon = ['/assets/images/Vouchers_DeleteTimeSlot.svg'] as const;
+  protected readonly removePeriodIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
+  protected readonly addPeriodIcon = ['/assets/images/GeneralIcon_Add.svg'] as const;
+  protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
+  protected readonly clockIcon = ['/assets/images/GeneralIcon_Clock.svg'] as const;
+  protected readonly deleteTimeSlotIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
   protected readonly addTimeSlotIcon = ['/assets/images/Vouchers_AddTimeSlot.svg'] as const;
   private readonly dayNames = toSignal(
     this.translateService.stream('management.settings.vouchers.form.periods.days') as Observable<
