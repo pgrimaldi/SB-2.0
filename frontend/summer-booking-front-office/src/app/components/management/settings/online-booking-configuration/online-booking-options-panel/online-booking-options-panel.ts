@@ -23,6 +23,7 @@ import { OnlineBookingAudience } from '../../../../../entities/enums/online-book
 import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { BookingLimitRule } from '../../../../../entities/settings/online-booking-configuration/booking-limit-rule';
+import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { greaterThan } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
@@ -34,6 +35,7 @@ import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
+import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTimeField } from '../../../../shared/ui/inputs/filled-time-field/filled-time-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
@@ -83,6 +85,7 @@ const ONLINE_BOOKING_BLOCK_KEYS: Readonly<Record<OnlineBookingBlock, OnlineBooki
     FilledDateField,
     FilledNumberField,
     FilledSelect,
+    FilledTextField,
     FilledTimeField,
     FormField,
     FormRow,
@@ -119,10 +122,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   protected readonly calendarIcon = [
     '/assets/images/OnlineBookingConfiguration_Calendar.svg',
   ] as const;
-  protected readonly addRuleIcon = [
-    '/assets/images/OnlineBookingConfiguration_AddRule.svg',
-  ] as const;
-  protected readonly removeRuleIcon = [
+  protected readonly addIcon = ['/assets/images/OnlineBookingConfiguration_AddRule.svg'] as const;
+  protected readonly removeIcon = [
     '/assets/images/OnlineBookingConfiguration_DeleteRule.svg',
   ] as const;
   /** Example rows until an API gives the rows and sectors of the property. */
@@ -257,6 +258,16 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.draftForm
       .bookingLimitRules()
       .value.update((rules) => rules.filter((_, ruleIndex) => ruleIndex !== index));
+  }
+
+  protected addLegendItem(): void {
+    this.draftForm.legendItems().value.update((items) => [...items, new LegendItem()]);
+  }
+
+  protected removeLegendItem(index: number): void {
+    this.draftForm
+      .legendItems()
+      .value.update((items) => items.filter((_, itemIndex) => itemIndex !== index));
   }
 
   protected setBookingConfirmation(answer: Answer | null): void {

@@ -269,7 +269,6 @@
           "save": "حفظ",
           "position": {
             "title": "الموقع",
-            "edit": "تعديل",
             "map_error": "تعذّر تحميل الخريطة"
           },
           "images": {
@@ -365,6 +364,12 @@
             "contacts_only": "جهات الاتصال فقط"
           },
           "max_bookings_per_day": "الحد الأقصى للحجوزات في اليوم",
+          "legend": {
+            "title": "إعداد وسيلة الإيضاح",
+            "add": "إضافة عنصر",
+            "name_placeholder": "اسم العنصر",
+            "choose_icon": "اختيار أيقونة"
+          },
           "payment_methods": {
             "title": "طرق الدفع المقبولة",
             "pay_now": "ادفع الآن",

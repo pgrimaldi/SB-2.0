@@ -269,7 +269,6 @@
           "save": "Enregistrer",
           "position": {
             "title": "Emplacement",
-            "edit": "Modifier",
             "map_error": "Impossible de charger la carte"
           },
           "images": {
@@ -365,6 +364,12 @@
             "contacts_only": "Contacts uniquement"
           },
           "max_bookings_per_day": "Réservations max. par jour",
+          "legend": {
+            "title": "Configurer la légende",
+            "add": "Ajouter un élément",
+            "name_placeholder": "Nom de l'élément",
+            "choose_icon": "Choisir une icône"
+          },
           "payment_methods": {
             "title": "Moyens de paiement acceptés",
             "pay_now": "Payer maintenant",

@@ -269,7 +269,6 @@
           "save": "Speichern",
           "position": {
             "title": "Standort",
-            "edit": "Bearbeiten",
             "map_error": "Die Karte konnte nicht geladen werden"
           },
           "images": {
@@ -365,6 +364,12 @@
             "contacts_only": "Nur Kontakte"
           },
           "max_bookings_per_day": "Max. Buchungen pro Tag",
+          "legend": {
+            "title": "Legende festlegen",
+            "add": "Element hinzufügen",
+            "name_placeholder": "Name des Elements",
+            "choose_icon": "Symbol auswählen"
+          },
           "payment_methods": {
             "title": "Akzeptierte Zahlungsarten",
             "pay_now": "Jetzt bezahlen",

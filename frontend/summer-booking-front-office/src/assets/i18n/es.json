@@ -269,7 +269,6 @@
           "save": "Guardar",
           "position": {
             "title": "Ubicación",
-            "edit": "Editar",
             "map_error": "No se pudo cargar el mapa"
           },
           "images": {
@@ -365,6 +364,12 @@
             "contacts_only": "Solo contactos"
           },
           "max_bookings_per_day": "Máx. reservas por día",
+          "legend": {
+            "title": "Configurar leyenda",
+            "add": "Añadir elemento",
+            "name_placeholder": "Nombre del elemento",
+            "choose_icon": "Elegir icono"
+          },
           "payment_methods": {
             "title": "Métodos de pago aceptados",
             "pay_now": "Pagar ahora",

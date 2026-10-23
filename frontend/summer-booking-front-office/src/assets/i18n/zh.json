@@ -269,7 +269,6 @@
           "save": "保存",
           "position": {
             "title": "位置",
-            "edit": "编辑",
             "map_error": "无法加载地图"
           },
           "images": {
@@ -365,6 +364,12 @@
             "contacts_only": "仅限联系人"
           },
           "max_bookings_per_day": "每天最多预订数",
+          "legend": {
+            "title": "设置图例",
+            "add": "添加项目",
+            "name_placeholder": "项目名称",
+            "choose_icon": "选择图标"
+          },
           "payment_methods": {
             "title": "接受的付款方式",
             "pay_now": "立即付款",
