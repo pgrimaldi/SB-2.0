@@ -910,6 +910,21 @@
               "moved": "Booking moved",
               "dates_changed": "Booking dates changed"
             }
+          },
+          "not_implemented": "The service is not implemented yet",
+          "clear_filters": "Clear filters",
+          "filters_popup": {
+            "title": "Filters",
+            "action": "Action",
+            "user": "User",
+            "choose": "Select",
+            "cancel": "Cancel",
+            "apply": "Apply"
+          },
+          "chips": {
+            "action": "Action",
+            "user": "User",
+            "more_options": "More options"
           }
         },
         "form": {
@@ -936,7 +951,9 @@
             "title": "Delete users",
             "text": "Do you want to delete the {{count}} selected users?"
           }
-        }
+        },
+        "log": "Log",
+        "owner_not_editable": "The owner cannot be edited"
       }
     }
   },

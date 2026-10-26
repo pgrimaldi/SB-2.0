@@ -94,14 +94,19 @@
 }
 
 // Sizes in em follow the text of the rows, so they grow with it on large screens. The column is as
-// wide as its buttons (`--table-actions-count`: 1.75em each) and its switch (`--table-actions-toggle`:
-// 1.875rem, the switch keeps its size), 0.375em between them, never less than its header ("Azioni",
-// 4em), plus the side paddings each look gives in `--table-actions-padding`.
+// wide as its buttons (`--table-actions-count`: 1.75em each), its buttons with a word
+// (`--table-actions-text`: 4.5em each) and its switch (`--table-actions-toggle`: 1.875rem, the
+// switch keeps its size), 0.375em between them, never less than its header ("Azioni", 4em), plus the
+// side paddings each look gives in `--table-actions-padding`.
 .table__actions {
   width: calc(
     max(
-        var(--table-actions-count) * 1.75em + var(--table-actions-toggle) * 1.875rem +
-          (var(--table-actions-count) + var(--table-actions-toggle) - 1) * 0.375em,
+        var(--table-actions-count) * 1.75em + var(--table-actions-text) * 4.5em +
+          var(--table-actions-toggle) * 1.875rem +
+          (
+            var(--table-actions-count) + var(--table-actions-text) + var(--table-actions-toggle) - 1
+          ) *
+          0.375em,
         4em
       ) +
       var(--table-actions-padding, 0rem)
@@ -146,8 +151,53 @@
   }
 }
 
+// With a word: outlined, in the colour of the icons, the icon on the left of the word; its 5.125em
+// and 2em (of its smaller text) are about the 4.5em and 1.75em of the row.
+.table__action__text {
+  display: inline-flex;
+  width: 5.125em;
+  height: 2em;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  padding-inline: 0.375em;
+  border: 0.0625rem solid currentColor;
+  border-radius: 0.3125rem;
+  font-size: 0.875em;
+  font-weight: 500;
+
+  img,
+  mat-icon {
+    flex: none;
+    width: 1.125em;
+    height: 1.125em;
+    font-size: 1.125em;
+  }
+
+  img {
+    object-fit: contain;
+  }
+}
+
+// Not on this row: its place stays, so the buttons of all rows stay in line.
+.table__action__hidden {
+  visibility: hidden;
+}
+
+// Off on this row: faded and inert, but still showing its tooltip on hover (hence not `disabled`).
+.table__action__disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.table__action__word {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (hover: hover) {
-  .table__action:hover {
+  .table__action:not(.table__action__disabled):hover {
     background: var(--color__tertiary__theme);
   }
 }

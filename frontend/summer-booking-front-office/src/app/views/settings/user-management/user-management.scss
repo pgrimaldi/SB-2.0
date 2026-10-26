@@ -13,4 +13,9 @@
   --button-height: 1.625rem;
   --button-text-size: 0.75rem;
   --button-padding: 1rem;
+
+  // The clipboard is taller than wide: whole, not stretched to a square.
+  ::ng-deep .button__icon {
+    object-fit: contain;
+  }
 }

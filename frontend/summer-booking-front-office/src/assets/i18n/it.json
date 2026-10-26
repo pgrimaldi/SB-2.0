@@ -910,6 +910,21 @@
               "moved": "Spostamento prenotazione",
               "dates_changed": "Date prenotazione modificate"
             }
+          },
+          "not_implemented": "Il servizio non è ancora implementato",
+          "clear_filters": "Azzera filtri",
+          "filters_popup": {
+            "title": "Filtri",
+            "action": "Azione",
+            "user": "Utente",
+            "choose": "Seleziona",
+            "cancel": "Annulla",
+            "apply": "Applica"
+          },
+          "chips": {
+            "action": "Azione",
+            "user": "Utente",
+            "more_options": "Più opzioni"
           }
         },
         "form": {
@@ -936,7 +951,9 @@
             "title": "Elimina utenti",
             "text": "Vuoi eliminare i {{count}} utenti selezionati?"
           }
-        }
+        },
+        "log": "Log",
+        "owner_not_editable": "Il titolare non può essere modificato"
       }
     }
   },

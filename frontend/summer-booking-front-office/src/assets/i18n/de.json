@@ -910,6 +910,21 @@
               "moved": "Buchung verschoben",
               "dates_changed": "Buchungsdaten geändert"
             }
+          },
+          "not_implemented": "Der Dienst ist noch nicht implementiert",
+          "clear_filters": "Filter zurücksetzen",
+          "filters_popup": {
+            "title": "Filter",
+            "action": "Aktion",
+            "user": "Benutzer",
+            "choose": "Auswählen",
+            "cancel": "Abbrechen",
+            "apply": "Anwenden"
+          },
+          "chips": {
+            "action": "Aktion",
+            "user": "Benutzer",
+            "more_options": "Weitere Optionen"
           }
         },
         "form": {
@@ -936,7 +951,9 @@
             "title": "Benutzer löschen",
             "text": "Möchtest du die {{count}} ausgewählten Benutzer löschen?"
           }
-        }
+        },
+        "log": "Log",
+        "owner_not_editable": "Der Inhaber kann nicht bearbeitet werden"
       }
     }
   },

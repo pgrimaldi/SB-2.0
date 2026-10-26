@@ -910,6 +910,21 @@
               "moved": "预订已移动",
               "dates_changed": "预订日期已修改"
             }
+          },
+          "not_implemented": "该服务尚未实现",
+          "clear_filters": "清除筛选",
+          "filters_popup": {
+            "title": "筛选",
+            "action": "操作",
+            "user": "用户",
+            "choose": "请选择",
+            "cancel": "取消",
+            "apply": "应用"
+          },
+          "chips": {
+            "action": "操作",
+            "user": "用户",
+            "more_options": "更多选项"
           }
         },
         "form": {
@@ -936,7 +951,9 @@
             "title": "删除用户",
             "text": "要删除所选的 {{count}} 个用户吗？"
           }
-        }
+        },
+        "log": "日志",
+        "owner_not_editable": "无法修改所有者"
       }
     }
   },

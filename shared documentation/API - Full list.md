@@ -730,6 +730,118 @@ Nessun corpo (204).
 | `rows[].actionCode` | string \| null |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null |
 
+### POST `/api/audit/get-user-combobox`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### POST `/api/audit/export-log`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+File (binario), non JSON.
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+File (binario), non JSON.
+
+### POST `/api/audit/print-log`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+File (binario), non JSON.
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+File (binario), non JSON.
+
 ## Impostazioni magazzino
 
 ### POST `/api/warehouse/list`

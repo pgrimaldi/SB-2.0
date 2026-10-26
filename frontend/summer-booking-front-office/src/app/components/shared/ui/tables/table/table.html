@@ -147,11 +147,17 @@
             <app-toggle [checked]="isEnabled(row)" (checkedChange)="rowToggle(row, $event)" />
           }
           @for (rowAction of rowActions(); track $index) {
+            @let isActionDisabled = !!rowAction.isDisabled?.(row);
             <button
               class="table__action"
               type="button"
-              [matTooltip]="rowAction.label"
-              (click)="rowAction.action(row)"
+              [class.table__action__text]="!!rowAction.text"
+              [class.table__action__hidden]="!!rowAction.isHidden?.(row)"
+              [class.table__action__disabled]="isActionDisabled"
+              [matTooltip]="
+                isActionDisabled ? (rowAction.disabledLabel ?? rowAction.label) : rowAction.label
+              "
+              (click)="isActionDisabled || rowAction.action(row)"
             >
               @if (rowAction.icon) {
                 @if (icons().material) {
@@ -159,6 +165,9 @@
                 } @else {
                   <img [src]="rowAction.icon" width="24" height="24" alt="" />
                 }
+              }
+              @if (rowAction.text) {
+                <span class="table__action__word">{{ rowAction.text }}</span>
               }
             </button>
           }

@@ -18,6 +18,17 @@ export interface StandardRowActionHandlers<T> {
   edit?: (row: T) => void;
 }
 
+/** When a button is hidden or off on some rows; `disabledLabel` is its tooltip there. */
+export interface StandardRowActionRule<T> {
+  isHidden?: (row: T) => boolean;
+  isDisabled?: (row: T) => boolean;
+  disabledLabel?: Signal<string>;
+}
+
+export type StandardRowActionRules<T> = Partial<
+  Record<keyof StandardRowActionHandlers<T>, StandardRowActionRule<T>>
+>;
+
 /** Always shown in this order. */
 const STANDARD_ROW_ACTIONS = [
   { name: 'delete', icon: '/assets/images/GeneralIcon_Delete.svg' },
@@ -32,6 +43,7 @@ const STANDARD_ROW_ACTIONS = [
  */
 export function standardRowActions<T>(
   handlers: StandardRowActionHandlers<T>,
+  rules: StandardRowActionRules<T> = {},
 ): Signal<readonly TableRowAction<T>[]> {
   const labels = toSignal(
     inject(TranslateService).stream('table.actions') as Observable<StandardRowActionLabels>,
@@ -40,7 +52,19 @@ export function standardRowActions<T>(
   return computed(() =>
     STANDARD_ROW_ACTIONS.flatMap(({ name, icon }) => {
       const action = handlers[name];
-      return action ? [{ label: labels()[name], icon, action }] : [];
+      const rule = rules[name];
+      return action
+        ? [
+            {
+              label: labels()[name],
+              icon,
+              action,
+              isHidden: rule?.isHidden,
+              isDisabled: rule?.isDisabled,
+              disabledLabel: rule?.disabledLabel?.(),
+            },
+          ]
+        : [];
     }),
   );
 }

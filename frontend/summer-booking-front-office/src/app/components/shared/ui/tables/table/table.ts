@@ -87,7 +87,14 @@ export interface TableRowAction<T> {
    * otherwise an image path.
    */
   icon: string;
+  /** A short word (e.g. "Log"): the button is then outlined, with the icon (if any) on its left. */
+  text?: string;
   action: (row: T) => void;
+  /** Rows where the button is not there: its place stays empty, so the buttons keep their columns. */
+  isHidden?: (row: T) => boolean;
+  /** Rows where the button is off: it does nothing, its tooltip is `disabledLabel` (or `label`). */
+  isDisabled?: (row: T) => boolean;
+  disabledLabel?: string;
 }
 
 /** Called with the row and the state the user has just chosen. */
@@ -187,7 +194,8 @@ const SELECT_COLUMN = 'table__row__select';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[style.--table-page-size]': 'reservedRows()',
-    '[style.--table-actions-count]': 'rowActions()?.length ?? 0',
+    '[style.--table-actions-count]': 'iconActionsCount()',
+    '[style.--table-actions-text]': 'textActionsCount()',
     '[style.--table-actions-toggle]': 'rowToggle() ? 1 : 0',
     '[class.table__theme__app]': 'useAppTheme()',
     '[class.table__theme__default]': '!useAppTheme()',
@@ -357,6 +365,12 @@ export class Table<T, P extends object> implements OnDestroy {
     () => !this.areMassiveActionsHidden() || this.isSelectable(),
   );
   protected readonly rowActionsColumn = ROW_ACTIONS_COLUMN;
+  protected readonly textActionsCount = computed(
+    () => this.rowActions()?.filter((rowAction) => rowAction.text).length ?? 0,
+  );
+  protected readonly iconActionsCount = computed(
+    () => (this.rowActions()?.length ?? 0) - this.textActionsCount(),
+  );
   protected readonly hasRowActions = computed(
     () => (this.rowActions()?.length ?? 0) > 0 || !!this.rowToggle(),
   );
@@ -404,6 +418,11 @@ export class Table<T, P extends object> implements OnDestroy {
       }
       void this.document.fonts?.ready.then(this.layoutChanged);
     });
+  }
+
+  /** The request of the rows on screen (params, page, search, filters, sorting), e.g. to export them. */
+  currentRequest(): (P & TablePageRequest) | null {
+    return this.request();
   }
 
   /** Same page, search and sorting: e.g. "retry" after a `loadError`. */

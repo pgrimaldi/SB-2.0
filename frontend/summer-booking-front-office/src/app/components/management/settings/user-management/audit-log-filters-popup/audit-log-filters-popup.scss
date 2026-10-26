@@ -1,0 +1,58 @@
+@use '@angular/material' as mat;
+
+// The popup renders in an overlay outside the component: these styles are global.
+.audit__log__filters__popup__panel {
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color__layout__surface),
+      container-shape: 0.25rem,
+      container-max-width: none,
+      container-elevation-shadow: 0 0.5rem 2rem var(--color__layout__shadow),
+    )
+  );
+}
+
+// The element in the page only holds the popup template: Material draws the popup above the page.
+app-audit-log-filters-popup {
+  display: contents;
+}
+
+.audit__log__filters__popup {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5625rem 1.5rem 1.5rem;
+}
+
+.audit__log__filters__popup__title {
+  margin: 0 0 1rem;
+  margin-inline-end: 2rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+// Two filters per row, one per row on the phone.
+.audit__log__filters__popup__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.125rem 1rem;
+}
+
+@media (width < 30rem) {
+  .audit__log__filters__popup__fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+// The border of Annulla stays inside the 1.75rem height.
+.audit__log__filters__popup__buttons {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

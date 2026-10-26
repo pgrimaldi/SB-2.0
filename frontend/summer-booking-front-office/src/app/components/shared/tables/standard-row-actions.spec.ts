@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { standardRowActions } from './standard-row-actions';
@@ -30,5 +31,27 @@ describe('standardRowActions', () => {
     expect(actions().map(({ label }) => label)).toEqual(['Modifica']);
     actions()[0].action({ name: 'Ombrellone' });
     expect(edited).toEqual(['Ombrellone']);
+  });
+
+  it('should pass on when a button is hidden or off on a row, with the tooltip of the off button', () => {
+    setup();
+    const actions = TestBed.runInInjectionContext(() =>
+      standardRowActions<Item>(
+        { delete: () => undefined, edit: () => undefined },
+        {
+          delete: { isHidden: ({ name }) => name === 'Titolare' },
+          edit: {
+            isDisabled: ({ name }) => name === 'Titolare',
+            disabledLabel: signal('Non modificabile'),
+          },
+        },
+      ),
+    );
+
+    const [deleteAction, editAction] = actions();
+    expect(deleteAction.isHidden?.({ name: 'Titolare' })).toBe(true);
+    expect(deleteAction.isHidden?.({ name: 'Bagnino' })).toBe(false);
+    expect(editAction.isDisabled?.({ name: 'Titolare' })).toBe(true);
+    expect(editAction.disabledLabel).toBe('Non modificabile');
   });
 });

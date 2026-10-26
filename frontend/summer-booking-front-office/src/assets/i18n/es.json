@@ -910,6 +910,21 @@
               "moved": "Reserva movida",
               "dates_changed": "Fechas de reserva modificadas"
             }
+          },
+          "not_implemented": "El servicio aún no está implementado",
+          "clear_filters": "Borrar filtros",
+          "filters_popup": {
+            "title": "Filtros",
+            "action": "Acción",
+            "user": "Usuario",
+            "choose": "Seleccionar",
+            "cancel": "Cancelar",
+            "apply": "Aplicar"
+          },
+          "chips": {
+            "action": "Acción",
+            "user": "Usuario",
+            "more_options": "Más opciones"
           }
         },
         "form": {
@@ -936,7 +951,9 @@
             "title": "Eliminar usuarios",
             "text": "¿Quieres eliminar los {{count}} usuarios seleccionados?"
           }
-        }
+        },
+        "log": "Log",
+        "owner_not_editable": "El propietario no se puede modificar"
       }
     }
   },

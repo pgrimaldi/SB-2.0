@@ -346,6 +346,19 @@ Gestione utenti: log.
       "value": [
         "2026-10-23T23:59:59.999Z"
       ]
+    },
+    {
+      "field": "actionCode",
+      "value": [
+        "booking.spot_added",
+        "booking.dates_changed"
+      ]
+    },
+    {
+      "field": "idUser",
+      "value": [
+        "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01"
+      ]
     }
   ],
   "sortField": "occurredAt",
@@ -359,7 +372,7 @@ Gestione utenti: log.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `ferri` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-17T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-23T23:59:59.999Z"]}]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-17T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-23T23:59:59.999Z"]}, {"field": "actionCode", "value": ["booking.spot_added", "booking.dates_changed"]}, {"field": "idUser", "value": ["3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
 | `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-10-17T00:00:00.000Z"]` |
 | `sortField` | string | `occurredAt` |
@@ -406,6 +419,144 @@ Stato: 200 OK.
 | `rows[].spotLabel` | string \| null | `A1` |
 | `rows[].actionCode` | string \| null | `booking.spot_added` |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null | `2026-10-23T11:11:00.000Z` |
+
+### POST `/api/audit/get-user-combobox`
+
+Gestione utenti: utenti del filtro dei log.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d09",
+    "value": "Anna Caruso"
+  },
+  {
+    "id": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01",
+    "value": "Giulia Ferri"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d09` |
+| `value` | string | `Anna Caruso` |
+
+### POST `/api/audit/export-log`
+
+Gestione utenti: esporta log.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "search": "ferri",
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-10-20T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-10-26T23:59:59.999Z"
+      ]
+    }
+  ],
+  "sortField": "occurredAt",
+  "sortDirection": "Descending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `search` | string | `ferri` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-26T23:59:59.999Z"]}]` |
+| `filters[].field` | string | `datetimeFrom` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-10-20T00:00:00.000Z"]` |
+| `sortField` | string | `occurredAt` |
+| `sortDirection` | string (enum SortDirection) | `Descending` |
+
+#### Response
+
+Stato: 200 OK.
+
+Il corpo è il file (binario), non JSON.
+
+| Header | Esempio |
+|---|---|
+| `Content-Type` | `text/csv` |
+| `Content-Disposition` | `attachment; filename="log-2026-10-26.csv"` |
+
+### POST `/api/audit/print-log`
+
+Gestione utenti: stampa log.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "search": "ferri",
+  "filters": [
+    {
+      "field": "datetimeFrom",
+      "value": [
+        "2026-10-20T00:00:00.000Z"
+      ]
+    },
+    {
+      "field": "datetimeTo",
+      "value": [
+        "2026-10-26T23:59:59.999Z"
+      ]
+    }
+  ],
+  "sortField": "occurredAt",
+  "sortDirection": "Descending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `search` | string | `ferri` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-26T23:59:59.999Z"]}]` |
+| `filters[].field` | string | `datetimeFrom` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-10-20T00:00:00.000Z"]` |
+| `sortField` | string | `occurredAt` |
+| `sortDirection` | string (enum SortDirection) | `Descending` |
+
+#### Response
+
+Stato: 200 OK.
+
+Il corpo è il file (binario), non JSON.
+
+| Header | Esempio |
+|---|---|
+| `Content-Type` | `application/pdf` |
+| `Content-Disposition` | `attachment; filename="log-2026-10-26.pdf"` |
 
 ## /warehouse
 

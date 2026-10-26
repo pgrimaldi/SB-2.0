@@ -4,6 +4,7 @@
       <img [src]="backIcon" width="10" height="16" alt="" />
     </a>
     <h1 class="user__management__logs__heading">
+      <img class="user__management__logs__icon" [src]="titleIcon" width="15" height="18" alt="" />
       {{ 'management.settings.user_management.logs.title' | translate }}
     </h1>
   </div>
@@ -28,14 +29,25 @@
       [texts]="'management.settings.user_management.logs.date_filter' | translate"
       [pathIcon]="dateFilterIcons"
     />
-    <button appTableHeadingAction class="user__management__logs__filters" type="button">
+    <button
+      appTableHeadingAction
+      class="user__management__logs__filters"
+      type="button"
+      (click)="isFiltersOpen.set(true)"
+    >
       {{ 'management.settings.user_management.logs.filters' | translate }}
+      @if (chips().length) {
+        <span class="user__management__logs__filters__count">{{ chips().length }}</span>
+      }
     </button>
     <app-button
       appTableHeadingAction
       class="user__management__logs__export"
       [appearance]="ButtonAppearance.Light"
       [size]="ButtonSize.Small"
+      [disabled]="isPrinting()"
+      [isLoading]="isExporting()"
+      (clicked)="exportLog()"
     >
       {{ 'management.settings.user_management.logs.export' | translate }}
     </app-button>
@@ -44,11 +56,39 @@
       class="user__management__logs__print"
       [appearance]="ButtonAppearance.Light"
       [size]="ButtonSize.Small"
+      [disabled]="isExporting()"
+      [isLoading]="isPrinting()"
+      (clicked)="printLog()"
     >
       {{ 'management.settings.user_management.logs.print' | translate }}
     </app-button>
+    @if (hasFilters()) {
+      <app-filter-chips
+        appTableFilterBar
+        [chips]="chips()"
+        [texts]="{ clear: 'management.settings.user_management.logs.clear_filters' | translate }"
+        [pathIcon]="chipIcons"
+        (removed)="removeChip($event)"
+        (cleared)="clearFilters()"
+      />
+    }
   </app-table>
 </main>
+
+<app-audit-log-filters-popup
+  [pathIcon]="closeIcon"
+  [filters]="logFilters()"
+  [(open)]="isFiltersOpen"
+  (applied)="logFilters.set($event)"
+/>
+
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="'management.settings.user_management.logs.not_implemented' | translate"
+  [texts]="'alert' | translate"
+  [pathIcon]="alertIcons"
+  [(open)]="isNotImplementedShown"
+/>
 
 <app-table-error-popup
   [pathIcon]="closeIcon"

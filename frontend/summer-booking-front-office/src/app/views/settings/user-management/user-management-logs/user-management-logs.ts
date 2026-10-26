@@ -1,9 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, map, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import {
   dateRangeFilters,
@@ -12,19 +21,30 @@ import {
   thisWeekPeriod,
   todayPeriod,
 } from '../../../../behaviours/dates/date-periods';
+import { FileDownloadBehaviour } from '../../../../behaviours/files/file-download.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import {
   Button,
   ButtonAppearance,
   ButtonSize,
 } from '../../../../components/shared/ui/buttons/button/button';
+import { AuditLogFiltersPopup } from '../../../../components/management/settings/user-management/audit-log-filters-popup/audit-log-filters-popup';
+import {
+  FilterChip,
+  FilterChips,
+} from '../../../../components/shared/ui/chips/filter-chips/filter-chips';
+import { AlertPopup } from '../../../../components/shared/ui/dialogs/alert-popup/alert-popup';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
   DateRangeSelect,
   DateRangeSelectOption,
 } from '../../../../components/shared/ui/selects/date-range-select/date-range-select';
+import { TableFilterBar } from '../../../../components/shared/ui/tables/table/table-filter-bar';
 import { TableHeadingAction } from '../../../../components/shared/ui/tables/table/table-heading-action';
 import { Table, TableColumn, TableLoad } from '../../../../components/shared/ui/tables/table/table';
+import { PageFilter } from '../../../../entities/pagination/page';
+import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
+import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
 
@@ -46,6 +66,16 @@ interface UserManagementLogsTexts {
     occurred_at: string;
   };
   actions: Partial<Record<string, Partial<Record<string, string>>>>;
+  chips: {
+    action: string;
+    user: string;
+    more_options: string;
+  };
+}
+
+interface AuditLogFilterChip extends FilterChip {
+  /** What the filters become without this chip. */
+  emptied: Partial<AuditLogFilters>;
 }
 
 interface AuditEntryRow {
@@ -58,14 +88,21 @@ interface AuditEntryRow {
   occurredAt: string | null;
 }
 
+const EXPORT_FALLBACK_NAME = 'log';
+const PRINT_FALLBACK_NAME = 'log-print';
+
 @Component({
   selector: 'app-user-management-logs',
   imports: [
+    AlertPopup,
+    AuditLogFiltersPopup,
     Button,
     DateRangeSelect,
+    FilterChips,
     RouterLink,
     Table,
     TableErrorPopup,
+    TableFilterBar,
     TableHeadingAction,
     TranslatePipe,
   ],
@@ -79,18 +116,79 @@ export class UserManagementLogs {
   private readonly translateService = inject(TranslateService);
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+  private readonly fileDownload = inject(FileDownloadBehaviour);
+  private readonly table = viewChild.required<Table<AuditEntryRow, { idProperty: string }>>(Table);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly loadFailed = signal(false);
+  protected readonly isExporting = signal(false);
+  protected readonly isPrinting = signal(false);
+  protected readonly isNotImplementedShown = signal(false);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
   protected readonly dateRange = signal<DateRange | null>(null);
-  protected readonly filters = computed(() => dateRangeFilters(this.dateRange()));
+  protected readonly isFiltersOpen = signal(false);
+  protected readonly logFilters = signal(new AuditLogFilters());
+  private readonly logsTexts = toSignal(
+    this.translateService.stream(
+      'management.settings.user_management.logs',
+    ) as Observable<UserManagementLogsTexts>,
+  );
+  /** One chip for each filter with a choice; with more choices only "more options". */
+  protected readonly chips = computed<readonly AuditLogFilterChip[]>(() => {
+    const texts = this.logsTexts();
+    const filters = this.logFilters();
+    if (!texts) {
+      return [];
+    }
+    const chip = (
+      name: string,
+      labels: readonly string[],
+      emptied: Partial<AuditLogFilters>,
+    ): AuditLogFilterChip[] =>
+      labels.length
+        ? [
+            {
+              label: `${name}: ${labels.length > 1 ? texts.chips.more_options : labels[0]}`,
+              emptied,
+            },
+          ]
+        : [];
+    return [
+      ...chip(
+        texts.chips.action,
+        filters.actionCodes.map((code) => actionLabelOf(texts.actions, code)),
+        { actionCodes: [] },
+      ),
+      ...chip(
+        texts.chips.user,
+        filters.users.map((user) => user.value),
+        { users: [] },
+      ),
+    ];
+  });
+  protected readonly filters = computed(() => [
+    ...dateRangeFilters(this.dateRange()),
+    ...pageFiltersOf(this.logFilters()),
+  ]);
+  protected readonly hasFilters = computed(
+    () =>
+      this.dateRange() !== null ||
+      this.chips().length > 0 ||
+      !!this.table().currentRequest()?.search,
+  );
+  protected readonly chipIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly backIcon = '/assets/images/GeneralIcon_Previous.svg';
+  protected readonly titleIcon = '/assets/images/UserManagement_LogTitle.svg';
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
+  /** [X, warning]. */
+  protected readonly alertIcons = [
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_Warning.svg',
+  ] as const;
   /** In the select's order: [open, previous month, next month]. */
   protected readonly dateFilterIcons = [
     '/assets/images/GeneralIcon_DateFilterOpen.svg',
@@ -182,10 +280,61 @@ export class UserManagementLogs {
         ),
       ),
     );
+
+  protected removeChip(chip: AuditLogFilterChip): void {
+    this.logFilters.update((filters) => ({ ...filters, ...chip.emptied }));
+  }
+
+  protected clearFilters(): void {
+    this.logFilters.set(new AuditLogFilters());
+    this.dateRange.set(null);
+    this.table().clearSearch();
+  }
+
+  protected exportLog(): void {
+    void this.download(this.isExporting, this.audit.exportLog, EXPORT_FALLBACK_NAME);
+  }
+
+  protected printLog(): void {
+    void this.download(this.isPrinting, this.audit.printLog, PRINT_FALLBACK_NAME);
+  }
+
+  /** One file at a time, with the search, filters and sorting the table is showing. */
+  private async download(
+    isRunning: WritableSignal<boolean>,
+    call: (request: AuditLogFiltersRequest) => Observable<HttpResponse<Blob>>,
+    fallbackName: string,
+  ): Promise<void> {
+    const request = this.table().currentRequest();
+    if (!request || this.isExporting() || this.isPrinting()) {
+      return;
+    }
+    const { idProperty, search, filters, sortField, sortDirection } = request;
+    isRunning.set(true);
+    try {
+      const file = await firstValueFrom(
+        call({ idProperty, search, filters, sortField, sortDirection }),
+      );
+      this.fileDownload.save(file, fallbackName);
+    } catch {
+      this.isNotImplementedShown.set(true);
+    } finally {
+      isRunning.set(false);
+    }
+  }
 }
 
 /** The translation of a backend action code (`booking.spot_added`); the code itself when unknown. */
 function actionLabelOf(actions: UserManagementLogsTexts['actions'], actionCode: string): string {
   const [module, action] = actionCode.split('.');
   return (action && actions[module]?.[action]) || actionCode;
+}
+
+/** One filter per field with its chosen values (alternatives); a field with no choice is left out. */
+function pageFiltersOf(filters: AuditLogFilters): PageFilter[] {
+  const all: PageFilter[] = [
+    { field: 'actionCode', value: [...filters.actionCodes] },
+    { field: 'idUser', value: filters.users.map(({ id }) => id) },
+  ];
+  return all.filter(({ value }) => value.length);
 }

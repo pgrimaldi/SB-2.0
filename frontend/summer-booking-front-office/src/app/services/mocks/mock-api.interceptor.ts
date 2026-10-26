@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { entriesListMock } from './audit/audit.mock';
+import { entriesListMock, userComboboxMock } from './audit/audit.mock';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
@@ -123,6 +123,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/audit/entries-list`) {
     return entriesListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/audit/get-user-combobox`
+  ) {
+    return userComboboxMock(request);
   }
 
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/warehouse/list`) {

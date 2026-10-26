@@ -10,7 +10,12 @@ import { UserEditItemPopup } from '../../../components/management/settings/user-
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
-import { Table, TableColumn, TableLoad } from '../../../components/shared/ui/tables/table/table';
+import {
+  Table,
+  TableColumn,
+  TableLoad,
+  TableRowAction,
+} from '../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { UserRole } from '../../../entities/enums/user-role';
 import { IdentityService } from '../../../services/api/identity/identity.service';
@@ -42,6 +47,7 @@ interface UserRow {
   email: string | null;
   phone: string | null;
   role: string | null;
+  isOwner: boolean;
 }
 
 const USER_ROLE_KEYS: Record<UserRole, keyof UserManagementTexts['role']> = {
@@ -94,6 +100,8 @@ export class UserManagement {
     return idProperty ? { idProperty } : null;
   });
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
+  private readonly logIcon = '/assets/images/UserManagement_Log.svg';
+  protected readonly viewLogsIcon = ['/assets/images/UserManagement_LogWhite.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
     '/assets/images/GeneralIcon_Close.svg',
@@ -124,10 +132,30 @@ export class UserManagement {
     { field: 'phone', header: this.headers().mobile_phone, sortable: true },
     { field: 'role', header: this.headers().account_type, sortable: true },
   ]);
-  protected readonly rowActions = standardRowActions<UserRow>({
-    delete: ({ idUser, email }) => idUser && this.askDelete(idUser, email),
-    edit: ({ idUser }) => idUser && this.openEdit(idUser),
-  });
+  private readonly ownerNotEditable = toSignal(
+    this.translateService.stream(
+      'management.settings.user_management.owner_not_editable',
+    ) as Observable<string>,
+    { initialValue: '' },
+  );
+  private readonly standardActions = standardRowActions<UserRow>(
+    {
+      delete: ({ idUser, email }) => idUser && this.askDelete(idUser, email),
+      edit: ({ idUser }) => idUser && this.openEdit(idUser),
+    },
+    {
+      delete: { isHidden: ({ isOwner }) => isOwner },
+      edit: { isDisabled: ({ isOwner }) => isOwner, disabledLabel: this.ownerNotEditable },
+    },
+  );
+  private readonly logText = toSignal(
+    this.translateService.stream('management.settings.user_management.log') as Observable<string>,
+    { initialValue: '' },
+  );
+  protected readonly rowActions = computed<readonly TableRowAction<UserRow>[]>(() => [
+    { label: '', icon: this.logIcon, text: this.logText(), action: () => undefined },
+    ...this.standardActions(),
+  ]);
 
   protected readonly deleteUser = (idProperty: string, [idUser]: string[]) =>
     this.identity.deleteUser({ idProperty, idUser });
@@ -149,6 +177,7 @@ export class UserManagement {
                 ? [item.phoneCountryCode, item.phone].filter(Boolean).join(' ')
                 : null,
               role: item.role ? texts.role[USER_ROLE_KEYS[item.role]] : null,
+              isOwner: item.role === UserRole.SuperAdmin,
             })),
           })),
         ),

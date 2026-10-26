@@ -1,0 +1,36 @@
+<ng-template #content>
+  <div class="audit__log__filters__popup">
+    <h2 class="audit__log__filters__popup__title">
+      {{ 'management.settings.user_management.logs.filters_popup.title' | translate }}
+    </h2>
+
+    <div class="audit__log__filters__popup__fields">
+      <app-filled-multi-select
+        [label]="'management.settings.user_management.logs.filters_popup.action' | translate"
+        [placeholder]="'management.settings.user_management.logs.filters_popup.choose' | translate"
+        [options]="actionOptions()"
+        [(value)]="actionCodes"
+      />
+      <app-filled-multi-select
+        [label]="'management.settings.user_management.logs.filters_popup.user' | translate"
+        [placeholder]="'management.settings.user_management.logs.filters_popup.choose' | translate"
+        [options]="userOptions()"
+        [(value)]="idUsers"
+      />
+    </div>
+
+    <div class="audit__log__filters__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="close()"
+      >
+        {{ 'management.settings.user_management.logs.filters_popup.cancel' | translate }}
+      </app-button>
+      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="apply()">
+        {{ 'management.settings.user_management.logs.filters_popup.apply' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>
