@@ -32,10 +32,10 @@ app-audit-log-filters-popup {
   line-height: 1.25rem;
 }
 
-// Two filters per row, one per row on the phone.
+// Two filters per row, Azione the wider one (its names are long); one per row on the phone.
 .audit__log__filters__popup__fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 1.125rem 1rem;
 }
 

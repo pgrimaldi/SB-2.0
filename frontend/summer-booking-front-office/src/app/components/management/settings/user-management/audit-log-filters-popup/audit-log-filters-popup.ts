@@ -16,6 +16,7 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../../entities/settings/user-management/audit-log-filters';
 import { AuditService } from '../../../../../services/api/audit/audit.service';
@@ -23,6 +24,7 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { AUDIT_ACTIONS } from '../audit-actions';
 
 /** The translated backend action codes: `actions.<module>.<action>`. */
 type ActionTexts = Partial<Record<string, Partial<Record<string, string>>>>;
@@ -37,11 +39,14 @@ type ActionTexts = Partial<Record<string, Partial<Record<string, string>>>>;
 })
 export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
   readonly filters = input(new AuditLogFilters());
+  /** The only users of the Utente list, instead of all the users of the log. */
+  readonly onlyUsers = input<readonly ComboboxItem[] | null>(null);
   readonly applied = output<AuditLogFilters>();
 
   private readonly translateService = inject(TranslateService);
   private readonly audit = inject(AuditService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly language = inject(LanguageBehaviour).current;
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -55,10 +60,13 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
     ) as Observable<ActionTexts>,
   );
   protected readonly actionOptions = computed<readonly SelectOption[]>(() =>
-    actionOptionsOf(this.actionTexts()),
+    byLabel(actionOptionsOf(this.actionTexts()), this.language()),
   );
   protected readonly userOptions = computed<readonly SelectOption[]>(() =>
-    this.users().map((user) => ({ value: user.id, label: user.value })),
+    byLabel(
+      (this.onlyUsers() ?? this.users()).map((user) => ({ value: user.id, label: user.value })),
+      this.language(),
+    ),
   );
 
   constructor() {
@@ -67,7 +75,9 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
       if (this.open()) {
         untracked(() => {
           this.reset();
-          this.loadUsers();
+          if (!this.onlyUsers()) {
+            this.loadUsers();
+          }
         });
       }
     });
@@ -80,7 +90,7 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
 
   protected dialogConfig(): MatDialogConfig {
     return {
-      width: 'min(32rem, 90vw)',
+      width: 'min(48rem, 95vw)',
       maxWidth: 'none',
       position: { top: '6.875rem' },
       panelClass: 'audit__log__filters__popup__panel',
@@ -121,12 +131,17 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
   }
 }
 
-/** One option per translated action: the code (`booking.moved`) and its name. */
+/** One option per action of the catalog: its code, its name in the current language and its icon. */
 function actionOptionsOf(texts: ActionTexts | undefined): SelectOption[] {
-  return Object.entries(texts ?? {}).flatMap(([module, actions]) =>
-    Object.entries(actions ?? {}).map(([action, label]) => ({
-      value: `${module}.${action}`,
-      label: label ?? '',
-    })),
+  return AUDIT_ACTIONS.map(({ code, icon }) => {
+    const [module, action] = code.split('.');
+    return { value: code, label: (action && texts?.[module]?.[action]) || code, icon };
+  });
+}
+
+/** A to Z by name, in the alphabet of the current language. */
+function byLabel(options: SelectOption[], language: string): SelectOption[] {
+  return options.sort((first, second) =>
+    first.label.localeCompare(second.label, language, { sensitivity: 'base' }),
   );
 }

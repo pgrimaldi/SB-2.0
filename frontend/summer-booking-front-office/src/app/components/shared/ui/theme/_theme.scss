@@ -41,6 +41,34 @@
 // the tooltip of `app-icon-button`, where a line break of the text starts a new line (e.g. a list).
 // The app includes it once, next to the theme (`@include theme.overlays;` in styles.scss).
 @mixin overlays {
+  // The icon of an option (`SelectOption.icon`) before its name; a long name wraps beside it.
+  .mat-mdc-option:has(.select__option__icon) .mdc-list-item__primary-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .select__option__icon {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+  }
+
+  // A list as wide as its longest option (`isPanelSizedToOptions`): one line each; only on a screen
+  // narrower than the option the end is cut.
+  .select__panel__fit {
+    max-width: calc(100vw - 2rem);
+
+    .select__option__label {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
   .icon__button__tooltip .mdc-tooltip__surface {
     text-align: start;
     white-space: pre-line;

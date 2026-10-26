@@ -905,10 +905,82 @@
           },
           "actions": {
             "booking": {
-              "spot_added": "Aggiunta postazione",
+              "checked_in": "Check-in",
+              "checked_out": "Check-out",
+              "arrival_reported": "Ingresso segnalato",
+              "guest_added": "Ospite aggiunto",
+              "dates_changed": "Date prenotazione modificate",
+              "agreement_added": "Convenzione aggiunta",
               "repeated": "Prenotazione ripetuta",
-              "moved": "Spostamento prenotazione",
-              "dates_changed": "Date prenotazione modificate"
+              "spot_added": "Postazione aggiunta",
+              "absences_added": "Assenze programmate aggiunte",
+              "moved": "Prenotazione spostata",
+              "file_attached": "File allegato",
+              "extra_added": "Extra aggiunto",
+              "renewed": "Prenotazione rinnovata",
+              "cancelled": "Prenotazione cancellata"
+            },
+            "customer": {
+              "updated": "Dati cliente modificati"
+            },
+            "payment": {
+              "deposit_added": "Acconto aggiunto",
+              "balance_added": "Saldo aggiunto",
+              "bill_split": "Conto diviso",
+              "discount_code_applied": "Codice sconto applicato",
+              "discount_applied": "Sconto applicato",
+              "increase_added": "Incremento aggiunto"
+            },
+            "property": {
+              "info_updated": "Informazioni stabilimento modificate"
+            },
+            "identity": {
+              "user_created": "Utente aggiunto",
+              "user_deleted": "Utente eliminato"
+            },
+            "cash": {
+              "pre_bill_printed": "Preconto stampato",
+              "receipt_printed": "Scontrino stampato"
+            },
+            "database": {
+              "bookings_trashed": "Dati database eliminati",
+              "bookings_restored": "Dati database ripristinati",
+              "trash_emptied": "Cestino database svuotato"
+            },
+            "table_booking": {
+              "created": "Prenotazione servizio tavoli aggiunta",
+              "deleted": "Prenotazione servizio tavoli eliminata",
+              "updated": "Prenotazione servizio tavoli modificata"
+            },
+            "order": {
+              "marked_done": "Ordine segnalato come evaso",
+              "marked_not_done": "Ordine segnalato come non evaso"
+            },
+            "price_list": {
+              "package_updated": "Pacchetto listino modificato",
+              "extra_item_updated": "Articolo aggiuntivo listino modificato",
+              "package_created": "Pacchetto listino aggiunto",
+              "extra_item_created": "Articolo aggiuntivo listino aggiunto",
+              "package_deleted": "Pacchetto listino eliminato",
+              "extra_item_deleted": "Articolo aggiuntivo listino eliminato",
+              "package_duplicated": "Pacchetto listino duplicato",
+              "extra_item_duplicated": "Articolo aggiuntivo listino duplicato"
+            },
+            "warehouse": {
+              "item_updated": "Articolo magazzino modificato",
+              "item_created": "Articolo magazzino aggiunto",
+              "item_deleted": "Articolo magazzino eliminato"
+            },
+            "season": {
+              "dates_updated": "Date stagionale modificate",
+              "period_updated": "Periodo modificato",
+              "period_created": "Periodo aggiunto",
+              "period_deleted": "Periodo eliminato"
+            },
+            "map": {
+              "sector_updated": "Settore/fila modificato",
+              "sector_created": "Settore/fila aggiunto",
+              "sector_deleted": "Settore/fila eliminato"
             }
           },
           "not_implemented": "Il servizio non è ancora implementato",

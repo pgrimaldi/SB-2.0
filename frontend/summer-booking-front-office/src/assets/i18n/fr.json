@@ -905,10 +905,82 @@
           },
           "actions": {
             "booking": {
-              "spot_added": "Emplacement ajouté",
+              "checked_in": "Check-in",
+              "checked_out": "Check-out",
+              "arrival_reported": "Arrivée signalée",
+              "guest_added": "Invité ajouté",
+              "dates_changed": "Dates de réservation modifiées",
+              "agreement_added": "Convention ajoutée",
               "repeated": "Réservation répétée",
+              "spot_added": "Emplacement ajouté",
+              "absences_added": "Absences programmées ajoutées",
               "moved": "Réservation déplacée",
-              "dates_changed": "Dates de réservation modifiées"
+              "file_attached": "Fichier joint",
+              "extra_added": "Extra ajouté",
+              "renewed": "Réservation renouvelée",
+              "cancelled": "Réservation annulée"
+            },
+            "customer": {
+              "updated": "Données client modifiées"
+            },
+            "payment": {
+              "deposit_added": "Acompte ajouté",
+              "balance_added": "Solde ajouté",
+              "bill_split": "Addition partagée",
+              "discount_code_applied": "Code de réduction appliqué",
+              "discount_applied": "Réduction appliquée",
+              "increase_added": "Supplément ajouté"
+            },
+            "property": {
+              "info_updated": "Informations de l'établissement modifiées"
+            },
+            "identity": {
+              "user_created": "Utilisateur ajouté",
+              "user_deleted": "Utilisateur supprimé"
+            },
+            "cash": {
+              "pre_bill_printed": "Pré-addition imprimée",
+              "receipt_printed": "Ticket de caisse imprimé"
+            },
+            "database": {
+              "bookings_trashed": "Données de la base supprimées",
+              "bookings_restored": "Données de la base restaurées",
+              "trash_emptied": "Corbeille de la base vidée"
+            },
+            "table_booking": {
+              "created": "Réservation de table ajoutée",
+              "deleted": "Réservation de table supprimée",
+              "updated": "Réservation de table modifiée"
+            },
+            "order": {
+              "marked_done": "Commande marquée comme servie",
+              "marked_not_done": "Commande marquée comme non servie"
+            },
+            "price_list": {
+              "package_updated": "Forfait de la liste de prix modifié",
+              "extra_item_updated": "Article supplémentaire de la liste de prix modifié",
+              "package_created": "Forfait de la liste de prix ajouté",
+              "extra_item_created": "Article supplémentaire de la liste de prix ajouté",
+              "package_deleted": "Forfait de la liste de prix supprimé",
+              "extra_item_deleted": "Article supplémentaire de la liste de prix supprimé",
+              "package_duplicated": "Forfait de la liste de prix dupliqué",
+              "extra_item_duplicated": "Article supplémentaire de la liste de prix dupliqué"
+            },
+            "warehouse": {
+              "item_updated": "Article du stock modifié",
+              "item_created": "Article du stock ajouté",
+              "item_deleted": "Article du stock supprimé"
+            },
+            "season": {
+              "dates_updated": "Dates de la saison modifiées",
+              "period_updated": "Période modifiée",
+              "period_created": "Période ajoutée",
+              "period_deleted": "Période supprimée"
+            },
+            "map": {
+              "sector_updated": "Secteur/rangée modifié",
+              "sector_created": "Secteur/rangée ajouté",
+              "sector_deleted": "Secteur/rangée supprimé"
             }
           },
           "not_implemented": "Le service n'est pas encore implémenté",

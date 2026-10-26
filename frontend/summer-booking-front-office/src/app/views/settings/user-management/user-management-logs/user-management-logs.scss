@@ -2,6 +2,13 @@
 
 @include page.table-page(user__management__logs);
 
+// Chips and "Azzera filtri" bigger than the wrapper's defaults, to be read easily.
+.user__management__logs {
+  --filter-chip-height: 1.5rem;
+  --filter-chip-text-size: 0.75rem;
+  --filter-chip-max-width: 16rem;
+}
+
 .user__management__logs__title {
   display: flex;
   align-items: center;
@@ -121,7 +128,14 @@
     line-height: 2.5rem;
   }
 
+  .user__management__logs:has(app-filter-chips) {
+    padding-top: 0.5rem;
+  }
+
   .user__management__logs {
+    --filter-chip-height: 1.75rem;
+    --filter-chip-text-size: 0.875rem;
+    --filter-chip-max-width: 18rem;
     --date-range-select-width: 16rem;
     --date-range-select-height: 2.25rem;
     --date-range-select-text-size: 0.875rem;

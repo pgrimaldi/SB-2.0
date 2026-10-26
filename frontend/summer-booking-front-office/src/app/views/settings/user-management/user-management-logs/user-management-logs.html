@@ -78,8 +78,9 @@
 <app-audit-log-filters-popup
   [pathIcon]="closeIcon"
   [filters]="logFilters()"
+  [onlyUsers]="onlyUsers()"
   [(open)]="isFiltersOpen"
-  (applied)="logFilters.set($event)"
+  (applied)="applyFilters($event)"
 />
 
 <app-alert-popup

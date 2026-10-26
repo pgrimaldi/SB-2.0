@@ -9,17 +9,24 @@
   [class.filled__multi__select__locked]="disabled()"
 >
   <mat-select
-    panelClass="select__panel"
+    [panelClass]="isPanelSizedToOptions() ? 'select__panel select__panel__fit' : 'select__panel'"
+    [panelWidth]="isPanelSizedToOptions() ? null : 'auto'"
     multiple
     [disabled]="disabled()"
     [errorStateMatcher]="errorMatcher"
     [placeholder]="placeholder() ?? ''"
     [value]="value()"
     (valueChange)="value.set($event)"
+    (openedChange)="fitPanel($event)"
     (closed)="touch.emit()"
   >
     @for (option of options(); track option.value) {
-      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+      <mat-option [value]="option.value">
+        @if (option.icon) {
+          <img class="select__option__icon" [src]="option.icon" width="16" height="16" alt="" />
+        }
+        <span class="select__option__label">{{ option.label }}</span>
+      </mat-option>
     }
   </mat-select>
 </mat-form-field>

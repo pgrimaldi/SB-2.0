@@ -4,6 +4,8 @@ import { MatSelectModule } from '@angular/material/select';
 export interface SelectOption<K extends string = string> {
   value: K;
   label: string;
+  /** Image path shown before the name, in `app-filled-select` and `app-filled-multi-select`. */
+  icon?: string;
 }
 
 @Component({

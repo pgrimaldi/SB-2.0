@@ -18,6 +18,7 @@ import {
 } from '../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { UserRole } from '../../../entities/enums/user-role';
+import { AuditLogUserState } from '../../../entities/settings/user-management/audit-log-user-state';
 import { IdentityService } from '../../../services/api/identity/identity.service';
 
 interface UserManagementTexts {
@@ -153,7 +154,12 @@ export class UserManagement {
     { initialValue: '' },
   );
   protected readonly rowActions = computed<readonly TableRowAction<UserRow>[]>(() => [
-    { label: '', icon: this.logIcon, text: this.logText(), action: () => undefined },
+    {
+      label: '',
+      icon: this.logIcon,
+      text: this.logText(),
+      action: ({ idUser, email }) => idUser && this.openUserLogs(idUser, email),
+    },
     ...this.standardActions(),
   ]);
 
@@ -197,5 +203,11 @@ export class UserManagement {
 
   protected openLogs(): void {
     void this.router.navigateByUrl('/settings/user-management/logs');
+  }
+
+  /** The log filtered on the user; the id travels in the navigation state, not in the address. */
+  private openUserLogs(idUser: string, email: string | null): void {
+    const state: AuditLogUserState = { logUser: { id: idUser, value: email ?? '' } };
+    void this.router.navigateByUrl('/settings/user-management/logs', { state });
   }
 }

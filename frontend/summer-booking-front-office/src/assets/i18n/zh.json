@@ -905,10 +905,82 @@
           },
           "actions": {
             "booking": {
-              "spot_added": "已添加位置",
+              "checked_in": "入住",
+              "checked_out": "退房",
+              "arrival_reported": "已登记到达",
+              "guest_added": "已添加客人",
+              "dates_changed": "已修改预订日期",
+              "agreement_added": "已添加协议",
               "repeated": "预订已重复",
+              "spot_added": "已添加位置",
+              "absences_added": "已添加计划缺席",
               "moved": "预订已移动",
-              "dates_changed": "预订日期已修改"
+              "file_attached": "已附加文件",
+              "extra_added": "已添加额外项目",
+              "renewed": "预订已续订",
+              "cancelled": "预订已取消"
+            },
+            "customer": {
+              "updated": "已修改客户资料"
+            },
+            "payment": {
+              "deposit_added": "已添加定金",
+              "balance_added": "已添加尾款",
+              "bill_split": "账单已拆分",
+              "discount_code_applied": "已使用折扣码",
+              "discount_applied": "已应用折扣",
+              "increase_added": "已添加附加费"
+            },
+            "property": {
+              "info_updated": "已修改场所信息"
+            },
+            "identity": {
+              "user_created": "已添加用户",
+              "user_deleted": "已删除用户"
+            },
+            "cash": {
+              "pre_bill_printed": "已打印预结单",
+              "receipt_printed": "已打印收据"
+            },
+            "database": {
+              "bookings_trashed": "已删除数据库数据",
+              "bookings_restored": "已恢复数据库数据",
+              "trash_emptied": "已清空数据库回收站"
+            },
+            "table_booking": {
+              "created": "已添加餐桌预订",
+              "deleted": "已删除餐桌预订",
+              "updated": "已修改餐桌预订"
+            },
+            "order": {
+              "marked_done": "订单已标记为完成",
+              "marked_not_done": "订单已标记为未完成"
+            },
+            "price_list": {
+              "package_updated": "已修改价目表套餐",
+              "extra_item_updated": "已修改价目表附加项目",
+              "package_created": "已添加价目表套餐",
+              "extra_item_created": "已添加价目表附加项目",
+              "package_deleted": "已删除价目表套餐",
+              "extra_item_deleted": "已删除价目表附加项目",
+              "package_duplicated": "已复制价目表套餐",
+              "extra_item_duplicated": "已复制价目表附加项目"
+            },
+            "warehouse": {
+              "item_updated": "已修改仓库物品",
+              "item_created": "已添加仓库物品",
+              "item_deleted": "已删除仓库物品"
+            },
+            "season": {
+              "dates_updated": "已修改季节日期",
+              "period_updated": "已修改时段",
+              "period_created": "已添加时段",
+              "period_deleted": "已删除时段"
+            },
+            "map": {
+              "sector_updated": "已修改区域/排",
+              "sector_created": "已添加区域/排",
+              "sector_deleted": "已删除区域/排"
             }
           },
           "not_implemented": "该服务尚未实现",

@@ -25,7 +25,12 @@
     (closed)="touch.emit()"
   >
     @for (option of options(); track option.value) {
-      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+      <mat-option [value]="option.value">
+        @if (option.icon) {
+          <img class="select__option__icon" [src]="option.icon" width="16" height="16" alt="" />
+        }
+        <span class="select__option__label">{{ option.label }}</span>
+      </mat-option>
     }
   </mat-select>
 </mat-form-field>

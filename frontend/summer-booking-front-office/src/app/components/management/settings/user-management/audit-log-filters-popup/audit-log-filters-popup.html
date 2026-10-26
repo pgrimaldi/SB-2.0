@@ -9,6 +9,7 @@
         [label]="'management.settings.user_management.logs.filters_popup.action' | translate"
         [placeholder]="'management.settings.user_management.logs.filters_popup.choose' | translate"
         [options]="actionOptions()"
+        [isPanelSizedToOptions]="true"
         [(value)]="actionCodes"
       />
       <app-filled-multi-select

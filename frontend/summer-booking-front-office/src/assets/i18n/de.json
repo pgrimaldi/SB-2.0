@@ -905,10 +905,82 @@
           },
           "actions": {
             "booking": {
-              "spot_added": "Platz hinzugefügt",
+              "checked_in": "Check-in",
+              "checked_out": "Check-out",
+              "arrival_reported": "Ankunft gemeldet",
+              "guest_added": "Gast hinzugefügt",
+              "dates_changed": "Buchungsdaten geändert",
+              "agreement_added": "Vereinbarung hinzugefügt",
               "repeated": "Buchung wiederholt",
+              "spot_added": "Platz hinzugefügt",
+              "absences_added": "Geplante Abwesenheiten hinzugefügt",
               "moved": "Buchung verschoben",
-              "dates_changed": "Buchungsdaten geändert"
+              "file_attached": "Datei angehängt",
+              "extra_added": "Extra hinzugefügt",
+              "renewed": "Buchung verlängert",
+              "cancelled": "Buchung storniert"
+            },
+            "customer": {
+              "updated": "Kundendaten geändert"
+            },
+            "payment": {
+              "deposit_added": "Anzahlung hinzugefügt",
+              "balance_added": "Restzahlung hinzugefügt",
+              "bill_split": "Rechnung geteilt",
+              "discount_code_applied": "Rabattcode angewendet",
+              "discount_applied": "Rabatt angewendet",
+              "increase_added": "Aufschlag hinzugefügt"
+            },
+            "property": {
+              "info_updated": "Betriebsinformationen geändert"
+            },
+            "identity": {
+              "user_created": "Benutzer hinzugefügt",
+              "user_deleted": "Benutzer gelöscht"
+            },
+            "cash": {
+              "pre_bill_printed": "Zwischenrechnung gedruckt",
+              "receipt_printed": "Kassenbon gedruckt"
+            },
+            "database": {
+              "bookings_trashed": "Datenbankdaten gelöscht",
+              "bookings_restored": "Datenbankdaten wiederhergestellt",
+              "trash_emptied": "Datenbank-Papierkorb geleert"
+            },
+            "table_booking": {
+              "created": "Tischreservierung hinzugefügt",
+              "deleted": "Tischreservierung gelöscht",
+              "updated": "Tischreservierung geändert"
+            },
+            "order": {
+              "marked_done": "Bestellung als erledigt markiert",
+              "marked_not_done": "Bestellung als nicht erledigt markiert"
+            },
+            "price_list": {
+              "package_updated": "Preislisten-Paket geändert",
+              "extra_item_updated": "Preislisten-Zusatzartikel geändert",
+              "package_created": "Preislisten-Paket hinzugefügt",
+              "extra_item_created": "Preislisten-Zusatzartikel hinzugefügt",
+              "package_deleted": "Preislisten-Paket gelöscht",
+              "extra_item_deleted": "Preislisten-Zusatzartikel gelöscht",
+              "package_duplicated": "Preislisten-Paket dupliziert",
+              "extra_item_duplicated": "Preislisten-Zusatzartikel dupliziert"
+            },
+            "warehouse": {
+              "item_updated": "Lagerartikel geändert",
+              "item_created": "Lagerartikel hinzugefügt",
+              "item_deleted": "Lagerartikel gelöscht"
+            },
+            "season": {
+              "dates_updated": "Saisondaten geändert",
+              "period_updated": "Zeitraum geändert",
+              "period_created": "Zeitraum hinzugefügt",
+              "period_deleted": "Zeitraum gelöscht"
+            },
+            "map": {
+              "sector_updated": "Sektor/Reihe geändert",
+              "sector_created": "Sektor/Reihe hinzugefügt",
+              "sector_deleted": "Sektor/Reihe gelöscht"
             }
           },
           "not_implemented": "Der Dienst ist noch nicht implementiert",

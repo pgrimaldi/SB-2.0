@@ -905,10 +905,82 @@
           },
           "actions": {
             "booking": {
-              "spot_added": "Spot added",
+              "checked_in": "Check-in",
+              "checked_out": "Check-out",
+              "arrival_reported": "Arrival reported",
+              "guest_added": "Guest added",
+              "dates_changed": "Booking dates changed",
+              "agreement_added": "Agreement added",
               "repeated": "Booking repeated",
+              "spot_added": "Spot added",
+              "absences_added": "Scheduled absences added",
               "moved": "Booking moved",
-              "dates_changed": "Booking dates changed"
+              "file_attached": "File attached",
+              "extra_added": "Extra added",
+              "renewed": "Booking renewed",
+              "cancelled": "Booking cancelled"
+            },
+            "customer": {
+              "updated": "Customer details changed"
+            },
+            "payment": {
+              "deposit_added": "Deposit added",
+              "balance_added": "Balance added",
+              "bill_split": "Bill split",
+              "discount_code_applied": "Discount code applied",
+              "discount_applied": "Discount applied",
+              "increase_added": "Surcharge added"
+            },
+            "property": {
+              "info_updated": "Property information changed"
+            },
+            "identity": {
+              "user_created": "User added",
+              "user_deleted": "User deleted"
+            },
+            "cash": {
+              "pre_bill_printed": "Pre-bill printed",
+              "receipt_printed": "Receipt printed"
+            },
+            "database": {
+              "bookings_trashed": "Database data deleted",
+              "bookings_restored": "Database data restored",
+              "trash_emptied": "Database trash emptied"
+            },
+            "table_booking": {
+              "created": "Table booking added",
+              "deleted": "Table booking deleted",
+              "updated": "Table booking changed"
+            },
+            "order": {
+              "marked_done": "Order marked as fulfilled",
+              "marked_not_done": "Order marked as not fulfilled"
+            },
+            "price_list": {
+              "package_updated": "Price list package changed",
+              "extra_item_updated": "Price list extra item changed",
+              "package_created": "Price list package added",
+              "extra_item_created": "Price list extra item added",
+              "package_deleted": "Price list package deleted",
+              "extra_item_deleted": "Price list extra item deleted",
+              "package_duplicated": "Price list package duplicated",
+              "extra_item_duplicated": "Price list extra item duplicated"
+            },
+            "warehouse": {
+              "item_updated": "Warehouse item changed",
+              "item_created": "Warehouse item added",
+              "item_deleted": "Warehouse item deleted"
+            },
+            "season": {
+              "dates_updated": "Season dates changed",
+              "period_updated": "Period changed",
+              "period_created": "Period added",
+              "period_deleted": "Period deleted"
+            },
+            "map": {
+              "sector_updated": "Sector/row changed",
+              "sector_created": "Sector/row added",
+              "sector_deleted": "Sector/row deleted"
             }
           },
           "not_implemented": "The service is not implemented yet",

@@ -905,10 +905,82 @@
           },
           "actions": {
             "booking": {
-              "spot_added": "تمت إضافة موقع",
+              "checked_in": "تسجيل الوصول",
+              "checked_out": "تسجيل المغادرة",
+              "arrival_reported": "تم تسجيل الدخول",
+              "guest_added": "تمت إضافة ضيف",
+              "dates_changed": "تم تعديل تواريخ الحجز",
+              "agreement_added": "تمت إضافة اتفاقية",
               "repeated": "تم تكرار الحجز",
+              "spot_added": "تمت إضافة موقع",
+              "absences_added": "تمت إضافة غيابات مجدولة",
               "moved": "تم نقل الحجز",
-              "dates_changed": "تم تعديل تواريخ الحجز"
+              "file_attached": "تم إرفاق ملف",
+              "extra_added": "تمت إضافة إضافي",
+              "renewed": "تم تجديد الحجز",
+              "cancelled": "تم إلغاء الحجز"
+            },
+            "customer": {
+              "updated": "تم تعديل بيانات العميل"
+            },
+            "payment": {
+              "deposit_added": "تمت إضافة عربون",
+              "balance_added": "تمت إضافة الرصيد",
+              "bill_split": "تم تقسيم الفاتورة",
+              "discount_code_applied": "تم تطبيق رمز الخصم",
+              "discount_applied": "تم تطبيق الخصم",
+              "increase_added": "تمت إضافة زيادة"
+            },
+            "property": {
+              "info_updated": "تم تعديل معلومات المنشأة"
+            },
+            "identity": {
+              "user_created": "تمت إضافة مستخدم",
+              "user_deleted": "تم حذف مستخدم"
+            },
+            "cash": {
+              "pre_bill_printed": "تمت طباعة الفاتورة المبدئية",
+              "receipt_printed": "تمت طباعة الإيصال"
+            },
+            "database": {
+              "bookings_trashed": "تم حذف بيانات قاعدة البيانات",
+              "bookings_restored": "تمت استعادة بيانات قاعدة البيانات",
+              "trash_emptied": "تم إفراغ سلة قاعدة البيانات"
+            },
+            "table_booking": {
+              "created": "تمت إضافة حجز طاولة",
+              "deleted": "تم حذف حجز طاولة",
+              "updated": "تم تعديل حجز طاولة"
+            },
+            "order": {
+              "marked_done": "تم تعليم الطلب كمنجز",
+              "marked_not_done": "تم تعليم الطلب كغير منجز"
+            },
+            "price_list": {
+              "package_updated": "تم تعديل باقة قائمة الأسعار",
+              "extra_item_updated": "تم تعديل عنصر إضافي في قائمة الأسعار",
+              "package_created": "تمت إضافة باقة إلى قائمة الأسعار",
+              "extra_item_created": "تمت إضافة عنصر إضافي إلى قائمة الأسعار",
+              "package_deleted": "تم حذف باقة من قائمة الأسعار",
+              "extra_item_deleted": "تم حذف عنصر إضافي من قائمة الأسعار",
+              "package_duplicated": "تم تكرار باقة قائمة الأسعار",
+              "extra_item_duplicated": "تم تكرار عنصر إضافي في قائمة الأسعار"
+            },
+            "warehouse": {
+              "item_updated": "تم تعديل صنف في المخزن",
+              "item_created": "تمت إضافة صنف إلى المخزن",
+              "item_deleted": "تم حذف صنف من المخزن"
+            },
+            "season": {
+              "dates_updated": "تم تعديل تواريخ الموسم",
+              "period_updated": "تم تعديل الفترة",
+              "period_created": "تمت إضافة فترة",
+              "period_deleted": "تم حذف فترة"
+            },
+            "map": {
+              "sector_updated": "تم تعديل القطاع/الصف",
+              "sector_created": "تمت إضافة قطاع/صف",
+              "sector_deleted": "تم حذف قطاع/صف"
             }
           },
           "not_implemented": "لم يتم تنفيذ الخدمة بعد",

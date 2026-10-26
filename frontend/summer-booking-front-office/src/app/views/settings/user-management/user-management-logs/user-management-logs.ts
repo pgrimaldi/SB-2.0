@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { Location } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
@@ -43,7 +44,9 @@ import { TableFilterBar } from '../../../../components/shared/ui/tables/table/ta
 import { TableHeadingAction } from '../../../../components/shared/ui/tables/table/table-heading-action';
 import { Table, TableColumn, TableLoad } from '../../../../components/shared/ui/tables/table/table';
 import { PageFilter } from '../../../../entities/pagination/page';
+import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
+import { AuditLogUserState } from '../../../../entities/settings/user-management/audit-log-user-state';
 import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
@@ -116,6 +119,7 @@ export class UserManagementLogs {
   private readonly translateService = inject(TranslateService);
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+  private readonly location = inject(Location);
   private readonly fileDownload = inject(FileDownloadBehaviour);
   private readonly table = viewChild.required<Table<AuditEntryRow, { idProperty: string }>>(Table);
 
@@ -131,7 +135,13 @@ export class UserManagementLogs {
   });
   protected readonly dateRange = signal<DateRange | null>(null);
   protected readonly isFiltersOpen = signal(false);
-  protected readonly logFilters = signal(new AuditLogFilters());
+  /** From the Log button of a user row: the only user of the Utente filter while it is chosen. */
+  private readonly logUser = signal(logUserOf(this.location.getState()));
+  protected readonly logFilters = signal(this.navigationFilters());
+  protected readonly onlyUsers = computed(() => {
+    const logUser = this.logUser();
+    return logUser ? [logUser] : null;
+  });
   private readonly logsTexts = toSignal(
     this.translateService.stream(
       'management.settings.user_management.logs',
@@ -170,10 +180,11 @@ export class UserManagementLogs {
       ),
     ];
   });
-  protected readonly filters = computed(() => [
-    ...dateRangeFilters(this.dateRange()),
-    ...pageFiltersOf(this.logFilters()),
-  ]);
+  /** Only a change of the values loads the table again, not a user's name. */
+  protected readonly filters = computed(
+    () => [...dateRangeFilters(this.dateRange()), ...pageFiltersOf(this.logFilters())],
+    { equal: sameFilters },
+  );
   protected readonly hasFilters = computed(
     () =>
       this.dateRange() !== null ||
@@ -251,6 +262,10 @@ export class UserManagementLogs {
     { field: 'occurredAt', header: this.headers().occurred_at, width: 18, sortable: true },
   ]);
 
+  constructor() {
+    this.nameLogUser();
+  }
+
   protected readonly load: TableLoad<{ idProperty: string }, AuditEntryRow> = (request) =>
     this.audit.entriesList(request).pipe(
       switchMap((page) =>
@@ -281,12 +296,20 @@ export class UserManagementLogs {
       ),
     );
 
+  /** Without the user of the Log button, the Utente filter offers all the users again. */
+  protected applyFilters(filters: AuditLogFilters): void {
+    this.logFilters.set(filters);
+    if (!filters.users.some(({ id }) => id === this.logUser()?.id)) {
+      this.logUser.set(null);
+    }
+  }
+
   protected removeChip(chip: AuditLogFilterChip): void {
-    this.logFilters.update((filters) => ({ ...filters, ...chip.emptied }));
+    this.applyFilters({ ...this.logFilters(), ...chip.emptied });
   }
 
   protected clearFilters(): void {
-    this.logFilters.set(new AuditLogFilters());
+    this.applyFilters(new AuditLogFilters());
     this.dateRange.set(null);
     this.table().clearSearch();
   }
@@ -297,6 +320,34 @@ export class UserManagementLogs {
 
   protected printLog(): void {
     void this.download(this.isPrinting, this.audit.printLog, PRINT_FALLBACK_NAME);
+  }
+
+  /** From the Log button of a user row: the log starts filtered on that user. */
+  private navigationFilters(): AuditLogFilters {
+    const logUser = this.logUser();
+    return logUser ? { actionCodes: [], users: [logUser] } : new AuditLogFilters();
+  }
+
+  /** The row brings the email: the name comes from the users of the log, matched by id. */
+  private nameLogUser(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    if (!this.logUser() || !idProperty) {
+      return;
+    }
+    this.audit.userCombobox(idProperty).subscribe({
+      next: (users) => {
+        const named = users.find(({ id }) => id === this.logUser()?.id);
+        if (!named) {
+          return;
+        }
+        this.logUser.set(named);
+        this.logFilters.update((filters) => ({
+          ...filters,
+          users: filters.users.map((user) => (user.id === named.id ? named : user)),
+        }));
+      },
+      error: () => undefined,
+    });
   }
 
   /** One file at a time, with the search, filters and sorting the table is showing. */
@@ -337,4 +388,15 @@ function pageFiltersOf(filters: AuditLogFilters): PageFilter[] {
     { field: 'idUser', value: filters.users.map(({ id }) => id) },
   ];
   return all.filter(({ value }) => value.length);
+}
+
+function sameFilters(first: readonly PageFilter[], second: readonly PageFilter[]): boolean {
+  return JSON.stringify(first) === JSON.stringify(second);
+}
+
+function logUserOf(state: unknown): ComboboxItem | null {
+  const logUser = (state as Partial<AuditLogUserState> | null)?.logUser;
+  return typeof logUser?.id === 'string' && typeof logUser.value === 'string'
+    ? { id: logUser.id, value: logUser.value }
+    : null;
 }
