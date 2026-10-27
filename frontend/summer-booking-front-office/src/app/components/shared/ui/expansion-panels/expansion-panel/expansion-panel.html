@@ -6,6 +6,13 @@
 >
   <mat-expansion-panel-header class="expansion__panel__header">
     <mat-panel-title class="expansion__panel__title">
+      <span
+        class="expansion__panel__start"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
+      >
+        <ng-content select="[appExpansionPanelStart]" />
+      </span>
       @if (icons().list[0]; as icon) {
         @if (icons().material) {
           <mat-icon>{{ icon }}</mat-icon>
@@ -14,6 +21,13 @@
         }
       }
       {{ title() }}
+      <span
+        class="expansion__panel__title__aside"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
+      >
+        <ng-content select="[appExpansionPanelTitleAside]" />
+      </span>
     </mat-panel-title>
     <span
       class="expansion__panel__actions"

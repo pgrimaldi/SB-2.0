@@ -1,0 +1,60 @@
+.period__calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.25rem 0.75rem 0.5rem;
+  color: var(--color__main__theme__one);
+}
+
+// Month and year: a click shows the years, then the months.
+.period__calendar__period {
+  min-width: 7rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.period__calendar__month {
+  display: flex;
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  // A month without days that can be chosen (outside minDate / maxDate).
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  img {
+    display: block;
+    width: 0.375rem;
+    height: 0.625rem;
+  }
+
+  mat-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Right to left (Arabic): the previous month is on the right, so the arrows point the other way.
+:host-context([dir='rtl']) .period__calendar__month {
+  img,
+  mat-icon {
+    transform: scaleX(-1);
+  }
+}

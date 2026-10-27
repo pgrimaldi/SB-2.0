@@ -27,6 +27,17 @@ import {
   updateUserMock,
   usersListMock,
 } from './identity/identity.mock';
+import {
+  addSeasonIntervalMock,
+  addSeasonPeriodMock,
+  deleteSeasonIntervalsMock,
+  deleteSeasonPeriodMock,
+  saveSeasonDatesMock,
+  seasonDatesMock,
+  seasonPeriodListMock,
+  updateSeasonIntervalMock,
+  updateSeasonPeriodMock,
+} from './seasons/seasons.mock';
 import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
 import {
   addVoucherItemMock,
@@ -330,6 +341,63 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/database/delete-selected-item`
   ) {
     return deleteSelectedItemMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/seasons/season-dates`
+  ) {
+    return seasonDatesMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/seasons/save-season-dates`
+  ) {
+    return saveSeasonDatesMock(request);
+  }
+
+  if (request.method === 'GET' && request.url === `${environment.apiBaseUrl}/seasons/period-list`) {
+    return seasonPeriodListMock(request);
+  }
+
+  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/seasons/add-period`) {
+    return addSeasonPeriodMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/seasons/delete-period`
+  ) {
+    return deleteSeasonPeriodMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/seasons/delete-intervals`
+  ) {
+    return deleteSeasonIntervalsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/seasons/update-interval`
+  ) {
+    return updateSeasonIntervalMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/seasons/add-interval`
+  ) {
+    return addSeasonIntervalMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/seasons/update-period`
+  ) {
+    return updateSeasonPeriodMock(request);
   }
 
   if (

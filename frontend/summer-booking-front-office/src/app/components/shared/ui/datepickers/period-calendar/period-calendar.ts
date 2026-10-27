@@ -56,6 +56,14 @@ export class PeriodCalendar {
   readonly value = model<PeriodCalendarPeriod[]>([]);
   readonly readonly = input(false);
   readonly disabled = input(false);
+  /** First and last day that can be chosen, at midnight UTC as ISO strings; none: no limit. */
+  readonly minDate = input<string | null>(null);
+  readonly maxDate = input<string | null>(null);
+  /**
+   * Days that cannot be chosen, greyed (e.g. taken by other periods). After the first day of a
+   * period, the days from the next of these periods on are greyed too, so a period never covers one.
+   */
+  readonly disabledPeriods = input<readonly PeriodCalendarPeriod[]>([]);
   readonly texts = input<PeriodCalendarTexts | null>();
   /** Icons as Material icon names (Material Symbols font): [previous month, next month, remove a period]. */
   readonly matIcon = input<readonly string[] | null>();
@@ -71,15 +79,29 @@ export class PeriodCalendar {
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly removeIcon = computed(() => this.icons().list.slice(2, 3));
   protected readonly isLocked = computed(() => this.readonly() || this.disabled());
+  protected readonly minDay = computed(() => this.day(this.minDate()));
+  protected readonly maxDay = computed(() => this.day(this.maxDate()));
   /** The first day clicked, waiting for the last one. */
   protected readonly draft = signal<DateRange<Date> | null>(null);
-  private readonly periods = computed(() =>
-    this.value().flatMap((period): Days[] => {
-      const start = this.day(period.dateFrom);
-      const end = this.day(period.dateTo);
-      return start && end ? [{ start, end }] : [];
-    }),
-  );
+  private readonly periods = computed(() => this.toDays(this.value()));
+  private readonly disabledDays = computed(() => this.toDays(this.disabledPeriods()));
+  protected readonly dateFilter = computed(() => {
+    const disabled = this.disabledDays();
+    const start = this.draft()?.start;
+    const limit = start
+      ? disabled.reduce<Date | null>(
+          (first, period) =>
+            this.dateAdapter.compareDate(period.start, start) > 0 &&
+            (!first || this.dateAdapter.compareDate(period.start, first) < 0)
+              ? period.start
+              : first,
+          null,
+        )
+      : null;
+    return (date: Date): boolean =>
+      !disabled.some((period) => this.isInside(date, period)) &&
+      !(limit && this.dateAdapter.compareDate(date, limit) >= 0);
+  });
   protected readonly chips = computed<readonly PeriodChip[]>(() =>
     this.periods().map(({ start, end }, index) => ({
       label: `${this.format(start)} - ${this.format(end)}`,
@@ -92,11 +114,7 @@ export class PeriodCalendar {
       if (view !== 'month') {
         return '';
       }
-      const period = periods.find(
-        ({ start, end }) =>
-          this.dateAdapter.compareDate(date, start) >= 0 &&
-          this.dateAdapter.compareDate(date, end) <= 0,
-      );
+      const period = periods.find((days) => this.isInside(date, days));
       return {
         period__calendar__chosen: !!period,
         period__calendar__chosen__start: !!period && this.dateAdapter.sameDate(date, period.start),
@@ -143,6 +161,20 @@ export class PeriodCalendar {
     }
     this.value.update((periods) => periods.filter((_, index) => index !== chip.index));
     this.touch.emit();
+  }
+
+  private toDays(periods: readonly PeriodCalendarPeriod[]): Days[] {
+    return periods.flatMap((period): Days[] => {
+      const start = this.day(period.dateFrom);
+      const end = this.day(period.dateTo);
+      return start && end ? [{ start, end }] : [];
+    });
+  }
+
+  private isInside(date: Date, { start, end }: Days): boolean {
+    return (
+      this.dateAdapter.compareDate(date, start) >= 0 && this.dateAdapter.compareDate(date, end) <= 0
+    );
   }
 
   private day(value: string | null): Date | null {

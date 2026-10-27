@@ -9,5 +9,8 @@
     }
     {{ text() }}
   </h2>
-  <div class="section__title__action"><ng-content /></div>
+  <div class="section__title__controls">
+    <div class="section__title__aside"><ng-content select="[appSectionTitleAside]" /></div>
+    <div class="section__title__action"><ng-content /></div>
+  </div>
 </div>

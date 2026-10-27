@@ -1,0 +1,175 @@
+<section class="season__periods">
+  <app-section-title
+    [text]="'management.settings.seasons.periods.title' | translate"
+    [pathIcon]="titleIcon"
+  >
+    <app-button
+      appSectionTitleAside
+      class="season__periods__button"
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      (clicked)="toggleAll()"
+    >
+      {{
+        (isAllShown()
+          ? 'management.settings.seasons.periods.hide_all'
+          : 'management.settings.seasons.periods.show_all'
+        ) | translate
+      }}
+    </app-button>
+    @if (selectedTotal() > 1) {
+      <app-button
+        appSectionTitleAside
+        class="season__periods__clear"
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="clearSelection()"
+      >
+        {{ 'management.settings.seasons.periods.clear_selection' | translate }}
+      </app-button>
+    }
+    @if (selectedTotal() > 1) {
+      <app-button
+        appSectionTitleAside
+        class="season__periods__delete"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        (clicked)="askDeleteSelected()"
+      >
+        {{ 'management.settings.seasons.periods.delete_selected' | translate }}
+      </app-button>
+    }
+    <app-button
+      class="season__periods__button"
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [pathIcon]="addIcon"
+      (clicked)="isAddOpen.set(true)"
+    >
+      {{ 'management.settings.seasons.periods.add' | translate }}
+    </app-button>
+  </app-section-title>
+
+  @if (errorMessage(); as errorMessage) {
+    <p class="season__periods__error">{{ errorMessage }}</p>
+  }
+
+  @if (periods(); as periods) {
+    @for (period of periods; track period.idPeriod) {
+      <app-expansion-panel [title]="period.periodName" [pathIcon]="periodIcons">
+        <app-icon-button
+          appExpansionPanelStart
+          class="season__periods__icon"
+          [label]="'table.actions.delete' | translate"
+          [pathIcon]="deleteIcon"
+          (click)="askDelete(period)"
+        />
+        <app-icon-button
+          appExpansionPanelTitleAside
+          class="season__periods__icon season__periods__name__icon"
+          [label]="'table.actions.edit' | translate"
+          [pathIcon]="editIcon"
+          (click)="editPeriod(period)"
+        />
+        <app-icon-button
+          appExpansionPanelTitleAside
+          class="season__periods__icon season__periods__name__icon"
+          [label]="'management.settings.seasons.add_interval_popup.title' | translate"
+          [pathIcon]="addIntervalIcon"
+          (click)="addInterval(period)"
+        />
+        <div class="season__periods__dates">
+          <div class="season__periods__intervals">
+            <div class="season__periods__row season__periods__headings">
+              <span class="season__periods__heading season__periods__from">
+                {{ 'management.settings.seasons.periods.date_from' | translate }}
+              </span>
+              <span class="season__periods__heading season__periods__to">
+                {{ 'management.settings.seasons.periods.date_to' | translate }}
+              </span>
+            </div>
+            @for (interval of period.intervals; track interval.idInterval) {
+              <div class="season__periods__row season__periods__interval">
+                <app-selection-checkbox
+                  class="season__periods__check"
+                  [checked]="isIntervalSelected(interval.idInterval)"
+                  (checkedChange)="selectInterval(interval.idInterval, $event)"
+                />
+                <span class="season__periods__from">{{ interval.dateFrom }}</span>
+                <span class="season__periods__to">{{ interval.dateTo }}</span>
+                <span class="season__periods__actions">
+                  <app-icon-button
+                    class="season__periods__icon"
+                    [label]="'table.actions.delete' | translate"
+                    [pathIcon]="deleteIcon"
+                    (click)="askDeleteInterval(interval)"
+                  />
+                  <app-icon-button
+                    class="season__periods__icon"
+                    [label]="'table.actions.edit' | translate"
+                    [pathIcon]="editIcon"
+                    (click)="editInterval(interval)"
+                  />
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </app-expansion-panel>
+    } @empty {
+      <p class="season__periods__empty">
+        {{ 'management.settings.seasons.periods.empty' | translate }}
+      </p>
+    }
+  }
+</section>
+
+<app-season-period-add-popup
+  [pathIcon]="closeIcon"
+  [isNextSeason]="isNextSeason"
+  [season]="season()"
+  [seasonIntervals]="seasonIntervals()"
+  [(open)]="isAddOpen"
+  (added)="reload()"
+/>
+<app-delete-items-popup
+  [idItems]="idPeriodsToDelete()"
+  [itemName]="periodToDelete()?.periodName ?? null"
+  translationKey="management.settings.seasons.delete"
+  [action]="deletePeriod"
+  [pathIcon]="alertIcons"
+  [(open)]="isDeleteAsked"
+  (deleted)="reload()"
+/>
+<app-season-period-edit-popup
+  [pathIcon]="closeIcon"
+  [period]="periodToEdit()"
+  [(open)]="isEditPeriodOpen"
+  (updated)="reload()"
+/>
+<app-season-interval-add-popup
+  [pathIcon]="closeIcon"
+  [period]="periodToExtend()"
+  [season]="season()"
+  [seasonIntervals]="seasonIntervals()"
+  [(open)]="isAddIntervalOpen"
+  (added)="reload()"
+/>
+<app-season-interval-edit-popup
+  [pathIcon]="closeIcon"
+  [interval]="intervalToEdit()"
+  [season]="season()"
+  [seasonIntervals]="seasonIntervals()"
+  [(open)]="isEditIntervalOpen"
+  (updated)="reload()"
+/>
+<app-delete-items-popup
+  [idItems]="intervalsToDelete().idIntervals"
+  [itemName]="intervalsToDelete().name"
+  translationKey="management.settings.seasons.delete_intervals"
+  [action]="deleteIntervals"
+  [pathIcon]="alertIcons"
+  [(open)]="isDeleteIntervalsAsked"
+  (deleted)="reload()"
+/>

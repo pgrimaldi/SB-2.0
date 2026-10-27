@@ -1,0 +1,59 @@
+<ng-template #content>
+  <div class="season__interval__add__popup">
+    <h2 class="season__interval__add__popup__title">
+      {{ 'management.settings.seasons.add_interval_popup.title' | translate }}
+    </h2>
+
+    <div class="season__interval__add__popup__dates">
+      <app-filled-date-field
+        [label]="'management.settings.seasons.add_interval_popup.date_from' | translate"
+        [isMandatory]="true"
+        [pathIcon]="dateIcon"
+        [minDate]="season()?.dateFrom ?? null"
+        [maxDate]="season()?.dateTo ?? null"
+        [disabledPeriods]="seasonIntervals()"
+        [formField]="draftForm.dateFrom"
+        [error]="dateFromError()"
+      />
+      <app-filled-date-field
+        [label]="'management.settings.seasons.add_interval_popup.date_to' | translate"
+        [isMandatory]="true"
+        [pathIcon]="dateIcon"
+        [minDate]="dateToMin()"
+        [maxDate]="dateToMax()"
+        [disabledPeriods]="seasonIntervals()"
+        [formField]="draftForm.dateTo"
+        [error]="dateToError()"
+      />
+    </div>
+
+    @if (overlapError(); as overlapError) {
+      <p class="season__interval__add__popup__error">{{ overlapError }}</p>
+    }
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="season__interval__add__popup__error">{{ errorMessage }}</p>
+    }
+
+    <div class="season__interval__add__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.seasons.add_interval_popup.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!canSave()"
+        [isLoading]="isLoading()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.seasons.add_interval_popup.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

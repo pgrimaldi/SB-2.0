@@ -1,0 +1,60 @@
+// Season name on the left, centred on the fields; the dates at the end of the row. The name gets
+// wider only with the room the dates leave.
+.season__dates__panel__boundary {
+  --form-row-columns: minmax(auto, 15rem) minmax(min-content, 1fr);
+  --form-row-label-size: 0.875rem;
+  --form-row-label-offset: 0.3125rem;
+
+  padding: 0.8125rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  border-radius: 0.3125rem;
+}
+
+// Words and fields in columns, so that the fields line up also when the row is stacked.
+.season__dates__panel__range {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: auto minmax(8rem, 10rem) auto minmax(8rem, 10rem);
+  justify-content: end;
+  align-items: start;
+  gap: 0.5rem 1rem;
+}
+
+.season__dates__panel__word {
+  color: var(--color__layout__text__soft);
+  font-weight: 600;
+  line-height: var(--filled-field-height, 1.625rem);
+}
+
+.season__dates__panel__to {
+  margin-inline-start: 1.5rem;
+}
+
+// "al" under "Dal" when both do not fit side by side.
+@container (width < 36rem) {
+  .season__dates__panel__range {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .season__dates__panel__to {
+    margin-inline-start: 0;
+  }
+}
+
+.season__dates__panel__error {
+  margin: 0;
+  color: var(--color__layout__error);
+}
+
+// Under the rows, on the right: Modifica, or Annulla and Salva.
+.season__dates__panel__actions {
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  app-button {
+    width: 8rem;
+  }
+}

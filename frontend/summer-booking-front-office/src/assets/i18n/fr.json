@@ -1026,6 +1026,91 @@
         },
         "log": "Log",
         "owner_not_editable": "Le propriétaire ne peut pas être modifié"
+      },
+      "seasons": {
+        "season_dates": {
+          "title": "Début et fin de saison",
+          "current": "Saison en cours",
+          "next": "Saison prochaine",
+          "from": "Du",
+          "to": "au",
+          "edit": "Modifier",
+          "cancel": "Annuler",
+          "save": "Enregistrer",
+          "periods_outside": "Opération annulée car certaines périodes de cette saison ne sont pas comprises dans les dates choisies. Supprimez ou modifiez ces périodes, puis réessayez."
+        },
+        "tabs": {
+          "current_season": "Saison en cours",
+          "next_season": "Saison prochaine"
+        },
+        "periods": {
+          "title": "Périodes",
+          "show_all": "Tout afficher",
+          "hide_all": "Tout masquer",
+          "add": "Ajouter une période",
+          "date_from": "Date de début",
+          "date_to": "Date de fin",
+          "empty": "Aucune période ajoutée",
+          "clear_selection": "Désélectionner",
+          "delete_selected": "Supprimer la sélection"
+        },
+        "add_popup": {
+          "title": "Définir la période",
+          "name": "Nom de la période :",
+          "calendar": {
+            "hint": "Cliquez sur deux dates pour choisir une période",
+            "selected": "Périodes sélectionnées :"
+          },
+          "field_names": {
+            "interval": "période"
+          },
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "edit_period_popup": {
+          "title": "Modifier la période",
+          "name": "Nom de la période :",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "add_interval_popup": {
+          "title": "Ajouter une plage de dates",
+          "date_from": "Date de début",
+          "date_to": "Date de fin",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "edit_interval_popup": {
+          "title": "Modifier la plage de dates",
+          "date_from": "Date de début",
+          "date_to": "Date de fin",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "delete": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "one": {
+            "title": "Supprimer la période",
+            "text": "Voulez-vous supprimer la période {{name}} ? Toutes ses plages de dates, s'il y en a, seront également supprimées."
+          },
+          "many": {
+            "title": "Supprimer les périodes",
+            "text": "Voulez-vous supprimer les {{count}} périodes sélectionnées ? Toutes leurs plages de dates, s'il y en a, seront également supprimées."
+          }
+        },
+        "delete_intervals": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "one": {
+            "title": "Supprimer la plage de dates",
+            "text": "Voulez-vous supprimer la plage de dates {{name}} ?"
+          },
+          "many": {
+            "title": "Supprimer les plages de dates",
+            "text": "Voulez-vous supprimer les {{count}} plages de dates sélectionnées ?"
+          }
+        }
       }
     }
   },
@@ -1147,7 +1232,8 @@
     "min_length": "Au moins {{min}} caractères",
     "missing_digit": "Au moins 1 chiffre",
     "missing_uppercase": "Au moins 1 majuscule",
-    "missing_lowercase": "Au moins 1 minuscule"
+    "missing_lowercase": "Au moins 1 minuscule",
+    "overlap": "Ces dates chevauchent une autre plage de dates de la saison"
   },
   "unsaved_changes": {
     "title": "Modifications non enregistrées",

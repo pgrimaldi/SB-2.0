@@ -1,0 +1,134 @@
+// Bin and name of each period close to the left edge and to each other.
+.season__periods {
+  --section-title-padding-bottom: 0.625rem;
+  --expansion-panel-header-padding: 0 1.5rem 0 0.75rem;
+  --expansion-panel-title-gap: 0.375rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// The light blue of the add button of the tables.
+.season__periods__button {
+  --color__main__theme__one: var(--color__layout__text__soft);
+  --button-padding: 0.875rem;
+}
+
+// White with the light blue border and text, like "Annulla selezione" of the tables.
+.season__periods__clear {
+  --color__main__theme__one: var(--color__layout__text__soft);
+  --button-border-color: var(--color__layout__text__soft);
+  --button-padding: 0.875rem;
+}
+
+// Red, like the button that deletes the chosen rows of the Database page.
+.season__periods__delete {
+  --color__main__theme__one: var(--color__layout__error);
+  --button-padding: 0.875rem;
+}
+
+// Only the drawing of the icon buttons, without the grey circle.
+.season__periods__icon {
+  --icon-button-background: transparent;
+}
+
+// Pencil and + next to the name of a period: smaller buttons, so the two icons stay close.
+.season__periods__name__icon {
+  --icon-button-size: 1.375rem;
+}
+
+.season__periods__dates {
+  container-type: inline-size;
+}
+
+// One row per interval: checkbox, start and end close to each other, the buttons at the end of the
+// row; the column names on top.
+.season__periods__intervals {
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content) minmax(0, max-content) minmax(0, 1fr) auto;
+  gap: 0.375rem 1rem;
+}
+
+.season__periods__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+.season__periods__from {
+  grid-column: 2;
+}
+
+.season__periods__to {
+  grid-column: 3;
+  padding-inline-start: 1.75rem;
+}
+
+// The column names a little above the rows.
+.season__periods__headings {
+  margin-bottom: 0.125rem;
+}
+
+// Rows in turn white and in the light blue of the even table rows, each with a thin grey border and
+// a little room between them, so that the white ones stand out from the panel.
+.season__periods__interval {
+  padding: 0.25rem 0.5rem;
+  border: 0.0625rem solid var(--color__layout__muted);
+  border-radius: 0.25rem;
+
+  &:nth-child(odd of .season__periods__interval) {
+    background: var(--color__layout__surface);
+  }
+
+  &:nth-child(even of .season__periods__interval) {
+    background: var(--color__layout__highlight);
+  }
+}
+
+.season__periods__actions {
+  display: flex;
+  grid-column: 5;
+}
+
+// Narrower than the longest dates side by side (Spanish): the end under the start, in every language.
+@container (width < 29rem) {
+  .season__periods__intervals {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+  }
+
+  .season__periods__check,
+  .season__periods__actions {
+    grid-row: 1 / 3;
+  }
+
+  .season__periods__actions {
+    grid-column: 3;
+  }
+
+  .season__periods__from {
+    grid-row: 1;
+  }
+
+  .season__periods__to {
+    grid-row: 2;
+    grid-column: 2;
+    padding-inline-start: 0;
+  }
+}
+
+.season__periods__heading {
+  color: var(--color__layout__text__soft);
+  font-weight: 600;
+}
+
+.season__periods__empty,
+.season__periods__error {
+  margin: 0;
+}
+
+.season__periods__error {
+  color: var(--color__layout__error);
+}

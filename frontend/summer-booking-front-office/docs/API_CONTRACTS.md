@@ -558,6 +558,304 @@ Il corpo è il file (binario), non JSON.
 | `Content-Type` | `application/pdf` |
 | `Content-Disposition` | `attachment; filename="log-2026-10-26.pdf"` |
 
+## /seasons
+
+### GET `/api/seasons/season-dates?idProperty={idProperty}`
+
+Stagioni e periodi: date di stagione.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/seasons/season-dates?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "currentSeasonDateFrom": "2026-05-01T00:00:00.000Z",
+  "currentSeasonDateTo": "2026-09-30T00:00:00.000Z",
+  "nextSeasonDateFrom": "2027-05-01T00:00:00.000Z",
+  "nextSeasonDateTo": "2027-09-30T00:00:00.000Z"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `currentSeasonDateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
+| `currentSeasonDateTo` | string (ISO 8601, UTC) | `2026-09-30T00:00:00.000Z` |
+| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null | `2027-05-01T00:00:00.000Z` |
+| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null | `2027-09-30T00:00:00.000Z` |
+
+### POST `/api/seasons/save-season-dates`
+
+Stagioni e periodi: salva date di stagione.
+
+#### Payload
+
+```json
+{
+  "currentSeasonDateFrom": "2026-05-01T00:00:00.000Z",
+  "currentSeasonDateTo": "2026-09-25T00:00:00.000Z",
+  "nextSeasonDateFrom": "2027-05-01T00:00:00.000Z",
+  "nextSeasonDateTo": "2027-09-30T00:00:00.000Z",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `currentSeasonDateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
+| `currentSeasonDateTo` | string (ISO 8601, UTC) | `2026-09-25T00:00:00.000Z` |
+| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null | `2027-05-01T00:00:00.000Z` |
+| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null | `2027-09-30T00:00:00.000Z` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+
+Stagioni e periodi: periodi.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/seasons/period-list?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d&isNextSeason=false
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `isNextSeason` | boolean | `false` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+    "periodName": "Bassa stagione",
+    "intervals": [
+      {
+        "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01",
+        "dateFrom": "2026-05-01T00:00:00.000Z",
+        "dateTo": "2026-06-15T00:00:00.000Z"
+      },
+      {
+        "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02",
+        "dateFrom": "2026-09-01T00:00:00.000Z",
+        "dateTo": "2026-09-30T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+    "periodName": "Media stagione",
+    "intervals": [
+      {
+        "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03",
+        "dateFrom": "2026-06-16T00:00:00.000Z",
+        "dateTo": "2026-07-31T00:00:00.000Z"
+      }
+    ]
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodName` | string | `Bassa stagione` |
+| `intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) | `[{"idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01", "dateFrom": "2026-05-01T00:00:00.000Z", "dateTo": "2026-06-15T00:00:00.000Z"}, {"idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02", "dateFrom": "2026-09-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z"}]` |
+| `intervals[].idInterval` | string (UUID) | `7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01` |
+| `intervals[].dateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
+| `intervals[].dateTo` | string (ISO 8601, UTC) | `2026-06-15T00:00:00.000Z` |
+
+### POST `/api/seasons/add-period`
+
+Stagioni e periodi: nuovo periodo.
+
+#### Payload
+
+```json
+{
+  "periodName": "Pre stagione",
+  "intervals": [
+    {
+      "dateFrom": "2027-04-20T00:00:00.000Z",
+      "dateTo": "2027-04-30T00:00:00.000Z"
+    }
+  ],
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "isNextSeason": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `isNextSeason` | boolean | `true` |
+| `periodName` | string | `Pre stagione` |
+| `intervals[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"dateFrom": "2027-04-20T00:00:00.000Z", "dateTo": "2027-04-30T00:00:00.000Z"}]` |
+| `intervals[].dateFrom` | string (ISO 8601, UTC) | `2027-04-20T00:00:00.000Z` |
+| `intervals[].dateTo` | string (ISO 8601, UTC) | `2027-04-30T00:00:00.000Z` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/seasons/delete-period`
+
+Stagioni e periodi: elimina periodo.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/seasons/update-period`
+
+Stagioni e periodi: modifica periodo.
+
+#### Payload
+
+```json
+{
+  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+  "periodName": "Bassissima stagione",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodName` | string | `Bassissima stagione` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/seasons/add-interval`
+
+Stagioni e periodi: nuovo intervallo.
+
+#### Payload
+
+```json
+{
+  "dateFrom": "2026-09-01T00:00:00.000Z",
+  "dateTo": "2026-09-05T00:00:00.000Z",
+  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02` |
+| `dateFrom` | string (ISO 8601, UTC) | `2026-09-01T00:00:00.000Z` |
+| `dateTo` | string (ISO 8601, UTC) | `2026-09-05T00:00:00.000Z` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/seasons/update-interval`
+
+Stagioni e periodi: modifica intervallo.
+
+#### Payload
+
+```json
+{
+  "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01",
+  "dateFrom": "2026-05-01T00:00:00.000Z",
+  "dateTo": "2026-06-20T00:00:00.000Z",
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idInterval` | string (UUID) | `7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01` |
+| `dateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
+| `dateTo` | string (ISO 8601, UTC) | `2026-06-20T00:00:00.000Z` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/seasons/delete-intervals`
+
+Stagioni e periodi: elimina intervalli.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idIntervals": [
+    "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02",
+    "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idIntervals` | string[] (UUID) | `["7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02", "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /warehouse
 
 ### POST `/api/warehouse/list`

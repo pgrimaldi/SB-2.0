@@ -1,0 +1,44 @@
+<ng-template #content>
+  <div class="season__period__edit__popup">
+    <h2 class="season__period__edit__popup__title">
+      {{ 'management.settings.seasons.edit_period_popup.title' | translate }}
+    </h2>
+
+    <app-form-row>
+      <span appFormRowLabel>
+        {{ 'management.settings.seasons.edit_period_popup.name' | translate }}
+      </span>
+      <app-filled-text-field
+        class="season__period__edit__popup__field"
+        autocomplete="off"
+        [formField]="draftForm.periodName"
+        [error]="periodNameError()"
+      />
+    </app-form-row>
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="season__period__edit__popup__error">{{ errorMessage }}</p>
+    }
+
+    <div class="season__period__edit__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.seasons.edit_period_popup.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!canSave()"
+        [isLoading]="isLoading()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.seasons.edit_period_popup.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

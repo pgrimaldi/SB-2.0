@@ -1026,6 +1026,91 @@
         },
         "log": "Log",
         "owner_not_editable": "Il titolare non può essere modificato"
+      },
+      "seasons": {
+        "season_dates": {
+          "title": "Impostazione inizio e fine di Stagione",
+          "current": "Stagione corrente",
+          "next": "Prossima stagione",
+          "from": "Dal",
+          "to": "al",
+          "edit": "Modifica",
+          "cancel": "Annulla",
+          "save": "Salva",
+          "periods_outside": "Operazione annullata perché esistono periodi per questa stagione che non rientrano negli estremi selezionati. Cancellare o modificare questi periodi e poi riprovare."
+        },
+        "tabs": {
+          "current_season": "Stagione Corrente",
+          "next_season": "Prossima Stagione"
+        },
+        "periods": {
+          "title": "Periodi",
+          "show_all": "Mostra tutti",
+          "hide_all": "Nascondi tutti",
+          "add": "Aggiungi periodo",
+          "date_from": "Data inizio",
+          "date_to": "Data fine",
+          "empty": "Nessun periodo inserito",
+          "clear_selection": "Annulla selezione",
+          "delete_selected": "Cancella selezionati"
+        },
+        "add_popup": {
+          "title": "Imposta periodo",
+          "name": "Nome del periodo:",
+          "calendar": {
+            "hint": "Clicca due date per selezionare un intervallo",
+            "selected": "Intervalli di date selezionati:"
+          },
+          "field_names": {
+            "interval": "intervallo"
+          },
+          "cancel": "Annulla",
+          "save": "Salva"
+        },
+        "edit_period_popup": {
+          "title": "Modifica Periodo",
+          "name": "Nome del periodo:",
+          "cancel": "Annulla",
+          "save": "Salva"
+        },
+        "add_interval_popup": {
+          "title": "Aggiungi intervallo",
+          "date_from": "Data inizio",
+          "date_to": "Data fine",
+          "cancel": "Annulla",
+          "save": "Salva"
+        },
+        "edit_interval_popup": {
+          "title": "Modifica Intervallo",
+          "date_from": "Data inizio",
+          "date_to": "Data fine",
+          "cancel": "Annulla",
+          "save": "Salva"
+        },
+        "delete": {
+          "cancel": "Annulla",
+          "confirm": "Elimina",
+          "one": {
+            "title": "Elimina periodo",
+            "text": "Vuoi eliminare il periodo {{name}}? Verranno eliminati anche tutti i suoi intervalli di date se presenti."
+          },
+          "many": {
+            "title": "Elimina periodi",
+            "text": "Vuoi eliminare i {{count}} periodi selezionati? Verranno eliminati anche tutti i loro intervalli di date se presenti."
+          }
+        },
+        "delete_intervals": {
+          "cancel": "Annulla",
+          "confirm": "Elimina",
+          "one": {
+            "title": "Elimina intervallo",
+            "text": "Vuoi eliminare l'intervallo {{name}}?"
+          },
+          "many": {
+            "title": "Elimina intervalli",
+            "text": "Vuoi eliminare i {{count}} intervalli selezionati?"
+          }
+        }
       }
     }
   },
@@ -1147,7 +1232,8 @@
     "min_length": "Almeno {{min}} caratteri",
     "missing_digit": "Almeno 1 numero",
     "missing_uppercase": "Almeno 1 Maiuscola",
-    "missing_lowercase": "Almeno 1 Minuscola"
+    "missing_lowercase": "Almeno 1 Minuscola",
+    "overlap": "Le date si sovrappongono a un altro intervallo della stagione"
   },
   "unsaved_changes": {
     "title": "Modifiche non salvate",

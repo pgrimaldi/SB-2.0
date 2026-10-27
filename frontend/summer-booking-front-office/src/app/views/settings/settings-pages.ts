@@ -40,7 +40,7 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
   {
     path: 'seasons',
     label: 'management.settings.menu.seasons',
-    loadComponent: () => import('./seasons/seasons').then((component) => component.Seasons),
+    loadChildren: () => import('./seasons/seasons.routes').then((routes) => routes.SEASONS_ROUTES),
   },
   { path: 'sectors', label: 'management.settings.menu.sectors' },
   { path: 'map', label: 'management.settings.menu.map' },

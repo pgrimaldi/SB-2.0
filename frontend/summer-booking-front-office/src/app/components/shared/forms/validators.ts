@@ -37,6 +37,53 @@ export interface MissingLowercaseError extends ValidationError {
   readonly kind: 'missing_lowercase';
 }
 
+export interface OverlapError extends ValidationError {
+  readonly kind: 'overlap';
+}
+
+/** First and last day, at midnight UTC as ISO strings. */
+export interface DayRange {
+  dateFrom: string | null;
+  dateTo: string | null;
+}
+
+/** At least one day in common; a range without both of its days has none. */
+export function rangesOverlap(first: DayRange, second: DayRange): boolean {
+  if (!first.dateFrom || !first.dateTo || !second.dateFrom || !second.dateTo) {
+    return false;
+  }
+  return (
+    first.dateFrom.slice(0, 10) <= second.dateTo.slice(0, 10) &&
+    second.dateFrom.slice(0, 10) <= first.dateTo.slice(0, 10)
+  );
+}
+
+/** A range of days (the form itself, e.g. Dal / Al) that shares a day with one of `others`. */
+export function noOverlap<T extends DayRange, TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<T, SchemaPathRules.Supported, TPathKind>,
+  others: () => readonly DayRange[],
+): void {
+  validate(path, ({ value }): OverlapError | undefined =>
+    others().some((other) => rangesOverlap(value(), other)) ? { kind: 'overlap' } : undefined,
+  );
+}
+
+/** A list of ranges of days where one shares a day with another of the list or with one of `others`. */
+export function noOverlaps<T extends DayRange, TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<readonly T[], SchemaPathRules.Supported, TPathKind>,
+  others: () => readonly DayRange[],
+): void {
+  validate(path, ({ value }): OverlapError | undefined => {
+    const ranges = value();
+    const isClash = ranges.some(
+      (range, index) =>
+        others().some((other) => rangesOverlap(range, other)) ||
+        ranges.some((other, otherIndex) => otherIndex !== index && rangesOverlap(range, other)),
+    );
+    return isClash ? { kind: 'overlap' } : undefined;
+  });
+}
+
 /** Unlike Angular's `required`, a text made only of spaces is empty too. */
 export function requiredText<TPathKind extends PathKind = PathKind.Root>(
   path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,

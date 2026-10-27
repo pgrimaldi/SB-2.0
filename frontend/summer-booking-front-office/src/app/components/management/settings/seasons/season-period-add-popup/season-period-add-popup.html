@@ -1,0 +1,54 @@
+<ng-template #content>
+  <div class="season__period__add__popup">
+    <h2 class="season__period__add__popup__title">
+      {{ 'management.settings.seasons.add_popup.title' | translate }}
+    </h2>
+
+    <app-form-row class="season__period__add__popup__name">
+      <span appFormRowLabel>{{ 'management.settings.seasons.add_popup.name' | translate }}</span>
+      <app-filled-text-field
+        class="season__period__add__popup__field"
+        autocomplete="off"
+        [formField]="draftForm.periodName"
+        [error]="periodNameError()"
+      />
+    </app-form-row>
+
+    <app-period-calendar
+      [texts]="'management.settings.seasons.add_popup.calendar' | translate"
+      [pathIcon]="calendarIcons"
+      [minDate]="season()?.dateFrom ?? null"
+      [maxDate]="season()?.dateTo ?? null"
+      [disabledPeriods]="takenIntervals()"
+      [formField]="draftForm.intervals"
+    />
+    @if (intervalsError(); as intervalsError) {
+      <p class="season__period__add__popup__error">{{ intervalsError }}</p>
+    }
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="season__period__add__popup__error">{{ errorMessage }}</p>
+    }
+
+    <div class="season__period__add__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.seasons.add_popup.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!canSave()"
+        [isLoading]="isLoading()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.seasons.add_popup.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

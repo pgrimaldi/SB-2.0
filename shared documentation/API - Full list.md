@@ -842,6 +842,300 @@ File (binario), non JSON.
 
 File (binario), non JSON.
 
+## Stagioni e periodi
+
+### GET `/api/seasons/season-dates?idProperty={idProperty}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "currentSeasonDateFrom": "string (ISO 8601, UTC)",
+  "currentSeasonDateTo": "string (ISO 8601, UTC)",
+  "nextSeasonDateFrom": "string (ISO 8601, UTC) | null",
+  "nextSeasonDateTo": "string (ISO 8601, UTC) | null"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `currentSeasonDateFrom` | string (ISO 8601, UTC) |
+| `currentSeasonDateTo` | string (ISO 8601, UTC) |
+| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null |
+| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null |
+
+### POST `/api/seasons/save-season-dates`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "currentSeasonDateFrom": "string (ISO 8601, UTC)",
+  "currentSeasonDateTo": "string (ISO 8601, UTC)",
+  "nextSeasonDateFrom": "string (ISO 8601, UTC) | null",
+  "nextSeasonDateTo": "string (ISO 8601, UTC) | null"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `currentSeasonDateFrom` | string (ISO 8601, UTC) |
+| `currentSeasonDateTo` | string (ISO 8601, UTC) |
+| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null |
+| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "isNextSeason": "boolean"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "idPeriod": "string (UUID)",
+    "periodName": "string",
+    "intervals": [
+      {
+        "idInterval": "string (UUID)",
+        "dateFrom": "string (ISO 8601, UTC)",
+        "dateTo": "string (ISO 8601, UTC)"
+      }
+    ]
+  }
+]
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `isNextSeason` | boolean |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].idPeriod` | string (UUID) |
+| `[].periodName` | string |
+| `[].intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) |
+| `[].intervals[].idInterval` | string (UUID) |
+| `[].intervals[].dateFrom` | string (ISO 8601, UTC) |
+| `[].intervals[].dateTo` | string (ISO 8601, UTC) |
+
+### POST `/api/seasons/add-period`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "isNextSeason": "boolean",
+  "periodName": "string",
+  "intervals": [
+    {
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `isNextSeason` | boolean |
+| `periodName` | string |
+| `intervals[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `intervals[].dateFrom` | string (ISO 8601, UTC) |
+| `intervals[].dateTo` | string (ISO 8601, UTC) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/seasons/delete-period`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idPeriod": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idPeriod` | string (UUID) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/seasons/update-period`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idPeriod": "string (UUID)",
+  "periodName": "string"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idPeriod` | string (UUID) |
+| `periodName` | string |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/seasons/add-interval`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idPeriod": "string (UUID)",
+  "dateFrom": "string (ISO 8601, UTC)",
+  "dateTo": "string (ISO 8601, UTC)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idPeriod` | string (UUID) |
+| `dateFrom` | string (ISO 8601, UTC) |
+| `dateTo` | string (ISO 8601, UTC) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/seasons/update-interval`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idInterval": "string (UUID)",
+  "dateFrom": "string (ISO 8601, UTC)",
+  "dateTo": "string (ISO 8601, UTC)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idInterval` | string (UUID) |
+| `dateFrom` | string (ISO 8601, UTC) |
+| `dateTo` | string (ISO 8601, UTC) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/seasons/delete-intervals`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idIntervals": "string[] (UUID)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idIntervals` | string[] (UUID) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ## Impostazioni magazzino
 
 ### POST `/api/warehouse/list`

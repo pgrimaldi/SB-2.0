@@ -1026,6 +1026,91 @@
         },
         "log": "日志",
         "owner_not_editable": "无法修改所有者"
+      },
+      "seasons": {
+        "season_dates": {
+          "title": "季节起止设置",
+          "current": "当前季节",
+          "next": "下一季节",
+          "from": "从",
+          "to": "至",
+          "edit": "编辑",
+          "cancel": "取消",
+          "save": "保存",
+          "periods_outside": "操作已取消：本季节有时段不在所选的起止日期内。请删除或修改这些时段后重试。"
+        },
+        "tabs": {
+          "current_season": "当前季节",
+          "next_season": "下一季节"
+        },
+        "periods": {
+          "title": "时段",
+          "show_all": "全部展开",
+          "hide_all": "全部收起",
+          "add": "添加时段",
+          "date_from": "开始日期",
+          "date_to": "结束日期",
+          "empty": "尚未添加时段",
+          "clear_selection": "取消选择",
+          "delete_selected": "删除所选"
+        },
+        "add_popup": {
+          "title": "设置时段",
+          "name": "时段名称：",
+          "calendar": {
+            "hint": "点击两个日期以选择一个时间段",
+            "selected": "已选日期区间："
+          },
+          "field_names": {
+            "interval": "日期区间"
+          },
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "edit_period_popup": {
+          "title": "编辑时段",
+          "name": "时段名称：",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "add_interval_popup": {
+          "title": "添加日期区间",
+          "date_from": "开始日期",
+          "date_to": "结束日期",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "edit_interval_popup": {
+          "title": "编辑日期区间",
+          "date_from": "开始日期",
+          "date_to": "结束日期",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "delete": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除时段",
+            "text": "要删除时段 {{name}} 吗？其所有日期区间（如有）也将被删除。"
+          },
+          "many": {
+            "title": "删除时段",
+            "text": "要删除选中的 {{count}} 个时段吗？它们的所有日期区间（如有）也将被删除。"
+          }
+        },
+        "delete_intervals": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除日期区间",
+            "text": "要删除日期区间 {{name}} 吗？"
+          },
+          "many": {
+            "title": "删除日期区间",
+            "text": "要删除选中的 {{count}} 个日期区间吗？"
+          }
+        }
       }
     }
   },
@@ -1147,7 +1232,8 @@
     "min_length": "至少 {{min}} 个字符",
     "missing_digit": "至少 1 个数字",
     "missing_uppercase": "至少 1 个大写字母",
-    "missing_lowercase": "至少 1 个小写字母"
+    "missing_lowercase": "至少 1 个小写字母",
+    "overlap": "这些日期与本季节的另一个日期区间重叠"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

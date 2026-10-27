@@ -1,11 +1,11 @@
 /** The actions of the log, in the order of the Azione filter: backend code and icon. */
 export const AUDIT_ACTIONS: readonly { code: string; icon: string }[] = [
-  { code: 'booking.checked_in', icon: '/assets/images/UserManagement_ActionCalendar.svg' },
-  { code: 'booking.checked_out', icon: '/assets/images/UserManagement_ActionCalendar.svg' },
+  { code: 'booking.checked_in', icon: '/assets/images/GeneralIcon_CalendarFilled.svg' },
+  { code: 'booking.checked_out', icon: '/assets/images/GeneralIcon_CalendarFilled.svg' },
   { code: 'booking.arrival_reported', icon: '/assets/images/UserManagement_ActionCheck.svg' },
   { code: 'customer.updated', icon: '/assets/images/UserManagement_ActionEdit.svg' },
   { code: 'booking.guest_added', icon: '/assets/images/UserManagement_ActionAdd.svg' },
-  { code: 'booking.dates_changed', icon: '/assets/images/UserManagement_ActionCalendar.svg' },
+  { code: 'booking.dates_changed', icon: '/assets/images/GeneralIcon_CalendarFilled.svg' },
   { code: 'booking.agreement_added', icon: '/assets/images/UserManagement_ActionAgreement.svg' },
   { code: 'booking.repeated', icon: '/assets/images/UserManagement_ActionRepeat.svg' },
   { code: 'booking.spot_added', icon: '/assets/images/UserManagement_ActionAdd.svg' },

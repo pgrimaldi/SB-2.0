@@ -1,6 +1,8 @@
 @use '@angular/material' as mat;
 
 // White panel with a thin border, blue bold title with its icon, an arrow pointing right when closed and down when open.
+// A page can change --expansion-panel-header-padding (0 1.5rem 0 2rem) and --expansion-panel-title-gap
+// (0.75rem, between what is before the title, its icon and the text).
 :host {
   display: block;
 
@@ -27,7 +29,7 @@
 }
 
 .expansion__panel__header {
-  padding: 0 1.5rem 0 2rem;
+  padding: var(--expansion-panel-header-padding, 0 1.5rem 0 2rem);
 }
 
 .expansion__panel.mat-expanded .expansion__panel__header {
@@ -37,7 +39,20 @@
 .expansion__panel__title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--expansion-panel-title-gap, 0.75rem);
+}
+
+// Before the title (e.g. a bin) and right after it (e.g. a pencil): a click there does not open or
+// close the panel.
+.expansion__panel__start,
+.expansion__panel__title__aside {
+  display: flex;
+  flex: none;
+  align-items: center;
+
+  &:empty {
+    display: none;
+  }
 }
 
 // The arrow turns, not its box: Material clips what goes out of the header content, and a turned box

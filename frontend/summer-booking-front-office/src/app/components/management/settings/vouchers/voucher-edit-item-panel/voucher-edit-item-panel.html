@@ -49,6 +49,7 @@
                 <app-filled-date-field
                   class="voucher__edit__item__panel__field"
                   [pathIcon]="calendarIcon"
+                  [minDate]="period.validFrom().value()"
                   [formField]="period.validTo"
                   [error]="validationText.text(period.validTo)"
                 />

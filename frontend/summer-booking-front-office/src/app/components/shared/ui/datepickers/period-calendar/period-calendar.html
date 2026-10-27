@@ -3,6 +3,9 @@
     class="period__calendar__calendar"
     [headerComponent]="Header"
     [selected]="draft()"
+    [minDate]="minDay()"
+    [maxDate]="maxDay()"
+    [dateFilter]="dateFilter()"
     [dateClass]="dateClass()"
     (selectedChange)="pick($event)"
   />

@@ -4,7 +4,8 @@ import { resolveIcons } from '../../icons/icons';
 
 /**
  * Title of a section with the line under it; what is put inside (e.g. a button) goes on the right
- * and moves under the title when the row is too narrow. The space around it is up to the page.
+ * and moves under the title when the row is too narrow, what is marked `appSectionTitleAside` right
+ * after the text. The space around it is up to the page.
  */
 @Component({
   selector: 'app-section-title',

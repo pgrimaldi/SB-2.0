@@ -1026,6 +1026,91 @@
         },
         "log": "Log",
         "owner_not_editable": "Der Inhaber kann nicht bearbeitet werden"
+      },
+      "seasons": {
+        "season_dates": {
+          "title": "Saisonbeginn und -ende",
+          "current": "Aktuelle Saison",
+          "next": "Nächste Saison",
+          "from": "Vom",
+          "to": "bis",
+          "edit": "Bearbeiten",
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "periods_outside": "Vorgang abgebrochen, weil es Zeiträume dieser Saison gibt, die nicht innerhalb der gewählten Daten liegen. Lösche oder ändere diese Zeiträume und versuche es erneut."
+        },
+        "tabs": {
+          "current_season": "Aktuelle Saison",
+          "next_season": "Nächste Saison"
+        },
+        "periods": {
+          "title": "Zeiträume",
+          "show_all": "Alle anzeigen",
+          "hide_all": "Alle ausblenden",
+          "add": "Zeitraum hinzufügen",
+          "date_from": "Startdatum",
+          "date_to": "Enddatum",
+          "empty": "Keine Zeiträume vorhanden",
+          "clear_selection": "Abwählen",
+          "delete_selected": "Ausgewählte löschen"
+        },
+        "add_popup": {
+          "title": "Zeitraum festlegen",
+          "name": "Name des Zeitraums:",
+          "calendar": {
+            "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
+            "selected": "Gewählte Zeiträume:"
+          },
+          "field_names": {
+            "interval": "Zeitraum"
+          },
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "edit_period_popup": {
+          "title": "Zeitraum bearbeiten",
+          "name": "Name des Zeitraums:",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "add_interval_popup": {
+          "title": "Datumsbereich hinzufügen",
+          "date_from": "Startdatum",
+          "date_to": "Enddatum",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "edit_interval_popup": {
+          "title": "Datumsbereich bearbeiten",
+          "date_from": "Startdatum",
+          "date_to": "Enddatum",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "delete": {
+          "cancel": "Abbrechen",
+          "confirm": "Löschen",
+          "one": {
+            "title": "Zeitraum löschen",
+            "text": "Möchtest du den Zeitraum {{name}} löschen? Auch alle seine Datumsbereiche werden gelöscht, falls vorhanden."
+          },
+          "many": {
+            "title": "Zeiträume löschen",
+            "text": "Möchtest du die {{count}} ausgewählten Zeiträume löschen? Auch alle ihre Datumsbereiche werden gelöscht, falls vorhanden."
+          }
+        },
+        "delete_intervals": {
+          "cancel": "Abbrechen",
+          "confirm": "Löschen",
+          "one": {
+            "title": "Datumsbereich löschen",
+            "text": "Möchtest du den Datumsbereich {{name}} löschen?"
+          },
+          "many": {
+            "title": "Datumsbereiche löschen",
+            "text": "Möchtest du die {{count}} ausgewählten Datumsbereiche löschen?"
+          }
+        }
       }
     }
   },
@@ -1147,7 +1232,8 @@
     "min_length": "Mindestens {{min}} Zeichen",
     "missing_digit": "Mindestens 1 Zahl",
     "missing_uppercase": "Mindestens 1 Großbuchstabe",
-    "missing_lowercase": "Mindestens 1 Kleinbuchstabe"
+    "missing_lowercase": "Mindestens 1 Kleinbuchstabe",
+    "overlap": "Diese Daten überschneiden sich mit einem anderen Datumsbereich der Saison"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

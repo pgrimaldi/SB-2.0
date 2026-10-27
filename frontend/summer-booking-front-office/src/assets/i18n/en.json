@@ -1026,6 +1026,91 @@
         },
         "log": "Log",
         "owner_not_editable": "The owner cannot be edited"
+      },
+      "seasons": {
+        "season_dates": {
+          "title": "Season start and end settings",
+          "current": "Current season",
+          "next": "Next season",
+          "from": "From",
+          "to": "to",
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save",
+          "periods_outside": "Operation cancelled because some periods of this season fall outside the selected dates. Delete or change these periods and try again."
+        },
+        "tabs": {
+          "current_season": "Current Season",
+          "next_season": "Next Season"
+        },
+        "periods": {
+          "title": "Periods",
+          "show_all": "Show all",
+          "hide_all": "Hide all",
+          "add": "Add period",
+          "date_from": "Start date",
+          "date_to": "End date",
+          "empty": "No periods added",
+          "clear_selection": "Clear selection",
+          "delete_selected": "Delete selected"
+        },
+        "add_popup": {
+          "title": "Set period",
+          "name": "Period name:",
+          "calendar": {
+            "hint": "Click two dates to select a range",
+            "selected": "Selected date ranges:"
+          },
+          "field_names": {
+            "interval": "date range"
+          },
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "edit_period_popup": {
+          "title": "Edit period",
+          "name": "Period name:",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "add_interval_popup": {
+          "title": "Add date range",
+          "date_from": "Start date",
+          "date_to": "End date",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "edit_interval_popup": {
+          "title": "Edit date range",
+          "date_from": "Start date",
+          "date_to": "End date",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "delete": {
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "one": {
+            "title": "Delete period",
+            "text": "Do you want to delete the period {{name}}? All its date ranges, if any, will be deleted too."
+          },
+          "many": {
+            "title": "Delete periods",
+            "text": "Do you want to delete the {{count}} selected periods? All their date ranges, if any, will be deleted too."
+          }
+        },
+        "delete_intervals": {
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "one": {
+            "title": "Delete date range",
+            "text": "Do you want to delete the date range {{name}}?"
+          },
+          "many": {
+            "title": "Delete date ranges",
+            "text": "Do you want to delete the {{count}} selected date ranges?"
+          }
+        }
       }
     }
   },
@@ -1147,7 +1232,8 @@
     "min_length": "At least {{min}} characters",
     "missing_digit": "At least 1 number",
     "missing_uppercase": "At least 1 uppercase letter",
-    "missing_lowercase": "At least 1 lowercase letter"
+    "missing_lowercase": "At least 1 lowercase letter",
+    "overlap": "These dates overlap another date range of the season"
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

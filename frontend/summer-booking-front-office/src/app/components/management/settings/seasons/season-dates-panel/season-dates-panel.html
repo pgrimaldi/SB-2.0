@@ -1,0 +1,95 @@
+<app-section-title [text]="'management.settings.seasons.season_dates.title' | translate" />
+
+<app-form-row class="season__dates__panel__boundary">
+  <span appFormRowLabel>
+    {{ 'management.settings.seasons.season_dates.current' | translate }}
+  </span>
+  <div class="season__dates__panel__range">
+    <span class="season__dates__panel__word">
+      {{ 'management.settings.seasons.season_dates.from' | translate }}
+    </span>
+    <app-filled-date-field
+      [pathIcon]="dateIcon"
+      [formField]="datesForm.currentSeasonDateFrom"
+      [error]="fieldErrors.currentSeasonDateFrom()"
+    />
+    <span class="season__dates__panel__word season__dates__panel__to">
+      {{ 'management.settings.seasons.season_dates.to' | translate }}
+    </span>
+    <app-filled-date-field
+      [pathIcon]="dateIcon"
+      [minDate]="datesForm.currentSeasonDateFrom().value()"
+      [formField]="datesForm.currentSeasonDateTo"
+      [error]="fieldErrors.currentSeasonDateTo()"
+    />
+  </div>
+</app-form-row>
+
+<app-form-row class="season__dates__panel__boundary">
+  <span appFormRowLabel>
+    {{ 'management.settings.seasons.season_dates.next' | translate }}
+  </span>
+  <div class="season__dates__panel__range">
+    <span class="season__dates__panel__word">
+      {{ 'management.settings.seasons.season_dates.from' | translate }}
+    </span>
+    <app-filled-date-field
+      [pathIcon]="dateIcon"
+      [formField]="datesForm.nextSeasonDateFrom"
+      [error]="fieldErrors.nextSeasonDateFrom()"
+    />
+    <span class="season__dates__panel__word season__dates__panel__to">
+      {{ 'management.settings.seasons.season_dates.to' | translate }}
+    </span>
+    <app-filled-date-field
+      [pathIcon]="dateIcon"
+      [minDate]="datesForm.nextSeasonDateFrom().value()"
+      [formField]="datesForm.nextSeasonDateTo"
+      [error]="fieldErrors.nextSeasonDateTo()"
+    />
+  </div>
+</app-form-row>
+
+@if (errorMessage(); as errorMessage) {
+  <p class="season__dates__panel__error">{{ errorMessage }}</p>
+}
+
+<div class="season__dates__panel__actions">
+  @if (isEditing()) {
+    <app-button
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="isSaving()"
+      (clicked)="cancel()"
+    >
+      {{ 'management.settings.seasons.season_dates.cancel' | translate }}
+    </app-button>
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="!canSave()"
+      [isLoading]="isSaving()"
+      (clicked)="save()"
+    >
+      {{ 'management.settings.seasons.season_dates.save' | translate }}
+    </app-button>
+  } @else {
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="isLoading()"
+      (clicked)="edit()"
+    >
+      {{ 'management.settings.seasons.season_dates.edit' | translate }}
+    </app-button>
+  }
+</div>
+
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="'management.settings.seasons.season_dates.periods_outside' | translate"
+  [texts]="'alert' | translate"
+  [pathIcon]="alertIcons"
+  [(open)]="isPeriodsOutsideShown"
+/>

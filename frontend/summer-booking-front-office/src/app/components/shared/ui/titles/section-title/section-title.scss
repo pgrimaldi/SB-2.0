@@ -6,6 +6,10 @@
   align-self: stretch;
 }
 
+:host:has(.section__title__aside:not(:empty)) {
+  container-type: inline-size;
+}
+
 .section__title {
   display: flex;
   flex-wrap: wrap;
@@ -34,12 +38,76 @@
   vertical-align: -0.25rem;
 }
 
+// Without an aside the action is an item of the title row of its own.
+.section__title__controls {
+  display: contents;
+}
+
+// With an aside: right after the text, the action still on the right.
+.section__title:has(.section__title__aside:not(:empty)) {
+  .section__title__text {
+    flex-grow: 0;
+  }
+
+  .section__title__controls {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+}
+
+.section__title__aside,
 .section__title__action {
   display: flex;
   flex: none;
-  margin-inline-start: auto;
 
   &:empty {
     display: none;
+  }
+}
+
+.section__title__aside {
+  gap: 0.5rem;
+}
+
+.section__title__action {
+  margin-inline-start: auto;
+}
+
+// A narrow title, the same width in every language: the text alone, under it the items of the aside
+// and the action two per row, all as wide; with an odd number the action takes the last row.
+@container (width < 43rem) {
+  .section__title:has(.section__title__aside:not(:empty)) {
+    .section__title__text {
+      flex-basis: 100%;
+    }
+
+    .section__title__controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .section__title__aside {
+      display: contents;
+    }
+
+    .section__title__action {
+      margin-inline-start: 0;
+    }
+
+    .section__title__controls:has(.section__title__aside > :nth-child(2):last-child)
+      .section__title__action {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+// Too narrow even for two items side by side: one item per row.
+@container (width < 21rem) {
+  .section__title:has(.section__title__aside:not(:empty)) .section__title__controls {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

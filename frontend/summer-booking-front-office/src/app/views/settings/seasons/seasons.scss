@@ -1,0 +1,43 @@
+@use '../../../styles/settings-panel' as panel;
+
+.seasons {
+  --button-text-size: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 0.8125rem 1.5rem;
+  color: var(--color__main__theme__two);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.seasons__panel {
+  @include panel.settings-panel;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.seasons__boundaries {
+  --section-title-text-size: 1rem;
+
+  gap: 1.25rem;
+}
+
+// The tabs head the white panel; the open tab shows the periods of its season inside it.
+.seasons__periods {
+  --tab-nav-panel-padding: 1.5rem;
+
+  @include panel.settings-panel;
+}
+
+@media (width < 48rem) {
+  .seasons__periods {
+    --tab-nav-panel-padding: 1rem;
+  }
+}
