@@ -16,8 +16,30 @@
   [isCreateButtonHidden]="false"
   [createLabel]="'management.settings.services.bar_services.create' | translate"
   [rowActions]="rowActions()"
+  [(selection)]="idSelectedBarServices"
   [pathIcon]="tableIcons"
   (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idBarServicesToDelete()"
+  [itemName]="barServiceNameToDelete()"
+  translationKey="management.settings.services.bar_services.delete"
+  [action]="deleteBarServices"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idBarServicesToDuplicate()"
+  [itemName]="barServiceNameToDuplicate()"
+  translationKey="management.settings.services.bar_services.duplicate"
+  [action]="duplicateBarServices"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup

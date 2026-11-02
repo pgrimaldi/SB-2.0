@@ -1126,6 +1126,30 @@
           "table": {
             "service": "Service",
             "price": "Price"
+          },
+          "delete": {
+            "cancel": "Cancel",
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete bar service",
+              "text": "Do you want to delete the bar service {{name}}?"
+            },
+            "many": {
+              "title": "Delete bar services",
+              "text": "Do you want to delete the {{count}} selected bar services?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancel",
+            "confirm": "Duplicate",
+            "one": {
+              "title": "Duplicate bar service",
+              "text": "Do you want to duplicate the bar service {{name}}?"
+            },
+            "many": {
+              "title": "Duplicate bar services",
+              "text": "Do you want to duplicate the {{count}} selected bar services?"
+            }
           }
         },
         "standard_services": {
@@ -1134,6 +1158,30 @@
           "table": {
             "service": "Service",
             "price": "Price"
+          },
+          "delete": {
+            "cancel": "Cancel",
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete service",
+              "text": "Do you want to delete the service {{name}}?"
+            },
+            "many": {
+              "title": "Delete services",
+              "text": "Do you want to delete the {{count}} selected services?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancel",
+            "confirm": "Duplicate",
+            "one": {
+              "title": "Duplicate service",
+              "text": "Do you want to duplicate the service {{name}}?"
+            },
+            "many": {
+              "title": "Duplicate services",
+              "text": "Do you want to duplicate the {{count}} selected services?"
+            }
           }
         },
         "hourly_services": {
@@ -1141,6 +1189,30 @@
           "create": "Add hourly service",
           "table": {
             "service": "Service"
+          },
+          "delete": {
+            "cancel": "Cancel",
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete hourly service",
+              "text": "Do you want to delete the hourly service {{name}}?"
+            },
+            "many": {
+              "title": "Delete hourly services",
+              "text": "Do you want to delete the {{count}} selected hourly services?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancel",
+            "confirm": "Duplicate",
+            "one": {
+              "title": "Duplicate hourly service",
+              "text": "Do you want to duplicate the hourly service {{name}}?"
+            },
+            "many": {
+              "title": "Duplicate hourly services",
+              "text": "Do you want to duplicate the {{count}} selected hourly services?"
+            }
           }
         },
         "automatic_prices": {
@@ -1149,6 +1221,30 @@
           "table": {
             "service": "Service",
             "price": "Price"
+          },
+          "delete": {
+            "cancel": "Cancel",
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete automatic price",
+              "text": "Do you want to delete the automatic price {{name}}?"
+            },
+            "many": {
+              "title": "Delete automatic prices",
+              "text": "Do you want to delete the {{count}} selected automatic prices?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancel",
+            "confirm": "Duplicate",
+            "one": {
+              "title": "Duplicate automatic price",
+              "text": "Do you want to duplicate the automatic price {{name}}?"
+            },
+            "many": {
+              "title": "Duplicate automatic prices",
+              "text": "Do you want to duplicate the {{count}} selected automatic prices?"
+            }
           }
         },
         "table_booking": {
@@ -1156,6 +1252,30 @@
           "create": "Add table service",
           "table": {
             "service_name": "Service name"
+          },
+          "delete": {
+            "cancel": "Cancel",
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete table service",
+              "text": "Do you want to delete the table service {{name}}?"
+            },
+            "many": {
+              "title": "Delete table services",
+              "text": "Do you want to delete the {{count}} selected table services?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancel",
+            "confirm": "Duplicate",
+            "one": {
+              "title": "Duplicate table service",
+              "text": "Do you want to duplicate the table service {{name}}?"
+            },
+            "many": {
+              "title": "Duplicate table services",
+              "text": "Do you want to duplicate the {{count}} selected table services?"
+            }
           }
         }
       }

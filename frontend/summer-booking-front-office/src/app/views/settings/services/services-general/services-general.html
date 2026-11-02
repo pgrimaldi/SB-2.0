@@ -16,8 +16,30 @@
   [isCreateButtonHidden]="false"
   [createLabel]="'management.settings.services.standard_services.create' | translate"
   [rowActions]="rowActions()"
+  [(selection)]="idSelectedStandardServices"
   [pathIcon]="tableIcons"
   (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idStandardServicesToDelete()"
+  [itemName]="standardServiceNameToDelete()"
+  translationKey="management.settings.services.standard_services.delete"
+  [action]="deleteStandardServices"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idStandardServicesToDuplicate()"
+  [itemName]="standardServiceNameToDuplicate()"
+  translationKey="management.settings.services.standard_services.duplicate"
+  [action]="duplicateStandardServices"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup

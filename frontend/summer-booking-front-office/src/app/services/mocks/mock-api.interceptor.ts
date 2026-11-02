@@ -10,6 +10,16 @@ import {
   bathhouseConfigurationMediaMock,
   bathhouseConfigurationServicesMock,
   countriesComboboxMock,
+  deleteBarServiceItemsMock,
+  deleteStandardServiceItemsMock,
+  duplicateStandardServiceItemsMock,
+  deleteHourlyServiceItemsMock,
+  duplicateHourlyServiceItemsMock,
+  deleteAutomaticPriceItemsMock,
+  duplicateAutomaticPriceItemsMock,
+  deleteTableServiceItemsMock,
+  duplicateTableServiceItemsMock,
+  duplicateBarServiceItemsMock,
   hourlyServiceListMock,
   saveBathhouseConfigurationGeneralMock,
   saveBathhouseConfigurationServicesMock,
@@ -512,9 +522,37 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-bar-service-item`
+  ) {
+    return deleteBarServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-bar-service-item`
+  ) {
+    return duplicateBarServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
     request.url === `${environment.apiBaseUrl}/catalog/standard-service-list`
   ) {
     return standardServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-standard-service-item`
+  ) {
+    return deleteStandardServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-standard-service-item`
+  ) {
+    return duplicateStandardServiceItemsMock(request);
   }
 
   if (
@@ -526,6 +564,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-hourly-service-item`
+  ) {
+    return deleteHourlyServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-hourly-service-item`
+  ) {
+    return duplicateHourlyServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
     request.url === `${environment.apiBaseUrl}/catalog/automatic-price-list`
   ) {
     return automaticPriceListMock(request);
@@ -533,9 +585,37 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-automatic-price-item`
+  ) {
+    return deleteAutomaticPriceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-automatic-price-item`
+  ) {
+    return duplicateAutomaticPriceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
     request.url === `${environment.apiBaseUrl}/catalog/table-service-list`
   ) {
     return tableServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-table-service-item`
+  ) {
+    return deleteTableServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-table-service-item`
+  ) {
+    return duplicateTableServiceItemsMock(request);
   }
 
   return next(request);

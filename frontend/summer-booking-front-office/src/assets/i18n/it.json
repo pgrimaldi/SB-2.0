@@ -1126,6 +1126,30 @@
           "table": {
             "service": "Servizio",
             "price": "Prezzo"
+          },
+          "delete": {
+            "cancel": "Annulla",
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina servizio bar",
+              "text": "Vuoi eliminare il servizio bar {{name}}?"
+            },
+            "many": {
+              "title": "Elimina servizi bar",
+              "text": "Vuoi eliminare i {{count}} servizi bar selezionati?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica servizio bar",
+              "text": "Vuoi duplicare il servizio bar {{name}}?"
+            },
+            "many": {
+              "title": "Duplica servizi bar",
+              "text": "Vuoi duplicare i {{count}} servizi bar selezionati?"
+            }
           }
         },
         "standard_services": {
@@ -1134,6 +1158,30 @@
           "table": {
             "service": "Servizio",
             "price": "Prezzo"
+          },
+          "delete": {
+            "cancel": "Annulla",
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina servizio",
+              "text": "Vuoi eliminare il servizio {{name}}?"
+            },
+            "many": {
+              "title": "Elimina servizi",
+              "text": "Vuoi eliminare i {{count}} servizi selezionati?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica servizio",
+              "text": "Vuoi duplicare il servizio {{name}}?"
+            },
+            "many": {
+              "title": "Duplica servizi",
+              "text": "Vuoi duplicare i {{count}} servizi selezionati?"
+            }
           }
         },
         "hourly_services": {
@@ -1141,6 +1189,30 @@
           "create": "Aggiungi servizio orario",
           "table": {
             "service": "Servizio"
+          },
+          "delete": {
+            "cancel": "Annulla",
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina servizio orario",
+              "text": "Vuoi eliminare il servizio orario {{name}}?"
+            },
+            "many": {
+              "title": "Elimina servizi orari",
+              "text": "Vuoi eliminare i {{count}} servizi orari selezionati?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica servizio orario",
+              "text": "Vuoi duplicare il servizio orario {{name}}?"
+            },
+            "many": {
+              "title": "Duplica servizi orari",
+              "text": "Vuoi duplicare i {{count}} servizi orari selezionati?"
+            }
           }
         },
         "automatic_prices": {
@@ -1149,6 +1221,30 @@
           "table": {
             "service": "Servizio",
             "price": "Prezzo"
+          },
+          "delete": {
+            "cancel": "Annulla",
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina prezzo automatico",
+              "text": "Vuoi eliminare il prezzo automatico {{name}}?"
+            },
+            "many": {
+              "title": "Elimina prezzi automatici",
+              "text": "Vuoi eliminare i {{count}} prezzi automatici selezionati?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica prezzo automatico",
+              "text": "Vuoi duplicare il prezzo automatico {{name}}?"
+            },
+            "many": {
+              "title": "Duplica prezzi automatici",
+              "text": "Vuoi duplicare i {{count}} prezzi automatici selezionati?"
+            }
           }
         },
         "table_booking": {
@@ -1156,6 +1252,30 @@
           "create": "Aggiungi servizio tavoli",
           "table": {
             "service_name": "Nome servizio"
+          },
+          "delete": {
+            "cancel": "Annulla",
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina servizio tavoli",
+              "text": "Vuoi eliminare il servizio tavoli {{name}}?"
+            },
+            "many": {
+              "title": "Elimina servizi tavoli",
+              "text": "Vuoi eliminare i {{count}} servizi tavoli selezionati?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica servizio tavoli",
+              "text": "Vuoi duplicare il servizio tavoli {{name}}?"
+            },
+            "many": {
+              "title": "Duplica servizi tavoli",
+              "text": "Vuoi duplicare i {{count}} servizi tavoli selezionati?"
+            }
           }
         }
       }

@@ -1126,6 +1126,30 @@
           "table": {
             "service": "Servicio",
             "price": "Precio"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar servicio de bar",
+              "text": "¿Quieres eliminar el servicio de bar {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar servicios de bar",
+              "text": "¿Quieres eliminar los {{count}} servicios de bar seleccionados?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancelar",
+            "confirm": "Duplicar",
+            "one": {
+              "title": "Duplicar servicio de bar",
+              "text": "¿Quieres duplicar el servicio de bar {{name}}?"
+            },
+            "many": {
+              "title": "Duplicar servicios de bar",
+              "text": "¿Quieres duplicar los {{count}} servicios de bar seleccionados?"
+            }
           }
         },
         "standard_services": {
@@ -1134,6 +1158,30 @@
           "table": {
             "service": "Servicio",
             "price": "Precio"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar servicio",
+              "text": "¿Quieres eliminar el servicio {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar servicios",
+              "text": "¿Quieres eliminar los {{count}} servicios seleccionados?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancelar",
+            "confirm": "Duplicar",
+            "one": {
+              "title": "Duplicar servicio",
+              "text": "¿Quieres duplicar el servicio {{name}}?"
+            },
+            "many": {
+              "title": "Duplicar servicios",
+              "text": "¿Quieres duplicar los {{count}} servicios seleccionados?"
+            }
           }
         },
         "hourly_services": {
@@ -1141,6 +1189,30 @@
           "create": "Añadir servicio por horas",
           "table": {
             "service": "Servicio"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar servicio por horas",
+              "text": "¿Quieres eliminar el servicio por horas {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar servicios por horas",
+              "text": "¿Quieres eliminar los {{count}} servicios por horas seleccionados?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancelar",
+            "confirm": "Duplicar",
+            "one": {
+              "title": "Duplicar servicio por horas",
+              "text": "¿Quieres duplicar el servicio por horas {{name}}?"
+            },
+            "many": {
+              "title": "Duplicar servicios por horas",
+              "text": "¿Quieres duplicar los {{count}} servicios por horas seleccionados?"
+            }
           }
         },
         "automatic_prices": {
@@ -1149,6 +1221,30 @@
           "table": {
             "service": "Servicio",
             "price": "Precio"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar precio automático",
+              "text": "¿Quieres eliminar el precio automático {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar precios automáticos",
+              "text": "¿Quieres eliminar los {{count}} precios automáticos seleccionados?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancelar",
+            "confirm": "Duplicar",
+            "one": {
+              "title": "Duplicar precio automático",
+              "text": "¿Quieres duplicar el precio automático {{name}}?"
+            },
+            "many": {
+              "title": "Duplicar precios automáticos",
+              "text": "¿Quieres duplicar los {{count}} precios automáticos seleccionados?"
+            }
           }
         },
         "table_booking": {
@@ -1156,6 +1252,30 @@
           "create": "Añadir servicio de mesas",
           "table": {
             "service_name": "Nombre del servicio"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar servicio de mesas",
+              "text": "¿Quieres eliminar el servicio de mesas {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar servicios de mesas",
+              "text": "¿Quieres eliminar los {{count}} servicios de mesas seleccionados?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancelar",
+            "confirm": "Duplicar",
+            "one": {
+              "title": "Duplicar servicio de mesas",
+              "text": "¿Quieres duplicar el servicio de mesas {{name}}?"
+            },
+            "many": {
+              "title": "Duplicar servicios de mesas",
+              "text": "¿Quieres duplicar los {{count}} servicios de mesas seleccionados?"
+            }
           }
         }
       }

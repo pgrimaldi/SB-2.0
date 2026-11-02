@@ -1126,6 +1126,30 @@
           "table": {
             "service": "服务",
             "price": "价格"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除酒吧服务",
+              "text": "要删除酒吧服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除酒吧服务",
+              "text": "要删除所选的 {{count}} 个酒吧服务吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制酒吧服务",
+              "text": "要复制酒吧服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制酒吧服务",
+              "text": "要复制所选的 {{count}} 个酒吧服务吗？"
+            }
           }
         },
         "standard_services": {
@@ -1134,6 +1158,30 @@
           "table": {
             "service": "服务",
             "price": "价格"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除服务",
+              "text": "要删除服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除服务",
+              "text": "要删除所选的 {{count}} 个服务吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制服务",
+              "text": "要复制服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制服务",
+              "text": "要复制所选的 {{count}} 个服务吗？"
+            }
           }
         },
         "hourly_services": {
@@ -1141,6 +1189,30 @@
           "create": "添加按小时服务",
           "table": {
             "service": "服务"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除按小时服务",
+              "text": "要删除按小时服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除按小时服务",
+              "text": "要删除所选的 {{count}} 个按小时服务吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制按小时服务",
+              "text": "要复制按小时服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制按小时服务",
+              "text": "要复制所选的 {{count}} 个按小时服务吗？"
+            }
           }
         },
         "automatic_prices": {
@@ -1149,6 +1221,30 @@
           "table": {
             "service": "服务",
             "price": "价格"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除自动价格",
+              "text": "要删除自动价格 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除自动价格",
+              "text": "要删除所选的 {{count}} 个自动价格吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制自动价格",
+              "text": "要复制自动价格 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制自动价格",
+              "text": "要复制所选的 {{count}} 个自动价格吗？"
+            }
           }
         },
         "table_booking": {
@@ -1156,6 +1252,30 @@
           "create": "添加餐桌服务",
           "table": {
             "service_name": "服务名称"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除餐桌服务",
+              "text": "要删除餐桌服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除餐桌服务",
+              "text": "要删除所选的 {{count}} 个餐桌服务吗？"
+            }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制餐桌服务",
+              "text": "要复制餐桌服务 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制餐桌服务",
+              "text": "要复制所选的 {{count}} 个餐桌服务吗？"
+            }
           }
         }
       }

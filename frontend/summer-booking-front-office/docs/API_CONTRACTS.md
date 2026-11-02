@@ -2624,6 +2624,59 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Acqua naturale 1L` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
 
+### POST `/api/catalog/delete-bar-service-item`
+
+Servizi: eliminazione servizi bar.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idBarServices": [
+    "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08",
+    "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idBarServices` | string[] (UUID, almeno uno) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-bar-service-item`
+
+Servizi: duplicazione servizi bar.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idBarServices": [
+    "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idBarServices` | string[] (UUID, almeno uno) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/standard-service-list`
 
 Servizi: servizi.
@@ -2686,6 +2739,59 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Doccia calda` |
 | `rows[].price` | number (decimale, €) \| null | `3` |
 
+### POST `/api/catalog/delete-standard-service-item`
+
+Servizi: eliminazione servizi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idStandardServices": [
+    "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+    "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idStandardServices` | string[] (UUID, almeno uno) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01", "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-standard-service-item`
+
+Servizi: duplicazione servizi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idStandardServices": [
+    "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idStandardServices` | string[] (UUID, almeno uno) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/hourly-service-list`
 
 Servizi: servizi orari.
@@ -2745,6 +2851,59 @@ Stato: 200 OK.
 | `rows[]` | HourlyServiceItem[] (array di oggetti) | `[{"idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03", "serviceName": "Piscina"}]` |
 | `rows[].idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03` |
 | `rows[].serviceName` | string \| null | `Piscina` |
+
+### POST `/api/catalog/delete-hourly-service-item`
+
+Servizi: eliminazione servizi orari.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idHourlyServices": [
+    "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
+    "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idHourlyServices` | string[] (UUID, almeno uno) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01", "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-hourly-service-item`
+
+Servizi: duplicazione servizi orari.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idHourlyServices": [
+    "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idHourlyServices` | string[] (UUID, almeno uno) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
 
 ### POST `/api/catalog/automatic-price-list`
 
@@ -2808,6 +2967,59 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Coperto` |
 | `rows[].price` | number (decimale, €) \| null | `2` |
 
+### POST `/api/catalog/delete-automatic-price-item`
+
+Servizi: eliminazione prezzi automatici.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idAutomaticPrices": [
+    "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01",
+    "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idAutomaticPrices` | string[] (UUID, almeno uno) | `["7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01", "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-automatic-price-item`
+
+Servizi: duplicazione prezzi automatici.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idAutomaticPrices": [
+    "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idAutomaticPrices` | string[] (UUID, almeno uno) | `["7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/table-service-list`
 
 Servizi: prenotazione servizio tavoli.
@@ -2867,6 +3079,59 @@ Stato: 200 OK.
 | `rows[]` | TableServiceItem[] (array di oggetti) | `[{"idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702", "serviceName": "Cena"}]` |
 | `rows[].idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702` |
 | `rows[].serviceName` | string \| null | `Cena` |
+
+### POST `/api/catalog/delete-table-service-item`
+
+Servizi: eliminazione servizi tavoli.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idTableServices": [
+    "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
+    "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idTableServices` | string[] (UUID, almeno uno) | `["2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701", "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-table-service-item`
+
+Servizi: duplicazione servizi tavoli.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idTableServices": [
+    "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idTableServices` | string[] (UUID, almeno uno) | `["2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
 
 ## /booking
 

@@ -9,6 +9,16 @@ import { BathhouseMedia } from '../../../entities/settings/bathhouse-configurati
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
+import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
+import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
+import { DuplicateStandardServiceItemsRequest } from '../../../entities/settings/services/duplicate-standard-service-items-request';
+import { DeleteHourlyServiceItemsRequest } from '../../../entities/settings/services/delete-hourly-service-items-request';
+import { DuplicateHourlyServiceItemsRequest } from '../../../entities/settings/services/duplicate-hourly-service-items-request';
+import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/services/delete-automatic-price-items-request';
+import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
+import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
+import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
@@ -71,11 +81,33 @@ export class CatalogService {
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
     this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
 
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteBarServiceItems = (request: DeleteBarServiceItemsRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-bar-service-item`, request);
+
+  /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
+  readonly duplicateBarServiceItems = (
+    request: DuplicateBarServiceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-bar-service-item`, request);
+
   readonly standardServiceList = (request: PageRequest): Observable<Page<StandardServiceItem>> =>
     this.httpClient.post<Page<StandardServiceItem>>(
       `${this.endpoint}/standard-service-list`,
       request,
     );
+
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteStandardServiceItems = (
+    request: DeleteStandardServiceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-standard-service-item`, request);
+
+  /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
+  readonly duplicateStandardServiceItems = (
+    request: DuplicateStandardServiceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-standard-service-item`, request);
 
   /**
    * An arrow property on purpose: the page hands it to `app-table` as its loader
@@ -85,11 +117,35 @@ export class CatalogService {
   readonly hourlyServiceList = (request: PageRequest): Observable<Page<HourlyServiceItem>> =>
     this.httpClient.post<Page<HourlyServiceItem>>(`${this.endpoint}/hourly-service-list`, request);
 
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteHourlyServiceItems = (
+    request: DeleteHourlyServiceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-hourly-service-item`, request);
+
+  /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
+  readonly duplicateHourlyServiceItems = (
+    request: DuplicateHourlyServiceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-hourly-service-item`, request);
+
   readonly automaticPriceList = (request: PageRequest): Observable<Page<AutomaticPriceItem>> =>
     this.httpClient.post<Page<AutomaticPriceItem>>(
       `${this.endpoint}/automatic-price-list`,
       request,
     );
+
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteAutomaticPriceItems = (
+    request: DeleteAutomaticPriceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-automatic-price-item`, request);
+
+  /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
+  readonly duplicateAutomaticPriceItems = (
+    request: DuplicateAutomaticPriceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-automatic-price-item`, request);
 
   /**
    * An arrow property on purpose: the page hands it to `app-table` as its loader
@@ -98,4 +154,14 @@ export class CatalogService {
    */
   readonly tableServiceList = (request: PageRequest): Observable<Page<TableServiceItem>> =>
     this.httpClient.post<Page<TableServiceItem>>(`${this.endpoint}/table-service-list`, request);
+
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteTableServiceItems = (request: DeleteTableServiceItemsRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-table-service-item`, request);
+
+  /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
+  readonly duplicateTableServiceItems = (
+    request: DuplicateTableServiceItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, request);
 }

@@ -16,8 +16,30 @@
   [isCreateButtonHidden]="false"
   [createLabel]="'management.settings.services.automatic_prices.create' | translate"
   [rowActions]="rowActions()"
+  [(selection)]="idSelectedAutomaticPrices"
   [pathIcon]="tableIcons"
   (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idAutomaticPricesToDelete()"
+  [itemName]="automaticPriceNameToDelete()"
+  translationKey="management.settings.services.automatic_prices.delete"
+  [action]="deleteAutomaticPrices"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idAutomaticPricesToDuplicate()"
+  [itemName]="automaticPriceNameToDuplicate()"
+  translationKey="management.settings.services.automatic_prices.duplicate"
+  [action]="duplicateAutomaticPrices"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup

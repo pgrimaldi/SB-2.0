@@ -16,8 +16,30 @@
   [isCreateButtonHidden]="false"
   [createLabel]="'management.settings.services.hourly_services.create' | translate"
   [rowActions]="rowActions()"
+  [(selection)]="idSelectedHourlyServices"
   [pathIcon]="tableIcons"
   (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idHourlyServicesToDelete()"
+  [itemName]="hourlyServiceNameToDelete()"
+  translationKey="management.settings.services.hourly_services.delete"
+  [action]="deleteHourlyServices"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idHourlyServicesToDuplicate()"
+  [itemName]="hourlyServiceNameToDuplicate()"
+  translationKey="management.settings.services.hourly_services.duplicate"
+  [action]="duplicateHourlyServices"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup
