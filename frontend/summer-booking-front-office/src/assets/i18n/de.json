@@ -1119,6 +1119,14 @@
           "hourly_services": "Stundenleistungen",
           "automatic_prices": "Automatische Preise",
           "table_booking": "Tischreservierung"
+        },
+        "bar_services": {
+          "title": "Bar-Leistungen",
+          "create": "Bar-Leistung hinzufügen",
+          "table": {
+            "service": "Leistung",
+            "price": "Preis"
+          }
         }
       }
     }

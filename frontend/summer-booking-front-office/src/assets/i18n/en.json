@@ -1119,6 +1119,14 @@
           "hourly_services": "Hourly Services",
           "automatic_prices": "Automatic Prices",
           "table_booking": "Table Booking"
+        },
+        "bar_services": {
+          "title": "Bar services",
+          "create": "Add bar service",
+          "table": {
+            "service": "Service",
+            "price": "Price"
+          }
         }
       }
     }

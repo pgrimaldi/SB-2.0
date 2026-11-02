@@ -3,9 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
@@ -61,4 +63,7 @@ export class CatalogService {
       services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
       idProperty,
     });
+
+  readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
+    this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
 }

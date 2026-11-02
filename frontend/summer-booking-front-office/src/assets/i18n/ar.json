@@ -1119,6 +1119,14 @@
           "hourly_services": "خدمات بالساعة",
           "automatic_prices": "أسعار تلقائية",
           "table_booking": "حجز الطاولات"
+        },
+        "bar_services": {
+          "title": "خدمات البار",
+          "create": "إضافة خدمة بار",
+          "table": {
+            "service": "الخدمة",
+            "price": "السعر"
+          }
         }
       }
     }

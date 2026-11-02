@@ -1119,6 +1119,14 @@
           "hourly_services": "Servicios por horas",
           "automatic_prices": "Precios automáticos",
           "table_booking": "Reserva de mesas"
+        },
+        "bar_services": {
+          "title": "Servicios de bar",
+          "create": "Añadir servicio de bar",
+          "table": {
+            "service": "Servicio",
+            "price": "Precio"
+          }
         }
       }
     }

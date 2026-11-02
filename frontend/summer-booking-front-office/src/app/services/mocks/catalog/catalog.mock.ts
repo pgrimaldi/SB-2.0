@@ -1,9 +1,11 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { forbidden, resourceNotFound } from '../errors/problem.mock';
@@ -699,3 +701,79 @@ export const bathhouseConfigurationMediaMock = (
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: media })).pipe(delay(300));
 };
+
+type BarServiceRow = BarServiceItem & { propertyId: number };
+
+const BAR_SERVICES: readonly BarServiceRow[] = (
+  [
+    ['01', 'Caffè', 1],
+    ['02', 'Croissant', 1.4],
+    ['03', 'Panino', 3],
+    ['04', 'Succo di frutta', 2],
+    ['05', 'Pizza', 3],
+    ['06', 'Sfoglia', 1.3],
+    ['07', 'Bibita lattina', 2.5],
+    ['08', 'Acqua naturale 1L', 1.2],
+    ['09', 'Acqua frizzante 1L', 1.2],
+    ['10', 'Schiacciata', 3],
+    ['11', 'Tramezzino', 2.8],
+    ['12', 'Gelato', 2.5],
+  ] as const
+).map(([suffix, serviceName, price]) => ({
+  propertyId: 1,
+  idBarService: `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c${suffix}`,
+  serviceName,
+  price,
+}));
+
+const MAX_PAGE_SIZE = 100;
+const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
+
+/**
+ * `POST /api/catalog/bar-service-list`: one page of the bar services of the requested property,
+ * searched in the name. 401 without a valid access token; 403 for a missing or unknown property.
+ */
+export const barServiceListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = BAR_SERVICES.filter(
+    (row) =>
+      row.propertyId === property.id &&
+      (!search || row.serviceName?.toLowerCase().includes(search)),
+  ).map((row) => onlyFieldsOf(BarServiceItem, row));
+  const field = BAR_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
+  const answer: Page<BarServiceItem> = {
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+/** Numbers by value, texts alphabetically; a missing value first ascending, last descending. */
+function compare(first: string | number | null, second: string | number | null): number {
+  if (first === null || second === null) {
+    return first === second ? 0 : first === null ? -1 : 1;
+  }
+  return typeof first === 'number' && typeof second === 'number'
+    ? first - second
+    : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
+}
+
+function positiveInteger(value: unknown, fallback: number): number {
+  return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
+}

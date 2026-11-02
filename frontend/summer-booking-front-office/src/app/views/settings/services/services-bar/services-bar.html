@@ -1,0 +1,29 @@
+<app-page-title
+  class="services__bar__title"
+  [text]="'management.settings.services.bar_services.title' | translate"
+/>
+<app-table
+  #table
+  [columns]="columns()"
+  [params]="params()"
+  [load]="load"
+  idField="idBarService"
+  [texts]="'table' | translate"
+  [isSearchable]="true"
+  [useAppTheme]="false"
+  [areMassiveActionsHidden]="false"
+  [isCreateButtonHidden]="false"
+  [createLabel]="'management.settings.services.bar_services.create' | translate"
+  [rowActions]="rowActions()"
+  [pathIcon]="tableIcons"
+  (loadError)="loadFailed.set(true)"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

@@ -1119,6 +1119,14 @@
           "hourly_services": "Servizi Orari",
           "automatic_prices": "Prezzi Automatici",
           "table_booking": "Prenotazione tavoli"
+        },
+        "bar_services": {
+          "title": "Servizi bar",
+          "create": "Aggiungi servizio bar",
+          "table": {
+            "service": "Servizio",
+            "price": "Prezzo"
+          }
         }
       }
     }

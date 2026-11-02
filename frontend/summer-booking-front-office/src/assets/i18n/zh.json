@@ -1119,6 +1119,14 @@
           "hourly_services": "按小时服务",
           "automatic_prices": "自动价格",
           "table_booking": "餐桌预订"
+        },
+        "bar_services": {
+          "title": "酒吧服务",
+          "create": "添加酒吧服务",
+          "table": {
+            "service": "服务",
+            "price": "价格"
+          }
         }
       }
     }

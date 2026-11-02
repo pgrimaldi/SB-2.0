@@ -2556,6 +2556,74 @@ Stato: 200 OK.
 | `priceListPdfUrl` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
 | `menuPdfUrl` | string \| null | `https://media.example.com/lido-demo/menu.pdf` |
 
+### POST `/api/catalog/bar-service-list`
+
+Servizi: servizi bar.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "acqua",
+  "filters": [
+    {
+      "field": "serviceName",
+      "value": [
+        "Acqua naturale 1L",
+        "Acqua frizzante 1L"
+      ]
+    }
+  ],
+  "sortField": "price",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `acqua` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Acqua naturale 1L", "Acqua frizzante 1L"]}]` |
+| `filters[].field` | string | `serviceName` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Acqua naturale 1L", "Acqua frizzante 1L"]` |
+| `sortField` | string | `price` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08",
+      "serviceName": "Acqua naturale 1L",
+      "price": 1.2
+    },
+    {
+      "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09",
+      "serviceName": "Acqua frizzante 1L",
+      "price": 1.2
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | BarServiceItem[] (array di oggetti) | `[{"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "serviceName": "Acqua naturale 1L", "price": 1.2}, {"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09", "serviceName": "Acqua frizzante 1L", "price": 1.2}]` |
+| `rows[].idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08` |
+| `rows[].serviceName` | string \| null | `Acqua naturale 1L` |
+| `rows[].price` | number (decimale, €) \| null | `1.2` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
