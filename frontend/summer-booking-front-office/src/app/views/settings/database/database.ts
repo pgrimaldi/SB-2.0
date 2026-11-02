@@ -23,6 +23,7 @@ import {
 } from '../../../behaviours/i18n/date-language.behaviour';
 import { ConfirmDeleteBookingPopup } from '../../../components/management/settings/database/confirm-delete-booking-popup/confirm-delete-booking-popup';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
+import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { ExistingBookingFiltersPopup } from '../../../components/management/settings/database/existing-booking-filters-popup/existing-booking-filters-popup';
 import {
   FilterChip,
@@ -130,6 +131,7 @@ const RESERVATION_STATUS_KEYS: Record<
     I18nText,
     MessagePopup,
     PageSpinner,
+    PageTitle,
     RouterLink,
     Table,
     TableErrorPopup,

@@ -1,5 +1,5 @@
 // 1rem semibold blue, icon of 19px on the left;
-// bigger from 1920px, where the table is wider.
+// bigger from 1920px, where the table is wider. `--page-title-color` changes the colour of the text.
 :host {
   display: block;
 }
@@ -9,7 +9,7 @@
   align-items: center;
   gap: 0.625rem;
   margin: 0;
-  color: var(--color__main__theme__one);
+  color: var(--page-title-color, var(--color__main__theme__one));
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.5rem;

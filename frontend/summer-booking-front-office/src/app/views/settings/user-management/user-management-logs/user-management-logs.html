@@ -3,10 +3,10 @@
     <a class="user__management__logs__back" routerLink="/settings/user-management">
       <img [src]="backIcon" width="10" height="16" alt="" />
     </a>
-    <h1 class="user__management__logs__heading">
-      <img class="user__management__logs__icon" [src]="titleIcon" width="15" height="18" alt="" />
-      {{ 'management.settings.user_management.logs.title' | translate }}
-    </h1>
+    <app-page-title
+      [text]="'management.settings.user_management.logs.title' | translate"
+      [pathIcon]="titleIcon"
+    />
   </div>
   <app-table
     #table

@@ -5,11 +5,12 @@
         <a class="database__back" routerLink="/settings/database">
           <img [src]="backIcon" width="10" height="16" alt="" />
         </a>
-        <h1 class="database__heading database__heading__trash">
-          {{ 'management.settings.database.trash_page.title' | translate }}
-        </h1>
+        <app-page-title
+          class="database__heading__trash"
+          [text]="'management.settings.database.trash_page.title' | translate"
+        />
       } @else {
-        <h1 class="database__heading" appI18nText="management.settings.database.title"></h1>
+        <app-page-title [text]="'management.settings.database.title' | translate" />
       }
     </div>
     @if (isTrash) {

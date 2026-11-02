@@ -27,23 +27,6 @@
   }
 }
 
-.user__management__logs__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.4em;
-  margin: 0;
-  color: var(--color__main__theme__one);
-  font-size: 1.375rem;
-  font-weight: 600;
-  line-height: 2rem;
-}
-
-// As high as the letters of the title, so it grows with it.
-.user__management__logs__icon {
-  width: auto;
-  height: 1em;
-}
-
 .user__management__logs__filters {
   display: inline-flex;
   align-items: center;
@@ -123,11 +106,6 @@
 
 // From 1920px the search of the table grows: the date select and Filtri grow with it.
 @media (width >= 120rem) {
-  .user__management__logs__heading {
-    font-size: 1.75rem;
-    line-height: 2.5rem;
-  }
-
   .user__management__logs:has(app-filter-chips) {
     padding-top: 0.5rem;
   }

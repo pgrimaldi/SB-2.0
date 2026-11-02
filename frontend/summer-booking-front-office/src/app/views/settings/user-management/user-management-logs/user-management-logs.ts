@@ -43,6 +43,7 @@ import {
 import { TableFilterBar } from '../../../../components/shared/ui/tables/table/table-filter-bar';
 import { TableHeadingAction } from '../../../../components/shared/ui/tables/table/table-heading-action';
 import { Table, TableColumn, TableLoad } from '../../../../components/shared/ui/tables/table/table';
+import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
 import { PageFilter } from '../../../../entities/pagination/page';
 import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
@@ -102,6 +103,7 @@ const PRINT_FALLBACK_NAME = 'log-print';
     Button,
     DateRangeSelect,
     FilterChips,
+    PageTitle,
     RouterLink,
     Table,
     TableErrorPopup,
@@ -193,7 +195,7 @@ export class UserManagementLogs {
   );
   protected readonly chipIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly backIcon = '/assets/images/GeneralIcon_Previous.svg';
-  protected readonly titleIcon = '/assets/images/UserManagement_LogTitle.svg';
+  protected readonly titleIcon = ['/assets/images/UserManagement_LogTitle.svg'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
