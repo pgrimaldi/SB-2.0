@@ -4,7 +4,7 @@ import { SearchField } from './search-field';
 
 @Component({
   imports: [SearchField],
-  template: `<app-search-field placeholder="Cerca per nome" (searched)="searches.push($event)" />`,
+  template: `<app-search-field placeholder="Cerca..." (searched)="searches.push($event)" />`,
 })
 class SearchFieldHost {
   readonly searches: string[] = [];

@@ -367,7 +367,7 @@ class TableBarHost {
   readonly params = { day: '2026-09-30' };
   readonly columns: TableColumn<Row>[] = [{ field: 'name', header: 'Nome' }];
   readonly texts = {
-    search: { placeholder: 'Cerca nella tabella', submit: 'Cerca', clear: 'Svuota' },
+    search: { placeholder: 'Cerca...', submit: 'Cerca', clear: 'Svuota' },
   };
   readonly requests: (Filters & PageRequest)[] = [];
   readonly load = (request: Filters & PageRequest) => {

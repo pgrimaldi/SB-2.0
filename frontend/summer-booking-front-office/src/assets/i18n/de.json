@@ -46,7 +46,7 @@
       "range": "{{start}} – {{end}} von {{total}}"
     },
     "search": {
-      "placeholder": "In der Tabelle suchen"
+      "placeholder": "Suchen..."
     },
     "load_error": {
       "title": "Fehler",
@@ -175,7 +175,7 @@
         "afternoon": "Nachmittag"
       },
       "search": {
-        "placeholder": "Nach Name suchen"
+        "placeholder": "Suchen..."
       },
       "actions": {
         "configuration": "Konfiguration",

@@ -46,7 +46,7 @@
       "range": "{{start}} – {{end}} من {{total}}"
     },
     "search": {
-      "placeholder": "ابحث في الجدول"
+      "placeholder": "بحث..."
     },
     "load_error": {
       "title": "خطأ",
@@ -175,7 +175,7 @@
         "afternoon": "بعد الظهر"
       },
       "search": {
-        "placeholder": "ابحث بالاسم"
+        "placeholder": "بحث..."
       },
       "actions": {
         "configuration": "الإعداد",

@@ -46,7 +46,7 @@
       "range": "{{start}} – {{end}} sur {{total}}"
     },
     "search": {
-      "placeholder": "Rechercher dans le tableau"
+      "placeholder": "Rechercher..."
     },
     "load_error": {
       "title": "Erreur",
@@ -175,7 +175,7 @@
         "afternoon": "Après-midi"
       },
       "search": {
-        "placeholder": "Rechercher par nom"
+        "placeholder": "Rechercher..."
       },
       "actions": {
         "configuration": "Configuration",

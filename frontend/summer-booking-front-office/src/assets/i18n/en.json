@@ -46,7 +46,7 @@
       "range": "{{start}} – {{end}} of {{total}}"
     },
     "search": {
-      "placeholder": "Search the table"
+      "placeholder": "Search..."
     },
     "load_error": {
       "title": "Error",
@@ -175,7 +175,7 @@
         "afternoon": "Afternoon"
       },
       "search": {
-        "placeholder": "Search by name"
+        "placeholder": "Search..."
       },
       "actions": {
         "configuration": "Configuration",
