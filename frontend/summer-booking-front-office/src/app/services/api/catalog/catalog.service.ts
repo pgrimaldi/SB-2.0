@@ -8,6 +8,7 @@ import { BathhouseGeneralInformation } from '../../../entities/settings/bathhous
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
@@ -66,4 +67,10 @@ export class CatalogService {
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
     this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
+
+  readonly standardServiceList = (request: PageRequest): Observable<Page<StandardServiceItem>> =>
+    this.httpClient.post<Page<StandardServiceItem>>(
+      `${this.endpoint}/standard-service-list`,
+      request,
+    );
 }

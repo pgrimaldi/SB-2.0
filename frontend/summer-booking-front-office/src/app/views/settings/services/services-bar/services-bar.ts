@@ -39,6 +39,7 @@ export class ServicesBar {
     const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
   });
+  protected readonly titleIcon = ['/assets/images/Services_BarTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** In the table's order: [search magnifier, search X, duplicate chosen, delete chosen, create]. */
   protected readonly tableIcons = [

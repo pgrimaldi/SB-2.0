@@ -1720,6 +1720,66 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
+### POST `/api/catalog/standard-service-list`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idStandardService": "string (UUID)",
+      "serviceName": "string | null",
+      "price": "number (decimale, €) | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | StandardServiceItem[] (array di oggetti) |
+| `rows[].idStandardService` | string (UUID) |
+| `rows[].serviceName` | string \| null |
+| `rows[].price` | number (decimale, €) \| null |
+
 ## Sharing
 
 ### GET `/api/sharing/general-information?idProperty={idProperty}`

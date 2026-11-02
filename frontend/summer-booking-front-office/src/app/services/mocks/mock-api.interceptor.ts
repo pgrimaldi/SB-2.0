@@ -11,6 +11,7 @@ import {
   countriesComboboxMock,
   saveBathhouseConfigurationGeneralMock,
   saveBathhouseConfigurationServicesMock,
+  standardServiceListMock,
 } from './catalog/catalog.mock';
 import {
   affiliatedHotelComboboxMock,
@@ -504,6 +505,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/bar-service-list`
   ) {
     return barServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/standard-service-list`
+  ) {
+    return standardServiceListMock(request);
   }
 
   return next(request);

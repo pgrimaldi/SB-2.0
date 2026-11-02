@@ -2624,6 +2624,68 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Acqua naturale 1L` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
 
+### POST `/api/catalog/standard-service-list`
+
+Servizi: servizi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "doccia",
+  "filters": [
+    {
+      "field": "serviceName",
+      "value": [
+        "Doccia calda"
+      ]
+    }
+  ],
+  "sortField": "serviceName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `doccia` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Doccia calda"]}]` |
+| `filters[].field` | string | `serviceName` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Doccia calda"]` |
+| `sortField` | string | `serviceName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 1,
+  "rows": [
+    {
+      "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+      "serviceName": "Doccia calda",
+      "price": 3
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `1` |
+| `rows[]` | StandardServiceItem[] (array di oggetti) | `[{"idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01", "serviceName": "Doccia calda", "price": 3}]` |
+| `rows[].idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+| `rows[].serviceName` | string \| null | `Doccia calda` |
+| `rows[].price` | number (decimale, €) \| null | `3` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

@@ -1127,6 +1127,14 @@
             "service": "服务",
             "price": "价格"
           }
+        },
+        "standard_services": {
+          "title": "服务",
+          "create": "添加服务",
+          "table": {
+            "service": "服务",
+            "price": "价格"
+          }
         }
       }
     }

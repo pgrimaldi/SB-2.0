@@ -1127,6 +1127,14 @@
             "service": "الخدمة",
             "price": "السعر"
           }
+        },
+        "standard_services": {
+          "title": "الخدمات",
+          "create": "إضافة خدمة",
+          "table": {
+            "service": "الخدمة",
+            "price": "السعر"
+          }
         }
       }
     }

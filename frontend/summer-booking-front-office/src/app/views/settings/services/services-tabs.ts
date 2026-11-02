@@ -1,6 +1,6 @@
 import { Type } from '@angular/core';
 import { ServicesBar } from './services-bar/services-bar';
-import { ServicesStandard } from './services-standard/services-standard';
+import { ServicesGeneral } from './services-general/services-general';
 import { ServicesHourly } from './services-hourly/services-hourly';
 import { AutomaticPrices } from './automatic-prices/automatic-prices';
 import { TableBooking } from './table-booking/table-booking';
@@ -25,7 +25,7 @@ export const SERVICES_TABS: readonly ServicesTab[] = [
     path: '2',
     label: 'management.settings.services.tabs.services',
     widthPercent: 20,
-    component: ServicesStandard,
+    component: ServicesGeneral,
   },
   {
     path: '3',

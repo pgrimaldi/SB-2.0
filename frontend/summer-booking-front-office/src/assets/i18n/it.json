@@ -1127,6 +1127,14 @@
             "service": "Servizio",
             "price": "Prezzo"
           }
+        },
+        "standard_services": {
+          "title": "Servizi",
+          "create": "Aggiungi servizio",
+          "table": {
+            "service": "Servizio",
+            "price": "Prezzo"
+          }
         }
       }
     }

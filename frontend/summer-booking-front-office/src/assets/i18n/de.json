@@ -1127,6 +1127,14 @@
             "service": "Leistung",
             "price": "Preis"
           }
+        },
+        "standard_services": {
+          "title": "Leistungen",
+          "create": "Leistung hinzufügen",
+          "table": {
+            "service": "Leistung",
+            "price": "Preis"
+          }
         }
       }
     }

@@ -6,6 +6,7 @@ import { BathhouseGeneralInformation } from '../../../entities/settings/bathhous
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { forbidden, resourceNotFound } from '../errors/problem.mock';
@@ -758,6 +759,59 @@ export const barServiceListMock = (
     found.sort((first, second) => sign * compare(first[field], second[field]));
   }
   const answer: Page<BarServiceItem> = {
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+type StandardServiceRow = StandardServiceItem & { propertyId: number };
+
+const STANDARD_SERVICES: readonly StandardServiceRow[] = (
+  [
+    ['01', 'Doccia calda', 3],
+    ['02', 'Cassetta di Sicurezza', 3],
+    ['03', 'Parcheggio', 3],
+  ] as const
+).map(([suffix, serviceName, price]) => ({
+  propertyId: 1,
+  idStandardService: `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d${suffix}`,
+  serviceName,
+  price,
+}));
+
+const STANDARD_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
+
+/**
+ * `POST /api/catalog/standard-service-list`: one page of the services (neither bar nor hourly) of
+ * the requested property, searched in the name. 401 without a valid access token; 403 for a missing
+ * or unknown property.
+ */
+export const standardServiceListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = STANDARD_SERVICES.filter(
+    (row) =>
+      row.propertyId === property.id &&
+      (!search || row.serviceName?.toLowerCase().includes(search)),
+  ).map((row) => onlyFieldsOf(StandardServiceItem, row));
+  const field = STANDARD_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
+  const answer: Page<StandardServiceItem> = {
     total: found.length,
     rows: found.slice((page - 1) * pageSize, page * pageSize),
   };
