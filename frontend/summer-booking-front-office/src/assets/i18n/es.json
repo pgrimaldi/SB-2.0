@@ -1111,6 +1111,15 @@
             "text": "¿Quieres eliminar los {{count}} intervalos seleccionados?"
           }
         }
+      },
+      "services": {
+        "tabs": {
+          "bar_services": "Servicios de bar",
+          "services": "Servicios",
+          "hourly_services": "Servicios por horas",
+          "automatic_prices": "Precios automáticos",
+          "table_booking": "Reserva de mesas"
+        }
       }
     }
   },

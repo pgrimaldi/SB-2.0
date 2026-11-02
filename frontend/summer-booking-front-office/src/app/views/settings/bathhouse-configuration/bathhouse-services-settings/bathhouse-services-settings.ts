@@ -37,13 +37,13 @@ interface ServiceSection {
 }
 
 @Component({
-  selector: 'app-bathhouse-configuration-2',
+  selector: 'app-bathhouse-services-settings',
   imports: [Button, Checkbox, FormField, SectionTitle, TranslatePipe],
-  templateUrl: './bathhouse-configuration-2.html',
-  styleUrl: './bathhouse-configuration-2.scss',
+  templateUrl: './bathhouse-services-settings.html',
+  styleUrl: './bathhouse-services-settings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BathhouseConfiguration2 implements UnsavedChanges, OnDestroy {
+export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
   private readonly catalog = inject(CatalogService);

@@ -45,13 +45,13 @@ const POSITION_ZOOM = 15;
 const GALLERY_ROW_SLOT_QUANTITY = 4;
 
 @Component({
-  selector: 'app-bathhouse-configuration-3',
+  selector: 'app-bathhouse-media-settings',
   imports: [Button, FileDropZone, FilledTextField, LocationMap, SectionTitle, TranslatePipe],
-  templateUrl: './bathhouse-configuration-3.html',
-  styleUrl: './bathhouse-configuration-3.scss',
+  templateUrl: './bathhouse-media-settings.html',
+  styleUrl: './bathhouse-media-settings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BathhouseConfiguration3 implements UnsavedChanges, OnDestroy {
+export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);

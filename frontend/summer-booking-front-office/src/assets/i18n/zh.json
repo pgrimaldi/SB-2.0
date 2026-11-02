@@ -1111,6 +1111,15 @@
             "text": "要删除选中的 {{count}} 个日期区间吗？"
           }
         }
+      },
+      "services": {
+        "tabs": {
+          "bar_services": "酒吧服务",
+          "services": "服务",
+          "hourly_services": "按小时服务",
+          "automatic_prices": "自动价格",
+          "table_booking": "餐桌预订"
+        }
       }
     }
   },

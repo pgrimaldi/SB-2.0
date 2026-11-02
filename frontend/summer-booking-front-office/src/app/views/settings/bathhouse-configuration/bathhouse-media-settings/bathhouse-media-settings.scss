@@ -1,5 +1,5 @@
 // The buttons of the management pages.
-.bathhouse__configuration__3 {
+.bathhouse__media__settings {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
   --button-padding: 1rem;
@@ -9,14 +9,14 @@
   gap: 2rem;
 }
 
-.bathhouse__configuration__3__section {
+.bathhouse__media__settings__section {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
 // Grey until the map is drawn, without moving what is under it.
-.bathhouse__configuration__3__map {
+.bathhouse__media__settings__map {
   display: grid;
   height: 16rem;
   overflow: hidden;
@@ -24,7 +24,7 @@
   background: var(--color__layout__highlight);
 }
 
-.bathhouse__configuration__3__map__error {
+.bathhouse__media__settings__map__error {
   place-self: center;
   margin: 0;
   padding: 1rem;
@@ -34,7 +34,7 @@
   text-align: center;
 }
 
-.bathhouse__configuration__3__label {
+.bathhouse__media__settings__label {
   margin: 0;
   color: var(--color__main__theme__one);
   font-size: 0.75rem;
@@ -42,11 +42,11 @@
   line-height: 1rem;
 }
 
-.bathhouse__configuration__3__main__image {
+.bathhouse__media__settings__main__image {
   height: 12rem;
 }
 
-.bathhouse__configuration__3__gallery {
+.bathhouse__media__settings__gallery {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
@@ -57,12 +57,12 @@
 }
 
 @media (width < 48rem) {
-  .bathhouse__configuration__3__gallery {
+  .bathhouse__media__settings__gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.bathhouse__configuration__3__document {
+.bathhouse__media__settings__document {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -76,24 +76,24 @@
   }
 }
 
-.bathhouse__configuration__3__document__name {
+.bathhouse__media__settings__document__name {
   color: var(--color__main__theme__one);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1rem;
 }
 
-.bathhouse__configuration__3__document__file {
+.bathhouse__media__settings__document__file {
   color: var(--color__layout__text__soft);
   font-size: 0.625rem;
   line-height: 0.875rem;
 }
 
-.bathhouse__configuration__3__document__link {
+.bathhouse__media__settings__document__link {
   color: var(--color__main__theme__one);
 }
 
-.bathhouse__configuration__3__actions {
+.bathhouse__media__settings__actions {
   --button-border-color: var(--color__layout__text__soft);
 
   display: flex;
@@ -105,7 +105,7 @@
   }
 }
 
-.bathhouse__configuration__3__error {
+.bathhouse__media__settings__error {
   margin: 0;
   color: var(--color__layout__error);
   font-size: 0.75rem;

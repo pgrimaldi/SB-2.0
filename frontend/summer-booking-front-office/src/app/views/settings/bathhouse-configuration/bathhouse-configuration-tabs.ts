@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
-import { BathhouseConfiguration1 } from './bathhouse-configuration-1/bathhouse-configuration-1';
-import { BathhouseConfiguration2 } from './bathhouse-configuration-2/bathhouse-configuration-2';
-import { BathhouseConfiguration3 } from './bathhouse-configuration-3/bathhouse-configuration-3';
+import { BathhouseGeneralSettings } from './bathhouse-general-settings/bathhouse-general-settings';
+import { BathhouseServicesSettings } from './bathhouse-services-settings/bathhouse-services-settings';
+import { BathhouseMediaSettings } from './bathhouse-media-settings/bathhouse-media-settings';
 
 export interface BathhouseConfigurationTab {
   path: string;
@@ -17,18 +17,18 @@ export const BATHHOUSE_CONFIGURATION_TABS: readonly BathhouseConfigurationTab[] 
     path: '1',
     label: 'management.settings.bathhouse_configuration.tabs.general_information',
     widthPercent: 34,
-    component: BathhouseConfiguration1,
+    component: BathhouseGeneralSettings,
   },
   {
     path: '2',
     label: 'management.settings.bathhouse_configuration.tabs.services',
     widthPercent: 33,
-    component: BathhouseConfiguration2,
+    component: BathhouseServicesSettings,
   },
   {
     path: '3',
     label: 'management.settings.bathhouse_configuration.tabs.media',
     widthPercent: 33,
-    component: BathhouseConfiguration3,
+    component: BathhouseMediaSettings,
   },
 ];

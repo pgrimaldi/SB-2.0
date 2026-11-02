@@ -1,5 +1,5 @@
 // The buttons of the management pages.
-.bathhouse__configuration__2 {
+.bathhouse__services__settings {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
   --button-padding: 1rem;
@@ -9,19 +9,19 @@
   gap: 1.5rem;
 }
 
-.bathhouse__configuration__2__section {
+.bathhouse__services__settings__section {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.bathhouse__configuration__2__services {
+.bathhouse__services__settings__services {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem 1rem;
 }
 
-.bathhouse__configuration__2__service {
+.bathhouse__services__settings__service {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
@@ -35,12 +35,12 @@
 }
 
 @media (width < 48rem) {
-  .bathhouse__configuration__2__services {
+  .bathhouse__services__settings__services {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-.bathhouse__configuration__2__actions {
+.bathhouse__services__settings__actions {
   --button-border-color: var(--color__layout__text__soft);
 
   display: flex;
@@ -52,7 +52,7 @@
   }
 }
 
-.bathhouse__configuration__2__error {
+.bathhouse__services__settings__error {
   margin: 0;
   color: var(--color__layout__error);
   font-size: 0.75rem;

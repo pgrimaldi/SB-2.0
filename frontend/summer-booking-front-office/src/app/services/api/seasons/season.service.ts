@@ -63,7 +63,7 @@ export class SeasonService {
       idProperty,
     });
 
-  /** A new date interval of a period; one it has already is not added. Answers 204 with no body. */
+  /** A new date interval of a period. Answers 204 with no body. */
   readonly addInterval = (
     idProperty: string,
     idPeriod: string,

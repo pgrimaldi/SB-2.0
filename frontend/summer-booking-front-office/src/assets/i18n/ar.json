@@ -1111,6 +1111,15 @@
             "text": "هل تريد حذف {{count}} من نطاقات التواريخ المحددة؟"
           }
         }
+      },
+      "services": {
+        "tabs": {
+          "bar_services": "خدمات البار",
+          "services": "الخدمات",
+          "hourly_services": "خدمات بالساعة",
+          "automatic_prices": "أسعار تلقائية",
+          "table_booking": "حجز الطاولات"
+        }
       }
     }
   },

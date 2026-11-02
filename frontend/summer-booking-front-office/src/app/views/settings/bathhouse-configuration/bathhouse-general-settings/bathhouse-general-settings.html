@@ -1,5 +1,5 @@
-<div class="bathhouse__configuration__1" [attr.inert]="isLoading() ? '' : null">
-  <div class="bathhouse__configuration__1__name__row">
+<div class="bathhouse__general__settings" [attr.inert]="isLoading() ? '' : null">
+  <div class="bathhouse__general__settings__name__row">
     <app-filled-text-field
       [label]="
         'management.settings.bathhouse_configuration.general_information.bathhouse_name' | translate
@@ -15,7 +15,7 @@
       [formField]="informationForm.address"
     />
     <app-filled-text-field
-      class="bathhouse__configuration__1__postal__code"
+      class="bathhouse__general__settings__postal__code"
       [label]="
         'management.settings.bathhouse_configuration.general_information.postal_code' | translate
       "
@@ -23,15 +23,15 @@
       [formField]="informationForm.postalCode"
     />
   </div>
-  <div class="bathhouse__configuration__1__area__row">
+  <div class="bathhouse__general__settings__area__row">
     <app-filled-text-field
-      class="bathhouse__configuration__1__city"
+      class="bathhouse__general__settings__city"
       [label]="'management.settings.bathhouse_configuration.general_information.city' | translate"
       [error]="fieldErrors.city()"
       [formField]="informationForm.city"
     />
     <app-filled-text-field
-      class="bathhouse__configuration__1__province"
+      class="bathhouse__general__settings__province"
       [label]="
         'management.settings.bathhouse_configuration.general_information.province' | translate
       "
@@ -39,13 +39,13 @@
       [formField]="informationForm.province"
     />
     <app-filled-text-field
-      class="bathhouse__configuration__1__region"
+      class="bathhouse__general__settings__region"
       [label]="'management.settings.bathhouse_configuration.general_information.region' | translate"
       [error]="fieldErrors.region()"
       [formField]="informationForm.region"
     />
     <app-filled-select
-      class="bathhouse__configuration__1__country"
+      class="bathhouse__general__settings__country"
       [label]="
         'management.settings.bathhouse_configuration.general_information.country' | translate
       "
@@ -57,7 +57,7 @@
       [formField]="informationForm.country"
     />
   </div>
-  <div class="bathhouse__configuration__1__contacts__row">
+  <div class="bathhouse__general__settings__contacts__row">
     <app-filled-text-field
       [label]="'management.settings.bathhouse_configuration.general_information.phone' | translate"
       [isPhoneField]="true"
@@ -78,7 +78,7 @@
       [formField]="informationForm.email"
     />
   </div>
-  <div class="bathhouse__configuration__1__web__row">
+  <div class="bathhouse__general__settings__web__row">
     <app-filled-text-field
       [label]="
         'management.settings.bathhouse_configuration.general_information.website' | translate
@@ -110,15 +110,15 @@
     [error]="fieldErrors.description()"
     [formField]="informationForm.description"
   />
-  <div class="bathhouse__configuration__1__rules__row">
-    <div class="bathhouse__configuration__1__opening">
-      <span class="bathhouse__configuration__1__opening__label">
+  <div class="bathhouse__general__settings__rules__row">
+    <div class="bathhouse__general__settings__opening">
+      <span class="bathhouse__general__settings__opening__label">
         {{
           'management.settings.bathhouse_configuration.general_information.opening_hours'
             | translate
         }}
       </span>
-      <div class="bathhouse__configuration__1__opening__times">
+      <div class="bathhouse__general__settings__opening__times">
         <app-filled-time-field
           [placeholder]="
             'management.settings.bathhouse_configuration.general_information.opening_time'
@@ -167,7 +167,7 @@
     [error]="fieldErrors.regulation()"
     [formField]="informationForm.regulation"
   />
-  <div class="bathhouse__configuration__1__actions">
+  <div class="bathhouse__general__settings__actions">
     @if (isEditing()) {
       <app-button
         [appearance]="ButtonAppearance.Light"
@@ -193,6 +193,6 @@
     }
   </div>
   @if (errorMessage(); as errorMessage) {
-    <p class="bathhouse__configuration__1__error">{{ errorMessage }}</p>
+    <p class="bathhouse__general__settings__error">{{ errorMessage }}</p>
   }
 </div>

@@ -1,5 +1,5 @@
 // The buttons of the management pages; Descrizione and Regolamento a line lower than the default.
-.bathhouse__configuration__1 {
+.bathhouse__general__settings {
   --button-text-size: 0.75rem;
   --button-height: 1.75rem;
   --button-padding: 1rem;
@@ -10,45 +10,45 @@
   gap: 1.125rem;
 }
 
-.bathhouse__configuration__1__name__row,
-.bathhouse__configuration__1__area__row,
-.bathhouse__configuration__1__contacts__row,
-.bathhouse__configuration__1__web__row,
-.bathhouse__configuration__1__rules__row {
+.bathhouse__general__settings__name__row,
+.bathhouse__general__settings__area__row,
+.bathhouse__general__settings__contacts__row,
+.bathhouse__general__settings__web__row,
+.bathhouse__general__settings__rules__row {
   display: grid;
   gap: 1rem;
 }
 
 // Nome stabilimento 35%, Indirizzo 45%, Cap 20%.
-.bathhouse__configuration__1__name__row {
+.bathhouse__general__settings__name__row {
   grid-template-columns: minmax(0, 35fr) minmax(0, 45fr) minmax(0, 20fr);
 }
 
-.bathhouse__configuration__1__area__row {
+.bathhouse__general__settings__area__row {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.bathhouse__configuration__1__contacts__row,
-.bathhouse__configuration__1__web__row,
-.bathhouse__configuration__1__rules__row {
+.bathhouse__general__settings__contacts__row,
+.bathhouse__general__settings__web__row,
+.bathhouse__general__settings__rules__row {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 // The label over the two times, like the labels of the fields.
-.bathhouse__configuration__1__opening {
+.bathhouse__general__settings__opening {
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
 }
 
-.bathhouse__configuration__1__opening__label {
+.bathhouse__general__settings__opening__label {
   color: var(--color__layout__text__soft);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1rem;
 }
 
-.bathhouse__configuration__1__opening__times {
+.bathhouse__general__settings__opening__times {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
@@ -58,63 +58,63 @@
 // but Cap (moved under Città) with Provincia and Regione with Nazione, half each: their rules start
 // from the page, to weigh more than the whole-row one.
 @media (width < 48rem) {
-  .bathhouse__configuration__1 {
+  .bathhouse__general__settings {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 1.125rem 0.75rem;
   }
 
-  .bathhouse__configuration__1__name__row,
-  .bathhouse__configuration__1__area__row,
-  .bathhouse__configuration__1__contacts__row,
-  .bathhouse__configuration__1__web__row,
-  .bathhouse__configuration__1__rules__row {
+  .bathhouse__general__settings__name__row,
+  .bathhouse__general__settings__area__row,
+  .bathhouse__general__settings__contacts__row,
+  .bathhouse__general__settings__web__row,
+  .bathhouse__general__settings__rules__row {
     display: contents;
   }
 
-  .bathhouse__configuration__1 > *,
-  .bathhouse__configuration__1__name__row > *,
-  .bathhouse__configuration__1__area__row > *,
-  .bathhouse__configuration__1__contacts__row > *,
-  .bathhouse__configuration__1__web__row > *,
-  .bathhouse__configuration__1__rules__row > * {
+  .bathhouse__general__settings > *,
+  .bathhouse__general__settings__name__row > *,
+  .bathhouse__general__settings__area__row > *,
+  .bathhouse__general__settings__contacts__row > *,
+  .bathhouse__general__settings__web__row > *,
+  .bathhouse__general__settings__rules__row > * {
     grid-column: 1 / -1;
   }
 
-  .bathhouse__configuration__1__name__row > :nth-child(1) {
+  .bathhouse__general__settings__name__row > :nth-child(1) {
     grid-row: 1;
   }
 
-  .bathhouse__configuration__1__name__row > :nth-child(2) {
+  .bathhouse__general__settings__name__row > :nth-child(2) {
     grid-row: 2;
   }
 
-  .bathhouse__configuration__1 .bathhouse__configuration__1__city {
+  .bathhouse__general__settings .bathhouse__general__settings__city {
     grid-row: 3;
   }
 
-  .bathhouse__configuration__1 .bathhouse__configuration__1__postal__code {
+  .bathhouse__general__settings .bathhouse__general__settings__postal__code {
     grid-row: 4;
     grid-column: 1 / 4;
   }
 
-  .bathhouse__configuration__1 .bathhouse__configuration__1__province {
+  .bathhouse__general__settings .bathhouse__general__settings__province {
     grid-row: 4;
     grid-column: 4 / 7;
   }
 
-  .bathhouse__configuration__1 .bathhouse__configuration__1__region {
+  .bathhouse__general__settings .bathhouse__general__settings__region {
     grid-row: 5;
     grid-column: 1 / 4;
   }
 
-  .bathhouse__configuration__1 .bathhouse__configuration__1__country {
+  .bathhouse__general__settings .bathhouse__general__settings__country {
     grid-row: 5;
     grid-column: 4 / 7;
   }
 }
 
-.bathhouse__configuration__1__actions {
+.bathhouse__general__settings__actions {
   --button-border-color: var(--color__layout__text__soft);
 
   display: flex;
@@ -126,7 +126,7 @@
   }
 }
 
-.bathhouse__configuration__1__error {
+.bathhouse__general__settings__error {
   margin: 0;
   color: var(--color__layout__error);
   font-size: 0.75rem;

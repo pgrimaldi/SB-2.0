@@ -1,10 +1,10 @@
-<div class="bathhouse__configuration__3" [attr.inert]="isLoading() ? '' : null">
-  <section class="bathhouse__configuration__3__section">
+<div class="bathhouse__media__settings" [attr.inert]="isLoading() ? '' : null">
+  <section class="bathhouse__media__settings__section">
     <app-section-title
       [text]="'management.settings.bathhouse_configuration.media.position.title' | translate"
       [pathIcon]="positionIcon"
     />
-    <div class="bathhouse__configuration__3__map">
+    <div class="bathhouse__media__settings__map">
       @if (isMapReady()) {
         <app-location-map
           [mapId]="mapId"
@@ -13,33 +13,33 @@
           [markerPosition]="position()"
         />
       } @else if (isMapFailed()) {
-        <p class="bathhouse__configuration__3__map__error">
+        <p class="bathhouse__media__settings__map__error">
           {{ 'management.settings.bathhouse_configuration.media.position.map_error' | translate }}
         </p>
       }
     </div>
   </section>
 
-  <section class="bathhouse__configuration__3__section">
+  <section class="bathhouse__media__settings__section">
     <app-section-title
       [text]="'management.settings.bathhouse_configuration.media.images.title' | translate"
       [pathIcon]="imagesIcon"
     />
-    <h3 class="bathhouse__configuration__3__label">
+    <h3 class="bathhouse__media__settings__label">
       {{ 'management.settings.bathhouse_configuration.media.images.main' | translate }}
     </h3>
     <app-file-drop-zone
-      class="bathhouse__configuration__3__main__image"
+      class="bathhouse__media__settings__main__image"
       accept="image/*"
       [text]="'management.settings.bathhouse_configuration.media.images.main_hint' | translate"
       [pathIcon]="addImageIcon"
       [previewUrl]="mainPhoto()?.url"
       [disabled]="!isEditing()"
     />
-    <h3 class="bathhouse__configuration__3__label">
+    <h3 class="bathhouse__media__settings__label">
       {{ 'management.settings.bathhouse_configuration.media.images.gallery' | translate }}
     </h3>
-    <div class="bathhouse__configuration__3__gallery">
+    <div class="bathhouse__media__settings__gallery">
       @for (photo of galleryPhotos(); track photo.idPhoto) {
         <app-file-drop-zone accept="image/*" [previewUrl]="photo.url" [disabled]="!isEditing()" />
       }
@@ -54,7 +54,7 @@
     </div>
   </section>
 
-  <section class="bathhouse__configuration__3__section">
+  <section class="bathhouse__media__settings__section">
     <app-section-title
       [text]="'management.settings.bathhouse_configuration.media.virtual_tour.title' | translate"
       [pathIcon]="virtualTourIcon"
@@ -70,18 +70,18 @@
     />
   </section>
 
-  <section class="bathhouse__configuration__3__section">
+  <section class="bathhouse__media__settings__section">
     <app-section-title
       [text]="'management.settings.bathhouse_configuration.media.documents.title' | translate"
       [pathIcon]="documentsIcon"
     />
     @for (document of documents(); track document.name) {
-      <div class="bathhouse__configuration__3__document">
+      <div class="bathhouse__media__settings__document">
         <div>
-          <p class="bathhouse__configuration__3__document__name">{{ document.name | translate }}</p>
+          <p class="bathhouse__media__settings__document__name">{{ document.name | translate }}</p>
           @if (document.url; as url) {
             <a
-              class="bathhouse__configuration__3__document__file bathhouse__configuration__3__document__link"
+              class="bathhouse__media__settings__document__file bathhouse__media__settings__document__link"
               target="_blank"
               rel="noopener noreferrer"
               [href]="url"
@@ -89,7 +89,7 @@
               {{ 'management.settings.bathhouse_configuration.media.documents.open' | translate }}
             </a>
           } @else {
-            <p class="bathhouse__configuration__3__document__file">
+            <p class="bathhouse__media__settings__document__file">
               {{
                 'management.settings.bathhouse_configuration.media.documents.no_file' | translate
               }}
@@ -103,7 +103,7 @@
     }
   </section>
 
-  <div class="bathhouse__configuration__3__actions">
+  <div class="bathhouse__media__settings__actions">
     @if (isEditing()) {
       <app-button
         [appearance]="ButtonAppearance.Light"
@@ -123,6 +123,6 @@
     }
   </div>
   @if (errorMessage(); as errorMessage) {
-    <p class="bathhouse__configuration__3__error">{{ errorMessage }}</p>
+    <p class="bathhouse__media__settings__error">{{ errorMessage }}</p>
   }
 </div>

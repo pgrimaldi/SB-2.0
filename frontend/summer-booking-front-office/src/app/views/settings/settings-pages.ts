@@ -53,7 +53,12 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
       ),
   },
   { path: 'price-list', label: 'management.settings.menu.price_list' },
-  { path: 'services', label: 'management.settings.menu.services' },
+  {
+    path: 'services',
+    label: 'management.settings.menu.services',
+    loadChildren: () =>
+      import('./services/services.routes').then((routes) => routes.SERVICES_ROUTES),
+  },
   {
     path: 'vouchers',
     label: 'management.settings.menu.discounts',

@@ -1111,6 +1111,15 @@
             "text": "Do you want to delete the {{count}} selected date ranges?"
           }
         }
+      },
+      "services": {
+        "tabs": {
+          "bar_services": "Bar Services",
+          "services": "Services",
+          "hourly_services": "Hourly Services",
+          "automatic_prices": "Automatic Prices",
+          "table_booking": "Table Booking"
+        }
       }
     }
   },

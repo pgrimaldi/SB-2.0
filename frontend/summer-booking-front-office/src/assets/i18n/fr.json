@@ -1111,6 +1111,15 @@
             "text": "Voulez-vous supprimer les {{count}} plages de dates sélectionnées ?"
           }
         }
+      },
+      "services": {
+        "tabs": {
+          "bar_services": "Services bar",
+          "services": "Services",
+          "hourly_services": "Services horaires",
+          "automatic_prices": "Prix automatiques",
+          "table_booking": "Réservation de table"
+        }
       }
     }
   },

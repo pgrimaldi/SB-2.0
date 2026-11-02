@@ -1111,6 +1111,15 @@
             "text": "Möchtest du die {{count}} ausgewählten Datumsbereiche löschen?"
           }
         }
+      },
+      "services": {
+        "tabs": {
+          "bar_services": "Bar-Leistungen",
+          "services": "Leistungen",
+          "hourly_services": "Stundenleistungen",
+          "automatic_prices": "Automatische Preise",
+          "table_booking": "Tischreservierung"
+        }
       }
     }
   },

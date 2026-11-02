@@ -47,7 +47,7 @@ interface GeneralInformationTexts {
 }
 
 @Component({
-  selector: 'app-bathhouse-configuration-1',
+  selector: 'app-bathhouse-general-settings',
   imports: [
     Button,
     FilledSelect,
@@ -57,11 +57,11 @@ interface GeneralInformationTexts {
     RichTextField,
     TranslatePipe,
   ],
-  templateUrl: './bathhouse-configuration-1.html',
-  styleUrl: './bathhouse-configuration-1.scss',
+  templateUrl: './bathhouse-general-settings.html',
+  styleUrl: './bathhouse-general-settings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BathhouseConfiguration1 implements UnsavedChanges, OnDestroy {
+export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
   private readonly catalog = inject(CatalogService);
