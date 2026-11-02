@@ -859,7 +859,7 @@
         }
       },
       "user_management": {
-        "title": "User management - Active users list",
+        "title": "User Management",
         "create": "Add user",
         "table": {
           "email": "Email",

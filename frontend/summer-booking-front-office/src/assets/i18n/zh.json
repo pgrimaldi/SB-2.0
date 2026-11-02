@@ -859,7 +859,7 @@
         }
       },
       "user_management": {
-        "title": "用户管理 - 活跃用户列表",
+        "title": "用户管理",
         "create": "添加用户",
         "table": {
           "email": "电子邮件",

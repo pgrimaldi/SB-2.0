@@ -859,7 +859,7 @@
         }
       },
       "user_management": {
-        "title": "Gestión de usuarios - Lista de usuarios activos",
+        "title": "Gestión de usuarios",
         "create": "Añadir usuario",
         "table": {
           "email": "Correo electrónico",
