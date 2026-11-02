@@ -1,0 +1,30 @@
+<app-page-title
+  class="table__booking__title"
+  [text]="'management.settings.services.table_booking.title' | translate"
+  [pathIcon]="titleIcon"
+/>
+<app-table
+  #table
+  [columns]="columns()"
+  [params]="params()"
+  [load]="catalog.tableServiceList"
+  idField="idTableService"
+  [texts]="'table' | translate"
+  [isSearchable]="true"
+  [useAppTheme]="false"
+  [areMassiveActionsHidden]="false"
+  [isCreateButtonHidden]="false"
+  [createLabel]="'management.settings.services.table_booking.create' | translate"
+  [rowActions]="rowActions()"
+  [pathIcon]="tableIcons"
+  (loadError)="loadFailed.set(true)"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

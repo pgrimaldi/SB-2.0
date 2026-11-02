@@ -1135,6 +1135,28 @@
             "service": "الخدمة",
             "price": "السعر"
           }
+        },
+        "hourly_services": {
+          "title": "خدمات بالساعة",
+          "create": "إضافة خدمة بالساعة",
+          "table": {
+            "service": "الخدمة"
+          }
+        },
+        "automatic_prices": {
+          "title": "أسعار تلقائية",
+          "create": "إضافة سعر تلقائي",
+          "table": {
+            "service": "الخدمة",
+            "price": "السعر"
+          }
+        },
+        "table_booking": {
+          "title": "حجز خدمة الطاولات",
+          "create": "إضافة خدمة طاولات",
+          "table": {
+            "service_name": "اسم الخدمة"
+          }
         }
       }
     }

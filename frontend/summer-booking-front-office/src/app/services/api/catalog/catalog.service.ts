@@ -7,8 +7,11 @@ import { Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
@@ -73,4 +76,26 @@ export class CatalogService {
       `${this.endpoint}/standard-service-list`,
       request,
     );
+
+  /**
+   * An arrow property on purpose: the page hands it to `app-table` as its loader
+   * (`[load]="catalog.hourlyServiceList"`), and only an arrow function keeps `this` when it is
+   * passed around on its own.
+   */
+  readonly hourlyServiceList = (request: PageRequest): Observable<Page<HourlyServiceItem>> =>
+    this.httpClient.post<Page<HourlyServiceItem>>(`${this.endpoint}/hourly-service-list`, request);
+
+  readonly automaticPriceList = (request: PageRequest): Observable<Page<AutomaticPriceItem>> =>
+    this.httpClient.post<Page<AutomaticPriceItem>>(
+      `${this.endpoint}/automatic-price-list`,
+      request,
+    );
+
+  /**
+   * An arrow property on purpose: the page hands it to `app-table` as its loader
+   * (`[load]="catalog.tableServiceList"`), and only an arrow function keeps `this` when it is
+   * passed around on its own.
+   */
+  readonly tableServiceList = (request: PageRequest): Observable<Page<TableServiceItem>> =>
+    this.httpClient.post<Page<TableServiceItem>>(`${this.endpoint}/table-service-list`, request);
 }

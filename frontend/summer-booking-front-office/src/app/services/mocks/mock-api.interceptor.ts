@@ -4,14 +4,17 @@ import { entriesListMock, userComboboxMock } from './audit/audit.mock';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
+  automaticPriceListMock,
   barServiceListMock,
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationMediaMock,
   bathhouseConfigurationServicesMock,
   countriesComboboxMock,
+  hourlyServiceListMock,
   saveBathhouseConfigurationGeneralMock,
   saveBathhouseConfigurationServicesMock,
   standardServiceListMock,
+  tableServiceListMock,
 } from './catalog/catalog.mock';
 import {
   affiliatedHotelComboboxMock,
@@ -512,6 +515,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/standard-service-list`
   ) {
     return standardServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/hourly-service-list`
+  ) {
+    return hourlyServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/automatic-price-list`
+  ) {
+    return automaticPriceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/table-service-list`
+  ) {
+    return tableServiceListMock(request);
   }
 
   return next(request);

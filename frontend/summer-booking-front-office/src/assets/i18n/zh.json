@@ -1135,6 +1135,28 @@
             "service": "服务",
             "price": "价格"
           }
+        },
+        "hourly_services": {
+          "title": "按小时服务",
+          "create": "添加按小时服务",
+          "table": {
+            "service": "服务"
+          }
+        },
+        "automatic_prices": {
+          "title": "自动价格",
+          "create": "添加自动价格",
+          "table": {
+            "service": "服务",
+            "price": "价格"
+          }
+        },
+        "table_booking": {
+          "title": "餐桌服务预订",
+          "create": "添加餐桌服务",
+          "table": {
+            "service_name": "服务名称"
+          }
         }
       }
     }

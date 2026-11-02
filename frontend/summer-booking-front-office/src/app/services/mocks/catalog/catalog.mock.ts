@@ -5,8 +5,11 @@ import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/paginati
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { forbidden, resourceNotFound } from '../errors/problem.mock';
@@ -812,6 +815,160 @@ export const standardServiceListMock = (
     found.sort((first, second) => sign * compare(first[field], second[field]));
   }
   const answer: Page<StandardServiceItem> = {
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+type HourlyServiceRow = HourlyServiceItem & { propertyId: number };
+
+const HOURLY_SERVICES: readonly HourlyServiceRow[] = (
+  [
+    ['01', 'Sup'],
+    ['02', 'Pedalò'],
+    ['03', 'Piscina'],
+    ['04', 'Idromassaggio'],
+  ] as const
+).map(([suffix, serviceName]) => ({
+  propertyId: 1,
+  idHourlyService: `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a${suffix}`,
+  serviceName,
+}));
+
+const HOURLY_SERVICE_SORT_FIELDS = ['serviceName'] as const;
+
+/**
+ * `POST /api/catalog/hourly-service-list`: one page of the hourly services of the requested
+ * property, searched in the name. 401 without a valid access token; 403 for a missing or unknown
+ * property.
+ */
+export const hourlyServiceListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = HOURLY_SERVICES.filter(
+    (row) =>
+      row.propertyId === property.id &&
+      (!search || row.serviceName?.toLowerCase().includes(search)),
+  ).map((row) => onlyFieldsOf(HourlyServiceItem, row));
+  const field = HOURLY_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
+  const answer: Page<HourlyServiceItem> = {
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+type AutomaticPriceRow = AutomaticPriceItem & { propertyId: number };
+
+const AUTOMATIC_PRICES: readonly AutomaticPriceRow[] = [
+  {
+    propertyId: 1,
+    idAutomaticPrice: '7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01',
+    serviceName: 'Coperto',
+    price: 2,
+  },
+];
+
+const AUTOMATIC_PRICE_SORT_FIELDS = ['serviceName', 'price'] as const;
+
+/**
+ * `POST /api/catalog/automatic-price-list`: one page of the automatic prices of the requested
+ * property, searched in the name. 401 without a valid access token; 403 for a missing or unknown
+ * property.
+ */
+export const automaticPriceListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = AUTOMATIC_PRICES.filter(
+    (row) =>
+      row.propertyId === property.id &&
+      (!search || row.serviceName?.toLowerCase().includes(search)),
+  ).map((row) => onlyFieldsOf(AutomaticPriceItem, row));
+  const field = AUTOMATIC_PRICE_SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
+  const answer: Page<AutomaticPriceItem> = {
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+type TableServiceRow = TableServiceItem & { propertyId: number };
+
+const TABLE_SERVICES: readonly TableServiceRow[] = (
+  [
+    ['01', 'Pranzo'],
+    ['02', 'Cena'],
+    ['03', 'Colazione'],
+  ] as const
+).map(([suffix, serviceName]) => ({
+  propertyId: 1,
+  idTableService: `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a7${suffix}`,
+  serviceName,
+}));
+
+const TABLE_SERVICE_SORT_FIELDS = ['serviceName'] as const;
+
+/**
+ * `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) of the
+ * requested property, searched in the name. 401 without a valid access token; 403 for a missing or
+ * unknown property.
+ */
+export const tableServiceListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = TABLE_SERVICES.filter(
+    (row) =>
+      row.propertyId === property.id &&
+      (!search || row.serviceName?.toLowerCase().includes(search)),
+  ).map((row) => onlyFieldsOf(TableServiceItem, row));
+  const field = TABLE_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
+  const answer: Page<TableServiceItem> = {
     total: found.length,
     rows: found.slice((page - 1) * pageSize, page * pageSize),
   };

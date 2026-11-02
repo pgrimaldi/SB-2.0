@@ -1135,6 +1135,28 @@
             "service": "Service",
             "price": "Price"
           }
+        },
+        "hourly_services": {
+          "title": "Hourly services",
+          "create": "Add hourly service",
+          "table": {
+            "service": "Service"
+          }
+        },
+        "automatic_prices": {
+          "title": "Automatic prices",
+          "create": "Add automatic price",
+          "table": {
+            "service": "Service",
+            "price": "Price"
+          }
+        },
+        "table_booking": {
+          "title": "Table service booking",
+          "create": "Add table service",
+          "table": {
+            "service_name": "Service name"
+          }
         }
       }
     }

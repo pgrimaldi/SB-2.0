@@ -1135,6 +1135,28 @@
             "service": "Leistung",
             "price": "Preis"
           }
+        },
+        "hourly_services": {
+          "title": "Stundenleistungen",
+          "create": "Stundenleistung hinzufügen",
+          "table": {
+            "service": "Leistung"
+          }
+        },
+        "automatic_prices": {
+          "title": "Automatische Preise",
+          "create": "Preis hinzufügen",
+          "table": {
+            "service": "Leistung",
+            "price": "Preis"
+          }
+        },
+        "table_booking": {
+          "title": "Tischservice-Reservierung",
+          "create": "Tischservice hinzufügen",
+          "table": {
+            "service_name": "Leistungsname"
+          }
         }
       }
     }

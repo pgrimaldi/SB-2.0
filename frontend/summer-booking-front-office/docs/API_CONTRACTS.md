@@ -2686,6 +2686,188 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Doccia calda` |
 | `rows[].price` | number (decimale, €) \| null | `3` |
 
+### POST `/api/catalog/hourly-service-list`
+
+Servizi: servizi orari.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "pisc",
+  "filters": [
+    {
+      "field": "serviceName",
+      "value": [
+        "Piscina"
+      ]
+    }
+  ],
+  "sortField": "serviceName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `pisc` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Piscina"]}]` |
+| `filters[].field` | string | `serviceName` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Piscina"]` |
+| `sortField` | string | `serviceName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 1,
+  "rows": [
+    {
+      "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03",
+      "serviceName": "Piscina"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `1` |
+| `rows[]` | HourlyServiceItem[] (array di oggetti) | `[{"idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03", "serviceName": "Piscina"}]` |
+| `rows[].idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03` |
+| `rows[].serviceName` | string \| null | `Piscina` |
+
+### POST `/api/catalog/automatic-price-list`
+
+Servizi: prezzi automatici.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "cop",
+  "filters": [
+    {
+      "field": "serviceName",
+      "value": [
+        "Coperto"
+      ]
+    }
+  ],
+  "sortField": "price",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `cop` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Coperto"]}]` |
+| `filters[].field` | string | `serviceName` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Coperto"]` |
+| `sortField` | string | `price` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 1,
+  "rows": [
+    {
+      "idAutomaticPrice": "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01",
+      "serviceName": "Coperto",
+      "price": 2
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `1` |
+| `rows[]` | AutomaticPriceItem[] (array di oggetti) | `[{"idAutomaticPrice": "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01", "serviceName": "Coperto", "price": 2}]` |
+| `rows[].idAutomaticPrice` | string (UUID) | `7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01` |
+| `rows[].serviceName` | string \| null | `Coperto` |
+| `rows[].price` | number (decimale, €) \| null | `2` |
+
+### POST `/api/catalog/table-service-list`
+
+Servizi: prenotazione servizio tavoli.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "cen",
+  "filters": [
+    {
+      "field": "serviceName",
+      "value": [
+        "Cena"
+      ]
+    }
+  ],
+  "sortField": "serviceName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `cen` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Cena"]}]` |
+| `filters[].field` | string | `serviceName` |
+| `filters[].value` | string[] (array di stringhe, almeno una) | `["Cena"]` |
+| `sortField` | string | `serviceName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 1,
+  "rows": [
+    {
+      "idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702",
+      "serviceName": "Cena"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `1` |
+| `rows[]` | TableServiceItem[] (array di oggetti) | `[{"idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702", "serviceName": "Cena"}]` |
+| `rows[].idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702` |
+| `rows[].serviceName` | string \| null | `Cena` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

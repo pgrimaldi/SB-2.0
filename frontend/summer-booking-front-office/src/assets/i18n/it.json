@@ -1135,6 +1135,28 @@
             "service": "Servizio",
             "price": "Prezzo"
           }
+        },
+        "hourly_services": {
+          "title": "Servizi orari",
+          "create": "Aggiungi servizio orario",
+          "table": {
+            "service": "Servizio"
+          }
+        },
+        "automatic_prices": {
+          "title": "Prezzi automatici",
+          "create": "Aggiungi prezzo automatico",
+          "table": {
+            "service": "Servizio",
+            "price": "Prezzo"
+          }
+        },
+        "table_booking": {
+          "title": "Prenotazione servizio tavoli",
+          "create": "Aggiungi servizio tavoli",
+          "table": {
+            "service_name": "Nome servizio"
+          }
         }
       }
     }
