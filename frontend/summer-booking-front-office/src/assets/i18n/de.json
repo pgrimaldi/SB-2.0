@@ -1152,7 +1152,14 @@
               "text": "Möchtest du die {{count}} ausgewählten Bar-Leistungen duplizieren?"
             }
           },
-          "add_title": "Neue Bar-Leistung hinzufügen"
+          "add_title": "Neue Bar-Leistung hinzufügen",
+          "categories": {
+            "cafeteria": "Kaffee",
+            "drinks": "Getränke",
+            "snacks_and_sandwiches": "Snacks und Sandwiches",
+            "ice_creams": "Eis",
+            "desserts": "Desserts"
+          }
         },
         "standard_services": {
           "title": "Leistungen",

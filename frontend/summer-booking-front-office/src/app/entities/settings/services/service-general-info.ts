@@ -1,8 +1,10 @@
+import { BarServiceCategory } from '../../enums/bar-service-category';
+import { BarServiceIcon } from '../../enums/bar-service-icon';
 import { ServiceTranslation } from './service-translation';
 
 export class ServiceGeneralInfo {
   translations: ServiceTranslation[] = [];
-  idCategory: string | null = null;
-  idIcon: number | null = null;
+  category: BarServiceCategory | null = null;
+  icon: BarServiceIcon | null = null;
   isHighlighted = false;
 }

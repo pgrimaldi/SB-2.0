@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
@@ -16,6 +16,7 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { BarServiceCategory } from '../../../../entities/enums/bar-service-category';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
 interface ServicesBarTexts {
@@ -24,12 +25,30 @@ interface ServicesBarTexts {
   price: string;
 }
 
+interface BarServiceCategoryTexts {
+  cafeteria: string;
+  drinks: string;
+  snacks_and_sandwiches: string;
+  ice_creams: string;
+  desserts: string;
+}
+
 interface BarServiceRow {
   idBarService: string | null;
   serviceName: string | null;
-  categoryName: string | null;
+  category: string | null;
   price: string | null;
 }
+
+const BAR_SERVICE_CATEGORY_KEYS: Readonly<
+  Record<BarServiceCategory, keyof BarServiceCategoryTexts>
+> = {
+  [BarServiceCategory.Cafeteria]: 'cafeteria',
+  [BarServiceCategory.Drinks]: 'drinks',
+  [BarServiceCategory.SnacksAndSandwiches]: 'snacks_and_sandwiches',
+  [BarServiceCategory.IceCreams]: 'ice_creams',
+  [BarServiceCategory.Desserts]: 'desserts',
+};
 
 @Component({
   selector: 'app-services-bar',
@@ -88,7 +107,7 @@ export class ServicesBar {
   );
   protected readonly columns = computed<readonly TableColumn<BarServiceRow>[]>(() => [
     { field: 'serviceName', header: this.headers().service, sortable: true },
-    { field: 'categoryName', header: this.headers().category, sortable: true },
+    { field: 'category', header: this.headers().category, sortable: true },
     { field: 'price', header: this.headers().price, sortable: true },
   ]);
   protected readonly rowActions = standardRowActions<BarServiceRow>({
@@ -101,19 +120,30 @@ export class ServicesBar {
 
   protected readonly load: TableLoad<{ idProperty: string }, BarServiceRow> = (request) =>
     this.catalog.barServiceList(request).pipe(
-      map((page) => {
-        const amount = new Intl.NumberFormat(this.dateLanguage.locale(), {
-          style: 'currency',
-          currency: 'EUR',
-        });
-        return {
-          total: page.total,
-          rows: page.rows.map((item): BarServiceRow => ({
-            ...item,
-            price: item.price === null ? null : amount.format(item.price),
-          })),
-        };
-      }),
+      switchMap((page) =>
+        (
+          this.translateService.get(
+            'management.settings.services.bar_services.categories',
+          ) as Observable<BarServiceCategoryTexts>
+        ).pipe(
+          map((categories) => {
+            const amount = new Intl.NumberFormat(this.dateLanguage.locale(), {
+              style: 'currency',
+              currency: 'EUR',
+            });
+            return {
+              total: page.total,
+              rows: page.rows.map((item): BarServiceRow => ({
+                ...item,
+                category: item.category
+                  ? categories[BAR_SERVICE_CATEGORY_KEYS[item.category]]
+                  : null,
+                price: item.price === null ? null : amount.format(item.price),
+              })),
+            };
+          }),
+        ),
+      ),
     );
 
   protected readonly deleteBarServices = (idProperty: string, idBarServices: string[]) =>

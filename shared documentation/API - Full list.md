@@ -1690,7 +1690,7 @@ Nessun corpo (204).
     {
       "idBarService": "string (UUID)",
       "serviceName": "string | null",
-      "categoryName": "string | null",
+      "category": "string (enum BarServiceCategory) | null",
       "price": "number (decimale, €) | null"
     }
   ]
@@ -1719,70 +1719,8 @@ Nessun corpo (204).
 | `rows[]` | BarServiceItem[] (array di oggetti) |
 | `rows[].idBarService` | string (UUID) |
 | `rows[].serviceName` | string \| null |
-| `rows[].categoryName` | string \| null |
+| `rows[].category` | string (enum BarServiceCategory) \| null |
 | `rows[].price` | number (decimale, €) \| null |
-
-### GET `/api/catalog/bar-service-category-combobox?idProperty={idProperty}`
-
-**Payload JSON** (query string)
-
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
-
-**Response JSON**
-
-```json
-[
-  {
-    "id": "string (UUID)",
-    "value": "string"
-  }
-]
-```
-
-**Payload tabella** (query string)
-
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
-
-**Response tabella**
-
-| Campo | Tipo |
-|---|---|
-| `[].id` | string (UUID) |
-| `[].value` | string |
-
-### GET `/api/catalog/bar-service-icon-list`
-
-**Payload JSON**
-
-Nessun payload.
-
-**Response JSON**
-
-```json
-[
-  {
-    "idIcon": "number (intero)",
-    "iconUrl": "string (URL)"
-  }
-]
-```
-
-**Payload tabella**
-
-Nessun payload.
-
-**Response tabella**
-
-| Campo | Tipo |
-|---|---|
-| `[].idIcon` | number (intero) |
-| `[].iconUrl` | string (URL) |
 
 ### POST `/api/catalog/delete-bar-service-item`
 

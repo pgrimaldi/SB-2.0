@@ -2605,13 +2605,13 @@ Stato: 200 OK.
     {
       "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08",
       "serviceName": "Acqua naturale 1L",
-      "categoryName": "Bevande",
+      "category": "Drinks",
       "price": 1.2
     },
     {
       "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09",
       "serviceName": "Acqua frizzante 1L",
-      "categoryName": "Bevande",
+      "category": "Drinks",
       "price": 1.2
     }
   ]
@@ -2621,79 +2621,11 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | BarServiceItem[] (array di oggetti) | `[{"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "serviceName": "Acqua naturale 1L", "categoryName": "Bevande", "price": 1.2}, {"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09", "serviceName": "Acqua frizzante 1L", "categoryName": "Bevande", "price": 1.2}]` |
+| `rows[]` | BarServiceItem[] (array di oggetti) | `[{"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "serviceName": "Acqua naturale 1L", "category": "Drinks", "price": 1.2}, {"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09", "serviceName": "Acqua frizzante 1L", "category": "Drinks", "price": 1.2}]` |
 | `rows[].idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08` |
 | `rows[].serviceName` | string \| null | `Acqua naturale 1L` |
-| `rows[].categoryName` | string \| null | `Bevande` |
+| `rows[].category` | string (enum BarServiceCategory) \| null | `Drinks` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
-
-### GET `/api/catalog/bar-service-category-combobox?idProperty={idProperty}`
-
-Servizi: categorie dei servizi bar.
-
-#### Payload
-
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/catalog/bar-service-category-combobox?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-
-#### Response
-
-Stato: 200 OK.
-
-```json
-[
-  {
-    "id": "3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d01",
-    "value": "Caffetteria"
-  },
-  {
-    "id": "3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d02",
-    "value": "Bevande"
-  }
-]
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `id` | string (UUID) | `3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d01` |
-| `value` | string | `Caffetteria` |
-
-### GET `/api/catalog/bar-service-icon-list`
-
-Servizi: icone dei servizi bar.
-
-#### Payload
-
-Nessun corpo e nessun parametro: è una GET e le icone sono le stesse per ogni stabilimento.
-
-#### Response
-
-Stato: 200 OK.
-
-```json
-[
-  {
-    "idIcon": 1,
-    "iconUrl": "https://media.example.com/icons/bar/caffe.svg"
-  },
-  {
-    "idIcon": 2,
-    "iconUrl": "https://media.example.com/icons/bar/cocktail.svg"
-  }
-]
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idIcon` | number (intero) | `1` |
-| `iconUrl` | string (URL) | `https://media.example.com/icons/bar/caffe.svg` |
 
 ### POST `/api/catalog/delete-bar-service-item`
 

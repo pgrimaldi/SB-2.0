@@ -20,7 +20,6 @@ import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
-import { ServiceIconItem } from '../../../entities/settings/services/service-icon-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../only-fields-of';
@@ -81,16 +80,6 @@ export class CatalogService {
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
     this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
-
-  /** The categories of the bar services of the property, for the select of the add panel. */
-  readonly barServiceCategoryCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.get<ComboboxItem[]>(`${this.endpoint}/bar-service-category-combobox`, {
-      params: { idProperty },
-    });
-
-  /** The icons a bar service can have: the same for every property. */
-  readonly barServiceIconList = (): Observable<ServiceIconItem[]> =>
-    this.httpClient.get<ServiceIconItem[]>(`${this.endpoint}/bar-service-icon-list`);
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteBarServiceItems = (request: DeleteBarServiceItemsRequest): Observable<void> =>

@@ -1152,7 +1152,14 @@
               "text": "هل تريد نسخ {{count}} من خدمات البار المحددة؟"
             }
           },
-          "add_title": "إضافة خدمة بار جديدة"
+          "add_title": "إضافة خدمة بار جديدة",
+          "categories": {
+            "cafeteria": "القهوة",
+            "drinks": "المشروبات",
+            "snacks_and_sandwiches": "الوجبات الخفيفة والسندويشات",
+            "ice_creams": "المثلجات",
+            "desserts": "الحلويات"
+          }
         },
         "standard_services": {
           "title": "الخدمات",

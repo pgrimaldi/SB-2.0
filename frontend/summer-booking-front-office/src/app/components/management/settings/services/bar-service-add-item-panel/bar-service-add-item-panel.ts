@@ -13,7 +13,7 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { form } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, forkJoin, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -22,18 +22,16 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { ServiceGeneralInfo } from '../../../../../entities/settings/services/service-general-info';
-import { ServiceIconItem } from '../../../../../entities/settings/services/service-icon-item';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
 import { ServicePrices } from '../../../../../entities/settings/services/service-prices';
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
-import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
-import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import {
   SERVICE_LANGUAGES,
@@ -77,7 +75,6 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   readonly pathIcon = input<readonly string[] | null>();
 
   private readonly auth = inject(AuthBehaviour);
-  private readonly catalog = inject(CatalogService);
   private readonly seasons = inject(SeasonService);
   private readonly language = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
@@ -107,8 +104,6 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   /** The prices as they were when the panel opened, with an empty price for every period. */
   private readonly pristinePrices = signal(JSON.stringify(new ServicePrices()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
-  protected readonly categories = signal<readonly SelectOption[]>([]);
-  protected readonly icons = signal<readonly ServiceIconItem[]>([]);
   protected readonly isFetching = signal(false);
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
@@ -141,13 +136,13 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     );
   }
 
-  protected chooseIcon(idIcon: number): void {
-    this.draftForm.idIcon().value.set(idIcon);
+  protected chooseIcon(icon: BarServiceIcon): void {
+    this.draftForm.icon().value.set(icon);
     this.setImage(null);
   }
 
   protected chooseImage(image: File): void {
-    this.draftForm.idIcon().value.set(null);
+    this.draftForm.icon().value.set(null);
     this.setImage(image);
   }
 
@@ -165,14 +160,11 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.bookingOptionsForm().reset();
     this.setImage(null);
     this.selectedTab.set(PanelTab.GeneralInfo);
-    this.fetchChoices();
+    this.fetchPeriods();
   }
 
-  /**
-   * The categories of the property, the icons a bar service can have and the periods of the current
-   * season.
-   */
-  private fetchChoices(): void {
+  /** The periods of the current season, each with its own price in the Prezzi tab. */
+  private fetchPeriods(): void {
     this.fetching?.unsubscribe();
     this.error.set(null);
     const idProperty = this.auth.user()?.propertyId;
@@ -180,18 +172,11 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       return;
     }
     this.isFetching.set(true);
-    this.fetching = forkJoin({
-      categories: this.catalog.barServiceCategoryCombobox(idProperty),
-      icons: this.catalog.barServiceIconList(),
-      periods: this.seasons.periodList(idProperty, false),
-    })
+    this.fetching = this.seasons
+      .periodList(idProperty, false)
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
-        next: ({ categories, icons, periods }) => {
-          this.categories.set(categories.map(({ id, value }) => ({ value: id, label: value })));
-          this.icons.set(icons);
-          this.setPrices(periods);
-        },
+        next: (periods) => this.setPrices(periods),
         error: (error: unknown) => this.error.set(toApiProblem(error)),
       });
   }

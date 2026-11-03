@@ -1152,7 +1152,14 @@
               "text": "Do you want to duplicate the {{count}} selected bar services?"
             }
           },
-          "add_title": "Add new bar service"
+          "add_title": "Add new bar service",
+          "categories": {
+            "cafeteria": "Coffee",
+            "drinks": "Drinks",
+            "snacks_and_sandwiches": "Snacks and sandwiches",
+            "ice_creams": "Ice cream",
+            "desserts": "Desserts"
+          }
         },
         "standard_services": {
           "title": "Services",

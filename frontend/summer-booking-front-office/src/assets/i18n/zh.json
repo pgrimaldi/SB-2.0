@@ -1152,7 +1152,14 @@
               "text": "要复制所选的 {{count}} 个酒吧服务吗？"
             }
           },
-          "add_title": "添加新的酒吧服务"
+          "add_title": "添加新的酒吧服务",
+          "categories": {
+            "cafeteria": "咖啡",
+            "drinks": "饮料",
+            "snacks_and_sandwiches": "小吃和三明治",
+            "ice_creams": "冰淇淋",
+            "desserts": "甜点"
+          }
         },
         "standard_services": {
           "title": "服务",

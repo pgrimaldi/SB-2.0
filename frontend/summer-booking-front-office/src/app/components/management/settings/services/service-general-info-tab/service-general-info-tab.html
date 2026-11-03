@@ -58,7 +58,7 @@
   [label]="'management.settings.services.form.category' | translate"
   [placeholder]="'management.settings.services.form.choose' | translate"
   [options]="categories()"
-  [formField]="form().idCategory"
+  [formField]="form().category"
 />
 
 <section class="service__general__info__tab__image">
@@ -70,14 +70,14 @@
     {{ 'management.settings.services.form.image.choose_icon' | translate }}
   </span>
   <div class="service__general__info__tab__icons">
-    @for (icon of icons(); track icon.idIcon) {
+    @for (icon of icons; track icon.icon) {
       <button
         class="service__general__info__tab__icon"
         type="button"
-        [class.service__general__info__tab__icon__chosen]="icon.idIcon === form().idIcon().value()"
-        (click)="icon.idIcon === null || iconChosen.emit(icon.idIcon)"
+        [class.service__general__info__tab__icon__chosen]="icon.icon === form().icon().value()"
+        (click)="iconChosen.emit(icon.icon)"
       >
-        <img [src]="icon.iconUrl" width="24" height="24" alt="" />
+        <img [src]="icon.url" width="24" height="24" alt="" />
       </button>
     }
   </div>

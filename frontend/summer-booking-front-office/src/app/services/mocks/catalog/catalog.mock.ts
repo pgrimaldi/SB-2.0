@@ -1,6 +1,7 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
@@ -18,7 +19,6 @@ import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
-import { ServiceIconItem } from '../../../entities/settings/services/service-icon-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -721,29 +721,29 @@ type BarServiceRow = BarServiceItem & { propertyId: number };
 
 const BAR_SERVICES: BarServiceRow[] = (
   [
-    ['01', 'Caffè', 'Caffetteria', 1],
-    ['02', 'Croissant', 'Dolci', 1.4],
-    ['03', 'Panino', 'Snack e panini', 3],
-    ['04', 'Succo di frutta', 'Bevande', 2],
-    ['05', 'Pizza', 'Snack e panini', 3],
-    ['06', 'Sfoglia', 'Dolci', 1.3],
-    ['07', 'Bibita lattina', 'Bevande', 2.5],
-    ['08', 'Acqua naturale 1L', 'Bevande', 1.2],
-    ['09', 'Acqua frizzante 1L', 'Bevande', 1.2],
-    ['10', 'Schiacciata', 'Snack e panini', 3],
-    ['11', 'Tramezzino', 'Snack e panini', 2.8],
-    ['12', 'Gelato', 'Gelati', 2.5],
+    ['01', 'Caffè', BarServiceCategory.Cafeteria, 1],
+    ['02', 'Croissant', BarServiceCategory.Desserts, 1.4],
+    ['03', 'Panino', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['04', 'Succo di frutta', BarServiceCategory.Drinks, 2],
+    ['05', 'Pizza', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['06', 'Sfoglia', BarServiceCategory.Desserts, 1.3],
+    ['07', 'Bibita lattina', BarServiceCategory.Drinks, 2.5],
+    ['08', 'Acqua naturale 1L', BarServiceCategory.Drinks, 1.2],
+    ['09', 'Acqua frizzante 1L', BarServiceCategory.Drinks, 1.2],
+    ['10', 'Schiacciata', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['11', 'Tramezzino', BarServiceCategory.SnacksAndSandwiches, 2.8],
+    ['12', 'Gelato', BarServiceCategory.IceCreams, 2.5],
   ] as const
-).map(([suffix, serviceName, categoryName, price]) => ({
+).map(([suffix, serviceName, category, price]) => ({
   propertyId: 1,
   idBarService: `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c${suffix}`,
   serviceName,
-  categoryName,
+  category,
   price,
 }));
 
 const MAX_PAGE_SIZE = 100;
-const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'categoryName', 'price'] as const;
+const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
 /**
  * `POST /api/catalog/bar-service-list`: one page of the bar services of the requested property,
@@ -778,75 +778,6 @@ export const barServiceListMock = (
     rows: found.slice((page - 1) * pageSize, page * pageSize),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
-
-const BAR_SERVICE_CATEGORIES: readonly ComboboxItem[] = [
-  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d01', value: 'Caffetteria' },
-  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d02', value: 'Bevande' },
-  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d03', value: 'Snack e panini' },
-  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d04', value: 'Gelati' },
-  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d05', value: 'Dolci' },
-];
-
-/**
- * `GET /api/catalog/bar-service-category-combobox?idProperty=…`: the categories of the bar services of
- * the property. 401 without a valid access token; 403 for a missing or unknown property.
- */
-export const barServiceCategoryComboboxMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
-  }
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: [...BAR_SERVICE_CATEGORIES] }),
-  ).pipe(delay(150));
-};
-
-const BAR_SERVICE_ICONS: readonly ServiceIconItem[] = [
-  'Services_BarCoffee.png',
-  'Services_BarCroissant.png',
-  'Services_BarCocktail.png',
-  'Services_BarJuice.png',
-  'Services_BarDrink.png',
-  'Services_BarWaterBottle.png',
-  'Services_BarBeer.png',
-  'Services_BarJam.png',
-  'Services_BarCookie.png',
-  'Services_BarMacaron.png',
-  'Services_BarIceCream.png',
-  'Services_BarCupcake.png',
-  'Services_BarRoomService.png',
-  'Services_BarMug.png',
-  'Services_BarPizzaSlice.png',
-  'Services_BarSandwich.png',
-  'Services_BarCutlery.png',
-  'Services_BarBurger.png',
-  'Services_BarFastFood.png',
-  'Services_BarRiceBowl.png',
-  'Services_BarCake.png',
-  'Services_BarPancakes.png',
-].map((file, index) => ({
-  idIcon: index + 1,
-  iconUrl: `/assets/images/${file}`,
-}));
-
-/**
- * `GET /api/catalog/bar-service-icon-list`: the icons a bar service can have, the same for every
- * property. 401 without a valid access token.
- */
-export const barServiceIconListMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  return of(new HttpResponse({ status: 200, url: request.url, body: [...BAR_SERVICE_ICONS] })).pipe(
-    delay(150),
-  );
 };
 
 /**
