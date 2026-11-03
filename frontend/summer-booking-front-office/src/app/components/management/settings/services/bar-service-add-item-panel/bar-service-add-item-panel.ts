@@ -23,6 +23,7 @@ import {
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
+import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { ServiceGeneralInfo } from '../../../../../entities/settings/services/service-general-info';
 import { ServiceIconItem } from '../../../../../entities/settings/services/service-icon-item';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
@@ -38,6 +39,7 @@ import {
   SERVICE_LANGUAGES,
   ServiceGeneralInfoTab,
 } from '../service-general-info-tab/service-general-info-tab';
+import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab';
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
 
 interface ServiceFormTexts {
@@ -57,7 +59,14 @@ enum PanelTab {
 
 @Component({
   selector: 'app-bar-service-add-item-panel',
-  imports: [ServiceGeneralInfoTab, ServicePricesTab, SidePanel, TabGroup, TranslatePipe],
+  imports: [
+    ServiceBookingsTab,
+    ServiceGeneralInfoTab,
+    ServicePricesTab,
+    SidePanel,
+    TabGroup,
+    TranslatePipe,
+  ],
   templateUrl: './bar-service-add-item-panel.html',
   styleUrl: './bar-service-add-item-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -93,6 +102,8 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly draftForm = form(this.draft);
   private readonly pricesDraft = signal(new ServicePrices());
   protected readonly pricesForm = form(this.pricesDraft);
+  private readonly bookingOptions = signal<ServiceBookingOption[]>([]);
+  protected readonly bookingOptionsForm = form(this.bookingOptions);
   /** The prices as they were when the panel opened, with an empty price for every period. */
   private readonly pristinePrices = signal(JSON.stringify(new ServicePrices()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
@@ -125,7 +136,8 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.open() &&
       (this.image() !== null ||
         JSON.stringify(this.draft()) !== JSON.stringify(newGeneralInfo()) ||
-        JSON.stringify(this.pricesDraft()) !== this.pristinePrices())
+        JSON.stringify(this.pricesDraft()) !== this.pristinePrices() ||
+        this.bookingOptions().length > 0)
     );
   }
 
@@ -149,6 +161,8 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draft.set(newGeneralInfo());
     this.draftForm().reset();
     this.setPrices([]);
+    this.bookingOptions.set([]);
+    this.bookingOptionsForm().reset();
     this.setImage(null);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.fetchChoices();

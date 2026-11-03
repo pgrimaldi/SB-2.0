@@ -1302,6 +1302,7 @@
             "drop": "Drag the image here or click to upload"
           },
           "highlighted": "Highlight",
+          "highlighted_info": "If this option **is enabled**, when a customer books a beach service, they can see this service and add it straight to their booking.",
           "prices": {
             "price": "Price",
             "vat": "VAT (%)",
@@ -1313,12 +1314,37 @@
             "online_purchase": "Enable online purchase",
             "period_pricing": {
               "enable": "Enable price changes by period",
+              "info": "If this option **is enabled**, the prices entered in this section are used, with a different price for each period set within the season.\n\nIf this option **is not enabled**, the base price entered above is used.",
               "no_periods": "The current season has no periods: create them in Seasons and periods."
             },
             "limits": {
               "title": "Limits",
               "sectors": "Service on sale in these rows/sectors",
               "all_sectors": "All rows/sectors"
+            }
+          },
+          "bookings": {
+            "title": "Booking options",
+            "add": "Add booking options",
+            "period": "Period",
+            "date_from": "From",
+            "date_to": "to",
+            "management_hours": "Back-office booking hours",
+            "online_hours": "Online booking hours",
+            "time_from": "From",
+            "time_to": "to",
+            "max_bookings_per_hour": "Maximum bookings per hour",
+            "max_bookings_per_day": "Maximum bookings per day",
+            "time_interval": "Time interval",
+            "time_interval_info": "How much time must pass between one order and the next.\nOnce a user orders this service, the time set here must pass before they can order it again.",
+            "min_items_per_booking": "Minimum items per booking",
+            "max_items_per_booking": "Maximum items per booking",
+            "time_intervals": {
+              "fifteen_minutes": "15 minutes",
+              "thirty_minutes": "30 minutes",
+              "forty_five_minutes": "45 minutes",
+              "one_hour": "1 hour",
+              "two_hours": "2 hours"
             }
           }
         }

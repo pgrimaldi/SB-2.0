@@ -1,3 +1,5 @@
+@use '../../../../../styles/info-button' as info;
+
 // The buttons of the management panels.
 :host {
   --button-text-size: 0.75rem;
@@ -70,6 +72,17 @@
   min-width: 0;
 }
 
+// The (i) right after the label of the toggle.
+.service__prices__tab__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.service__prices__tab__info {
+  @include info.info-button;
+}
+
 // Without the grey circle.
 .service__prices__tab__remove {
   --icon-button-background: transparent;
@@ -131,5 +144,9 @@
 
   .service__prices__tab__period__price {
     flex: none;
+  }
+
+  .service__prices__tab__section {
+    padding-inline: 0.75rem;
   }
 }

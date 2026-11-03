@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ServiceGeneralInfo } from '../../../../../entities/settings/services/service-general-info';
 import { ServiceIconItem } from '../../../../../entities/settings/services/service-icon-item';
 import { Language } from '../../../../../entities/shared/language';
+import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
+import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
@@ -37,6 +39,8 @@ export const SERVICE_LANGUAGES: readonly Language[] = [
     FormField,
     FormRow,
     FormRowLabel,
+    IconButton,
+    InfoPopup,
     SectionTitle,
     Toggle,
     TranslatePipe,
@@ -59,6 +63,13 @@ export class ServiceGeneralInfoTab {
   protected readonly addImageIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
   /** [before the title, arrow]. */
   protected readonly languagesIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
+  protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
+  /** [X, before the title]. */
+  protected readonly infoPopupIcons = [
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_InfoTitle.svg',
+  ] as const;
+  protected readonly showingHighlightedInfo = signal(false);
 
   protected readonly mainTranslation = computed(
     () =>

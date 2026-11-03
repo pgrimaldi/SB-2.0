@@ -23,6 +23,11 @@
         [form]="pricesForm"
         [periods]="periods()"
       />
+    } @else if (selectedTab() === PanelTab.Bookings) {
+      <app-service-bookings-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="bookingOptionsForm"
+      />
     }
     @if (errorMessage(); as errorMessage) {
       <p class="bar__service__add__item__panel__error">{{ errorMessage }}</p>

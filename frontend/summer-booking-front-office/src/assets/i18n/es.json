@@ -1302,6 +1302,7 @@
             "drop": "Arrastra la imagen aquí o haz clic para subirla"
           },
           "highlighted": "Destacar",
+          "highlighted_info": "Si esta opción **está activada**, cuando un cliente reserva un servicio de playa, puede ver este servicio y añadirlo directamente a su reserva.",
           "prices": {
             "price": "Precio",
             "vat": "IVA (%)",
@@ -1313,12 +1314,37 @@
             "online_purchase": "Activar compra online",
             "period_pricing": {
               "enable": "Activar precios por periodo",
+              "info": "Si esta opción **está activada**, se tendrán en cuenta los precios introducidos en esta sección, con una variación para cada periodo definido dentro de la temporada.\n\nSi esta opción **no está activada**, se tendrá en cuenta el precio base introducido anteriormente.",
               "no_periods": "La temporada actual no tiene periodos: créalos en Temporadas y periodos."
             },
             "limits": {
               "title": "Límites",
               "sectors": "Servicio a la venta en estas filas/sectores",
               "all_sectors": "Todas las filas/sectores"
+            }
+          },
+          "bookings": {
+            "title": "Opciones de reserva",
+            "add": "Añadir opciones de reserva",
+            "period": "Periodo",
+            "date_from": "Del",
+            "date_to": "al",
+            "management_hours": "Horario de reservas desde gestión",
+            "online_hours": "Horario de reservas online",
+            "time_from": "De",
+            "time_to": "a",
+            "max_bookings_per_hour": "Número máximo de reservas por hora",
+            "max_bookings_per_day": "Número máximo de reservas por día",
+            "time_interval": "Intervalo de tiempo",
+            "time_interval_info": "Cuánto tiempo debe pasar entre un pedido y el siguiente.\nCuando un usuario pide este servicio, debe pasar el tiempo indicado aquí antes de poder pedirlo de nuevo.",
+            "min_items_per_booking": "Número mínimo de artículos por reserva",
+            "max_items_per_booking": "Número máximo de artículos por reserva",
+            "time_intervals": {
+              "fifteen_minutes": "15 minutos",
+              "thirty_minutes": "30 minutos",
+              "forty_five_minutes": "45 minutos",
+              "one_hour": "1 hora",
+              "two_hours": "2 horas"
             }
           }
         }

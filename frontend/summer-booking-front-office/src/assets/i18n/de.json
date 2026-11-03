@@ -1302,6 +1302,7 @@
             "drop": "Ziehe das Bild hierher oder klicke zum Hochladen"
           },
           "highlighted": "Hervorheben",
+          "highlighted_info": "Wenn diese Option **aktiviert ist**, sieht ein Kunde bei der Buchung einer Strandleistung diese Leistung und kann sie direkt zu seiner Buchung hinzufügen.",
           "prices": {
             "price": "Preis",
             "vat": "MwSt. (%)",
@@ -1313,12 +1314,37 @@
             "online_purchase": "Online-Kauf aktivieren",
             "period_pricing": {
               "enable": "Preise je Zeitraum aktivieren",
+              "info": "Wenn diese Option **aktiviert ist**, gelten die in diesem Bereich eingegebenen Preise, mit einem eigenen Preis für jeden Zeitraum der Saison.\n\nWenn diese Option **nicht aktiviert ist**, gilt der zuvor eingegebene Grundpreis.",
               "no_periods": "Die aktuelle Saison hat keine Zeiträume: lege sie unter Saisons und Zeiträume an."
             },
             "limits": {
               "title": "Einschränkungen",
               "sectors": "Leistung buchbar in diesen Reihen/Sektoren",
               "all_sectors": "Alle Reihen/Sektoren"
+            }
+          },
+          "bookings": {
+            "title": "Buchungsoptionen",
+            "add": "Buchungsoptionen hinzufügen",
+            "period": "Zeitraum",
+            "date_from": "Vom",
+            "date_to": "bis",
+            "management_hours": "Buchungszeiten in der Verwaltung",
+            "online_hours": "Online-Buchungszeiten",
+            "time_from": "Von",
+            "time_to": "bis",
+            "max_bookings_per_hour": "Maximale Buchungen pro Stunde",
+            "max_bookings_per_day": "Maximale Buchungen pro Tag",
+            "time_interval": "Zeitintervall",
+            "time_interval_info": "Wie viel Zeit zwischen zwei Bestellungen vergehen muss.\nNachdem ein Nutzer diese Leistung bestellt hat, muss die hier angegebene Zeit vergehen, bevor er sie erneut bestellen kann.",
+            "min_items_per_booking": "Mindestanzahl Artikel pro Buchung",
+            "max_items_per_booking": "Höchstanzahl Artikel pro Buchung",
+            "time_intervals": {
+              "fifteen_minutes": "15 Minuten",
+              "thirty_minutes": "30 Minuten",
+              "forty_five_minutes": "45 Minuten",
+              "one_hour": "1 Stunde",
+              "two_hours": "2 Stunden"
             }
           }
         }

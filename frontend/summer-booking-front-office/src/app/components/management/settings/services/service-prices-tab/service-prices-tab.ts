@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DateLanguageBehaviour } from '../../../../../behaviours/i18n/date-language.behaviour';
@@ -7,6 +7,7 @@ import { ServicePrices } from '../../../../../entities/settings/services/service
 import { ServiceVariant } from '../../../../../entities/settings/services/service-variant';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
+import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
@@ -29,6 +30,7 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
     FormRow,
     FormRowLabel,
     IconButton,
+    InfoPopup,
     SectionTitle,
     Toggle,
     TranslatePipe,
@@ -47,6 +49,12 @@ export class ServicePricesTab {
   protected readonly ButtonSize = ButtonSize;
   protected readonly addIcon = ['/assets/images/GeneralIcon_Add.svg'] as const;
   protected readonly removeIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
+  protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
+  /** [X, before the title]. */
+  protected readonly infoPopupIcons = [
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_InfoTitle.svg',
+  ] as const;
   /** [before the title, arrow]. */
   protected readonly periodIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
   /** Example rows until an API gives the rows and sectors of the property. */
@@ -55,6 +63,7 @@ export class ServicePricesTab {
     { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e02', label: 'Fila 2' },
     { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e03', label: 'Fila 3' },
   ];
+  protected readonly showingPeriodPricingInfo = signal(false);
 
   protected readonly periodPrices = computed(
     () =>

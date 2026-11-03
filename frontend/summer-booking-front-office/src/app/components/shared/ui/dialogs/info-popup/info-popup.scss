@@ -1,0 +1,35 @@
+@use '../popup' as popup;
+
+@include popup.popup(info__popup, app-info-popup);
+
+// Unlike the other popups: everything on the left, a smaller title, no buttons.
+.info__popup {
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  text-align: start;
+}
+
+.info__popup__icon {
+  width: 1rem;
+  height: 1rem;
+  margin-bottom: 0.25rem;
+  color: var(--color__main__theme__one);
+  font-size: 1rem;
+}
+
+.info__popup__title {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.info__popup__text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  white-space: pre-line;
+
+  strong {
+    font-weight: 600;
+  }
+}

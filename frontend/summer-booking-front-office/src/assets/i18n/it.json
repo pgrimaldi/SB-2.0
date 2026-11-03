@@ -1302,6 +1302,7 @@
             "drop": "Trascina qui l'immagine o clicca per caricare"
           },
           "highlighted": "Metti in evidenza",
+          "highlighted_info": "Se questa opzione **è abilitata**, quando un cliente prenota un servizio spiaggia, può visualizzare ed aggiungere direttamente questo servizio alla sua prenotazione.",
           "prices": {
             "price": "Prezzo",
             "vat": "IVA (%)",
@@ -1313,12 +1314,37 @@
             "online_purchase": "Abilita acquisto online",
             "period_pricing": {
               "enable": "Abilita variazioni di prezzo per periodo",
+              "info": "Se questa opzione **è abilitata**, saranno presi in considerazione i prezzi inseriti in questa sezione, con variazione per ogni periodo impostato all'interno della stagione.\n\nSe questa opzione **non è abilitata**, sarà preso in considerazione il prezzo base inserito in precedenza.",
               "no_periods": "La stagione corrente non ha periodi: si creano in Stagioni e periodi."
             },
             "limits": {
               "title": "Limiti",
               "sectors": "Servizio acquistabile nelle seguenti file/settori",
               "all_sectors": "Tutte le file/settori"
+            }
+          },
+          "bookings": {
+            "title": "Opzioni di prenotazione",
+            "add": "Aggiungi opzioni di prenotazione",
+            "period": "Periodo",
+            "date_from": "Dal",
+            "date_to": "al",
+            "management_hours": "Orari prenotazioni da gestionale",
+            "online_hours": "Orari prenotazioni online",
+            "time_from": "Dalle",
+            "time_to": "alle",
+            "max_bookings_per_hour": "Numero massimo di prenotazioni all'ora",
+            "max_bookings_per_day": "Numero massimo di prenotazioni al giorno",
+            "time_interval": "Intervallo di tempo",
+            "time_interval_info": "Quanto tempo deve passare tra un'ordinazione e l'altra.\nSe un utente ordina questo servizio una volta, deve passare il tempo indicato in questa sezione prima che possa ordinarlo di nuovo.",
+            "min_items_per_booking": "Numero minimo di articoli per prenotazione",
+            "max_items_per_booking": "Numero massimo di articoli per prenotazione",
+            "time_intervals": {
+              "fifteen_minutes": "15 minuti",
+              "thirty_minutes": "30 minuti",
+              "forty_five_minutes": "45 minuti",
+              "one_hour": "1 ora",
+              "two_hours": "2 ore"
             }
           }
         }

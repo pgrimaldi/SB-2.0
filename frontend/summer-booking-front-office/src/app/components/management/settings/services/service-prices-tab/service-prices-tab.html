@@ -49,9 +49,16 @@
 </section>
 
 <section class="service__prices__tab__section">
-  <app-toggle [formField]="form().isPeriodPricingEnabled">
-    {{ 'management.settings.services.form.prices.period_pricing.enable' | translate }}
-  </app-toggle>
+  <div class="service__prices__tab__heading">
+    <app-toggle [formField]="form().isPeriodPricingEnabled">
+      {{ 'management.settings.services.form.prices.period_pricing.enable' | translate }}
+    </app-toggle>
+    <app-icon-button
+      class="service__prices__tab__info"
+      [pathIcon]="infoIcon"
+      (click)="showingPeriodPricingInfo.set(true)"
+    />
+  </div>
   @if (form().isPeriodPricingEnabled().value()) {
     @for (period of periods(); track period.idPeriod) {
       <app-expansion-panel [title]="period.periodName ?? ''" [pathIcon]="periodIcons">
@@ -103,3 +110,10 @@
 <app-toggle [formField]="form().isOnlinePurchaseEnabled">
   {{ 'management.settings.services.form.prices.online_purchase' | translate }}
 </app-toggle>
+
+<app-info-popup
+  [title]="'management.settings.services.form.prices.period_pricing.enable' | translate"
+  [text]="'management.settings.services.form.prices.period_pricing.info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingPeriodPricingInfo"
+/>

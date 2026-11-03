@@ -1302,6 +1302,7 @@
             "drop": "将图片拖到此处或点击上传"
           },
           "highlighted": "设为推荐",
+          "highlighted_info": "**启用**此选项后，客户预订海滩服务时，可以看到此服务并直接将其添加到预订中。",
           "prices": {
             "price": "价格",
             "vat": "增值税 (%)",
@@ -1313,12 +1314,37 @@
             "online_purchase": "启用在线购买",
             "period_pricing": {
               "enable": "启用按时段定价",
+              "info": "**启用**此选项后，将采用本部分填写的价格，赛季内设置的每个时段可有不同价格。\n\n**未启用**此选项时，将采用之前填写的基础价格。",
               "no_periods": "当前季节没有时段：请在“季节和时段”中创建。"
             },
             "limits": {
               "title": "限制",
               "sectors": "可购买此服务的排/区域",
               "all_sectors": "所有排/区域"
+            }
+          },
+          "bookings": {
+            "title": "预订选项",
+            "add": "添加预订选项",
+            "period": "期间",
+            "date_from": "从",
+            "date_to": "至",
+            "management_hours": "管理系统预订时间",
+            "online_hours": "在线预订时间",
+            "time_from": "从",
+            "time_to": "至",
+            "max_bookings_per_hour": "每小时最多预订数",
+            "max_bookings_per_day": "每天最多预订数",
+            "time_interval": "时间间隔",
+            "time_interval_info": "两次订购之间必须间隔的时间。\n用户订购此服务后，必须经过此处设置的时间才能再次订购。",
+            "min_items_per_booking": "每次预订最少物品数",
+            "max_items_per_booking": "每次预订最多物品数",
+            "time_intervals": {
+              "fifteen_minutes": "15分钟",
+              "thirty_minutes": "30分钟",
+              "forty_five_minutes": "45分钟",
+              "one_hour": "1小时",
+              "two_hours": "2小时"
             }
           }
         }

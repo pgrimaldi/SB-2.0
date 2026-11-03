@@ -94,6 +94,20 @@
   />
 </section>
 
-<app-toggle [formField]="form().isHighlighted">
-  {{ 'management.settings.services.form.highlighted' | translate }}
-</app-toggle>
+<div class="service__general__info__tab__highlighted">
+  <app-toggle [formField]="form().isHighlighted">
+    {{ 'management.settings.services.form.highlighted' | translate }}
+  </app-toggle>
+  <app-icon-button
+    class="service__general__info__tab__info"
+    [pathIcon]="infoIcon"
+    (click)="showingHighlightedInfo.set(true)"
+  />
+</div>
+
+<app-info-popup
+  [title]="'management.settings.services.form.highlighted' | translate"
+  [text]="'management.settings.services.form.highlighted_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingHighlightedInfo"
+/>

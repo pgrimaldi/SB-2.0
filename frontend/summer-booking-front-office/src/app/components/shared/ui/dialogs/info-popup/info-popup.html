@@ -1,0 +1,21 @@
+<ng-template #content>
+  <div class="info__popup">
+    @if (icons().list[1]; as icon) {
+      @if (icons().material) {
+        <mat-icon class="info__popup__icon">{{ icon }}</mat-icon>
+      } @else {
+        <img class="info__popup__icon" [src]="icon" width="16" height="16" alt="" />
+      }
+    }
+    <h2 class="info__popup__title">{{ title() }}</h2>
+    <p class="info__popup__text">
+      @for (part of textParts(); track $index) {
+        @if (part.isBold) {
+          <strong>{{ part.text }}</strong>
+        } @else {
+          <span>{{ part.text }}</span>
+        }
+      }
+    </p>
+  </div>
+</ng-template>

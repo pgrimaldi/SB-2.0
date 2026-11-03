@@ -1,3 +1,5 @@
+@use '../../../../../styles/info-button' as info;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -72,6 +74,17 @@
   .service__general__info__tab__icon:hover {
     background: var(--color__tertiary__theme);
   }
+}
+
+// The (i) right after the label of the toggle.
+.service__general__info__tab__highlighted {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.service__general__info__tab__info {
+  @include info.info-button;
 }
 
 .service__general__info__tab__drop {
