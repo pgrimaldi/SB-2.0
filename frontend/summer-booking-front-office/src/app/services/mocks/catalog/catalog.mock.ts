@@ -721,28 +721,29 @@ type BarServiceRow = BarServiceItem & { propertyId: number };
 
 const BAR_SERVICES: BarServiceRow[] = (
   [
-    ['01', 'Caffè', 1],
-    ['02', 'Croissant', 1.4],
-    ['03', 'Panino', 3],
-    ['04', 'Succo di frutta', 2],
-    ['05', 'Pizza', 3],
-    ['06', 'Sfoglia', 1.3],
-    ['07', 'Bibita lattina', 2.5],
-    ['08', 'Acqua naturale 1L', 1.2],
-    ['09', 'Acqua frizzante 1L', 1.2],
-    ['10', 'Schiacciata', 3],
-    ['11', 'Tramezzino', 2.8],
-    ['12', 'Gelato', 2.5],
+    ['01', 'Caffè', 'Caffetteria', 1],
+    ['02', 'Croissant', 'Dolci', 1.4],
+    ['03', 'Panino', 'Snack e panini', 3],
+    ['04', 'Succo di frutta', 'Bevande', 2],
+    ['05', 'Pizza', 'Snack e panini', 3],
+    ['06', 'Sfoglia', 'Dolci', 1.3],
+    ['07', 'Bibita lattina', 'Bevande', 2.5],
+    ['08', 'Acqua naturale 1L', 'Bevande', 1.2],
+    ['09', 'Acqua frizzante 1L', 'Bevande', 1.2],
+    ['10', 'Schiacciata', 'Snack e panini', 3],
+    ['11', 'Tramezzino', 'Snack e panini', 2.8],
+    ['12', 'Gelato', 'Gelati', 2.5],
   ] as const
-).map(([suffix, serviceName, price]) => ({
+).map(([suffix, serviceName, categoryName, price]) => ({
   propertyId: 1,
   idBarService: `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c${suffix}`,
   serviceName,
+  categoryName,
   price,
 }));
 
 const MAX_PAGE_SIZE = 100;
-const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
+const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'categoryName', 'price'] as const;
 
 /**
  * `POST /api/catalog/bar-service-list`: one page of the bar services of the requested property,
@@ -805,17 +806,32 @@ export const barServiceCategoryComboboxMock = (
   ).pipe(delay(150));
 };
 
-/** Example icons, taken from the images of the app until the backend gives its own. */
 const BAR_SERVICE_ICONS: readonly ServiceIconItem[] = [
-  'Cafe',
-  'Cocktail',
-  'Pizza',
-  'Restaurant',
-  'GlutenFree',
-  'Leaf',
-].map((icon, index) => ({
+  'Services_BarTitle.png',
+  'Services_BarCroissant.png',
+  'Services_BarCocktail.png',
+  'Services_BarJuice.png',
+  'Services_BarDrink.png',
+  'Services_BarWaterBottle.png',
+  'Services_BarBeer.png',
+  'Services_BarJam.png',
+  'Services_BarCookie.png',
+  'Services_BarMacaron.png',
+  'Services_BarIceCream.png',
+  'Services_BarCupcake.png',
+  'Services_BarRoomService.png',
+  'Services_BarMug.png',
+  'Services_BarPizzaSlice.png',
+  'Services_BarSandwich.png',
+  'Services_BarCutlery.png',
+  'Services_BarBurger.png',
+  'Services_BarFastFood.png',
+  'Services_BarRiceBowl.png',
+  'Services_BarCake.png',
+  'Services_BarPancakes.png',
+].map((file, index) => ({
   idIcon: index + 1,
-  iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
+  iconUrl: `/assets/images/${file}`,
 }));
 
 /**

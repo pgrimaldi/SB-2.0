@@ -1690,6 +1690,7 @@ Nessun corpo (204).
     {
       "idBarService": "string (UUID)",
       "serviceName": "string | null",
+      "categoryName": "string | null",
       "price": "number (decimale, €) | null"
     }
   ]
@@ -1718,6 +1719,7 @@ Nessun corpo (204).
 | `rows[]` | BarServiceItem[] (array di oggetti) |
 | `rows[].idBarService` | string (UUID) |
 | `rows[].serviceName` | string \| null |
+| `rows[].categoryName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
 ### GET `/api/catalog/bar-service-category-combobox?idProperty={idProperty}`

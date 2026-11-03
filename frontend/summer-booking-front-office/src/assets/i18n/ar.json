@@ -1125,6 +1125,7 @@
           "create": "إضافة خدمة بار",
           "table": {
             "service": "الخدمة",
+            "category": "الفئة",
             "price": "السعر"
           },
           "delete": {

@@ -1125,6 +1125,7 @@
           "create": "添加酒吧服务",
           "table": {
             "service": "服务",
+            "category": "类别",
             "price": "价格"
           },
           "delete": {

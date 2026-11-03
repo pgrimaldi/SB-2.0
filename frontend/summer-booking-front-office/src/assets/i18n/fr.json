@@ -1125,6 +1125,7 @@
           "create": "Ajouter un service bar",
           "table": {
             "service": "Service",
+            "category": "Catégorie",
             "price": "Prix"
           },
           "delete": {

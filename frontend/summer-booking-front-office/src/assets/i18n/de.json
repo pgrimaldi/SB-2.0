@@ -1125,6 +1125,7 @@
           "create": "Bar-Leistung hinzufügen",
           "table": {
             "service": "Leistung",
+            "category": "Kategorie",
             "price": "Preis"
           },
           "delete": {

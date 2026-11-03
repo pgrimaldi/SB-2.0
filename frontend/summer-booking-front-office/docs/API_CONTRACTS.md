@@ -2605,11 +2605,13 @@ Stato: 200 OK.
     {
       "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08",
       "serviceName": "Acqua naturale 1L",
+      "categoryName": "Bevande",
       "price": 1.2
     },
     {
       "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09",
       "serviceName": "Acqua frizzante 1L",
+      "categoryName": "Bevande",
       "price": 1.2
     }
   ]
@@ -2619,9 +2621,10 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | BarServiceItem[] (array di oggetti) | `[{"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "serviceName": "Acqua naturale 1L", "price": 1.2}, {"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09", "serviceName": "Acqua frizzante 1L", "price": 1.2}]` |
+| `rows[]` | BarServiceItem[] (array di oggetti) | `[{"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "serviceName": "Acqua naturale 1L", "categoryName": "Bevande", "price": 1.2}, {"idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09", "serviceName": "Acqua frizzante 1L", "categoryName": "Bevande", "price": 1.2}]` |
 | `rows[].idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08` |
 | `rows[].serviceName` | string \| null | `Acqua naturale 1L` |
+| `rows[].categoryName` | string \| null | `Bevande` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
 
 ### GET `/api/catalog/bar-service-category-combobox?idProperty={idProperty}`

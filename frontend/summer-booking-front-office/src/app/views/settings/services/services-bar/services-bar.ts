@@ -20,12 +20,14 @@ import { CatalogService } from '../../../../services/api/catalog/catalog.service
 
 interface ServicesBarTexts {
   service: string;
+  category: string;
   price: string;
 }
 
 interface BarServiceRow {
   idBarService: string | null;
   serviceName: string | null;
+  categoryName: string | null;
   price: string | null;
 }
 
@@ -82,10 +84,11 @@ export class ServicesBar {
     this.translateService.stream(
       'management.settings.services.bar_services.table',
     ) as Observable<ServicesBarTexts>,
-    { initialValue: { service: '', price: '' } },
+    { initialValue: { service: '', category: '', price: '' } },
   );
   protected readonly columns = computed<readonly TableColumn<BarServiceRow>[]>(() => [
     { field: 'serviceName', header: this.headers().service, sortable: true },
+    { field: 'categoryName', header: this.headers().category, sortable: true },
     { field: 'price', header: this.headers().price, sortable: true },
   ]);
   protected readonly rowActions = standardRowActions<BarServiceRow>({

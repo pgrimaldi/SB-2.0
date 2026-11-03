@@ -1125,6 +1125,7 @@
           "create": "Add bar service",
           "table": {
             "service": "Service",
+            "category": "Category",
             "price": "Price"
           },
           "delete": {
