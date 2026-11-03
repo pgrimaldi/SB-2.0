@@ -6,6 +6,7 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { BarServiceAddItemPanel } from '../../../../components/management/settings/services/bar-service-add-item-panel/bar-service-add-item-panel';
+import { BarServiceEditItemPanel } from '../../../../components/management/settings/services/bar-service-edit-item-panel/bar-service-edit-item-panel';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -54,6 +55,7 @@ const BAR_SERVICE_CATEGORY_KEYS: Readonly<
   selector: 'app-services-bar',
   imports: [
     BarServiceAddItemPanel,
+    BarServiceEditItemPanel,
     DeleteItemsPopup,
     DuplicateItemsPopup,
     PageTitle,
@@ -73,6 +75,8 @@ export class ServicesBar {
 
   protected readonly loadFailed = signal(false);
   protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idBarServiceToEdit = signal<string | null>(null);
   protected readonly idSelectedBarServices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idBarServicesToDelete = signal<readonly string[]>([]);
@@ -115,7 +119,7 @@ export class ServicesBar {
       idBarService && this.askDelete([idBarService], serviceName),
     duplicate: ({ idBarService, serviceName }) =>
       idBarService && this.askDuplicate([idBarService], serviceName),
-    edit: () => {},
+    edit: ({ idBarService }) => idBarService && this.openEdit(idBarService),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, BarServiceRow> = (request) =>
@@ -158,6 +162,11 @@ export class ServicesBar {
     this.idBarServicesToDelete.set(idBarServices.map(String));
     this.barServiceNameToDelete.set(barServiceName);
     this.deleting.set(true);
+  }
+
+  protected openEdit(idBarService: string): void {
+    this.idBarServiceToEdit.set(idBarService);
+    this.editing.set(true);
   }
 
   protected askDuplicate(

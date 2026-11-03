@@ -2757,6 +2757,168 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### GET `/api/catalog/get-bar-service-general-info?idBarService={idBarService}`
+
+Servizi: servizio bar, tab Info Generali.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio bar va nella query string.
+
+```text
+/api/catalog/get-bar-service-general-info?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Caffè",
+      "description": "Espresso in tazzina."
+    },
+    {
+      "language": "en",
+      "serviceName": "Coffee",
+      "description": "Espresso in a small cup."
+    }
+  ],
+  "category": "Cafeteria",
+  "icon": "Coffee",
+  "isHighlighted": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
+| `translations[]` | ServiceTranslation[] (array di oggetti) | `[{"language": "it", "serviceName": "Caffè", "description": "Espresso in tazzina."}, {"language": "en", "serviceName": "Coffee", "description": "Espresso in a small cup."}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Caffè` |
+| `translations[].description` | string \| null | `Espresso in tazzina.` |
+| `category` | string (enum BarServiceCategory) \| null | `Cafeteria` |
+| `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
+| `isHighlighted` | boolean | `true` |
+
+### GET `/api/catalog/get-bar-service-prices?idBarService={idBarService}`
+
+Servizi: servizio bar, tab Prezzi.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio bar va nella query string.
+
+```text
+/api/catalog/get-bar-service-prices?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "price": 1,
+  "vatRate": 10,
+  "variants": [
+    {
+      "variantName": "Doppio",
+      "price": 1.8
+    }
+  ],
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "price": 1.2
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `price` | number (decimale, €) \| null | `1` |
+| `vatRate` | number (decimale, %) \| null | `10` |
+| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 1.8}]` |
+| `variants[].variantName` | string \| null | `Doppio` |
+| `variants[].price` | number (decimale, €) \| null | `1.8` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.2}]` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].price` | number (decimale, €) \| null | `1.2` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+
+### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
+
+Servizi: servizio bar, tab Prenotazioni.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio bar va nella query string.
+
+```text
+/api/catalog/get-bar-service-booking-options?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "dateFrom": "2026-07-01T00:00:00.000Z",
+    "dateTo": "2026-07-31T00:00:00.000Z",
+    "managementStartTime": "08:00",
+    "managementEndTime": "12:00",
+    "onlineStartTime": "08:30",
+    "onlineEndTime": "11:30",
+    "maxBookingPerHourQuantity": 20,
+    "maxBookingPerDayQuantity": 80,
+    "timeInterval": "ThirtyMinutes",
+    "minItemPerBookingQuantity": 1,
+    "maxItemPerBookingQuantity": 4
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
+| `dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `managementStartTime` | string (HH:mm) \| null | `08:00` |
+| `managementEndTime` | string (HH:mm) \| null | `12:00` |
+| `onlineStartTime` | string (HH:mm) \| null | `08:30` |
+| `onlineEndTime` | string (HH:mm) \| null | `11:30` |
+| `maxBookingPerHourQuantity` | number (intero) \| null | `20` |
+| `maxBookingPerDayQuantity` | number (intero) \| null | `80` |
+| `timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
+| `minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `maxItemPerBookingQuantity` | number (intero) \| null | `4` |
+
 ### POST `/api/catalog/delete-bar-service-item`
 
 Servizi: eliminazione servizi bar.

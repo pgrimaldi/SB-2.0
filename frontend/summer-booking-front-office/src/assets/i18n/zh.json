@@ -1153,6 +1153,7 @@
             }
           },
           "add_title": "添加新的酒吧服务",
+          "edit_title": "编辑酒吧服务",
           "categories": {
             "cafeteria": "咖啡",
             "drinks": "饮料",

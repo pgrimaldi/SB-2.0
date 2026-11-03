@@ -1153,6 +1153,7 @@
             }
           },
           "add_title": "Neue Bar-Leistung hinzufügen",
+          "edit_title": "Bar-Leistung bearbeiten",
           "categories": {
             "cafeteria": "Kaffee",
             "drinks": "Getränke",

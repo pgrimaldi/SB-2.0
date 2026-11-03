@@ -5,7 +5,10 @@ import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   automaticPriceListMock,
+  barServiceBookingOptionsMock,
+  barServiceGeneralInfoMock,
   barServiceListMock,
+  barServicePricesMock,
   createBarServiceMock,
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationMediaMock,
@@ -526,6 +529,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/create-bar-service`
   ) {
     return createBarServiceMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-general-info`
+  ) {
+    return barServiceGeneralInfoMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-prices`
+  ) {
+    return barServicePricesMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-booking-options`
+  ) {
+    return barServiceBookingOptionsMock(request);
   }
 
   if (

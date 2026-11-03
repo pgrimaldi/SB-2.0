@@ -1818,6 +1818,161 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### GET `/api/catalog/get-bar-service-general-info?idBarService={idBarService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idBarService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "idBarService": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "serviceName": "string | null",
+      "description": "string | null"
+    }
+  ],
+  "category": "string (enum BarServiceCategory) | null",
+  "icon": "string (enum BarServiceIcon) | null",
+  "isHighlighted": "boolean"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idBarService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idBarService` | string (UUID) |
+| `translations[]` | ServiceTranslation[] (array di oggetti) |
+| `translations[].language` | string |
+| `translations[].serviceName` | string \| null |
+| `translations[].description` | string \| null |
+| `category` | string (enum BarServiceCategory) \| null |
+| `icon` | string (enum BarServiceIcon) \| null |
+| `isHighlighted` | boolean |
+
+### GET `/api/catalog/get-bar-service-prices?idBarService={idBarService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idBarService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "price": "number (decimale, €) | null",
+  "vatRate": "number (decimale, %) | null",
+  "variants": [
+    {
+      "variantName": "string | null",
+      "price": "number (decimale, €) | null"
+    }
+  ],
+  "isPeriodPricingEnabled": "boolean",
+  "periodPrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "price": "number (decimale, €) | null"
+    }
+  ],
+  "idSectors": "string[] (UUID)",
+  "isOnlinePurchaseEnabled": "boolean"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idBarService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `price` | number (decimale, €) \| null |
+| `vatRate` | number (decimale, %) \| null |
+| `variants[]` | ServiceVariant[] (array di oggetti) |
+| `variants[].variantName` | string \| null |
+| `variants[].price` | number (decimale, €) \| null |
+| `isPeriodPricingEnabled` | boolean |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].price` | number (decimale, €) \| null |
+| `idSectors` | string[] (UUID) |
+| `isOnlinePurchaseEnabled` | boolean |
+
+### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idBarService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
+    "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+    "managementStartTime": "string (HH:mm) | null",
+    "managementEndTime": "string (HH:mm) | null",
+    "onlineStartTime": "string (HH:mm) | null",
+    "onlineEndTime": "string (HH:mm) | null",
+    "maxBookingPerHourQuantity": "number (intero) | null",
+    "maxBookingPerDayQuantity": "number (intero) | null",
+    "timeInterval": "string (enum BookingTimeInterval) | null",
+    "minItemPerBookingQuantity": "number (intero) | null",
+    "maxItemPerBookingQuantity": "number (intero) | null"
+  }
+]
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idBarService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
+| `[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `[].managementStartTime` | string (HH:mm) \| null |
+| `[].managementEndTime` | string (HH:mm) \| null |
+| `[].onlineStartTime` | string (HH:mm) \| null |
+| `[].onlineEndTime` | string (HH:mm) \| null |
+| `[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `[].minItemPerBookingQuantity` | number (intero) \| null |
+| `[].maxItemPerBookingQuantity` | number (intero) \| null |
+
 ### POST `/api/catalog/delete-bar-service-item`
 
 **Payload JSON**

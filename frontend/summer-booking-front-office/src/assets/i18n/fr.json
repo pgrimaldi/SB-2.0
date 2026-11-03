@@ -1153,6 +1153,7 @@
             }
           },
           "add_title": "Ajouter un nouveau service bar",
+          "edit_title": "Modifier le service bar",
           "categories": {
             "cafeteria": "Café",
             "drinks": "Boissons",

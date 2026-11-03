@@ -177,4 +177,49 @@ describe('CatalogService', () => {
     expect(body).toEqual({ ...request, translations: [translation], idProperty: 'p1' });
     controller.verify();
   });
+
+  it('should ask for the general information of the bar service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.barServiceGeneralInfo('b1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-bar-service-general-info` &&
+        params.get('idBarService') === 'b1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the prices of the bar service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.barServicePrices('b1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-bar-service-prices` &&
+        params.get('idBarService') === 'b1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the booking options of the bar service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.barServiceBookingOptions('b1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-bar-service-booking-options` &&
+        params.get('idBarService') === 'b1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
 });

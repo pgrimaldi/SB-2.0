@@ -10,6 +10,8 @@ import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-confi
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
+import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
 import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
 import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
 import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
@@ -85,6 +87,28 @@ export class CatalogService {
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
     this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
+
+  /** The Info Generali tab of a bar service, for the edit panel. */
+  readonly barServiceGeneralInfo = (
+    idBarService: string,
+  ): Observable<BarServiceSelectedGeneralInfo> =>
+    this.httpClient.get<BarServiceSelectedGeneralInfo>(
+      `${this.endpoint}/get-bar-service-general-info`,
+      { params: { idBarService } },
+    );
+
+  /** The Prezzi tab of a bar service, for the edit panel. */
+  readonly barServicePrices = (idBarService: string): Observable<BarServiceSelectedPrices> =>
+    this.httpClient.get<BarServiceSelectedPrices>(`${this.endpoint}/get-bar-service-prices`, {
+      params: { idBarService },
+    });
+
+  /** The Prenotazioni tab of a bar service, its booking options, for the edit panel. */
+  readonly barServiceBookingOptions = (idBarService: string): Observable<ServiceBookingOption[]> =>
+    this.httpClient.get<ServiceBookingOption[]>(
+      `${this.endpoint}/get-bar-service-booking-options`,
+      { params: { idBarService } },
+    );
 
   /** The data of the three tabs of the add panel. Answers 204 with no body. */
   readonly createBarService = (

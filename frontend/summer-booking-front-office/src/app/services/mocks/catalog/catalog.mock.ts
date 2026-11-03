@@ -3,6 +3,7 @@ import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
+import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
@@ -10,6 +11,8 @@ import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-confi
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
+import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
 import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
 import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
 import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
@@ -23,6 +26,7 @@ import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/se
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
+import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
@@ -744,6 +748,154 @@ const BAR_SERVICES: BarServiceRow[] = (
   price,
 }));
 
+/**
+ * The data of the add panel of a bar service, by id: those created with the panel and Caffè; the
+ * other example rows get theirs from the list (see `detailsOf`).
+ */
+const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
+  [
+    '8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01',
+    Object.assign(new BarServiceAddItemRequest(), {
+      translations: [
+        { language: Language.It, serviceName: 'Caffè', description: 'Espresso in tazzina.' },
+        { language: Language.En, serviceName: 'Coffee', description: 'Espresso in a small cup.' },
+      ],
+      category: BarServiceCategory.Cafeteria,
+      icon: BarServiceIcon.Coffee,
+      isHighlighted: true,
+      price: 1,
+      vatRate: 10,
+      variants: [{ variantName: 'Doppio', price: 1.8 }],
+      isPeriodPricingEnabled: true,
+      periodPrices: [{ idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01', price: 1.2 }],
+      isOnlinePurchaseEnabled: true,
+      bookingOptions: [
+        {
+          dateFrom: '2026-07-01T00:00:00.000Z',
+          dateTo: '2026-07-31T00:00:00.000Z',
+          managementStartTime: '08:00',
+          managementEndTime: '12:00',
+          onlineStartTime: '08:30',
+          onlineEndTime: '11:30',
+          maxBookingPerHourQuantity: 20,
+          maxBookingPerDayQuantity: 80,
+          timeInterval: BookingTimeInterval.ThirtyMinutes,
+          minItemPerBookingQuantity: 1,
+          maxItemPerBookingQuantity: 4,
+        },
+      ],
+    }),
+  ],
+]);
+
+function detailsOf(row: BarServiceRow): BarServiceAddItemRequest {
+  return (
+    BAR_SERVICE_DETAILS.get(row.idBarService ?? '') ??
+    Object.assign(new BarServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: row.serviceName,
+          description: 'Servito al bar dello stabilimento.',
+        },
+      ],
+      category: row.category,
+      price: row.price,
+      vatRate: 10,
+    })
+  );
+}
+
+/** The bar service of the `idBarService` of the query string, if it exists. */
+function requestedBarService(request: HttpRequest<unknown>): BarServiceRow | undefined {
+  const idBarService = request.params.get('idBarService');
+  return BAR_SERVICES.find((row) => row.idBarService === idBarService);
+}
+
+/**
+ * `GET /api/catalog/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
+ * panel. 200 with `BarServiceSelectedGeneralInfo`, only the languages written; 401 without a valid
+ * access token; 404 `resource.not_found` for an unknown id.
+ */
+export const barServiceGeneralInfoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedBarService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = detailsOf(row);
+  const answer: BarServiceSelectedGeneralInfo = {
+    idBarService: row.idBarService,
+    translations: details.translations.filter(
+      ({ serviceName, description }) => serviceName || description,
+    ),
+    category: details.category,
+    icon: details.icon,
+    isHighlighted: details.isHighlighted,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200 with
+ * `BarServiceSelectedPrices`, a price only for the periods that have one; 401 without a valid access
+ * token; 404 `resource.not_found` for an unknown id.
+ */
+export const barServicePricesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedBarService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = detailsOf(row);
+  const answer: BarServiceSelectedPrices = {
+    price: details.price,
+    vatRate: details.vatRate,
+    variants: details.variants,
+    isPeriodPricingEnabled: details.isPeriodPricingEnabled,
+    periodPrices: details.periodPrices.filter(({ price }) => price !== null),
+    idSectors: details.idSectors,
+    isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
+ * edit panel, the array of the booking options (empty when there are none). 401 without a valid
+ * access token; 404 `resource.not_found` for an unknown id.
+ */
+export const barServiceBookingOptionsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedBarService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  return of(
+    new HttpResponse({
+      status: 200,
+      url: request.url,
+      body: structuredClone(detailsOf(row).bookingOptions),
+    }),
+  ).pipe(delay(300));
+};
+
 const MAX_PAGE_SIZE = 100;
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
@@ -807,9 +959,14 @@ export const createBarServiceMock = (
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }
   const main = body.translations?.find((translation) => translation.language === language);
+  const idBarService = crypto.randomUUID();
+  BAR_SERVICE_DETAILS.set(
+    idBarService,
+    structuredClone(onlyFieldsOf(BarServiceAddItemRequest, body as BarServiceAddItemRequest)),
+  );
   BAR_SERVICES.push({
     propertyId: property.id,
-    idBarService: crypto.randomUUID(),
+    idBarService,
     serviceName: main?.serviceName?.trim() ?? null,
     category: body.category ?? null,
     price: body.price ?? null,

@@ -1,0 +1,39 @@
+<app-side-panel
+  [title]="'management.settings.services.bar_services.edit_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group
+    [tabs]="tabs()"
+    [(selectedIndex)]="selectedTab"
+    (selectedIndexChange)="loadTab($event)"
+  >
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-service-general-info-tab
+        [attr.inert]="isLoading(PanelTab.GeneralInfo) ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [imagePreviewUrl]="imagePreviewUrl()"
+        (iconChosen)="chooseIcon($event)"
+        (imageChosen)="chooseImage($event)"
+      />
+    } @else if (selectedTab() === PanelTab.Prices) {
+      <app-service-prices-tab
+        [attr.inert]="isLoading(PanelTab.Prices) ? '' : null"
+        [form]="draftForm"
+        [periods]="periods()"
+      />
+    } @else if (selectedTab() === PanelTab.Bookings) {
+      <app-service-bookings-tab
+        [attr.inert]="isLoading(PanelTab.Bookings) ? '' : null"
+        [form]="draftForm.bookingOptions"
+      />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="bar__service__edit__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+</app-side-panel>
