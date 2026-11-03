@@ -6,16 +6,18 @@
   (closeRequest)="leave()"
 >
   <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
-    <app-service-general-info-tab
-      [attr.inert]="isFetching() ? '' : null"
-      [form]="draftForm"
-      [mainLanguage]="mainLanguage()"
-      [categories]="categories()"
-      [icons]="icons()"
-      [imagePreviewUrl]="imagePreviewUrl()"
-      (iconChosen)="chooseIcon($event)"
-      (imageChosen)="chooseImage($event)"
-    />
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-service-general-info-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [categories]="categories()"
+        [icons]="icons()"
+        [imagePreviewUrl]="imagePreviewUrl()"
+        (iconChosen)="chooseIcon($event)"
+        (imageChosen)="chooseImage($event)"
+      />
+    }
     @if (errorMessage(); as errorMessage) {
       <p class="bar__service__add__item__panel__error">{{ errorMessage }}</p>
     }

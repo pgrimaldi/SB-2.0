@@ -11,8 +11,16 @@
   <div class="service__general__info__tab__languages">
     @for (translation of otherTranslations(); track translation) {
       <app-form-row>
-        <span appFormRowLabel>{{ languageName(translation.language().value()) }}</span>
-        <app-filled-text-field [formField]="translation.serviceName" />
+        <span appFormRowLabel>
+          {{
+            'management.settings.services.form.translated_name'
+              | translate: { language: languageName(translation.language().value()) }
+          }}
+        </span>
+        <app-filled-text-field
+          class="service__general__info__tab__translation"
+          [formField]="translation.serviceName"
+        />
       </app-form-row>
     }
   </div>
@@ -31,8 +39,16 @@
   <div class="service__general__info__tab__languages">
     @for (translation of otherTranslations(); track translation) {
       <app-form-row>
-        <span appFormRowLabel>{{ languageName(translation.language().value()) }}</span>
-        <app-filled-textarea [formField]="translation.description" />
+        <span appFormRowLabel>
+          {{
+            'management.settings.services.form.translated_description'
+              | translate: { language: languageName(translation.language().value()) }
+          }}
+        </span>
+        <app-filled-text-field
+          class="service__general__info__tab__translation"
+          [formField]="translation.description"
+        />
       </app-form-row>
     }
   </div>

@@ -807,7 +807,7 @@ export const barServiceCategoryComboboxMock = (
 };
 
 const BAR_SERVICE_ICONS: readonly ServiceIconItem[] = [
-  'Services_BarTitle.png',
+  'Services_BarCoffee.png',
   'Services_BarCroissant.png',
   'Services_BarCocktail.png',
   'Services_BarJuice.png',

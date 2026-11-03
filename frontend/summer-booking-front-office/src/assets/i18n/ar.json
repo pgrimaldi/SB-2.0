@@ -1284,11 +1284,15 @@
           "cancel": "إلغاء",
           "save": "حفظ",
           "tabs": {
-            "general_info": "معلومات عامة"
+            "general_info": "معلومات عامة",
+            "prices": "الأسعار",
+            "bookings": "الحجوزات"
           },
           "name": "الاسم",
           "description": "الوصف",
           "other_languages": "لغات أخرى",
+          "translated_name": "الاسم ({{language}})",
+          "translated_description": "الوصف ({{language}})",
           "category": "الفئة",
           "choose": "اختر",
           "image": {

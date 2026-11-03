@@ -1284,11 +1284,15 @@
           "cancel": "Cancel",
           "save": "Save",
           "tabs": {
-            "general_info": "General info"
+            "general_info": "General info",
+            "prices": "Prices",
+            "bookings": "Bookings"
           },
           "name": "Name",
           "description": "Description",
           "other_languages": "Other languages",
+          "translated_name": "{{language}} name",
+          "translated_description": "{{language}} description",
           "category": "Category",
           "choose": "Select",
           "image": {

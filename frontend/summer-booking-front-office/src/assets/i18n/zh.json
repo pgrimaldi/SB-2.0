@@ -1284,11 +1284,15 @@
           "cancel": "取消",
           "save": "保存",
           "tabs": {
-            "general_info": "基本信息"
+            "general_info": "基本信息",
+            "prices": "价格",
+            "bookings": "预订"
           },
           "name": "名称",
           "description": "描述",
           "other_languages": "其他语言",
+          "translated_name": "{{language}}名称",
+          "translated_description": "{{language}}描述",
           "category": "类别",
           "choose": "请选择",
           "image": {

@@ -38,7 +38,16 @@ import {
 interface ServiceFormTexts {
   tabs: {
     general_info: string;
+    prices: string;
+    bookings: string;
   };
+}
+
+/** The tabs of the panel, in their order. */
+enum PanelTab {
+  GeneralInfo,
+  Prices,
+  Bookings,
 }
 
 @Component({
@@ -60,8 +69,9 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
 
+  protected readonly PanelTab = PanelTab;
   protected readonly mainLanguage = this.language.current;
-  protected readonly selectedTab = signal(0);
+  protected readonly selectedTab = signal<number>(PanelTab.GeneralInfo);
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.services.form',
@@ -69,7 +79,9 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   protected readonly tabs = computed<readonly TabGroupTab[]>(() => [
-    { label: this.texts()?.tabs.general_info ?? '' },
+    { label: this.texts()?.tabs.general_info ?? '', widthPercent: 34 },
+    { label: this.texts()?.tabs.prices ?? '', widthPercent: 33 },
+    { label: this.texts()?.tabs.bookings ?? '', widthPercent: 33 },
   ]);
   private readonly draft = signal(newGeneralInfo());
   protected readonly draftForm = form(this.draft);
@@ -124,7 +136,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draft.set(newGeneralInfo());
     this.draftForm().reset();
     this.setImage(null);
-    this.selectedTab.set(0);
+    this.selectedTab.set(PanelTab.GeneralInfo);
     this.fetchChoices();
   }
 
