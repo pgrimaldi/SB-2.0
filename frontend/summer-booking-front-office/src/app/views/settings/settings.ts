@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SettingsLink, SettingsMenu } from '../../components/settings/menu/settings-menu';
+import { SettingsLink, SettingsMenu } from '../../components/management/settings/settings-menu/settings-menu';
 import { SETTINGS_PAGES } from './settings-pages';
 
 @Component({
