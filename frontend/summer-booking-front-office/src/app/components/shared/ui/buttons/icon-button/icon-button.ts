@@ -17,6 +17,7 @@ import { resolveIcons } from '../../icons/icons';
 })
 export class IconButton {
   readonly label = input<string>();
+  readonly disabled = input(false);
   /** Icons as Material icon names (Material Symbols font): [icon]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [icon]. */

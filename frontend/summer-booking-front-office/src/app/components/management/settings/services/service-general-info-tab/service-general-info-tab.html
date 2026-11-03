@@ -78,6 +78,7 @@
       <button
         class="service__general__info__tab__icon"
         type="button"
+        [disabled]="isReadonly()"
         [class.service__general__info__tab__icon__chosen]="icon.icon === form().icon().value()"
         (click)="iconChosen.emit(icon.icon)"
       >
@@ -91,6 +92,7 @@
   <app-file-drop-zone
     class="service__general__info__tab__drop"
     accept="image/*"
+    [disabled]="isReadonly()"
     [text]="'management.settings.services.form.image.drop' | translate"
     [pathIcon]="addImageIcon"
     [previewUrl]="imagePreviewUrl()"

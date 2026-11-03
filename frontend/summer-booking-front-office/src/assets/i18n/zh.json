@@ -1291,6 +1291,7 @@
         "form": {
           "cancel": "取消",
           "save": "保存",
+          "edit": "编辑",
           "tabs": {
             "general_info": "基本信息",
             "prices": "价格",

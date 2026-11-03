@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
+  contentChild,
   inject,
   input,
   output,
@@ -11,6 +12,7 @@ import {
 import { MatDialogConfig } from '@angular/material/dialog';
 import { Button, ButtonAppearance, ButtonSize } from '../../buttons/button/button';
 import { BasePopup } from '../base-popup/base-popup';
+import { SidePanelButtons } from './side-panel-buttons';
 
 /** Portrait screens and phones, also held sideways: there the panel is a popup in the middle. */
 const SMALL_SCREEN = '(orientation: portrait), (max-width: 47.99rem), (max-height: 29.99rem)';
@@ -24,7 +26,8 @@ export interface SidePanelTexts {
  * Panel sliding in from the side of the page, for forms with many fields; on small screens a popup in
  * the middle. It never closes by itself: X, Annulla, Esc and a click outside send `closeRequest`, and
  * the caller closes it (e.g. after asking about unsaved changes). What is put inside scrolls between
- * the title and the buttons.
+ * the title and the buttons. An element marked `appSidePanelButtons` takes the place of Annulla and
+ * Salva, laid out the same way (two columns).
  */
 @Component({
   selector: 'app-side-panel',
@@ -50,6 +53,7 @@ export class SidePanel extends BasePopup {
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
+  protected readonly ownButtons = contentChild(SidePanelButtons);
 
   protected requestClose(): void {
     if (!this.isLoading()) {

@@ -43,6 +43,8 @@ export class ServicePricesTab {
   readonly form = input.required<FieldTree<BarServiceAddItemRequest>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
+  /** Only to look at: the buttons that change the data (icons, image, add, remove) are off. */
+  readonly isReadonly = input(false);
 
   private readonly dateLanguage = inject(DateLanguageBehaviour);
 

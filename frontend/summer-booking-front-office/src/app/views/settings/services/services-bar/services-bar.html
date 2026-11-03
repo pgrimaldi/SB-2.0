@@ -33,6 +33,7 @@
   [pathIcon]="closeIcon"
   [idBarService]="idBarServiceToEdit()"
   [(open)]="editing"
+  (updated)="table.reload()"
 />
 
 <app-delete-items-popup

@@ -1291,6 +1291,7 @@
         "form": {
           "cancel": "Cancel",
           "save": "Save",
+          "edit": "Edit",
           "tabs": {
             "general_info": "General info",
             "prices": "Prices",

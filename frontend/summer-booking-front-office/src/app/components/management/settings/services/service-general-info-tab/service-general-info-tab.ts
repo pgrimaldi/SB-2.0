@@ -83,6 +83,8 @@ export class ServiceGeneralInfoTab {
   readonly form = input.required<FieldTree<BarServiceAddItemRequest>>();
   /** Language of the main name and description: the user's; the others are translations. */
   readonly mainLanguage = input.required<Language>();
+  /** Only to look at: the buttons that change the data (icons, image, add, remove) are off. */
+  readonly isReadonly = input(false);
   readonly imagePreviewUrl = input<string | null>(null);
   readonly iconChosen = output<BarServiceIcon>();
   readonly imageChosen = output<File>();

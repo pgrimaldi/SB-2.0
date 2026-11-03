@@ -8,6 +8,9 @@ import { BookingTimeInterval } from '../../../entities/enums/booking-time-interv
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
+import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
+import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
+import { BarServiceUpdatePricesRequest } from '../../../entities/settings/services/bar-service-update-prices-request';
 import { Language } from '../../../entities/shared/language';
 import { CatalogService } from './catalog.service';
 
@@ -175,6 +178,101 @@ describe('CatalogService', () => {
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-bar-service`,
     ).request.body;
     expect(body).toEqual({ ...request, translations: [translation], idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the Info Generali of the bar service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idBarService: 'b1',
+      translations: [{ language: Language.It, serviceName: 'Caffè', description: 'Espresso' }],
+      category: BarServiceCategory.Cafeteria,
+      icon: BarServiceIcon.Coffee,
+      isHighlighted: true,
+    };
+
+    catalog
+      .updateBarServiceGeneral(
+        'p1',
+        Object.assign(new BarServiceUpdateGeneralRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-general`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the prices of the bar service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idBarService: 'b1',
+      price: 1,
+      vatRate: 10,
+      variants: [{ variantName: 'Doppio', price: 1.8 }],
+      isPeriodPricingEnabled: true,
+      periodPrices: [{ idPeriod: 'a1', price: 1.2 }],
+      idSectors: ['s1'],
+      isOnlinePurchaseEnabled: false,
+    };
+
+    catalog
+      .updateBarServicePrices(
+        'p1',
+        Object.assign(new BarServiceUpdatePricesRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-prices`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the booking options of the bar service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idBarService: 'b1',
+      bookingOptions: [
+        {
+          dateFrom: '2026-07-01T00:00:00.000Z',
+          dateTo: '2026-07-31T00:00:00.000Z',
+          managementStartTime: '08:00',
+          managementEndTime: '12:00',
+          onlineStartTime: '08:30',
+          onlineEndTime: '11:30',
+          maxBookingPerHourQuantity: 20,
+          maxBookingPerDayQuantity: 80,
+          timeInterval: BookingTimeInterval.ThirtyMinutes,
+          minItemPerBookingQuantity: 1,
+          maxItemPerBookingQuantity: 4,
+        },
+      ],
+    };
+
+    catalog
+      .updateBarServiceBooking(
+        'p1',
+        Object.assign(new BarServiceUpdateBookingRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-booking`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
     controller.verify();
   });
 

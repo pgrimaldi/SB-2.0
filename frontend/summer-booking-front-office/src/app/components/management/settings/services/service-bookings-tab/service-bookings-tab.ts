@@ -55,6 +55,8 @@ const TIME_INTERVAL_KEYS: Readonly<Record<BookingTimeInterval, keyof TimeInterva
 })
 export class ServiceBookingsTab {
   readonly form = input.required<FieldTree<ServiceBookingOption[]>>();
+  /** Only to look at: the buttons that change the data (icons, image, add, remove) are off. */
+  readonly isReadonly = input(false);
 
   private readonly translateService = inject(TranslateService);
 

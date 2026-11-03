@@ -100,4 +100,9 @@ app-side-panel {
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   padding: 1.5rem;
+
+  // The page's own buttons go in the grid as the default ones.
+  > [appSidePanelButtons] {
+    display: contents;
+  }
 }

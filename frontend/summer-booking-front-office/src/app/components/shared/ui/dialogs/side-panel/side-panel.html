@@ -9,24 +9,27 @@
     </div>
 
     <div class="side__panel__buttons">
-      <app-button
-        [appearance]="ButtonAppearance.Light"
-        [size]="ButtonSize.Small"
-        [isFullWidth]="true"
-        [disabled]="isLoading()"
-        (clicked)="requestClose()"
-      >
-        {{ texts()?.cancel }}
-      </app-button>
-      <app-button
-        [size]="ButtonSize.Small"
-        [isFullWidth]="true"
-        [disabled]="isSaveDisabled()"
-        [isLoading]="isLoading()"
-        (clicked)="save.emit()"
-      >
-        {{ texts()?.save }}
-      </app-button>
+      <ng-content select="[appSidePanelButtons]" />
+      @if (!ownButtons()) {
+        <app-button
+          [appearance]="ButtonAppearance.Light"
+          [size]="ButtonSize.Small"
+          [isFullWidth]="true"
+          [disabled]="isLoading()"
+          (clicked)="requestClose()"
+        >
+          {{ texts()?.cancel }}
+        </app-button>
+        <app-button
+          [size]="ButtonSize.Small"
+          [isFullWidth]="true"
+          [disabled]="isSaveDisabled()"
+          [isLoading]="isLoading()"
+          (clicked)="save.emit()"
+        >
+          {{ texts()?.save }}
+        </app-button>
+      }
     </div>
   </div>
 </ng-template>

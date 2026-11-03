@@ -10,6 +10,9 @@ import {
   barServiceListMock,
   barServicePricesMock,
   createBarServiceMock,
+  updateBarServiceBookingMock,
+  updateBarServiceGeneralMock,
+  updateBarServicePricesMock,
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationMediaMock,
   bathhouseConfigurationServicesMock,
@@ -550,6 +553,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-booking-options`
   ) {
     return barServiceBookingOptionsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-bar-service-general`
+  ) {
+    return updateBarServiceGeneralMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-bar-service-prices`
+  ) {
+    return updateBarServicePricesMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-bar-service-booking`
+  ) {
+    return updateBarServiceBookingMock(request);
   }
 
   if (

@@ -1291,6 +1291,7 @@
         "form": {
           "cancel": "إلغاء",
           "save": "حفظ",
+          "edit": "تعديل",
           "tabs": {
             "general_info": "معلومات عامة",
             "prices": "الأسعار",

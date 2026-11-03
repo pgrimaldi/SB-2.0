@@ -12,6 +12,9 @@ import { BarServiceAddItemRequest } from '../../../entities/settings/services/ba
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
+import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
+import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
+import { BarServiceUpdatePricesRequest } from '../../../entities/settings/services/bar-service-update-prices-request';
 import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
 import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
 import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
@@ -109,6 +112,46 @@ export class CatalogService {
       `${this.endpoint}/get-bar-service-booking-options`,
       { params: { idBarService } },
     );
+
+  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  readonly updateBarServiceGeneral = (
+    idProperty: string,
+    request: BarServiceUpdateGeneralRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-bar-service-general`, {
+      ...onlyFieldsOf(BarServiceUpdateGeneralRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
+  readonly updateBarServicePrices = (
+    idProperty: string,
+    request: BarServiceUpdatePricesRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-bar-service-prices`, {
+      ...onlyFieldsOf(BarServiceUpdatePricesRequest, request),
+      variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
+      periodPrices: request.periodPrices.map((periodPrice) =>
+        onlyFieldsOf(ServicePeriodPrice, periodPrice),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  readonly updateBarServiceBooking = (
+    idProperty: string,
+    request: BarServiceUpdateBookingRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-bar-service-booking`, {
+      ...onlyFieldsOf(BarServiceUpdateBookingRequest, request),
+      bookingOptions: request.bookingOptions.map((bookingOption) =>
+        onlyFieldsOf(ServiceBookingOption, bookingOption),
+      ),
+      idProperty,
+    });
 
   /** The data of the three tabs of the add panel. Answers 204 with no body. */
   readonly createBarService = (

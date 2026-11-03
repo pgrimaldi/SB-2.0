@@ -974,11 +974,15 @@ export const createBarServiceMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
+function barServiceErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
+  return [...generalErrors(body, language), ...priceErrors(body)];
+}
+
 /**
  * Name and description in the language of the request (the user's), as the panel requires; category
- * and icon, when given, among the values of their enums; prices not below 0.
+ * and icon, when given, among the values of their enums.
  */
-function barServiceErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
+function generalErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
   const errors: MockFieldError[] = [];
   const translations = Array.isArray(body.translations) ? body.translations : [];
   const index = translations.findIndex((translation) => translation.language === language);
@@ -996,11 +1000,113 @@ function barServiceErrors(body: CreateBarServiceBody, language: string): MockFie
   if (body.icon != null && !Object.values(BarServiceIcon).includes(body.icon)) {
     errors.push({ field: 'icon', code: 'validation.invalid' });
   }
-  if (body.price != null && !(typeof body.price === 'number' && body.price >= 0)) {
-    errors.push({ field: 'price', code: 'validation.invalid' });
-  }
   return errors;
 }
+
+/** A price, when given, not below 0. */
+function priceErrors(body: CreateBarServiceBody): MockFieldError[] {
+  return body.price != null && !(typeof body.price === 'number' && body.price >= 0)
+    ? [{ field: 'price', code: 'validation.invalid' }]
+    : [];
+}
+
+type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
+
+/**
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
+ * an unknown property; 404 `resource.not_found` for an `idBarService` that is not one of its bar
+ * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and
+ * the answer is 204 without a body.
+ */
+function updateBarService(
+  request: HttpRequest<unknown>,
+  errorsOf: (body: UpdateBarServiceBody) => MockFieldError[],
+  apply: (
+    details: BarServiceAddItemRequest,
+    body: UpdateBarServiceBody,
+    row: BarServiceRow,
+  ) => void,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as UpdateBarServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const row = BAR_SERVICES.find(
+    (item) => item.idBarService === body.idBarService && item.propertyId === property.id,
+  );
+  if (!row?.idBarService) {
+    return resourceNotFound(request);
+  }
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const details = structuredClone(detailsOf(row));
+  apply(details, structuredClone(body), row);
+  BAR_SERVICE_DETAILS.set(row.idBarService, details);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+}
+
+/**
+ * `POST /api/catalog/update-bar-service-general` with `BarServiceUpdateGeneralRequest` and
+ * `idProperty`: names, descriptions, category, icon and Metti in evidenza; the list shows the new name
+ * (language of `Accept-Language`) and category. Errors as the creation (see `generalErrors`).
+ */
+export const updateBarServiceGeneralMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  return updateBarService(
+    request,
+    (body) => generalErrors(body, language),
+    (details, body, row) => {
+      details.translations = body.translations ?? [];
+      details.category = body.category ?? null;
+      details.icon = body.icon ?? null;
+      details.isHighlighted = body.isHighlighted === true;
+      const main = details.translations.find((translation) => translation.language === language);
+      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.category = details.category;
+    },
+  );
+};
+
+/**
+ * `POST /api/catalog/update-bar-service-prices` with `BarServiceUpdatePricesRequest` and `idProperty`:
+ * the Prezzi tab; the list shows the new price. 400 for a price below 0.
+ */
+export const updateBarServicePricesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateBarService(request, priceErrors, (details, body, row) => {
+    details.price = body.price ?? null;
+    details.vatRate = body.vatRate ?? null;
+    details.variants = body.variants ?? [];
+    details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
+    details.periodPrices = body.periodPrices ?? [];
+    details.idSectors = body.idSectors ?? [];
+    details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
+    row.price = details.price;
+  });
+
+/**
+ * `POST /api/catalog/update-bar-service-booking` with `BarServiceUpdateBookingRequest` and
+ * `idProperty`: the booking options of the Prenotazioni tab, all of them.
+ */
+export const updateBarServiceBookingMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateBarService(
+    request,
+    () => [],
+    (details, body) => {
+      details.bookingOptions = body.bookingOptions ?? [];
+    },
+  );
 
 /**
  * `POST /api/catalog/delete-bar-service-item` with `DeleteBarServiceItemsRequest`: all or nothing. If

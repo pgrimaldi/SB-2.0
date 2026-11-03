@@ -3,6 +3,7 @@
   class="icon__button"
   type="button"
   [class.icon__button__text]="!icons().list[0]"
+  [disabled]="disabled()"
   [matTooltip]="label() ?? ''"
   matTooltipClass="icon__button__tooltip"
 >

@@ -27,6 +27,11 @@
     outline: 0.125rem solid var(--color__main__theme__one);
     outline-offset: 0.125rem;
   }
+
+  // Material greys only its own icons: an image looks off too.
+  &:disabled img {
+    opacity: 0.4;
+  }
 }
 
 .icon__button__text {

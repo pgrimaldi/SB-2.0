@@ -65,13 +65,18 @@
   }
 }
 
+// Only to look at: the chosen icon stays marked.
+.service__general__info__tab__icon:disabled {
+  cursor: default;
+}
+
 .service__general__info__tab__icon__chosen {
   border-color: var(--color__main__theme__one);
   background: var(--color__tertiary__theme);
 }
 
 @media (hover: hover) {
-  .service__general__info__tab__icon:hover {
+  .service__general__info__tab__icon:hover:not(:disabled) {
     background: var(--color__tertiary__theme);
   }
 }

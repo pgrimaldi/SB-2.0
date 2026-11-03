@@ -1,6 +1,11 @@
 <section class="service__bookings__tab__section">
   <app-section-title [text]="'management.settings.services.form.bookings.title' | translate">
-    <app-button [size]="ButtonSize.Small" [pathIcon]="addIcon" (clicked)="addOption()">
+    <app-button
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      [disabled]="isReadonly()"
+      (clicked)="addOption()"
+    >
       {{ 'management.settings.services.form.bookings.add' | translate }}
     </app-button>
   </app-section-title>
@@ -9,6 +14,7 @@
       <app-icon-button
         class="service__bookings__tab__remove"
         [pathIcon]="removeIcon"
+        [disabled]="isReadonly()"
         (click)="removeOption(optionIndex)"
       />
 
