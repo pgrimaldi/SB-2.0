@@ -1150,7 +1150,8 @@
               "title": "复制酒吧服务",
               "text": "要复制所选的 {{count}} 个酒吧服务吗？"
             }
-          }
+          },
+          "add_title": "添加新的酒吧服务"
         },
         "standard_services": {
           "title": "服务",
@@ -1277,6 +1278,25 @@
               "text": "要复制所选的 {{count}} 个餐桌服务吗？"
             }
           }
+        },
+        "form": {
+          "cancel": "取消",
+          "save": "保存",
+          "tabs": {
+            "general_info": "基本信息"
+          },
+          "name": "名称",
+          "description": "描述",
+          "other_languages": "其他语言",
+          "category": "类别",
+          "choose": "请选择",
+          "image": {
+            "title": "服务图片",
+            "choose_icon": "选择图标",
+            "upload": "或上传图片",
+            "drop": "将图片拖到此处或点击上传"
+          },
+          "highlighted": "设为推荐"
         }
       }
     }

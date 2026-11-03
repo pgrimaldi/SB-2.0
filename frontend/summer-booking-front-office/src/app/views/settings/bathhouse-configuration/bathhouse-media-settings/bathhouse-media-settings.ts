@@ -62,8 +62,8 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly positionIcon = ['/assets/images/BathhouseConfiguration_Position.svg'] as const;
-  protected readonly imagesIcon = ['/assets/images/BathhouseConfiguration_Images.svg'] as const;
-  protected readonly addImageIcon = ['/assets/images/BathhouseConfiguration_AddImage.svg'] as const;
+  protected readonly imagesIcon = ['/assets/images/GeneralIcon_Images.svg'] as const;
+  protected readonly addImageIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
   protected readonly virtualTourIcon = [
     '/assets/images/BathhouseConfiguration_VirtualTour.svg',
   ] as const;

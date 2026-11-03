@@ -2624,6 +2624,74 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Acqua naturale 1L` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
 
+### GET `/api/catalog/bar-service-category-combobox?idProperty={idProperty}`
+
+Servizi: categorie dei servizi bar.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/bar-service-category-combobox?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d01",
+    "value": "Caffetteria"
+  },
+  {
+    "id": "3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d02",
+    "value": "Bevande"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d01` |
+| `value` | string | `Caffetteria` |
+
+### GET `/api/catalog/bar-service-icon-list`
+
+Servizi: icone dei servizi bar.
+
+#### Payload
+
+Nessun corpo e nessun parametro: è una GET e le icone sono le stesse per ogni stabilimento.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "idIcon": 1,
+    "iconUrl": "https://media.example.com/icons/bar/caffe.svg"
+  },
+  {
+    "idIcon": 2,
+    "iconUrl": "https://media.example.com/icons/bar/cocktail.svg"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idIcon` | number (intero) | `1` |
+| `iconUrl` | string (URL) | `https://media.example.com/icons/bar/caffe.svg` |
+
 ### POST `/api/catalog/delete-bar-service-item`
 
 Servizi: eliminazione servizi bar.

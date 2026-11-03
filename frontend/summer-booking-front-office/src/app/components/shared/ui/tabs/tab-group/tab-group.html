@@ -1,0 +1,28 @@
+<mat-select
+  class="tab__group__select"
+  panelClass="select__panel"
+  hideSingleSelectionIndicator
+  [value]="selectedIndex()"
+  (valueChange)="selectedIndex.set($event)"
+>
+  @for (tab of tabs(); track $index) {
+    <mat-option [value]="$index">{{ tab.label }}</mat-option>
+  }
+</mat-select>
+<nav class="tab__group__bar" mat-tab-nav-bar [tabPanel]="panel">
+  @for (tab of tabs(); track $index) {
+    <button
+      class="tab__group__link"
+      type="button"
+      mat-tab-link
+      [style.flex]="tab.widthPercent === undefined ? null : '0 0 ' + tab.widthPercent + '%'"
+      [active]="$index === selectedIndex()"
+      (click)="selectedIndex.set($index)"
+    >
+      {{ tab.label }}
+    </button>
+  }
+</nav>
+<mat-tab-nav-panel #panel class="tab__group__panel">
+  <ng-content />
+</mat-tab-nav-panel>

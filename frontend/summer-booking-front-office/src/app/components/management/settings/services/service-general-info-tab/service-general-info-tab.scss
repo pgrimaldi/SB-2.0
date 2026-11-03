@@ -1,0 +1,71 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// One row per language: its name on the left, the translation on the right.
+.service__general__info__tab__languages {
+  --form-row-columns: 6rem minmax(0, 1fr);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service__general__info__tab__image {
+  --section-title-padding-bottom: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+// Same look as the labels of the fields.
+.service__general__info__tab__label {
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.service__general__info__tab__icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.service__general__info__tab__icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  padding: 0;
+  border: 0.0625rem solid transparent;
+  border-radius: 0.3125rem;
+  background: none;
+  cursor: pointer;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+.service__general__info__tab__icon__chosen {
+  border-color: var(--color__main__theme__one);
+  background: var(--color__tertiary__theme);
+}
+
+@media (hover: hover) {
+  .service__general__info__tab__icon:hover {
+    background: var(--color__tertiary__theme);
+  }
+}
+
+.service__general__info__tab__drop {
+  height: 8rem;
+}

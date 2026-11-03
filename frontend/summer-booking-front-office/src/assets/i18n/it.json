@@ -1150,7 +1150,8 @@
               "title": "Duplica servizi bar",
               "text": "Vuoi duplicare i {{count}} servizi bar selezionati?"
             }
-          }
+          },
+          "add_title": "Aggiungi nuovo servizio bar"
         },
         "standard_services": {
           "title": "Servizi",
@@ -1277,6 +1278,25 @@
               "text": "Vuoi duplicare i {{count}} servizi tavoli selezionati?"
             }
           }
+        },
+        "form": {
+          "cancel": "Annulla",
+          "save": "Salva",
+          "tabs": {
+            "general_info": "Info Generali"
+          },
+          "name": "Nome",
+          "description": "Descrizione",
+          "other_languages": "Altre lingue",
+          "category": "Categoria",
+          "choose": "Seleziona",
+          "image": {
+            "title": "Immagine servizio",
+            "choose_icon": "Seleziona un'icona",
+            "upload": "Oppure carica un'immagine",
+            "drop": "Trascina qui l'immagine o clicca per caricare"
+          },
+          "highlighted": "Metti in evidenza"
         }
       }
     }

@@ -5,6 +5,8 @@ import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   automaticPriceListMock,
+  barServiceCategoryComboboxMock,
+  barServiceIconListMock,
   barServiceListMock,
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationMediaMock,
@@ -518,6 +520,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/bar-service-list`
   ) {
     return barServiceListMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bar-service-category-combobox`
+  ) {
+    return barServiceCategoryComboboxMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/bar-service-icon-list`
+  ) {
+    return barServiceIconListMock(request);
   }
 
   if (

@@ -62,6 +62,36 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
+  it('should ask for the categories of the bar services of the property in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.barServiceCategoryCombobox('p1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/bar-service-category-combobox` &&
+        params.get('idProperty') === 'p1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the icons of the bar services with a GET and no parameters', () => {
+    const { catalog, controller } = setup();
+
+    catalog.barServiceIconList().subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/bar-service-icon-list` &&
+        params.keys().length === 0,
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
   it('should ask for the media of the property in the query string', () => {
     const { catalog, controller } = setup();
 

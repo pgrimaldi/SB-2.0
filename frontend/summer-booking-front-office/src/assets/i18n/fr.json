@@ -1150,7 +1150,8 @@
               "title": "Dupliquer les services bar",
               "text": "Voulez-vous dupliquer les {{count}} services bar sélectionnés ?"
             }
-          }
+          },
+          "add_title": "Ajouter un nouveau service bar"
         },
         "standard_services": {
           "title": "Services",
@@ -1277,6 +1278,25 @@
               "text": "Voulez-vous dupliquer les {{count}} services à table sélectionnés ?"
             }
           }
+        },
+        "form": {
+          "cancel": "Annuler",
+          "save": "Enregistrer",
+          "tabs": {
+            "general_info": "Infos générales"
+          },
+          "name": "Nom",
+          "description": "Description",
+          "other_languages": "Autres langues",
+          "category": "Catégorie",
+          "choose": "Sélectionner",
+          "image": {
+            "title": "Image du service",
+            "choose_icon": "Choisissez une icône",
+            "upload": "Ou importez une image",
+            "drop": "Faites glisser l'image ici ou cliquez pour l'importer"
+          },
+          "highlighted": "Mettre en avant"
         }
       }
     }

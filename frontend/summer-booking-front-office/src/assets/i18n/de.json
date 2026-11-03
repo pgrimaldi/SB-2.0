@@ -1150,7 +1150,8 @@
               "title": "Bar-Leistungen duplizieren",
               "text": "Möchtest du die {{count}} ausgewählten Bar-Leistungen duplizieren?"
             }
-          }
+          },
+          "add_title": "Neue Bar-Leistung hinzufügen"
         },
         "standard_services": {
           "title": "Leistungen",
@@ -1277,6 +1278,25 @@
               "text": "Möchtest du die {{count}} ausgewählten Tischservices duplizieren?"
             }
           }
+        },
+        "form": {
+          "cancel": "Abbrechen",
+          "save": "Speichern",
+          "tabs": {
+            "general_info": "Allgemeine Infos"
+          },
+          "name": "Name",
+          "description": "Beschreibung",
+          "other_languages": "Weitere Sprachen",
+          "category": "Kategorie",
+          "choose": "Auswählen",
+          "image": {
+            "title": "Bild der Leistung",
+            "choose_icon": "Wähle ein Symbol",
+            "upload": "Oder lade ein Bild hoch",
+            "drop": "Ziehe das Bild hierher oder klicke zum Hochladen"
+          },
+          "highlighted": "Hervorheben"
         }
       }
     }

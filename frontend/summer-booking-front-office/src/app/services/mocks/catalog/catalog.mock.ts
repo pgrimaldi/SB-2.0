@@ -18,6 +18,7 @@ import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { ServiceIconItem } from '../../../entities/settings/services/service-icon-item';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -776,6 +777,60 @@ export const barServiceListMock = (
     rows: found.slice((page - 1) * pageSize, page * pageSize),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+const BAR_SERVICE_CATEGORIES: readonly ComboboxItem[] = [
+  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d01', value: 'Caffetteria' },
+  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d02', value: 'Bevande' },
+  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d03', value: 'Snack e panini' },
+  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d04', value: 'Gelati' },
+  { id: '3f5a7c9e-1b2d-4c6e-8a0b-2c4e6a8b0d05', value: 'Dolci' },
+];
+
+/**
+ * `GET /api/catalog/bar-service-category-combobox?idProperty=…`: the categories of the bar services of
+ * the property. 401 without a valid access token; 403 for a missing or unknown property.
+ */
+export const barServiceCategoryComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  if (!propertyOf(request.params.get('idProperty'))) {
+    return forbidden(request);
+  }
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: [...BAR_SERVICE_CATEGORIES] }),
+  ).pipe(delay(150));
+};
+
+/** Example icons, taken from the images of the app until the backend gives its own. */
+const BAR_SERVICE_ICONS: readonly ServiceIconItem[] = [
+  'Cafe',
+  'Cocktail',
+  'Pizza',
+  'Restaurant',
+  'GlutenFree',
+  'Leaf',
+].map((icon, index) => ({
+  idIcon: index + 1,
+  iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
+}));
+
+/**
+ * `GET /api/catalog/bar-service-icon-list`: the icons a bar service can have, the same for every
+ * property. 401 without a valid access token.
+ */
+export const barServiceIconListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  return of(new HttpResponse({ status: 200, url: request.url, body: [...BAR_SERVICE_ICONS] })).pipe(
+    delay(150),
+  );
 };
 
 /**
