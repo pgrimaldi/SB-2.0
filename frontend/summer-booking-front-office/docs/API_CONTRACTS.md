@@ -2627,6 +2627,136 @@ Stato: 200 OK.
 | `rows[].category` | string (enum BarServiceCategory) \| null | `Drinks` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
 
+### POST `/api/catalog/create-bar-service`
+
+Servizi: creazione servizio bar.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Caffè ginseng",
+      "description": "Caffè al ginseng in tazza piccola"
+    },
+    {
+      "language": "en",
+      "serviceName": "Ginseng coffee",
+      "description": "Ginseng coffee in a small cup"
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "category": "Cafeteria",
+  "icon": "Coffee",
+  "isHighlighted": true,
+  "price": 1.5,
+  "vatRate": 10,
+  "variants": [
+    {
+      "variantName": "Grande",
+      "price": 2
+    }
+  ],
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "price": 1.5
+    },
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "price": 1.8
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true,
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-07-01T00:00:00.000Z",
+      "dateTo": "2026-07-31T00:00:00.000Z",
+      "managementStartTime": "09:00",
+      "managementEndTime": "12:00",
+      "onlineStartTime": "09:00",
+      "onlineEndTime": "12:00",
+      "maxBookingPerHourQuantity": 2,
+      "maxBookingPerDayQuantity": 5,
+      "timeInterval": "ThirtyMinutes",
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 2
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Caffè ginseng", "description": "Caffè al ginseng in tazza piccola"}, {"language": "en", "serviceName": "Ginseng coffee", "description": "Ginseng coffee in a small cup"}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Caffè ginseng` |
+| `translations[].description` | string \| null | `Caffè al ginseng in tazza piccola` |
+| `category` | string (enum BarServiceCategory) \| null | `Cafeteria` |
+| `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
+| `isHighlighted` | boolean | `true` |
+| `price` | number (decimale, €) \| null | `1.5` |
+| `vatRate` | number (decimale, %) \| null | `10` |
+| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Grande", "price": 2}]` |
+| `variants[].variantName` | string \| null | `Grande` |
+| `variants[].price` | number (decimale, €) \| null | `2` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 1.8}]` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].price` | number (decimale, €) \| null | `1.5` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "12:00", "onlineStartTime": "09:00", "onlineEndTime": "12:00", "maxBookingPerHourQuantity": 2, "maxBookingPerDayQuantity": 5, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `12:00` |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `12:00` |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `2` |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `5` |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/delete-bar-service-item`
 
 Servizi: eliminazione servizi bar.

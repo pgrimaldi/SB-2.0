@@ -2,8 +2,13 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
+import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
+import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
+import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
+import { Language } from '../../../entities/shared/language';
 import { CatalogService } from './catalog.service';
 
 describe('CatalogService', () => {
@@ -120,6 +125,56 @@ describe('CatalogService', () => {
       services: [{ ...new BathhouseServiceItem(), idService: 3, name: 'Doccia', isSelected: true }],
       idProperty: 'p1',
     });
+    controller.verify();
+  });
+
+  it('should create the bar service with the data of the three tabs and the property', () => {
+    const { catalog, controller } = setup();
+    const translation = {
+      language: Language.It,
+      serviceName: 'Caffè ginseng',
+      description: 'In tazza piccola',
+    };
+    const bookingOption = {
+      dateFrom: '2026-07-01T00:00:00.000Z',
+      dateTo: '2026-07-31T00:00:00.000Z',
+      managementStartTime: '09:00',
+      managementEndTime: '12:00',
+      onlineStartTime: '09:00',
+      onlineEndTime: '12:00',
+      maxBookingPerHourQuantity: 2,
+      maxBookingPerDayQuantity: 5,
+      timeInterval: BookingTimeInterval.ThirtyMinutes,
+      minItemPerBookingQuantity: 1,
+      maxItemPerBookingQuantity: 2,
+    };
+    const request = {
+      translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+      category: BarServiceCategory.Cafeteria,
+      icon: BarServiceIcon.Coffee,
+      isHighlighted: true,
+      price: 1.5,
+      vatRate: 10,
+      variants: [{ variantName: 'Grande', price: 2 }],
+      isPeriodPricingEnabled: true,
+      periodPrices: [{ idPeriod: 'a1', price: 1.8 }],
+      idSectors: ['s1'],
+      isOnlinePurchaseEnabled: true,
+      bookingOptions: [bookingOption],
+    };
+
+    catalog
+      .createBarService(
+        'p1',
+        Object.assign(new BarServiceAddItemRequest(), request, { unexpectedFlag: 'extra-field' }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-bar-service`,
+    ).request.body;
+    expect(body).toEqual({ ...request, translations: [translation], idProperty: 'p1' });
     controller.verify();
   });
 });

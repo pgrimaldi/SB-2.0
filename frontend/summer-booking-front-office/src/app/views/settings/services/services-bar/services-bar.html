@@ -24,7 +24,11 @@
   (create)="adding.set(true)"
 />
 
-<app-bar-service-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" />
+<app-bar-service-add-item-panel
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (created)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idBarServicesToDelete()"

@@ -2,11 +2,13 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
+import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
+import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
 import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
@@ -23,7 +25,7 @@ import { StandardServiceItem } from '../../../entities/settings/services/standar
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden, resourceNotFound } from '../errors/problem.mock';
+import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
 import { propertyOf } from '../properties/properties.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
@@ -779,6 +781,69 @@ export const barServiceListMock = (
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
+
+type CreateBarServiceBody = Partial<BarServiceAddItemRequest> & { idProperty?: unknown };
+
+/**
+ * `POST /api/catalog/create-bar-service` with `BarServiceAddItemRequest` and `idProperty`: the new
+ * bar service goes into the list, with the name in the language of `Accept-Language`. 204 without a
+ * body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
+ * field (see `barServiceErrors`).
+ */
+export const createBarServiceMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreateBarServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const errors = barServiceErrors(body, language);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const main = body.translations?.find((translation) => translation.language === language);
+  BAR_SERVICES.push({
+    propertyId: property.id,
+    idBarService: crypto.randomUUID(),
+    serviceName: main?.serviceName?.trim() ?? null,
+    category: body.category ?? null,
+    price: body.price ?? null,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * Name and description in the language of the request (the user's), as the panel requires; category
+ * and icon, when given, among the values of their enums; prices not below 0.
+ */
+function barServiceErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  const translations = Array.isArray(body.translations) ? body.translations : [];
+  const index = translations.findIndex((translation) => translation.language === language);
+  const main = translations[index];
+  const at = `translations[${Math.max(index, 0)}]`;
+  if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
+    errors.push({ field: `${at}.serviceName`, code: 'validation.required' });
+  }
+  if (typeof main?.description !== 'string' || !main.description.trim()) {
+    errors.push({ field: `${at}.description`, code: 'validation.required' });
+  }
+  if (body.category != null && !Object.values(BarServiceCategory).includes(body.category)) {
+    errors.push({ field: 'category', code: 'validation.invalid' });
+  }
+  if (body.icon != null && !Object.values(BarServiceIcon).includes(body.icon)) {
+    errors.push({ field: 'icon', code: 'validation.invalid' });
+  }
+  if (body.price != null && !(typeof body.price === 'number' && body.price >= 0)) {
+    errors.push({ field: 'price', code: 'validation.invalid' });
+  }
+  return errors;
+}
 
 /**
  * `POST /api/catalog/delete-bar-service-item` with `DeleteBarServiceItemsRequest`: all or nothing. If

@@ -1,7 +1,9 @@
 @if (mainTranslation(); as main) {
   <app-filled-text-field
     [label]="'management.settings.services.form.name' | translate"
+    [isMandatory]="true"
     [formField]="main.serviceName"
+    [error]="validationText.text(main.serviceName)"
   />
 }
 <app-expansion-panel
@@ -29,7 +31,9 @@
 @if (mainTranslation(); as main) {
   <app-filled-textarea
     [label]="'management.settings.services.form.description' | translate"
+    [isMandatory]="true"
     [formField]="main.description"
+    [error]="validationText.text(main.description)"
   />
 }
 <app-expansion-panel

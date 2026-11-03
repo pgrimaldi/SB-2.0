@@ -2,8 +2,11 @@
   [title]="'management.settings.services.bar_services.add_title' | translate"
   [texts]="'management.settings.services.form' | translate"
   [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [isSaveDisabled]="isSaveDisabled()"
   [(open)]="open"
   (closeRequest)="leave()"
+  (save)="save()"
 >
   <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
     @if (selectedTab() === PanelTab.GeneralInfo) {
@@ -18,13 +21,13 @@
     } @else if (selectedTab() === PanelTab.Prices) {
       <app-service-prices-tab
         [attr.inert]="isFetching() ? '' : null"
-        [form]="pricesForm"
+        [form]="draftForm"
         [periods]="periods()"
       />
     } @else if (selectedTab() === PanelTab.Bookings) {
       <app-service-bookings-tab
         [attr.inert]="isFetching() ? '' : null"
-        [form]="bookingOptionsForm"
+        [form]="draftForm.bookingOptions"
       />
     }
     @if (errorMessage(); as errorMessage) {

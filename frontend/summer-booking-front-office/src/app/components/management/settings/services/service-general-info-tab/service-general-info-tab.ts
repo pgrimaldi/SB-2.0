@@ -11,9 +11,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { BarServiceCategory } from '../../../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
-import { ServiceGeneralInfo } from '../../../../../entities/settings/services/service-general-info';
+import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
 import { Language } from '../../../../../entities/shared/language';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
@@ -79,7 +80,7 @@ const BAR_SERVICE_CATEGORY_KEYS: Readonly<
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceGeneralInfoTab {
-  readonly form = input.required<FieldTree<ServiceGeneralInfo>>();
+  readonly form = input.required<FieldTree<BarServiceAddItemRequest>>();
   /** Language of the main name and description: the user's; the others are translations. */
   readonly mainLanguage = input.required<Language>();
   readonly imagePreviewUrl = input<string | null>(null);
@@ -87,6 +88,7 @@ export class ServiceGeneralInfoTab {
   readonly imageChosen = output<File>();
 
   private readonly translateService = inject(TranslateService);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   /** Every icon a bar service can have, as shown in the grid. */
   protected readonly icons = Object.values(BarServiceIcon).map((icon) => ({

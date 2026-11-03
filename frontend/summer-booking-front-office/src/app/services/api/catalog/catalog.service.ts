@@ -8,6 +8,7 @@ import { BathhouseGeneralInformation } from '../../../entities/settings/bathhous
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
+import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
 import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
@@ -20,6 +21,10 @@ import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { ServiceBookingOption } from '../../../entities/settings/services/service-booking-option';
+import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
+import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
+import { ServiceVariant } from '../../../entities/settings/services/service-variant';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../only-fields-of';
@@ -80,6 +85,26 @@ export class CatalogService {
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
     this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
+
+  /** The data of the three tabs of the add panel. Answers 204 with no body. */
+  readonly createBarService = (
+    idProperty: string,
+    request: BarServiceAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/create-bar-service`, {
+      ...onlyFieldsOf(BarServiceAddItemRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
+      periodPrices: request.periodPrices.map((periodPrice) =>
+        onlyFieldsOf(ServicePeriodPrice, periodPrice),
+      ),
+      bookingOptions: request.bookingOptions.map((bookingOption) =>
+        onlyFieldsOf(ServiceBookingOption, bookingOption),
+      ),
+      idProperty,
+    });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteBarServiceItems = (request: DeleteBarServiceItemsRequest): Observable<void> =>

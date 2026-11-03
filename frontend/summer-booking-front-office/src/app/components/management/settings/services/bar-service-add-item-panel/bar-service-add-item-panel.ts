@@ -7,13 +7,14 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { form } from '@angular/forms/signals';
+import { TreeValidationResult, applyEach, applyWhen, form, submit } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -21,16 +22,17 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
-import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
-import { ServiceGeneralInfo } from '../../../../../entities/settings/services/service-general-info';
+import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
-import { ServicePrices } from '../../../../../entities/settings/services/service-prices';
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
+import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import {
@@ -73,8 +75,10 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   readonly open = model(false);
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
+  readonly created = output<void>();
 
   private readonly auth = inject(AuthBehaviour);
+  private readonly catalog = inject(CatalogService);
   private readonly seasons = inject(SeasonService);
   private readonly language = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
@@ -95,16 +99,27 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     { label: this.texts()?.tabs.prices ?? '', widthPercent: 33 },
     { label: this.texts()?.tabs.bookings ?? '', widthPercent: 33 },
   ]);
-  private readonly draft = signal(newGeneralInfo());
-  protected readonly draftForm = form(this.draft);
-  private readonly pricesDraft = signal(new ServicePrices());
-  protected readonly pricesForm = form(this.pricesDraft);
-  private readonly bookingOptions = signal<ServiceBookingOption[]>([]);
-  protected readonly bookingOptionsForm = form(this.bookingOptions);
-  /** The prices as they were when the panel opened, with an empty price for every period. */
-  private readonly pristinePrices = signal(JSON.stringify(new ServicePrices()));
+  private readonly draft = signal(newDraft());
+  protected readonly draftForm = form(this.draft, (path) => {
+    applyEach(path.translations, (translation) => {
+      applyWhen(
+        translation,
+        ({ valueOf }) => valueOf(translation.language) === this.mainLanguage(),
+        (main) => {
+          requiredText(main.serviceName);
+          requiredText(main.description);
+        },
+      );
+    });
+  });
+  /** The form as it was when the panel opened, with an empty price for every period. */
+  private readonly pristine = signal(JSON.stringify(newDraft()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   protected readonly isFetching = signal(false);
+  protected readonly isSaving = signal(false);
+  protected readonly isSaveDisabled = computed(
+    () => this.isFetching() || this.draftForm().invalid(),
+  );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
@@ -128,11 +143,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() &&
-      (this.image() !== null ||
-        JSON.stringify(this.draft()) !== JSON.stringify(newGeneralInfo()) ||
-        JSON.stringify(this.pricesDraft()) !== this.pristinePrices() ||
-        this.bookingOptions().length > 0)
+      this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine())
     );
   }
 
@@ -146,6 +157,30 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.setImage(image);
   }
 
+  protected save(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    if (this.isSaving() || !idProperty) {
+      return;
+    }
+
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.catalog.createBarService(idProperty, this.draft()));
+        this.isSaving.set(false);
+        this.open.set(false);
+        this.created.emit();
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
+  }
+
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
@@ -153,11 +188,9 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   private reset(): void {
-    this.draft.set(newGeneralInfo());
+    this.draft.set(newDraft());
     this.draftForm().reset();
-    this.setPrices([]);
-    this.bookingOptions.set([]);
-    this.bookingOptionsForm().reset();
+    this.setPeriods([]);
     this.setImage(null);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.fetchPeriods();
@@ -176,22 +209,20 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       .periodList(idProperty, false)
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
-        next: (periods) => this.setPrices(periods),
+        next: (periods) => this.setPeriods(periods),
         error: (error: unknown) => this.error.set(toApiProblem(error)),
       });
   }
 
-  /** Empty prices, with a price for each period of the season. */
-  private setPrices(periods: readonly SeasonPeriodItem[]): void {
-    const prices = Object.assign(new ServicePrices(), {
-      periodPrices: periods.map(({ idPeriod }) =>
-        Object.assign(new ServicePeriodPrice(), { idPeriod }),
-      ),
-    });
+  /** An empty price for each period of the season: the form without changes. */
+  private setPeriods(periods: readonly SeasonPeriodItem[]): void {
     this.periods.set(periods);
-    this.pricesDraft.set(prices);
-    this.pricesForm().reset();
-    this.pristinePrices.set(JSON.stringify(prices));
+    this.draftForm
+      .periodPrices()
+      .value.set(
+        periods.map(({ idPeriod }) => Object.assign(new ServicePeriodPrice(), { idPeriod })),
+      );
+    this.pristine.set(JSON.stringify(this.draft()));
   }
 
   private setImage(image: File | null): void {
@@ -211,8 +242,8 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
 }
 
 /** Empty, with a name and a description for every language: the user's one is the main. */
-function newGeneralInfo(): ServiceGeneralInfo {
-  return Object.assign(new ServiceGeneralInfo(), {
+function newDraft(): BarServiceAddItemRequest {
+  return Object.assign(new BarServiceAddItemRequest(), {
     translations: SERVICE_LANGUAGES.map((language) =>
       Object.assign(new ServiceTranslation(), { language }),
     ),

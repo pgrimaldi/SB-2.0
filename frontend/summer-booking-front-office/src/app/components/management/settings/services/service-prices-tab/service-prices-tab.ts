@@ -3,7 +3,7 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DateLanguageBehaviour } from '../../../../../behaviours/i18n/date-language.behaviour';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
-import { ServicePrices } from '../../../../../entities/settings/services/service-prices';
+import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
 import { ServiceVariant } from '../../../../../entities/settings/services/service-variant';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
@@ -40,7 +40,7 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServicePricesTab {
-  readonly form = input.required<FieldTree<ServicePrices>>();
+  readonly form = input.required<FieldTree<BarServiceAddItemRequest>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
 

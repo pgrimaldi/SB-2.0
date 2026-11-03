@@ -6,6 +6,7 @@ import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './bo
 import {
   automaticPriceListMock,
   barServiceListMock,
+  createBarServiceMock,
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationMediaMock,
   bathhouseConfigurationServicesMock,
@@ -518,6 +519,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/bar-service-list`
   ) {
     return barServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/create-bar-service`
+  ) {
+    return createBarServiceMock(request);
   }
 
   if (
