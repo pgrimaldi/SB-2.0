@@ -1,0 +1,105 @@
+<div class="service__prices__tab__price">
+  <div class="service__prices__tab__amount">
+    <app-filled-number-field
+      class="service__prices__tab__field"
+      [label]="'management.settings.services.form.prices.price' | translate"
+      [isDecimal]="true"
+      [isCurrency]="true"
+      [formField]="form().price"
+    />
+    <span class="service__prices__tab__unit">€</span>
+  </div>
+  <app-filled-number-field
+    [label]="'management.settings.services.form.prices.vat' | translate"
+    [isDecimal]="true"
+    [formField]="form().vatRate"
+  />
+</div>
+
+<section class="service__prices__tab__section">
+  <app-section-title [text]="'management.settings.services.form.prices.variants.title' | translate">
+    <app-button [size]="ButtonSize.Small" [pathIcon]="addIcon" (clicked)="addVariant()">
+      {{ 'management.settings.services.form.prices.variants.add' | translate }}
+    </app-button>
+  </app-section-title>
+  @for (variant of form().variants; track variant; let variantIndex = $index) {
+    <div class="service__prices__tab__variant">
+      <app-filled-text-field
+        class="service__prices__tab__variant__name"
+        [label]="'management.settings.services.form.prices.variants.name' | translate"
+        [formField]="variant.variantName"
+      />
+      <div class="service__prices__tab__amount service__prices__tab__variant__price">
+        <app-filled-number-field
+          class="service__prices__tab__field"
+          [label]="'management.settings.services.form.prices.price' | translate"
+          [isDecimal]="true"
+          [isCurrency]="true"
+          [formField]="variant.price"
+        />
+        <span class="service__prices__tab__unit">€</span>
+      </div>
+      <app-icon-button
+        class="service__prices__tab__remove"
+        [pathIcon]="removeIcon"
+        (click)="removeVariant(variantIndex)"
+      />
+    </div>
+  }
+</section>
+
+<section class="service__prices__tab__section">
+  <app-toggle [formField]="form().isPeriodPricingEnabled">
+    {{ 'management.settings.services.form.prices.period_pricing.enable' | translate }}
+  </app-toggle>
+  @if (form().isPeriodPricingEnabled().value()) {
+    @for (period of periods(); track period.idPeriod) {
+      <app-expansion-panel [title]="period.periodName ?? ''" [pathIcon]="periodIcons">
+        <div class="service__prices__tab__period">
+          <div class="service__prices__tab__dates">
+            <div class="service__prices__tab__intervals">
+              @for (interval of period.intervals; track interval.idInterval) {
+                <span>{{ day(interval.dateFrom) }}</span>
+                <span class="service__prices__tab__to">{{ day(interval.dateTo) }}</span>
+              }
+            </div>
+          </div>
+          @if (periodPrices().get(period.idPeriod); as periodPrice) {
+            <div class="service__prices__tab__amount service__prices__tab__period__price">
+              <app-filled-number-field
+                class="service__prices__tab__field"
+                [isDecimal]="true"
+                [isCurrency]="true"
+                [formField]="periodPrice.price"
+              />
+              <span class="service__prices__tab__unit">€</span>
+            </div>
+          }
+        </div>
+      </app-expansion-panel>
+    } @empty {
+      <p class="service__prices__tab__empty">
+        {{ 'management.settings.services.form.prices.period_pricing.no_periods' | translate }}
+      </p>
+    }
+  }
+</section>
+
+<section class="service__prices__tab__section">
+  <app-section-title [text]="'management.settings.services.form.prices.limits.title' | translate" />
+  <app-form-row>
+    <span appFormRowLabel>
+      {{ 'management.settings.services.form.prices.limits.sectors' | translate }}
+    </span>
+    <app-filled-multi-select
+      class="service__prices__tab__sectors"
+      [placeholder]="'management.settings.services.form.prices.limits.all_sectors' | translate"
+      [options]="sectorOptions"
+      [formField]="form().idSectors"
+    />
+  </app-form-row>
+</section>
+
+<app-toggle [formField]="form().isOnlinePurchaseEnabled">
+  {{ 'management.settings.services.form.prices.online_purchase' | translate }}
+</app-toggle>

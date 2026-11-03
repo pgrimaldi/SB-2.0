@@ -1301,7 +1301,26 @@
             "upload": "Ou importez une image",
             "drop": "Faites glisser l'image ici ou cliquez pour l'importer"
           },
-          "highlighted": "Mettre en avant"
+          "highlighted": "Mettre en avant",
+          "prices": {
+            "price": "Prix",
+            "vat": "TVA (%)",
+            "variants": {
+              "title": "Variantes",
+              "add": "Ajouter une variante",
+              "name": "Nom de la variante"
+            },
+            "online_purchase": "Activer l'achat en ligne",
+            "period_pricing": {
+              "enable": "Activer les prix par période",
+              "no_periods": "La saison en cours n'a pas de périodes : créez-les dans Saisons et périodes."
+            },
+            "limits": {
+              "title": "Limites",
+              "sectors": "Service en vente dans ces rangées/secteurs",
+              "all_sectors": "Toutes les rangées/secteurs"
+            }
+          }
         }
       }
     }

@@ -17,6 +17,12 @@
         (iconChosen)="chooseIcon($event)"
         (imageChosen)="chooseImage($event)"
       />
+    } @else if (selectedTab() === PanelTab.Prices) {
+      <app-service-prices-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="pricesForm"
+        [periods]="periods()"
+      />
     }
     @if (errorMessage(); as errorMessage) {
       <p class="bar__service__add__item__panel__error">{{ errorMessage }}</p>

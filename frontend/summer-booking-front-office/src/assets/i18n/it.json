@@ -1301,7 +1301,26 @@
             "upload": "Oppure carica un'immagine",
             "drop": "Trascina qui l'immagine o clicca per caricare"
           },
-          "highlighted": "Metti in evidenza"
+          "highlighted": "Metti in evidenza",
+          "prices": {
+            "price": "Prezzo",
+            "vat": "IVA (%)",
+            "variants": {
+              "title": "Varianti",
+              "add": "Aggiungi nuova variante",
+              "name": "Nome variante"
+            },
+            "online_purchase": "Abilita acquisto online",
+            "period_pricing": {
+              "enable": "Abilita variazioni di prezzo per periodo",
+              "no_periods": "La stagione corrente non ha periodi: si creano in Stagioni e periodi."
+            },
+            "limits": {
+              "title": "Limiti",
+              "sectors": "Servizio acquistabile nelle seguenti file/settori",
+              "all_sectors": "Tutte le file/settori"
+            }
+          }
         }
       }
     }

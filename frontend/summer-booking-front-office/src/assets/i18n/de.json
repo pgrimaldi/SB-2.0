@@ -1301,7 +1301,26 @@
             "upload": "Oder lade ein Bild hoch",
             "drop": "Ziehe das Bild hierher oder klicke zum Hochladen"
           },
-          "highlighted": "Hervorheben"
+          "highlighted": "Hervorheben",
+          "prices": {
+            "price": "Preis",
+            "vat": "MwSt. (%)",
+            "variants": {
+              "title": "Varianten",
+              "add": "Variante hinzufügen",
+              "name": "Name der Variante"
+            },
+            "online_purchase": "Online-Kauf aktivieren",
+            "period_pricing": {
+              "enable": "Preise je Zeitraum aktivieren",
+              "no_periods": "Die aktuelle Saison hat keine Zeiträume: lege sie unter Saisons und Zeiträume an."
+            },
+            "limits": {
+              "title": "Einschränkungen",
+              "sectors": "Leistung buchbar in diesen Reihen/Sektoren",
+              "all_sectors": "Alle Reihen/Sektoren"
+            }
+          }
         }
       }
     }

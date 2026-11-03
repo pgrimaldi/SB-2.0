@@ -1301,7 +1301,26 @@
             "upload": "Or upload an image",
             "drop": "Drag the image here or click to upload"
           },
-          "highlighted": "Highlight"
+          "highlighted": "Highlight",
+          "prices": {
+            "price": "Price",
+            "vat": "VAT (%)",
+            "variants": {
+              "title": "Variants",
+              "add": "Add new variant",
+              "name": "Variant name"
+            },
+            "online_purchase": "Enable online purchase",
+            "period_pricing": {
+              "enable": "Enable price changes by period",
+              "no_periods": "The current season has no periods: create them in Seasons and periods."
+            },
+            "limits": {
+              "title": "Limits",
+              "sectors": "Service on sale in these rows/sectors",
+              "all_sectors": "All rows/sectors"
+            }
+          }
         }
       }
     }

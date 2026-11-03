@@ -1301,7 +1301,26 @@
             "upload": "或上传图片",
             "drop": "将图片拖到此处或点击上传"
           },
-          "highlighted": "设为推荐"
+          "highlighted": "设为推荐",
+          "prices": {
+            "price": "价格",
+            "vat": "增值税 (%)",
+            "variants": {
+              "title": "规格",
+              "add": "添加规格",
+              "name": "规格名称"
+            },
+            "online_purchase": "启用在线购买",
+            "period_pricing": {
+              "enable": "启用按时段定价",
+              "no_periods": "当前季节没有时段：请在“季节和时段”中创建。"
+            },
+            "limits": {
+              "title": "限制",
+              "sectors": "可购买此服务的排/区域",
+              "all_sectors": "所有排/区域"
+            }
+          }
         }
       }
     }
