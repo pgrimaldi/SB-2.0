@@ -5,12 +5,17 @@ import { environment } from '../../../../environments/environment';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
 import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
+import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
 import { BarServiceUpdatePricesRequest } from '../../../entities/settings/services/bar-service-update-prices-request';
+import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
+import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/services/standard-service-update-booking-request';
+import { StandardServiceUpdateGeneralRequest } from '../../../entities/settings/services/standard-service-update-general-request';
+import { StandardServiceUpdatePricesRequest } from '../../../entities/settings/services/standard-service-update-prices-request';
 import { Language } from '../../../entities/shared/language';
 import { CatalogService } from './catalog.service';
 
@@ -316,6 +321,198 @@ describe('CatalogService', () => {
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/catalog/get-bar-service-booking-options` &&
         params.get('idBarService') === 'b1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should create the service with the data of the three tabs and the property', () => {
+    const { catalog, controller } = setup();
+    const translation = {
+      language: Language.It,
+      serviceName: 'Doccia calda',
+      description: 'Acqua calda tutto il giorno',
+    };
+    const request = {
+      translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+      icon: StandardServiceIcon.Shower,
+      isHighlighted: true,
+      price: 3,
+      vatRate: 22,
+      isPeriodPricingEnabled: true,
+      periodPrices: [{ idPeriod: 'a1', price: 3.5 }],
+      idSectors: ['s1'],
+      isOnlinePurchaseEnabled: true,
+      bookingOptions: [
+        {
+          dateFrom: '2026-07-01T00:00:00.000Z',
+          dateTo: '2026-07-31T00:00:00.000Z',
+          managementStartTime: '09:00',
+          managementEndTime: '18:00',
+          onlineStartTime: '09:00',
+          onlineEndTime: '17:00',
+          maxBookingPerHourQuantity: 4,
+          maxBookingPerDayQuantity: 30,
+          timeInterval: BookingTimeInterval.FifteenMinutes,
+          minItemPerBookingQuantity: 1,
+          maxItemPerBookingQuantity: 2,
+        },
+      ],
+    };
+
+    catalog
+      .createStandardService(
+        'p1',
+        Object.assign(new StandardServiceAddItemRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-standard-service`,
+    ).request.body;
+    expect(body).toEqual({ ...request, translations: [translation], idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the Info Generali of the service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idStandardService: 's1',
+      translations: [{ language: Language.It, serviceName: 'Parcheggio', description: 'Coperto' }],
+      icon: StandardServiceIcon.Parking,
+      isHighlighted: false,
+    };
+
+    catalog
+      .updateStandardServiceGeneral(
+        'p1',
+        Object.assign(new StandardServiceUpdateGeneralRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-standard-service-general`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the prices of the service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idStandardService: 's1',
+      price: 3,
+      vatRate: 22,
+      isPeriodPricingEnabled: true,
+      periodPrices: [{ idPeriod: 'a1', price: 4 }],
+      idSectors: ['s1'],
+      isOnlinePurchaseEnabled: false,
+    };
+
+    catalog
+      .updateStandardServicePrices(
+        'p1',
+        Object.assign(new StandardServiceUpdatePricesRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-standard-service-prices`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the booking options of the service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idStandardService: 's1',
+      bookingOptions: [
+        {
+          dateFrom: '2026-07-01T00:00:00.000Z',
+          dateTo: '2026-07-31T00:00:00.000Z',
+          managementStartTime: '09:00',
+          managementEndTime: '18:00',
+          onlineStartTime: '09:00',
+          onlineEndTime: '17:00',
+          maxBookingPerHourQuantity: 4,
+          maxBookingPerDayQuantity: 30,
+          timeInterval: BookingTimeInterval.OneHour,
+          minItemPerBookingQuantity: 1,
+          maxItemPerBookingQuantity: 1,
+        },
+      ],
+    };
+
+    catalog
+      .updateStandardServiceBooking(
+        'p1',
+        Object.assign(new StandardServiceUpdateBookingRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-standard-service-booking`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should ask for the general information of the service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.standardServiceGeneralInfo('s1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-standard-service-general-info` &&
+        params.get('idStandardService') === 's1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the prices of the service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.standardServicePrices('s1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-standard-service-prices` &&
+        params.get('idStandardService') === 's1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the booking options of the service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.standardServiceBookingOptions('s1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-standard-service-booking-options` &&
+        params.get('idStandardService') === 's1',
     ).request;
     expect(request.body).toBeNull();
     controller.verify();

@@ -30,7 +30,13 @@ import { ServiceBookingOption } from '../../../entities/settings/services/servic
 import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
 import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
 import { ServiceVariant } from '../../../entities/settings/services/service-variant';
+import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
+import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
+import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/services/standard-service-update-booking-request';
+import { StandardServiceUpdateGeneralRequest } from '../../../entities/settings/services/standard-service-update-general-request';
+import { StandardServiceUpdatePricesRequest } from '../../../entities/settings/services/standard-service-update-prices-request';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { onlyFieldsOf } from '../only-fields-of';
 
@@ -188,6 +194,91 @@ export class CatalogService {
       `${this.endpoint}/standard-service-list`,
       request,
     );
+
+  /** The Info Generali tab of a service, for the edit panel. */
+  readonly standardServiceGeneralInfo = (
+    idStandardService: string,
+  ): Observable<StandardServiceSelectedGeneralInfo> =>
+    this.httpClient.get<StandardServiceSelectedGeneralInfo>(
+      `${this.endpoint}/get-standard-service-general-info`,
+      { params: { idStandardService } },
+    );
+
+  /** The Prezzi tab of a service, for the edit panel. */
+  readonly standardServicePrices = (
+    idStandardService: string,
+  ): Observable<StandardServiceSelectedPrices> =>
+    this.httpClient.get<StandardServiceSelectedPrices>(
+      `${this.endpoint}/get-standard-service-prices`,
+      { params: { idStandardService } },
+    );
+
+  /** The Prenotazioni tab of a service, its booking options, for the edit panel. */
+  readonly standardServiceBookingOptions = (
+    idStandardService: string,
+  ): Observable<ServiceBookingOption[]> =>
+    this.httpClient.get<ServiceBookingOption[]>(
+      `${this.endpoint}/get-standard-service-booking-options`,
+      { params: { idStandardService } },
+    );
+
+  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  readonly updateStandardServiceGeneral = (
+    idProperty: string,
+    request: StandardServiceUpdateGeneralRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-standard-service-general`, {
+      ...onlyFieldsOf(StandardServiceUpdateGeneralRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
+  readonly updateStandardServicePrices = (
+    idProperty: string,
+    request: StandardServiceUpdatePricesRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-standard-service-prices`, {
+      ...onlyFieldsOf(StandardServiceUpdatePricesRequest, request),
+      periodPrices: request.periodPrices.map((periodPrice) =>
+        onlyFieldsOf(ServicePeriodPrice, periodPrice),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  readonly updateStandardServiceBooking = (
+    idProperty: string,
+    request: StandardServiceUpdateBookingRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-standard-service-booking`, {
+      ...onlyFieldsOf(StandardServiceUpdateBookingRequest, request),
+      bookingOptions: request.bookingOptions.map((bookingOption) =>
+        onlyFieldsOf(ServiceBookingOption, bookingOption),
+      ),
+      idProperty,
+    });
+
+  /** The data of the three tabs of the add panel. Answers 204 with no body. */
+  readonly createStandardService = (
+    idProperty: string,
+    request: StandardServiceAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/create-standard-service`, {
+      ...onlyFieldsOf(StandardServiceAddItemRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      periodPrices: request.periodPrices.map((periodPrice) =>
+        onlyFieldsOf(ServicePeriodPrice, periodPrice),
+      ),
+      bookingOptions: request.bookingOptions.map((bookingOption) =>
+        onlyFieldsOf(ServiceBookingOption, bookingOption),
+      ),
+      idProperty,
+    });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteStandardServiceItems = (

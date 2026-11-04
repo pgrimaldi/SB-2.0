@@ -7,13 +7,14 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { applyEach, applyWhen, form } from '@angular/forms/signals';
+import { TreeValidationResult, applyEach, applyWhen, form, submit } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -21,12 +22,14 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
 import { StandardServiceAddItemRequest } from '../../../../../entities/settings/services/standard-service-add-item-request';
+import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { requiredText } from '../../../../shared/forms/validators';
@@ -70,8 +73,10 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   readonly open = model(false);
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
+  readonly created = output<void>();
 
   private readonly auth = inject(AuthBehaviour);
+  private readonly catalog = inject(CatalogService);
   private readonly seasons = inject(SeasonService);
   private readonly language = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
@@ -109,6 +114,7 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly pristine = signal(JSON.stringify(newDraft()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   protected readonly isFetching = signal(false);
+  protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
     () => this.isFetching() || this.draftForm().invalid(),
   );
@@ -147,6 +153,30 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected chooseImage(image: File): void {
     this.draftForm.icon().value.set(null);
     this.setImage(image);
+  }
+
+  protected save(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    if (this.isSaving() || !idProperty) {
+      return;
+    }
+
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.catalog.createStandardService(idProperty, this.draft()));
+        this.isSaving.set(false);
+        this.open.set(false);
+        this.created.emit();
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
   }
 
   protected async leave(): Promise<void> {

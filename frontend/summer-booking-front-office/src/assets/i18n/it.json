@@ -1166,6 +1166,7 @@
           "title": "Servizi",
           "create": "Aggiungi servizio",
           "add_title": "Aggiungi nuovo servizio",
+          "edit_title": "Modifica servizio",
           "table": {
             "service": "Servizio",
             "price": "Prezzo"

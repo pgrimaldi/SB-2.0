@@ -24,7 +24,17 @@
   (create)="adding.set(true)"
 />
 
-<app-general-service-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" />
+<app-general-service-add-item-panel
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (created)="table.reload()"
+/>
+<app-general-service-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idStandardService]="idStandardServiceToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idStandardServicesToDelete()"

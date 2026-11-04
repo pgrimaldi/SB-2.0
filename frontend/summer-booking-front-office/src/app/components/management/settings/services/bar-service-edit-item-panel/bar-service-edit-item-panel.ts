@@ -268,13 +268,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         await firstValueFrom(this.update(tab, idProperty, idBarService));
-        const saved = structuredClone(this.draft());
-        this.pristine.update((pristine) => ({ ...pristine, ...pick(saved, tab) }));
-        if (tab === PanelTab.GeneralInfo) {
-          this.setImage(null);
-        }
-        this.draftForm().reset();
-        this.isEditing.set(false);
+        this.isSaving.set(false);
+        this.open.set(false);
         this.updated.emit();
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>

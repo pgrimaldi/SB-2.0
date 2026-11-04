@@ -7,6 +7,7 @@ import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { GeneralServiceAddItemPanel } from '../../../../components/management/settings/services/general-service-add-item-panel/general-service-add-item-panel';
+import { GeneralServiceEditItemPanel } from '../../../../components/management/settings/services/general-service-edit-item-panel/general-service-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -35,6 +36,7 @@ interface StandardServiceRow {
     DeleteItemsPopup,
     DuplicateItemsPopup,
     GeneralServiceAddItemPanel,
+    GeneralServiceEditItemPanel,
     PageTitle,
     Table,
     TableErrorPopup,
@@ -52,6 +54,8 @@ export class ServicesGeneral {
 
   protected readonly loadFailed = signal(false);
   protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idStandardServiceToEdit = signal<string | null>(null);
   protected readonly idSelectedStandardServices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idStandardServicesToDelete = signal<readonly string[]>([]);
@@ -93,7 +97,7 @@ export class ServicesGeneral {
       idStandardService && this.askDelete([idStandardService], serviceName),
     duplicate: ({ idStandardService, serviceName }) =>
       idStandardService && this.askDuplicate([idStandardService], serviceName),
-    edit: () => {},
+    edit: ({ idStandardService }) => idStandardService && this.openEdit(idStandardService),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, StandardServiceRow> = (request) =>
@@ -119,6 +123,11 @@ export class ServicesGeneral {
     idProperty: string,
     idStandardServices: string[],
   ) => this.catalog.duplicateStandardServiceItems({ idProperty, idStandardServices });
+
+  protected openEdit(idStandardService: string): void {
+    this.idStandardServiceToEdit.set(idStandardService);
+    this.editing.set(true);
+  }
 
   protected askDelete(
     idStandardServices: readonly TableRowId[],

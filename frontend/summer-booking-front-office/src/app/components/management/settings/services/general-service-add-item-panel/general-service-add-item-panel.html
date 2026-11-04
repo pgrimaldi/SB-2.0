@@ -2,9 +2,11 @@
   [title]="'management.settings.services.standard_services.add_title' | translate"
   [texts]="'management.settings.services.form' | translate"
   [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
   [isSaveDisabled]="isSaveDisabled()"
   [(open)]="open"
   (closeRequest)="leave()"
+  (save)="save()"
 >
   <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
     @if (selectedTab() === PanelTab.GeneralInfo) {

@@ -1166,6 +1166,7 @@
           "title": "Leistungen",
           "create": "Leistung hinzufügen",
           "add_title": "Neue Leistung hinzufügen",
+          "edit_title": "Leistung bearbeiten",
           "table": {
             "service": "Leistung",
             "price": "Preis"

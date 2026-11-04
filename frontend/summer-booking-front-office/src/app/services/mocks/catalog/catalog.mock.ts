@@ -4,6 +4,7 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
 import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
+import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
@@ -24,7 +25,10 @@ import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
+import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -1004,7 +1008,7 @@ function generalErrors(body: CreateBarServiceBody, language: string): MockFieldE
 }
 
 /** A price, when given, not below 0. */
-function priceErrors(body: CreateBarServiceBody): MockFieldError[] {
+function priceErrors(body: { price?: number | null }): MockFieldError[] {
   return body.price != null && !(typeof body.price === 'number' && body.price >= 0)
     ? [{ field: 'price', code: 'validation.invalid' }]
     : [];
@@ -1243,6 +1247,318 @@ export const standardServiceListMock = (
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
+
+/**
+ * The data of the add panel of a service, by id: those created with the panel and Doccia calda; the
+ * other example rows get theirs from the list (see `standardDetailsOf`).
+ */
+const STANDARD_SERVICE_DETAILS = new Map<string, StandardServiceAddItemRequest>([
+  [
+    '9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01',
+    Object.assign(new StandardServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: 'Doccia calda',
+          description: 'Acqua calda nelle docce dello stabilimento.',
+        },
+        {
+          language: Language.En,
+          serviceName: 'Hot shower',
+          description: 'Hot water in the showers of the beach club.',
+        },
+      ],
+      icon: StandardServiceIcon.Shower,
+      isHighlighted: true,
+      price: 3,
+      vatRate: 22,
+      isPeriodPricingEnabled: true,
+      periodPrices: [{ idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01', price: 2.5 }],
+      isOnlinePurchaseEnabled: true,
+      bookingOptions: [
+        {
+          dateFrom: '2026-06-15T00:00:00.000Z',
+          dateTo: '2026-09-15T00:00:00.000Z',
+          managementStartTime: '09:00',
+          managementEndTime: '19:00',
+          onlineStartTime: '09:00',
+          onlineEndTime: '18:00',
+          maxBookingPerHourQuantity: 6,
+          maxBookingPerDayQuantity: 50,
+          timeInterval: BookingTimeInterval.FifteenMinutes,
+          minItemPerBookingQuantity: 1,
+          maxItemPerBookingQuantity: 2,
+        },
+      ],
+    }),
+  ],
+]);
+
+function standardDetailsOf(row: StandardServiceRow): StandardServiceAddItemRequest {
+  return (
+    STANDARD_SERVICE_DETAILS.get(row.idStandardService ?? '') ??
+    Object.assign(new StandardServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: row.serviceName,
+          description: 'Servizio offerto dallo stabilimento.',
+        },
+      ],
+      price: row.price,
+      vatRate: 22,
+    })
+  );
+}
+
+/** The service of the `idStandardService` of the query string, if it exists. */
+function requestedStandardService(request: HttpRequest<unknown>): StandardServiceRow | undefined {
+  const idStandardService = request.params.get('idStandardService');
+  return STANDARD_SERVICES.find((row) => row.idStandardService === idStandardService);
+}
+
+/**
+ * `GET /api/catalog/get-standard-service-general-info?idStandardService=…`: the Info Generali tab of
+ * the edit panel. 200 with `StandardServiceSelectedGeneralInfo`, only the languages written; 401
+ * without a valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const standardServiceGeneralInfoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedStandardService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = standardDetailsOf(row);
+  const answer: StandardServiceSelectedGeneralInfo = {
+    idStandardService: row.idStandardService,
+    translations: details.translations.filter(
+      ({ serviceName, description }) => serviceName || description,
+    ),
+    icon: details.icon,
+    isHighlighted: details.isHighlighted,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
+ * panel. 200 with `StandardServiceSelectedPrices`, a price only for the periods that have one; 401
+ * without a valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const standardServicePricesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedStandardService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = standardDetailsOf(row);
+  const answer: StandardServiceSelectedPrices = {
+    price: details.price,
+    vatRate: details.vatRate,
+    isPeriodPricingEnabled: details.isPeriodPricingEnabled,
+    periodPrices: details.periodPrices.filter(({ price }) => price !== null),
+    idSectors: details.idSectors,
+    isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
+ * of the edit panel, the array of the booking options (empty when there are none). 401 without a
+ * valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const standardServiceBookingOptionsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedStandardService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  return of(
+    new HttpResponse({
+      status: 200,
+      url: request.url,
+      body: structuredClone(standardDetailsOf(row).bookingOptions),
+    }),
+  ).pipe(delay(300));
+};
+
+type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest> & { idProperty?: unknown };
+
+/**
+ * `POST /api/catalog/create-standard-service` with `StandardServiceAddItemRequest` and `idProperty`:
+ * the new service goes into the list, with the name in the language of `Accept-Language`. 204 without
+ * a body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
+ * field (see `standardGeneralErrors` and `priceErrors`).
+ */
+export const createStandardServiceMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreateStandardServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const errors = [...standardGeneralErrors(body, language), ...priceErrors(body)];
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const main = body.translations?.find((translation) => translation.language === language);
+  const idStandardService = crypto.randomUUID();
+  STANDARD_SERVICE_DETAILS.set(
+    idStandardService,
+    structuredClone(
+      onlyFieldsOf(StandardServiceAddItemRequest, body as StandardServiceAddItemRequest),
+    ),
+  );
+  STANDARD_SERVICES.push({
+    propertyId: property.id,
+    idStandardService,
+    serviceName: main?.serviceName?.trim() ?? null,
+    price: body.price ?? null,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * Name and description in the language of the request (the user's), as the panel requires; the
+ * icon, when given, among the values of its enum.
+ */
+function standardGeneralErrors(
+  body: CreateStandardServiceBody,
+  language: string,
+): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  const translations = Array.isArray(body.translations) ? body.translations : [];
+  const index = translations.findIndex((translation) => translation.language === language);
+  const main = translations[index];
+  const at = `translations[${Math.max(index, 0)}]`;
+  if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
+    errors.push({ field: `${at}.serviceName`, code: 'validation.required' });
+  }
+  if (typeof main?.description !== 'string' || !main.description.trim()) {
+    errors.push({ field: `${at}.description`, code: 'validation.required' });
+  }
+  if (body.icon != null && !Object.values(StandardServiceIcon).includes(body.icon)) {
+    errors.push({ field: 'icon', code: 'validation.invalid' });
+  }
+  return errors;
+}
+
+type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService?: unknown };
+
+/**
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
+ * an unknown property; 404 `resource.not_found` for an `idStandardService` that is not one of its
+ * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and the
+ * answer is 204 without a body.
+ */
+function updateStandardService(
+  request: HttpRequest<unknown>,
+  errorsOf: (body: UpdateStandardServiceBody) => MockFieldError[],
+  apply: (
+    details: StandardServiceAddItemRequest,
+    body: UpdateStandardServiceBody,
+    row: StandardServiceRow,
+  ) => void,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as UpdateStandardServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const row = STANDARD_SERVICES.find(
+    (item) => item.idStandardService === body.idStandardService && item.propertyId === property.id,
+  );
+  if (!row?.idStandardService) {
+    return resourceNotFound(request);
+  }
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const details = structuredClone(standardDetailsOf(row));
+  apply(details, structuredClone(body), row);
+  STANDARD_SERVICE_DETAILS.set(row.idStandardService, details);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+}
+
+/**
+ * `POST /api/catalog/update-standard-service-general` with `StandardServiceUpdateGeneralRequest` and
+ * `idProperty`: names, descriptions, icon and Metti in evidenza; the list shows the new name (language
+ * of `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
+ */
+export const updateStandardServiceGeneralMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  return updateStandardService(
+    request,
+    (body) => standardGeneralErrors(body, language),
+    (details, body, row) => {
+      details.translations = body.translations ?? [];
+      details.icon = body.icon ?? null;
+      details.isHighlighted = body.isHighlighted === true;
+      const main = details.translations.find((translation) => translation.language === language);
+      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+    },
+  );
+};
+
+/**
+ * `POST /api/catalog/update-standard-service-prices` with `StandardServiceUpdatePricesRequest` and
+ * `idProperty`: the Prezzi tab; the list shows the new price. 400 for a price below 0.
+ */
+export const updateStandardServicePricesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateStandardService(request, priceErrors, (details, body, row) => {
+    details.price = body.price ?? null;
+    details.vatRate = body.vatRate ?? null;
+    details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
+    details.periodPrices = body.periodPrices ?? [];
+    details.idSectors = body.idSectors ?? [];
+    details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
+    row.price = details.price;
+  });
+
+/**
+ * `POST /api/catalog/update-standard-service-booking` with `StandardServiceUpdateBookingRequest` and
+ * `idProperty`: the booking options of the Prenotazioni tab, all of them.
+ */
+export const updateStandardServiceBookingMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateStandardService(
+    request,
+    () => [],
+    (details, body) => {
+      details.bookingOptions = body.bookingOptions ?? [];
+    },
+  );
 
 type HourlyServiceRow = HourlyServiceItem & { propertyId: number };
 

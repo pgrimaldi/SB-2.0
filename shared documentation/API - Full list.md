@@ -2235,6 +2235,374 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
+### POST `/api/catalog/create-standard-service`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "serviceName": "string | null",
+      "description": "string | null"
+    }
+  ],
+  "icon": "string (enum StandardServiceIcon) | null",
+  "isHighlighted": "boolean",
+  "price": "number (decimale, €) | null",
+  "vatRate": "number (decimale, %) | null",
+  "isPeriodPricingEnabled": "boolean",
+  "periodPrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "price": "number (decimale, €) | null"
+    }
+  ],
+  "idSectors": "string[] (UUID)",
+  "isOnlinePurchaseEnabled": "boolean",
+  "bookingOptions": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
+      "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].serviceName` | string \| null |
+| `translations[].description` | string \| null |
+| `icon` | string (enum StandardServiceIcon) \| null |
+| `isHighlighted` | boolean |
+| `price` | number (decimale, €) \| null |
+| `vatRate` | number (decimale, %) \| null |
+| `isPeriodPricingEnabled` | boolean |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].price` | number (decimale, €) \| null |
+| `idSectors` | string[] (UUID) |
+| `isOnlinePurchaseEnabled` | boolean |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### GET `/api/catalog/get-standard-service-general-info?idStandardService={idStandardService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idStandardService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "idStandardService": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "serviceName": "string | null",
+      "description": "string | null"
+    }
+  ],
+  "icon": "string (enum StandardServiceIcon) | null",
+  "isHighlighted": "boolean"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idStandardService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idStandardService` | string (UUID) |
+| `translations[]` | ServiceTranslation[] (array di oggetti) |
+| `translations[].language` | string |
+| `translations[].serviceName` | string \| null |
+| `translations[].description` | string \| null |
+| `icon` | string (enum StandardServiceIcon) \| null |
+| `isHighlighted` | boolean |
+
+### GET `/api/catalog/get-standard-service-prices?idStandardService={idStandardService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idStandardService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "price": "number (decimale, €) | null",
+  "vatRate": "number (decimale, %) | null",
+  "isPeriodPricingEnabled": "boolean",
+  "periodPrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "price": "number (decimale, €) | null"
+    }
+  ],
+  "idSectors": "string[] (UUID)",
+  "isOnlinePurchaseEnabled": "boolean"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idStandardService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `price` | number (decimale, €) \| null |
+| `vatRate` | number (decimale, %) \| null |
+| `isPeriodPricingEnabled` | boolean |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].price` | number (decimale, €) \| null |
+| `idSectors` | string[] (UUID) |
+| `isOnlinePurchaseEnabled` | boolean |
+
+### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idStandardService": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
+    "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+    "managementStartTime": "string (HH:mm) | null",
+    "managementEndTime": "string (HH:mm) | null",
+    "onlineStartTime": "string (HH:mm) | null",
+    "onlineEndTime": "string (HH:mm) | null",
+    "maxBookingPerHourQuantity": "number (intero) | null",
+    "maxBookingPerDayQuantity": "number (intero) | null",
+    "timeInterval": "string (enum BookingTimeInterval) | null",
+    "minItemPerBookingQuantity": "number (intero) | null",
+    "maxItemPerBookingQuantity": "number (intero) | null"
+  }
+]
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idStandardService` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
+| `[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `[].managementStartTime` | string (HH:mm) \| null |
+| `[].managementEndTime` | string (HH:mm) \| null |
+| `[].onlineStartTime` | string (HH:mm) \| null |
+| `[].onlineEndTime` | string (HH:mm) \| null |
+| `[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `[].minItemPerBookingQuantity` | number (intero) \| null |
+| `[].maxItemPerBookingQuantity` | number (intero) \| null |
+
+### POST `/api/catalog/update-standard-service-general`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idStandardService": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "serviceName": "string | null",
+      "description": "string | null"
+    }
+  ],
+  "icon": "string (enum StandardServiceIcon) | null",
+  "isHighlighted": "boolean"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idStandardService` | string (UUID) |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].serviceName` | string \| null |
+| `translations[].description` | string \| null |
+| `icon` | string (enum StandardServiceIcon) \| null |
+| `isHighlighted` | boolean |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/update-standard-service-prices`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idStandardService": "string (UUID)",
+  "price": "number (decimale, €) | null",
+  "vatRate": "number (decimale, %) | null",
+  "isPeriodPricingEnabled": "boolean",
+  "periodPrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "price": "number (decimale, €) | null"
+    }
+  ],
+  "idSectors": "string[] (UUID)",
+  "isOnlinePurchaseEnabled": "boolean"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idStandardService` | string (UUID) |
+| `price` | number (decimale, €) \| null |
+| `vatRate` | number (decimale, %) \| null |
+| `isPeriodPricingEnabled` | boolean |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].price` | number (decimale, €) \| null |
+| `idSectors` | string[] (UUID) |
+| `isOnlinePurchaseEnabled` | boolean |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/update-standard-service-booking`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idStandardService": "string (UUID)",
+  "bookingOptions": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
+      "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idStandardService` | string (UUID) |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ### POST `/api/catalog/delete-standard-service-item`
 
 **Payload JSON**

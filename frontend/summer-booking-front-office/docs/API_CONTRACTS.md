@@ -3214,6 +3214,445 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Doccia calda` |
 | `rows[].price` | number (decimale, €) \| null | `3` |
 
+### POST `/api/catalog/create-standard-service`
+
+Servizi: creazione servizio.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Doccia calda",
+      "description": "Acqua calda nelle docce dello stabilimento."
+    },
+    {
+      "language": "en",
+      "serviceName": "Hot shower",
+      "description": "Hot water in the showers of the beach club."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "icon": "Shower",
+  "isHighlighted": true,
+  "price": 3,
+  "vatRate": 22,
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "price": 2.5
+    },
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "price": 3.5
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true,
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-15T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "managementStartTime": "09:00",
+      "managementEndTime": "19:00",
+      "onlineStartTime": "09:00",
+      "onlineEndTime": "18:00",
+      "maxBookingPerHourQuantity": 6,
+      "maxBookingPerDayQuantity": 50,
+      "timeInterval": "FifteenMinutes",
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 2
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Doccia calda", "description": "Acqua calda nelle docce dello stabilimento."}, {"language": "en", "serviceName": "Hot shower", "description": "Hot water in the showers of the beach club."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Doccia calda` |
+| `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
+| `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
+| `isHighlighted` | boolean | `true` |
+| `price` | number (decimale, €) \| null | `3` |
+| `vatRate` | number (decimale, %) \| null | `22` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 3.5}]` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `18:00` |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `6` |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `50` |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/get-standard-service-general-info?idStandardService={idStandardService}`
+
+Servizi: servizio, tab Info Generali.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio va nella query string.
+
+```text
+/api/catalog/get-standard-service-general-info?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Doccia calda",
+      "description": "Acqua calda nelle docce dello stabilimento."
+    },
+    {
+      "language": "en",
+      "serviceName": "Hot shower",
+      "description": "Hot water in the showers of the beach club."
+    }
+  ],
+  "icon": "Shower",
+  "isHighlighted": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+| `translations[]` | ServiceTranslation[] (array di oggetti) | `[{"language": "it", "serviceName": "Doccia calda", "description": "Acqua calda nelle docce dello stabilimento."}, {"language": "en", "serviceName": "Hot shower", "description": "Hot water in the showers of the beach club."}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Doccia calda` |
+| `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
+| `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
+| `isHighlighted` | boolean | `true` |
+
+### GET `/api/catalog/get-standard-service-prices?idStandardService={idStandardService}`
+
+Servizi: servizio, tab Prezzi.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio va nella query string.
+
+```text
+/api/catalog/get-standard-service-prices?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "price": 3,
+  "vatRate": 22,
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "price": 2.5
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `price` | number (decimale, €) \| null | `3` |
+| `vatRate` | number (decimale, %) \| null | `22` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}]` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+
+### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
+
+Servizi: servizio, tab Prenotazioni.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio va nella query string.
+
+```text
+/api/catalog/get-standard-service-booking-options?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "dateFrom": "2026-06-15T00:00:00.000Z",
+    "dateTo": "2026-09-15T00:00:00.000Z",
+    "managementStartTime": "09:00",
+    "managementEndTime": "19:00",
+    "onlineStartTime": "09:00",
+    "onlineEndTime": "18:00",
+    "maxBookingPerHourQuantity": 6,
+    "maxBookingPerDayQuantity": 50,
+    "timeInterval": "FifteenMinutes",
+    "minItemPerBookingQuantity": 1,
+    "maxItemPerBookingQuantity": 2
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
+| `dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `managementStartTime` | string (HH:mm) \| null | `09:00` |
+| `managementEndTime` | string (HH:mm) \| null | `19:00` |
+| `onlineStartTime` | string (HH:mm) \| null | `09:00` |
+| `onlineEndTime` | string (HH:mm) \| null | `18:00` |
+| `maxBookingPerHourQuantity` | number (intero) \| null | `6` |
+| `maxBookingPerDayQuantity` | number (intero) \| null | `50` |
+| `timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `maxItemPerBookingQuantity` | number (intero) \| null | `2` |
+
+### POST `/api/catalog/update-standard-service-general`
+
+Servizi: servizio, salvataggio Info Generali.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Doccia calda",
+      "description": "Acqua calda nelle docce dello stabilimento."
+    },
+    {
+      "language": "en",
+      "serviceName": "Hot shower",
+      "description": "Hot water in the showers of the beach club."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "icon": "Shower",
+  "isHighlighted": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Doccia calda", "description": "Acqua calda nelle docce dello stabilimento."}, {"language": "en", "serviceName": "Hot shower", "description": "Hot water in the showers of the beach club."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Doccia calda` |
+| `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
+| `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
+| `isHighlighted` | boolean | `false` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/update-standard-service-prices`
+
+Servizi: servizio, salvataggio Prezzi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+  "price": 4,
+  "vatRate": 22,
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "price": 2.5
+    },
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "price": 3.5
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+| `price` | number (decimale, €) \| null | `4` |
+| `vatRate` | number (decimale, %) \| null | `22` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 3.5}]` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/update-standard-service-booking`
+
+Servizi: servizio, salvataggio Prenotazioni.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-15T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "managementStartTime": "09:00",
+      "managementEndTime": "19:00",
+      "onlineStartTime": "09:00",
+      "onlineEndTime": "18:00",
+      "maxBookingPerHourQuantity": 6,
+      "maxBookingPerDayQuantity": 50,
+      "timeInterval": "FifteenMinutes",
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 2
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `18:00` |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `6` |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `50` |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/delete-standard-service-item`
 
 Servizi: eliminazione servizi.
