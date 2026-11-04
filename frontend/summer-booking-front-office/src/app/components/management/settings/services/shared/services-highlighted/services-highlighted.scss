@@ -1,0 +1,12 @@
+@use '../../../../../../styles/info-button' as info;
+
+// The (i) right after the label of the toggle.
+:host {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.services__highlighted__info {
+  @include info.info-button;
+}

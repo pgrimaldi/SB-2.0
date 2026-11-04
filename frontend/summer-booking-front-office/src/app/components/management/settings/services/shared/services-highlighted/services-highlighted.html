@@ -1,0 +1,15 @@
+<app-toggle [formField]="form()">
+  {{ 'management.settings.services.form.highlighted' | translate }}
+</app-toggle>
+<app-icon-button
+  class="services__highlighted__info"
+  [pathIcon]="infoIcon"
+  (click)="showingInfo.set(true)"
+/>
+
+<app-info-popup
+  [title]="'management.settings.services.form.highlighted' | translate"
+  [text]="'management.settings.services.form.highlighted_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingInfo"
+/>

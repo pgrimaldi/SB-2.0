@@ -1,0 +1,99 @@
+@use '../../../../../../styles/info-button' as info;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+// The (i) right after the label of the toggle.
+.services__period__prices__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.services__period__prices__info {
+  @include info.info-button;
+}
+
+// The days of the period on the left (from, to), its price on the right.
+.services__period__prices__period {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.services__period__prices__dates {
+  flex: 1 1 auto;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.services__period__prices__intervals {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 0.5rem 2rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+}
+
+// Narrower than the longest dates side by side (Spanish): the end under the start, in every language,
+// a little room between one interval and the next.
+@container (width < 17rem) {
+  .services__period__prices__intervals {
+    grid-template-columns: max-content;
+    row-gap: 0.125rem;
+  }
+
+  .services__period__prices__to:not(:last-child) {
+    margin-bottom: 0.5rem;
+  }
+}
+
+// A price and its "€", which sits beside the field, at its height.
+.services__period__prices__amount {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.services__period__prices__price {
+  flex: 0 1 9rem;
+}
+
+.services__period__prices__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.services__period__prices__unit {
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: var(--filled-field-height, 1.625rem);
+}
+
+.services__period__prices__empty {
+  margin: 0;
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+}
+
+@media (width < 48rem) {
+  :host {
+    padding-inline: 0.75rem;
+  }
+
+  .services__period__prices__period {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .services__period__prices__price {
+    flex: none;
+  }
+}

@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// One row per language: "Nome Inglese" on the left, the translation on the right, as long as the row.
+// The labels have one width, room for the longest of every language (German, 160px), so the fields
+// line up; the label is centred on its field (26px high).
+.services__translations__languages {
+  --form-row-columns: 10.5rem minmax(0, 1fr);
+  --form-row-label-offset: 0.3125rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.services__translations__translation {
+  flex: 1 1 auto;
+  min-width: 0;
+}

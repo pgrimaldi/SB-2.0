@@ -1165,6 +1165,7 @@
         "standard_services": {
           "title": "Services",
           "create": "Ajouter un service",
+          "add_title": "Ajouter un nouveau service",
           "table": {
             "service": "Service",
             "price": "Prix"

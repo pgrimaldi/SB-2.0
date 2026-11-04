@@ -1,0 +1,30 @@
+<app-side-panel
+  [title]="'management.settings.services.standard_services.add_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-general-service-general-info-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [imagePreviewUrl]="imagePreviewUrl()"
+        (iconChosen)="chooseIcon($event)"
+        (imageChosen)="chooseImage($event)"
+      />
+    } @else if (selectedTab() === PanelTab.Prices) {
+      <app-general-service-prices-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="draftForm"
+        [periods]="periods()"
+      />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="general__service__add__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+</app-side-panel>

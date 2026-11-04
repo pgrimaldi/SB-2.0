@@ -6,6 +6,7 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { GeneralServiceAddItemPanel } from '../../../../components/management/settings/services/general-service-add-item-panel/general-service-add-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -33,6 +34,7 @@ interface StandardServiceRow {
   imports: [
     DeleteItemsPopup,
     DuplicateItemsPopup,
+    GeneralServiceAddItemPanel,
     PageTitle,
     Table,
     TableErrorPopup,
@@ -49,6 +51,7 @@ export class ServicesGeneral {
   private readonly dateLanguage = inject(DateLanguageBehaviour);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
   protected readonly idSelectedStandardServices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idStandardServicesToDelete = signal<readonly string[]>([]);

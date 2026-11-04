@@ -1165,6 +1165,7 @@
         "standard_services": {
           "title": "服务",
           "create": "添加服务",
+          "add_title": "添加新服务",
           "table": {
             "service": "服务",
             "price": "价格"

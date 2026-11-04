@@ -52,12 +52,10 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
-import {
-  SERVICE_LANGUAGES,
-  ServiceGeneralInfoTab,
-} from '../service-general-info-tab/service-general-info-tab';
 import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab';
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
+import { ServiceGeneralInfoTab } from '../service-general-info-tab/service-general-info-tab';
+import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 
 interface ServiceFormTexts {
   tabs: {

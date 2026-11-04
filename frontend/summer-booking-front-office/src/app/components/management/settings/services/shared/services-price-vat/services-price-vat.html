@@ -1,0 +1,17 @@
+<div class="services__price__vat__amount">
+  <app-filled-number-field
+    class="services__price__vat__field"
+    [label]="'management.settings.services.form.prices.price' | translate"
+    [isDecimal]="true"
+    [isCurrency]="true"
+    [formField]="price()"
+    [error]="validationText.text(price())"
+  />
+  <span class="services__price__vat__unit">€</span>
+</div>
+<app-filled-number-field
+  [label]="'management.settings.services.form.prices.vat' | translate"
+  [isDecimal]="true"
+  [formField]="vatRate()"
+  [error]="validationText.text(vatRate())"
+/>

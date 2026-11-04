@@ -1,62 +1,4 @@
-@if (mainTranslation(); as main) {
-  <app-filled-text-field
-    [label]="'management.settings.services.form.name' | translate"
-    [isMandatory]="true"
-    [formField]="main.serviceName"
-    [error]="validationText.text(main.serviceName)"
-  />
-}
-<app-expansion-panel
-  [title]="'management.settings.services.form.other_languages' | translate"
-  [pathIcon]="languagesIcons"
->
-  <div class="service__general__info__tab__languages">
-    @for (translation of otherTranslations(); track translation) {
-      <app-form-row>
-        <span appFormRowLabel>
-          {{
-            'management.settings.services.form.translated_name'
-              | translate: { language: languageName(translation.language().value()) }
-          }}
-        </span>
-        <app-filled-text-field
-          class="service__general__info__tab__translation"
-          [formField]="translation.serviceName"
-        />
-      </app-form-row>
-    }
-  </div>
-</app-expansion-panel>
-
-@if (mainTranslation(); as main) {
-  <app-filled-textarea
-    [label]="'management.settings.services.form.description' | translate"
-    [isMandatory]="true"
-    [formField]="main.description"
-    [error]="validationText.text(main.description)"
-  />
-}
-<app-expansion-panel
-  [title]="'management.settings.services.form.other_languages' | translate"
-  [pathIcon]="languagesIcons"
->
-  <div class="service__general__info__tab__languages">
-    @for (translation of otherTranslations(); track translation) {
-      <app-form-row>
-        <span appFormRowLabel>
-          {{
-            'management.settings.services.form.translated_description'
-              | translate: { language: languageName(translation.language().value()) }
-          }}
-        </span>
-        <app-filled-text-field
-          class="service__general__info__tab__translation"
-          [formField]="translation.description"
-        />
-      </app-form-row>
-    }
-  </div>
-</app-expansion-panel>
+<app-services-translations [form]="form().translations" [mainLanguage]="mainLanguage()" />
 
 <app-filled-select
   [label]="'management.settings.services.form.category' | translate"
@@ -74,20 +16,4 @@
   (imageChosen)="imageChosen.emit($event)"
 />
 
-<div class="service__general__info__tab__highlighted">
-  <app-toggle [formField]="form().isHighlighted">
-    {{ 'management.settings.services.form.highlighted' | translate }}
-  </app-toggle>
-  <app-icon-button
-    class="service__general__info__tab__info"
-    [pathIcon]="infoIcon"
-    (click)="showingHighlightedInfo.set(true)"
-  />
-</div>
-
-<app-info-popup
-  [title]="'management.settings.services.form.highlighted' | translate"
-  [text]="'management.settings.services.form.highlighted_info' | translate"
-  [pathIcon]="infoPopupIcons"
-  [(open)]="showingHighlightedInfo"
-/>
+<app-services-highlighted [form]="form().isHighlighted" />

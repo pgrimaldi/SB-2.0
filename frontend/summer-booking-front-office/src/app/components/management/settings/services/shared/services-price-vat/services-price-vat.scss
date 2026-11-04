@@ -1,0 +1,32 @@
+// Prezzo and IVA side by side, sharing the row.
+:host {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 1rem;
+}
+
+// A price and its "€", which sits beside the field, at its height.
+.services__price__vat__amount {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.services__price__vat__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.services__price__vat__unit {
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: var(--filled-field-height, 1.625rem);
+}
+
+@media (width < 48rem) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

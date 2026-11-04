@@ -1,89 +1,15 @@
-<div class="service__prices__tab__price">
-  <div class="service__prices__tab__amount">
-    <app-filled-number-field
-      class="service__prices__tab__field"
-      [label]="'management.settings.services.form.prices.price' | translate"
-      [isDecimal]="true"
-      [isCurrency]="true"
-      [formField]="form().price"
-    />
-    <span class="service__prices__tab__unit">€</span>
-  </div>
-  <app-filled-number-field
-    [label]="'management.settings.services.form.prices.vat' | translate"
-    [isDecimal]="true"
-    [formField]="form().vatRate"
-  />
-</div>
+<app-services-price-vat [price]="form().price" [vatRate]="form().vatRate" />
 
 <app-services-popup-alternatives [form]="form().variants" [isReadonly]="isReadonly()" />
 
-<section class="service__prices__tab__section">
-  <div class="service__prices__tab__heading">
-    <app-toggle [formField]="form().isPeriodPricingEnabled">
-      {{ 'management.settings.services.form.prices.period_pricing.enable' | translate }}
-    </app-toggle>
-    <app-icon-button
-      class="service__prices__tab__info"
-      [pathIcon]="infoIcon"
-      (click)="showingPeriodPricingInfo.set(true)"
-    />
-  </div>
-  @if (form().isPeriodPricingEnabled().value()) {
-    @for (period of periods(); track period.idPeriod) {
-      <app-expansion-panel [title]="period.periodName ?? ''" [pathIcon]="periodIcons">
-        <div class="service__prices__tab__period">
-          <div class="service__prices__tab__dates">
-            <div class="service__prices__tab__intervals">
-              @for (interval of period.intervals; track interval.idInterval) {
-                <span>{{ day(interval.dateFrom) }}</span>
-                <span class="service__prices__tab__to">{{ day(interval.dateTo) }}</span>
-              }
-            </div>
-          </div>
-          @if (periodPrices().get(period.idPeriod); as periodPrice) {
-            <div class="service__prices__tab__amount service__prices__tab__period__price">
-              <app-filled-number-field
-                class="service__prices__tab__field"
-                [isDecimal]="true"
-                [isCurrency]="true"
-                [formField]="periodPrice.price"
-              />
-              <span class="service__prices__tab__unit">€</span>
-            </div>
-          }
-        </div>
-      </app-expansion-panel>
-    } @empty {
-      <p class="service__prices__tab__empty">
-        {{ 'management.settings.services.form.prices.period_pricing.no_periods' | translate }}
-      </p>
-    }
-  }
-</section>
+<app-services-period-prices
+  [isPeriodPricingEnabled]="form().isPeriodPricingEnabled"
+  [periodPrices]="form().periodPrices"
+  [periods]="periods()"
+/>
 
-<section class="service__prices__tab__section">
-  <app-section-title [text]="'management.settings.services.form.prices.limits.title' | translate" />
-  <app-form-row>
-    <span appFormRowLabel>
-      {{ 'management.settings.services.form.prices.limits.sectors' | translate }}
-    </span>
-    <app-filled-multi-select
-      class="service__prices__tab__sectors"
-      [placeholder]="'management.settings.services.form.prices.limits.all_sectors' | translate"
-      [options]="sectorOptions"
-      [formField]="form().idSectors"
-    />
-  </app-form-row>
-</section>
+<app-services-limits [form]="form().idSectors" />
 
 <app-toggle [formField]="form().isOnlinePurchaseEnabled">
   {{ 'management.settings.services.form.prices.online_purchase' | translate }}
 </app-toggle>
-
-<app-info-popup
-  [title]="'management.settings.services.form.prices.period_pricing.enable' | translate"
-  [text]="'management.settings.services.form.prices.period_pricing.info' | translate"
-  [pathIcon]="infoPopupIcons"
-  [(open)]="showingPeriodPricingInfo"
-/>

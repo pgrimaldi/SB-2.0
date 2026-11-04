@@ -1,34 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { DateLanguageBehaviour } from '../../../../../behaviours/i18n/date-language.behaviour';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
-import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
-import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
-import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
-import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
-import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
-import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
-import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
-import { SelectOption } from '../../../../shared/ui/selects/select/select';
-import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { ServicesLimits } from '../shared/services-limits/services-limits';
+import { ServicesPeriodPrices } from '../shared/services-period-prices/services-period-prices';
 import { ServicesPopupAlternatives } from '../shared/services-popup-alternatives/services-popup-alternatives';
+import { ServicesPriceVat } from '../shared/services-price-vat/services-price-vat';
 
 @Component({
   selector: 'app-service-prices-tab',
   imports: [
-    ExpansionPanel,
-    FilledMultiSelect,
-    FilledNumberField,
     FormField,
-    FormRow,
-    FormRowLabel,
-    IconButton,
-    InfoPopup,
-    SectionTitle,
+    ServicesLimits,
+    ServicesPeriodPrices,
     ServicesPopupAlternatives,
+    ServicesPriceVat,
     Toggle,
     TranslatePipe,
   ],
@@ -40,47 +28,6 @@ export class ServicePricesTab {
   readonly form = input.required<FieldTree<BarServiceAddItemRequest>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
-  /** Only to look at: the buttons that change the data (icons, image, add, remove) are off. */
+  /** Only to look at: the buttons that change the data (add, remove) are off. */
   readonly isReadonly = input(false);
-
-  private readonly dateLanguage = inject(DateLanguageBehaviour);
-
-  protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
-  /** [X, before the title]. */
-  protected readonly infoPopupIcons = [
-    '/assets/images/GeneralIcon_Close.svg',
-    '/assets/images/GeneralIcon_InfoTitle.svg',
-  ] as const;
-  /** [before the title, arrow]. */
-  protected readonly periodIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
-  /** Example rows until an API gives the rows and sectors of the property. */
-  protected readonly sectorOptions: readonly SelectOption[] = [
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01', label: 'Fila 1' },
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e02', label: 'Fila 2' },
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e03', label: 'Fila 3' },
-  ];
-  protected readonly showingPeriodPricingInfo = signal(false);
-
-  protected readonly periodPrices = computed(
-    () =>
-      new Map(
-        [...this.form().periodPrices].map((periodPrice) => [
-          periodPrice.idPeriod().value(),
-          periodPrice,
-        ]),
-      ),
-  );
-  private readonly dayFormat = computed(
-    () =>
-      new Intl.DateTimeFormat(this.dateLanguage.locale(), {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC',
-      }),
-  );
-
-  protected day(date: string | null): string {
-    return date ? this.dayFormat().format(new Date(date)) : '';
-  }
 }

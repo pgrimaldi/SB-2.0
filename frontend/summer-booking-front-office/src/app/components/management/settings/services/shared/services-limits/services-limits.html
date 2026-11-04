@@ -1,0 +1,12 @@
+<app-section-title [text]="'management.settings.services.form.prices.limits.title' | translate" />
+<app-form-row>
+  <span appFormRowLabel>
+    {{ 'management.settings.services.form.prices.limits.sectors' | translate }}
+  </span>
+  <app-filled-multi-select
+    class="services__limits__sectors"
+    [placeholder]="'management.settings.services.form.prices.limits.all_sectors' | translate"
+    [options]="sectorOptions"
+    [formField]="form()"
+  />
+</app-form-row>

@@ -1,0 +1,13 @@
+<app-services-price-vat [price]="form().price" [vatRate]="form().vatRate" />
+
+<app-services-period-prices
+  [isPeriodPricingEnabled]="form().isPeriodPricingEnabled"
+  [periodPrices]="form().periodPrices"
+  [periods]="periods()"
+/>
+
+<app-services-limits [form]="form().idSectors" />
+
+<app-toggle [formField]="form().isOnlinePurchaseEnabled">
+  {{ 'management.settings.services.form.prices.online_purchase' | translate }}
+</app-toggle>
