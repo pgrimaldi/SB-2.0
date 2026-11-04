@@ -1,5 +1,7 @@
 import { UserRole } from '../../enums/user-role';
 
+export const PASSWORD_MIN_LENGTH = 8;
+
 export class CreateUserRequest {
   email: string | null = null;
   isEmailActive = false;

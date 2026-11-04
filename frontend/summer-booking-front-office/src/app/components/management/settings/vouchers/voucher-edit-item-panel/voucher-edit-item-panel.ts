@@ -40,7 +40,10 @@ import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { VoucherSelectedItem } from '../../../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherTimeSlot } from '../../../../../entities/settings/vouchers/voucher-time-slot';
 import { VoucherUpdateItemRequest } from '../../../../../entities/settings/vouchers/voucher-update-item-request';
-import { VoucherValidityPeriod } from '../../../../../entities/settings/vouchers/voucher-validity-period';
+import {
+  DAYS_OF_WEEK,
+  VoucherValidityPeriod,
+} from '../../../../../entities/settings/vouchers/voucher-validity-period';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
 import { minItems, requiredText } from '../../../../shared/forms/validators';
@@ -59,17 +62,6 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
-
-/** ISO 8601 numbers: 1 is Monday, 7 is Sunday. */
-const DAYS_OF_WEEK = [
-  { number: 1, key: 'monday' },
-  { number: 2, key: 'tuesday' },
-  { number: 3, key: 'wednesday' },
-  { number: 4, key: 'thursday' },
-  { number: 5, key: 'friday' },
-  { number: 6, key: 'saturday' },
-  { number: 7, key: 'sunday' },
-] as const;
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 

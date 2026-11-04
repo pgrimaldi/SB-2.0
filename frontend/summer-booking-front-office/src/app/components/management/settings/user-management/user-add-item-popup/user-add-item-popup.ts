@@ -25,7 +25,10 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { UserRole } from '../../../../../entities/enums/user-role';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { CreateUserRequest } from '../../../../../entities/settings/user-management/create-user-request';
+import {
+  CreateUserRequest,
+  PASSWORD_MIN_LENGTH,
+} from '../../../../../entities/settings/user-management/create-user-request';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { IdentityService } from '../../../../../services/api/identity/identity.service';
 import { passwordRules, requiredText } from '../../../../shared/forms/validators';
@@ -51,8 +54,6 @@ interface UserRoleTexts {
   advanced_lifeguard: string;
   marketing: string;
 }
-
-const PASSWORD_MIN_LENGTH = 8;
 
 const ASSIGNABLE_USER_ROLES: readonly { role: UserRole; key: keyof UserRoleTexts }[] = [
   { role: UserRole.Admin, key: 'admin' },

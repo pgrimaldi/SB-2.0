@@ -23,7 +23,10 @@ import {
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { AddPrinterItemRequest } from '../../../../../entities/settings/taxation/add-printer-item-request';
+import {
+  AddPrinterItemRequest,
+  VAT_RATES,
+} from '../../../../../entities/settings/taxation/add-printer-item-request';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
@@ -33,8 +36,6 @@ import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-fi
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
-
-const VAT_RATES = ['0', '4', '5', '10', '22'];
 
 @Component({
   selector: 'app-add-printer-item-popup',
