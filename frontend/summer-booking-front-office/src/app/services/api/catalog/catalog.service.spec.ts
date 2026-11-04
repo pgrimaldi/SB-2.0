@@ -9,6 +9,7 @@ import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
@@ -736,6 +737,71 @@ describe('CatalogService', () => {
         params.get('idHourlyService') === 'h1',
     ).request;
     expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the services of the automatic prices with the property in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.automaticPriceServices('p1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-automatic-price-services` &&
+        params.get('idProperty') === 'p1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should create the automatic price with only the contract fields and the property', () => {
+    const { catalog, controller } = setup();
+    const translation = { language: Language.It, serviceName: 'Coperto', description: 'A persona' };
+    const timeSlot = { startTime: '12:00', endTime: '15:00' };
+    const validityPeriod = {
+      dateFrom: '2026-08-01T00:00:00.000Z',
+      dateTo: '2026-08-31T00:00:00.000Z',
+      daysOfWeek: [1, 2, 3],
+      timeSlots: [timeSlot],
+    };
+    const request = {
+      translations: [translation],
+      icon: BarServiceIcon.Cutlery,
+      price: 2,
+      vatRate: 10,
+      isOnlinePurchaseEnabled: true,
+      validityPeriods: [validityPeriod],
+      idBarServices: ['b1'],
+      idStandardServices: [],
+      idHourlyServices: ['h1'],
+      isPricePerServiceEnabled: true,
+      idSectors: ['s1'],
+    };
+
+    catalog
+      .createAutomaticPrice(
+        'p1',
+        Object.assign(new AutomaticPriceAddItemRequest(), {
+          ...request,
+          translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+          validityPeriods: [
+            {
+              ...validityPeriod,
+              timeSlots: [{ ...timeSlot, unexpectedFlag: 'extra-field' }],
+              unexpectedFlag: 'extra-field',
+            },
+          ],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-automatic-price`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
     controller.verify();
   });
 });

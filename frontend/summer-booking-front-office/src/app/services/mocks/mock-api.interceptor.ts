@@ -5,6 +5,8 @@ import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   automaticPriceListMock,
+  automaticPriceServicesMock,
+  createAutomaticPriceMock,
   barServiceBookingOptionsMock,
   barServiceGeneralInfoMock,
   barServiceListMock,
@@ -749,6 +751,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/automatic-price-list`
   ) {
     return automaticPriceListMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-automatic-price-services`
+  ) {
+    return automaticPriceServicesMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/create-automatic-price`
+  ) {
+    return createAutomaticPriceMock(request);
   }
 
   if (

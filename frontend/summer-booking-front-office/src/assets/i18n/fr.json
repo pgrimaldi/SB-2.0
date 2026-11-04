@@ -1390,6 +1390,21 @@
             "minutes": "min",
             "max_bookings_per_time_slot": "Réservations max par créneau",
             "fixed_time_slots": "Créneaux fixes"
+          },
+          "validity": {
+            "periods_title": "Périodes de validité",
+            "add_period": "Ajouter une période",
+            "days": "Jours de la semaine",
+            "time_slots": "Créneaux horaires",
+            "add_time_slot": "Ajouter un créneau",
+            "services_title": "Validité sur les services",
+            "bar_services": "Services bar",
+            "standard_services": "Services",
+            "hourly_services": "Services horaires",
+            "select_all": "Tout sélectionner",
+            "no_services": "Aucun service de ce type.",
+            "price_per_service": "Activer le prix automatique pour chaque service",
+            "price_per_service_info": "Si cette option **est activée**, le prix automatique est appliqué et ajouté automatiquement pour chaque service ajouté à la réservation.\n\nSi cette option **n'est pas activée**, le prix automatique est appliqué et ajouté automatiquement une seule fois par commande."
           }
         }
       }

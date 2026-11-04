@@ -1390,6 +1390,21 @@
             "minutes": "分钟",
             "max_bookings_per_time_slot": "每个时段最多预订数",
             "fixed_time_slots": "固定时段"
+          },
+          "validity": {
+            "periods_title": "有效期",
+            "add_period": "添加有效期",
+            "days": "星期",
+            "time_slots": "时段",
+            "add_time_slot": "添加时段",
+            "services_title": "适用服务",
+            "bar_services": "酒吧服务",
+            "standard_services": "服务",
+            "hourly_services": "按小时服务",
+            "select_all": "全选",
+            "no_services": "没有此类服务。",
+            "price_per_service": "为每项服务启用自动价格",
+            "price_per_service_info": "如果**启用**此选项，添加到预订中的每项服务都会自动应用并加入自动价格。\n\n如果**未启用**此选项，每个订单只会自动应用并加入一次自动价格。"
           }
         }
       }

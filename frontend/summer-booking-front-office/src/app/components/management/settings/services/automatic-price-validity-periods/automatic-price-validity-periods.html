@@ -1,0 +1,115 @@
+<section class="automatic__price__validity__periods__section">
+  <app-section-title
+    [text]="'management.settings.services.form.validity.periods_title' | translate"
+  >
+    <app-button [size]="ButtonSize.Small" [pathIcon]="addIcon" (clicked)="addPeriod()">
+      {{ 'management.settings.services.form.validity.add_period' | translate }}
+    </app-button>
+  </app-section-title>
+  @for (period of form(); track period; let periodIndex = $index) {
+    <div class="automatic__price__validity__periods__period">
+      <app-icon-button
+        class="automatic__price__validity__periods__remove"
+        [pathIcon]="removeIcon"
+        (click)="removePeriod(periodIndex)"
+      />
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.period' | translate }}
+        </span>
+        <div class="automatic__price__validity__periods__pair">
+          <span class="automatic__price__validity__periods__word">
+            {{ 'management.settings.services.form.bookings.date_from' | translate }}
+          </span>
+          <app-filled-date-field
+            class="automatic__price__validity__periods__field"
+            [pathIcon]="calendarIcon"
+            [formField]="period.dateFrom"
+            [error]="validationText.text(period.dateFrom)"
+          />
+        </div>
+        <div class="automatic__price__validity__periods__pair">
+          <span class="automatic__price__validity__periods__word">
+            {{ 'management.settings.services.form.bookings.date_to' | translate }}
+          </span>
+          <app-filled-date-field
+            class="automatic__price__validity__periods__field"
+            [pathIcon]="calendarIcon"
+            [minDate]="period.dateFrom().value()"
+            [formField]="period.dateTo"
+            [error]="validationText.text(period.dateTo)"
+          />
+        </div>
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.validity.days' | translate }}
+        </span>
+        <div class="automatic__price__validity__periods__days">
+          @for (day of days(); track day.number) {
+            <app-checkbox
+              [checked]="period.daysOfWeek().value().includes(day.number)"
+              [disabled]="areDaysLocked(period)"
+              (checkedChange)="setDay(period, day.number, $event)"
+            >
+              {{ day.label }}
+            </app-checkbox>
+          }
+          @if (validationText.text(period.daysOfWeek); as error) {
+            <p class="automatic__price__validity__periods__error">{{ error }}</p>
+          }
+        </div>
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.validity.time_slots' | translate }}
+        </span>
+        <div class="automatic__price__validity__periods__slots">
+          @for (timeSlot of period.timeSlots; track timeSlot; let slotIndex = $index) {
+            <div class="automatic__price__validity__periods__slot">
+              <div class="automatic__price__validity__periods__pair">
+                <span class="automatic__price__validity__periods__word">
+                  {{ 'management.settings.services.form.bookings.time_from' | translate }}
+                </span>
+                <app-filled-time-field
+                  class="automatic__price__validity__periods__field"
+                  [pathIcon]="clockIcon"
+                  [formField]="timeSlot.startTime"
+                  [error]="validationText.text(timeSlot.startTime)"
+                />
+              </div>
+              <div class="automatic__price__validity__periods__pair">
+                <span class="automatic__price__validity__periods__word">
+                  {{ 'management.settings.services.form.bookings.time_to' | translate }}
+                </span>
+                <app-filled-time-field
+                  class="automatic__price__validity__periods__field"
+                  [pathIcon]="clockIcon"
+                  [formField]="timeSlot.endTime"
+                  [error]="validationText.text(timeSlot.endTime)"
+                />
+              </div>
+              <app-icon-button
+                class="automatic__price__validity__periods__slot__remove"
+                [pathIcon]="deleteIcon"
+                (click)="removeTimeSlot(period, slotIndex)"
+              />
+            </div>
+          }
+          <app-button
+            class="automatic__price__validity__periods__add__slot"
+            [appearance]="ButtonAppearance.Secondary"
+            [size]="ButtonSize.Small"
+            [pathIcon]="addTimeSlotIcon"
+            (clicked)="addTimeSlot(period)"
+          >
+            {{ 'management.settings.services.form.validity.add_time_slot' | translate }}
+          </app-button>
+        </div>
+      </app-form-row>
+    </div>
+  }
+</section>

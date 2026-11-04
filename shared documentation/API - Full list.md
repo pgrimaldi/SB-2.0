@@ -3319,6 +3319,134 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
+### GET `/api/catalog/get-automatic-price-services?idProperty={idProperty}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "barServices": [
+    {
+      "id": "string (UUID)",
+      "value": "string"
+    }
+  ],
+  "standardServices": [
+    {
+      "id": "string (UUID)",
+      "value": "string"
+    }
+  ],
+  "hourlyServices": [
+    {
+      "id": "string (UUID)",
+      "value": "string"
+    }
+  ]
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `barServices[]` | ComboboxItem[] (array di oggetti) |
+| `barServices[].id` | string (UUID) |
+| `barServices[].value` | string |
+| `standardServices[]` | ComboboxItem[] (array di oggetti) |
+| `standardServices[].id` | string (UUID) |
+| `standardServices[].value` | string |
+| `hourlyServices[]` | ComboboxItem[] (array di oggetti) |
+| `hourlyServices[].id` | string (UUID) |
+| `hourlyServices[].value` | string |
+
+### POST `/api/catalog/create-automatic-price`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "translations": [
+    {
+      "language": "string",
+      "serviceName": "string | null",
+      "description": "string | null"
+    }
+  ],
+  "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null",
+  "price": "number (decimale, €) | null",
+  "vatRate": "number (decimale, %) | null",
+  "isOnlinePurchaseEnabled": "boolean",
+  "validityPeriods": [
+    {
+      "dateFrom": "string (ISO 8601, UTC) | null",
+      "dateTo": "string (ISO 8601, UTC) | null",
+      "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+      "timeSlots": [
+        {
+          "startTime": "string (HH:mm) | null",
+          "endTime": "string (HH:mm) | null"
+        }
+      ]
+    }
+  ],
+  "idBarServices": "string[] (UUID)",
+  "idStandardServices": "string[] (UUID)",
+  "idHourlyServices": "string[] (UUID)",
+  "isPricePerServiceEnabled": "boolean",
+  "idSectors": "string[] (UUID)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].serviceName` | string \| null |
+| `translations[].description` | string \| null |
+| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
+| `price` | number (decimale, €) \| null |
+| `vatRate` | number (decimale, %) \| null |
+| `isOnlinePurchaseEnabled` | boolean |
+| `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
+| `validityPeriods[].dateFrom` | string (ISO 8601, UTC) \| null |
+| `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
+| `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `idBarServices` | string[] (UUID) |
+| `idStandardServices` | string[] (UUID) |
+| `idHourlyServices` | string[] (UUID) |
+| `isPricePerServiceEnabled` | boolean |
+| `idSectors` | string[] (UUID) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ### POST `/api/catalog/delete-automatic-price-item`
 
 **Payload JSON**

@@ -1,0 +1,50 @@
+<app-section-title
+  [text]="'management.settings.services.form.validity.services_title' | translate"
+/>
+@for (group of groups(); track group.title) {
+  <app-expansion-panel [title]="group.title" [pathIcon]="groupIcons">
+    @if (group.services.length) {
+      <div class="automatic__price__service__validity__group">
+        <app-checkbox
+          [checked]="isAllChosen(group)"
+          [disabled]="isLocked(group)"
+          (checkedChange)="chooseAll(group, $event)"
+        >
+          {{ 'management.settings.services.form.validity.select_all' | translate }}
+        </app-checkbox>
+        <div class="automatic__price__service__validity__services">
+          @for (service of group.services; track service.id) {
+            <app-checkbox
+              [checked]="group.field().value().includes(service.id)"
+              [disabled]="isLocked(group)"
+              (checkedChange)="choose(group, service.id, $event)"
+            >
+              {{ service.value }}
+            </app-checkbox>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="automatic__price__service__validity__empty">
+        {{ 'management.settings.services.form.validity.no_services' | translate }}
+      </p>
+    }
+  </app-expansion-panel>
+}
+<div class="automatic__price__service__validity__per__service">
+  <app-checkbox [formField]="isPricePerServiceEnabled()">
+    {{ 'management.settings.services.form.validity.price_per_service' | translate }}
+  </app-checkbox>
+  <app-icon-button
+    class="automatic__price__service__validity__info"
+    [pathIcon]="infoIcon"
+    (click)="showingInfo.set(true)"
+  />
+</div>
+
+<app-info-popup
+  [title]="'management.settings.services.form.validity.price_per_service' | translate"
+  [text]="'management.settings.services.form.validity.price_per_service_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingInfo"
+/>

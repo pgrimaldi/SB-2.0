@@ -1390,6 +1390,21 @@
             "minutes": "min",
             "max_bookings_per_time_slot": "Max bookings per time slot",
             "fixed_time_slots": "Fixed time slots"
+          },
+          "validity": {
+            "periods_title": "Validity periods",
+            "add_period": "Add validity period",
+            "days": "Days of the week",
+            "time_slots": "Time slots",
+            "add_time_slot": "Add time slot",
+            "services_title": "Validity on services",
+            "bar_services": "Bar services",
+            "standard_services": "Services",
+            "hourly_services": "Hourly services",
+            "select_all": "Select all",
+            "no_services": "No services of this kind.",
+            "price_per_service": "Enable automatic price for each single service",
+            "price_per_service_info": "If this option **is enabled**, the automatic price is applied and added automatically for each single service added to the booking.\n\nIf this option **is not enabled**, the automatic price is applied and added automatically only once per order."
           }
         }
       }

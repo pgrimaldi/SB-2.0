@@ -4696,6 +4696,183 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Coperto` |
 | `rows[].price` | number (decimale, €) \| null | `2` |
 
+### GET `/api/catalog/get-automatic-price-services?idProperty={idProperty}`
+
+Prezzi Automatici: servizi a cui si applicano.
+
+#### Payload
+
+Nessun corpo: è una GET, lo stabilimento va nella query string.
+
+```text
+/api/catalog/get-automatic-price-services?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "barServices": [
+    {
+      "id": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
+      "value": "Caffè"
+    },
+    {
+      "id": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02",
+      "value": "Croissant"
+    }
+  ],
+  "standardServices": [
+    {
+      "id": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
+      "value": "Doccia calda"
+    }
+  ],
+  "hourlyServices": [
+    {
+      "id": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
+      "value": "Sup"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `barServices[]` | ComboboxItem[] (array di oggetti) | `[{"id": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "value": "Caffè"}, {"id": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02", "value": "Croissant"}]` |
+| `barServices[].id` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
+| `barServices[].value` | string | `Caffè` |
+| `standardServices[]` | ComboboxItem[] (array di oggetti) | `[{"id": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01", "value": "Doccia calda"}]` |
+| `standardServices[].id` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
+| `standardServices[].value` | string | `Doccia calda` |
+| `hourlyServices[]` | ComboboxItem[] (array di oggetti) | `[{"id": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01", "value": "Sup"}]` |
+| `hourlyServices[].id` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+| `hourlyServices[].value` | string | `Sup` |
+
+### POST `/api/catalog/create-automatic-price`
+
+Prezzi Automatici: creazione prezzo automatico.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Menu pranzo",
+      "description": "Prezzo fisso per il pranzo al bar."
+    },
+    {
+      "language": "en",
+      "serviceName": "Lunch menu",
+      "description": "Fixed price for lunch at the bar."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "icon": "Cutlery",
+  "price": 12,
+  "vatRate": 10,
+  "isOnlinePurchaseEnabled": true,
+  "validityPeriods": [
+    {
+      "dateFrom": "2026-08-01T00:00:00.000Z",
+      "dateTo": "2026-08-31T00:00:00.000Z",
+      "daysOfWeek": [
+        1,
+        2,
+        3
+      ],
+      "timeSlots": [
+        {
+          "startTime": "09:00",
+          "endTime": "12:00"
+        },
+        {
+          "startTime": "15:00",
+          "endTime": "17:00"
+        }
+      ]
+    }
+  ],
+  "idBarServices": [
+    "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
+    "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
+  ],
+  "idStandardServices": [
+    "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"
+  ],
+  "idHourlyServices": [
+    "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"
+  ],
+  "isPricePerServiceEnabled": false,
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Menu pranzo", "description": "Prezzo fisso per il pranzo al bar."}, {"language": "en", "serviceName": "Lunch menu", "description": "Fixed price for lunch at the bar."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Menu pranzo` |
+| `translations[].description` | string \| null | `Prezzo fisso per il pranzo al bar.` |
+| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null | `Cutlery` |
+| `price` | number (decimale, €) \| null | `12` |
+| `vatRate` | number (decimale, %) \| null | `10` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+| `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) | `[{"dateFrom": "2026-08-01T00:00:00.000Z", "dateTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"startTime": "09:00", "endTime": "12:00"}, {"startTime": "15:00", "endTime": "17:00"}]}]` |
+| `validityPeriods[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-08-01T00:00:00.000Z` |
+| `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null | `2026-08-31T00:00:00.000Z` |
+| `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3]` |
+| `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "12:00"}, {"startTime": "15:00", "endTime": "17:00"}]` |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null | `09:00` |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null | `12:00` |
+| `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
+| `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
+| `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
+| `isPricePerServiceEnabled` | boolean | `false` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/delete-automatic-price-item`
 
 Servizi: eliminazione prezzi automatici.

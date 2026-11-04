@@ -7,26 +7,35 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
   untracked,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { applyEach, applyWhen, form } from '@angular/forms/signals';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { TreeValidationResult, applyEach, applyWhen, form, submit } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
+import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { AutomaticPriceAddItemRequest } from '../../../../../entities/settings/services/automatic-price-add-item-request';
+import { AutomaticPriceServices } from '../../../../../entities/settings/services/automatic-price-services';
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
+import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-tab/automatic-price-general-info-tab';
+import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-validity-tab/automatic-price-prices-validity-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 
 interface ServiceFormTexts {
@@ -44,18 +53,29 @@ enum PanelTab {
 
 @Component({
   selector: 'app-automatic-price-add-item-panel',
-  imports: [AutomaticPriceGeneralInfoTab, SidePanel, TabGroup, TranslatePipe],
+  imports: [
+    AutomaticPriceGeneralInfoTab,
+    AutomaticPricePricesValidityTab,
+    SidePanel,
+    TabGroup,
+    TranslatePipe,
+  ],
   templateUrl: './automatic-price-add-item-panel.html',
+  styleUrl: './automatic-price-add-item-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   readonly open = model(false);
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
+  readonly created = output<void>();
 
+  private readonly auth = inject(AuthBehaviour);
+  private readonly catalog = inject(CatalogService);
   private readonly language = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
 
   protected readonly PanelTab = PanelTab;
   protected readonly mainLanguage = this.language.current;
@@ -85,10 +105,24 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   });
   /** The form as it was when the panel opened. */
   private readonly pristine = JSON.stringify(newDraft());
-  protected readonly isSaveDisabled = computed(() => this.draftForm().invalid());
+  /** The services of the property for "Validità sui servizi"; null until they are read. */
+  protected readonly services = signal<AutomaticPriceServices | null>(null);
+  protected readonly isFetching = signal(false);
+  protected readonly isSaving = signal(false);
+  protected readonly isSaveDisabled = computed(
+    () => this.isFetching() || this.draftForm().invalid(),
+  );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
+  private readonly error = signal<ApiProblem | null>(null);
+  protected readonly errorMessage = toSignal(
+    toObservable(this.error).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  private fetching?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
@@ -113,6 +147,30 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.setImage(image);
   }
 
+  protected save(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    if (this.isSaving() || !idProperty) {
+      return;
+    }
+
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.catalog.createAutomaticPrice(idProperty, this.draft()));
+        this.isSaving.set(false);
+        this.open.set(false);
+        this.created.emit();
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
+  }
+
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
@@ -122,8 +180,28 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   private reset(): void {
     this.draft.set(newDraft());
     this.draftForm().reset();
+    this.services.set(null);
     this.setImage(null);
     this.selectedTab.set(PanelTab.GeneralInfo);
+    this.fetchServices();
+  }
+
+  /** The services the automatic price can apply to, in the Prezzi e Validità tab. */
+  private fetchServices(): void {
+    this.fetching?.unsubscribe();
+    this.error.set(null);
+    const idProperty = this.auth.user()?.propertyId;
+    if (!idProperty) {
+      return;
+    }
+    this.isFetching.set(true);
+    this.fetching = this.catalog
+      .automaticPriceServices(idProperty)
+      .pipe(finalize(() => this.isFetching.set(false)))
+      .subscribe({
+        next: (services) => this.services.set(services),
+        error: (error: unknown) => this.error.set(toApiProblem(error)),
+      });
   }
 
   private setImage(image: File | null): void {
@@ -137,6 +215,7 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
+    this.fetching?.unsubscribe();
     this.setImage(null);
   }
 }

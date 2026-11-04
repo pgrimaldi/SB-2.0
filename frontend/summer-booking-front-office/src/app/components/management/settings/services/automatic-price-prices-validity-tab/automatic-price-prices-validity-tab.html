@@ -1,0 +1,17 @@
+<app-services-price-vat [price]="form().price" [vatRate]="form().vatRate" />
+
+<app-toggle [formField]="form().isOnlinePurchaseEnabled">
+  {{ 'management.settings.services.form.prices.online_purchase' | translate }}
+</app-toggle>
+
+<app-automatic-price-validity-periods [form]="form().validityPeriods" />
+
+<app-automatic-price-service-validity
+  [idBarServices]="form().idBarServices"
+  [idStandardServices]="form().idStandardServices"
+  [idHourlyServices]="form().idHourlyServices"
+  [isPricePerServiceEnabled]="form().isPricePerServiceEnabled"
+  [services]="services()"
+/>
+
+<app-services-limits [form]="form().idSectors" />

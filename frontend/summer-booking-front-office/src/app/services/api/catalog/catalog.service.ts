@@ -7,7 +7,11 @@ import { Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
+import { AutomaticPriceServices } from '../../../entities/settings/services/automatic-price-services';
+import { AutomaticPriceTimeSlot } from '../../../entities/settings/services/automatic-price-time-slot';
+import { AutomaticPriceValidityPeriod } from '../../../entities/settings/services/automatic-price-validity-period';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
@@ -403,6 +407,31 @@ export class CatalogService {
       `${this.endpoint}/automatic-price-list`,
       request,
     );
+
+  /** The bar, standard and hourly services of the property, for "Validità sui servizi". */
+  readonly automaticPriceServices = (idProperty: string): Observable<AutomaticPriceServices> =>
+    this.httpClient.get<AutomaticPriceServices>(`${this.endpoint}/get-automatic-price-services`, {
+      params: { idProperty },
+    });
+
+  /** The data of the two tabs of the add panel. Answers 204 with no body. */
+  readonly createAutomaticPrice = (
+    idProperty: string,
+    request: AutomaticPriceAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/create-automatic-price`, {
+      ...onlyFieldsOf(AutomaticPriceAddItemRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      validityPeriods: request.validityPeriods.map((validityPeriod) => ({
+        ...onlyFieldsOf(AutomaticPriceValidityPeriod, validityPeriod),
+        timeSlots: validityPeriod.timeSlots.map((timeSlot) =>
+          onlyFieldsOf(AutomaticPriceTimeSlot, timeSlot),
+        ),
+      })),
+      idProperty,
+    });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteAutomaticPriceItems = (

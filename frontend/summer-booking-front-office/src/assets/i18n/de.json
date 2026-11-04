@@ -1390,6 +1390,21 @@
             "minutes": "Min.",
             "max_bookings_per_time_slot": "Max. Buchungen pro Zeitfenster",
             "fixed_time_slots": "Feste Zeitfenster"
+          },
+          "validity": {
+            "periods_title": "Gültigkeitszeiträume",
+            "add_period": "Zeitraum hinzufügen",
+            "days": "Wochentage",
+            "time_slots": "Zeitfenster",
+            "add_time_slot": "Zeitfenster hinzufügen",
+            "services_title": "Gültigkeit für Leistungen",
+            "bar_services": "Bar-Leistungen",
+            "standard_services": "Leistungen",
+            "hourly_services": "Stundenleistungen",
+            "select_all": "Alle auswählen",
+            "no_services": "Keine Leistungen dieser Art.",
+            "price_per_service": "Automatischen Preis für jede Leistung aktivieren",
+            "price_per_service_info": "Wenn diese Option **aktiviert ist**, wird der automatische Preis für jede einzelne Leistung, die der Buchung hinzugefügt wird, automatisch angewendet und eingefügt.\n\nWenn diese Option **nicht aktiviert ist**, wird der automatische Preis nur einmal pro Bestellung automatisch angewendet und eingefügt."
           }
         }
       }
