@@ -77,6 +77,8 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   protected readonly datesForm = form(this.dates, (path) => {
     required(path.currentSeasonDateFrom);
     required(path.currentSeasonDateTo);
+    required(path.nextSeasonDateFrom);
+    required(path.nextSeasonDateTo);
     readonly(path, () => !this.isEditing() || this.isSaving() || this.isLoading());
   });
   protected readonly fieldErrors = {

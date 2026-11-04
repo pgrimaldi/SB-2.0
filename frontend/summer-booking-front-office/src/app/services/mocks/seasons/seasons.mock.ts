@@ -129,8 +129,8 @@ export const seasonDatesMock = (request: HttpRequest<unknown>): Observable<HttpE
 /**
  * `POST /api/seasons/save-season-dates` with the four days and `idProperty`: the new season dates
  * (until the page is reloaded). 204 without a body; 401 without a valid access token; 403 for a
- * missing or unknown property; 400 with one error per wrong day: the current season needs both, the
- * next one both or none, and no end before its start.
+ * missing or unknown property; 400 with one error per wrong day: each season needs both, and no end
+ * before its start.
  */
 export const saveSeasonDatesMock = (
   request: HttpRequest<unknown>,
@@ -144,25 +144,21 @@ export const saveSeasonDatesMock = (
     return forbidden(request);
   }
   const errors: MockFieldError[] = [];
-  const checkRange = (
-    from: keyof SeasonDates,
-    to: keyof SeasonDates,
-    isRequired: boolean,
-  ): void => {
+  const checkRange = (from: keyof SeasonDates, to: keyof SeasonDates): void => {
     const hasFrom = isDay(body[from]);
     const hasTo = isDay(body[to]);
-    if (!hasFrom && (isRequired || hasTo)) {
+    if (!hasFrom) {
       errors.push({ field: from, code: 'validation.required' });
     }
-    if (!hasTo && (isRequired || hasFrom)) {
+    if (!hasTo) {
       errors.push({ field: to, code: 'validation.required' });
     }
     if (hasFrom && hasTo && (body[to] as string) < (body[from] as string)) {
       errors.push({ field: to, code: 'validation.end_before_start' });
     }
   };
-  checkRange('currentSeasonDateFrom', 'currentSeasonDateTo', true);
-  checkRange('nextSeasonDateFrom', 'nextSeasonDateTo', false);
+  checkRange('currentSeasonDateFrom', 'currentSeasonDateTo');
+  checkRange('nextSeasonDateFrom', 'nextSeasonDateTo');
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }

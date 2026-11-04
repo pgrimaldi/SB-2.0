@@ -617,8 +617,8 @@ Stagioni e periodi: salva date di stagione.
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `currentSeasonDateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
 | `currentSeasonDateTo` | string (ISO 8601, UTC) | `2026-09-25T00:00:00.000Z` |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null | `2027-05-01T00:00:00.000Z` |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null | `2027-09-30T00:00:00.000Z` |
+| `nextSeasonDateFrom` | string (ISO 8601, UTC) | `2027-05-01T00:00:00.000Z` |
+| `nextSeasonDateTo` | string (ISO 8601, UTC) | `2027-09-30T00:00:00.000Z` |
 
 #### Response
 

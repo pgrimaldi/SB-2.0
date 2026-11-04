@@ -889,8 +889,8 @@ File (binario), non JSON.
   "idProperty": "string (UUID)",
   "currentSeasonDateFrom": "string (ISO 8601, UTC)",
   "currentSeasonDateTo": "string (ISO 8601, UTC)",
-  "nextSeasonDateFrom": "string (ISO 8601, UTC) | null",
-  "nextSeasonDateTo": "string (ISO 8601, UTC) | null"
+  "nextSeasonDateFrom": "string (ISO 8601, UTC)",
+  "nextSeasonDateTo": "string (ISO 8601, UTC)"
 }
 ```
 
@@ -905,8 +905,8 @@ Nessun corpo (204).
 | `idProperty` | string (UUID) |
 | `currentSeasonDateFrom` | string (ISO 8601, UTC) |
 | `currentSeasonDateTo` | string (ISO 8601, UTC) |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null |
+| `nextSeasonDateFrom` | string (ISO 8601, UTC) |
+| `nextSeasonDateTo` | string (ISO 8601, UTC) |
 
 **Response tabella**
 
