@@ -12,7 +12,7 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
@@ -111,7 +111,7 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.email);
     passwordRules(path.password, PASSWORD_MIN_LENGTH);
-    readonly(path, () => this.isLoading() || this.isFetching());
+    disabled(path, () => this.isLoading() || this.isFetching());
   });
   protected readonly emailError = this.validationText.message(this.draftForm.email);
   protected readonly isEmailActiveError = this.validationText.message(this.draftForm.isEmailActive);

@@ -11,7 +11,7 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
@@ -107,7 +107,7 @@ export class UserAddItemPopup extends BasePopup implements UnsavedChanges, OnDes
     requiredText(path.email);
     requiredText(path.password);
     passwordRules(path.password, PASSWORD_MIN_LENGTH);
-    readonly(path, () => this.isLoading());
+    disabled(path, () => this.isLoading());
   });
   protected readonly emailError = this.validationText.message(this.draftForm.email);
   protected readonly isEmailActiveError = this.validationText.message(this.draftForm.isEmailActive);
