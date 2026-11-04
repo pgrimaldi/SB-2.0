@@ -41,6 +41,11 @@
   font-size: 0.75rem;
 }
 
+// Its two days are cells of the grid of the intervals; on phones it is a row with a border.
+.services__period__prices__interval {
+  display: contents;
+}
+
 // Narrower than the longest dates side by side (Spanish): the end under the start, in every language,
 // a little room between one interval and the next.
 @container (width < 17rem) {
@@ -49,7 +54,7 @@
     row-gap: 0.125rem;
   }
 
-  .services__period__prices__to:not(:last-child) {
+  .services__period__prices__interval:not(:last-child) .services__period__prices__to {
     margin-bottom: 0.5rem;
   }
 }
@@ -95,5 +100,35 @@
 
   .services__period__prices__price {
     flex: none;
+  }
+
+  // The month is short here (see the component): both days of an interval fit on one line, the
+  // second ones aligned, each interval in its own box.
+  .services__period__prices__intervals {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.5rem 1.25rem;
+  }
+
+  .services__period__prices__interval {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    padding: 0.5rem 0.75rem;
+    border: 0.0625rem solid rgb(0 0 0 / 50%);
+  }
+
+  .services__period__prices__interval:not(:last-child) .services__period__prices__to {
+    margin-bottom: 0;
+  }
+
+  // Narrower than the longest days side by side (Chinese): the end under the start, in its box.
+  @container (width < 14rem) {
+    .services__period__prices__intervals {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .services__period__prices__interval {
+      row-gap: 0.125rem;
+    }
   }
 }

@@ -15,8 +15,10 @@
         <div class="services__period__prices__dates">
           <div class="services__period__prices__intervals">
             @for (interval of period.intervals; track interval.idInterval) {
-              <span>{{ day(interval.dateFrom) }}</span>
-              <span class="services__period__prices__to">{{ day(interval.dateTo) }}</span>
+              <div class="services__period__prices__interval">
+                <span>{{ day(interval.dateFrom) }}</span>
+                <span class="services__period__prices__to">{{ day(interval.dateTo) }}</span>
+              </div>
             }
           </div>
         </div>

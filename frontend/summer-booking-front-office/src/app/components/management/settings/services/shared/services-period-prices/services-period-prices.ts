@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DateLanguageBehaviour } from '../../../../../../behaviours/i18n/date-language.behaviour';
@@ -10,6 +19,9 @@ import { InfoPopup } from '../../../../../shared/ui/dialogs/info-popup/info-popu
 import { ExpansionPanel } from '../../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { FilledNumberField } from '../../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { Toggle } from '../../../../../shared/ui/toggles/toggle/toggle';
+
+/** The phone layout of the scss: the two days of an interval on one line, with the month short. */
+const PHONE_QUERY = '(width < 48rem)';
 
 /** "Abilita variazioni di prezzo per periodo": when on, a price for each period of the season. */
 @Component({
@@ -27,7 +39,7 @@ import { Toggle } from '../../../../../shared/ui/toggles/toggle/toggle';
   styleUrl: './services-period-prices.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ServicesPeriodPrices {
+export class ServicesPeriodPrices implements OnDestroy {
   /** The fields of the form of the panel, which validates and saves them. */
   readonly isPeriodPricingEnabled = input.required<FieldTree<boolean>>();
   readonly periodPrices = input.required<FieldTree<ServicePeriodPrice[]>>();
@@ -46,6 +58,8 @@ export class ServicesPeriodPrices {
   /** [before the title, arrow]. */
   protected readonly periodIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
   protected readonly showingInfo = signal(false);
+  private readonly phoneQuery = inject(DOCUMENT).defaultView?.matchMedia?.(PHONE_QUERY);
+  private readonly isPhone = signal(this.phoneQuery?.matches ?? false);
 
   protected readonly priceByPeriod = computed(
     () =>
@@ -60,13 +74,26 @@ export class ServicesPeriodPrices {
     () =>
       new Intl.DateTimeFormat(this.dateLanguage.locale(), {
         day: '2-digit',
-        month: 'long',
+        month: this.isPhone() ? 'short' : 'long',
         year: 'numeric',
         timeZone: 'UTC',
       }),
   );
 
+  constructor() {
+    this.phoneQuery?.addEventListener('change', this.phoneChanged);
+  }
+
   protected day(date: string | null): string {
     return date ? this.dayFormat().format(new Date(date)) : '';
+  }
+
+  /** A phone rotated, or a window resized, while the panel is open. */
+  private readonly phoneChanged = (event: MediaQueryListEvent): void => {
+    this.isPhone.set(event.matches);
+  };
+
+  ngOnDestroy(): void {
+    this.phoneQuery?.removeEventListener('change', this.phoneChanged);
   }
 }
