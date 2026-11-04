@@ -1,0 +1,22 @@
+<app-section-title [text]="'management.settings.services.form.availability.title' | translate">
+  <app-button
+    [appearance]="ButtonAppearance.Light"
+    [size]="ButtonSize.Small"
+    [pathIcon]="addIcon"
+    [disabled]="isReadonly()"
+    (clicked)="addOption()"
+  >
+    {{ 'management.settings.services.form.bookings.add' | translate }}
+  </app-button>
+</app-section-title>
+@for (option of form(); track option; let optionIndex = $index) {
+  <div class="services__availability__options__option">
+    <app-icon-button
+      class="services__availability__options__remove"
+      [pathIcon]="removeIcon"
+      [disabled]="isReadonly()"
+      (click)="removeOption(optionIndex)"
+    />
+    <app-services-availability-option [form]="option" />
+  </div>
+}

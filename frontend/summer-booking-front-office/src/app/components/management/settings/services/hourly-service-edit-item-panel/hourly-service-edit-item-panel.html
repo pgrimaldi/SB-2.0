@@ -1,0 +1,75 @@
+<app-side-panel
+  [title]="'management.settings.services.hourly_services.edit_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group
+    [tabs]="tabs()"
+    [(selectedIndex)]="tabIndex"
+    (selectedIndexChange)="requestTab($event)"
+  >
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-hourly-service-general-info-tab
+        [attr.inert]="isLoading(PanelTab.GeneralInfo) ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [isReadonly]="isLocked()"
+        [imagePreviewUrl]="imagePreviewUrl()"
+        (iconChosen)="chooseIcon($event)"
+        (imageChosen)="chooseImage($event)"
+      />
+    } @else if (selectedTab() === PanelTab.Prices) {
+      <app-hourly-service-prices-tab
+        [attr.inert]="isLoading(PanelTab.Prices) ? '' : null"
+        [form]="draftForm"
+        [periods]="periods()"
+        [isReadonly]="isLocked()"
+      />
+    } @else if (selectedTab() === PanelTab.Bookings) {
+      <app-hourly-service-bookings-tab
+        [attr.inert]="isLoading(PanelTab.Bookings) ? '' : null"
+        [form]="draftForm.bookingOptions"
+        [isReadonly]="isLocked()"
+      />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="hourly__service__edit__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+
+  <div appSidePanelButtons>
+    @if (isEditing()) {
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaving()"
+        (clicked)="cancelEdit()"
+      >
+        {{ 'management.settings.services.form.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaveDisabled()"
+        [isLoading]="isSaving()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.services.form.save' | translate }}
+      </app-button>
+    } @else {
+      <app-button
+        class="hourly__service__edit__item__panel__edit"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isEditDisabled()"
+        (clicked)="startEdit()"
+      >
+        {{ 'management.settings.services.form.edit' | translate }}
+      </app-button>
+    }
+  </div>
+</app-side-panel>

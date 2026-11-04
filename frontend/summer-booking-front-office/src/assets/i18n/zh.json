@@ -1200,6 +1200,7 @@
           "title": "按小时服务",
           "create": "添加按小时服务",
           "add_title": "添加新的按小时服务",
+          "edit_title": "编辑按小时服务",
           "table": {
             "service": "服务"
           },
@@ -1358,6 +1359,35 @@
               "one_hour": "1小时",
               "two_hours": "2小时"
             }
+          },
+          "availability": {
+            "title": "可用选项",
+            "hours": "可用时间",
+            "days_title": "可用日期",
+            "days": {
+              "monday": "周一",
+              "tuesday": "周二",
+              "wednesday": "周三",
+              "thursday": "周四",
+              "friday": "周五",
+              "saturday": "周六",
+              "sunday": "周日"
+            },
+            "time_slots": "可用时段",
+            "time_slot_names": {
+              "ten_minutes": "10分钟",
+              "fifteen_minutes": "15分钟",
+              "thirty_minutes": "30分钟",
+              "forty_five_minutes": "45分钟",
+              "one_hour": "1小时",
+              "one_hour_thirty_minutes": "1小时30分钟",
+              "two_hours": "2小时",
+              "three_hours": "3小时"
+            },
+            "custom": "自定义",
+            "minutes": "分钟",
+            "max_bookings_per_time_slot": "每个时段最多预订数",
+            "fixed_time_slots": "固定时段"
           }
         }
       }

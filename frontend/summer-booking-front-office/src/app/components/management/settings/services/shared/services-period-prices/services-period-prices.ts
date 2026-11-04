@@ -1,9 +1,10 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
   computed,
+  contentChild,
   inject,
   input,
   signal,
@@ -19,6 +20,7 @@ import { InfoPopup } from '../../../../../shared/ui/dialogs/info-popup/info-popu
 import { ExpansionPanel } from '../../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { FilledNumberField } from '../../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { Toggle } from '../../../../../shared/ui/toggles/toggle/toggle';
+import { ServicesPeriodContent } from './services-period-content';
 
 /** The phone layout of the scss: the two days of an interval on one line, with the month short. */
 const PHONE_QUERY = '(width < 48rem)';
@@ -32,6 +34,7 @@ const PHONE_QUERY = '(width < 48rem)';
     FormField,
     IconButton,
     InfoPopup,
+    NgTemplateOutlet,
     Toggle,
     TranslatePipe,
   ],
@@ -42,9 +45,11 @@ const PHONE_QUERY = '(width < 48rem)';
 export class ServicesPeriodPrices implements OnDestroy {
   /** The fields of the form of the panel, which validates and saves them. */
   readonly isPeriodPricingEnabled = input.required<FieldTree<boolean>>();
-  readonly periodPrices = input.required<FieldTree<ServicePeriodPrice[]>>();
+  /** A price for each period; without it each period shows the `appServicesPeriodContent` template. */
+  readonly periodPrices = input<FieldTree<ServicePeriodPrice[]>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
+  protected readonly content = contentChild(ServicesPeriodContent);
 
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   protected readonly validationText = inject(ValidationTextBehaviour);
@@ -64,7 +69,7 @@ export class ServicesPeriodPrices implements OnDestroy {
   protected readonly priceByPeriod = computed(
     () =>
       new Map(
-        [...this.periodPrices()].map((periodPrice) => [
+        [...(this.periodPrices() ?? [])].map((periodPrice) => [
           periodPrice.idPeriod().value(),
           periodPrice,
         ]),

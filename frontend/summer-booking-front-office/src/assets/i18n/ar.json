@@ -1200,6 +1200,7 @@
           "title": "خدمات بالساعة",
           "create": "إضافة خدمة بالساعة",
           "add_title": "إضافة خدمة جديدة بالساعة",
+          "edit_title": "تعديل الخدمة بالساعة",
           "table": {
             "service": "الخدمة"
           },
@@ -1358,6 +1359,35 @@
               "one_hour": "ساعة واحدة",
               "two_hours": "ساعتان"
             }
+          },
+          "availability": {
+            "title": "خيارات التوفر",
+            "hours": "ساعات التوفر",
+            "days_title": "الأيام المتاحة",
+            "days": {
+              "monday": "إثنين",
+              "tuesday": "ثلاثاء",
+              "wednesday": "أربعاء",
+              "thursday": "خميس",
+              "friday": "جمعة",
+              "saturday": "سبت",
+              "sunday": "أحد"
+            },
+            "time_slots": "الفترات المتاحة",
+            "time_slot_names": {
+              "ten_minutes": "10 دقائق",
+              "fifteen_minutes": "15 دقيقة",
+              "thirty_minutes": "30 دقيقة",
+              "forty_five_minutes": "45 دقيقة",
+              "one_hour": "ساعة",
+              "one_hour_thirty_minutes": "ساعة و30 دقيقة",
+              "two_hours": "ساعتان",
+              "three_hours": "3 ساعات"
+            },
+            "custom": "مخصص",
+            "minutes": "دقيقة",
+            "max_bookings_per_time_slot": "أقصى عدد حجوزات لكل فترة",
+            "fixed_time_slots": "فترات ثابتة"
           }
         }
       }

@@ -1,0 +1,12 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// The availability options need the width of the period: less room around them on phones.
+@media (width < 48rem) {
+  :host {
+    --expansion-panel-content-padding: 1.25rem 0.75rem 1.5rem;
+  }
+}

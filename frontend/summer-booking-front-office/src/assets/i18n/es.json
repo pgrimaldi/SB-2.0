@@ -1200,6 +1200,7 @@
           "title": "Servicios por horas",
           "create": "Añadir servicio por horas",
           "add_title": "Añadir nuevo servicio por horas",
+          "edit_title": "Editar servicio por horas",
           "table": {
             "service": "Servicio"
           },
@@ -1358,6 +1359,35 @@
               "one_hour": "1 hora",
               "two_hours": "2 horas"
             }
+          },
+          "availability": {
+            "title": "Opciones de disponibilidad",
+            "hours": "Horario de disponibilidad",
+            "days_title": "Días disponibles",
+            "days": {
+              "monday": "Lun",
+              "tuesday": "Mar",
+              "wednesday": "Mié",
+              "thursday": "Jue",
+              "friday": "Vie",
+              "saturday": "Sáb",
+              "sunday": "Dom"
+            },
+            "time_slots": "Franjas horarias disponibles",
+            "time_slot_names": {
+              "ten_minutes": "10 min",
+              "fifteen_minutes": "15 min",
+              "thirty_minutes": "30 min",
+              "forty_five_minutes": "45 min",
+              "one_hour": "1 h",
+              "one_hour_thirty_minutes": "1 h y 30 min",
+              "two_hours": "2 h",
+              "three_hours": "3 h"
+            },
+            "custom": "Personalizado",
+            "minutes": "min",
+            "max_bookings_per_time_slot": "Máx. reservas por franja horaria",
+            "fixed_time_slots": "Franjas horarias fijas"
           }
         }
       }

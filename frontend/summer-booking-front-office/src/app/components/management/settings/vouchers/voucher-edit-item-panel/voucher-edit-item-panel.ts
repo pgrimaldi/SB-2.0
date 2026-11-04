@@ -40,10 +40,8 @@ import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { VoucherSelectedItem } from '../../../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherTimeSlot } from '../../../../../entities/settings/vouchers/voucher-time-slot';
 import { VoucherUpdateItemRequest } from '../../../../../entities/settings/vouchers/voucher-update-item-request';
-import {
-  DAYS_OF_WEEK,
-  VoucherValidityPeriod,
-} from '../../../../../entities/settings/vouchers/voucher-validity-period';
+import { VoucherValidityPeriod } from '../../../../../entities/settings/vouchers/voucher-validity-period';
+import { DAYS_OF_WEEK } from '../../../../../entities/shared/days-of-week';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
 import { minItems, requiredText } from '../../../../shared/forms/validators';
@@ -158,7 +156,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
   protected readonly clockIcon = ['/assets/images/GeneralIcon_Clock.svg'] as const;
   protected readonly deleteTimeSlotIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
-  protected readonly addTimeSlotIcon = ['/assets/images/Vouchers_AddTimeSlot.svg'] as const;
+  protected readonly addTimeSlotIcon = ['/assets/images/GeneralIcon_AddBlue.svg'] as const;
   private readonly dayNames = toSignal(
     this.translateService.stream('management.settings.vouchers.form.periods.days') as Observable<
       Record<DayKey, string>

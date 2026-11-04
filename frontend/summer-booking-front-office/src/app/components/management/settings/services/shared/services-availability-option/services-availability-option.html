@@ -1,0 +1,111 @@
+<app-form-row>
+  <span appFormRowLabel>
+    {{ 'management.settings.services.form.availability.hours' | translate }}
+  </span>
+  <div class="services__availability__option__pair">
+    <span class="services__availability__option__word">
+      {{ 'management.settings.services.form.bookings.time_from' | translate }}
+    </span>
+    <app-filled-time-field
+      class="services__availability__option__time"
+      [pathIcon]="clockIcon"
+      [formField]="form().startTime"
+      [error]="validationText.text(form().startTime)"
+    />
+  </div>
+  <div class="services__availability__option__pair">
+    <span class="services__availability__option__word">
+      {{ 'management.settings.services.form.bookings.time_to' | translate }}
+    </span>
+    <app-filled-time-field
+      class="services__availability__option__time"
+      [pathIcon]="clockIcon"
+      [formField]="form().endTime"
+      [error]="validationText.text(form().endTime)"
+    />
+  </div>
+</app-form-row>
+
+<app-form-row>
+  <span appFormRowLabel>
+    {{ 'management.settings.services.form.availability.days_title' | translate }}
+  </span>
+  <div class="services__availability__option__days">
+    @for (day of days(); track day.number) {
+      <app-checkbox
+        [checked]="form().daysOfWeek().value().includes(day.number)"
+        [disabled]="areDaysLocked()"
+        (checkedChange)="setDay(day.number, $event)"
+      >
+        {{ day.label }}
+      </app-checkbox>
+    }
+    @if (validationText.text(form().daysOfWeek); as error) {
+      <p class="services__availability__option__error">{{ error }}</p>
+    }
+  </div>
+</app-form-row>
+
+<app-form-row>
+  <span appFormRowLabel>
+    {{ 'management.settings.services.form.availability.time_slots' | translate }}
+  </span>
+  <div class="services__availability__option__slots">
+    @for (timeSlotPrice of form().timeSlotPrices; track timeSlotPrice) {
+      <app-checkbox [formField]="timeSlotPrice.isEnabled">
+        {{ timeSlotName(timeSlotPrice.timeSlot().value()) }}
+      </app-checkbox>
+      <div class="services__availability__option__amount">
+        <app-filled-number-field
+          class="services__availability__option__price"
+          [isDecimal]="true"
+          [isCurrency]="true"
+          [formField]="timeSlotPrice.price"
+          [error]="validationText.text(timeSlotPrice.price)"
+        />
+        <span class="services__availability__option__unit">€</span>
+      </div>
+    }
+    <span class="services__availability__option__custom">
+      {{ 'management.settings.services.form.availability.custom' | translate }}
+    </span>
+    <div class="services__availability__option__amount">
+      <app-checkbox [formField]="form().isCustomTimeSlotEnabled" />
+      <app-filled-number-field
+        class="services__availability__option__minutes"
+        [formField]="form().customTimeSlotMinuteQuantity"
+        [error]="validationText.text(form().customTimeSlotMinuteQuantity)"
+      />
+      <span class="services__availability__option__unit">
+        {{ 'management.settings.services.form.availability.minutes' | translate }}
+      </span>
+    </div>
+    <div class="services__availability__option__amount">
+      <app-filled-number-field
+        class="services__availability__option__price"
+        [isDecimal]="true"
+        [isCurrency]="true"
+        [formField]="form().customTimeSlotPrice"
+        [error]="validationText.text(form().customTimeSlotPrice)"
+      />
+      <span class="services__availability__option__unit">€</span>
+    </div>
+  </div>
+</app-form-row>
+
+<app-filled-number-field
+  class="services__availability__option__value"
+  [label]="'management.settings.services.form.prices.vat' | translate"
+  [isDecimal]="true"
+  [formField]="form().vatRate"
+  [error]="validationText.text(form().vatRate)"
+/>
+<app-filled-number-field
+  class="services__availability__option__value"
+  [label]="'management.settings.services.form.availability.max_bookings_per_time_slot' | translate"
+  [formField]="form().maxBookingPerTimeSlotQuantity"
+  [error]="validationText.text(form().maxBookingPerTimeSlotQuantity)"
+/>
+<app-toggle [formField]="form().hasFixedTimeSlots">
+  {{ 'management.settings.services.form.availability.fixed_time_slots' | translate }}
+</app-toggle>

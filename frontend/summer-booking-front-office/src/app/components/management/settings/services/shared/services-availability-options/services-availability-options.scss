@@ -1,0 +1,35 @@
+// The buttons of the management panels.
+:host {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+  --section-title-padding-bottom: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// One box per option, its X in the corner, as in the booking options.
+.services__availability__options__option {
+  position: relative;
+  padding-block: 2rem 1.625rem;
+  padding-inline: 1.25rem 1.5625rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+// Without the grey circle.
+.services__availability__options__remove {
+  --icon-button-background: transparent;
+
+  position: absolute;
+  top: 0.25rem;
+  inset-inline-end: 0.25rem;
+}
+
+@media (width < 36rem) {
+  .services__availability__options__option {
+    padding-inline: 0.5rem;
+  }
+}

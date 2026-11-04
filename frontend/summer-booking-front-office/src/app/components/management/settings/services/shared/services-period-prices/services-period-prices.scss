@@ -20,6 +20,13 @@
   @include info.info-button;
 }
 
+// The days and the price of the period, then what its user puts under them.
+.services__period__prices__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 // The days of the period on the left (from, to), its price on the right.
 .services__period__prices__period {
   display: flex;

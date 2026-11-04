@@ -1,0 +1,79 @@
+$field-width: 8.5rem;
+$word-width: 2rem;
+$gap: 0.5rem;
+
+// The buttons of the management panels; the label in the middle of the field beside it.
+:host {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+  --form-row-label-offset: 0.3125rem;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.hourly__service__bookings__tab__section,
+.hourly__service__bookings__tab__option {
+  display: flex;
+  flex-direction: column;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+.hourly__service__bookings__tab__section {
+  --section-title-padding-bottom: 0.75rem;
+
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+// One box per option, its X in the corner, as in the booking options of the other services.
+.hourly__service__bookings__tab__option {
+  position: relative;
+  gap: 1rem;
+  padding-block: 2rem 1.625rem;
+  padding-inline: 1.25rem 1.5625rem;
+}
+
+// Without the grey circle.
+.hourly__service__bookings__tab__remove {
+  --icon-button-background: transparent;
+
+  position: absolute;
+  top: 0.25rem;
+  inset-inline-end: 0.25rem;
+}
+
+// A word and its field stay together, lined up with the hours of the availability below.
+.hourly__service__bookings__tab__pair {
+  display: flex;
+  flex: var(--form-row-fill) 1 auto;
+  align-items: flex-start;
+  gap: $gap;
+  min-width: 0;
+}
+
+.hourly__service__bookings__tab__word {
+  min-width: $word-width;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: var(--filled-field-height, 1.625rem);
+  text-align: end;
+}
+
+.hourly__service__bookings__tab__field {
+  flex: var(--form-row-fill) 1 $field-width;
+  min-width: 0;
+}
+
+// Phones: more room for the availability of each box.
+@media (width < 48rem) {
+  .hourly__service__bookings__tab__section {
+    padding-inline: 0.75rem;
+  }
+
+  .hourly__service__bookings__tab__option {
+    padding-inline: 0.5rem;
+  }
+}

@@ -25,9 +25,19 @@ import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/ser
 import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
+import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/services/hourly-service-selected-general-info';
+import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
+import { HourlyServiceUpdateBookingRequest } from '../../../entities/settings/services/hourly-service-update-booking-request';
+import { HourlyServiceUpdateGeneralRequest } from '../../../entities/settings/services/hourly-service-update-general-request';
+import { HourlyServiceUpdatePricesRequest } from '../../../entities/settings/services/hourly-service-update-prices-request';
+import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
 import { ServiceBookingOption } from '../../../entities/settings/services/service-booking-option';
+import { ServicePeriodAvailability } from '../../../entities/settings/services/service-period-availability';
 import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
+import { ServiceTimeSlotPrice } from '../../../entities/settings/services/service-time-slot-price';
 import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
 import { ServiceVariant } from '../../../entities/settings/services/service-variant';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
@@ -312,6 +322,82 @@ export class CatalogService {
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/duplicate-hourly-service-item`, request);
 
+  /** The Info Generali tab of an hourly service, for the edit panel. */
+  readonly hourlyServiceGeneralInfo = (
+    idHourlyService: string,
+  ): Observable<HourlyServiceSelectedGeneralInfo> =>
+    this.httpClient.get<HourlyServiceSelectedGeneralInfo>(
+      `${this.endpoint}/get-hourly-service-general-info`,
+      { params: { idHourlyService } },
+    );
+
+  /** The Prezzi tab of an hourly service, for the edit panel. */
+  readonly hourlyServicePrices = (
+    idHourlyService: string,
+  ): Observable<HourlyServiceSelectedPrices> =>
+    this.httpClient.get<HourlyServiceSelectedPrices>(`${this.endpoint}/get-hourly-service-prices`, {
+      params: { idHourlyService },
+    });
+
+  /** The Prenotazioni tab of an hourly service, its booking options, for the edit panel. */
+  readonly hourlyServiceBookingOptions = (
+    idHourlyService: string,
+  ): Observable<HourlyServiceBookingOption[]> =>
+    this.httpClient.get<HourlyServiceBookingOption[]>(
+      `${this.endpoint}/get-hourly-service-booking-options`,
+      { params: { idHourlyService } },
+    );
+
+  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  readonly updateHourlyServiceGeneral = (
+    idProperty: string,
+    request: HourlyServiceUpdateGeneralRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-general`, {
+      ...onlyFieldsOf(HourlyServiceUpdateGeneralRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
+  readonly updateHourlyServicePrices = (
+    idProperty: string,
+    request: HourlyServiceUpdatePricesRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-prices`, {
+      ...onlyFieldsOf(HourlyServiceUpdatePricesRequest, request),
+      periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
+      idProperty,
+    });
+
+  /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  readonly updateHourlyServiceBooking = (
+    idProperty: string,
+    request: HourlyServiceUpdateBookingRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-booking`, {
+      ...onlyFieldsOf(HourlyServiceUpdateBookingRequest, request),
+      bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
+      idProperty,
+    });
+
+  /** The data of the three tabs of the add panel. Answers 204 with no body. */
+  readonly createHourlyService = (
+    idProperty: string,
+    request: HourlyServiceAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/create-hourly-service`, {
+      ...onlyFieldsOf(HourlyServiceAddItemRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
+      bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
+      idProperty,
+    });
+
   readonly automaticPriceList = (request: PageRequest): Observable<Page<AutomaticPriceItem>> =>
     this.httpClient.post<Page<AutomaticPriceItem>>(
       `${this.endpoint}/automatic-price-list`,
@@ -347,4 +433,32 @@ export class CatalogService {
     request: DuplicateTableServiceItemsRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, request);
+}
+
+/** Only the fields of the contract, at every level: the time slots inside the option too. */
+function availabilityOptionFields(option: ServiceAvailabilityOption): ServiceAvailabilityOption {
+  return {
+    ...onlyFieldsOf(ServiceAvailabilityOption, option),
+    timeSlotPrices: option.timeSlotPrices.map((timeSlotPrice) =>
+      onlyFieldsOf(ServiceTimeSlotPrice, timeSlotPrice),
+    ),
+  };
+}
+
+function periodAvailabilityFields(
+  periodAvailability: ServicePeriodAvailability,
+): ServicePeriodAvailability {
+  return {
+    ...onlyFieldsOf(ServicePeriodAvailability, periodAvailability),
+    availabilityOptions: periodAvailability.availabilityOptions.map(availabilityOptionFields),
+  };
+}
+
+function hourlyBookingOptionFields(
+  bookingOption: HourlyServiceBookingOption,
+): HourlyServiceBookingOption {
+  return {
+    ...onlyFieldsOf(HourlyServiceBookingOption, bookingOption),
+    availabilityOption: availabilityOptionFields(bookingOption.availabilityOption),
+  };
 }

@@ -1200,6 +1200,7 @@
           "title": "Stundenleistungen",
           "create": "Stundenleistung hinzufügen",
           "add_title": "Neue Stundenleistung hinzufügen",
+          "edit_title": "Stundenleistung bearbeiten",
           "table": {
             "service": "Leistung"
           },
@@ -1358,6 +1359,35 @@
               "one_hour": "1 Stunde",
               "two_hours": "2 Stunden"
             }
+          },
+          "availability": {
+            "title": "Verfügbarkeitsoptionen",
+            "hours": "Verfügbarkeitszeiten",
+            "days_title": "Verfügbare Tage",
+            "days": {
+              "monday": "Mo",
+              "tuesday": "Di",
+              "wednesday": "Mi",
+              "thursday": "Do",
+              "friday": "Fr",
+              "saturday": "Sa",
+              "sunday": "So"
+            },
+            "time_slots": "Verfügbare Zeitfenster",
+            "time_slot_names": {
+              "ten_minutes": "10 Min.",
+              "fifteen_minutes": "15 Min.",
+              "thirty_minutes": "30 Min.",
+              "forty_five_minutes": "45 Min.",
+              "one_hour": "1 Std.",
+              "one_hour_thirty_minutes": "1 Std. 30 Min.",
+              "two_hours": "2 Std.",
+              "three_hours": "3 Std."
+            },
+            "custom": "Individuell",
+            "minutes": "Min.",
+            "max_bookings_per_time_slot": "Max. Buchungen pro Zeitfenster",
+            "fixed_time_slots": "Feste Zeitfenster"
           }
         }
       }

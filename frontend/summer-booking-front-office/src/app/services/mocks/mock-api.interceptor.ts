@@ -27,6 +27,13 @@ import {
   deleteBarServiceItemsMock,
   deleteStandardServiceItemsMock,
   duplicateStandardServiceItemsMock,
+  createHourlyServiceMock,
+  hourlyServiceBookingOptionsMock,
+  hourlyServiceGeneralInfoMock,
+  hourlyServicePricesMock,
+  updateHourlyServiceBookingMock,
+  updateHourlyServiceGeneralMock,
+  updateHourlyServicePricesMock,
   deleteHourlyServiceItemsMock,
   duplicateHourlyServiceItemsMock,
   deleteAutomaticPriceItemsMock,
@@ -672,6 +679,55 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/hourly-service-list`
   ) {
     return hourlyServiceListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/create-hourly-service`
+  ) {
+    return createHourlyServiceMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-hourly-service-general-info`
+  ) {
+    return hourlyServiceGeneralInfoMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-hourly-service-prices`
+  ) {
+    return hourlyServicePricesMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-hourly-service-booking-options`
+  ) {
+    return hourlyServiceBookingOptionsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-hourly-service-general`
+  ) {
+    return updateHourlyServiceGeneralMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-hourly-service-prices`
+  ) {
+    return updateHourlyServicePricesMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-hourly-service-booking`
+  ) {
+    return updateHourlyServiceBookingMock(request);
   }
 
   if (

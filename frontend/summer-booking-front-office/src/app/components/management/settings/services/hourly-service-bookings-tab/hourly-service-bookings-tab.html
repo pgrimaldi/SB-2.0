@@ -1,0 +1,53 @@
+<section class="hourly__service__bookings__tab__section">
+  <app-section-title [text]="'management.settings.services.form.bookings.title' | translate">
+    <app-button
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      [disabled]="isReadonly()"
+      (clicked)="addOption()"
+    >
+      {{ 'management.settings.services.form.bookings.add' | translate }}
+    </app-button>
+  </app-section-title>
+  @for (option of form(); track option; let optionIndex = $index) {
+    <div class="hourly__service__bookings__tab__option">
+      <app-icon-button
+        class="hourly__service__bookings__tab__remove"
+        [pathIcon]="removeIcon"
+        [disabled]="isReadonly()"
+        (click)="removeOption(optionIndex)"
+      />
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.period' | translate }}
+        </span>
+        <div class="hourly__service__bookings__tab__pair">
+          <span class="hourly__service__bookings__tab__word">
+            {{ 'management.settings.services.form.bookings.date_from' | translate }}
+          </span>
+          <app-filled-date-field
+            class="hourly__service__bookings__tab__field"
+            [pathIcon]="calendarIcon"
+            [formField]="option.dateFrom"
+            [error]="validationText.text(option.dateFrom)"
+          />
+        </div>
+        <div class="hourly__service__bookings__tab__pair">
+          <span class="hourly__service__bookings__tab__word">
+            {{ 'management.settings.services.form.bookings.date_to' | translate }}
+          </span>
+          <app-filled-date-field
+            class="hourly__service__bookings__tab__field"
+            [pathIcon]="calendarIcon"
+            [minDate]="option.dateFrom().value()"
+            [formField]="option.dateTo"
+            [error]="validationText.text(option.dateTo)"
+          />
+        </div>
+      </app-form-row>
+
+      <app-services-availability-option [form]="option.availabilityOption" />
+    </div>
+  }
+</section>

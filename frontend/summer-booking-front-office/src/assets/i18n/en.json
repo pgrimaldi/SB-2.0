@@ -1200,6 +1200,7 @@
           "title": "Hourly services",
           "create": "Add hourly service",
           "add_title": "Add new hourly service",
+          "edit_title": "Edit hourly service",
           "table": {
             "service": "Service"
           },
@@ -1358,6 +1359,35 @@
               "one_hour": "1 hour",
               "two_hours": "2 hours"
             }
+          },
+          "availability": {
+            "title": "Availability options",
+            "hours": "Availability hours",
+            "days_title": "Available days",
+            "days": {
+              "monday": "Mon",
+              "tuesday": "Tue",
+              "wednesday": "Wed",
+              "thursday": "Thu",
+              "friday": "Fri",
+              "saturday": "Sat",
+              "sunday": "Sun"
+            },
+            "time_slots": "Available time slots",
+            "time_slot_names": {
+              "ten_minutes": "10 min",
+              "fifteen_minutes": "15 min",
+              "thirty_minutes": "30 min",
+              "forty_five_minutes": "45 min",
+              "one_hour": "1 hr",
+              "one_hour_thirty_minutes": "1 hr 30 min",
+              "two_hours": "2 hr",
+              "three_hours": "3 hr"
+            },
+            "custom": "Custom",
+            "minutes": "min",
+            "max_bookings_per_time_slot": "Max bookings per time slot",
+            "fixed_time_slots": "Fixed time slots"
           }
         }
       }

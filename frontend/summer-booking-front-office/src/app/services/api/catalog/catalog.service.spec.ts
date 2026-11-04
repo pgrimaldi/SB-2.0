@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
 import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
+import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
@@ -12,6 +13,10 @@ import { BarServiceAddItemRequest } from '../../../entities/settings/services/ba
 import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
 import { BarServiceUpdatePricesRequest } from '../../../entities/settings/services/bar-service-update-prices-request';
+import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceUpdateBookingRequest } from '../../../entities/settings/services/hourly-service-update-booking-request';
+import { HourlyServiceUpdateGeneralRequest } from '../../../entities/settings/services/hourly-service-update-general-request';
+import { HourlyServiceUpdatePricesRequest } from '../../../entities/settings/services/hourly-service-update-prices-request';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/services/standard-service-update-booking-request';
 import { StandardServiceUpdateGeneralRequest } from '../../../entities/settings/services/standard-service-update-general-request';
@@ -513,6 +518,222 @@ describe('CatalogService', () => {
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/catalog/get-standard-service-booking-options` &&
         params.get('idStandardService') === 's1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  /** An availability as the panel sends it, with an extra field at every level to drop. */
+  const availability = () => {
+    const clean = {
+      startTime: '09:00',
+      endTime: '19:00',
+      daysOfWeek: [1, 2, 3],
+      timeSlotPrices: [
+        { timeSlot: ServiceTimeSlot.ThirtyMinutes, isEnabled: true, price: 8 },
+        { timeSlot: ServiceTimeSlot.OneHour, isEnabled: false, price: null },
+      ],
+      isCustomTimeSlotEnabled: true,
+      customTimeSlotMinuteQuantity: 20,
+      customTimeSlotPrice: 6,
+      vatRate: 22,
+      maxBookingPerTimeSlotQuantity: 4,
+      hasFixedTimeSlots: true,
+    };
+    const sent = {
+      ...clean,
+      timeSlotPrices: clean.timeSlotPrices.map((timeSlotPrice) => ({
+        ...timeSlotPrice,
+        unexpectedFlag: 'extra-field',
+      })),
+      unexpectedFlag: 'extra-field',
+    };
+    return { clean, sent };
+  };
+
+  it('should create the hourly service with only the contract fields and the property', () => {
+    const { catalog, controller } = setup();
+    const translation = { language: Language.It, serviceName: 'Sup', description: 'Tavola a ore' };
+    const periodOption = availability();
+    const bookingOption = availability();
+    const request = {
+      translations: [translation],
+      icon: StandardServiceIcon.Surfing,
+      isHighlighted: true,
+      isPeriodPricingEnabled: true,
+      periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [periodOption.clean] }],
+      idSectors: ['s1'],
+      isOnlinePurchaseEnabled: true,
+      bookingOptions: [
+        {
+          dateFrom: '2026-07-01T00:00:00.000Z',
+          dateTo: '2026-07-31T00:00:00.000Z',
+          availabilityOption: bookingOption.clean,
+        },
+      ],
+    };
+
+    catalog
+      .createHourlyService(
+        'p1',
+        Object.assign(new HourlyServiceAddItemRequest(), {
+          ...request,
+          translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+          periodAvailabilities: [
+            {
+              idPeriod: 'a1',
+              availabilityOptions: [periodOption.sent],
+              unexpectedFlag: 'extra-field',
+            },
+          ],
+          bookingOptions: [
+            {
+              ...request.bookingOptions[0],
+              availabilityOption: bookingOption.sent,
+              unexpectedFlag: 'extra-field',
+            },
+          ],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-hourly-service`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the Info Generali of the hourly service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const request = {
+      idHourlyService: 'h1',
+      translations: [{ language: Language.It, serviceName: 'Pedalò', description: 'A ore' }],
+      icon: StandardServiceIcon.Sailing,
+      isHighlighted: false,
+    };
+
+    catalog
+      .updateHourlyServiceGeneral(
+        'p1',
+        Object.assign(new HourlyServiceUpdateGeneralRequest(), request, {
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-hourly-service-general`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the prices of the hourly service with only the contract fields', () => {
+    const { catalog, controller } = setup();
+    const option = availability();
+    const request = {
+      idHourlyService: 'h1',
+      isPeriodPricingEnabled: true,
+      periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [option.clean] }],
+      idSectors: ['s1'],
+      isOnlinePurchaseEnabled: false,
+    };
+
+    catalog
+      .updateHourlyServicePrices(
+        'p1',
+        Object.assign(new HourlyServiceUpdatePricesRequest(), {
+          ...request,
+          periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [option.sent] }],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-hourly-service-prices`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the booking options of the hourly service with only the contract fields', () => {
+    const { catalog, controller } = setup();
+    const option = availability();
+    const bookingOption = {
+      dateFrom: '2026-07-01T00:00:00.000Z',
+      dateTo: '2026-07-31T00:00:00.000Z',
+      availabilityOption: option.clean,
+    };
+    const request = { idHourlyService: 'h1', bookingOptions: [bookingOption] };
+
+    catalog
+      .updateHourlyServiceBooking(
+        'p1',
+        Object.assign(new HourlyServiceUpdateBookingRequest(), {
+          ...request,
+          bookingOptions: [{ ...bookingOption, availabilityOption: option.sent }],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-hourly-service-booking`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should ask for the general information of the hourly service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.hourlyServiceGeneralInfo('h1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-hourly-service-general-info` &&
+        params.get('idHourlyService') === 'h1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the prices of the hourly service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.hourlyServicePrices('h1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-hourly-service-prices` &&
+        params.get('idHourlyService') === 'h1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the booking options of the hourly service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.hourlyServiceBookingOptions('h1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-hourly-service-booking-options` &&
+        params.get('idHourlyService') === 'h1',
     ).request;
     expect(request.body).toBeNull();
     controller.verify();

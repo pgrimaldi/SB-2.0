@@ -24,7 +24,15 @@ import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/ser
 import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
 import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
 import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
+import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
+import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/services/hourly-service-selected-general-info';
+import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
+import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
+import { ServicePeriodAvailability } from '../../../entities/settings/services/service-period-availability';
+import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
@@ -1442,10 +1450,11 @@ export const createStandardServiceMock = (
 
 /**
  * Name and description in the language of the request (the user's), as the panel requires; the
- * icon, when given, among the values of its enum.
+ * icon, when given, among the values of its enum. Also for the hourly services, which have the same
+ * icons.
  */
 function standardGeneralErrors(
-  body: CreateStandardServiceBody,
+  body: { translations?: ServiceTranslation[]; icon?: StandardServiceIcon | null },
   language: string,
 ): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -1612,6 +1621,341 @@ export const hourlyServiceListMock = (
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
+
+/** An availability of the examples: every day from 9 to 19, four time slots and a custom one. */
+function exampleAvailability(): ServiceAvailabilityOption {
+  const prices: Partial<Record<ServiceTimeSlot, number>> = {
+    [ServiceTimeSlot.TenMinutes]: 3,
+    [ServiceTimeSlot.ThirtyMinutes]: 8,
+    [ServiceTimeSlot.OneHour]: 15,
+    [ServiceTimeSlot.TwoHours]: 25,
+  };
+  const option = Object.assign(new ServiceAvailabilityOption(), {
+    startTime: '09:00',
+    endTime: '19:00',
+    daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+    isCustomTimeSlotEnabled: true,
+    customTimeSlotMinuteQuantity: 20,
+    customTimeSlotPrice: 6,
+    vatRate: 22,
+    maxBookingPerTimeSlotQuantity: 4,
+  });
+  option.timeSlotPrices = option.timeSlotPrices.map((timeSlotPrice) => {
+    const price = timeSlotPrice.timeSlot ? prices[timeSlotPrice.timeSlot] : undefined;
+    return price === undefined ? timeSlotPrice : { ...timeSlotPrice, isEnabled: true, price };
+  });
+  return option;
+}
+
+/**
+ * The data of the add panel of an hourly service, by id: those created with the panel and Sup; the
+ * other example rows get theirs from the list (see `hourlyDetailsOf`).
+ */
+const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
+  [
+    '4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01',
+    Object.assign(new HourlyServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: 'Sup',
+          description: 'Tavola da stand up paddle con pagaia, a noleggio a ore.',
+        },
+        {
+          language: Language.En,
+          serviceName: 'Sup',
+          description: 'Stand up paddle board with paddle, rented by the hour.',
+        },
+      ],
+      icon: StandardServiceIcon.Surfing,
+      isPeriodPricingEnabled: true,
+      periodAvailabilities: [
+        {
+          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          availabilityOptions: [exampleAvailability()],
+        },
+      ],
+      idSectors: ['7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01'],
+      isOnlinePurchaseEnabled: true,
+      bookingOptions: [
+        {
+          dateFrom: '2026-06-01T00:00:00.000Z',
+          dateTo: '2026-09-15T00:00:00.000Z',
+          availabilityOption: exampleAvailability(),
+        },
+      ],
+    }),
+  ],
+]);
+
+function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
+  return (
+    HOURLY_SERVICE_DETAILS.get(row.idHourlyService ?? '') ??
+    Object.assign(new HourlyServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: row.serviceName,
+          description: 'Servizio a ore offerto dallo stabilimento.',
+        },
+      ],
+    })
+  );
+}
+
+/** The hourly service of the `idHourlyService` of the query string, if it exists. */
+function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow | undefined {
+  const idHourlyService = request.params.get('idHourlyService');
+  return HOURLY_SERVICES.find((row) => row.idHourlyService === idHourlyService);
+}
+
+/**
+ * `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of the
+ * edit panel. 200 with `HourlyServiceSelectedGeneralInfo`, only the languages written; 401 without a
+ * valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const hourlyServiceGeneralInfoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedHourlyService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = hourlyDetailsOf(row);
+  const answer: HourlyServiceSelectedGeneralInfo = {
+    idHourlyService: row.idHourlyService,
+    translations: details.translations.filter(
+      ({ serviceName, description }) => serviceName || description,
+    ),
+    icon: details.icon,
+    isHighlighted: details.isHighlighted,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
+ * 200 with `HourlyServiceSelectedPrices`, the availability only of the periods that have it; 401
+ * without a valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const hourlyServicePricesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedHourlyService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = hourlyDetailsOf(row);
+  const answer: HourlyServiceSelectedPrices = {
+    isPeriodPricingEnabled: details.isPeriodPricingEnabled,
+    periodAvailabilities: details.periodAvailabilities.filter(
+      ({ availabilityOptions }) => availabilityOptions.length > 0,
+    ),
+    idSectors: details.idSectors,
+    isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
+ * the edit panel, the array of the booking options (empty when there are none). 401 without a valid
+ * access token; 404 `resource.not_found` for an unknown id.
+ */
+export const hourlyServiceBookingOptionsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedHourlyService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  return of(
+    new HttpResponse({
+      status: 200,
+      url: request.url,
+      body: structuredClone(hourlyDetailsOf(row).bookingOptions),
+    }),
+  ).pipe(delay(300));
+};
+
+type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest> & { idProperty?: unknown };
+
+/**
+ * `POST /api/catalog/create-hourly-service` with `HourlyServiceAddItemRequest` and `idProperty`: the
+ * new hourly service goes into the list, with the name in the language of `Accept-Language`. 204
+ * without a body; 401 without a valid access token; 403 for an unknown property; 400 with one error
+ * per wrong field (see `standardGeneralErrors` and `hourlyPriceErrors`).
+ */
+export const createHourlyServiceMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreateHourlyServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const errors = [...standardGeneralErrors(body, language), ...hourlyPriceErrors(body)];
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const main = body.translations?.find((translation) => translation.language === language);
+  const idHourlyService = crypto.randomUUID();
+  HOURLY_SERVICE_DETAILS.set(
+    idHourlyService,
+    structuredClone(onlyFieldsOf(HourlyServiceAddItemRequest, body as HourlyServiceAddItemRequest)),
+  );
+  HOURLY_SERVICES.push({
+    propertyId: property.id,
+    idHourlyService,
+    serviceName: main?.serviceName?.trim() ?? null,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/** Every price of the time slots, of the periods and of the booking options, when given, not below 0. */
+function hourlyPriceErrors(body: {
+  periodAvailabilities?: ServicePeriodAvailability[];
+  bookingOptions?: HourlyServiceBookingOption[];
+}): MockFieldError[] {
+  const errorsOf = (option: ServiceAvailabilityOption, at: string): MockFieldError[] => [
+    ...option.timeSlotPrices.flatMap(({ price }, index) =>
+      priceErrors({ price }).map((): MockFieldError => ({
+        field: `${at}.timeSlotPrices[${index}].price`,
+        code: 'validation.invalid',
+      })),
+    ),
+    ...priceErrors({ price: option.customTimeSlotPrice }).map((): MockFieldError => ({
+      field: `${at}.customTimeSlotPrice`,
+      code: 'validation.invalid',
+    })),
+  ];
+  return [
+    ...(body.periodAvailabilities ?? []).flatMap((periodAvailability, periodIndex) =>
+      periodAvailability.availabilityOptions.flatMap((option, optionIndex) =>
+        errorsOf(
+          option,
+          `periodAvailabilities[${periodIndex}].availabilityOptions[${optionIndex}]`,
+        ),
+      ),
+    ),
+    ...(body.bookingOptions ?? []).flatMap((bookingOption, index) =>
+      errorsOf(bookingOption.availabilityOption, `bookingOptions[${index}].availabilityOption`),
+    ),
+  ];
+}
+
+type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unknown };
+
+/**
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
+ * an unknown property; 404 `resource.not_found` for an `idHourlyService` that is not one of its
+ * hourly services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab
+ * and the answer is 204 without a body.
+ */
+function updateHourlyService(
+  request: HttpRequest<unknown>,
+  errorsOf: (body: UpdateHourlyServiceBody) => MockFieldError[],
+  apply: (
+    details: HourlyServiceAddItemRequest,
+    body: UpdateHourlyServiceBody,
+    row: HourlyServiceRow,
+  ) => void,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as UpdateHourlyServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const row = HOURLY_SERVICES.find(
+    (item) => item.idHourlyService === body.idHourlyService && item.propertyId === property.id,
+  );
+  if (!row?.idHourlyService) {
+    return resourceNotFound(request);
+  }
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const details = structuredClone(hourlyDetailsOf(row));
+  apply(details, structuredClone(body), row);
+  HOURLY_SERVICE_DETAILS.set(row.idHourlyService, details);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+}
+
+/**
+ * `POST /api/catalog/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest` and
+ * `idProperty`: names, descriptions, icon and Metti in evidenza; the list shows the new name
+ * (language of `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
+ */
+export const updateHourlyServiceGeneralMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  return updateHourlyService(
+    request,
+    (body) => standardGeneralErrors(body, language),
+    (details, body, row) => {
+      details.translations = body.translations ?? [];
+      details.icon = body.icon ?? null;
+      details.isHighlighted = body.isHighlighted === true;
+      const main = details.translations.find((translation) => translation.language === language);
+      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+    },
+  );
+};
+
+/**
+ * `POST /api/catalog/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest` and
+ * `idProperty`: the Prezzi tab. 400 for a price below 0.
+ */
+export const updateHourlyServicePricesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateHourlyService(
+    request,
+    (body) => hourlyPriceErrors({ periodAvailabilities: body.periodAvailabilities }),
+    (details, body) => {
+      details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
+      details.periodAvailabilities = body.periodAvailabilities ?? [];
+      details.idSectors = body.idSectors ?? [];
+      details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
+    },
+  );
+
+/**
+ * `POST /api/catalog/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest` and
+ * `idProperty`: the booking options of the Prenotazioni tab, all of them. 400 for a price below 0.
+ */
+export const updateHourlyServiceBookingMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateHourlyService(
+    request,
+    (body) => hourlyPriceErrors({ bookingOptions: body.bookingOptions }),
+    (details, body) => {
+      details.bookingOptions = body.bookingOptions ?? [];
+    },
+  );
 
 type AutomaticPriceRow = AutomaticPriceItem & { propertyId: number };
 

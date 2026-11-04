@@ -1,0 +1,19 @@
+<app-services-period-prices
+  [isPeriodPricingEnabled]="form().isPeriodPricingEnabled"
+  [periods]="periods()"
+>
+  <ng-template appServicesPeriodContent let-period>
+    @if (availabilityByPeriod().get(period.idPeriod); as periodAvailability) {
+      <app-services-availability-options
+        [form]="periodAvailability.availabilityOptions"
+        [isReadonly]="isReadonly()"
+      />
+    }
+  </ng-template>
+</app-services-period-prices>
+
+<app-services-limits [form]="form().idSectors" />
+
+<app-toggle [formField]="form().isOnlinePurchaseEnabled">
+  {{ 'management.settings.services.form.prices.online_purchase' | translate }}
+</app-toggle>

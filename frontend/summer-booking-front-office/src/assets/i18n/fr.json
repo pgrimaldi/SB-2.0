@@ -1200,6 +1200,7 @@
           "title": "Services horaires",
           "create": "Ajouter un service horaire",
           "add_title": "Ajouter un nouveau service horaire",
+          "edit_title": "Modifier le service horaire",
           "table": {
             "service": "Service"
           },
@@ -1358,6 +1359,35 @@
               "one_hour": "1 heure",
               "two_hours": "2 heures"
             }
+          },
+          "availability": {
+            "title": "Options de disponibilité",
+            "hours": "Horaires de disponibilité",
+            "days_title": "Jours disponibles",
+            "days": {
+              "monday": "Lun",
+              "tuesday": "Mar",
+              "wednesday": "Mer",
+              "thursday": "Jeu",
+              "friday": "Ven",
+              "saturday": "Sam",
+              "sunday": "Dim"
+            },
+            "time_slots": "Créneaux disponibles",
+            "time_slot_names": {
+              "ten_minutes": "10 min",
+              "fifteen_minutes": "15 min",
+              "thirty_minutes": "30 min",
+              "forty_five_minutes": "45 min",
+              "one_hour": "1 h",
+              "one_hour_thirty_minutes": "1 h 30 min",
+              "two_hours": "2 h",
+              "three_hours": "3 h"
+            },
+            "custom": "Personnalisé",
+            "minutes": "min",
+            "max_bookings_per_time_slot": "Réservations max par créneau",
+            "fixed_time_slots": "Créneaux fixes"
           }
         }
       }

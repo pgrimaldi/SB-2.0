@@ -11,28 +11,36 @@
 @if (isPeriodPricingEnabled()().value()) {
   @for (period of periods(); track period.idPeriod) {
     <app-expansion-panel [title]="period.periodName ?? ''" [pathIcon]="periodIcons">
-      <div class="services__period__prices__period">
-        <div class="services__period__prices__dates">
-          <div class="services__period__prices__intervals">
-            @for (interval of period.intervals; track interval.idInterval) {
-              <div class="services__period__prices__interval">
-                <span>{{ day(interval.dateFrom) }}</span>
-                <span class="services__period__prices__to">{{ day(interval.dateTo) }}</span>
-              </div>
-            }
+      <div class="services__period__prices__body">
+        <div class="services__period__prices__period">
+          <div class="services__period__prices__dates">
+            <div class="services__period__prices__intervals">
+              @for (interval of period.intervals; track interval.idInterval) {
+                <div class="services__period__prices__interval">
+                  <span>{{ day(interval.dateFrom) }}</span>
+                  <span class="services__period__prices__to">{{ day(interval.dateTo) }}</span>
+                </div>
+              }
+            </div>
           </div>
+          @if (priceByPeriod().get(period.idPeriod); as periodPrice) {
+            <div class="services__period__prices__amount services__period__prices__price">
+              <app-filled-number-field
+                class="services__period__prices__field"
+                [isDecimal]="true"
+                [isCurrency]="true"
+                [formField]="periodPrice.price"
+                [error]="validationText.text(periodPrice.price)"
+              />
+              <span class="services__period__prices__unit">€</span>
+            </div>
+          }
         </div>
-        @if (priceByPeriod().get(period.idPeriod); as periodPrice) {
-          <div class="services__period__prices__amount services__period__prices__price">
-            <app-filled-number-field
-              class="services__period__prices__field"
-              [isDecimal]="true"
-              [isCurrency]="true"
-              [formField]="periodPrice.price"
-              [error]="validationText.text(periodPrice.price)"
-            />
-            <span class="services__period__prices__unit">€</span>
-          </div>
+        @if (content(); as content) {
+          <ng-container
+            [ngTemplateOutlet]="content.template"
+            [ngTemplateOutletContext]="{ $implicit: period }"
+          />
         }
       </div>
     </app-expansion-panel>

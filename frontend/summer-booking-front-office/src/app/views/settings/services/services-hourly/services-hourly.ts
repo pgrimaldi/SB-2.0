@@ -6,6 +6,7 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { HourlyServiceAddItemPanel } from '../../../../components/management/settings/services/hourly-service-add-item-panel/hourly-service-add-item-panel';
+import { HourlyServiceEditItemPanel } from '../../../../components/management/settings/services/hourly-service-edit-item-panel/hourly-service-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -27,6 +28,7 @@ interface ServicesHourlyTexts {
     DeleteItemsPopup,
     DuplicateItemsPopup,
     HourlyServiceAddItemPanel,
+    HourlyServiceEditItemPanel,
     PageTitle,
     Table,
     TableErrorPopup,
@@ -43,6 +45,8 @@ export class ServicesHourly {
 
   protected readonly loadFailed = signal(false);
   protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idHourlyServiceToEdit = signal<string | null>(null);
   protected readonly idSelectedHourlyServices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idHourlyServicesToDelete = signal<readonly string[]>([]);
@@ -83,13 +87,18 @@ export class ServicesHourly {
       idHourlyService && this.askDelete([idHourlyService], serviceName),
     duplicate: ({ idHourlyService, serviceName }) =>
       idHourlyService && this.askDuplicate([idHourlyService], serviceName),
-    edit: () => {},
+    edit: ({ idHourlyService }) => idHourlyService && this.openEdit(idHourlyService),
   });
 
   protected readonly deleteHourlyServices = (idProperty: string, idHourlyServices: string[]) =>
     this.catalog.deleteHourlyServiceItems({ idProperty, idHourlyServices });
   protected readonly duplicateHourlyServices = (idProperty: string, idHourlyServices: string[]) =>
     this.catalog.duplicateHourlyServiceItems({ idProperty, idHourlyServices });
+
+  protected openEdit(idHourlyService: string): void {
+    this.idHourlyServiceToEdit.set(idHourlyService);
+    this.editing.set(true);
+  }
 
   protected askDelete(
     idHourlyServices: readonly TableRowId[],

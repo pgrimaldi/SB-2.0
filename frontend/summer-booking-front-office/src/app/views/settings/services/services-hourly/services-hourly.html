@@ -24,7 +24,17 @@
   (create)="adding.set(true)"
 />
 
-<app-hourly-service-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" />
+<app-hourly-service-add-item-panel
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (created)="table.reload()"
+/>
+<app-hourly-service-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idHourlyService]="idHourlyServiceToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idHourlyServicesToDelete()"

@@ -1,0 +1,504 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  effect,
+  inject,
+  input,
+  model,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
+  TreeValidationResult,
+  applyEach,
+  applyWhen,
+  disabled,
+  form,
+  submit,
+} from '@angular/forms/signals';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable, Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
+import { ServiceTimeSlot } from '../../../../../entities/enums/service-time-slot';
+import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceBookingOption } from '../../../../../entities/settings/services/hourly-service-booking-option';
+import { HourlyServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/hourly-service-selected-general-info';
+import { HourlyServiceSelectedPrices } from '../../../../../entities/settings/services/hourly-service-selected-prices';
+import { HourlyServiceUpdateBookingRequest } from '../../../../../entities/settings/services/hourly-service-update-booking-request';
+import { HourlyServiceUpdateGeneralRequest } from '../../../../../entities/settings/services/hourly-service-update-general-request';
+import { HourlyServiceUpdatePricesRequest } from '../../../../../entities/settings/services/hourly-service-update-prices-request';
+import { ServiceAvailabilityOption } from '../../../../../entities/settings/services/service-availability-option';
+import { ServicePeriodAvailability } from '../../../../../entities/settings/services/service-period-availability';
+import { ServiceTimeSlotPrice } from '../../../../../entities/settings/services/service-time-slot-price';
+import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
+import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
+import { SeasonService } from '../../../../../services/api/seasons/season.service';
+import { requiredText } from '../../../../shared/forms/validators';
+import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
+import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
+import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
+import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-service-bookings-tab';
+import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/hourly-service-general-info-tab';
+import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
+import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+
+interface ServiceFormTexts {
+  tabs: {
+    general_info: string;
+    prices: string;
+    bookings: string;
+  };
+}
+
+/** The tabs of the panel, in their order. */
+enum PanelTab {
+  GeneralInfo,
+  Prices,
+  Bookings,
+}
+
+/** The fields of the form each tab shows, reads and saves. */
+const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof HourlyServiceAddItemRequest)[]>> = {
+  [PanelTab.GeneralInfo]: ['translations', 'icon', 'isHighlighted'],
+  [PanelTab.Prices]: [
+    'isPeriodPricingEnabled',
+    'periodAvailabilities',
+    'idSectors',
+    'isOnlinePurchaseEnabled',
+  ],
+  [PanelTab.Bookings]: ['bookingOptions'],
+};
+
+@Component({
+  selector: 'app-hourly-service-edit-item-panel',
+  imports: [
+    Button,
+    HourlyServiceBookingsTab,
+    HourlyServiceGeneralInfoTab,
+    HourlyServicePricesTab,
+    SidePanel,
+    SidePanelButtons,
+    TabGroup,
+    TranslatePipe,
+  ],
+  templateUrl: './hourly-service-edit-item-panel.html',
+  styleUrl: './hourly-service-edit-item-panel.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
+  readonly open = model(false);
+  readonly idHourlyService = input<string | null>(null);
+  /** Icons as image paths: [X]. */
+  readonly pathIcon = input<readonly string[] | null>();
+  readonly updated = output<void>();
+
+  private readonly auth = inject(AuthBehaviour);
+  private readonly catalog = inject(CatalogService);
+  private readonly seasons = inject(SeasonService);
+  private readonly language = inject(LanguageBehaviour);
+  private readonly translateService = inject(TranslateService);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
+
+  protected readonly ButtonAppearance = ButtonAppearance;
+  protected readonly ButtonSize = ButtonSize;
+  protected readonly PanelTab = PanelTab;
+  protected readonly mainLanguage = this.language.current;
+  protected readonly selectedTab = signal<number>(PanelTab.GeneralInfo);
+  /** The tab marked in the bar: back to `selectedTab` when the user stays on the tab being edited. */
+  protected readonly tabIndex = signal<number>(PanelTab.GeneralInfo);
+  /** Modifica pressed: the fields of the tab can be changed, until Annulla or Salva. */
+  protected readonly isEditing = signal(false);
+  protected readonly isSaving = signal(false);
+  protected readonly isLocked = computed(() => !this.isEditing() || this.isSaving());
+  private readonly texts = toSignal(
+    this.translateService.stream(
+      'management.settings.services.form',
+    ) as Observable<ServiceFormTexts>,
+    { initialValue: null },
+  );
+  protected readonly tabs = computed<readonly TabGroupTab[]>(() => [
+    { label: this.texts()?.tabs.general_info ?? '', widthPercent: 34 },
+    { label: this.texts()?.tabs.prices ?? '', widthPercent: 33 },
+    { label: this.texts()?.tabs.bookings ?? '', widthPercent: 33 },
+  ]);
+  private readonly draft = signal(newDraft());
+  protected readonly draftForm = form(this.draft, (path) => {
+    disabled(path, () => this.isLocked());
+    applyEach(path.translations, (translation) => {
+      applyWhen(
+        translation,
+        ({ valueOf }) =>
+          this.selectedTab() === PanelTab.GeneralInfo &&
+          valueOf(translation.language) === this.mainLanguage(),
+        (main) => {
+          requiredText(main.serviceName);
+          requiredText(main.description);
+        },
+      );
+    });
+  });
+  /** The values as the APIs gave them, tab by tab: the form is compared with them. */
+  private readonly pristine = signal(newDraft());
+  protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
+  private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The tabs whose data are being read: their fields cannot be used meanwhile. */
+  private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  protected readonly isEditDisabled = computed(() => {
+    const tab = this.selectedTab() as PanelTab;
+    return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
+  });
+  protected readonly isSaveDisabled = computed(
+    () => this.loadingTabs().has(this.selectedTab()) || this.draftForm().invalid(),
+  );
+  /** The image chosen from the computer, instead of an icon of the list. */
+  private readonly image = signal<File | null>(null);
+  protected readonly imagePreviewUrl = signal<string | null>(null);
+  private readonly error = signal<ApiProblem | null>(null);
+  protected readonly errorMessage = toSignal(
+    toObservable(this.error).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  private readonly loadings = new Map<PanelTab, Subscription>();
+
+  constructor() {
+    this.unsaved.watch(this);
+    effect(() => {
+      if (this.open()) {
+        untracked(() => this.reset());
+      }
+    });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return (
+      this.open() &&
+      (this.image() !== null || JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()))
+    );
+  }
+
+  protected isLoading(tab: PanelTab): boolean {
+    return this.loadingTabs().has(tab);
+  }
+
+  protected chooseIcon(icon: StandardServiceIcon): void {
+    this.draftForm.icon().value.set(icon);
+    this.setImage(null);
+  }
+
+  protected chooseImage(image: File): void {
+    this.draftForm.icon().value.set(null);
+    this.setImage(image);
+  }
+
+  protected startEdit(): void {
+    this.error.set(null);
+    this.isEditing.set(true);
+  }
+
+  /** Annulla: the tab goes back to the values read, only to look at. */
+  protected cancelEdit(): void {
+    const tab = this.selectedTab() as PanelTab;
+    const pristine = structuredClone(this.pristine());
+    this.draft.update((draft) => ({ ...draft, ...pick(pristine, tab) }));
+    if (tab === PanelTab.GeneralInfo) {
+      this.setImage(null);
+    }
+    this.draftForm().reset();
+    this.error.set(null);
+    this.isEditing.set(false);
+  }
+
+  /**
+   * Another tab while editing: with changes, first the question about losing them; staying, the bar
+   * marks the tab being edited again.
+   */
+  protected async requestTab(index: number): Promise<void> {
+    const current = this.selectedTab();
+    if (index === current) {
+      return;
+    }
+    if (this.isEditing()) {
+      if (!(await this.unsaved.confirmDiscard(this))) {
+        this.tabIndex.set(current);
+        return;
+      }
+      this.cancelEdit();
+    }
+    this.selectedTab.set(index);
+    this.tabIndex.set(index);
+    this.loadTab(index);
+  }
+
+  /** Salva: only the tab being edited, with its API. */
+  protected save(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    const idHourlyService = this.idHourlyService();
+    if (this.isSaving() || !idProperty || !idHourlyService) {
+      return;
+    }
+    const tab = this.selectedTab() as PanelTab;
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.update(tab, idProperty, idHourlyService));
+        this.isSaving.set(false);
+        this.open.set(false);
+        this.updated.emit();
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
+  }
+
+  protected async leave(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.open.set(false);
+    }
+  }
+
+  /** The data of a tab, read from its API the first time the tab is opened. */
+  private loadTab(tab: PanelTab): void {
+    const idHourlyService = this.idHourlyService();
+    const idProperty = this.auth.user()?.propertyId;
+    if (!idHourlyService || !idProperty || this.loadedTabs().has(tab)) {
+      return;
+    }
+    this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
+    this.error.set(null);
+    this.setLoading(tab, true);
+    if (tab === PanelTab.GeneralInfo) {
+      this.loadings.set(
+        tab,
+        this.catalog
+          .hourlyServiceGeneralInfo(idHourlyService)
+          .pipe(finalize(() => this.setLoading(tab, false)))
+          .subscribe({
+            next: (info) => this.setGeneralInfo(info),
+            error: (error: unknown) => this.loadFailed(tab, error),
+          }),
+      );
+    } else if (tab === PanelTab.Prices) {
+      this.loadings.set(
+        tab,
+        forkJoin({
+          prices: this.catalog.hourlyServicePrices(idHourlyService),
+          periods: this.seasons.periodList(idProperty, false),
+        })
+          .pipe(finalize(() => this.setLoading(tab, false)))
+          .subscribe({
+            next: ({ prices, periods }) => this.setPrices(prices, periods),
+            error: (error: unknown) => this.loadFailed(tab, error),
+          }),
+      );
+    } else {
+      this.loadings.set(
+        tab,
+        this.catalog
+          .hourlyServiceBookingOptions(idHourlyService)
+          .pipe(finalize(() => this.setLoading(tab, false)))
+          .subscribe({
+            next: (options) => this.setBookingOptions(options),
+            error: (error: unknown) => this.loadFailed(tab, error),
+          }),
+      );
+    }
+  }
+
+  /** The tab is read again the next time it is opened. */
+  private loadFailed(tab: PanelTab, error: unknown): void {
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.error.set(toApiProblem(error));
+  }
+
+  /** The update API of the tab, with the fields of that tab only. */
+  private update(tab: PanelTab, idProperty: string, idHourlyService: string): Observable<void> {
+    const draft = this.draft();
+    if (tab === PanelTab.GeneralInfo) {
+      return this.catalog.updateHourlyServiceGeneral(
+        idProperty,
+        Object.assign(new HourlyServiceUpdateGeneralRequest(), {
+          idHourlyService,
+          ...pick(draft, tab),
+        }),
+      );
+    }
+    if (tab === PanelTab.Prices) {
+      return this.catalog.updateHourlyServicePrices(
+        idProperty,
+        Object.assign(new HourlyServiceUpdatePricesRequest(), {
+          idHourlyService,
+          ...pick(draft, tab),
+        }),
+      );
+    }
+    return this.catalog.updateHourlyServiceBooking(
+      idProperty,
+      Object.assign(new HourlyServiceUpdateBookingRequest(), {
+        idHourlyService,
+        ...pick(draft, tab),
+      }),
+    );
+  }
+
+  private reset(): void {
+    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.loadings.clear();
+    this.loadedTabs.set(new Set());
+    this.loadingTabs.set(new Set());
+    this.error.set(null);
+    this.isEditing.set(false);
+    this.isSaving.set(false);
+    this.draft.set(newDraft());
+    this.pristine.set(newDraft());
+    this.draftForm().reset();
+    this.periods.set([]);
+    this.setImage(null);
+    this.selectedTab.set(PanelTab.GeneralInfo);
+    this.tabIndex.set(PanelTab.GeneralInfo);
+    this.loadTab(PanelTab.GeneralInfo);
+  }
+
+  /** Name and description in every language, also those the API leaves out (empty). */
+  private setGeneralInfo(info: HourlyServiceSelectedGeneralInfo): void {
+    this.applyLoaded({
+      translations: SERVICE_LANGUAGES.map((language) => {
+        const translation = info.translations.find((item) => item.language === language);
+        return Object.assign(new ServiceTranslation(), {
+          language,
+          serviceName: translation?.serviceName ?? null,
+          description: translation?.description ?? null,
+        });
+      }),
+      icon: info.icon,
+      isHighlighted: info.isHighlighted ?? false,
+    });
+  }
+
+  /**
+   * The availability options of each period of the current season: the saved ones, or an empty one as
+   * in the add panel.
+   */
+  private setPrices(
+    prices: HourlyServiceSelectedPrices,
+    periods: readonly SeasonPeriodItem[],
+  ): void {
+    this.periods.set(periods);
+    this.applyLoaded({
+      isPeriodPricingEnabled: prices.isPeriodPricingEnabled ?? false,
+      periodAvailabilities: periods.map(({ idPeriod }) => {
+        const saved = prices.periodAvailabilities.find((item) => item.idPeriod === idPeriod);
+        return Object.assign(new ServicePeriodAvailability(), {
+          idPeriod,
+          availabilityOptions: saved?.availabilityOptions.length
+            ? saved.availabilityOptions.map(availabilityOf)
+            : [new ServiceAvailabilityOption()],
+        });
+      }),
+      idSectors: [...prices.idSectors],
+      isOnlinePurchaseEnabled: prices.isOnlinePurchaseEnabled ?? false,
+    });
+  }
+
+  private setBookingOptions(options: readonly HourlyServiceBookingOption[]): void {
+    this.applyLoaded({
+      bookingOptions: options.map((option) =>
+        Object.assign(new HourlyServiceBookingOption(), option, {
+          availabilityOption: availabilityOf(option.availabilityOption),
+        }),
+      ),
+    });
+  }
+
+  /** Values read from an API: into the form, and into what the form is compared with. */
+  private applyLoaded(values: Partial<HourlyServiceAddItemRequest>): void {
+    this.draft.update((draft) => ({ ...draft, ...values }));
+    this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+  }
+
+  private setLoading(tab: PanelTab, isLoading: boolean): void {
+    this.loadingTabs.update((tabs) => {
+      const next = new Set(tabs);
+      if (isLoading) {
+        next.add(tab);
+      } else {
+        next.delete(tab);
+      }
+      return next;
+    });
+  }
+
+  private setImage(image: File | null): void {
+    const previewUrl = this.imagePreviewUrl();
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    this.image.set(image);
+    this.imagePreviewUrl.set(image ? URL.createObjectURL(image) : null);
+  }
+
+  ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
+    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.setImage(null);
+  }
+}
+
+/** Empty, with a name and a description for every language: the user's one is the main. */
+function newDraft(): HourlyServiceAddItemRequest {
+  return Object.assign(new HourlyServiceAddItemRequest(), {
+    translations: SERVICE_LANGUAGES.map((language) =>
+      Object.assign(new ServiceTranslation(), { language }),
+    ),
+  });
+}
+
+/** A saved availability with every time slot of the list, in its order, as the form shows them. */
+function availabilityOf(saved: ServiceAvailabilityOption): ServiceAvailabilityOption {
+  return Object.assign(new ServiceAvailabilityOption(), saved, {
+    daysOfWeek: [...saved.daysOfWeek],
+    timeSlotPrices: Object.values(ServiceTimeSlot).map((timeSlot) =>
+      Object.assign(
+        new ServiceTimeSlotPrice(),
+        saved.timeSlotPrices.find((item) => item.timeSlot === timeSlot),
+        { timeSlot },
+      ),
+    ),
+  });
+}
+
+/** The values of the fields of one tab. */
+function pick(
+  values: HourlyServiceAddItemRequest,
+  tab: PanelTab,
+): Partial<HourlyServiceAddItemRequest> {
+  return Object.fromEntries(TAB_FIELDS[tab].map((field) => [field, values[field]]));
+}

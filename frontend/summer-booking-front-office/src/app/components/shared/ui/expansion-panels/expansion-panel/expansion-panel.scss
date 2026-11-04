@@ -89,7 +89,7 @@
 }
 
 .expansion__panel__content {
-  padding: 1.5rem 2rem 2rem;
+  padding: var(--expansion-panel-content-padding, 1.5rem 2rem 2rem);
 }
 
 // Material puts its own padding around the content, with no token to change it.

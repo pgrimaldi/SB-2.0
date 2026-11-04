@@ -7,25 +7,45 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
   untracked,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { applyEach, applyWhen, form } from '@angular/forms/signals';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
+  TreeValidationResult,
+  applyEach,
+  applyWhen,
+  disabled,
+  form,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
+import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
+import { ServiceAvailabilityOption } from '../../../../../entities/settings/services/service-availability-option';
+import { ServicePeriodAvailability } from '../../../../../entities/settings/services/service-period-availability';
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
+import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
+import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
+import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-service-bookings-tab';
 import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/hourly-service-general-info-tab';
+import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 
 interface ServiceFormTexts {
@@ -45,18 +65,31 @@ enum PanelTab {
 
 @Component({
   selector: 'app-hourly-service-add-item-panel',
-  imports: [HourlyServiceGeneralInfoTab, SidePanel, TabGroup, TranslatePipe],
+  imports: [
+    HourlyServiceBookingsTab,
+    HourlyServiceGeneralInfoTab,
+    HourlyServicePricesTab,
+    SidePanel,
+    TabGroup,
+    TranslatePipe,
+  ],
   templateUrl: './hourly-service-add-item-panel.html',
+  styleUrl: './hourly-service-add-item-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   readonly open = model(false);
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
+  readonly created = output<void>();
 
+  private readonly auth = inject(AuthBehaviour);
+  private readonly catalog = inject(CatalogService);
+  private readonly seasons = inject(SeasonService);
   private readonly language = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
 
   protected readonly PanelTab = PanelTab;
   protected readonly mainLanguage = this.language.current;
@@ -73,7 +106,10 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     { label: this.texts()?.tabs.bookings ?? '', widthPercent: 33 },
   ]);
   private readonly draft = signal(newDraft());
+  /** Until the periods are read, the price per period cannot be turned on. */
+  private readonly arePeriodsLoaded = signal(false);
   protected readonly draftForm = form(this.draft, (path) => {
+    disabled(path.isPeriodPricingEnabled, () => !this.arePeriodsLoaded());
     applyEach(path.translations, (translation) => {
       applyWhen(
         translation,
@@ -85,12 +121,25 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       );
     });
   });
-  /** The form as it was when the panel opened. */
-  private readonly pristine = JSON.stringify(newDraft());
-  protected readonly isSaveDisabled = computed(() => this.draftForm().invalid());
+  /** The form as it was when the panel opened, with an empty availability option for every period. */
+  private readonly pristine = signal(JSON.stringify(newDraft()));
+  protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  protected readonly isFetching = signal(false);
+  protected readonly isSaving = signal(false);
+  protected readonly isSaveDisabled = computed(
+    () => this.isFetching() || this.draftForm().invalid(),
+  );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
+  private readonly error = signal<ApiProblem | null>(null);
+  protected readonly errorMessage = toSignal(
+    toObservable(this.error).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  private fetching?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
@@ -102,7 +151,9 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine);
+    return (
+      this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine())
+    );
   }
 
   protected chooseIcon(icon: StandardServiceIcon): void {
@@ -115,6 +166,30 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.setImage(image);
   }
 
+  protected save(): void {
+    const idProperty = this.auth.user()?.propertyId;
+    if (this.isSaving() || !idProperty) {
+      return;
+    }
+
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.catalog.createHourlyService(idProperty, this.draft()));
+        this.isSaving.set(false);
+        this.open.set(false);
+        this.created.emit();
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
+  }
+
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
@@ -124,8 +199,46 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private reset(): void {
     this.draft.set(newDraft());
     this.draftForm().reset();
+    this.setPeriods([]);
+    this.arePeriodsLoaded.set(false);
     this.setImage(null);
     this.selectedTab.set(PanelTab.GeneralInfo);
+    this.fetchPeriods();
+  }
+
+  /** The periods of the current season, each with its own availability options in the Prezzi tab. */
+  private fetchPeriods(): void {
+    this.fetching?.unsubscribe();
+    this.error.set(null);
+    const idProperty = this.auth.user()?.propertyId;
+    if (!idProperty) {
+      return;
+    }
+    this.isFetching.set(true);
+    this.fetching = this.seasons
+      .periodList(idProperty, false)
+      .pipe(finalize(() => this.isFetching.set(false)))
+      .subscribe({
+        next: (periods) => {
+          this.setPeriods(periods);
+          this.arePeriodsLoaded.set(true);
+        },
+        error: (error: unknown) => this.error.set(toApiProblem(error)),
+      });
+  }
+
+  /** An empty availability option for each period of the season: the form without changes. */
+  private setPeriods(periods: readonly SeasonPeriodItem[]): void {
+    this.periods.set(periods);
+    this.draftForm.periodAvailabilities().value.set(
+      periods.map(({ idPeriod }) =>
+        Object.assign(new ServicePeriodAvailability(), {
+          idPeriod,
+          availabilityOptions: [new ServiceAvailabilityOption()],
+        }),
+      ),
+    );
+    this.pristine.set(JSON.stringify(this.draft()));
   }
 
   private setImage(image: File | null): void {
@@ -139,6 +252,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
+    this.fetching?.unsubscribe();
     this.setImage(null);
   }
 }

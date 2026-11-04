@@ -3819,6 +3819,821 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### POST `/api/catalog/create-hourly-service`
+
+Servizi Orari: creazione servizio orario.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Sup",
+      "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."
+    },
+    {
+      "language": "en",
+      "serviceName": "Sup",
+      "description": "Stand up paddle board with paddle, rented by the hour."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "icon": "Surfing",
+  "isHighlighted": false,
+  "isPeriodPricingEnabled": true,
+  "periodAvailabilities": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "availabilityOptions": [
+        {
+          "startTime": "09:00",
+          "endTime": "19:00",
+          "daysOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "timeSlotPrices": [
+            {
+              "timeSlot": "TenMinutes",
+              "isEnabled": true,
+              "price": 3
+            },
+            {
+              "timeSlot": "FifteenMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "ThirtyMinutes",
+              "isEnabled": true,
+              "price": 8
+            },
+            {
+              "timeSlot": "FortyFiveMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "OneHour",
+              "isEnabled": true,
+              "price": 15
+            },
+            {
+              "timeSlot": "OneHourThirtyMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "TwoHours",
+              "isEnabled": true,
+              "price": 25
+            },
+            {
+              "timeSlot": "ThreeHours",
+              "isEnabled": false,
+              "price": null
+            }
+          ],
+          "isCustomTimeSlotEnabled": true,
+          "customTimeSlotMinuteQuantity": 20,
+          "customTimeSlotPrice": 6,
+          "vatRate": 22,
+          "maxBookingPerTimeSlotQuantity": 4,
+          "hasFixedTimeSlots": false
+        }
+      ]
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true,
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "availabilityOption": {
+        "startTime": "09:00",
+        "endTime": "19:00",
+        "daysOfWeek": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "timeSlotPrices": [
+          {
+            "timeSlot": "TenMinutes",
+            "isEnabled": true,
+            "price": 3
+          },
+          {
+            "timeSlot": "FifteenMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "ThirtyMinutes",
+            "isEnabled": true,
+            "price": 8
+          },
+          {
+            "timeSlot": "FortyFiveMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "OneHour",
+            "isEnabled": true,
+            "price": 15
+          },
+          {
+            "timeSlot": "OneHourThirtyMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "TwoHours",
+            "isEnabled": true,
+            "price": 25
+          },
+          {
+            "timeSlot": "ThreeHours",
+            "isEnabled": false,
+            "price": null
+          }
+        ],
+        "isCustomTimeSlotEnabled": true,
+        "customTimeSlotMinuteQuantity": 20,
+        "customTimeSlotPrice": 6,
+        "vatRate": 22,
+        "maxBookingPerTimeSlotQuantity": 4,
+        "hasFixedTimeSlots": false
+      }
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Sup", "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."}, {"language": "en", "serviceName": "Sup", "description": "Stand up paddle board with paddle, rented by the hour."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Sup` |
+| `translations[].description` | string \| null | `Tavola da stand up paddle con pagaia, a noleggio a ore.` |
+| `icon` | string (enum StandardServiceIcon) \| null | `Surfing` |
+| `isHighlighted` | boolean | `false` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
+| `periodAvailabilities[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]` |
+| `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null | `09:00` |
+| `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null | `19:00` |
+| `periodAvailabilities[].availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].isEnabled` | boolean | `true` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `periodAvailabilities[].availabilityOptions[].isCustomTimeSlotEnabled` | boolean | `true` |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null | `22` |
+| `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+| `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) | `{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}` |
+| `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null | `19:00` |
+| `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].isEnabled` | boolean | `true` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `bookingOptions[].availabilityOption.isCustomTimeSlotEnabled` | boolean | `true` |
+| `bookingOptions[].availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `bookingOptions[].availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `bookingOptions[].availabilityOption.vatRate` | number (decimale, %) \| null | `22` |
+| `bookingOptions[].availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `bookingOptions[].availabilityOption.hasFixedTimeSlots` | boolean | `false` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/get-hourly-service-general-info?idHourlyService={idHourlyService}`
+
+Servizi Orari: servizio orario, tab Info Generali.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio orario va nella query string.
+
+```text
+/api/catalog/get-hourly-service-general-info?idHourlyService=4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Sup",
+      "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."
+    },
+    {
+      "language": "en",
+      "serviceName": "Sup",
+      "description": "Stand up paddle board with paddle, rented by the hour."
+    }
+  ],
+  "icon": "Surfing",
+  "isHighlighted": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+| `translations[]` | ServiceTranslation[] (array di oggetti) | `[{"language": "it", "serviceName": "Sup", "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."}, {"language": "en", "serviceName": "Sup", "description": "Stand up paddle board with paddle, rented by the hour."}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Sup` |
+| `translations[].description` | string \| null | `Tavola da stand up paddle con pagaia, a noleggio a ore.` |
+| `icon` | string (enum StandardServiceIcon) \| null | `Surfing` |
+| `isHighlighted` | boolean | `false` |
+
+### GET `/api/catalog/get-hourly-service-prices?idHourlyService={idHourlyService}`
+
+Servizi Orari: servizio orario, tab Prezzi.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio orario va nella query string.
+
+```text
+/api/catalog/get-hourly-service-prices?idHourlyService=4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "isPeriodPricingEnabled": true,
+  "periodAvailabilities": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "availabilityOptions": [
+        {
+          "startTime": "09:00",
+          "endTime": "19:00",
+          "daysOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "timeSlotPrices": [
+            {
+              "timeSlot": "TenMinutes",
+              "isEnabled": true,
+              "price": 3
+            },
+            {
+              "timeSlot": "FifteenMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "ThirtyMinutes",
+              "isEnabled": true,
+              "price": 8
+            },
+            {
+              "timeSlot": "FortyFiveMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "OneHour",
+              "isEnabled": true,
+              "price": 15
+            },
+            {
+              "timeSlot": "OneHourThirtyMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "TwoHours",
+              "isEnabled": true,
+              "price": 25
+            },
+            {
+              "timeSlot": "ThreeHours",
+              "isEnabled": false,
+              "price": null
+            }
+          ],
+          "isCustomTimeSlotEnabled": true,
+          "customTimeSlotMinuteQuantity": 20,
+          "customTimeSlotPrice": 6,
+          "vatRate": 22,
+          "maxBookingPerTimeSlotQuantity": 4,
+          "hasFixedTimeSlots": false
+        }
+      ]
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
+| `periodAvailabilities[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]` |
+| `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null | `09:00` |
+| `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null | `19:00` |
+| `periodAvailabilities[].availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].isEnabled` | boolean | `true` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `periodAvailabilities[].availabilityOptions[].isCustomTimeSlotEnabled` | boolean | `true` |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null | `22` |
+| `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+
+### GET `/api/catalog/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
+
+Servizi Orari: servizio orario, tab Prenotazioni.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio orario va nella query string.
+
+```text
+/api/catalog/get-hourly-service-booking-options?idHourlyService=4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "dateFrom": "2026-06-01T00:00:00.000Z",
+    "dateTo": "2026-09-15T00:00:00.000Z",
+    "availabilityOption": {
+      "startTime": "09:00",
+      "endTime": "19:00",
+      "daysOfWeek": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "timeSlotPrices": [
+        {
+          "timeSlot": "TenMinutes",
+          "isEnabled": true,
+          "price": 3
+        },
+        {
+          "timeSlot": "FifteenMinutes",
+          "isEnabled": false,
+          "price": null
+        },
+        {
+          "timeSlot": "ThirtyMinutes",
+          "isEnabled": true,
+          "price": 8
+        },
+        {
+          "timeSlot": "FortyFiveMinutes",
+          "isEnabled": false,
+          "price": null
+        },
+        {
+          "timeSlot": "OneHour",
+          "isEnabled": true,
+          "price": 15
+        },
+        {
+          "timeSlot": "OneHourThirtyMinutes",
+          "isEnabled": false,
+          "price": null
+        },
+        {
+          "timeSlot": "TwoHours",
+          "isEnabled": true,
+          "price": 25
+        },
+        {
+          "timeSlot": "ThreeHours",
+          "isEnabled": false,
+          "price": null
+        }
+      ],
+      "isCustomTimeSlotEnabled": true,
+      "customTimeSlotMinuteQuantity": 20,
+      "customTimeSlotPrice": 6,
+      "vatRate": 22,
+      "maxBookingPerTimeSlotQuantity": 4,
+      "hasFixedTimeSlots": false
+    }
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `dateTo` | string (ISO 8601, UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `availabilityOption` | ServiceAvailabilityOption (oggetto) | `{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}` |
+| `availabilityOption.startTime` | string (HH:mm) \| null | `09:00` |
+| `availabilityOption.endTime` | string (HH:mm) \| null | `19:00` |
+| `availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `availabilityOption.timeSlotPrices[].isEnabled` | boolean | `true` |
+| `availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `availabilityOption.isCustomTimeSlotEnabled` | boolean | `true` |
+| `availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `availabilityOption.vatRate` | number (decimale, %) \| null | `22` |
+| `availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `availabilityOption.hasFixedTimeSlots` | boolean | `false` |
+
+### POST `/api/catalog/update-hourly-service-general`
+
+Servizi Orari: servizio orario, salvataggio Info Generali.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Sup",
+      "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."
+    },
+    {
+      "language": "en",
+      "serviceName": "Sup",
+      "description": "Stand up paddle board with paddle, rented by the hour."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "icon": "Surfing",
+  "isHighlighted": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Sup", "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."}, {"language": "en", "serviceName": "Sup", "description": "Stand up paddle board with paddle, rented by the hour."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Sup` |
+| `translations[].description` | string \| null | `Tavola da stand up paddle con pagaia, a noleggio a ore.` |
+| `icon` | string (enum StandardServiceIcon) \| null | `Surfing` |
+| `isHighlighted` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/update-hourly-service-prices`
+
+Servizi Orari: servizio orario, salvataggio Prezzi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
+  "isPeriodPricingEnabled": true,
+  "periodAvailabilities": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "availabilityOptions": [
+        {
+          "startTime": "09:00",
+          "endTime": "19:00",
+          "daysOfWeek": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "timeSlotPrices": [
+            {
+              "timeSlot": "TenMinutes",
+              "isEnabled": true,
+              "price": 3
+            },
+            {
+              "timeSlot": "FifteenMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "ThirtyMinutes",
+              "isEnabled": true,
+              "price": 8
+            },
+            {
+              "timeSlot": "FortyFiveMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "OneHour",
+              "isEnabled": true,
+              "price": 15
+            },
+            {
+              "timeSlot": "OneHourThirtyMinutes",
+              "isEnabled": false,
+              "price": null
+            },
+            {
+              "timeSlot": "TwoHours",
+              "isEnabled": true,
+              "price": 25
+            },
+            {
+              "timeSlot": "ThreeHours",
+              "isEnabled": false,
+              "price": null
+            }
+          ],
+          "isCustomTimeSlotEnabled": true,
+          "customTimeSlotMinuteQuantity": 20,
+          "customTimeSlotPrice": 6,
+          "vatRate": 22,
+          "maxBookingPerTimeSlotQuantity": 4,
+          "hasFixedTimeSlots": false
+        }
+      ]
+    }
+  ],
+  "idSectors": [
+    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+  ],
+  "isOnlinePurchaseEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+| `isPeriodPricingEnabled` | boolean | `true` |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
+| `periodAvailabilities[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]` |
+| `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null | `09:00` |
+| `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null | `19:00` |
+| `periodAvailabilities[].availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].isEnabled` | boolean | `true` |
+| `periodAvailabilities[].availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `periodAvailabilities[].availabilityOptions[].isCustomTimeSlotEnabled` | boolean | `true` |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `periodAvailabilities[].availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null | `22` |
+| `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
+| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `isOnlinePurchaseEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/update-hourly-service-booking`
+
+Servizi Orari: servizio orario, salvataggio Prenotazioni.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "availabilityOption": {
+        "startTime": "09:00",
+        "endTime": "19:00",
+        "daysOfWeek": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "timeSlotPrices": [
+          {
+            "timeSlot": "TenMinutes",
+            "isEnabled": true,
+            "price": 3
+          },
+          {
+            "timeSlot": "FifteenMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "ThirtyMinutes",
+            "isEnabled": true,
+            "price": 8
+          },
+          {
+            "timeSlot": "FortyFiveMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "OneHour",
+            "isEnabled": true,
+            "price": 15
+          },
+          {
+            "timeSlot": "OneHourThirtyMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "TwoHours",
+            "isEnabled": true,
+            "price": 25
+          },
+          {
+            "timeSlot": "ThreeHours",
+            "isEnabled": false,
+            "price": null
+          }
+        ],
+        "isCustomTimeSlotEnabled": true,
+        "customTimeSlotMinuteQuantity": 20,
+        "customTimeSlotPrice": 6,
+        "vatRate": 22,
+        "maxBookingPerTimeSlotQuantity": 4,
+        "hasFixedTimeSlots": false
+      }
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
+| `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) | `{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}` |
+| `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null | `19:00` |
+| `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].isEnabled` | boolean | `true` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `bookingOptions[].availabilityOption.isCustomTimeSlotEnabled` | boolean | `true` |
+| `bookingOptions[].availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `bookingOptions[].availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `bookingOptions[].availabilityOption.vatRate` | number (decimale, %) \| null | `22` |
+| `bookingOptions[].availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `bookingOptions[].availabilityOption.hasFixedTimeSlots` | boolean | `false` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### POST `/api/catalog/automatic-price-list`
 
 Servizi: prezzi automatici.
