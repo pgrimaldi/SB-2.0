@@ -7,6 +7,7 @@ import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { AutomaticPriceAddItemPanel } from '../../../../components/management/settings/services/automatic-price-add-item-panel/automatic-price-add-item-panel';
+import { AutomaticPriceEditItemPanel } from '../../../../components/management/settings/services/automatic-price-edit-item-panel/automatic-price-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -34,6 +35,7 @@ interface AutomaticPriceRow {
   imports: [
     DeleteItemsPopup,
     AutomaticPriceAddItemPanel,
+    AutomaticPriceEditItemPanel,
     DuplicateItemsPopup,
     PageTitle,
     Table,
@@ -52,6 +54,8 @@ export class AutomaticPrices {
 
   protected readonly loadFailed = signal(false);
   protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idAutomaticPriceToEdit = signal<string | null>(null);
   protected readonly idSelectedAutomaticPrices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idAutomaticPricesToDelete = signal<readonly string[]>([]);
@@ -93,7 +97,7 @@ export class AutomaticPrices {
       idAutomaticPrice && this.askDelete([idAutomaticPrice], serviceName),
     duplicate: ({ idAutomaticPrice, serviceName }) =>
       idAutomaticPrice && this.askDuplicate([idAutomaticPrice], serviceName),
-    edit: () => {},
+    edit: ({ idAutomaticPrice }) => idAutomaticPrice && this.openEdit(idAutomaticPrice),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, AutomaticPriceRow> = (request) =>
@@ -117,6 +121,11 @@ export class AutomaticPrices {
     this.catalog.deleteAutomaticPriceItems({ idProperty, idAutomaticPrices });
   protected readonly duplicateAutomaticPrices = (idProperty: string, idAutomaticPrices: string[]) =>
     this.catalog.duplicateAutomaticPriceItems({ idProperty, idAutomaticPrices });
+
+  protected openEdit(idAutomaticPrice: string): void {
+    this.idAutomaticPriceToEdit.set(idAutomaticPrice);
+    this.editing.set(true);
+  }
 
   protected askDelete(
     idAutomaticPrices: readonly TableRowId[],

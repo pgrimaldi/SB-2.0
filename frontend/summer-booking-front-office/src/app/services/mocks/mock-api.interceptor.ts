@@ -5,7 +5,11 @@ import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
   automaticPriceListMock,
+  automaticPriceGeneralInfoMock,
+  automaticPricePricesValidityMock,
   automaticPriceServicesMock,
+  updateAutomaticPriceGeneralMock,
+  updateAutomaticPricePricesValidityMock,
   createAutomaticPriceMock,
   barServiceBookingOptionsMock,
   barServiceGeneralInfoMock,
@@ -765,6 +769,34 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/create-automatic-price`
   ) {
     return createAutomaticPriceMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-automatic-price-general-info`
+  ) {
+    return automaticPriceGeneralInfoMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-automatic-price-prices-validity`
+  ) {
+    return automaticPricePricesValidityMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-automatic-price-general`
+  ) {
+    return updateAutomaticPriceGeneralMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-automatic-price-prices-validity`
+  ) {
+    return updateAutomaticPricePricesValidityMock(request);
   }
 
   if (

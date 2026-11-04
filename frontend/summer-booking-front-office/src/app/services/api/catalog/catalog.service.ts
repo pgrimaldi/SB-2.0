@@ -9,8 +9,12 @@ import { BathhouseMedia } from '../../../entities/settings/bathhouse-configurati
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
+import { AutomaticPriceSelectedGeneralInfo } from '../../../entities/settings/services/automatic-price-selected-general-info';
+import { AutomaticPriceSelectedPricesValidity } from '../../../entities/settings/services/automatic-price-selected-prices-validity';
 import { AutomaticPriceServices } from '../../../entities/settings/services/automatic-price-services';
 import { AutomaticPriceTimeSlot } from '../../../entities/settings/services/automatic-price-time-slot';
+import { AutomaticPriceUpdateGeneralRequest } from '../../../entities/settings/services/automatic-price-update-general-request';
+import { AutomaticPriceUpdatePricesValidityRequest } from '../../../entities/settings/services/automatic-price-update-prices-validity-request';
 import { AutomaticPriceValidityPeriod } from '../../../entities/settings/services/automatic-price-validity-period';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
@@ -424,12 +428,49 @@ export class CatalogService {
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
-      validityPeriods: request.validityPeriods.map((validityPeriod) => ({
-        ...onlyFieldsOf(AutomaticPriceValidityPeriod, validityPeriod),
-        timeSlots: validityPeriod.timeSlots.map((timeSlot) =>
-          onlyFieldsOf(AutomaticPriceTimeSlot, timeSlot),
-        ),
-      })),
+      validityPeriods: request.validityPeriods.map(validityPeriodFields),
+      idProperty,
+    });
+
+  /** The Info Generali tab of an automatic price, for the edit panel. */
+  readonly automaticPriceGeneralInfo = (
+    idAutomaticPrice: string,
+  ): Observable<AutomaticPriceSelectedGeneralInfo> =>
+    this.httpClient.get<AutomaticPriceSelectedGeneralInfo>(
+      `${this.endpoint}/get-automatic-price-general-info`,
+      { params: { idAutomaticPrice } },
+    );
+
+  /** The Prezzi e Validità tab of an automatic price, for the edit panel. */
+  readonly automaticPricePricesValidity = (
+    idAutomaticPrice: string,
+  ): Observable<AutomaticPriceSelectedPricesValidity> =>
+    this.httpClient.get<AutomaticPriceSelectedPricesValidity>(
+      `${this.endpoint}/get-automatic-price-prices-validity`,
+      { params: { idAutomaticPrice } },
+    );
+
+  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  readonly updateAutomaticPriceGeneral = (
+    idProperty: string,
+    request: AutomaticPriceUpdateGeneralRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-automatic-price-general`, {
+      ...onlyFieldsOf(AutomaticPriceUpdateGeneralRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Prezzi e Validità tab of the edit panel. Answers 204 with no body. */
+  readonly updateAutomaticPricePricesValidity = (
+    idProperty: string,
+    request: AutomaticPriceUpdatePricesValidityRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-automatic-price-prices-validity`, {
+      ...onlyFieldsOf(AutomaticPriceUpdatePricesValidityRequest, request),
+      validityPeriods: request.validityPeriods.map(validityPeriodFields),
       idProperty,
     });
 
@@ -480,6 +521,17 @@ function periodAvailabilityFields(
   return {
     ...onlyFieldsOf(ServicePeriodAvailability, periodAvailability),
     availabilityOptions: periodAvailability.availabilityOptions.map(availabilityOptionFields),
+  };
+}
+
+function validityPeriodFields(
+  validityPeriod: AutomaticPriceValidityPeriod,
+): AutomaticPriceValidityPeriod {
+  return {
+    ...onlyFieldsOf(AutomaticPriceValidityPeriod, validityPeriod),
+    timeSlots: validityPeriod.timeSlots.map((timeSlot) =>
+      onlyFieldsOf(AutomaticPriceTimeSlot, timeSlot),
+    ),
   };
 }
 

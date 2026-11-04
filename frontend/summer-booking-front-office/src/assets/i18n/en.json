@@ -1233,6 +1233,7 @@
           "title": "Automatic prices",
           "create": "Add automatic price",
           "add_title": "Add new automatic price",
+          "edit_title": "Edit automatic price",
           "table": {
             "service": "Service",
             "price": "Price"

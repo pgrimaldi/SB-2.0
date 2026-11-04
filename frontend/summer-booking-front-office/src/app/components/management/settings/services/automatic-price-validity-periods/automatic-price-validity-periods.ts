@@ -40,6 +40,8 @@ type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 export class AutomaticPriceValidityPeriods {
   /** The periods of the form of the panel, which validates and saves them. */
   readonly form = input.required<FieldTree<AutomaticPriceValidityPeriod[]>>();
+  /** Only to look at: adding and removing periods and time slots are off. */
+  readonly isReadonly = input(false);
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);

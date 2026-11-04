@@ -11,6 +11,8 @@ import { BathhouseMedia } from '../../../entities/settings/bathhouse-configurati
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
+import { AutomaticPriceSelectedGeneralInfo } from '../../../entities/settings/services/automatic-price-selected-general-info';
+import { AutomaticPriceSelectedPricesValidity } from '../../../entities/settings/services/automatic-price-selected-prices-validity';
 import { AutomaticPriceServices } from '../../../entities/settings/services/automatic-price-services';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
@@ -1972,8 +1974,52 @@ const AUTOMATIC_PRICES: AutomaticPriceRow[] = [
 
 const AUTOMATIC_PRICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
-/** The data of the add panel of an automatic price, by id: those created with the panel. */
-const AUTOMATIC_PRICE_DETAILS = new Map<string, AutomaticPriceAddItemRequest>();
+/**
+ * The data of the add panel of an automatic price, by id: those created with the panel and Coperto;
+ * the other example rows get theirs from the list (see `automaticDetailsOf`).
+ */
+const AUTOMATIC_PRICE_DETAILS = new Map<string, AutomaticPriceAddItemRequest>([
+  [
+    '7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01',
+    Object.assign(new AutomaticPriceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: 'Coperto',
+          description: 'Coperto a persona per i servizi del bar.',
+        },
+        {
+          language: Language.En,
+          serviceName: 'Cover charge',
+          description: 'Cover charge per person for the bar services.',
+        },
+      ],
+      icon: BarServiceIcon.Cutlery,
+      price: 2,
+      vatRate: 10,
+      isOnlinePurchaseEnabled: true,
+      validityPeriods: [
+        {
+          dateFrom: '2026-06-01T00:00:00.000Z',
+          dateTo: '2026-09-30T00:00:00.000Z',
+          daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+          timeSlots: [
+            { startTime: '12:00', endTime: '15:00' },
+            { startTime: '19:00', endTime: '23:00' },
+          ],
+        },
+      ],
+      idBarServices: [
+        '8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01',
+        '8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02',
+      ],
+      idStandardServices: ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01'],
+      idHourlyServices: ['4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01'],
+      isPricePerServiceEnabled: true,
+      idSectors: ['7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01'],
+    }),
+  ],
+]);
 
 /** The services of a property as `{ id, value }`, with the name. */
 function serviceItemsOf<Row extends { propertyId: number; serviceName: string | null }>(
@@ -2047,35 +2093,13 @@ export const createAutomaticPriceMock = (
   if (!property) {
     return forbidden(request);
   }
-  if (
-    !areServicesOf(body.idBarServices, BAR_SERVICES, property.id, (row) => row.idBarService) ||
-    !areServicesOf(
-      body.idStandardServices,
-      STANDARD_SERVICES,
-      property.id,
-      (row) => row.idStandardService,
-    ) ||
-    !areServicesOf(
-      body.idHourlyServices,
-      HOURLY_SERVICES,
-      property.id,
-      (row) => row.idHourlyService,
-    )
-  ) {
+  if (!areAutomaticServicesOf(body, property.id)) {
     return resourceNotFound(request);
   }
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const icon = body.icon ?? null;
-  const isKnownIcon =
-    icon === null ||
-    Object.values<string>(BarServiceIcon).includes(icon) ||
-    Object.values<string>(StandardServiceIcon).includes(icon);
-  const iconErrors: MockFieldError[] = isKnownIcon
-    ? []
-    : [{ field: 'icon', code: 'validation.invalid' }];
   const errors = [
     ...standardGeneralErrors({ translations: body.translations }, language),
-    ...iconErrors,
+    ...automaticIconErrors(body.icon ?? null),
     ...priceErrors(body),
   ];
   if (errors.length) {
@@ -2097,6 +2121,203 @@ export const createAutomaticPriceMock = (
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/** The data of the add panel of an automatic price: the saved one, or a minimal one from the list. */
+function automaticDetailsOf(row: AutomaticPriceRow): AutomaticPriceAddItemRequest {
+  return (
+    AUTOMATIC_PRICE_DETAILS.get(row.idAutomaticPrice ?? '') ??
+    Object.assign(new AutomaticPriceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: row.serviceName,
+          description: 'Prezzo automatico dello stabilimento.',
+        },
+      ],
+      price: row.price,
+      vatRate: 10,
+    })
+  );
+}
+
+/** The automatic price of the `idAutomaticPrice` of the query string, if it exists. */
+function requestedAutomaticPrice(request: HttpRequest<unknown>): AutomaticPriceRow | undefined {
+  const idAutomaticPrice = request.params.get('idAutomaticPrice');
+  return AUTOMATIC_PRICES.find((row) => row.idAutomaticPrice === idAutomaticPrice);
+}
+
+/**
+ * `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of the
+ * edit panel. 200 with `AutomaticPriceSelectedGeneralInfo`, only the languages written; 401 without a
+ * valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const automaticPriceGeneralInfoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedAutomaticPrice(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = automaticDetailsOf(row);
+  const answer: AutomaticPriceSelectedGeneralInfo = {
+    idAutomaticPrice: row.idAutomaticPrice,
+    translations: details.translations.filter(
+      ({ serviceName, description }) => serviceName || description,
+    ),
+    icon: details.icon,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
+ * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity`; 401 without a valid access
+ * token; 404 `resource.not_found` for an unknown id.
+ */
+export const automaticPricePricesValidityMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedAutomaticPrice(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = automaticDetailsOf(row);
+  const answer: AutomaticPriceSelectedPricesValidity = {
+    price: details.price,
+    vatRate: details.vatRate,
+    isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
+    validityPeriods: details.validityPeriods,
+    idBarServices: details.idBarServices,
+    idStandardServices: details.idStandardServices,
+    idHourlyServices: details.idHourlyServices,
+    isPricePerServiceEnabled: details.isPricePerServiceEnabled,
+    idSectors: details.idSectors,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: unknown };
+
+/**
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 403 for an
+ * unknown property; 404 `resource.not_found` for an `idAutomaticPrice` that is not one of its
+ * automatic prices (or for a service that is not one of the property); 400 with one error per wrong
+ * field; otherwise `apply` changes the data of its tab and the answer is 204 without a body.
+ */
+function updateAutomaticPrice(
+  request: HttpRequest<unknown>,
+  errorsOf: (body: UpdateAutomaticPriceBody, propertyId: number) => MockFieldError[] | null,
+  apply: (
+    details: AutomaticPriceAddItemRequest,
+    body: UpdateAutomaticPriceBody,
+    row: AutomaticPriceRow,
+  ) => void,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as UpdateAutomaticPriceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const row = AUTOMATIC_PRICES.find(
+    (item) => item.idAutomaticPrice === body.idAutomaticPrice && item.propertyId === property.id,
+  );
+  const errors = row ? errorsOf(body, property.id) : null;
+  if (!row?.idAutomaticPrice || !errors) {
+    return resourceNotFound(request);
+  }
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const details = structuredClone(automaticDetailsOf(row));
+  apply(details, structuredClone(body), row);
+  AUTOMATIC_PRICE_DETAILS.set(row.idAutomaticPrice, details);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+}
+
+/**
+ * `POST /api/catalog/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest` and
+ * `idProperty`: names, descriptions and icon; the list shows the new name (language of
+ * `Accept-Language`). Errors as the creation.
+ */
+export const updateAutomaticPriceGeneralMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  return updateAutomaticPrice(
+    request,
+    (body) => [
+      ...standardGeneralErrors({ translations: body.translations }, language),
+      ...automaticIconErrors(body.icon ?? null),
+    ],
+    (details, body, row) => {
+      details.translations = body.translations ?? [];
+      details.icon = body.icon ?? null;
+      const main = details.translations.find((translation) => translation.language === language);
+      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+    },
+  );
+};
+
+/**
+ * `POST /api/catalog/update-automatic-price-prices-validity` with
+ * `AutomaticPriceUpdatePricesValidityRequest` and `idProperty`: the Prezzi e Validità tab; the list
+ * shows the new price. 400 for a price below 0; 404 for a service that is not one of the property.
+ */
+export const updateAutomaticPricePricesValidityMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateAutomaticPrice(
+    request,
+    (body, propertyId) => (areAutomaticServicesOf(body, propertyId) ? priceErrors(body) : null),
+    (details, body, row) => {
+      details.price = body.price ?? null;
+      details.vatRate = body.vatRate ?? null;
+      details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
+      details.validityPeriods = body.validityPeriods ?? [];
+      details.idBarServices = body.idBarServices ?? [];
+      details.idStandardServices = body.idStandardServices ?? [];
+      details.idHourlyServices = body.idHourlyServices ?? [];
+      details.isPricePerServiceEnabled = body.isPricePerServiceEnabled === true;
+      details.idSectors = body.idSectors ?? [];
+      row.price = details.price;
+    },
+  );
+
+/** The services of the body, when given, all of the property. */
+function areAutomaticServicesOf(body: CreateAutomaticPriceBody, propertyId: number): boolean {
+  return (
+    areServicesOf(body.idBarServices, BAR_SERVICES, propertyId, (row) => row.idBarService) &&
+    areServicesOf(
+      body.idStandardServices,
+      STANDARD_SERVICES,
+      propertyId,
+      (row) => row.idStandardService,
+    ) &&
+    areServicesOf(body.idHourlyServices, HOURLY_SERVICES, propertyId, (row) => row.idHourlyService)
+  );
+}
+
+/** The icon, when given, of the bar services or of the other services. */
+function automaticIconErrors(icon: string | null): MockFieldError[] {
+  return icon === null ||
+    Object.values<string>(BarServiceIcon).includes(icon) ||
+    Object.values<string>(StandardServiceIcon).includes(icon)
+    ? []
+    : [{ field: 'icon', code: 'validation.invalid' }];
+}
 
 /**
  * `POST /api/catalog/automatic-price-list`: one page of the automatic prices of the requested

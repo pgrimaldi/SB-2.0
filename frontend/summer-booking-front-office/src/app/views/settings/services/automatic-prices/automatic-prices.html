@@ -29,6 +29,12 @@
   [(open)]="adding"
   (created)="table.reload()"
 />
+<app-automatic-price-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idAutomaticPrice]="idAutomaticPriceToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idAutomaticPricesToDelete()"

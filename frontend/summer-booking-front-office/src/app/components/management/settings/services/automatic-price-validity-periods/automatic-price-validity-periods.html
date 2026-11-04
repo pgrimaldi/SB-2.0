@@ -2,7 +2,12 @@
   <app-section-title
     [text]="'management.settings.services.form.validity.periods_title' | translate"
   >
-    <app-button [size]="ButtonSize.Small" [pathIcon]="addIcon" (clicked)="addPeriod()">
+    <app-button
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      [disabled]="isReadonly()"
+      (clicked)="addPeriod()"
+    >
       {{ 'management.settings.services.form.validity.add_period' | translate }}
     </app-button>
   </app-section-title>
@@ -11,6 +16,7 @@
       <app-icon-button
         class="automatic__price__validity__periods__remove"
         [pathIcon]="removeIcon"
+        [disabled]="isReadonly()"
         (click)="removePeriod(periodIndex)"
       />
 
@@ -95,6 +101,7 @@
               <app-icon-button
                 class="automatic__price__validity__periods__slot__remove"
                 [pathIcon]="deleteIcon"
+                [disabled]="isReadonly()"
                 (click)="removeTimeSlot(period, slotIndex)"
               />
             </div>
@@ -104,6 +111,7 @@
             [appearance]="ButtonAppearance.Secondary"
             [size]="ButtonSize.Small"
             [pathIcon]="addTimeSlotIcon"
+            [disabled]="isReadonly()"
             (clicked)="addTimeSlot(period)"
           >
             {{ 'management.settings.services.form.validity.add_time_slot' | translate }}

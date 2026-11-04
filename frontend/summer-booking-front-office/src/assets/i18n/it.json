@@ -1233,6 +1233,7 @@
           "title": "Prezzi automatici",
           "create": "Aggiungi prezzo automatico",
           "add_title": "Aggiungi nuovo prezzo automatico",
+          "edit_title": "Modifica prezzo automatico",
           "table": {
             "service": "Servizio",
             "price": "Prezzo"

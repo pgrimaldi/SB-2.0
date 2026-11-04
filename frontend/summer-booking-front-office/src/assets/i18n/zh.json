@@ -1233,6 +1233,7 @@
           "title": "自动价格",
           "create": "添加自动价格",
           "add_title": "添加新的自动价格",
+          "edit_title": "编辑自动价格",
           "table": {
             "service": "服务",
             "price": "价格"

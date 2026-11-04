@@ -28,4 +28,6 @@ export class AutomaticPricePricesValidityTab {
   readonly form = input.required<FieldTree<AutomaticPriceAddItemRequest>>();
   /** The services of the property, by kind; null while they are not read. */
   readonly services = input<AutomaticPriceServices | null>(null);
+  /** Only to look at: adding and removing periods and time slots are off. */
+  readonly isReadonly = input(false);
 }

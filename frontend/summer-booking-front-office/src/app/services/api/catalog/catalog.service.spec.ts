@@ -10,6 +10,8 @@ import { StandardServiceIcon } from '../../../entities/enums/standard-service-ic
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
+import { AutomaticPriceUpdateGeneralRequest } from '../../../entities/settings/services/automatic-price-update-general-request';
+import { AutomaticPriceUpdatePricesValidityRequest } from '../../../entities/settings/services/automatic-price-update-prices-validity-request';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
@@ -800,6 +802,113 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-automatic-price`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should ask for the general information of the automatic price in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.automaticPriceGeneralInfo('a1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-automatic-price-general-info` &&
+        params.get('idAutomaticPrice') === 'a1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the prices and validity of the automatic price in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.automaticPricePricesValidity('a1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-automatic-price-prices-validity` &&
+        params.get('idAutomaticPrice') === 'a1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should save the Info Generali of the automatic price with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const translation = { language: Language.It, serviceName: 'Coperto', description: 'A persona' };
+    const request = {
+      idAutomaticPrice: 'a1',
+      translations: [translation],
+      icon: StandardServiceIcon.Pool,
+    };
+
+    catalog
+      .updateAutomaticPriceGeneral(
+        'p1',
+        Object.assign(new AutomaticPriceUpdateGeneralRequest(), {
+          ...request,
+          translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-automatic-price-general`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the prices and validity of the automatic price with only the contract fields', () => {
+    const { catalog, controller } = setup();
+    const timeSlot = { startTime: '19:00', endTime: '23:00' };
+    const validityPeriod = {
+      dateFrom: '2026-06-01T00:00:00.000Z',
+      dateTo: '2026-09-30T00:00:00.000Z',
+      daysOfWeek: [6, 7],
+      timeSlots: [timeSlot],
+    };
+    const request = {
+      idAutomaticPrice: 'a1',
+      price: 2.5,
+      vatRate: 10,
+      isOnlinePurchaseEnabled: false,
+      validityPeriods: [validityPeriod],
+      idBarServices: ['b1'],
+      idStandardServices: ['s1'],
+      idHourlyServices: [],
+      isPricePerServiceEnabled: false,
+      idSectors: [],
+    };
+
+    catalog
+      .updateAutomaticPricePricesValidity(
+        'p1',
+        Object.assign(new AutomaticPriceUpdatePricesValidityRequest(), {
+          ...request,
+          validityPeriods: [
+            {
+              ...validityPeriod,
+              timeSlots: [{ ...timeSlot, unexpectedFlag: 'extra-field' }],
+              unexpectedFlag: 'extra-field',
+            },
+          ],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-automatic-price-prices-validity`,
     ).request.body;
     expect(body).toEqual({ ...request, idProperty: 'p1' });
     controller.verify();

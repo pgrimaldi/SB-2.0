@@ -4,7 +4,7 @@
   {{ 'management.settings.services.form.prices.online_purchase' | translate }}
 </app-toggle>
 
-<app-automatic-price-validity-periods [form]="form().validityPeriods" />
+<app-automatic-price-validity-periods [form]="form().validityPeriods" [isReadonly]="isReadonly()" />
 
 <app-automatic-price-service-validity
   [idBarServices]="form().idBarServices"
