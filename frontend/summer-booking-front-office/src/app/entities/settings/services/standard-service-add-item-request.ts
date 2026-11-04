@@ -1,4 +1,5 @@
 import { StandardServiceIcon } from '../../enums/standard-service-icon';
+import { ServiceBookingOption } from './service-booking-option';
 import { ServicePeriodPrice } from './service-period-price';
 import { ServiceTranslation } from './service-translation';
 
@@ -12,4 +13,5 @@ export class StandardServiceAddItemRequest {
   periodPrices: ServicePeriodPrice[] = [];
   idSectors: string[] = [];
   isOnlinePurchaseEnabled = false;
+  bookingOptions: ServiceBookingOption[] = [];
 }

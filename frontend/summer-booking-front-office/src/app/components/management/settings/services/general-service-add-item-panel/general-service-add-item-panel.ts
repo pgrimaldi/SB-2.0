@@ -33,6 +33,7 @@ import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { GeneralServiceGeneralInfoTab } from '../general-service-general-info-tab/general-service-general-info-tab';
+import { GeneralServiceBookingsTab } from '../general-service-bookings-tab/general-service-bookings-tab';
 import { GeneralServicePricesTab } from '../general-service-prices-tab/general-service-prices-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 
@@ -40,6 +41,7 @@ interface ServiceFormTexts {
   tabs: {
     general_info: string;
     prices: string;
+    bookings: string;
   };
 }
 
@@ -47,11 +49,13 @@ interface ServiceFormTexts {
 enum PanelTab {
   GeneralInfo,
   Prices,
+  Bookings,
 }
 
 @Component({
   selector: 'app-general-service-add-item-panel',
   imports: [
+    GeneralServiceBookingsTab,
     GeneralServiceGeneralInfoTab,
     GeneralServicePricesTab,
     SidePanel,
@@ -86,6 +90,7 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly tabs = computed<readonly TabGroupTab[]>(() => [
     { label: this.texts()?.tabs.general_info ?? '', widthPercent: 34 },
     { label: this.texts()?.tabs.prices ?? '', widthPercent: 33 },
+    { label: this.texts()?.tabs.bookings ?? '', widthPercent: 33 },
   ]);
   private readonly draft = signal(newDraft());
   protected readonly draftForm = form(this.draft, (path) => {
