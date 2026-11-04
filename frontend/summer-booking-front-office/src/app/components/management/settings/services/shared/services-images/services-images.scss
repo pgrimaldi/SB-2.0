@@ -1,0 +1,61 @@
+:host {
+  --section-title-padding-bottom: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+// Same look as the labels of the fields.
+.services__images__label {
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.services__images__icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.services__images__icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  padding: 0;
+  border: 0.0625rem solid transparent;
+  border-radius: 0.3125rem;
+  background: none;
+  cursor: pointer;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+// Only to look at: the chosen icon stays marked.
+.services__images__icon:disabled {
+  cursor: default;
+}
+
+.services__images__icon__chosen {
+  border-color: var(--color__main__theme__one);
+  background: var(--color__tertiary__theme);
+}
+
+@media (hover: hover) {
+  .services__images__icon:hover:not(:disabled) {
+    background: var(--color__tertiary__theme);
+  }
+}
+
+.services__images__drop {
+  height: 8rem;
+}

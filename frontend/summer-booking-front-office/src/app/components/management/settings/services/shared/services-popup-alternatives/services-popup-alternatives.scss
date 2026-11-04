@@ -1,0 +1,60 @@
+// The box of the variants, with the buttons of the management panels.
+:host {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+  --section-title-padding-bottom: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+// Name, price and bin on one line; the name takes what the others leave.
+.services__popup__alternatives__variant {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.services__popup__alternatives__name {
+  flex: 2 1 0;
+  min-width: 0;
+}
+
+// A price and its "€", which sits beside the field, at its height.
+.services__popup__alternatives__amount {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.services__popup__alternatives__price {
+  flex: 1 1 0;
+}
+
+.services__popup__alternatives__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.services__popup__alternatives__unit {
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: var(--filled-field-height, 1.625rem);
+}
+
+// Without the grey circle.
+.services__popup__alternatives__remove {
+  --icon-button-background: transparent;
+}
+
+@media (width < 48rem) {
+  :host {
+    padding-inline: 0.75rem;
+  }
+}

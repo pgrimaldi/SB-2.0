@@ -65,40 +65,14 @@
   [formField]="form().category"
 />
 
-<section class="service__general__info__tab__image">
-  <app-section-title
-    [text]="'management.settings.services.form.image.title' | translate"
-    [pathIcon]="imagesIcon"
-  />
-  <span class="service__general__info__tab__label">
-    {{ 'management.settings.services.form.image.choose_icon' | translate }}
-  </span>
-  <div class="service__general__info__tab__icons">
-    @for (icon of icons; track icon.icon) {
-      <button
-        class="service__general__info__tab__icon"
-        type="button"
-        [disabled]="isReadonly()"
-        [class.service__general__info__tab__icon__chosen]="icon.icon === form().icon().value()"
-        (click)="iconChosen.emit(icon.icon)"
-      >
-        <img [src]="icon.url" width="24" height="24" alt="" />
-      </button>
-    }
-  </div>
-  <span class="service__general__info__tab__label">
-    {{ 'management.settings.services.form.image.upload' | translate }}
-  </span>
-  <app-file-drop-zone
-    class="service__general__info__tab__drop"
-    accept="image/*"
-    [disabled]="isReadonly()"
-    [text]="'management.settings.services.form.image.drop' | translate"
-    [pathIcon]="addImageIcon"
-    [previewUrl]="imagePreviewUrl()"
-    (filesSelected)="chooseImage($event)"
-  />
-</section>
+<app-services-images
+  [icons]="icons"
+  [chosenIcon]="form().icon().value()"
+  [imagePreviewUrl]="imagePreviewUrl()"
+  [isReadonly]="isReadonly()"
+  (iconChosen)="iconChosen.emit($event)"
+  (imageChosen)="imageChosen.emit($event)"
+/>
 
 <div class="service__general__info__tab__highlighted">
   <app-toggle [formField]="form().isHighlighted">

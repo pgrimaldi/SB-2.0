@@ -16,43 +16,7 @@
   />
 </div>
 
-<section class="service__prices__tab__section">
-  <app-section-title [text]="'management.settings.services.form.prices.variants.title' | translate">
-    <app-button
-      [size]="ButtonSize.Small"
-      [pathIcon]="addIcon"
-      [disabled]="isReadonly()"
-      (clicked)="addVariant()"
-    >
-      {{ 'management.settings.services.form.prices.variants.add' | translate }}
-    </app-button>
-  </app-section-title>
-  @for (variant of form().variants; track variant; let variantIndex = $index) {
-    <div class="service__prices__tab__variant">
-      <app-filled-text-field
-        class="service__prices__tab__variant__name"
-        [label]="'management.settings.services.form.prices.variants.name' | translate"
-        [formField]="variant.variantName"
-      />
-      <div class="service__prices__tab__amount service__prices__tab__variant__price">
-        <app-filled-number-field
-          class="service__prices__tab__field"
-          [label]="'management.settings.services.form.prices.price' | translate"
-          [isDecimal]="true"
-          [isCurrency]="true"
-          [formField]="variant.price"
-        />
-        <span class="service__prices__tab__unit">€</span>
-      </div>
-      <app-icon-button
-        class="service__prices__tab__remove"
-        [pathIcon]="removeIcon"
-        [disabled]="isReadonly()"
-        (click)="removeVariant(variantIndex)"
-      />
-    </div>
-  }
-</section>
+<app-services-popup-alternatives [form]="form().variants" [isReadonly]="isReadonly()" />
 
 <section class="service__prices__tab__section">
   <div class="service__prices__tab__heading">

@@ -1,0 +1,32 @@
+<app-section-title
+  [text]="'management.settings.services.form.image.title' | translate"
+  [pathIcon]="imagesIcon"
+/>
+<span class="services__images__label">
+  {{ 'management.settings.services.form.image.choose_icon' | translate }}
+</span>
+<div class="services__images__icons">
+  @for (icon of icons(); track icon.value) {
+    <button
+      class="services__images__icon"
+      type="button"
+      [disabled]="isReadonly()"
+      [class.services__images__icon__chosen]="icon.value === chosenIcon()"
+      (click)="iconChosen.emit(icon.value)"
+    >
+      <img [src]="icon.url" width="24" height="24" alt="" />
+    </button>
+  }
+</div>
+<span class="services__images__label">
+  {{ 'management.settings.services.form.image.upload' | translate }}
+</span>
+<app-file-drop-zone
+  class="services__images__drop"
+  accept="image/*"
+  [disabled]="isReadonly()"
+  [text]="'management.settings.services.form.image.drop' | translate"
+  [pathIcon]="addImageIcon"
+  [previewUrl]="imagePreviewUrl()"
+  (filesSelected)="chooseImage($event)"
+/>

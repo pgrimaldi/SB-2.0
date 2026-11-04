@@ -1,0 +1,37 @@
+<app-section-title [text]="'management.settings.services.form.prices.variants.title' | translate">
+  <app-button
+    [size]="ButtonSize.Small"
+    [pathIcon]="addIcon"
+    [disabled]="isReadonly()"
+    (clicked)="addVariant()"
+  >
+    {{ 'management.settings.services.form.prices.variants.add' | translate }}
+  </app-button>
+</app-section-title>
+@for (variant of form(); track variant; let variantIndex = $index) {
+  <div class="services__popup__alternatives__variant">
+    <app-filled-text-field
+      class="services__popup__alternatives__name"
+      [label]="'management.settings.services.form.prices.variants.name' | translate"
+      [formField]="variant.variantName"
+      [error]="validationText.text(variant.variantName)"
+    />
+    <div class="services__popup__alternatives__amount services__popup__alternatives__price">
+      <app-filled-number-field
+        class="services__popup__alternatives__field"
+        [label]="'management.settings.services.form.prices.price' | translate"
+        [isDecimal]="true"
+        [isCurrency]="true"
+        [formField]="variant.price"
+        [error]="validationText.text(variant.price)"
+      />
+      <span class="services__popup__alternatives__unit">€</span>
+    </div>
+    <app-icon-button
+      class="services__popup__alternatives__remove"
+      [pathIcon]="removeIcon"
+      [disabled]="isReadonly()"
+      (click)="removeVariant(variantIndex)"
+    />
+  </div>
+}

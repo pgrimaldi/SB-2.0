@@ -1,0 +1,176 @@
+<section class="services__booking__option__section">
+  <app-section-title [text]="'management.settings.services.form.bookings.title' | translate">
+    <app-button
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      [disabled]="isReadonly()"
+      (clicked)="addOption()"
+    >
+      {{ 'management.settings.services.form.bookings.add' | translate }}
+    </app-button>
+  </app-section-title>
+  @for (option of form(); track option; let optionIndex = $index) {
+    <div class="services__booking__option__option">
+      <app-icon-button
+        class="services__booking__option__remove"
+        [pathIcon]="removeIcon"
+        [disabled]="isReadonly()"
+        (click)="removeOption(optionIndex)"
+      />
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.period' | translate }}
+        </span>
+        <div class="services__booking__option__pair">
+          <span class="services__booking__option__word">
+            {{ 'management.settings.services.form.bookings.date_from' | translate }}
+          </span>
+          <app-filled-date-field
+            class="services__booking__option__field"
+            [pathIcon]="calendarIcon"
+            [formField]="option.dateFrom"
+            [error]="validationText.text(option.dateFrom)"
+          />
+        </div>
+        <div class="services__booking__option__pair">
+          <span class="services__booking__option__word">
+            {{ 'management.settings.services.form.bookings.date_to' | translate }}
+          </span>
+          <app-filled-date-field
+            class="services__booking__option__field"
+            [pathIcon]="calendarIcon"
+            [minDate]="option.dateFrom().value()"
+            [formField]="option.dateTo"
+            [error]="validationText.text(option.dateTo)"
+          />
+        </div>
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.management_hours' | translate }}
+        </span>
+        <div class="services__booking__option__pair">
+          <span class="services__booking__option__word">
+            {{ 'management.settings.services.form.bookings.time_from' | translate }}
+          </span>
+          <app-filled-time-field
+            class="services__booking__option__field"
+            [pathIcon]="clockIcon"
+            [formField]="option.managementStartTime"
+            [error]="validationText.text(option.managementStartTime)"
+          />
+        </div>
+        <div class="services__booking__option__pair">
+          <span class="services__booking__option__word">
+            {{ 'management.settings.services.form.bookings.time_to' | translate }}
+          </span>
+          <app-filled-time-field
+            class="services__booking__option__field"
+            [pathIcon]="clockIcon"
+            [formField]="option.managementEndTime"
+            [error]="validationText.text(option.managementEndTime)"
+          />
+        </div>
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.online_hours' | translate }}
+        </span>
+        <div class="services__booking__option__pair">
+          <span class="services__booking__option__word">
+            {{ 'management.settings.services.form.bookings.time_from' | translate }}
+          </span>
+          <app-filled-time-field
+            class="services__booking__option__field"
+            [pathIcon]="clockIcon"
+            [formField]="option.onlineStartTime"
+            [error]="validationText.text(option.onlineStartTime)"
+          />
+        </div>
+        <div class="services__booking__option__pair">
+          <span class="services__booking__option__word">
+            {{ 'management.settings.services.form.bookings.time_to' | translate }}
+          </span>
+          <app-filled-time-field
+            class="services__booking__option__field"
+            [pathIcon]="clockIcon"
+            [formField]="option.onlineEndTime"
+            [error]="validationText.text(option.onlineEndTime)"
+          />
+        </div>
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.max_bookings_per_hour' | translate }}
+        </span>
+        <app-filled-number-field
+          class="services__booking__option__value"
+          [formField]="option.maxBookingPerHourQuantity"
+          [error]="validationText.text(option.maxBookingPerHourQuantity)"
+        />
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.max_bookings_per_day' | translate }}
+        </span>
+        <app-filled-number-field
+          class="services__booking__option__value"
+          [formField]="option.maxBookingPerDayQuantity"
+          [error]="validationText.text(option.maxBookingPerDayQuantity)"
+        />
+      </app-form-row>
+
+      <app-form-row class="services__booking__option__interval">
+        <span appFormRowLabel class="services__booking__option__label">
+          {{ 'management.settings.services.form.bookings.time_interval' | translate }}
+          <app-icon-button
+            class="services__booking__option__info"
+            [pathIcon]="infoIcon"
+            (click)="showingTimeIntervalInfo.set(true)"
+          />
+        </span>
+        <app-filled-select
+          class="services__booking__option__value"
+          [placeholder]="'management.settings.services.form.choose' | translate"
+          [options]="timeIntervalOptions()"
+          [formField]="option.timeInterval"
+          [error]="validationText.text(option.timeInterval)"
+        />
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.min_items_per_booking' | translate }}
+        </span>
+        <app-filled-number-field
+          class="services__booking__option__value"
+          [formField]="option.minItemPerBookingQuantity"
+          [error]="validationText.text(option.minItemPerBookingQuantity)"
+        />
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.max_items_per_booking' | translate }}
+        </span>
+        <app-filled-number-field
+          class="services__booking__option__value"
+          [formField]="option.maxItemPerBookingQuantity"
+          [error]="validationText.text(option.maxItemPerBookingQuantity)"
+        />
+      </app-form-row>
+    </div>
+  }
+</section>
+
+<app-info-popup
+  [title]="'management.settings.services.form.bookings.time_interval' | translate"
+  [text]="'management.settings.services.form.bookings.time_interval_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingTimeIntervalInfo"
+/>

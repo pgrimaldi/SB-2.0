@@ -25,9 +25,8 @@ import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/
 import { FilledTextarea } from '../../../../shared/ui/inputs/filled-textarea/filled-textarea';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
-import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
-import { FileDropZone } from '../../../../shared/ui/uploads/file-drop-zone/file-drop-zone';
+import { ServicesImages, ServicesImagesIcon } from '../shared/services-images/services-images';
 
 /** Order of the languages in the form. */
 export const SERVICE_LANGUAGES: readonly Language[] = [
@@ -62,7 +61,6 @@ const BAR_SERVICE_CATEGORY_KEYS: Readonly<
   selector: 'app-service-general-info-tab',
   imports: [
     ExpansionPanel,
-    FileDropZone,
     FilledSelect,
     FilledTextField,
     FilledTextarea,
@@ -71,7 +69,7 @@ const BAR_SERVICE_CATEGORY_KEYS: Readonly<
     FormRowLabel,
     IconButton,
     InfoPopup,
-    SectionTitle,
+    ServicesImages,
     Toggle,
     TranslatePipe,
   ],
@@ -93,12 +91,9 @@ export class ServiceGeneralInfoTab {
   protected readonly validationText = inject(ValidationTextBehaviour);
 
   /** Every icon a bar service can have, as shown in the grid. */
-  protected readonly icons = Object.values(BarServiceIcon).map((icon) => ({
-    icon,
-    url: `/assets/images/Services_Bar${icon}.png`,
-  }));
-  protected readonly imagesIcon = ['/assets/images/GeneralIcon_Images.svg'] as const;
-  protected readonly addImageIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
+  protected readonly icons: readonly ServicesImagesIcon<BarServiceIcon>[] = Object.values(
+    BarServiceIcon,
+  ).map((value) => ({ value, url: `/assets/images/Services_Bar${value}.png` }));
   /** [before the title, arrow]. */
   protected readonly languagesIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
   protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
@@ -140,12 +135,5 @@ export class ServiceGeneralInfoTab {
   protected languageName(language: Language | null): string {
     const name = language ? (this.languageNames().of(language) ?? language) : '';
     return name.charAt(0).toLocaleUpperCase(this.mainLanguage()) + name.slice(1);
-  }
-
-  protected chooseImage(files: readonly File[]): void {
-    const [image] = files;
-    if (image) {
-      this.imageChosen.emit(image);
-    }
   }
 }
