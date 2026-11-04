@@ -1,0 +1,20 @@
+<app-side-panel
+  [title]="'management.settings.services.automatic_prices.add_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-automatic-price-general-info-tab
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [imagePreviewUrl]="imagePreviewUrl()"
+        (iconChosen)="chooseIcon($event)"
+        (imageChosen)="chooseImage($event)"
+      />
+    }
+  </app-tab-group>
+</app-side-panel>

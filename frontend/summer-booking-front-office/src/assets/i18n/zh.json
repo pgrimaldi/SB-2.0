@@ -1232,6 +1232,7 @@
         "automatic_prices": {
           "title": "自动价格",
           "create": "添加自动价格",
+          "add_title": "添加新的自动价格",
           "table": {
             "service": "服务",
             "price": "价格"
@@ -1299,7 +1300,8 @@
           "tabs": {
             "general_info": "基本信息",
             "prices": "价格",
-            "bookings": "预订"
+            "bookings": "预订",
+            "prices_validity": "价格与有效期"
           },
           "name": "名称",
           "description": "描述",

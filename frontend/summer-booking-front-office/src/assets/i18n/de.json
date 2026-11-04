@@ -1232,6 +1232,7 @@
         "automatic_prices": {
           "title": "Automatische Preise",
           "create": "Preis hinzufügen",
+          "add_title": "Neuer automatischer Preis",
           "table": {
             "service": "Leistung",
             "price": "Preis"
@@ -1299,7 +1300,8 @@
           "tabs": {
             "general_info": "Allgemeine Infos",
             "prices": "Preise",
-            "bookings": "Buchungen"
+            "bookings": "Buchungen",
+            "prices_validity": "Preise und Gültigkeit"
           },
           "name": "Name",
           "description": "Beschreibung",

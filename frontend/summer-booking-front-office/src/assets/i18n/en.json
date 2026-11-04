@@ -1232,6 +1232,7 @@
         "automatic_prices": {
           "title": "Automatic prices",
           "create": "Add automatic price",
+          "add_title": "Add new automatic price",
           "table": {
             "service": "Service",
             "price": "Price"
@@ -1299,7 +1300,8 @@
           "tabs": {
             "general_info": "General info",
             "prices": "Prices",
-            "bookings": "Bookings"
+            "bookings": "Bookings",
+            "prices_validity": "Prices and validity"
           },
           "name": "Name",
           "description": "Description",

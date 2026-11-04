@@ -6,6 +6,7 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { AutomaticPriceAddItemPanel } from '../../../../components/management/settings/services/automatic-price-add-item-panel/automatic-price-add-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -32,6 +33,7 @@ interface AutomaticPriceRow {
   selector: 'app-automatic-prices',
   imports: [
     DeleteItemsPopup,
+    AutomaticPriceAddItemPanel,
     DuplicateItemsPopup,
     PageTitle,
     Table,
@@ -49,6 +51,7 @@ export class AutomaticPrices {
   private readonly dateLanguage = inject(DateLanguageBehaviour);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
   protected readonly idSelectedAutomaticPrices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idAutomaticPricesToDelete = signal<readonly string[]>([]);

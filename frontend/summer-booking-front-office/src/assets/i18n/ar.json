@@ -1232,6 +1232,7 @@
         "automatic_prices": {
           "title": "أسعار تلقائية",
           "create": "إضافة سعر تلقائي",
+          "add_title": "إضافة سعر تلقائي جديد",
           "table": {
             "service": "الخدمة",
             "price": "السعر"
@@ -1299,7 +1300,8 @@
           "tabs": {
             "general_info": "معلومات عامة",
             "prices": "الأسعار",
-            "bookings": "الحجوزات"
+            "bookings": "الحجوزات",
+            "prices_validity": "الأسعار والصلاحية"
           },
           "name": "الاسم",
           "description": "الوصف",
