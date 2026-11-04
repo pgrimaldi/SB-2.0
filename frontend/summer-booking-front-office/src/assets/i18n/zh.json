@@ -1199,6 +1199,7 @@
         "hourly_services": {
           "title": "按小时服务",
           "create": "添加按小时服务",
+          "add_title": "添加新的按小时服务",
           "table": {
             "service": "服务"
           },

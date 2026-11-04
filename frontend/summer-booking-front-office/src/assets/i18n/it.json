@@ -1199,6 +1199,7 @@
         "hourly_services": {
           "title": "Servizi orari",
           "create": "Aggiungi servizio orario",
+          "add_title": "Aggiungi nuovo servizio orario",
           "table": {
             "service": "Servizio"
           },

@@ -1199,6 +1199,7 @@
         "hourly_services": {
           "title": "Stundenleistungen",
           "create": "Stundenleistung hinzufügen",
+          "add_title": "Neue Stundenleistung hinzufügen",
           "table": {
             "service": "Leistung"
           },

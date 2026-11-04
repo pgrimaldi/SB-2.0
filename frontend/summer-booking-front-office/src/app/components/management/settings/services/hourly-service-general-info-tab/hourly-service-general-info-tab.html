@@ -1,0 +1,12 @@
+<app-services-translations [form]="form().translations" [mainLanguage]="mainLanguage()" />
+
+<app-services-images
+  [icons]="icons"
+  [chosenIcon]="form().icon().value()"
+  [imagePreviewUrl]="imagePreviewUrl()"
+  [isReadonly]="isReadonly()"
+  (iconChosen)="iconChosen.emit($event)"
+  (imageChosen)="imageChosen.emit($event)"
+/>
+
+<app-services-highlighted [form]="form().isHighlighted" />

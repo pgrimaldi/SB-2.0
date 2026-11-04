@@ -1199,6 +1199,7 @@
         "hourly_services": {
           "title": "Hourly services",
           "create": "Add hourly service",
+          "add_title": "Add new hourly service",
           "table": {
             "service": "Service"
           },
