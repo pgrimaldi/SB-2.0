@@ -12,7 +12,14 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { TreeValidationResult, applyEach, applyWhen, form, submit } from '@angular/forms/signals';
+import {
+  TreeValidationResult,
+  applyEach,
+  applyWhen,
+  disabled,
+  form,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
@@ -98,7 +105,10 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     { label: this.texts()?.tabs.bookings ?? '', widthPercent: 33 },
   ]);
   private readonly draft = signal(newDraft());
+  /** Until the periods are read, the price per period cannot be turned on. */
+  private readonly arePeriodsLoaded = signal(false);
   protected readonly draftForm = form(this.draft, (path) => {
+    disabled(path.isPeriodPricingEnabled, () => !this.arePeriodsLoaded());
     applyEach(path.translations, (translation) => {
       applyWhen(
         translation,
@@ -189,6 +199,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draft.set(newDraft());
     this.draftForm().reset();
     this.setPeriods([]);
+    this.arePeriodsLoaded.set(false);
     this.setImage(null);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.fetchPeriods();
@@ -207,7 +218,10 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       .periodList(idProperty, false)
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
-        next: (periods) => this.setPeriods(periods),
+        next: (periods) => {
+          this.setPeriods(periods);
+          this.arePeriodsLoaded.set(true);
+        },
         error: (error: unknown) => this.error.set(toApiProblem(error)),
       });
   }
