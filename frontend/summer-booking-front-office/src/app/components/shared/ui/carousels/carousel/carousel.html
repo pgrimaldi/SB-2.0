@@ -1,6 +1,4 @@
-<div
-  class="carousel"
->
+<div>
   <div
     #viewport
     class="carousel__viewport"
@@ -16,7 +14,6 @@
           class="carousel__slide"
           [attr.inert]="isVisible($index) ? null : ''"
         >
-          <!-- The slide role lives on the inner element: a role on the <li> would break the list. -->
           <div
             class="carousel__slide__content"
           >
