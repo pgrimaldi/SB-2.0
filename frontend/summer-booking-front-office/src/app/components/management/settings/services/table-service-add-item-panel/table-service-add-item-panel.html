@@ -2,7 +2,13 @@
   [title]="'management.settings.services.table_booking.add_title' | translate"
   [texts]="'management.settings.services.form' | translate"
   [pathIcon]="pathIcon()"
-  [isSaveDisabled]="true"
+  [isSaveDisabled]="isSaveDisabled()"
   [(open)]="open"
-  (closeRequest)="open.set(false)"
-/>
+  (closeRequest)="leave()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-table-service-general-info-tab [form]="draftForm" [mainLanguage]="mainLanguage()" />
+    }
+  </app-tab-group>
+</app-side-panel>
