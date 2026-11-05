@@ -1,0 +1,97 @@
+$quantity-width: 5rem;
+$gap: 0.5rem;
+
+// The buttons of the management panels.
+:host {
+  --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
+  --button-padding: 1rem;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.table__service__capacity {
+  --section-title-padding-bottom: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 0.0625rem solid var(--color__layout__border);
+  box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
+}
+
+// The choice between tables and seats, with its line under it.
+.table__service__capacity__mode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 0.0625rem solid var(--color__layout__border);
+}
+
+.table__service__capacity__label {
+  color: var(--color__black);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.table__service__capacity__hint {
+  margin: 0;
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// Tables, seats and the bin of a group on one line, the bin at the end.
+.table__service__capacity__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: $gap 1.5rem;
+}
+
+// A word and its field stay together.
+.table__service__capacity__pair {
+  display: flex;
+  align-items: flex-start;
+  gap: $gap;
+}
+
+.table__service__capacity__word {
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: var(--filled-field-height, 1.625rem);
+}
+
+.table__service__capacity__quantity {
+  width: $quantity-width;
+}
+
+// Without the grey circle.
+.table__service__capacity__remove {
+  --icon-button-background: transparent;
+
+  margin-inline-start: auto;
+}
+
+.table__service__capacity__add {
+  align-self: flex-end;
+}
+
+.table__service__capacity__seats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $gap 1rem;
+}
+
+// Phones: more room for the fields.
+@media (width < 48rem) {
+  .table__service__capacity {
+    padding-inline: 0.75rem;
+  }
+}

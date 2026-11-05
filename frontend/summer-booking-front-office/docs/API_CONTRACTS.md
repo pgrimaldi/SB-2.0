@@ -5320,6 +5320,525 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### POST `/api/catalog/create-table-service`
+
+Prenotazione tavoli: creazione servizio tavoli.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Aperitivo",
+      "description": "Tavoli per l'aperitivo al tramonto."
+    },
+    {
+      "language": "en",
+      "serviceName": "Aperitif",
+      "description": "Tables for the sunset aperitif."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "isHighlighted": true,
+  "availabilities": [
+    {
+      "dateFrom": "2026-07-01T00:00:00.000Z",
+      "dateTo": "2026-07-31T00:00:00.000Z",
+      "isSameTimeForAllDays": true,
+      "startTime": "18:00",
+      "endTime": "21:00",
+      "days": [
+        {
+          "dayOfWeek": 1,
+          "isEnabled": false,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "dayOfWeek": 2,
+          "isEnabled": false,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "dayOfWeek": 3,
+          "isEnabled": false,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "dayOfWeek": 4,
+          "isEnabled": false,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "dayOfWeek": 5,
+          "isEnabled": true,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "dayOfWeek": 6,
+          "isEnabled": true,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        },
+        {
+          "dayOfWeek": 7,
+          "isEnabled": true,
+          "startTime": "18:00",
+          "endTime": "21:00"
+        }
+      ]
+    }
+  ],
+  "availabilityMode": "Tables",
+  "tableGroups": [
+    {
+      "tableQuantity": 10,
+      "seatPerTableQuantity": 2
+    },
+    {
+      "tableQuantity": 6,
+      "seatPerTableQuantity": 4
+    }
+  ],
+  "totalSeatQuantity": null,
+  "averageMealDuration": "OneHourThirtyMinutes",
+  "maxBookingPerTimeSlotQuantity": 8,
+  "bookingPayment": "Deposit",
+  "depositMode": "PerPerson",
+  "depositPercentage": 20,
+  "isOnlineBookingEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Aperitivo", "description": "Tavoli per l'aperitivo al tramonto."}, {"language": "en", "serviceName": "Aperitif", "description": "Tables for the sunset aperitif."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Aperitivo` |
+| `translations[].description` | string \| null | `Tavoli per l'aperitivo al tramonto.` |
+| `isHighlighted` | boolean | `true` |
+| `availabilities[]` | TableServiceAvailability[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "isSameTimeForAllDays": true, "startTime": "18:00", "endTime": "21:00", "days": [{"dayOfWeek": 1, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 2, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 3, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 4, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "18:00", "endTime": "21:00"}]}]` |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-07-01T00:00:00.000Z` |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `availabilities[].isSameTimeForAllDays` | boolean | `true` |
+| `availabilities[].startTime` | string (HH:mm) \| null | `18:00` |
+| `availabilities[].endTime` | string (HH:mm) \| null | `21:00` |
+| `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) | `[{"dayOfWeek": 1, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 2, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 3, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 4, "isEnabled": false, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "18:00", "endTime": "21:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "18:00", "endTime": "21:00"}]` |
+| `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) | `1` |
+| `availabilities[].days[].isEnabled` | boolean | `false` |
+| `availabilities[].days[].startTime` | string (HH:mm) \| null | `18:00` |
+| `availabilities[].days[].endTime` | string (HH:mm) \| null | `21:00` |
+| `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) | `Tables` |
+| `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) | `[{"tableQuantity": 10, "seatPerTableQuantity": 2}, {"tableQuantity": 6, "seatPerTableQuantity": 4}]` |
+| `tableGroups[].tableQuantity` | number (intero) \| null | `10` |
+| `tableGroups[].seatPerTableQuantity` | number (intero) \| null | `2` |
+| `totalSeatQuantity` | number (intero) \| null | `null` |
+| `averageMealDuration` | string (enum TableServiceMealDuration) \| null | `OneHourThirtyMinutes` |
+| `maxBookingPerTimeSlotQuantity` | number (intero) \| null | `8` |
+| `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) | `Deposit` |
+| `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) | `PerPerson` |
+| `depositPercentage` | number (decimale, %) \| null | `20` |
+| `isOnlineBookingEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/get-table-service-general-info?idTableService={idTableService}`
+
+Prenotazione tavoli: servizio tavoli, tab Info Generali.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio tavoli va nella query string.
+
+```text
+/api/catalog/get-table-service-general-info?idTableService=2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Pranzo",
+      "description": "Tavoli del ristorante per il pranzo."
+    },
+    {
+      "language": "en",
+      "serviceName": "Lunch",
+      "description": "Restaurant tables for lunch."
+    }
+  ],
+  "isHighlighted": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
+| `translations[]` | ServiceTranslation[] (array di oggetti) | `[{"language": "it", "serviceName": "Pranzo", "description": "Tavoli del ristorante per il pranzo."}, {"language": "en", "serviceName": "Lunch", "description": "Restaurant tables for lunch."}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Pranzo` |
+| `translations[].description` | string \| null | `Tavoli del ristorante per il pranzo.` |
+| `isHighlighted` | boolean | `true` |
+
+### GET `/api/catalog/get-table-service-availability-bookings?idTableService={idTableService}`
+
+Prenotazione tavoli: servizio tavoli, tab Disponibilità e Prenotazioni.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id del servizio tavoli va nella query string.
+
+```text
+/api/catalog/get-table-service-availability-bookings?idTableService=2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "availabilities": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-30T00:00:00.000Z",
+      "isSameTimeForAllDays": true,
+      "startTime": "12:00",
+      "endTime": "15:00",
+      "days": [
+        {
+          "dayOfWeek": 1,
+          "isEnabled": false,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 2,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 3,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 4,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 5,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 6,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 7,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        }
+      ]
+    }
+  ],
+  "availabilityMode": "Tables",
+  "tableGroups": [
+    {
+      "tableQuantity": 10,
+      "seatPerTableQuantity": 2
+    },
+    {
+      "tableQuantity": 8,
+      "seatPerTableQuantity": 4
+    },
+    {
+      "tableQuantity": 6,
+      "seatPerTableQuantity": 5
+    }
+  ],
+  "totalSeatQuantity": null,
+  "averageMealDuration": "OneHourThirtyMinutes",
+  "maxBookingPerTimeSlotQuantity": 8,
+  "bookingPayment": "Deposit",
+  "depositMode": "Total",
+  "depositPercentage": 20,
+  "isOnlineBookingEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `availabilities[]` | TableServiceAvailability[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z", "isSameTimeForAllDays": true, "startTime": "12:00", "endTime": "15:00", "days": [{"dayOfWeek": 1, "isEnabled": false, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 2, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 3, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 4, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}]}]` |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-30T00:00:00.000Z` |
+| `availabilities[].isSameTimeForAllDays` | boolean | `true` |
+| `availabilities[].startTime` | string (HH:mm) \| null | `12:00` |
+| `availabilities[].endTime` | string (HH:mm) \| null | `15:00` |
+| `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) | `[{"dayOfWeek": 1, "isEnabled": false, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 2, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 3, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 4, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}]` |
+| `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) | `1` |
+| `availabilities[].days[].isEnabled` | boolean | `false` |
+| `availabilities[].days[].startTime` | string (HH:mm) \| null | `12:00` |
+| `availabilities[].days[].endTime` | string (HH:mm) \| null | `15:00` |
+| `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) | `Tables` |
+| `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) | `[{"tableQuantity": 10, "seatPerTableQuantity": 2}, {"tableQuantity": 8, "seatPerTableQuantity": 4}, {"tableQuantity": 6, "seatPerTableQuantity": 5}]` |
+| `tableGroups[].tableQuantity` | number (intero) \| null | `10` |
+| `tableGroups[].seatPerTableQuantity` | number (intero) \| null | `2` |
+| `totalSeatQuantity` | number (intero) \| null | `null` |
+| `averageMealDuration` | string (enum TableServiceMealDuration) \| null | `OneHourThirtyMinutes` |
+| `maxBookingPerTimeSlotQuantity` | number (intero) \| null | `8` |
+| `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) | `Deposit` |
+| `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) | `Total` |
+| `depositPercentage` | number (decimale, %) \| null | `20` |
+| `isOnlineBookingEnabled` | boolean | `true` |
+
+### POST `/api/catalog/update-table-service-general`
+
+Prenotazione tavoli: servizio tavoli, salvataggio Info Generali.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
+  "translations": [
+    {
+      "language": "it",
+      "serviceName": "Pranzo",
+      "description": "Tavoli del ristorante per il pranzo."
+    },
+    {
+      "language": "en",
+      "serviceName": "Lunch",
+      "description": "Restaurant tables for lunch."
+    },
+    {
+      "language": "fr",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "de",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "es",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "ar",
+      "serviceName": null,
+      "description": null
+    },
+    {
+      "language": "zh",
+      "serviceName": null,
+      "description": null
+    }
+  ],
+  "isHighlighted": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
+| `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Pranzo", "description": "Tavoli del ristorante per il pranzo."}, {"language": "en", "serviceName": "Lunch", "description": "Restaurant tables for lunch."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].serviceName` | string \| null | `Pranzo` |
+| `translations[].description` | string \| null | `Tavoli del ristorante per il pranzo.` |
+| `isHighlighted` | boolean | `false` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/update-table-service-availability-bookings`
+
+Prenotazione tavoli: servizio tavoli, salvataggio Disponibilità e Prenotazioni.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
+  "availabilities": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-30T00:00:00.000Z",
+      "isSameTimeForAllDays": true,
+      "startTime": "12:00",
+      "endTime": "15:00",
+      "days": [
+        {
+          "dayOfWeek": 1,
+          "isEnabled": false,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 2,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 3,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 4,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 5,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 6,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        },
+        {
+          "dayOfWeek": 7,
+          "isEnabled": true,
+          "startTime": "12:00",
+          "endTime": "15:00"
+        }
+      ]
+    }
+  ],
+  "availabilityMode": "Tables",
+  "tableGroups": [
+    {
+      "tableQuantity": 10,
+      "seatPerTableQuantity": 2
+    },
+    {
+      "tableQuantity": 8,
+      "seatPerTableQuantity": 4
+    },
+    {
+      "tableQuantity": 6,
+      "seatPerTableQuantity": 5
+    }
+  ],
+  "totalSeatQuantity": null,
+  "averageMealDuration": "OneHourThirtyMinutes",
+  "maxBookingPerTimeSlotQuantity": 8,
+  "bookingPayment": "Deposit",
+  "depositMode": "Total",
+  "depositPercentage": 20,
+  "isOnlineBookingEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
+| `availabilities[]` | TableServiceAvailability[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z", "isSameTimeForAllDays": true, "startTime": "12:00", "endTime": "15:00", "days": [{"dayOfWeek": 1, "isEnabled": false, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 2, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 3, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 4, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}]}]` |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-30T00:00:00.000Z` |
+| `availabilities[].isSameTimeForAllDays` | boolean | `true` |
+| `availabilities[].startTime` | string (HH:mm) \| null | `12:00` |
+| `availabilities[].endTime` | string (HH:mm) \| null | `15:00` |
+| `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) | `[{"dayOfWeek": 1, "isEnabled": false, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 2, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 3, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 4, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}]` |
+| `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) | `1` |
+| `availabilities[].days[].isEnabled` | boolean | `false` |
+| `availabilities[].days[].startTime` | string (HH:mm) \| null | `12:00` |
+| `availabilities[].days[].endTime` | string (HH:mm) \| null | `15:00` |
+| `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) | `Tables` |
+| `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) | `[{"tableQuantity": 10, "seatPerTableQuantity": 2}, {"tableQuantity": 8, "seatPerTableQuantity": 4}, {"tableQuantity": 6, "seatPerTableQuantity": 5}]` |
+| `tableGroups[].tableQuantity` | number (intero) \| null | `10` |
+| `tableGroups[].seatPerTableQuantity` | number (intero) \| null | `2` |
+| `totalSeatQuantity` | number (intero) \| null | `null` |
+| `averageMealDuration` | string (enum TableServiceMealDuration) \| null | `OneHourThirtyMinutes` |
+| `maxBookingPerTimeSlotQuantity` | number (intero) \| null | `8` |
+| `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) | `Deposit` |
+| `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) | `Total` |
+| `depositPercentage` | number (decimale, %) \| null | `20` |
+| `isOnlineBookingEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

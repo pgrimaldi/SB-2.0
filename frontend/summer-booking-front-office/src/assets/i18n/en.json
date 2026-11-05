@@ -1266,6 +1266,8 @@
         "table_booking": {
           "title": "Table service booking",
           "create": "Add table service",
+          "add_title": "Add new table service",
+          "edit_title": "Edit table service",
           "table": {
             "service_name": "Service name"
           },
@@ -1302,7 +1304,8 @@
             "general_info": "General info",
             "prices": "Prices",
             "bookings": "Bookings",
-            "prices_validity": "Prices and validity"
+            "prices_validity": "Prices and validity",
+            "availability_bookings": "Availability and bookings"
           },
           "name": "Name",
           "description": "Description",
@@ -1406,6 +1409,71 @@
             "no_services": "No services of this kind.",
             "price_per_service": "Enable automatic price for each single service",
             "price_per_service_info": "If this option **is enabled**, the automatic price is applied and added automatically for each single service added to the booking.\n\nIf this option **is not enabled**, the automatic price is applied and added automatically only once per order."
+          },
+          "tables": {
+            "availability_title": "Availability",
+            "add_availability": "Add availability",
+            "days_hours": "Days and time slots",
+            "same_hours": "Apply the same hours to all days",
+            "days": {
+              "monday": "Monday",
+              "tuesday": "Tuesday",
+              "wednesday": "Wednesday",
+              "thursday": "Thursday",
+              "friday": "Friday",
+              "saturday": "Saturday",
+              "sunday": "Sunday"
+            },
+            "capacity_title": "Table and seat availability",
+            "manage_by": "Manage availability by:",
+            "modes": {
+              "tables": "Number of tables",
+              "seats": "Number of seats"
+            },
+            "mode_change": {
+              "title": "Warning",
+              "text": "Changing how availability is managed will delete the current settings.",
+              "cancel": "Cancel",
+              "confirm": "Change"
+            },
+            "tables_hint": "Set the number of available tables and the number of seats per table.",
+            "table_quantity": "No. of tables",
+            "seats_from": "with",
+            "seats": "seats",
+            "add_tables": "Add tables",
+            "seats_hint": "Set the total number of available seats.",
+            "meal_duration": "Average meal duration",
+            "meal_durations": {
+              "thirty_minutes": "30 minutes",
+              "forty_five_minutes": "45 minutes",
+              "one_hour": "1 h",
+              "one_hour_fifteen_minutes": "1 h 15 minutes",
+              "one_hour_thirty_minutes": "1 h 30 minutes",
+              "one_hour_forty_five_minutes": "1 h 45 minutes",
+              "two_hours": "2 h",
+              "two_hours_thirty_minutes": "2 h 30 minutes",
+              "three_hours": "3 h"
+            },
+            "max_bookings_per_time_slot": "Maximum bookings per time slot",
+            "allow_booking": "Allow booking:",
+            "payments": {
+              "none": "Without any payment",
+              "deposit": "With confirmation deposit"
+            },
+            "payment_change": {
+              "title": "Warning",
+              "text": "Switching to \"Without any payment\" will delete the data entered for the confirmation deposit.",
+              "cancel": "Cancel",
+              "confirm": "Change"
+            },
+            "deposit_mode": "Deposit handling",
+            "deposit_modes": {
+              "total": "Total",
+              "per_person": "Per person"
+            },
+            "deposit_amount": "Deposit amount",
+            "deposit_info": "**1. Total**\nThe confirmation deposit for the table service booking is applied only once for all the people/seats booked.\n\n**2. Per person**\nThe confirmation deposit for the table service booking is applied for each person/seat booked.",
+            "online_booking": "Enable online booking"
           }
         }
       }

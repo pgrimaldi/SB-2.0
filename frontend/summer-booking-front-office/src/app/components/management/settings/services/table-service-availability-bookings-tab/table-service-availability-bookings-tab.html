@@ -1,0 +1,20 @@
+<app-table-service-availabilities [form]="form().availabilities" [isReadonly]="isReadonly()" />
+
+<app-table-service-capacity
+  [availabilityMode]="form().availabilityMode"
+  [tableGroups]="form().tableGroups"
+  [totalSeatQuantity]="form().totalSeatQuantity"
+  [isReadonly]="isReadonly()"
+/>
+
+<app-table-service-booking-options
+  [averageMealDuration]="form().averageMealDuration"
+  [maxBookingPerTimeSlotQuantity]="form().maxBookingPerTimeSlotQuantity"
+  [bookingPayment]="form().bookingPayment"
+  [depositMode]="form().depositMode"
+  [depositPercentage]="form().depositPercentage"
+/>
+
+<app-toggle [formField]="form().isOnlineBookingEnabled">
+  {{ 'management.settings.services.form.tables.online_booking' | translate }}
+</app-toggle>

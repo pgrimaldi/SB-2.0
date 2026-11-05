@@ -1,0 +1,21 @@
+<app-side-panel
+  [title]="'management.settings.services.table_booking.add_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+  (save)="save()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-table-service-general-info-tab [form]="draftForm" [mainLanguage]="mainLanguage()" />
+    } @else if (selectedTab() === PanelTab.AvailabilityBookings) {
+      <app-table-service-availability-bookings-tab [form]="draftForm" />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="table__service__add__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+</app-side-panel>

@@ -1266,6 +1266,8 @@
         "table_booking": {
           "title": "Tischservice-Reservierung",
           "create": "Tischservice hinzufügen",
+          "add_title": "Neuen Tischservice hinzufügen",
+          "edit_title": "Tischservice bearbeiten",
           "table": {
             "service_name": "Leistungsname"
           },
@@ -1302,7 +1304,8 @@
             "general_info": "Allgemeine Infos",
             "prices": "Preise",
             "bookings": "Buchungen",
-            "prices_validity": "Preise und Gültigkeit"
+            "prices_validity": "Preise und Gültigkeit",
+            "availability_bookings": "Verfügbarkeit und Buchungen"
           },
           "name": "Name",
           "description": "Beschreibung",
@@ -1406,6 +1409,71 @@
             "no_services": "Keine Leistungen dieser Art.",
             "price_per_service": "Automatischen Preis für jede Leistung aktivieren",
             "price_per_service_info": "Wenn diese Option **aktiviert ist**, wird der automatische Preis für jede einzelne Leistung, die der Buchung hinzugefügt wird, automatisch angewendet und eingefügt.\n\nWenn diese Option **nicht aktiviert ist**, wird der automatische Preis nur einmal pro Bestellung automatisch angewendet und eingefügt."
+          },
+          "tables": {
+            "availability_title": "Verfügbarkeit",
+            "add_availability": "Verfügbarkeit hinzufügen",
+            "days_hours": "Tage und Zeitfenster",
+            "same_hours": "Gleiche Zeiten für alle Tage",
+            "days": {
+              "monday": "Montag",
+              "tuesday": "Dienstag",
+              "wednesday": "Mittwoch",
+              "thursday": "Donnerstag",
+              "friday": "Freitag",
+              "saturday": "Samstag",
+              "sunday": "Sonntag"
+            },
+            "capacity_title": "Tisch- und Platzverfügbarkeit",
+            "manage_by": "Verfügbarkeit verwalten nach:",
+            "modes": {
+              "tables": "Anzahl Tische",
+              "seats": "Anzahl Plätze"
+            },
+            "mode_change": {
+              "title": "Achtung",
+              "text": "Wenn du die Art der Verfügbarkeitsverwaltung änderst, werden die aktuellen Einstellungen gelöscht.",
+              "cancel": "Abbrechen",
+              "confirm": "Ändern"
+            },
+            "tables_hint": "Lege die Anzahl verfügbarer Tische und die Plätze pro Tisch fest.",
+            "table_quantity": "Anz. Tische",
+            "seats_from": "mit",
+            "seats": "Plätzen",
+            "add_tables": "Tische hinzufügen",
+            "seats_hint": "Lege die Gesamtzahl verfügbarer Plätze fest.",
+            "meal_duration": "Durchschnittliche Essensdauer",
+            "meal_durations": {
+              "thirty_minutes": "30 Minuten",
+              "forty_five_minutes": "45 Minuten",
+              "one_hour": "1 Std.",
+              "one_hour_fifteen_minutes": "1 Std. 15 Min.",
+              "one_hour_thirty_minutes": "1 Std. 30 Min.",
+              "one_hour_forty_five_minutes": "1 Std. 45 Min.",
+              "two_hours": "2 Std.",
+              "two_hours_thirty_minutes": "2 Std. 30 Min.",
+              "three_hours": "3 Std."
+            },
+            "max_bookings_per_time_slot": "Maximale Buchungen pro Zeitfenster",
+            "allow_booking": "Buchung erlauben:",
+            "payments": {
+              "none": "Ohne Zahlung",
+              "deposit": "Mit Anzahlung"
+            },
+            "payment_change": {
+              "title": "Achtung",
+              "text": "Wenn du zu „Ohne Zahlung\" wechselst, gehen die Angaben zur Anzahlung verloren.",
+              "cancel": "Abbrechen",
+              "confirm": "Ändern"
+            },
+            "deposit_mode": "Art der Anzahlung",
+            "deposit_modes": {
+              "total": "Gesamt",
+              "per_person": "Pro Person"
+            },
+            "deposit_amount": "Anzahlungsbetrag",
+            "deposit_info": "**1. Gesamt**\nDie Anzahlung für die Tischservice-Reservierung wird nur einmal für alle gebuchten Personen/Plätze berechnet.\n\n**2. Pro Person**\nDie Anzahlung für die Tischservice-Reservierung wird für jede gebuchte Person bzw. jeden gebuchten Platz berechnet.",
+            "online_booking": "Online-Buchung aktivieren"
           }
         }
       }

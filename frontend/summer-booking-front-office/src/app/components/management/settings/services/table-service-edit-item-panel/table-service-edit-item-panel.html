@@ -1,0 +1,64 @@
+<app-side-panel
+  [title]="'management.settings.services.table_booking.edit_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group
+    [tabs]="tabs()"
+    [(selectedIndex)]="tabIndex"
+    (selectedIndexChange)="requestTab($event)"
+  >
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-table-service-general-info-tab
+        [attr.inert]="isLoading(PanelTab.GeneralInfo) ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+      />
+    } @else if (selectedTab() === PanelTab.AvailabilityBookings) {
+      <app-table-service-availability-bookings-tab
+        [attr.inert]="isLoading(PanelTab.AvailabilityBookings) ? '' : null"
+        [form]="draftForm"
+        [isReadonly]="isLocked()"
+      />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="table__service__edit__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+
+  <div appSidePanelButtons>
+    @if (isEditing()) {
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaving()"
+        (clicked)="cancelEdit()"
+      >
+        {{ 'management.settings.services.form.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaveDisabled()"
+        [isLoading]="isSaving()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.services.form.save' | translate }}
+      </app-button>
+    } @else {
+      <app-button
+        class="table__service__edit__item__panel__edit"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isEditDisabled()"
+        (clicked)="startEdit()"
+      >
+        {{ 'management.settings.services.form.edit' | translate }}
+      </app-button>
+    }
+  </div>
+</app-side-panel>

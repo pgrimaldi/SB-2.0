@@ -1,0 +1,89 @@
+<section class="table__service__booking__options">
+  <app-section-title [text]="'management.settings.services.form.bookings.title' | translate" />
+
+  <app-form-row>
+    <span appFormRowLabel>
+      {{ 'management.settings.services.form.tables.meal_duration' | translate }}
+    </span>
+    <app-filled-select
+      class="table__service__booking__options__value"
+      [placeholder]="'management.settings.services.form.choose' | translate"
+      [options]="mealDurations()"
+      [formField]="averageMealDuration()"
+      [error]="validationText.text(averageMealDuration())"
+    />
+  </app-form-row>
+
+  <app-form-row>
+    <span appFormRowLabel>
+      {{ 'management.settings.services.form.tables.max_bookings_per_time_slot' | translate }}
+    </span>
+    <app-filled-number-field
+      class="table__service__booking__options__value"
+      [formField]="maxBookingPerTimeSlotQuantity()"
+      [error]="validationText.text(maxBookingPerTimeSlotQuantity())"
+    />
+  </app-form-row>
+
+  <div class="table__service__booking__options__payment">
+    <span class="table__service__booking__options__text">
+      {{ 'management.settings.services.form.tables.allow_booking' | translate }}
+    </span>
+    <app-radio-group
+      [options]="payments()"
+      [formField]="bookingPayment()"
+      (valueChange)="changePayment($event)"
+    />
+  </div>
+
+  @if (bookingPayment()().value() === TableServiceBookingPayment.Deposit) {
+    <div class="table__service__booking__options__deposit">
+      <div class="table__service__booking__options__group">
+        <span class="table__service__booking__options__label">
+          {{ 'management.settings.services.form.tables.deposit_mode' | translate }}
+          <app-icon-button
+            class="table__service__booking__options__info"
+            [pathIcon]="infoIcon"
+            (click)="showingDepositInfo.set(true)"
+          />
+        </span>
+        <app-filled-select
+          class="table__service__booking__options__mode"
+          [options]="depositModes()"
+          [formField]="depositMode()"
+          [error]="validationText.text(depositMode())"
+        />
+      </div>
+      <div class="table__service__booking__options__group">
+        <span class="table__service__booking__options__label">
+          {{ 'management.settings.services.form.tables.deposit_amount' | translate }}
+        </span>
+        <app-filled-number-field
+          class="table__service__booking__options__amount"
+          [isDecimal]="true"
+          [formField]="depositPercentage()"
+          [error]="validationText.text(depositPercentage())"
+        />
+        <span class="table__service__booking__options__unit">%</span>
+      </div>
+    </div>
+  }
+</section>
+
+<app-info-popup
+  [title]="'management.settings.services.form.tables.deposit_mode' | translate"
+  [text]="'management.settings.services.form.tables.deposit_info' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingDepositInfo"
+/>
+
+<app-confirm-popup
+  [pathIcon]="closeIcon"
+  [title]="'management.settings.services.form.tables.payment_change.title' | translate"
+  [text]="'management.settings.services.form.tables.payment_change.text' | translate"
+  [texts]="'management.settings.services.form.tables.payment_change' | translate"
+  [danger]="true"
+  [open]="isAskingPaymentChange()"
+  (openChange)="closePaymentChange($event)"
+  (confirmed)="confirmPaymentChange()"
+/>

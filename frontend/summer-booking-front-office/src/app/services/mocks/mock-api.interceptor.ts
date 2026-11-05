@@ -46,6 +46,11 @@ import {
   duplicateAutomaticPriceItemsMock,
   deleteTableServiceItemsMock,
   duplicateTableServiceItemsMock,
+  createTableServiceMock,
+  tableServiceAvailabilityBookingsMock,
+  tableServiceGeneralInfoMock,
+  updateTableServiceAvailabilityBookingsMock,
+  updateTableServiceGeneralMock,
   duplicateBarServiceItemsMock,
   hourlyServiceListMock,
   saveBathhouseConfigurationGeneralMock,
@@ -832,6 +837,41 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/duplicate-table-service-item`
   ) {
     return duplicateTableServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/create-table-service`
+  ) {
+    return createTableServiceMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-table-service-general-info`
+  ) {
+    return tableServiceGeneralInfoMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-table-service-availability-bookings`
+  ) {
+    return tableServiceAvailabilityBookingsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-table-service-general`
+  ) {
+    return updateTableServiceGeneralMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`
+  ) {
+    return updateTableServiceAvailabilityBookingsMock(request);
   }
 
   return next(request);

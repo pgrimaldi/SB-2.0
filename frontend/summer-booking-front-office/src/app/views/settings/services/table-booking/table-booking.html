@@ -21,6 +21,19 @@
   (loadError)="loadFailed.set(true)"
   (deleteSelected)="askDelete($event)"
   (duplicateSelected)="askDuplicate($event)"
+  (create)="adding.set(true)"
+/>
+
+<app-table-service-add-item-panel
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (created)="table.reload()"
+/>
+<app-table-service-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idTableService]="idTableServiceToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
 />
 
 <app-delete-items-popup
