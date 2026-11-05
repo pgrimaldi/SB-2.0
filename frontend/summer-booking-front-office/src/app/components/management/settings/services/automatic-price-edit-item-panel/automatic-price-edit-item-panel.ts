@@ -211,6 +211,12 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
+  protected async requestCancel(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.cancelEdit();
+    }
+  }
+
   protected cancelEdit(): void {
     const tab = this.selectedTab() as PanelTab;
     const pristine = structuredClone(this.pristine());

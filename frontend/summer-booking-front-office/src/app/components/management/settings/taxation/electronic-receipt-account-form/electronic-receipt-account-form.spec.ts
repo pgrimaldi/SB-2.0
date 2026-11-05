@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ElectronicReceiptAccount } from '../../../../../entities/settings/taxation/electronic-receipt-account';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
 import { ElectronicReceiptAccountForm } from './electronic-receipt-account-form';
@@ -173,6 +174,10 @@ describe('ElectronicReceiptAccountForm', () => {
     await type(inputs()[0], 'Bagno Nuovo');
     button('cancel')!.click();
     await fixture.whenStable();
+    const unsaved = TestBed.inject(UnsavedChangesBehaviour);
+    expect(unsaved.asking()).toBe(true);
+    unsaved.answer(true); // Esci senza salvare
+    await settle();
     expect(inputs()[0].value).toBe('Bagno Esempio');
     expect(inputs()[10].value).toBe('');
     expect(editable()).toEqual([]);

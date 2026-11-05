@@ -20,6 +20,10 @@ import {
   ExistingBookingFilterTexts,
   filterOptionsOf,
 } from '../../../../../behaviours/database/existing-booking-filter-options';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import {
   AgreementBookingFilter,
@@ -42,13 +46,14 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
   // The popup is rendered by Material in an overlay outside this component.
   encapsulation: ViewEncapsulation.None,
 })
-export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy {
+export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly filters = input(new ExistingBookingFilters());
   readonly applied = output<ExistingBookingFilters>();
 
   private readonly translateService = inject(TranslateService);
   private readonly database = inject(DatabaseService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -57,6 +62,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
   protected readonly idAffiliatedHotels = signal<readonly string[]>([]);
   protected readonly paymentStatuses = signal<readonly PaymentStatusFilter[]>([]);
   private readonly affiliatedHotels = signal<readonly ComboboxItem[]>([]);
+  private pristineChoices = '';
   private affiliatedHotelsSubscription?: Subscription;
   private readonly texts = toSignal(
     this.translateService.stream(
@@ -78,6 +84,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
 
   constructor() {
     super();
+    this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => {
@@ -86,6 +93,10 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
         });
       }
     });
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.open() && this.choices() !== this.pristineChoices;
   }
 
   protected apply(): void {
@@ -98,12 +109,23 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     this.close();
   }
 
+  protected async leave(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.close();
+    }
+  }
+
+  protected override closeRequested(): void {
+    void this.leave();
+  }
+
   protected dialogConfig(): MatDialogConfig {
     return {
       width: 'min(32rem, 90vw)',
       maxWidth: 'none',
       position: { top: '6.875rem' },
       panelClass: 'existing__booking__filters__popup__panel',
+      disableClose: true,
       autoFocus: false,
     };
   }
@@ -114,6 +136,16 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
     this.agreementBookings.set(filters.agreementBookings);
     this.idAffiliatedHotels.set(filters.affiliatedHotels.map((hotel) => hotel.id));
     this.paymentStatuses.set(filters.paymentStatuses);
+    this.pristineChoices = this.choices();
+  }
+
+  private choices(): string {
+    return JSON.stringify([
+      this.bookingTypologies(),
+      this.agreementBookings(),
+      this.idAffiliatedHotels(),
+      this.paymentStatuses(),
+    ]);
   }
 
   /** With their names, for the chips: from the list of the server, or as they were applied. */
@@ -143,6 +175,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements OnDestroy 
   }
 
   override ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
     this.affiliatedHotelsSubscription?.unsubscribe();
     super.ngOnDestroy();
   }

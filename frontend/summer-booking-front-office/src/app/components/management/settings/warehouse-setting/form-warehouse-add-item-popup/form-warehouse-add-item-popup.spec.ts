@@ -63,7 +63,7 @@ describe('FormWarehouseAddItemPopup', () => {
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should ask before the X drops what is typed, while Annulla drops it at once', async () => {
+  it('should ask before the X or Annulla drops what is typed', async () => {
     const { fixture, host, popup } = await setup();
     const unsaved = TestBed.inject(UnsavedChangesBehaviour);
     const closeX = () => document.querySelector<HTMLButtonElement>('.popup__frame__close')!;
@@ -95,7 +95,9 @@ describe('FormWarehouseAddItemPopup', () => {
 
     cancel().click();
     await fixture.whenStable();
-    expect(unsaved.asking()).toBe(false);
+    expect(unsaved.asking()).toBe(true);
+    unsaved.answer(true); // Esci senza salvare
+    await fixture.whenStable();
     expect(host.open()).toBe(false);
   });
 

@@ -174,7 +174,7 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isSaving()"
-        (clicked)="cancel()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.bathhouse_configuration.general_information.cancel' | translate }}
       </app-button>

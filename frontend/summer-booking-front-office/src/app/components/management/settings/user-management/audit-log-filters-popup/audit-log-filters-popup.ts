@@ -16,6 +16,10 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../../entities/settings/user-management/audit-log-filters';
@@ -37,7 +41,7 @@ type ActionTexts = Partial<Record<string, Partial<Record<string, string>>>>;
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
+export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly filters = input(new AuditLogFilters());
   /** The only users of the Utente list, instead of all the users of the log. */
   readonly onlyUsers = input<readonly ComboboxItem[] | null>(null);
@@ -47,12 +51,14 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
   private readonly audit = inject(AuditService);
   private readonly auth = inject(AuthBehaviour);
   private readonly language = inject(LanguageBehaviour).current;
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly actionCodes = signal<readonly string[]>([]);
   protected readonly idUsers = signal<readonly string[]>([]);
   private readonly users = signal<readonly ComboboxItem[]>([]);
+  private pristineChoices = '';
   private usersSubscription?: Subscription;
   private readonly actionTexts = toSignal(
     this.translateService.stream(
@@ -71,6 +77,7 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
 
   constructor() {
     super();
+    this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => {
@@ -83,9 +90,23 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
     });
   }
 
+  hasUnsavedChanges(): boolean {
+    return this.open() && this.choices() !== this.pristineChoices;
+  }
+
   protected apply(): void {
     this.applied.emit({ actionCodes: [...this.actionCodes()], users: this.chosenUsers() });
     this.close();
+  }
+
+  protected async leave(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.close();
+    }
+  }
+
+  protected override closeRequested(): void {
+    void this.leave();
   }
 
   protected dialogConfig(): MatDialogConfig {
@@ -94,6 +115,7 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
       maxWidth: 'none',
       position: { top: '6.875rem' },
       panelClass: 'audit__log__filters__popup__panel',
+      disableClose: true,
       autoFocus: false,
     };
   }
@@ -102,6 +124,11 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
     const filters = this.filters();
     this.actionCodes.set(filters.actionCodes);
     this.idUsers.set(filters.users.map((user) => user.id));
+    this.pristineChoices = this.choices();
+  }
+
+  private choices(): string {
+    return JSON.stringify([this.actionCodes(), this.idUsers()]);
   }
 
   /** With their names, for the chips: from the list of the server, or as they were applied. */
@@ -126,6 +153,7 @@ export class AuditLogFiltersPopup extends BasePopup implements OnDestroy {
   }
 
   override ngOnDestroy(): void {
+    this.unsaved.unwatch(this);
     this.usersSubscription?.unsubscribe();
     super.ngOnDestroy();
   }

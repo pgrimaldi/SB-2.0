@@ -109,6 +109,12 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
     this.isEditing.set(true);
   }
 
+  protected async requestCancel(): Promise<void> {
+    if (await this.unsaved.confirmDiscard(this)) {
+      this.cancel();
+    }
+  }
+
   protected cancel(): void {
     this.services.set(this.loaded);
     this.servicesForm().reset();

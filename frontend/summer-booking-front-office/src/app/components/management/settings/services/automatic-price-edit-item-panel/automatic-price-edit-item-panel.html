@@ -41,7 +41,7 @@
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
         [disabled]="isSaving()"
-        (clicked)="cancelEdit()"
+        (clicked)="requestCancel()"
       >
         {{ 'management.settings.services.form.cancel' | translate }}
       </app-button>

@@ -61,7 +61,7 @@
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [disabled]="isSaving()"
-      (clicked)="cancel()"
+      (clicked)="requestCancel()"
     >
       {{ 'management.settings.seasons.season_dates.cancel' | translate }}
     </app-button>
