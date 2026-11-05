@@ -52,7 +52,7 @@ app-form-warehouse-add-item-popup {
 
 .form__warehouse__add__item__popup__error {
   margin: 1.125rem 0 -0.5rem;
-  color: #dc3545;
+  color: var(--color__layout__error);
   font-size: 0.75rem;
   line-height: 1rem;
 }

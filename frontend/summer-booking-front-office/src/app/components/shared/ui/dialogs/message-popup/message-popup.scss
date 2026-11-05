@@ -2,10 +2,10 @@
 
 @include popup.popup(message__popup, app-message-popup);
 
-// Unlike the other popups: text on the left and the button at the bottom right.
+// Unlike the other popups: text at the start of the line and the button at the bottom end.
 .message__popup {
   align-items: stretch;
-  text-align: left;
+  text-align: start;
 }
 
 .message__popup__close {
