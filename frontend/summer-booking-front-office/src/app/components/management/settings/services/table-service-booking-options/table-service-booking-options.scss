@@ -22,7 +22,6 @@ $gap: 0.5rem;
   box-shadow: 0 0 0.25rem var(--color__layout__shadow__light);
 }
 
-// As wide as the right half of the box, as in the mockup.
 .table__service__booking__options__value {
   flex: var(--form-row-fill) 1 calc(2 * $field-width + 3rem);
   min-width: 0;

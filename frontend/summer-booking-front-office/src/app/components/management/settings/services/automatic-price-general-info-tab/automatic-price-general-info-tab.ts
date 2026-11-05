@@ -24,7 +24,6 @@ export class AutomaticPriceGeneralInfoTab {
   readonly iconChosen = output<BarServiceIcon | StandardServiceIcon>();
   readonly imageChosen = output<File>();
 
-  /** The icons of the bar services, then those of the other services, as in the grid of the mockup. */
   protected readonly icons: readonly ServicesImagesIcon<BarServiceIcon | StandardServiceIcon>[] = [
     ...Object.values(BarServiceIcon).map((value) => ({
       value,

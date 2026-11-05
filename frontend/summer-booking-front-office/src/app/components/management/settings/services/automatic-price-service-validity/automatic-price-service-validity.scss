@@ -18,7 +18,6 @@
   gap: 1rem;
 }
 
-// Three services a line in the panel, as in the mockup; fewer on narrow screens.
 .automatic__price__service__validity__services {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
