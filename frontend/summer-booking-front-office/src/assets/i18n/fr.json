@@ -1303,7 +1303,8 @@
             "general_info": "Infos générales",
             "prices": "Prix",
             "bookings": "Réservations",
-            "prices_validity": "Prix et validité"
+            "prices_validity": "Prix et validité",
+            "availability_bookings": "Disponibilité et réservations"
           },
           "name": "Nom",
           "description": "Description",
@@ -1407,6 +1408,71 @@
             "no_services": "Aucun service de ce type.",
             "price_per_service": "Activer le prix automatique pour chaque service",
             "price_per_service_info": "Si cette option **est activée**, le prix automatique est appliqué et ajouté automatiquement pour chaque service ajouté à la réservation.\n\nSi cette option **n'est pas activée**, le prix automatique est appliqué et ajouté automatiquement une seule fois par commande."
+          },
+          "tables": {
+            "availability_title": "Disponibilité",
+            "add_availability": "Ajouter une disponibilité",
+            "days_hours": "Jours et créneaux",
+            "same_hours": "Appliquer les mêmes horaires à tous les jours",
+            "days": {
+              "monday": "Lundi",
+              "tuesday": "Mardi",
+              "wednesday": "Mercredi",
+              "thursday": "Jeudi",
+              "friday": "Vendredi",
+              "saturday": "Samedi",
+              "sunday": "Dimanche"
+            },
+            "capacity_title": "Disponibilité des tables et des places",
+            "manage_by": "Gérer la disponibilité par :",
+            "modes": {
+              "tables": "Nombre de tables",
+              "seats": "Nombre de places"
+            },
+            "mode_change": {
+              "title": "Attention",
+              "text": "Changer la façon dont la disponibilité est gérée supprimera les réglages actuels.",
+              "cancel": "Annuler",
+              "confirm": "Changer"
+            },
+            "tables_hint": "Indiquez le nombre de tables disponibles et le nombre de places par table.",
+            "table_quantity": "Nb de tables",
+            "seats_from": "de",
+            "seats": "places",
+            "add_tables": "Ajouter des tables",
+            "seats_hint": "Indiquez le nombre total de places disponibles.",
+            "meal_duration": "Durée moyenne du repas",
+            "meal_durations": {
+              "thirty_minutes": "30 minutes",
+              "forty_five_minutes": "45 minutes",
+              "one_hour": "1 h",
+              "one_hour_fifteen_minutes": "1 h 15",
+              "one_hour_thirty_minutes": "1 h 30",
+              "one_hour_forty_five_minutes": "1 h 45",
+              "two_hours": "2 h",
+              "two_hours_thirty_minutes": "2 h 30",
+              "three_hours": "3 h"
+            },
+            "max_bookings_per_time_slot": "Nombre maximum de réservations par créneau",
+            "allow_booking": "Autoriser la réservation :",
+            "payments": {
+              "none": "Sans aucun paiement",
+              "deposit": "Avec acompte de confirmation"
+            },
+            "payment_change": {
+              "title": "Attention",
+              "text": "En passant à « Sans aucun paiement », les données saisies pour l'acompte de confirmation seront perdues.",
+              "cancel": "Annuler",
+              "confirm": "Changer"
+            },
+            "deposit_mode": "Gestion de l'acompte",
+            "deposit_modes": {
+              "total": "Total",
+              "per_person": "Par personne"
+            },
+            "deposit_amount": "Montant de l'acompte",
+            "deposit_info": "**1. Total**\nL'acompte de confirmation pour la réservation du service à table est appliqué une seule fois pour l'ensemble des personnes/places réservées.\n\n**2. Par personne**\nL'acompte de confirmation pour la réservation du service à table est appliqué pour chaque personne/place réservée.",
+            "online_booking": "Activer la réservation en ligne"
           }
         }
       }

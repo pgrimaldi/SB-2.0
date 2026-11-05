@@ -1,0 +1,85 @@
+<section class="table__service__capacity">
+  <app-section-title
+    [text]="'management.settings.services.form.tables.capacity_title' | translate"
+  />
+
+  <div class="table__service__capacity__mode">
+    <span class="table__service__capacity__label">
+      {{ 'management.settings.services.form.tables.manage_by' | translate }}
+    </span>
+    <app-radio-group
+      [options]="modes()"
+      [formField]="availabilityMode()"
+      (valueChange)="changeMode()"
+    />
+  </div>
+
+  @if (availabilityMode()().value() === TableServiceAvailabilityMode.Tables) {
+    <p class="table__service__capacity__hint">
+      {{ 'management.settings.services.form.tables.tables_hint' | translate }}
+    </p>
+    @for (tableGroup of tableGroups(); track tableGroup; let groupIndex = $index) {
+      <div class="table__service__capacity__group">
+        <div class="table__service__capacity__pair">
+          <span class="table__service__capacity__word">
+            {{ 'management.settings.services.form.tables.table_quantity' | translate }}
+          </span>
+          <app-filled-number-field
+            class="table__service__capacity__quantity"
+            [formField]="tableGroup.tableQuantity"
+            [error]="validationText.text(tableGroup.tableQuantity)"
+          />
+        </div>
+        <div class="table__service__capacity__pair">
+          <span class="table__service__capacity__word">
+            {{ 'management.settings.services.form.tables.seats_from' | translate }}
+          </span>
+          <app-filled-number-field
+            class="table__service__capacity__quantity"
+            [formField]="tableGroup.seatPerTableQuantity"
+            [error]="validationText.text(tableGroup.seatPerTableQuantity)"
+          />
+          <span class="table__service__capacity__word">
+            {{ 'management.settings.services.form.tables.seats' | translate }}
+          </span>
+        </div>
+        <app-icon-button
+          class="table__service__capacity__remove"
+          [pathIcon]="deleteIcon"
+          (click)="removeTableGroup(groupIndex)"
+        />
+      </div>
+    }
+    <app-button
+      class="table__service__capacity__add"
+      [appearance]="ButtonAppearance.Secondary"
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      (clicked)="addTableGroup()"
+    >
+      {{ 'management.settings.services.form.tables.add_tables' | translate }}
+    </app-button>
+  } @else {
+    <div class="table__service__capacity__seats">
+      <span class="table__service__capacity__hint">
+        {{ 'management.settings.services.form.tables.seats_hint' | translate }}
+      </span>
+      <app-filled-number-field
+        class="table__service__capacity__quantity"
+        [formField]="totalSeatQuantity()"
+        [error]="validationText.text(totalSeatQuantity())"
+      />
+    </div>
+  }
+</section>
+
+<app-confirm-popup
+  [pathIcon]="closeIcon"
+  [title]="'management.settings.services.form.tables.mode_change.title' | translate"
+  [text]="'management.settings.services.form.tables.mode_change.text' | translate"
+  [texts]="'management.settings.services.form.tables.mode_change' | translate"
+  [danger]="true"
+  [open]="isAskingModeChange()"
+  (openChange)="closeModeChange($event)"
+  (confirmed)="confirmModeChange()"
+/>

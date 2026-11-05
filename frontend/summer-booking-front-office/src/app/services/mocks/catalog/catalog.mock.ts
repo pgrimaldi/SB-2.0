@@ -5,6 +5,10 @@ import { BarServiceCategory } from '../../../entities/enums/bar-service-category
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
 import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
+import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
+import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
+import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
+import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
@@ -41,6 +45,7 @@ import { StandardServiceAddItemRequest } from '../../../entities/settings/servic
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
 import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
+import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -2728,6 +2733,94 @@ export const duplicateTableServiceItemsMock = (
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+type CreateTableServiceBody = Partial<TableServiceAddItemRequest> & { idProperty?: unknown };
+
+/**
+ * `POST /api/catalog/create-table-service` with `TableServiceAddItemRequest` and `idProperty`: the new
+ * table service goes into the list, with the name in the language of `Accept-Language`. 204 without a
+ * body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
+ * field (name and description in the language of the request, choices among the values of their
+ * enums, quantities whole and above 0, deposit from 0 to 100).
+ */
+export const createTableServiceMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreateTableServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const errors = [
+    ...standardGeneralErrors({ translations: body.translations }, language),
+    ...tableServiceErrors(body),
+  ];
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const main = body.translations?.find((translation) => translation.language === language);
+  TABLE_SERVICES.push({
+    propertyId: property.id,
+    idTableService: crypto.randomUUID(),
+    serviceName: main?.serviceName?.trim() ?? null,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  const invalid = (field: string): void => {
+    errors.push({ field, code: 'validation.invalid' });
+  };
+  if (!isValueOf(TableServiceAvailabilityMode, body.availabilityMode)) {
+    invalid('availabilityMode');
+  }
+  if (!isValueOf(TableServiceBookingPayment, body.bookingPayment)) {
+    invalid('bookingPayment');
+  }
+  if (!isValueOf(TableServiceDepositMode, body.depositMode)) {
+    invalid('depositMode');
+  }
+  if (
+    body.averageMealDuration != null &&
+    !isValueOf(TableServiceMealDuration, body.averageMealDuration)
+  ) {
+    invalid('averageMealDuration');
+  }
+  const tableGroups = Array.isArray(body.tableGroups) ? body.tableGroups : [];
+  tableGroups.forEach((tableGroup, index) => {
+    if (!isQuantity(tableGroup.tableQuantity)) {
+      invalid(`tableGroups[${index}].tableQuantity`);
+    }
+    if (!isQuantity(tableGroup.seatPerTableQuantity)) {
+      invalid(`tableGroups[${index}].seatPerTableQuantity`);
+    }
+  });
+  if (!isQuantity(body.totalSeatQuantity)) {
+    invalid('totalSeatQuantity');
+  }
+  if (!isQuantity(body.maxBookingPerTimeSlotQuantity)) {
+    invalid('maxBookingPerTimeSlotQuantity');
+  }
+  const deposit = body.depositPercentage;
+  if (deposit != null && !(typeof deposit === 'number' && deposit >= 0 && deposit <= 100)) {
+    invalid('depositPercentage');
+  }
+  return errors;
+}
+
+function isValueOf(choices: Record<string, string>, value: unknown): boolean {
+  return Object.values(choices).some((choice) => choice === value);
+}
+
+/** Empty, or a whole number above 0. */
+function isQuantity(value: unknown): boolean {
+  return value == null || (Number.isInteger(value) && (value as number) > 0);
+}
 
 /**
  * The table services of the property for `idTableServices` (repeated ids once); null when one id is not

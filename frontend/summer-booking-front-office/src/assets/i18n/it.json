@@ -1303,7 +1303,8 @@
             "general_info": "Info Generali",
             "prices": "Prezzi",
             "bookings": "Prenotazioni",
-            "prices_validity": "Prezzi e Validità"
+            "prices_validity": "Prezzi e Validità",
+            "availability_bookings": "Disponibilità e Prenotazioni"
           },
           "name": "Nome",
           "description": "Descrizione",
@@ -1407,6 +1408,71 @@
             "no_services": "Nessun servizio di questo tipo.",
             "price_per_service": "Abilita prezzo automatico per ogni singolo servizio",
             "price_per_service_info": "Se questa opzione **è abilitata**, il prezzo automatico verrà applicato e inserito automaticamente per ogni singolo servizio che viene aggiunto alla prenotazione.\n\nSe questa opzione **non è abilitata**, il prezzo automatico verrà applicato e inserito automaticamente una sola volta per singolo ordine."
+          },
+          "tables": {
+            "availability_title": "Disponibilità",
+            "add_availability": "Aggiungi disponibilità",
+            "days_hours": "Giorni e fasce orarie",
+            "same_hours": "Applica stessi orari per tutti i giorni",
+            "days": {
+              "monday": "Lunedì",
+              "tuesday": "Martedì",
+              "wednesday": "Mercoledì",
+              "thursday": "Giovedì",
+              "friday": "Venerdì",
+              "saturday": "Sabato",
+              "sunday": "Domenica"
+            },
+            "capacity_title": "Disponibilità tavoli e posti",
+            "manage_by": "Gestisci la disponibilità per:",
+            "modes": {
+              "tables": "Numero tavoli",
+              "seats": "Numero posti"
+            },
+            "mode_change": {
+              "title": "Attenzione",
+              "text": "Cambiare il modo in cui viene gestita la disponibilità cancellerà le impostazioni attuali.",
+              "cancel": "Annulla",
+              "confirm": "Cambia"
+            },
+            "tables_hint": "Imposta il numero di tavoli disponibili e il numero di posti per ogni tavolo.",
+            "table_quantity": "N° tavoli",
+            "seats_from": "da",
+            "seats": "posti",
+            "add_tables": "Aggiungi tavoli",
+            "seats_hint": "Imposta il numero di posti totali disponibili.",
+            "meal_duration": "Durata media del pasto",
+            "meal_durations": {
+              "thirty_minutes": "30 minuti",
+              "forty_five_minutes": "45 minuti",
+              "one_hour": "1 h",
+              "one_hour_fifteen_minutes": "1 h e 15 minuti",
+              "one_hour_thirty_minutes": "1 h e 30 minuti",
+              "one_hour_forty_five_minutes": "1 h e 45 minuti",
+              "two_hours": "2 h",
+              "two_hours_thirty_minutes": "2 h e 30 minuti",
+              "three_hours": "3 h"
+            },
+            "max_bookings_per_time_slot": "Numero massimo di prenotazioni per fascia oraria",
+            "allow_booking": "Consenti prenotazione:",
+            "payments": {
+              "none": "Senza alcun pagamento",
+              "deposit": "Con caparra confirmatoria"
+            },
+            "payment_change": {
+              "title": "Attenzione",
+              "text": "Passando a \"Senza alcun pagamento\" i dati inseriti nella caparra confirmatoria verranno persi.",
+              "cancel": "Annulla",
+              "confirm": "Cambia"
+            },
+            "deposit_mode": "Gestione caparra",
+            "deposit_modes": {
+              "total": "Totale",
+              "per_person": "A persona"
+            },
+            "deposit_amount": "Importo caparra",
+            "deposit_info": "**1. Totale**\nLa caparra confirmatoria per la prenotazione del servizio tavoli verrà applicata una sola volta per il totale delle persone/posti prenotati.\n\n**2. A persona**\nLa caparra confirmatoria per la prenotazione del servizio tavoli verrà applicata per ogni persona/posto prenotato.",
+            "online_booking": "Abilita prenotazione online"
           }
         }
       }

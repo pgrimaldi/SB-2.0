@@ -1303,7 +1303,8 @@
             "general_info": "基本信息",
             "prices": "价格",
             "bookings": "预订",
-            "prices_validity": "价格与有效期"
+            "prices_validity": "价格与有效期",
+            "availability_bookings": "可用性与预订"
           },
           "name": "名称",
           "description": "描述",
@@ -1407,6 +1408,71 @@
             "no_services": "没有此类服务。",
             "price_per_service": "为每项服务启用自动价格",
             "price_per_service_info": "如果**启用**此选项，添加到预订中的每项服务都会自动应用并加入自动价格。\n\n如果**未启用**此选项，每个订单只会自动应用并加入一次自动价格。"
+          },
+          "tables": {
+            "availability_title": "可用性",
+            "add_availability": "添加可用时间",
+            "days_hours": "日期与时段",
+            "same_hours": "所有日期使用相同时间",
+            "days": {
+              "monday": "星期一",
+              "tuesday": "星期二",
+              "wednesday": "星期三",
+              "thursday": "星期四",
+              "friday": "星期五",
+              "saturday": "星期六",
+              "sunday": "星期日"
+            },
+            "capacity_title": "餐桌与座位可用性",
+            "manage_by": "按以下方式管理可用性：",
+            "modes": {
+              "tables": "餐桌数量",
+              "seats": "座位数量"
+            },
+            "mode_change": {
+              "title": "注意",
+              "text": "更改可用性的管理方式将删除当前设置。",
+              "cancel": "取消",
+              "confirm": "更改"
+            },
+            "tables_hint": "设置可用餐桌数量及每张餐桌的座位数。",
+            "table_quantity": "餐桌数",
+            "seats_from": "每张",
+            "seats": "个座位",
+            "add_tables": "添加餐桌",
+            "seats_hint": "设置可用座位总数。",
+            "meal_duration": "平均用餐时长",
+            "meal_durations": {
+              "thirty_minutes": "30分钟",
+              "forty_five_minutes": "45分钟",
+              "one_hour": "1小时",
+              "one_hour_fifteen_minutes": "1小时15分钟",
+              "one_hour_thirty_minutes": "1小时30分钟",
+              "one_hour_forty_five_minutes": "1小时45分钟",
+              "two_hours": "2小时",
+              "two_hours_thirty_minutes": "2小时30分钟",
+              "three_hours": "3小时"
+            },
+            "max_bookings_per_time_slot": "每个时段的最大预订数",
+            "allow_booking": "允许预订：",
+            "payments": {
+              "none": "无需付款",
+              "deposit": "需支付确认定金"
+            },
+            "payment_change": {
+              "title": "注意",
+              "text": "切换为“无需付款”后，已填写的确认定金数据将会丢失。",
+              "cancel": "取消",
+              "confirm": "更改"
+            },
+            "deposit_mode": "定金管理",
+            "deposit_modes": {
+              "total": "总计",
+              "per_person": "按人"
+            },
+            "deposit_amount": "定金金额",
+            "deposit_info": "**1. 总计**\n餐桌服务预订的确认定金仅按所有预订人数/座位总计收取一次。\n\n**2. 按人**\n餐桌服务预订的确认定金按每位预订人/每个座位收取。",
+            "online_booking": "启用在线预订"
           }
         }
       }

@@ -55,7 +55,11 @@ import { StandardServiceSelectedPrices } from '../../../entities/settings/servic
 import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/services/standard-service-update-booking-request';
 import { StandardServiceUpdateGeneralRequest } from '../../../entities/settings/services/standard-service-update-general-request';
 import { StandardServiceUpdatePricesRequest } from '../../../entities/settings/services/standard-service-update-prices-request';
+import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
+import { TableServiceAvailability } from '../../../entities/settings/services/table-service-availability';
+import { TableServiceAvailabilityDay } from '../../../entities/settings/services/table-service-availability-day';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
+import { TableServiceTableGroup } from '../../../entities/settings/services/table-service-table-group';
 import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
@@ -503,6 +507,23 @@ export class CatalogService {
     request: DuplicateTableServiceItemsRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, request);
+
+  /** The data of the two tabs of the add panel. Answers 204 with no body. */
+  readonly createTableService = (
+    idProperty: string,
+    request: TableServiceAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/create-table-service`, {
+      ...onlyFieldsOf(TableServiceAddItemRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      availabilities: request.availabilities.map(tableAvailabilityFields),
+      tableGroups: request.tableGroups.map((tableGroup) =>
+        onlyFieldsOf(TableServiceTableGroup, tableGroup),
+      ),
+      idProperty,
+    });
 }
 
 /** Only the fields of the contract, at every level: the time slots inside the option too. */
@@ -541,5 +562,12 @@ function hourlyBookingOptionFields(
   return {
     ...onlyFieldsOf(HourlyServiceBookingOption, bookingOption),
     availabilityOption: availabilityOptionFields(bookingOption.availabilityOption),
+  };
+}
+
+function tableAvailabilityFields(availability: TableServiceAvailability): TableServiceAvailability {
+  return {
+    ...onlyFieldsOf(TableServiceAvailability, availability),
+    days: availability.days.map((day) => onlyFieldsOf(TableServiceAvailabilityDay, day)),
   };
 }

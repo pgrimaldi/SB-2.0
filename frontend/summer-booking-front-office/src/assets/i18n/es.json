@@ -1303,7 +1303,8 @@
             "general_info": "Información general",
             "prices": "Precios",
             "bookings": "Reservas",
-            "prices_validity": "Precios y validez"
+            "prices_validity": "Precios y validez",
+            "availability_bookings": "Disponibilidad y reservas"
           },
           "name": "Nombre",
           "description": "Descripción",
@@ -1407,6 +1408,71 @@
             "no_services": "No hay servicios de este tipo.",
             "price_per_service": "Activar precio automático para cada servicio",
             "price_per_service_info": "Si esta opción **está activada**, el precio automático se aplica y se añade automáticamente por cada servicio que se añade a la reserva.\n\nSi esta opción **no está activada**, el precio automático se aplica y se añade automáticamente una sola vez por pedido."
+          },
+          "tables": {
+            "availability_title": "Disponibilidad",
+            "add_availability": "Añadir disponibilidad",
+            "days_hours": "Días y franjas horarias",
+            "same_hours": "Aplicar el mismo horario a todos los días",
+            "days": {
+              "monday": "Lunes",
+              "tuesday": "Martes",
+              "wednesday": "Miércoles",
+              "thursday": "Jueves",
+              "friday": "Viernes",
+              "saturday": "Sábado",
+              "sunday": "Domingo"
+            },
+            "capacity_title": "Disponibilidad de mesas y plazas",
+            "manage_by": "Gestionar la disponibilidad por:",
+            "modes": {
+              "tables": "Número de mesas",
+              "seats": "Número de plazas"
+            },
+            "mode_change": {
+              "title": "Atención",
+              "text": "Cambiar la forma en que se gestiona la disponibilidad borrará la configuración actual.",
+              "cancel": "Cancelar",
+              "confirm": "Cambiar"
+            },
+            "tables_hint": "Indica el número de mesas disponibles y el número de plazas de cada mesa.",
+            "table_quantity": "N.º de mesas",
+            "seats_from": "de",
+            "seats": "plazas",
+            "add_tables": "Añadir mesas",
+            "seats_hint": "Indica el número total de plazas disponibles.",
+            "meal_duration": "Duración media de la comida",
+            "meal_durations": {
+              "thirty_minutes": "30 minutos",
+              "forty_five_minutes": "45 minutos",
+              "one_hour": "1 h",
+              "one_hour_fifteen_minutes": "1 h y 15 minutos",
+              "one_hour_thirty_minutes": "1 h y 30 minutos",
+              "one_hour_forty_five_minutes": "1 h y 45 minutos",
+              "two_hours": "2 h",
+              "two_hours_thirty_minutes": "2 h y 30 minutos",
+              "three_hours": "3 h"
+            },
+            "max_bookings_per_time_slot": "Número máximo de reservas por franja horaria",
+            "allow_booking": "Permitir reserva:",
+            "payments": {
+              "none": "Sin ningún pago",
+              "deposit": "Con depósito de confirmación"
+            },
+            "payment_change": {
+              "title": "Atención",
+              "text": "Al pasar a \"Sin ningún pago\" se perderán los datos introducidos en el depósito de confirmación.",
+              "cancel": "Cancelar",
+              "confirm": "Cambiar"
+            },
+            "deposit_mode": "Gestión del depósito",
+            "deposit_modes": {
+              "total": "Total",
+              "per_person": "Por persona"
+            },
+            "deposit_amount": "Importe del depósito",
+            "deposit_info": "**1. Total**\nEl depósito de confirmación de la reserva del servicio de mesas se aplica una sola vez por el total de personas/plazas reservadas.\n\n**2. Por persona**\nEl depósito de confirmación de la reserva del servicio de mesas se aplica por cada persona/plaza reservada.",
+            "online_booking": "Activar reserva online"
           }
         }
       }

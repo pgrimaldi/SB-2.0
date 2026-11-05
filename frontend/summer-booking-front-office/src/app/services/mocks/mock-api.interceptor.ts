@@ -46,6 +46,7 @@ import {
   duplicateAutomaticPriceItemsMock,
   deleteTableServiceItemsMock,
   duplicateTableServiceItemsMock,
+  createTableServiceMock,
   duplicateBarServiceItemsMock,
   hourlyServiceListMock,
   saveBathhouseConfigurationGeneralMock,
@@ -832,6 +833,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/duplicate-table-service-item`
   ) {
     return duplicateTableServiceItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/create-table-service`
+  ) {
+    return createTableServiceMock(request);
   }
 
   return next(request);

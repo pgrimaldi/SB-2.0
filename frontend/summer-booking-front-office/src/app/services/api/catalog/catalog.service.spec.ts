@@ -7,6 +7,10 @@ import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
 import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
 import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
+import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
+import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
+import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
+import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
@@ -24,6 +28,7 @@ import { StandardServiceAddItemRequest } from '../../../entities/settings/servic
 import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/services/standard-service-update-booking-request';
 import { StandardServiceUpdateGeneralRequest } from '../../../entities/settings/services/standard-service-update-general-request';
 import { StandardServiceUpdatePricesRequest } from '../../../entities/settings/services/standard-service-update-prices-request';
+import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
 import { Language } from '../../../entities/shared/language';
 import { CatalogService } from './catalog.service';
 
@@ -909,6 +914,61 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-automatic-price-prices-validity`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should create the table service with only the contract fields and the property', () => {
+    const { catalog, controller } = setup();
+    const translation = { language: Language.It, serviceName: 'Pranzo', description: 'Ai tavoli' };
+    const day = { dayOfWeek: 1, isEnabled: true, startTime: '12:00', endTime: '15:00' };
+    const availability = {
+      dateFrom: '2026-07-01T00:00:00.000Z',
+      dateTo: '2026-07-31T00:00:00.000Z',
+      isSameTimeForAllDays: true,
+      startTime: '12:00',
+      endTime: '15:00',
+      days: [day],
+    };
+    const tableGroup = { tableQuantity: 10, seatPerTableQuantity: 2 };
+    const request = {
+      translations: [translation],
+      isHighlighted: true,
+      availabilities: [availability],
+      availabilityMode: TableServiceAvailabilityMode.Tables,
+      tableGroups: [tableGroup],
+      totalSeatQuantity: null,
+      averageMealDuration: TableServiceMealDuration.OneHourThirtyMinutes,
+      maxBookingPerTimeSlotQuantity: 8,
+      bookingPayment: TableServiceBookingPayment.Deposit,
+      depositMode: TableServiceDepositMode.PerPerson,
+      depositPercentage: 20,
+      isOnlineBookingEnabled: true,
+    };
+
+    catalog
+      .createTableService(
+        'p1',
+        Object.assign(new TableServiceAddItemRequest(), {
+          ...request,
+          translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+          availabilities: [
+            {
+              ...availability,
+              days: [{ ...day, unexpectedFlag: 'extra-field' }],
+              unexpectedFlag: 'extra-field',
+            },
+          ],
+          tableGroups: [{ ...tableGroup, unexpectedFlag: 'extra-field' }],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-table-service`,
     ).request.body;
     expect(body).toEqual({ ...request, idProperty: 'p1' });
     controller.verify();

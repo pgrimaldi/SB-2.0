@@ -1,0 +1,120 @@
+<section class="table__service__availabilities__section">
+  <app-section-title
+    [text]="'management.settings.services.form.tables.availability_title' | translate"
+  >
+    <app-button [size]="ButtonSize.Small" [pathIcon]="addIcon" (clicked)="addAvailability()">
+      {{ 'management.settings.services.form.tables.add_availability' | translate }}
+    </app-button>
+  </app-section-title>
+  @for (availability of form(); track availability; let availabilityIndex = $index) {
+    <div class="table__service__availabilities__availability">
+      <app-icon-button
+        class="table__service__availabilities__remove"
+        [pathIcon]="removeIcon"
+        (click)="removeAvailability(availabilityIndex)"
+      />
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.bookings.period' | translate }}
+        </span>
+        <div class="table__service__availabilities__pair">
+          <span class="table__service__availabilities__word">
+            {{ 'management.settings.services.form.bookings.date_from' | translate }}
+          </span>
+          <app-filled-date-field
+            class="table__service__availabilities__date"
+            [pathIcon]="calendarIcon"
+            [formField]="availability.dateFrom"
+            [error]="validationText.text(availability.dateFrom)"
+          />
+        </div>
+        <div class="table__service__availabilities__pair">
+          <span class="table__service__availabilities__word">
+            {{ 'management.settings.services.form.bookings.date_to' | translate }}
+          </span>
+          <app-filled-date-field
+            class="table__service__availabilities__date"
+            [pathIcon]="calendarIcon"
+            [minDate]="availability.dateFrom().value()"
+            [formField]="availability.dateTo"
+            [error]="validationText.text(availability.dateTo)"
+          />
+        </div>
+      </app-form-row>
+
+      <app-form-row>
+        <span appFormRowLabel>
+          {{ 'management.settings.services.form.tables.days_hours' | translate }}
+        </span>
+        <div class="table__service__availabilities__days">
+          <div class="table__service__availabilities__day table__service__availabilities__all">
+            <app-checkbox
+              class="table__service__availabilities__check"
+              [formField]="availability.isSameTimeForAllDays"
+              (checkedChange)="chooseSameTime(availability, $event)"
+            >
+              {{ 'management.settings.services.form.tables.same_hours' | translate }}
+            </app-checkbox>
+            <div class="table__service__availabilities__pair">
+              <span class="table__service__availabilities__word">
+                {{ 'management.settings.services.form.bookings.time_from' | translate }}
+              </span>
+              <app-filled-time-field
+                class="table__service__availabilities__time"
+                [pathIcon]="clockIcon"
+                [formField]="availability.startTime"
+                [error]="validationText.text(availability.startTime)"
+                (valueChange)="changeStartTime(availability, $event)"
+              />
+            </div>
+            <div class="table__service__availabilities__pair">
+              <span class="table__service__availabilities__word">
+                {{ 'management.settings.services.form.bookings.time_to' | translate }}
+              </span>
+              <app-filled-time-field
+                class="table__service__availabilities__time"
+                [pathIcon]="clockIcon"
+                [formField]="availability.endTime"
+                [error]="validationText.text(availability.endTime)"
+                (valueChange)="changeEndTime(availability, $event)"
+              />
+            </div>
+          </div>
+          @for (day of availability.days; track day) {
+            <div class="table__service__availabilities__day">
+              <app-checkbox
+                class="table__service__availabilities__check"
+                [formField]="day.isEnabled"
+              >
+                {{ dayName(day.dayOfWeek().value()) }}
+              </app-checkbox>
+              <div class="table__service__availabilities__pair">
+                <span class="table__service__availabilities__word">
+                  {{ 'management.settings.services.form.bookings.time_from' | translate }}
+                </span>
+                <app-filled-time-field
+                  class="table__service__availabilities__time"
+                  [pathIcon]="clockIcon"
+                  [formField]="day.startTime"
+                  [error]="validationText.text(day.startTime)"
+                />
+              </div>
+              <div class="table__service__availabilities__pair">
+                <span class="table__service__availabilities__word">
+                  {{ 'management.settings.services.form.bookings.time_to' | translate }}
+                </span>
+                <app-filled-time-field
+                  class="table__service__availabilities__time"
+                  [pathIcon]="clockIcon"
+                  [formField]="day.endTime"
+                  [error]="validationText.text(day.endTime)"
+                />
+              </div>
+            </div>
+          }
+        </div>
+      </app-form-row>
+    </div>
+  }
+</section>
