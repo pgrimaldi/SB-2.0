@@ -1,0 +1,41 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CredenzialiDb",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "{{Output:DbSecretArn}}"
+    },
+    {
+      "Sid": "CredenzialiDbSolaLettura",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "arn:aws:secretsmanager:{{Region}}:{{Account}}:secret:{{Stack}}/db-lettura-*"
+    },
+    {
+      "Sid": "AccessoDalPc",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupIngress"
+      ],
+      "Resource": "arn:aws:ec2:{{Region}}:{{Account}}:security-group/{{Output:DbSecurityGroupId}}"
+    },
+    {
+      "Sid": "LetturaRegole",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSecurityGroupRules"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

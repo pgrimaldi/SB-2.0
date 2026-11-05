@@ -1,0 +1,3 @@
+# Ogni utility ha il suo .gitignore (configurazione locale, data/, logs/, build/, dist/, .venv/).
+# Qui: lavoro temporaneo dello script di pacchetto.
+dist/_staging/

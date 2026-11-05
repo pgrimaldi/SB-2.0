@@ -1,0 +1,57 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LetturaIam",
+      "Effect": "Allow",
+      "Action": ["iam:Get*", "iam:List*", "iam:GenerateServiceLastAccessedDetails", "iam:SimulatePrincipalPolicy"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "RuoliSoloDentroIlConfine",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole", "iam:PutRolePermissionsBoundary",
+        "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:PutRolePolicy", "iam:DeleteRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::{{Account}}:role/*",
+      "Condition": {"StringEquals": {"iam:PermissionsBoundary": "arn:aws:iam::{{Account}}:policy/sb-dev-confine"}}
+    },
+    {
+      "Sid": "GestioneRuoliSbDev",
+      "Effect": "Allow",
+      "Action": [
+        "iam:DeleteRole", "iam:UpdateRole", "iam:UpdateRoleDescription", "iam:UpdateAssumeRolePolicy",
+        "iam:TagRole", "iam:UntagRole", "iam:PassRole"
+      ],
+      "Resource": "arn:aws:iam::{{Account}}:role/sb-dev-*"
+    },
+    {
+      "Sid": "PolicySbDev",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicy", "iam:CreatePolicyVersion", "iam:DeletePolicy", "iam:DeletePolicyVersion",
+        "iam:SetDefaultPolicyVersion", "iam:TagPolicy", "iam:UntagPolicy"
+      ],
+      "Resource": "arn:aws:iam::{{Account}}:policy/sb-dev-*"
+    },
+    {
+      "Sid": "MaiLePolicyDeiRuoliNeIlConfine",
+      "Effect": "Deny",
+      "Action": [
+        "iam:CreatePolicyVersion", "iam:DeletePolicy", "iam:DeletePolicyVersion", "iam:SetDefaultPolicyVersion"
+      ],
+      "Resource": [
+        "arn:aws:iam::{{Account}}:policy/sb-dev-confine",
+        "arn:aws:iam::{{Account}}:policy/sb-dev-ruolo-*",
+        "arn:aws:iam::{{Account}}:policy/sb-ruolo-*"
+      ]
+    },
+    {
+      "Sid": "MaiTogliereIlConfine",
+      "Effect": "Deny",
+      "Action": ["iam:DeleteRolePermissionsBoundary"],
+      "Resource": "*"
+    }
+  ]
+}

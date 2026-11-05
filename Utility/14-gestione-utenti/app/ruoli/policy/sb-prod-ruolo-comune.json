@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Identita",
+      "Effect": "Allow",
+      "Action": ["sts:GetCallerIdentity"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StatoStack",
+      "Effect": "Allow",
+      "Action": ["cloudformation:DescribeStacks", "cloudformation:DescribeStackEvents", "cloudformation:DescribeStackResources"],
+      "Resource": "arn:aws:cloudformation:{{Region}}:{{Account}}:stack/{{Stack}}/*"
+    },
+    {
+      "Sid": "StatoBuild",
+      "Effect": "Allow",
+      "Action": ["codebuild:ListBuildsForProject", "codebuild:BatchGetBuilds"],
+      "Resource": [
+        "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:BackendBuildProject}}",
+        "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:FrontendBuildProject}}"
+      ]
+    },
+    {
+      "Sid": "StatoServizio",
+      "Effect": "Allow",
+      "Action": ["ecs:DescribeServices", "ecr:DescribeImages"],
+      "Resource": [
+        "arn:aws:ecs:{{Region}}:{{Account}}:service/{{Output:ClusterName}}/*",
+        "arn:aws:ecr:{{Region}}:{{Account}}:repository/{{Output:EcrRepositoryName}}"
+      ]
+    }
+  ]
+}

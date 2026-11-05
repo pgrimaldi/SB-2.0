@@ -93,12 +93,31 @@ Correzioni rispetto al legacy:
 | `ix_..._source` | `(source_kind, source_id)` | btree | risalita alla prenotazione/offerta di origine; cancellazione a cascata logica |
 | `ix_..._booking_number` | `(booking_number)` | btree | correlazione diretta con C3/C4 |
 | `ix_..._holds_expiry` | `(held_until) WHERE state = 'held' AND held_until IS NOT NULL` | parziale | job di scadenza degli hold |
-| `xc_..._no_overlap` | `EXCLUDE USING gist (property_id WITH =, resource_id WITH =, daterange(consumption_date, consumption_date, '[]') WITH &&, period_mask WITH &&) WHERE (state <> 'released' AND resource_id IS NOT NULL AND resource_type IN ('umbrella','sunbed','cabin','deckchair','chair','tent','parking'))` | EXCLUSION | il DB garantisce nessun doppio consumo attivo sulla stessa postazione/giorno/fascia ⚠️ **Non presente a DB** (verifica del 2026-10-06): progettato, mai creato. Riquadro sotto. |
+| `ex_booking_resource_consumptions_spot` | `EXCLUDE USING gist (resource_id WITH =, consumption_date WITH =, int4range(CASE booking_period WHEN 'afternoon' THEN 2 ELSE 1 END, CASE booking_period WHEN 'morning' THEN 2 ELSE 3 END) WITH &&) WHERE (state <> 'released' AND deleted_at IS NULL AND resource_id IS NOT NULL AND resource_type IN ('umbrella','sunbed','sunbed_xl','cabin','special_cabin','tent','parking'))` | EXCLUSION | una postazione a uso esclusivo occupata una sola volta per giorno e fascia. ✅ Creato il 2026-11-05 (migration `ConsumptionSpotExclusion` di Booking). |
 
-*(`period_mask` = colonna generata `int` da `booking_period` per la sovrapposizione fascia: `full_day`
-maschera `morning`+`afternoon`.)*
+*(La fascia è un `int4range` calcolato nel vincolo: mattina `[1,2)`, pomeriggio `[2,3)`, giornata intera `[1,3)`.
+Nessuna colonna `period_mask`.)*
 
-> ### ⚠️ Il vincolo anti-doppia-prenotazione non esiste a DB (verifica del 2026-10-06)
+> ### ✅ Vincolo creato il 2026-11-05 — com'era la situazione e cosa è cambiato
+>
+> - **Il vincolo vale solo sulle righe che portano la postazione** (`resource_id` = `catalog_map_spots.public_id`).
+>   Gli articoli dei pacchetti con un tipo di postazione (es. «1 ombrellone + 2 lettini») si registrano con
+>   `resource_id` **NULL**: sono quantità, non occupano una postazione precisa. Booking e l'ETL devono rispettare
+>   questa regola, altrimenti un articolo verrebbe preso per una postazione.
+> - **L'ETL ora scrive l'occupazione**: un consumo per riga di prenotazione e giorno (`source_kind =
+>   reservation_line`, `source_id` = riga), circa 1,85 milioni di righe. Prima non c'era: la postazione stava solo
+>   in `booking_lines`. I giorni rivenduti con lo sharing e quelli dopo un'uscita anticipata sono `released`; le
+>   riserve manuali ripetute si scrivono una volta; i conflitti rimasti si risolvono a favore della prima
+>   prenotazione (le altre righe `released`, nel registro scarti con motivo `conflitto_postazione`).
+> - **Postazioni esclusive**: ombrellone, lettino, lettino XL, cabina, cabina personalizzata (`special_cabin`),
+>   tenda, parcheggio. Fuori le aree (capienza), gli articoli personalizzati della mappa e gli elementi da spiaggia.
+> - **Errore applicativo**: la violazione (`23P01`) diventa 409 `booking.spot_unavailable`.
+> - Le prenotazioni `status = 2` del legacy (online mai confermate) si migrano annullate se già finite alla data di
+>   cutover, e non occupano.
+>
+> Analisi completa in `documentazione-locale/booking-da-chiarire.md` (T-01).
+>
+> #### Com'era (verifica del 2026-10-06)
 >
 > Né `xc_booking_resource_consumptions_no_overlap` né la colonna generata `period_mask` sono mai stati
 > creati: non c'erano nella prima `InitialCreate` del 2026-09-14 e non sono stati aggiunti dopo (lo SQL

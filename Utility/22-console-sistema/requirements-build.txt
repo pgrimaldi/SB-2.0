@@ -1,0 +1,2 @@
+# Solo per build-exe.ps1: non serve per usare la utility.
+pyinstaller==6.22.3

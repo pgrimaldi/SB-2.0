@@ -1,0 +1,65 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BuildBackend",
+      "Effect": "Allow",
+      "Action": ["codebuild:StartBuild", "codebuild:StopBuild", "codebuild:BatchGetBuilds", "codebuild:ListBuildsForProject", "codebuild:BatchGetProjects"],
+      "Resource": "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:BackendBuildProject}}"
+    },
+    {
+      "Sid": "SorgentiDellaBuild",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::{{Output:BuildBucketName}}/*"
+    },
+    {
+      "Sid": "LoginEcr",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ImmaginiBackend",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:DescribeImages", "ecr:ListImages", "ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchCheckLayerAvailability", "ecr:InitiateLayerUpload", "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload", "ecr:PutImage", "ecr:DescribeImageScanFindings"
+      ],
+      "Resource": "arn:aws:ecr:{{Region}}:{{Account}}:repository/sb-dev/api"
+    },
+    {
+      "Sid": "LogBackend",
+      "Effect": "Allow",
+      "Action": ["logs:GetLogEvents", "logs:FilterLogEvents", "logs:DescribeLogStreams", "logs:StartQuery"],
+      "Resource": [
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:/aws/codebuild/{{Output:BackendBuildProject}}:*",
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:{{Output:AppLogGroup}}:*",
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:/summerbooking/dev/apigw:*"
+      ]
+    },
+    {
+      "Sid": "RisultatiQueryLog",
+      "Effect": "Allow",
+      "Action": ["logs:GetQueryResults", "logs:StopQuery", "logs:DescribeQueries", "logs:DescribeLogGroups"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "TaskInEsercizio",
+      "Effect": "Allow",
+      "Action": ["ecs:ListTasks", "ecs:DescribeTasks"],
+      "Resource": "*",
+      "Condition": {"ArnEquals": {"ecs:cluster": "arn:aws:ecs:{{Region}}:{{Account}}:cluster/{{Output:ClusterName}}"}}
+    },
+    {
+      "Sid": "EcsExec",
+      "Effect": "Allow",
+      "Action": ["ecs:ExecuteCommand"],
+      "Resource": [
+        "arn:aws:ecs:{{Region}}:{{Account}}:cluster/{{Output:ClusterName}}",
+        "arn:aws:ecs:{{Region}}:{{Account}}:task/{{Output:ClusterName}}/*"
+      ]
+    }
+  ]
+}

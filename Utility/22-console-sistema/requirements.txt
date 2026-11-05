@@ -1,0 +1,12 @@
+# Dipendenze della utility 22 - console del nuovo sistema.
+#
+# La GUI e' Tkinter (stdlib); git, dotnet e pg_restore si lanciano come programmi esterni.
+
+# SDK AWS (porta con se' botocore e jmespath, usato dalla scansione per estrarre gli id dalle risposte)
+boto3==1.43.114
+# database dei fusi orari: su Windows zoneinfo non ce l'ha; va anche nel pacchetto della Lambda dell'orario
+tzdata==2025.2
+# query sul PostgreSQL locale e su RDS (migration, svuotamento, conteggi, inventario degli archivi)
+psycopg[binary]==3.2.10
+# password del PostgreSQL locale nel Gestore credenziali di Windows, mai in un file
+keyring==25.6.0

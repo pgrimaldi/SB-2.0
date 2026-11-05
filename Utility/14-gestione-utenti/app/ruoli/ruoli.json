@@ -1,0 +1,152 @@
+{
+  "_comment": "Ruoli della utility 14. Ogni ruolo e' un gruppo IAM; un utente puo' averne piu' d'uno e i permessi si sommano. Un utente ha ruoli per l'ambiente dev e/o per l'ambiente prod, piu' eventuali ruoli sull'intero account. Le policy 'proprie' sono i file in policy/ (segnaposto {{Account}}, {{Region}}, {{Stack}}, {{Output:<nome>}} = output dello stack dell'ambiente); 'policy_aws' sono policy gestite da AWS; 'policy_esistenti' sono policy del cliente create da altri (lo stack) e solo agganciate. Un ambiente o un ruolo con da_definire=true compare nella utility ma non si prepara ne' si assegna.",
+
+  "base": {
+    "gruppo": "sb-ruolo-base",
+    "descrizione": "Sempre assegnato: la propria password, le proprie chiavi, il proprio MFA",
+    "policy": ["sb-ruolo-base"]
+  },
+
+  "ambienti": [
+    {
+      "nome": "dev",
+      "descrizione": "Ambiente di test sb-dev",
+      "stack": "sb-dev",
+      "ruoli": [
+        {
+          "nome": "frontend",
+          "gruppo": "sb-dev-ruolo-frontend",
+          "descrizione": "Build e pubblicazione del front office su sb-dev, log delle build",
+          "policy": ["sb-dev-ruolo-comune", "sb-dev-ruolo-frontend"]
+        },
+        {
+          "nome": "backend",
+          "gruppo": "sb-dev-ruolo-backend",
+          "descrizione": "Build dell'immagine, migration, rilascio su sb-dev, log del backend, ECS Exec",
+          "policy": ["sb-dev-ruolo-comune", "sb-dev-ruolo-backend", "sb-dev-ruolo-rilascio", "sb-dev-ruolo-accesso-db"],
+          "policy_esistenti": ["sb-dev-power-utility"]
+        },
+        {
+          "nome": "database",
+          "gruppo": "sb-dev-ruolo-database",
+          "descrizione": "Crea, carica, svuota ed elimina il DB di sb-dev; accesso dal PC",
+          "policy": ["sb-dev-ruolo-comune", "sb-dev-ruolo-database", "sb-dev-ruolo-rilascio", "sb-dev-ruolo-accesso-db"],
+          "policy_esistenti": ["sb-dev-power-utility"]
+        },
+        {
+          "nome": "orario",
+          "gruppo": "sb-dev-ruolo-orario",
+          "descrizione": "Solo accensione e spegnimento di sb-dev (utility 20, parte orario)",
+          "policy": ["sb-dev-ruolo-comune"],
+          "policy_esistenti": ["sb-dev-power-utility"]
+        },
+        {
+          "nome": "log",
+          "gruppo": "sb-dev-ruolo-log",
+          "descrizione": "Lettura di log e metriche di sb-dev",
+          "policy": ["sb-dev-ruolo-comune", "sb-dev-ruolo-log"]
+        },
+        {
+          "nome": "file",
+          "gruppo": "sb-dev-ruolo-file",
+          "descrizione": "File S3 di sb-dev (utility 22): elenco, scarico, caricamento e cancellazione dei file applicativi; archivi della retention e altri bucket in sola lettura",
+          "policy": ["sb-dev-ruolo-comune", "sb-dev-ruolo-file"]
+        }
+      ],
+      "preset": {"fullstack": ["frontend", "backend"]}
+    },
+    {
+      "nome": "prod",
+      "descrizione": "Produzione della nuova piattaforma: lo stack sb-prod lo crea la utility 23; finche' non esiste i ruoli non si preparano",
+      "stack": "sb-prod",
+      "da_definire": true,
+      "ruoli": [
+        {
+          "nome": "frontend",
+          "gruppo": "sb-prod-ruolo-frontend",
+          "descrizione": "Build e pubblicazione del front office di produzione (utility 23, linguetta Frontend)",
+          "policy": ["sb-prod-ruolo-comune", "sb-prod-ruolo-frontend"]
+        },
+        {
+          "nome": "backend",
+          "gruppo": "sb-prod-ruolo-backend",
+          "descrizione": "Build dell'immagine e rilascio del backend di produzione (utility 23, linguetta Backend), log del backend",
+          "policy": ["sb-prod-ruolo-comune", "sb-prod-ruolo-backend", "sb-prod-ruolo-rilascio"]
+        },
+        {
+          "nome": "database",
+          "gruppo": "sb-prod-ruolo-database",
+          "descrizione": "DA DEFINIRE: operazioni sul DB di produzione (backup, ripristino, accesso controllato)",
+          "da_definire": true
+        },
+        {
+          "nome": "log",
+          "gruppo": "sb-prod-ruolo-log",
+          "descrizione": "DA DEFINIRE: lettura di log e metriche di produzione",
+          "da_definire": true
+        },
+        {
+          "nome": "file",
+          "gruppo": "sb-prod-ruolo-file",
+          "descrizione": "DA DEFINIRE: file S3 e archivi della retention di produzione (utility 22)",
+          "da_definire": true
+        }
+      ],
+      "preset": {"fullstack": ["frontend", "backend"]}
+    }
+  ],
+
+  "account": {
+    "descrizione": "Ruoli sull'intero account AWS (dev, prod e prod legacy insieme)",
+    "ruoli": [
+      {
+        "nome": "lettura",
+        "gruppo": "sb-ruolo-lettura",
+        "descrizione": "Vede come sono configurate le risorse dell'account, senza dati (niente file, segreti, log, righe)",
+        "policy_aws": ["arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"]
+      },
+      {
+        "nome": "costi",
+        "gruppo": "sb-ruolo-costi",
+        "descrizione": "Fatturazione e Cost Explorer in sola lettura",
+        "policy_aws": ["arn:aws:iam::aws:policy/AWSBillingReadOnlyAccess"]
+      },
+      {
+        "nome": "infrastruttura",
+        "gruppo": "sb-ruolo-infrastruttura",
+        "descrizione": "Modifica l'infrastruttura AWS; i ruoli IAM che crea restano dentro il confine sb-dev-confine. MFA obbligatoria in console",
+        "policy": ["sb-ruolo-infrastruttura", "sb-ruolo-mfa-console"],
+        "policy_aws": ["arn:aws:iam::aws:policy/PowerUserAccess"]
+      },
+      {
+        "nome": "admin",
+        "gruppo": "sb-ruolo-admin",
+        "descrizione": "Tutto, compresa la gestione degli utenti. MFA obbligatoria in console",
+        "policy": ["sb-ruolo-mfa-console"],
+        "policy_aws": ["arn:aws:iam::aws:policy/AdministratorAccess"]
+      }
+    ]
+  },
+
+  "policy_senza_gruppo": ["sb-dev-confine"],
+  "_policy_senza_gruppo_note": "Policy create ma non assegnate a un gruppo: sb-dev-confine e' il permissions boundary obbligatorio sui ruoli IAM creati da chi ha il ruolo infrastruttura.",
+
+  "descrizioni_policy": {
+    "sb-ruolo-base": "Utility 14: gestione della propria password, delle proprie chiavi e del proprio MFA",
+    "sb-ruolo-mfa-console": "Utility 14: in console senza MFA si puo' solo configurare l'MFA",
+    "sb-ruolo-infrastruttura": "Utility 14: IAM per il ruolo infrastruttura, solo ruoli dentro sb-dev-confine",
+    "sb-dev-confine": "Utility 14: permissions boundary dei ruoli IAM creati dal ruolo infrastruttura",
+    "sb-dev-ruolo-comune": "Utility 14: stato dell'ambiente sb-dev in sola lettura",
+    "sb-dev-ruolo-frontend": "Utility 14: build e pubblicazione del front office di sb-dev",
+    "sb-dev-ruolo-backend": "Utility 14: build dell'immagine e log del backend di sb-dev",
+    "sb-dev-ruolo-rilascio": "Utility 14: aggiornamento dei parametri dello stack sb-dev (ImageTag, DatabaseEnabled)",
+    "sb-dev-ruolo-accesso-db": "Utility 14: credenziali e accesso dal PC al DB di sb-dev",
+    "sb-dev-ruolo-database": "Utility 14: creazione, caricamento ed eliminazione del DB di sb-dev",
+    "sb-dev-ruolo-log": "Utility 14: log e metriche di sb-dev in sola lettura",
+    "sb-dev-ruolo-file": "Utility 14: file S3 di sb-dev (lettura e scrittura dei file, archivio in lettura)",
+    "sb-prod-ruolo-comune": "Utility 14: stato della produzione (stack, build, servizio) in sola lettura",
+    "sb-prod-ruolo-frontend": "Utility 14: build e pubblicazione del front office di produzione",
+    "sb-prod-ruolo-backend": "Utility 14: build dell'immagine e log del backend di produzione",
+    "sb-prod-ruolo-rilascio": "Utility 14: aggiornamento del parametro ImageTag dello stack di produzione"
+  }
+}

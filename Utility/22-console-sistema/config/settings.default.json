@@ -1,0 +1,170 @@
+{
+  "_comment": "Valori preimpostati della utility 22 (console del nuovo sistema). Copiato in settings.local.json da setup.ps1 / al primo avvio: modifica QUELLO, non e' versionato. Nessun segreto qui: le chiavi AWS stanno nel profilo della AWS CLI, la password del PostgreSQL locale nel Gestore credenziali di Windows.",
+
+  "aws": {"profile": "", "region": "eu-south-1"},
+  "_aws_note": "profile = profilo della AWS CLI dell'utente che usa la utility. Le linguette si abilitano secondo i gruppi IAM (ruoli della utility 14) di quell'utente.",
+
+  "account_atteso": "747862473836",
+  "_account_note": "La utility rifiuta di lavorare su un account diverso.",
+
+  "ambiente_iniziale": "dev",
+
+  "repository": {
+    "percorso": "",
+    "remoto": "origin",
+    "branch": "dev"
+  },
+  "_repository_note": "Clone locale del repository, usato in sola lettura: si pubblica sempre un commit del remoto (git fetch + git archive), mai la cartella di lavoro. Il branch proposto si puo' cambiare per ambiente (ambienti.<nome>.branch).",
+
+  "locale_pg": {
+    "host": "localhost",
+    "port": 5432,
+    "utente": "postgres",
+    "bin": "C:/Program Files/PostgreSQL/17/bin",
+    "escludi": ["postgres", "Test001", "newliving"]
+  },
+  "_locale_pg_note": "PostgreSQL locale: sorgente di schema e dati per Crea/Aggiorna DB (solo dev) e pg_restore --list per la verifica dei backup. bin = cartella di pg_dump/pg_restore, stessa versione principale di RDS.",
+
+  "backup": {
+    "cartella": "data/backup",
+    "formato": "custom",
+    "compressione": 6,
+    "tieni_su_s3": false,
+    "prefisso_s3": "dump/backup/"
+  },
+  "_backup_note": "Valori proposti nella linguetta Backup. formato custom = pg_dump -Fc (si ripristina con pg_restore, compressione interna 0-9); sql = testo SQL, compresso in .sql.gz se compressione > 0. Il dump lo fa il task Fargate dbloader dentro la VPC (dal PC le sessioni lunghe verso RDS cadono), lo appoggia nel bucket di build sotto prefisso_s3 e la utility lo scarica in cartella/<ambiente>/. tieni_su_s3 = non cancellare la copia nel bucket dopo lo scarico.",
+
+  "ambienti": {
+    "dev": {
+      "descrizione": "Ambiente di test sb-dev",
+      "stack": "sb-dev",
+      "gruppi_prefisso": "sb-dev-ruolo-",
+      "branch": "dev",
+      "orario": {
+        "plan_parameter": "/sb/dev/power-plan",
+        "plan_parameter_tier": "Intelligent-Tiering",
+        "lambda_name": "dev-power",
+        "log_group": "/aws/lambda/dev-power",
+        "schedule_name": "sb-dev-power-tick",
+        "ore_accensione_manuale": 3,
+        "giorni_prossimi_eventi": 7,
+        "storico_max": 50
+      },
+      "ore_massime_manutenzione": 3,
+      "backend": {
+        "build_project": "sb-dev-backend",
+        "ecr_repository": "sb-dev/api",
+        "cartella": "backend/summerbooking-backend",
+        "moduli_migration": ["Identity", "Catalog", "Booking", "Payment", "Fiskaly", "FiscalPrint",
+                             "Notification", "Switchboard", "Chatbot", "Privacy", "Infra", "Audit"],
+        "health_path": "/health",
+        "minuti_attesa_health": 5,
+        "minuti_attesa_servizio": 15,
+        "migration": "applica"
+      },
+      "frontends": [
+        {"nome": "front office", "build_project": "sb-dev-frontend", "cartella": "frontend/summer-booking-front-office",
+         "configurazioni": ["dev", "production"], "output_url": "FrontendUrl"}
+      ],
+      "database": {
+        "db_secret": "sb-dev/db",
+        "schemi": ["identity", "catalog", "booking", "payment", "fiskaly", "fiscalprint",
+                   "notification", "switchboard", "chatbot", "privacy", "infra", "audit"],
+        "tabelle_seed": [
+          "catalog.pricing_calculation_methods",
+          "identity.access_roles",
+          "identity.account_license_plans",
+          "identity.account_license_plan_translations",
+          "privacy.privacy_retention_policies"
+        ],
+        "lavori_paralleli_restore": 2,
+        "operazioni_distruttive": true,
+        "utente_lettura": "sb_lettura"
+      },
+      "s3": {
+        "bucket_output": ["FilesBucketName", "ArchiveBucketName", "FrontendBucketName", "BuildBucketName"],
+        "sola_lettura": ["ArchiveBucketName"],
+        "max_elementi_elenco": 5000
+      },
+      "archivi": {"bucket_output": "ArchiveBucketName", "prefisso": "archivio/", "righe_anteprima": 200},
+      "log": {
+        "gruppi_output": ["AppLogGroup", "DbLoaderLogGroup"],
+        "gruppi": ["/summerbooking/dev/apigw", "/aws/codebuild/sb-dev-backend", "/aws/codebuild/sb-dev-frontend",
+                   "/aws/lambda/dev-power"]
+      },
+      "infra": {"template": "", "parametri": {}, "protezione_cancellazione": false}
+    },
+    "prod": {
+      "descrizione": "Produzione del nuovo sistema (stack non ancora creato)",
+      "stack": "sb-prod",
+      "gruppi_prefisso": "sb-prod-ruolo-",
+      "branch": "main",
+      "orario": {},
+      "ore_massime_manutenzione": 3,
+      "backend": {
+        "build_project": "sb-prod-backend",
+        "ecr_repository": "sb-prod/api",
+        "cartella": "backend/summerbooking-backend",
+        "moduli_migration": ["Identity", "Catalog", "Booking", "Payment", "Fiskaly", "FiscalPrint",
+                             "Notification", "Switchboard", "Chatbot", "Privacy", "Infra", "Audit"],
+        "health_path": "/health",
+        "minuti_attesa_health": 5,
+        "minuti_attesa_servizio": 15,
+        "migration": "blocca"
+      },
+      "frontends": [
+        {"nome": "front office", "build_project": "sb-prod-frontend", "cartella": "frontend/summer-booking-front-office",
+         "configurazioni": ["production"], "output_url": "FrontendUrl"}
+      ],
+      "database": {
+        "db_secret": "sb-prod/db",
+        "schemi": ["identity", "catalog", "booking", "payment", "fiskaly", "fiscalprint",
+                   "notification", "switchboard", "chatbot", "privacy", "infra", "audit"],
+        "tabelle_seed": [],
+        "lavori_paralleli_restore": 2,
+        "operazioni_distruttive": false,
+        "utente_lettura": "sb_lettura"
+      },
+      "s3": {
+        "bucket_output": ["FilesBucketName", "ArchiveBucketName", "FrontendBucketName", "BuildBucketName"],
+        "sola_lettura": ["ArchiveBucketName", "FilesBucketName"],
+        "max_elementi_elenco": 5000
+      },
+      "archivi": {"bucket_output": "ArchiveBucketName", "prefisso": "archivio/", "righe_anteprima": 200},
+      "log": {"gruppi_output": ["AppLogGroup", "DbLoaderLogGroup"], "gruppi": []},
+      "infra": {"template": "", "parametri": {"EnvironmentName": "prod", "MultiAZ": "true"},
+                "protezione_cancellazione": true}
+    }
+  },
+  "_ambienti_note": "Un blocco per ambiente. Ogni nome di risorsa deve contenere il nome dell'ambiente (dev/prod) e non quello dell'altro, altrimenti la utility rifiuta di partire. Lo stack di prod deve rispettare lo stesso contratto di output di sb-dev (ClusterName, DbEndpoint, DbLoaderTaskFamily, BuildBucketName, FilesBucketName, ArchiveBucketName, FrontendUrl, ApiUrl...): una funzione il cui output manca lo dice e non parte. orario vuoto = niente accensione/spegnimento. operazioni_distruttive = Crea/Aggiorna/Svuota/Elimina DB (mai in prod). backend.migration: applica = le migration pendenti si applicano dal PC con una seconda conferma (dev); blocca = se il commit cambia le migration rispetto a quello in esercizio il rilascio si ferma prima della build, e al primo rilascio si conferma che lo schema e' gia' allineato (prod). Progetti CodeBuild e repository ECR si prendono dagli output dello stack (BackendBuildProject, FrontendBuildProject o frontends[].build_output, EcrRepositoryName/EcrRepositoryUri) e, se mancano, dalla configurazione. infra = template da cui la linguetta Infrastruttura crea il change set (percorso relativo alla utility), parametri passati (gli altri restano quelli in esercizio o il default del template; mai segreti), protezione_cancellazione = attivata alla creazione dello stack. database.utente_lettura = utente PostgreSQL in sola lettura per query, panoramica e sessioni (password nel segreto <db_secret>-lettura, creato dalla utility). s3.sola_lettura = bucket (per nome di output) in cui la linguetta File non carica e non cancella: l'archivio della retention si cancella solo con la retention.",
+
+  "scan": {
+    "aws": {"home_region": "eu-south-1", "max_workers": 12, "max_attempts": 10, "connect_timeout": 10, "read_timeout": 120},
+    "regions": {"mode": "auto", "always": ["eu-south-1"], "list": [], "exclude": []},
+    "sections": {
+      "json": true, "details": true, "iam": true, "s3": true, "secrets": true, "stack_templates": true,
+      "iac_generator": true, "lambda_code": true, "ecr_images": true, "other_artifacts": true
+    },
+    "services": [
+      "acm", "amplify", "apigateway", "apigatewayv2", "application-autoscaling", "apprunner", "appsync",
+      "athena", "autoscaling", "backup", "batch", "cloudformation", "cloudfront", "cloudtrail", "cloudwatch",
+      "codeartifact", "codebuild", "codecommit", "codedeploy", "codepipeline", "codestar-connections",
+      "cognito-identity", "cognito-idp", "config", "dms", "ds", "dynamodb", "ec2", "ecr", "ecs", "efs", "eks",
+      "elasticache", "elasticbeanstalk", "elb", "elbv2", "es", "events", "firehose", "glue", "guardduty",
+      "iam", "kafka", "kinesis", "kms", "lambda", "lightsail", "logs", "mq", "opensearch", "organizations",
+      "ram", "rds", "redshift", "resource-groups", "resourcegroupstaggingapi", "route53", "route53domains",
+      "route53resolver", "s3", "s3control", "scheduler", "secretsmanager", "securityhub", "servicediscovery",
+      "ses", "sesv2", "sns", "sqs", "ssm", "sso-admin", "stepfunctions", "transfer", "wafv2", "xray",
+      "accessanalyzer", "budgets", "network-firewall", "acm-pca", "memorydb", "appconfig"
+    ],
+    "iac": {"reuse_recent_scan_minutes": 0, "poll_seconds": 10, "timeout_minutes": 60, "max_resources_per_template": 500,
+            "delete_generated_templates": true, "include_managed_by_stack": false},
+    "lambda": {"all_versions": false, "all_layer_versions": false},
+    "ecr": {"max_images_per_repo": 0, "include_untagged": false, "repositories": []},
+    "output_dir": "data/scan"
+  },
+  "_scan_note": "Stessa configurazione della utility 12 (vedi il suo settings.default.json per il significato di ogni chiave). La scansione e' dell'intero account, non di un ambiente; il profilo e' aws.profile. Output in output_dir, una cartella per corsa: contiene segreti in chiaro, non va condivisa.",
+
+  "log_dir": "logs",
+  "work_dir": "data"
+}

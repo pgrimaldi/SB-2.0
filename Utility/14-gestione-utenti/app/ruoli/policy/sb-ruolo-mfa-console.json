@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ConsoleSenzaMfaSoloConfigurazioneMfa",
+      "Effect": "Deny",
+      "NotAction": [
+        "iam:GetUser", "iam:ChangePassword", "iam:GetLoginProfile", "iam:GetAccountPasswordPolicy",
+        "iam:ListMFADevices", "iam:ListVirtualMFADevices", "iam:CreateVirtualMFADevice",
+        "iam:EnableMFADevice", "iam:ResyncMFADevice", "iam:GetAccountSummary",
+        "sts:GetSessionToken", "sts:GetCallerIdentity"
+      ],
+      "Resource": "*",
+      "Condition": {"Bool": {"aws:MultiFactorAuthPresent": "false"}}
+    }
+  ]
+}

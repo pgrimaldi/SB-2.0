@@ -1,0 +1,31 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LogSbDev",
+      "Effect": "Allow",
+      "Action": ["logs:GetLogEvents", "logs:FilterLogEvents", "logs:DescribeLogStreams", "logs:StartQuery", "logs:StartLiveTail"],
+      "Resource": [
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:/summerbooking/dev/*",
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:/aws/codebuild/sb-dev-*",
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:{{Output:PowerLogGroup}}:*"
+      ]
+    },
+    {
+      "Sid": "QueryEMetriche",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups", "logs:GetQueryResults", "logs:StopQuery", "logs:DescribeQueries",
+        "cloudwatch:GetMetricData", "cloudwatch:GetMetricStatistics", "cloudwatch:ListMetrics", "cloudwatch:DescribeAlarms"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "TaskInEsercizio",
+      "Effect": "Allow",
+      "Action": ["ecs:ListTasks", "ecs:DescribeTasks"],
+      "Resource": "*",
+      "Condition": {"ArnEquals": {"ecs:cluster": "arn:aws:ecs:{{Region}}:{{Account}}:cluster/{{Output:ClusterName}}"}}
+    }
+  ]
+}

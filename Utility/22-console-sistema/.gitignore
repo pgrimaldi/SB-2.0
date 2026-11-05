@@ -1,0 +1,14 @@
+# configurazione locale (profilo, percorsi): mai nel repository
+config/settings.local.json
+# backup, scansioni, file scaricati (dati reali e segreti) e log per corsa
+data/*
+!data/.gitkeep
+logs/*
+!logs/.gitkeep
+# build dell'eseguibile
+build/
+dist/
+*.spec
+.venv/
+__pycache__/
+*.pyc
