@@ -1,5 +1,3 @@
-import { Pipe, PipeTransform } from '@angular/core';
-
 export type TextParams = Readonly<Record<string, string | number>>;
 
 /**
@@ -13,11 +11,4 @@ export function formatText(text: string | null | undefined, params: TextParams):
         name in params ? String(params[name]) : placeholder,
       )
     : null;
-}
-
-@Pipe({ name: 'formatText' })
-export class FormatTextPipe implements PipeTransform {
-  transform(text: string | null | undefined, params: TextParams): string | null {
-    return formatText(text, params);
-  }
 }
