@@ -1,0 +1,8 @@
+<app-side-panel
+  [title]="'management.settings.services.table_booking.add_title' | translate"
+  [texts]="'management.settings.services.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isSaveDisabled]="true"
+  [(open)]="open"
+  (closeRequest)="open.set(false)"
+/>

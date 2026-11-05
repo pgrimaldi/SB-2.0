@@ -21,7 +21,10 @@
   (loadError)="loadFailed.set(true)"
   (deleteSelected)="askDelete($event)"
   (duplicateSelected)="askDuplicate($event)"
+  (create)="adding.set(true)"
 />
+
+<app-table-service-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" />
 
 <app-delete-items-popup
   [idItems]="idTableServicesToDelete()"

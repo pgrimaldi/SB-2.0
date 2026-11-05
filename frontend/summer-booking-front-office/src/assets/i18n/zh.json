@@ -1266,6 +1266,7 @@
         "table_booking": {
           "title": "餐桌服务预订",
           "create": "添加餐桌服务",
+          "add_title": "添加新的餐桌服务",
           "table": {
             "service_name": "服务名称"
           },

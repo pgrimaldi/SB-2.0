@@ -1266,6 +1266,7 @@
         "table_booking": {
           "title": "Prenotazione servizio tavoli",
           "create": "Aggiungi servizio tavoli",
+          "add_title": "Aggiungi nuovo servizio tavoli",
           "table": {
             "service_name": "Nome servizio"
           },

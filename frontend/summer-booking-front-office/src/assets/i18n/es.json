@@ -1266,6 +1266,7 @@
         "table_booking": {
           "title": "Reserva del servicio de mesas",
           "create": "Añadir servicio de mesas",
+          "add_title": "Añadir nuevo servicio de mesas",
           "table": {
             "service_name": "Nombre del servicio"
           },

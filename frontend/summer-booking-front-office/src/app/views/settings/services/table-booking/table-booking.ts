@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { TableServiceAddItemPanel } from '../../../../components/management/settings/services/table-service-add-item-panel/table-service-add-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -28,6 +29,7 @@ interface TableBookingTexts {
     PageTitle,
     Table,
     TableErrorPopup,
+    TableServiceAddItemPanel,
     TranslatePipe,
   ],
   templateUrl: './table-booking.html',
@@ -40,6 +42,7 @@ export class TableBooking {
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
   protected readonly idSelectedTableServices = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idTableServicesToDelete = signal<readonly string[]>([]);
