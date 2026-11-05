@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 using Module.Catalog.Domain.Enums;
@@ -23,7 +23,7 @@ public sealed class BathhouseConfiguration : IEntityTypeConfiguration<Bathhouse>
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, copiato cross-modulo (C5 identity_customer_bathhouse_likes.bathhouse_id) e usato in URL/API pubbliche.");
+			.HasComment("Id pubblico stabile, copiato cross-modulo (identity_customer_bathhouse_likes.bathhouse_id) e usato in URL/API pubbliche.");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -53,6 +53,7 @@ public sealed class BathhouseConfiguration : IEntityTypeConfiguration<Bathhouse>
 		builder.Property(x => x.Instagram).HasColumnName("instagram").HasMaxLength(255).HasComment("Link Instagram.");
 		builder.Property(x => x.Whatsapp).HasColumnName("whatsapp").HasMaxLength(32).HasComment("Numero WhatsApp pubblico.");
 
+		builder.Property(x => x.VirtualTourUrl).HasColumnName("virtual_tour_url").HasMaxLength(500).HasComment("Link al tour virtuale (Matterport, 360°), mostrato sulla pagina pubblica se valorizzato.");
 		builder.Property(x => x.OpenHoursFrom).HasColumnName("open_hours_from").HasColumnType("time").HasComment("Orario di apertura giornaliero.");
 		builder.Property(x => x.OpenHoursTo).HasColumnName("open_hours_to").HasColumnType("time").HasComment("Orario di chiusura giornaliero.");
 
@@ -115,5 +116,24 @@ public sealed class BathhouseConfiguration : IEntityTypeConfiguration<Bathhouse>
 		builder.HasOne(x => x.MainPhoto).WithMany().HasForeignKey(x => x.MainPhotoId).HasConstraintName("fk_catalog_bathhouses_main_photo");
 		builder.HasOne(x => x.MenuPdf).WithMany().HasForeignKey(x => x.MenuPdfId).HasConstraintName("fk_catalog_bathhouses_menu_pdf");
 		builder.HasOne(x => x.PriceListPdf).WithMany().HasForeignKey(x => x.PriceListPdfId).HasConstraintName("fk_catalog_bathhouses_price_list_pdf");
+	
+		builder.Property(x => x.LikeCount)
+			.HasColumnName("like_count")
+			.IsRequired()
+			.HasDefaultValue(0)
+			.HasComment("«Mi piace» dei clienti, aggiornati dagli eventi di Identity.");
+		builder.Property(x => x.RegionId)
+			.HasColumnName("region_id")
+			.HasComment("Regione della vetrina: automatica dalla colonna region, o scelta a mano.");
+		builder.Property(x => x.IsRegionManual)
+			.HasColumnName("is_region_manual")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Regione scelta a mano dal systemadmin: non si ricalcola dall'indirizzo.");
+		builder.HasOne(x => x.ShowcaseRegion)
+			.WithMany()
+			.HasForeignKey(x => x.RegionId)
+			.HasConstraintName("fk_catalog_bathhouses_showcase_region")
+			.OnDelete(DeleteBehavior.SetNull);
 	}
 }

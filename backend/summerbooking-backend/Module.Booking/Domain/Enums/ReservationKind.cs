@@ -1,7 +1,7 @@
-namespace Module.Booking.Domain.Enums;
+﻿namespace Module.Booking.Domain.Enums;
 
 /// <summary>
-/// Canale/natura della prenotazione: con postazioni (ex tabella bookings) o soli servizi (ex service_reservation).
+/// Canale/natura della prenotazione: con postazioni o soli servizi.
 /// </summary>
 public enum ReservationKind
 {

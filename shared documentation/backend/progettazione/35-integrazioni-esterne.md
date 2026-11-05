@@ -154,7 +154,8 @@ breaker che passa in `Open` su un provider critico è un alert `page`
 | **SendGrid / SMTP** (email transazionali e marketing) | Notification | `IEmailSender` | Media | Invii via outbox; retry su 5xx; bounce/deliverability come metrica |
 | **Telnyx** (numeri, traffico centralino) | Switchboard | `ITelephonyProvider` | Media | Payload grezzo `jsonb`; retention del traffico da chiarire ([11-modulo-privacy.md §3](11-modulo-privacy.md)) |
 | **AWS S3** (media, PDF fiscali) | modulo che possiede l'asset | `IObjectStorage` | Bassa/Media | SDK AWS con retry nativo; URL scomposto `origin`+`path` ([03-gestione-dati.md §1](03-gestione-dati.md)) |
-| **API meteo** (eventuale) | Booking / ZTest | `IWeatherApi` | Bassa | Fallback degradato, la richiesta utente prosegue |
+| **Open-Meteo** (pioggia prevista e storica) ✅ 2026-10-27 | Catalog (Revenue) | `IWeatherForecast` → `OpenMeteoWeather` | Bassa | Nessuna chiave; timeout 10 s; se non risponde i giorni restano senza dato e la regola della pioggia del prezzo suggerito non si applica |
+| **Anti-robot dei form pubblici** ✅ 2026-10-27 | BuildingBlocks (usato da Catalog) | `IHumanVerification`, `IHumanChallengeIssuer` | Bassa | Di default **nessun servizio esterno**: prova di lavoro firmata dal backend (`Provider = proof_of_work`). Cloudflare Turnstile resta selezionabile (`Provider = turnstile`): se non risponde la verifica fallisce e il form va ripetuto |
 | **TeamSystem POS** (`ofsale`) | Cassa | `IPosGateway` | Media | Da modellare come gli altri: contratto in Application, SDK solo in Infrastructure |
 
 ---

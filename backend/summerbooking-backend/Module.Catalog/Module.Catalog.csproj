@@ -24,6 +24,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Il modulo espone endpoint Minimal API: serve il framework ASP.NET Core (non e' un progetto Web). -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Solo per gli strumenti `dotnet ef` (design-time): questo modulo e auto-sufficiente per le
          migration, non serve un progetto di avvio (Boot) ne l'API. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
@@ -38,6 +48,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\BuildingBlocks.Application\BuildingBlocks.Application.csproj" />
     <ProjectReference Include="..\BuildingBlocks.Infrastructure\BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
 

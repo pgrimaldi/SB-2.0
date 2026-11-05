@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 using Module.Catalog.Domain.Enums;
@@ -10,8 +10,12 @@ public sealed class OnlineBookingSettingsConfiguration : IEntityTypeConfiguratio
 {
 	public void Configure(EntityTypeBuilder<OnlineBookingSettings> builder)
 	{
-		builder.ToTable("property_online_booking_settings", "catalog", t => t.HasComment(
-			"Configurazione del canale di prenotazione online delle postazioni per uno stabilimento (1:1)."));
+		builder.ToTable("property_online_booking_settings", "catalog", t =>
+		{
+			t.HasComment("Configurazione del canale di prenotazione online delle postazioni per uno stabilimento (1:1).");
+			t.HasCheckConstraint("ck_catalog_property_online_booking_settings_morning", "morning_from IS NULL OR morning_to IS NULL OR morning_to > morning_from");
+			t.HasCheckConstraint("ck_catalog_property_online_booking_settings_afternoon", "afternoon_from IS NULL OR afternoon_to IS NULL OR afternoon_to > afternoon_from");
+		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_property_online_booking_settings");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -93,11 +97,28 @@ public sealed class OnlineBookingSettingsConfiguration : IEntityTypeConfiguratio
 			.HasColumnName("allows_sharing")
 			.HasDefaultValue(false)
 			.IsRequired()
-			.HasComment("Espone al cliente la funzione di sharing durante la prenotazione online (i parametri operativi vivono in C1).");
+			.HasComment("Espone al cliente la funzione di sharing durante la prenotazione online (i parametri operativi vivono in Booking).");
 
 		builder.Property(x => x.MaxSpotsPerBooking)
 			.HasColumnName("max_spots_per_booking")
 			.HasComment("Numero massimo di postazioni prenotabili in una singola prenotazione online; NULL = nessun limite.");
+
+		builder.Property(x => x.MaxBookingsPerDay)
+			.HasColumnName("max_bookings_per_day")
+			.HasComment("Numero massimo di prenotazioni online al giorno; NULL = nessun limite.");
+
+		builder.Property(x => x.BookingHorizonDays)
+			.HasColumnName("booking_horizon_days")
+			.HasComment("Blocca le prenotazioni online oltre questo numero di giorni dal giorno corrente; NULL = nessun blocco.");
+
+		builder.Property(x => x.MorningFrom).HasColumnName("morning_from").HasColumnType("time").HasComment("Mezza giornata: inizio della mattina.");
+		builder.Property(x => x.MorningTo).HasColumnName("morning_to").HasColumnType("time").HasComment("Mezza giornata: fine della mattina.");
+		builder.Property(x => x.AfternoonFrom).HasColumnName("afternoon_from").HasColumnType("time").HasComment("Mezza giornata: inizio del pomeriggio.");
+		builder.Property(x => x.AfternoonTo).HasColumnName("afternoon_to").HasColumnType("time").HasComment("Mezza giornata: fine del pomeriggio.");
+		builder.Property(x => x.AfternoonConversionTime)
+			.HasColumnName("afternoon_conversion_time")
+			.HasColumnType("time")
+			.HasComment("Le prenotazioni del giorno fatte dopo questo orario diventano pomeridiane; NULL = nessuna conversione.");
 
 		builder.Property(x => x.AllowOnlineBookingScope)
 			.HasColumnName("allow_online_booking_scope")

@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 

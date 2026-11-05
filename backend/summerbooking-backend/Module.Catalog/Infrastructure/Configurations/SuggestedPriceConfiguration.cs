@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 using Module.Catalog.Domain.Enums;
@@ -44,7 +44,7 @@ public sealed class SuggestedPriceConfiguration : IEntityTypeConfiguration<Sugge
 		builder.Property(x => x.PeriodLabel)
 			.HasColumnName("period_label")
 			.HasMaxLength(120)
-			.HasComment("Etichetta libera del periodo/settore legacy (es. \"Fila 1 Alta stagione\"); NULL quando il calcolo non distingue varianti per la data.");
+			.HasComment("Etichetta «fila + periodo» dei dati importati (es. \"Fila 1 Alta stagione\"), solo traccia: valgono sector_id e tariff_period_group.");
 
 		builder.Property(x => x.ListDailyPrice)
 			.HasColumnName("list_daily_price")
@@ -114,9 +114,23 @@ public sealed class SuggestedPriceConfiguration : IEntityTypeConfiguration<Sugge
 		// UNIQUE su (price_list_id, price_date, period_label) invece di (price_list_id, price_date):
 		// i dati reali sono multi-variante per data (99%+ delle date con più di una riga
 		// packages[] per lo stesso pacchetto/data, distinte per period_label).
-		builder.HasIndex(x => new { x.PriceListId, x.PriceDate, x.PeriodLabel })
+		builder.Property(x => x.SectorId)
+			.HasColumnName("sector_id")
+			.HasComment("Fila del prezzo di listino di partenza; NULL = tutte le file.");
+		builder.HasOne<MapSector>()
+			.WithMany()
+			.HasForeignKey(x => x.SectorId)
+			.HasConstraintName("fk_catalog_pricing_suggested_prices_sector")
+			.OnDelete(DeleteBehavior.Restrict);
+		builder.Property(x => x.TariffPeriodGroup)
+			.HasColumnName("tariff_period_group")
+			.HasComment("Periodo tariffario della data, al momento del calcolo.");
+
+		builder.HasIndex(x => new { x.PriceListId, x.PriceDate, x.SectorId }, "uq_catalog_pricing_suggested_prices_package_date_sector")
 			.IsUnique()
-			.HasDatabaseName("uq_catalog_pricing_suggested_prices_package_date_period");
+			.AreNullsDistinct(false)
+			.HasFilter("deleted_at IS NULL")
+			.HasDatabaseName("uq_catalog_pricing_suggested_prices_package_date_sector");
 
 		builder.HasIndex(x => new { x.PropertyId, x.PriceDate })
 			.HasFilter("applied_mode <> 'none'")

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -12,7 +12,7 @@ public sealed class PriceListStayPriceConfiguration : IEntityTypeConfiguration<P
 		builder.ToTable("pricing_price_list_stay_prices", "catalog", t =>
 		{
 			t.HasComment("Override manuale del prezzo per una durata specifica (1-90 giorni) di un periodo tariffario.");
-			t.HasCheckConstraint("ck_catalog_pricing_price_list_stay_prices_stay_days", "stay_days BETWEEN 1 AND 90");
+			t.HasCheckConstraint("ck_catalog_pricing_price_list_stay_prices_stay_days", "stay_days BETWEEN 1 AND 366");
 		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_pricing_price_list_stay_prices");
@@ -52,7 +52,7 @@ public sealed class PriceListStayPriceConfiguration : IEntityTypeConfiguration<P
 			.HasColumnName("is_manual_override")
 			.HasDefaultValue(true)
 			.IsRequired()
-			.HasComment("Sempre true per le righe presenti: si persistono solo gli override manuali (isPriceChange legacy).");
+			.HasComment("Sempre true per le righe presenti: si persistono solo le celle corrette a mano dal gestore.");
 
 		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
 		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions

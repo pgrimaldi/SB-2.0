@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -49,7 +49,7 @@ public sealed class SearchBathhouseConfiguration : IEntityTypeConfiguration<Sear
 		builder.Property(x => x.MinPrice)
 			.HasColumnName("min_price")
 			.HasColumnType("numeric(12,2)")
-			.HasComment("Prezzo minimo corrente prenotabile online, materializzato dal rebuild (evita la query-per-risultato del legacy).");
+			.HasComment("Prezzo minimo corrente prenotabile online, materializzato dal rebuild (nessuna query per ogni risultato).");
 
 		builder.Property(x => x.AmenityIds)
 			.HasColumnName("amenity_ids")
@@ -116,5 +116,26 @@ public sealed class SearchBathhouseConfiguration : IEntityTypeConfiguration<Sear
 
 		builder.HasIndex(x => x.PropertyId)
 			.HasDatabaseName("ix_catalog_search_bathhouses_property");
+	
+		builder.Property(x => x.RegionId)
+			.HasColumnName("region_id")
+			.HasComment("Regione della vetrina (copiata da catalog.bathhouses.region_id, nessuna FK).");
+		builder.Property(x => x.SubscribedSince)
+			.HasColumnName("subscribed_since")
+			.HasComment("Inizio dell'abbonamento al gestionale: secondo criterio della popolarità.");
+		builder.Property(x => x.IsOnlineBookable)
+			.HasColumnName("is_online_bookable")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Prenotabile online adesso (stato, vendite, abbonamento, pacchetti online).");
+		builder.Property(x => x.IsContactOnly)
+			.HasColumnName("is_contact_only")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Struttura importata: solo contatti.");
+
+		builder.HasIndex(x => new { x.RegionId, x.LikeCount })
+			.HasFilter("is_published")
+			.HasDatabaseName("ix_catalog_search_bathhouses_published_region");
 	}
 }

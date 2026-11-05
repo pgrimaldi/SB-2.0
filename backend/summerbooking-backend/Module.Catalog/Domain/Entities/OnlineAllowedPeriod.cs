@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -14,4 +14,6 @@ public sealed class OnlineAllowedPeriod : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private OnlineAllowedPeriod() { }
+
+	internal static OnlineAllowedPeriod Create(DateOnly startsOn, DateOnly endsOn) => new() { StartsOn = startsOn, EndsOn = endsOn };
 }

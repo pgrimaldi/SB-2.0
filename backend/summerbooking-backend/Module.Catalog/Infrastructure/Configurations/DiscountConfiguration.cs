@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 using Module.Catalog.Domain.Enums;
@@ -24,7 +24,7 @@ public sealed class DiscountConfiguration : IEntityTypeConfiguration<Discount>
 		builder.Property(x => x.PublicId)
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
-			.HasComment("Id pubblico, copiato negli snapshot sconto di C1 (booking_discount, discountData).");
+			.HasComment("Id pubblico, copiato negli snapshot sconto di Booking (booking_discount, discountData).");
 		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_pricing_discounts_public_id");
 
 		builder.Property(x => x.PropertyId)
@@ -43,8 +43,7 @@ public sealed class DiscountConfiguration : IEntityTypeConfiguration<Discount>
 			.IsRequired()
 			.HasComment("Codice che il cliente digita per riscattare lo sconto.");
 
-		// Colonna generata per l'unicità case-insensitive per property (upper(code)),
-		// il legacy non la garantiva.
+		// Colonna generata per l'unicità case-insensitive per property (upper(code)).
 		builder.Property<string>("CodeNormalized")
 			.HasColumnName("code_normalized")
 			.HasMaxLength(60)
@@ -89,6 +88,19 @@ public sealed class DiscountConfiguration : IEntityTypeConfiguration<Discount>
 			.IsRequired()
 			.HasComment("Canale/i di prenotazione su cui il voucher è valido.");
 
+		builder.Property(x => x.RequiresCode)
+			.HasColumnName("requires_code")
+			.IsRequired()
+			.HasDefaultValue(true)
+			.HasComment("true = si applica digitando il codice; false = automatico nei periodi, giorni e fasce di validità.");
+
+		builder.Property(x => x.Weekdays)
+			.HasColumnName("weekdays")
+			.HasColumnType("catalog.weekday[]")
+			.HasDefaultValueSql("'{}'")
+			.IsRequired()
+			.HasComment("Giorni di validità; vuoto = tutti.");
+
 		builder.Property(x => x.MaxUses)
 			.HasColumnName("max_uses")
 			.HasComment("Numero massimo di utilizzi consentiti, aggregato (NULL = illimitato).");
@@ -97,7 +109,7 @@ public sealed class DiscountConfiguration : IEntityTypeConfiguration<Discount>
 			.HasColumnName("used_count")
 			.HasDefaultValue(0)
 			.IsRequired()
-			.HasComment("Utilizzi già effettuati, incrementato atomicamente da C1 alla conferma prenotazione.");
+			.HasComment("Utilizzi già effettuati, incrementato atomicamente da Booking alla conferma prenotazione.");
 
 		builder.Property(x => x.IsActive)
 			.HasColumnName("is_active")

@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Module.Infra.Domain.Entities;
@@ -9,7 +9,7 @@ namespace Module.Infra.Infrastructure.Infras;
 
 /// <summary>
 /// Verifica delle credenziali dei client M2M sul registro di Infra. Client disattivati o scaduti non
-/// passano (il legacy ignorava <c>expiresAt</c>); i confronti sono a tempo costante.
+/// passano; i confronti sono a tempo costante.
 /// </summary>
 public sealed class PartnerClientAuthenticator : IPartnerClientAuthenticator
 {

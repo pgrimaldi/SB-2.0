@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Payment.Domain.Entities;
 using Module.Payment.Domain.Enums;
@@ -23,7 +23,7 @@ public sealed class RefundConfiguration : IEntityTypeConfiguration<Refund>
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, per il gestionale e per eventuale riferimento da C4/C6.");
+			.HasComment("Id pubblico stabile, per il gestionale e per eventuale riferimento da Fiskaly/Notification.");
 
 		builder.Property(x => x.ChargeId)
 			.HasColumnName("charge_id")

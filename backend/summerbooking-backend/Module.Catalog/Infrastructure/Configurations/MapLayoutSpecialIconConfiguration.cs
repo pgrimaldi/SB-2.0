@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -9,8 +9,11 @@ public sealed class MapLayoutSpecialIconConfiguration : IEntityTypeConfiguration
 {
 	public void Configure(EntityTypeBuilder<MapLayoutSpecialIcon> builder)
 	{
-		builder.ToTable("map_layout_special_icons", "catalog", t => t.HasComment(
-			"Icone delle varianti speciali di ombrellone (1-5) per stato occupato/libero. Sostituisce le colonne specialUmbrella1..5 di configure_maps."));
+		builder.ToTable("map_layout_special_icons", "catalog", t =>
+		{
+			t.HasComment("Icone degli articoli personalizzati (1-8) per stato occupato/libero.");
+			t.HasCheckConstraint("ck_catalog_map_layout_special_icons_variant", "variant BETWEEN 1 AND 8");
+		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_map_layout_special_icons");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -23,7 +26,7 @@ public sealed class MapLayoutSpecialIconConfiguration : IEntityTypeConfiguration
 		builder.Property(x => x.Variant)
 			.HasColumnName("variant")
 			.IsRequired()
-			.HasComment("Indice della variante speciale (1-5, corrispondente a SpecialUmbrella1..5 nel legacy); estendibile.");
+			.HasComment("Numero dell'articolo personalizzato (1-8).");
 
 		builder.Property(x => x.State)
 			.HasColumnName("state")

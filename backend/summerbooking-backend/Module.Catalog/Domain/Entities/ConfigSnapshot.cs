@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -27,5 +27,24 @@ public sealed class ConfigSnapshot : IAuditable, ISoftDeletable
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
 
+	public const short CurrentSchema = 1;
+
 	private ConfigSnapshot() { }
+
+	public static ConfigSnapshot Create(long propertyId, ConfigSnapshotKind kind) => new() { PropertyId = propertyId, SnapshotKind = kind };
+
+	/// <summary>Nuovo contenuto; false se identico a quello salvato (niente da scrivere).</summary>
+	public bool Replace(string payload, byte[] contentHash, DateTime now)
+	{
+		if (ContentHash is not null && ContentHash.SequenceEqual(contentHash) && PayloadSchema == CurrentSchema && StaleSince is null)
+			return false;
+		Payload = payload;
+		PayloadSchema = CurrentSchema;
+		SourceHash = contentHash;
+		ContentHash = contentHash;
+		BuiltAt = now;
+		StaleSince = null;
+		return true;
+	}
+
 }

@@ -38,6 +38,8 @@ Correzioni rispetto al legacy:
 | `pk_catalog_map_layouts` | `id` | PK | — |
 | `uq_catalog_map_layouts_property` | `(property_id)` | UNIQUE | 1:1 con la property |
 
+Vincoli `CHECK`: formato di `background_color`; `ck_catalog_map_layouts_tilt` (`tilt_degrees` da −45 a 45).
+
 ## Campi
 
 ### id
@@ -99,6 +101,22 @@ Correzioni rispetto al legacy:
 - **Relazioni**: —.
 - **Note**: resta hex libero (input `<input type="color">` — nessun ENUM/lookup colori).
 
+### tilt_degrees
+- **Legacy**: — (decisione C2 del committente, 2026-10)
+- **Descrizione**: inclinazione dell'intero reticolo in gradi, valida anche sulla mappa del sito.
+- **Tipo**: `smallint`, da −45 a 45.
+- **Default**: `0`.
+- **Nullabile**: No.
+
+### reset_deletes_bookings
+- **Legacy**: — (decisione C4 del committente, 2026-10)
+- **Descrizione**: impostazione fissa del gestore per «Reimposta mappa» e per svuotare o eliminare righe e
+  colonne: `false` = mantieni le prenotazioni ricollegandole per numero (**predefinita**), `true` = cancellale
+  anche se pagate o scontrinate. L'effetto sulle prenotazioni è di Booking.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+
 ### umbrella_occupied_asset_id / umbrella_free_asset_id
 - **Legacy**: `configure_maps.umbrellaImg` / `configure_maps.umbrellaImage_free` (URL)
 - **Descrizione**: icone dell'ombrellone standard nei due stati.
@@ -106,6 +124,9 @@ Correzioni rispetto al legacy:
 - **Default**: nessuno.
 - **Nullabile**: Sì.
 - **Relazioni**: **FK** → [`catalog_media_assets.id`](catalog_media_assets.md) (`kind = 'icon'`).
+- **Note**: si riferisce al file dell'icona, non alla riga di [`catalog_map_icons`](catalog_map_icons.md), perché
+  ci sono anche icone caricate nel vecchio gestionale; le API accettano l'id pubblico dell'icona del catalogo e
+  ne salvano il file. `NULL` = icona predefinita della categoria (`map_icons.is_default`).
 
 ### created_by_user_id
 - **Legacy**: `configure_maps.createdBy`
@@ -140,7 +161,7 @@ Una riga per (layout × variante speciale × stato).
 |---|---|---|---|
 | `id` | — | `bigint` IDENTITY | PK |
 | `layout_id` | — | `bigint` | **FK** → `catalog_map_layouts.id` `ON DELETE CASCADE` |
-| `variant` | indice 1..5 nel nome colonna | `smallint` | 1–5 (`SpecialUmbrella1..5`); estendibile |
+| `variant` | indice 1..5 nel nome colonna | `smallint` | 1–8 = articolo personalizzato 1–8 (i primi 5 dal legacy `SpecialUmbrella1..5`); `CHECK` `ck_catalog_map_layout_special_icons_variant` |
 | `state` | suffisso `_free` o assenza | `enum catalog.map_icon_state` (`occupied`/`free`) | — |
 | `media_asset_id` | valore URL della colonna | `bigint` | **FK** → `catalog_media_assets.id` |
 | `created_at` / `updated_at` / `deleted_at` | — | `timestamptz` | standard |
@@ -179,12 +200,17 @@ definizione canonica in [`catalog_map_icons.md`](catalog_map_icons.md), non ride
 ```csharp
 namespace Module.Catalog.Infrastructure.Configurations;
 
+/// <summary>Mapping EF Core di <see cref="MapLayout"/> su catalog.map_layouts.</summary>
 public sealed class MapLayoutConfiguration : IEntityTypeConfiguration<MapLayout>
 {
 	public void Configure(EntityTypeBuilder<MapLayout> builder)
 	{
-		builder.ToTable("map_layouts", "catalog", t => t.HasComment(
-			"Layout grafico della mappa spiaggia di uno stabilimento: griglia, sfondo, colore, icone per tipo elemento nei due stati."));
+		builder.ToTable("map_layouts", "catalog", t =>
+		{
+			t.HasComment("Layout grafico della mappa spiaggia di uno stabilimento: griglia, sfondo, colore, icone per tipo elemento nei due stati.");
+			t.HasCheckConstraint("ck_catalog_map_layouts_background_color", "background_color IS NULL OR background_color ~ '^#[0-9A-Fa-f]{6}$'");
+			t.HasCheckConstraint("ck_catalog_map_layouts_tilt", "tilt_degrees BETWEEN -45 AND 45");
+		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_map_layouts");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -220,9 +246,6 @@ public sealed class MapLayoutConfiguration : IEntityTypeConfiguration<MapLayout>
 			.HasColumnName("background_color")
 			.HasColumnType("char(7)")
 			.HasComment("Colore di sfondo/tema della griglia, hex #RRGGBB.");
-		builder.ToTable(t => t.HasCheckConstraint(
-			"ck_catalog_map_layouts_background_color",
-			"background_color IS NULL OR background_color ~ '^#[0-9A-Fa-f]{6}$'"));
 
 		builder.Property(x => x.UmbrellaOccupiedAssetId)
 			.HasColumnName("umbrella_occupied_asset_id")
@@ -230,6 +253,18 @@ public sealed class MapLayoutConfiguration : IEntityTypeConfiguration<MapLayout>
 		builder.Property(x => x.UmbrellaFreeAssetId)
 			.HasColumnName("umbrella_free_asset_id")
 			.HasComment("Icona dell'ombrellone standard nello stato libero.");
+
+		builder.Property(x => x.TiltDegrees)
+			.HasColumnName("tilt_degrees")
+			.IsRequired()
+			.HasDefaultValue((short)0)
+			.HasComment("Inclinazione del reticolo in gradi (da -45 a 45), applicata anche sul sito.");
+
+		builder.Property(x => x.ResetDeletesBookings)
+			.HasColumnName("reset_deletes_bookings")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Impostazione del gestore: false = «Reimposta mappa» e l'eliminazione di righe o colonne mantengono le prenotazioni e le ricollegano per numero; true = le cancellano.");
 
 		builder.Property(x => x.CreatedByUserPublicId)
 			.HasColumnName("created_by_user_id")
@@ -262,12 +297,16 @@ variante × stato).
 ```csharp
 namespace Module.Catalog.Infrastructure.Configurations;
 
+/// <summary>Mapping EF Core di <see cref="MapLayoutSpecialIcon"/> su catalog.map_layout_special_icons.</summary>
 public sealed class MapLayoutSpecialIconConfiguration : IEntityTypeConfiguration<MapLayoutSpecialIcon>
 {
 	public void Configure(EntityTypeBuilder<MapLayoutSpecialIcon> builder)
 	{
-		builder.ToTable("map_layout_special_icons", "catalog", t => t.HasComment(
-			"Icone delle varianti speciali di ombrellone (1-5) per stato occupato/libero. Sostituisce le colonne specialUmbrella1..5 di configure_maps."));
+		builder.ToTable("map_layout_special_icons", "catalog", t =>
+		{
+			t.HasComment("Icone degli articoli personalizzati (1-8) per stato occupato/libero. Sostituisce le colonne specialUmbrella1..5 di configure_maps.");
+			t.HasCheckConstraint("ck_catalog_map_layout_special_icons_variant", "variant BETWEEN 1 AND 8");
+		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_map_layout_special_icons");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -280,7 +319,7 @@ public sealed class MapLayoutSpecialIconConfiguration : IEntityTypeConfiguration
 		builder.Property(x => x.Variant)
 			.HasColumnName("variant")
 			.IsRequired()
-			.HasComment("Indice della variante speciale (1-5, corrispondente a SpecialUmbrella1..5 nel legacy); estendibile.");
+			.HasComment("Numero dell'articolo personalizzato (1-8, i primi 5 corrispondono a SpecialUmbrella1..5 del legacy).");
 
 		builder.Property(x => x.State)
 			.HasColumnName("state")

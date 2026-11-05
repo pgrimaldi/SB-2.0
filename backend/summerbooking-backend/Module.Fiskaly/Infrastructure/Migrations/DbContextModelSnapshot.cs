@@ -669,7 +669,7 @@ namespace Module.Fiskaly.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile (UUIDv7); usato in URL gestionale e copiato cross-modulo da C3/C6.");
+                        .HasComment("Id pubblico stabile (UUIDv7); usato in URL gestionale e copiato cross-modulo da Payment/Notification.");
 
                     b.Property<string>("RecordId")
                         .HasMaxLength(36)
@@ -902,7 +902,7 @@ namespace Module.Fiskaly.Infrastructure.Migrations
                     b.Property<Guid?>("SourceLinePublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("source_line_public_id")
-                        .HasComment("public_id della riga prenotazione C1 di provenienza (booking_lines / booking_service_lines / booking_line_additional_items secondo line_kind), copiato — nessuna FK cross-schema. NULL per voci sintetiche non mappabili.");
+                        .HasComment("public_id della riga prenotazione di Booking di provenienza (booking_lines / booking_service_lines / booking_line_additional_items secondo line_kind), copiato — nessuna FK cross-schema. NULL per voci sintetiche non mappabili.");
 
                     b.Property<decimal>("UnitPriceGross")
                         .HasColumnType("numeric(12,2)")
@@ -1015,7 +1015,7 @@ namespace Module.Fiskaly.Infrastructure.Migrations
                     b.Property<string>("FiskalyErrorMessage")
                         .HasColumnType("text")
                         .HasColumnName("fiskaly_error_message")
-                        .HasComment("Messaggio d'errore Fiskaly completo, non troncato (a differenza del legacy).");
+                        .HasComment("Messaggio d'errore Fiskaly completo, non troncato.");
 
                     b.Property<short?>("FiskalyErrorStatus")
                         .HasColumnType("smallint")
@@ -1139,12 +1139,12 @@ namespace Module.Fiskaly.Infrastructure.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)")
                         .HasColumnName("label")
-                        .HasComment("Etichetta descrittiva libera (es. per online/other) o valore originale del drift legacy, testo congelato.");
+                        .HasComment("Etichetta descrittiva libera (es. per online/other) o valore originale dei dati importati, testo congelato.");
 
                     b.Property<Guid?>("LedgerEntryPublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("ledger_entry_public_id")
-                        .HasComment("public_id di payment.ledger_entries, copiato — nessuna FK cross-schema. Movimento di incasso corrispondente nel libro incassi C3.");
+                        .HasComment("public_id di payment.ledger_entries, copiato — nessuna FK cross-schema. Movimento di incasso corrispondente nel libro incassi Payment.");
 
                     b.Property<int?>("OutstandingConcept")
                         .HasColumnType("fiskaly.outstanding_concept")

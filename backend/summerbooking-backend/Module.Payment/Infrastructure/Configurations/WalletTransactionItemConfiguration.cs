@@ -48,7 +48,7 @@ public static class WalletTransactionItemConfiguration
 			.HasColumnName("description_snapshot")
 			.HasMaxLength(160)
 			.IsRequired()
-			.HasComment("Nome dell'articolo congelato al momento del consumo; il nome vivo si legge da C2 quando sale_item_public_id è valorizzato.");
+			.HasComment("Nome dell'articolo congelato al momento del consumo; il nome vivo si legge da Catalog quando sale_item_public_id è valorizzato.");
 
 		builder.Property(x => x.Quantity)
 			.HasColumnName("quantity")
@@ -81,8 +81,7 @@ public static class WalletTransactionItemConfiguration
 			.HasComputedColumnSql("quantity * unit_price + variants_surcharge", stored: true)
 			.HasComment("Totale della riga — colonna generata (quantity * unit_price + " +
 				"variants_surcharge). Sola lettura: le rettifiche sono un nuovo movimento con " +
-				"source = 'adjustment'. Chiude anche un bug storico del legacy, dove il totale " +
-				"arrivava spesso null o incoerente con le sue componenti.");
+				"source = 'adjustment'. Il totale non puo' mai essere null o incoerente con le sue componenti.");
 
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()").IsRequired()
 			.HasComment("Creazione della riga.");

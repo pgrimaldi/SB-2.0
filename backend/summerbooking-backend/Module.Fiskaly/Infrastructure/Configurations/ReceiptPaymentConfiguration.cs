@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Fiskaly.Domain.Entities;
 
@@ -62,7 +62,7 @@ public sealed class ReceiptPaymentConfiguration : IEntityTypeConfiguration<Recei
 		builder.Property(x => x.Label)
 			.HasColumnName("label")
 			.HasMaxLength(120)
-			.HasComment("Etichetta descrittiva libera (es. per online/other) o valore originale del drift legacy, testo congelato.");
+			.HasComment("Etichetta descrittiva libera (es. per online/other) o valore originale dei dati importati, testo congelato.");
 
 		builder.Property(x => x.CardKind)
 			.HasColumnName("card_kind")
@@ -86,7 +86,7 @@ public sealed class ReceiptPaymentConfiguration : IEntityTypeConfiguration<Recei
 
 		builder.Property(x => x.LedgerEntryPublicId)
 			.HasColumnName("ledger_entry_public_id")
-			.HasComment("public_id di payment.ledger_entries, copiato — nessuna FK cross-schema. Movimento di incasso corrispondente nel libro incassi C3.");
+			.HasComment("public_id di payment.ledger_entries, copiato — nessuna FK cross-schema. Movimento di incasso corrispondente nel libro incassi Payment.");
 		builder.HasIndex(x => x.LedgerEntryPublicId)
 			.HasFilter("ledger_entry_public_id IS NOT NULL")
 			.HasDatabaseName("ix_fiskaly_receipt_payments_ledger");

@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -18,5 +18,12 @@ public sealed class PriceListStayPrice : IAuditable, ISoftDeletable
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
 
+	public const short MaxStayDays = 366;
+
 	private PriceListStayPrice() { }
+
+	internal static PriceListStayPrice Create(long? sectorId, short stayDays, decimal price)
+		=> new() { SectorId = sectorId, StayDays = stayDays, Price = price, IsManualOverride = true };
+
+	internal void SetPrice(decimal price) => Price = price;
 }

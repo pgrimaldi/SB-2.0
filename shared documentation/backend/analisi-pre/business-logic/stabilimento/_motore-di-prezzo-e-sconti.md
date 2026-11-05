@@ -16,9 +16,10 @@
 > **Fonti**: `front-pre/src/services/BookingCalcService.js` (~1650 righe: motore prezzo postazioni/
 > pacchetti), `front-pre/src/services/voucherServices.js` (sconti/voucher),
 > `front-pre/src/services/ArithmaticService.js` (utilità numeriche), `front-pre/src/services/configureServices.js`
-> (limiti di soggiorno), `front-customer-pre/src/services/BookingCalcService.js` (variante lato cliente,
-> con in più `getReducedPrices`). Backend: `discounts.controller.js` (`checkdiscount`), `booking.helper.js`
-> (`Booking`, salvataggio importi). Schede DB: [`price_lists.md`](../../db/price_lists.md),
+> (limiti di soggiorno), `front-pre/src/services/PriceCalcService.js` (griglia prezzo per durata
+> generata al salvataggio del pacchetto), `front-customer-pre/src/services/BookingCalcService.js`
+> (variante lato cliente, senza cumulativo né Revenue; `getReducedPrices` c'è in entrambe). Backend:
+> `discounts.controller.js` (`checkdiscount`), `booking.helper.js` (`Booking`, salvataggio importi). Schede DB: [`price_lists.md`](../../db/price_lists.md),
 > [`discounts.md`](../../db/discounts.md), [`seasons_periods.md`](../../db/seasons_periods.md),
 > [`sectors_rows.md`](../../db/sectors_rows.md), [`warehouses.md`](../../db/warehouses.md).
 
@@ -28,9 +29,11 @@
 
 - **Pacchetto** (`price_lists`, `type = "package"`): per ogni **periodo tariffario** (`detailPrices[]`,
   es. "Alta stagione") sono definiti: `half_day_price`, `half_day_weekend_price`, `daily_price`,
-  `weekend_price`, `days_7_price`, `days_14_price`, `monthly_price`, più `edit_price_data[]` (deroghe di
-  prezzo su singole date). `mainPrices[]` dà un prezzo forfettario per settore, usato come
-  fallback/riferimento.
+  `weekend_price`, `days_7_price`, `days_14_price`, `monthly_price`, più `edit_price_data[]`: **griglia
+  prezzo per durata** (una cella per ogni numero di giorni 1..N, N = giorni di stagione, massimo 90),
+  generata al salvataggio del pacchetto da `PriceCalcService.js` e correggibile a mano cella per cella
+  (`isPriceChange`). Non contiene prezzi per data. `mainPrices[]` dà il prezzo **stagionale** per
+  settore (`halfday` per la mezza giornata).
 - **Metodo di calcolo** (`price_lists.priceCalculation`): valore stringa "sporco" con varianti storiche;
   i concetti reali sono **`proportional`** (proporzionale ai giorni), **`daily`** (a giornata),
   **`Daily price with weekend`** (a giornata con sovrapprezzo weekend) e **`logarithmic`** (metodo
@@ -41,8 +44,10 @@
   scaglione mensile (durata effettiva del mese vs "monthly" fisso).
 - **Festività** (`price_lists.allowPublicHolidays` + `holidayDates[]`): se attive, i giorni festivi
   sono trattati come weekend ai fini del sovrapprezzo.
-- **Periodi stagione** (`seasons_periods.periods[]`): il periodo di una data si determina per **match di
-  sottostringa** fra `detailPrices[].name` e `periods[].name` (accoppiamento debole per stringa).
+- **Periodi stagione** (`seasons_periods.periods[]`): il periodo di una data si abbina per
+  **uguaglianza esatta** (a meno degli spazi finali) fra `detailPrices[].name` e la stringa
+  `"<fila> <periodo>"` (`getMatchedPkgObj` in `BookingCalcService.js`); accoppiamento per stringa, non
+  per id. Se nessun periodo combacia il prezzo è 0.
 - **Assenze** (`booking_absences` / date di assenza): giorni in cui la postazione **non** è occupata dal
   cliente, da **scalare** dal conteggio.
 - **Articoli del pacchetto** (`details.PackageItemSelected[]`): articoli di magazzino
@@ -53,7 +58,21 @@
 
 ## 2. Calcolo del prezzo di una singola postazione/pacchetto (per periodo)
 
-Funzione centrale: `getPackagePriceCalc` (per ogni combinazione riga/periodo), che a sua volta usa:
+Il calcolo avviene in **due fasi**:
+
+- **Fase 1 — griglia al salvataggio del pacchetto** (`PriceCalcService.js:16-670`): per ogni durata
+  1..N giorni si calcola il prezzo con il metodo del listino (proporzionale, giornaliero, logaritmico)
+  a partire da `daily_price`, `days_7_price`, `days_14_price`, `monthly_price` (con fallback
+  P7→P1, P14→P7→P1, mensile→P14→P7→P1), arrotondato a 1 decimale, e si salva in `edit_price_data`.
+- **Fase 2 — calcolo alla prenotazione** (`BookingCalcService.js:595-811`), con questa precedenza:
+  prezzo modificato dall'operatore > stagionale (`mainPrices`, `halfday` per mattina/pomeriggio) >
+  prezzo ridotto (finestra esatta) > Revenue (solo «giornaliero con weekend», pacchetto predefinito,
+  tratto di un giorno) > cella corretta a mano > scaglione mensile > griglia per durata + weekend e
+  festivi > mezza giornata (tariffa lineare).
+
+Formule complete in `documentazione-locale/catalog-api-analisi.md` §11.
+
+Funzione centrale della fase 2: `getPackagePriceCalc` (per ogni combinazione riga/periodo), che a sua volta usa:
 
 1. **Suddivisione in combinazioni periodo** (`setRowSeasonCombination`): l'intervallo prenotato è
    spezzato nei sotto‑intervalli che cadono in periodi tariffari diversi; ogni sotto‑intervallo è
@@ -72,10 +91,12 @@ Funzione centrale: `getPackagePriceCalc` (per ogni combinazione riga/periodo), c
    è `numero_giorni_speciali × tariffa_weekend`, sommato al prezzo dei giorni feriali.
 5. **Mezza giornata** (`bookingPeriod` = mattina/pomeriggio): usa `half_day_price` /
    `half_day_weekend_price` invece delle tariffe piene.
-6. **Deroghe su singola data** (`edit_price_data` / `getSelectedRecPrice`): se una data prenotata ha un
-   prezzo override, quello prevale sul calcolo standard per quel giorno.
-7. **Prezzo ridotto per fascia** (solo lato cliente, `getReducedPrices` + `details.setReducedPrice[]`):
-   se la data rientra in una fascia a prezzo ridotto, si usa il valore ridotto.
+6. **Griglia per durata** (`edit_price_data` / `getSelectedRecPrice`): il prezzo del tratto si legge
+   dalla cella corrispondente al **numero di giorni** (non alla data); una cella corretta a mano
+   (`isPriceChange`) prevale sul valore calcolato.
+7. **Prezzo ridotto** (`getReducedPrices` + `details.setReducedPrice[]`, sia sul sito clienti sia nel
+   gestionale, dove si applica con una spunta dell'operatore): vale solo se le date della prenotazione
+   coincidono **esattamente** con inizio e fine della finestra ridotta.
 8. **Prezzo suggerito Revenue** (`getMatchedSuggestedPrice` + `price_lists.suggestedPriceDetails` /
    `revenue_notifications`): se attivo, il prezzo base può essere sostituito dal prezzo suggerito
    dinamico calcolato dalla feature Revenue (vedi [10-revenue](10-revenue.md)).
@@ -110,13 +131,16 @@ Il backend fa **solo controlli di validità**, non calcola l'importo:
 
 1. Esiste una riga `discounts` per quel `propertyId`? (altrimenti "discounts not found")
 2. Il **codice** esiste dentro il JSON `items`? (ricerca `discountCodeSearch`)
-3. La **data corrente** rientra nella validità del voucher?
+3. Le **date della prenotazione** (`additionalSetting.selectedDates`) rientrano nella validità del
+   voucher (`voucherDateRange`)? Il controllo è in `discountCodeSearch`
+   (`back-pre/app/global/globalConstants.js:240`), non sulla data corrente.
 4. `maximunNoUse − totalNoOfUsage > 0` (utilizzi residui). Se sì → restituisce i parametri del voucher
    (`type`, `voucher_value`, righe/postazioni ammesse, ecc.); altrimenti "discount not valid".
 
 ### 5.2 Calcolo dell'importo scontato (client — `voucherServices.js`)
 
-- `type = "fixed"` → sconto = `voucher_value` (importo fisso).
+- `type = "fixed"` → totale scontato = `totale − voucher_value` (importo fisso sottratto). Sui servizi
+  `voucherServices.js:103-111` restituisce invece `voucher_value` come totale: è un bug.
 - `type` percentuale → sconto = `totale × voucher_value ÷ 100`.
 - Per i **servizi** la percentuale è applicata come `totale − (totale × valore ÷ 100)`.
 - Lo sconto per postazione è tenuto per chiave‑postazione in un reducer
@@ -155,12 +179,33 @@ imposto lato server.
 ## 8. Riepilogo "calcoli / logiche / eventi" di questo motore
 
 - **Calcoli**: prezzo per periodo (proporzionale / a giornata / con weekend / logaritmico); scaglioni
-  7/14/mensile; sovrapprezzo weekend+festivi; mezza giornata; deroghe per data; prezzo ridotto per
-  fascia; prezzo suggerito Revenue; ridistribuzione cumulativa multi‑postazione; totali servizi
+  7/14/mensile; sovrapprezzo weekend+festivi; mezza giornata; griglia per durata con celle corrette a mano; prezzo ridotto per
+  finestra; prezzo suggerito Revenue; ridistribuzione cumulativa multi‑postazione; totali servizi
   bar/normali/orari; sconto fisso/percentuale; commissione online (vedi
   [`properties.md`](../../db/properties.md#commissionamount)).
 - **Logiche**: iterazione su combinazioni periodo, su postazioni del gruppo, su date di assenza, su
   slot orari; condizioni su `weekendSetting`/`monthlySetting`/`allowPublicHolidays`; match periodo per
-  sottostringa; validità voucher (data + utilizzi residui + righe ammesse).
+  uguaglianza esatta `"<fila> <periodo>"`; validità voucher (date della prenotazione + utilizzi residui
+  + righe ammesse).
 - **Eventi**: **nessuno** in questo modulo (è puro calcolo). Gli eventi (email, notifiche, Stripe,
   Fiskaly) scattano nelle azioni che *usano* questi importi, descritte nelle singole voci di menù.
+
+---
+
+> **Decisione del committente (2026-10)**
+>
+> - **Correzioni del motore** (B1): si correggono il prezzo a 0 oltre i 90 giorni e la mezza giornata
+>   nel weekend contata due volte su più periodi. Resta invariata la regola del weekend (solo fino a 3
+>   giorni) e dei festivi (fino a 6) per proporzionale, giornaliero e logaritmico.
+> - **Cumulativo** (B2): resta un interruttore separato dal metodo di calcolo; i listini che lo hanno
+>   attivo si convertono correggendo gli errori; il centesimo residuo va all'ultima postazione; previsto
+>   anche sui listini delle convenzioni.
+> - **Metodi di calcolo**: restano quelli del legacy.
+> - **Sconti**: quattro tipologie (codice; codice con opzioni personalizzate; senza codice, automatico
+>   su periodo/giorni/fasce orarie; senza codice con opzioni personalizzate). Le opzioni personalizzate
+>   sono file/settori e/o servizi bar, servizi, servizi orari. **Al massimo uno sconto per
+>   prenotazione**: vale l'ultimo inserito. Lo sconto fisso vale **sul totale** (totale − valore),
+>   prima della commissione online. **Numero di utilizzi vuoto = illimitato.** Validità sulle date della
+>   prenotazione; l'utilizzo non torna disponibile all'annullamento.
+>
+> Dettaglio in `documentazione-locale/catalog-api-analisi.md` §4.2.

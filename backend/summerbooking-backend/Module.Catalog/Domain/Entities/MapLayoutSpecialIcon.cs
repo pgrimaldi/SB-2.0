@@ -1,11 +1,10 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
-/// Icona di una variante speciale di ombrellone (1-5) per stato occupato/libero. Sostituisce le colonne
-/// specialUmbrella1..5[_free] di configure_maps.
+/// Icona di un articolo personalizzato (1-8) per stato occupato/libero.
 /// </summary>
 public sealed class MapLayoutSpecialIcon : IAuditable, ISoftDeletable
 {
@@ -20,5 +19,16 @@ public sealed class MapLayoutSpecialIcon : IAuditable, ISoftDeletable
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
 
+	public const short MaxVariant = 8;
+
 	private MapLayoutSpecialIcon() { }
+
+	internal static MapLayoutSpecialIcon Create(short variant, MapIconState state, long mediaAssetId) => new()
+	{
+		Variant = variant,
+		State = state,
+		MediaAssetId = mediaAssetId,
+	};
+
+	internal void SetAsset(long mediaAssetId) => MediaAssetId = mediaAssetId;
 }

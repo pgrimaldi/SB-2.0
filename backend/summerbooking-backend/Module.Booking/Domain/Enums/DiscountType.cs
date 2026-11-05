@@ -1,7 +1,7 @@
-namespace Module.Booking.Domain.Enums;
+﻿namespace Module.Booking.Domain.Enums;
 
 /// <summary>
-/// Natura del valore dello sconto — vocabolario condiviso con C2 (catalog_pricing_discounts) e C3, ma
+/// Natura del valore dello sconto — vocabolario condiviso con Catalog (catalog_pricing_discounts) e Payment, ma
 /// ogni schema Postgres registra la propria copia dell'ENUM (i tipi ENUM non sono condivisibili cross-schema).
 /// </summary>
 public enum DiscountType

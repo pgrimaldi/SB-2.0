@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Notification.Domain.Entities;
 using Module.Notification.Domain.Enums;
@@ -69,7 +69,7 @@ public sealed class EmailCampaignConfiguration : IEntityTypeConfiguration<EmailC
 			.HasColumnName("also_send_push")
 			.IsRequired()
 			.HasDefaultValue(false)
-			.HasComment("Se, dopo l'email, inviare anche una push FCM ai destinatari utenti C5 con device token.");
+			.HasComment("Se, dopo l'email, inviare anche una push FCM ai destinatari utenti di Identity con device token.");
 
 		builder.Property(x => x.SendCopyToManager)
 			.HasColumnName("send_copy_to_manager")

@@ -106,7 +106,7 @@ public sealed class MessageTemplateConfiguration : IEntityTypeConfiguration<Mess
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()").IsRequired()
 			.HasComment("Data di ultima modifica.");
 		builder.Property(x => x.DeletedAt).HasColumnName("deleted_at")
-			.HasComment("Soft-delete: ex status=0 di custom_templates / isDeleted di hotel_message_templates.");
+			.HasComment("Soft-delete.");
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
 		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.

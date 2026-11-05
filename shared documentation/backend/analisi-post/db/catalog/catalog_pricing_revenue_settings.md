@@ -129,6 +129,15 @@ Correzioni rispetto al legacy:
 | `revenue_notifications.discounts` (JSON) | colonna morta — mai scritta/letta, `NULL` ovunque |
 | `revenue_notifications.enableDiscountsForSelectedLocations` (JSON) | → [`catalog_pricing_revenue_discounted_spots`](catalog_pricing_revenue_discounted_spots.md) |
 
+### is_suggested_price_enabled
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration RevenueCatalog).
+- **Descrizione**: Prezzo suggerito attivo (legacy revenue_notifications.isRevenuePricesEnabled).
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. `enableDiscountsForSelectedLocations` → tabella figlia; `discounts` → non migrata.

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -11,7 +11,7 @@ public sealed class AgreementPriceListPeriodPriceConfiguration
 	public void Configure(EntityTypeBuilder<AgreementPriceListPeriodPrice> builder)
 	{
 		builder.ToTable("agreement_price_list_period_prices", "catalog", t => t.HasComment(
-			"Prezzi per periodo tariffario (etichetta libera) di un listino/voucher hotel, per modalità di durata."));
+			"Prezzi per periodo tariffario (etichetta libera) di un listino/voucher di una convenzione, per modalità di durata."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_agreement_price_list_period_prices");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -20,12 +20,29 @@ public sealed class AgreementPriceListPeriodPriceConfiguration
 			.HasColumnName("price_list_id")
 			.HasColumnType("integer")
 			.IsRequired()
-			.HasComment("Listino/voucher hotel a cui appartiene il prezzo di periodo.");
+			.HasComment("Listino/voucher della convenzione a cui appartiene il prezzo di periodo.");
 
 		builder.Property(x => x.PeriodLabel)
 			.HasColumnName("period_label")
 			.HasMaxLength(120)
-			.HasComment("Etichetta libera del periodo tariffario; NULL = tariffa unica del listino (nessun collegamento a stagioni).");
+			.HasComment("Etichetta «fila + periodo» dei dati importati, solo traccia: valgono sector_id e tariff_period_group.");
+
+		builder.Property(x => x.SectorId)
+			.HasColumnName("sector_id")
+			.HasComment("Fila/settore; NULL = tutte le file.");
+		builder.HasOne<MapSector>()
+			.WithMany()
+			.HasForeignKey(x => x.SectorId)
+			.HasConstraintName("fk_catalog_agreement_price_list_period_prices_sector")
+			.OnDelete(DeleteBehavior.Restrict);
+
+		builder.Property(x => x.TariffPeriodGroup)
+			.HasColumnName("tariff_period_group")
+			.HasComment("Periodo tariffario della stagione (pricing_tariff_periods.period_group_key); NULL = senza periodo.");
+
+		builder.Property(x => x.HalfDay7Price).HasColumnName("half_day_7_price").HasPrecision(12, 2).HasComment("Mezza giornata per 7 giorni nel periodo.");
+		builder.Property(x => x.HalfDay14Price).HasColumnName("half_day_14_price").HasPrecision(12, 2).HasComment("Mezza giornata per 14 giorni nel periodo.");
+		builder.Property(x => x.HalfDayMonthlyPrice).HasColumnName("half_day_monthly_price").HasPrecision(12, 2).HasComment("Mezza giornata per il mese nel periodo.");
 
 		builder.Property(x => x.HalfDayPrice).HasColumnName("half_day_price")
 			.HasColumnType("numeric(12,2)").HasComment("Prezzo mezza giornata nel periodo.");
@@ -63,5 +80,11 @@ public sealed class AgreementPriceListPeriodPriceConfiguration
 		builder.HasIndex(x => x.PriceListId)
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("ix_catalog_agreement_price_list_period_prices_price_list");
+
+		builder.HasIndex(x => new { x.PriceListId, x.SectorId, x.TariffPeriodGroup }, "uq_catalog_agreement_price_list_period_prices_period")
+			.IsUnique()
+			.AreNullsDistinct(false)
+			.HasFilter("deleted_at IS NULL")
+			.HasDatabaseName("uq_catalog_agreement_price_list_period_prices_period");
 	}
 }

@@ -11,9 +11,7 @@
 
 ## Descrizione
 
-Per un servizio a fascia oraria (`kind = hourly`), le **fasce orarie interne** prenotabili, con eventuale
-prezzo dedicato (es. slot 9–11 a tariffa diversa da 15–17). Una riga per fascia. Referenziata da C1
-(`hourly_service_booking_management` → `resource_consumptions` con `slot_start`/`slot_end`).
+Durata prenotabile di un servizio orario (kind = hourly) con il suo prezzo, dentro una disponibilità (service_hourly_options). Dal 2026-11-05 ogni durata sta dentro una disponibilità ([`catalog_service_hourly_options`](catalog_service_hourly_options.md)).
 
 ## Indici
 
@@ -76,6 +74,24 @@ prezzo dedicato (es. slot 9–11 a tariffa diversa da 15–17). Una riga per fas
 - **Nullabile**: No.
 - **Relazioni**: **FK** → [`catalog_service_sale_items.id`](catalog_service_sale_items.md)
   `ON DELETE CASCADE`.
+
+### option_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-11-05 (migration ServicesAndNextSeason).
+- **Descrizione**: Disponibilità a cui appartiene la durata (service_hourly_options).
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_service_hourly_options.id`](catalog_service_hourly_options.md) `ON DELETE CASCADE`.
+
+### is_custom
+- **Legacy**: nessuno; la durata personalizzata del legacy (`hourlyServices[].manual_timeslot`) diventa una riga con `is_custom = true`.
+- **Nota**: campo aggiunto il 2026-11-05 (migration ServicesAndNextSeason).
+- **Descrizione**: Durata personalizzata dal gestore, oltre a quelle standard.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
 
 ### label
 - **Legacy**: `timeslot_constants[].name` (atteso `"9-11"`; nei dati reali è **sempre una durata**:

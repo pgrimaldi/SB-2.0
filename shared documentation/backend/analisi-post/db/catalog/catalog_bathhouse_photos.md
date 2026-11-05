@@ -79,6 +79,15 @@ rimozione): aggiungere/togliere una foto è un `INSERT`/`DELETE`.
 - **Note**: si può anche scegliere hard-delete qui (tabella di puro collegamento) + GC dell'asset; il
   soft-delete è mantenuto per uniformità e per un eventuale "annulla".
 
+### public_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PropertyInfo).
+- **Descrizione**: Id pubblico (UUIDv7) usato dalle API.
+- **Tipo**: `uuid`.
+- **Default**: `'00000000-0000-0000-0000-000000000000'::uuid`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON — è la tabella che *elimina* il JSON `photos`.

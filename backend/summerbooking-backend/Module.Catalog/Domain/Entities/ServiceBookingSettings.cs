@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -20,4 +20,17 @@ public sealed class ServiceBookingSettings : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private ServiceBookingSettings() { }
+
+	public static ServiceBookingSettings Create(long propertyId) => new() { PropertyId = propertyId };
+
+	public void Update(ServiceBookingSettingsData d)
+	{
+		IsEnabled = d.IsEnabled;
+		SurchargeType = d.SurchargeType;
+		SurchargeValue = d.SurchargeType == SurchargeType.Disable ? 0 : d.SurchargeValue;
+		RequiresManualConfirmation = d.RequiresManualConfirmation;
+		SectionTitle = d.SectionTitle;
+		UsefulInfo = d.UsefulInfo;
+		EnabledPaymentMethods = d.PaymentMethods.Distinct().ToList();
+	}
 }

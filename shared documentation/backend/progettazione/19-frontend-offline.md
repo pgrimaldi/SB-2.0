@@ -177,7 +177,7 @@ Endpoint autenticato, minimale, senza accesso al DB (o quasi): il client lo usa 
 
 ### 3.4 Autenticazione tollerante alla disconnessione
 
-- Access token breve (15‑60 min, [pre/autenticazione-autorizzazione-dotnet.md §2](pre/autenticazione-autorizzazione-dotnet.md)) + **refresh token** con vita ≥ finestra offline massima + margine (decisione: es. 24h).
+- Access token breve (15‑60 min, [pre/autenticazione-autorizzazione-dotnet.md §2](pre/autenticazione-autorizzazione-dotnet.md)) + **refresh token** con vita ≥ finestra offline massima (24 ore, decisa il 2026-10-25) + margine.
 - Al rientro: il client rinnova prima di sincronizzare. Se il refresh è scaduto → sync bloccata,
   l'operatore rientra con login e **la coda resta in IndexedDB** (non si perde).
 - Nessuna sessione "offline" a permessi estesi: offline si può fare **solo** ciò che il ruolo già
@@ -483,7 +483,7 @@ sconosciuto" per `code` non ancora mappati ([pre/standard-risposta-api-dotnet.md
 ### 5.12 Limiti e sicurezza
 
 - **Finestra offline massima** allineata a: TTL degli `idempotency_keys` e tolleranza `occurred_at`
-  (proposta 24h). Oltre, l'UI avvisa che il lavoro offline non è più garantito.
+  (**24 ore**, decisa il 2026-10-25). Oltre, l'UI avvisa che il lavoro offline non è più garantito.
 - Il working set contiene **PII** (contatti cliente, `isBlackList`, note): risiede in IndexedDB sul
   dispositivo. **Cancellare** la cache e la coda al logout; purga per TTL; nessun dato carta/fiscale è
   in cache (non ce n'è). Valutare cifratura a riposo se il dispositivo è condiviso (decisione aperta) —
@@ -561,6 +561,12 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
   stabilito che un prezzo calcolato offline **resta valido** anche se nel frattempo il listino cambia.
   Soluzione scelta: un solo motore scritto in C#, eseguito dal server e, compilato in WebAssembly, dal
   browser; al replay il server lo rivalida con la versione del listino usata offline. Dettaglio in §12.
+- **Risposte del committente del 2026-11-02**: **B chiusa** — offline si registra un incasso con **qualsiasi
+  metodo di pagamento**, ma **senza scontrino** (Fiskaly resta online-only). **C aperta fino alle prove** — la rete
+  manca al massimo un giorno, in media 6 ore; finestra da 14 a 30 giorni, da decidere misurando il peso del
+  working set. **D chiusa** — l'annullo offline di una prenotazione pagata online è **consentito**, rimborso Stripe
+  differito via outbox (`booking.cancel_blocked_paid_online` non serve). **E chiusa** — primo commit vince, il
+  perdente si riposiziona a mano. **G chiusa** — nessuna cifratura del working set.
 - **B — Perimetro pagamenti offline.** Confermare che carta (Stripe) e scontrino (Fiskaly) restano
   online‑only e che offline "mettere pagamenti" = **solo incasso manuale/contante**. Se sì, non serve
   altro lavoro su Stripe/Fiskaly per l'offline.
@@ -678,6 +684,13 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
   niente prezzo a 0 oltre i 90 giorni, niente doppio conteggio della mezza giornata nel weekend; regola
   del weekend invariata). La formalizzazione è nel resoconto dell'analisi del modulo Catalog.
 
+> **✅ Stato al 2026-10-27.** Il motore esiste ed è puro: `Module.Catalog/Domain/Pricing` (`PriceGrid`,
+> `PackagePricer`, `QuoteRules`), senza dipendenze oltre agli enum di dominio, e ha la griglia del legacy
+> verificata cella per cella (0 differenze). Differenze rispetto a §12.2: il preventivo è
+> `POST /api/catalog/quotes` (non `/pricing/quote`), e oggi il listino lo legge dalle tabelle
+> (`PricingSource`), non dagli snapshot; `catalogHash`/`engineVersion` nella risposta, `IPricingApi` per
+> Booking e il pacchetto WebAssembly (§12.3) non sono ancora fatti.
+
 ### 12.3 Cosa fa il backend
 
 1. **Libreria del motore** come in §12.2, usata da Catalog per il preventivo e da Booking (tramite
@@ -694,7 +707,7 @@ Formato Problem Details di [pre/standard-risposta-api-dotnet.md §3](pre/standar
 4. **Storico delle versioni del listino**: oggi `catalog_config_snapshots` tiene una sola riga per
    stabilimento e tipo. Serve una tabella che conservi i payload degli snapshot di prezzo per
    `content_hash` (stabilimento, tipo, hash, payload, data) almeno per la finestra offline massima più un
-   margine (proposta 7 giorni), cancellati poi dal motore di retention ([80-retention.md](80-retention.md)).
+   margine (**7 giorni**, deciso il 2026-10-25), cancellati poi dal motore di retention ([80-retention.md](80-retention.md)).
 5. **Creazione prenotazione** (Booking): il corpo accetta un blocco `pricing` con `amount`, righe,
    `catalogHash`, `engineVersion`, `computedOffline`. Online il prezzo lo decide il server con il
    listino attuale; il blocco del client è ignorato.

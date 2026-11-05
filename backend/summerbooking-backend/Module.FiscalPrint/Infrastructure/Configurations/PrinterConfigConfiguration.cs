@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.FiscalPrint.Domain.Entities;
 
@@ -109,7 +109,7 @@ public sealed class PrinterConfigConfiguration : IEntityTypeConfiguration<Printe
 
 		builder.Property(x => x.DeletedAt)
 			.HasColumnName("deleted_at")
-			.HasComment("Soft-delete: valorizzato alla rimozione; is_active riportato a false in automatico (corregge il bug legacy che scollegava i due flag).");
+			.HasComment("Soft-delete: valorizzato alla rimozione; is_active riportato a false in automatico, così i due flag restano coerenti.");
 
 		builder.HasIndex(x => x.PropertyId)
 			.HasFilter("deleted_at IS NULL")

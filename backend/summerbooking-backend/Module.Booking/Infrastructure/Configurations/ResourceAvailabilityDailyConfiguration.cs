@@ -11,7 +11,7 @@ public sealed class ResourceAvailabilityDailyConfiguration : IEntityTypeConfigur
 	{
 		builder.ToTable("resource_availability_daily", "booking", t => t.HasComment(
 			"Proiezione di disponibilità per (risorsa/tipo × giorno), mantenuta dal DB via trigger su " +
-			"booking_resource_consumptions: sostituisce il GROUP BY a runtime del legacy."));
+			"booking_resource_consumptions: evita il GROUP BY a ogni lettura."));
 
 		// Chiave primaria composita (id, consumption_date): PostgreSQL impone che la PK di una
 		// tabella partizionata contenga la chiave di partizione (partizionamento per anno solare). id resta di fatto univoco da solo — e' pur
@@ -33,7 +33,7 @@ public sealed class ResourceAvailabilityDailyConfiguration : IEntityTypeConfigur
 
 		builder.Property(x => x.ResourceId)
 			.HasColumnName("resource_id")
-			.HasComment("public_id C2 della risorsa (proiezione fine); NULL per la proiezione grossolana per tipo");
+			.HasComment("public_id (Catalog) della risorsa (proiezione fine); NULL per la proiezione grossolana per tipo");
 
 		builder.Property(x => x.SectorId)
 			.HasColumnName("sector_id")

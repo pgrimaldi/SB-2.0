@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Payment.Domain.Entities;
 using Module.Payment.Domain.Enums;
@@ -43,7 +43,7 @@ public sealed class PosChargeConfiguration : IEntityTypeConfiguration<PosCharge>
 		builder.Property(x => x.BookingNumber)
 			.HasColumnName("booking_number")
 			.HasMaxLength(32)
-			.HasComment("Numero prenotazione, denormalizzato per correlazione col legacy.");
+			.HasComment("Numero prenotazione, denormalizzato per la correlazione con la cassa.");
 
 		builder.Property(x => x.ExternalRef)
 			.HasColumnName("external_ref")

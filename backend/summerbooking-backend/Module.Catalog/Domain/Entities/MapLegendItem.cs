@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -19,5 +19,15 @@ public sealed class MapLegendItem : IAuditable, ISoftDeletable
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
 
+	public const int LabelMaxLength = 100;
+
 	private MapLegendItem() { }
+
+	public static MapLegendItem Create(long propertyId, string label, long? iconAssetId, short sortOrder) => new()
+	{
+		PropertyId = propertyId,
+		Label = label.Trim(),
+		IconAssetId = iconAssetId,
+		SortOrder = sortOrder,
+	};
 }

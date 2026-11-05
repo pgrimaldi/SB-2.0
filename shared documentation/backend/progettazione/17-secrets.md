@@ -122,6 +122,15 @@ ContainerDefinitions:
   `ISecretProvider` che chiama l'SDK di Secrets Manager con cache a TTL breve — da introdurre solo se un
   secret specifico lo richiede (oggi non c'è questo requisito).
 
+### 3.3 Secret del nuovo backend aggiunti con le API Catalog (2026-10-27)
+
+| Variabile | Quando serve | Nota |
+|---|---|---|
+| `Security__HumanVerification__HmacKey` | `Enabled = true` e `Provider = proof_of_work` (il default) | chiave HMAC in base64, **almeno 32 byte**, con cui il backend firma le sfide anti-robot. Va **uguale su tutte le istanze**, altrimenti una sfida emessa da un'istanza è rifiutata dall'altra. Senza, con la protezione accesa, il backend non parte. Ruotarla invalida solo le sfide in corso (durano 10 minuti) |
+| `Security__HumanVerification__SecretKey` | solo con `Provider = turnstile` | secret di Cloudflare Turnstile |
+
+In locale e in sviluppo `Enabled = false`: la verifica passa sempre e nessuna delle due serve.
+
 ---
 
 ## 4. Inventario dei secret nel software precedente (`back-pre`/`front-pre`/`front-admin`)

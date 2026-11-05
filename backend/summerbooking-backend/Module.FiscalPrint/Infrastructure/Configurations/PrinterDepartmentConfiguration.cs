@@ -31,7 +31,7 @@ public sealed class PrinterDepartmentConfiguration : IEntityTypeConfiguration<Pr
 		builder.Property(x => x.DeptNumber)
 			.HasColumnName("dept_number")
 			.IsRequired()
-			.HasComment("Numero del reparto fisico sul registratore RT (esplicito, non più posizionale come nel legacy).");
+			.HasComment("Numero del reparto fisico sul registratore RT (esplicito, non posizionale).");
 
 		builder.Property(x => x.VatRate)
 			.HasColumnName("vat_rate")

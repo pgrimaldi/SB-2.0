@@ -1,13 +1,23 @@
-namespace Shared.Security;
+﻿namespace Shared.Security;
 
 /// <summary>
 /// Matrice ruolo→permessi: chi legge la lista contatti, chi ne vede i dettagli e li modifica, chi accetta i
-/// contratti, chi gestisce utenti e 2FA (superadmin e admin).
+/// contratti, chi gestisce utenti e 2FA (superadmin e admin), chi configura il catalogo dello stabilimento.
 /// </summary>
 public static class RolePermissions
 {
 	private static readonly string[] ContactRoles =
 		[RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Manager, RoleCodes.User1, RoleCodes.Marketing];
+
+	private static readonly string[] StaffRoles =
+	[
+		RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Lifeguard, RoleCodes.Manager, RoleCodes.CashOperator,
+		RoleCodes.WebsiteAdmin, RoleCodes.User1, RoleCodes.Waiter, RoleCodes.Affiliate, RoleCodes.AdvancedLifeguard,
+		RoleCodes.Marketing, RoleCodes.DailyCashOperator,
+	];
+
+	// Impostazioni dello stabilimento (magazzino, listini, sconti, mappa): titolare, amministratore e user1.
+	private static readonly string[] SettingsRoles = [RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1];
 
 	private static readonly Dictionary<string, HashSet<string>> Matrix = Build();
 
@@ -39,6 +49,15 @@ public static class RolePermissions
 		Grant(Permissions.ContractsAccept, RoleCodes.SuperAdmin, RoleCodes.Admin);
 		Grant(Permissions.AuditRead, RoleCodes.SuperAdmin, RoleCodes.Admin);
 		Grant(Permissions.PlatformManage, RoleCodes.SystemAdmin);
+		Grant(Permissions.CatalogRead, StaffRoles);
+		Grant(Permissions.CatalogSettings, SettingsRoles);
+		Grant(Permissions.CatalogPricing, SettingsRoles);
+		Grant(Permissions.InventoryManage, SettingsRoles);
+		Grant(Permissions.InventoryRead,
+			RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1, RoleCodes.Manager, RoleCodes.Lifeguard,
+			RoleCodes.AdvancedLifeguard, RoleCodes.CashOperator, RoleCodes.DailyCashOperator);
+		Grant(Permissions.AgreementsManage, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Manager);
+		Grant(Permissions.RevenueManage, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Manager, RoleCodes.User1);
 		return matrix;
 	}
 }

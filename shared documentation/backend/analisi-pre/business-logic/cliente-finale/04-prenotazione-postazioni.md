@@ -85,13 +85,25 @@ calcolato **interamente nel browser**:
 
 ---
 
-## 4. Conferma tramite codice prenotazione
+## 4. Conferma della prenotazione da parte del gestore (tramite codice)
+
+**Chi conferma**: il **gestore**, non il cliente (confermato dal committente il 2026-10-30 e verificato sul
+codice). Con «Richiedi conferma» attivo, l'email inviata allo stabilimento ha i pulsanti **«Conferma
+prenotazione»** e **«Annulla prenotazione»**, che aprono la pagina del gestionale
+`/confirmationbooking/manager/{lingua}/{codice}` (`front-pre/src/components/EmailTemplates/manager/ManagerConfirmation.js`;
+template in `back-pre/app/mailtemplates/bookingTemplates.js`). Da lì il gestore conferma
+(`confirmBookingByReservationCode`) o annulla (`sb/booking/cancelBooking`). Il codice prenotazione serve quindi
+come chiave del link inviato al gestore.
 
 **Azione** — `POST confirmBookingByReservationCode` (`reservation_code`, `languageCode`).
 
 **Logiche**: trova le prenotazioni con quel `reservation_code`; imposta `is_booking_confirmed = 1` su
 tutte. **Eventi**: invia **email** "Your booking is confirmed" al cliente + indirizzi stabilimento
 (`sendEmailToCustomerOnBooking`) + `email_logs`.
+
+**Nel nuovo sistema** (committente, 2026-10-30): finché non è confermata la postazione risulta occupata; il
+pagamento online si incassa dopo la conferma; senza conferma la prenotazione scade dopo 48 ore. Dettagli ancora
+aperti in `documentazione-locale/booking-da-chiarire.md` (BK-03).
 
 `getBookingDetailsByReservationCode` / `getBookingByReservationCode` restituiscono il dettaglio a
 partire dal codice (per la pagina di riepilogo pubblica `/onlinebooking/consumer/:language/:code`).
@@ -113,7 +125,8 @@ partire dal codice (per la pagina di riepilogo pubblica `/onlinebooking/consumer
 - **Calcoli**: prezzo pacchetto/postazione (motore client); commissione online (tasso iframe/online,
   `± /2` per acconto, `+ 0,50`, esenzioni hardcoded); sconto fisso/percentuale; totale/`toPay`.
 - **Logiche**: blacklist; contatto registrato (`contacts_only`); disponibilità magazzino;
-  `payment_status 2 → 3`; `is_booking_confirmed`; incremento `totalNoOfUsage` voucher; limiti settore
+  `payment_status 2 → 3`; `is_booking_confirmed` (confermato dal gestore dal link nell'email, §4);
+  incremento `totalNoOfUsage` voucher; limiti settore
   solo client; disponibilità postazione non atomica.
 - **Eventi**: **notifica in‑app** allo stabilimento; **socket.io**; **email di conferma** al cliente +
   stabilimento (con QR per lo staff) + `email_logs`; incremento contatore voucher. Pagamento e sue

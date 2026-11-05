@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Notification.Domain.Entities;
 using Module.Notification.Domain.Enums;
@@ -66,7 +66,7 @@ public sealed class NewsletterSubscriptionConfiguration : IEntityTypeConfigurati
 
 		builder.Property(x => x.CustomerPublicId)
 			.HasColumnName("customer_public_id")
-			.HasComment("public_id di identity_access... customers (C5), copiato — nessuna FK cross-schema.");
+			.HasComment("public_id di identity_access... customers (Identity), copiato — nessuna FK cross-schema.");
 
 		builder.Property(x => x.UnsubscribedAt)
 			.HasColumnName("unsubscribed_at")

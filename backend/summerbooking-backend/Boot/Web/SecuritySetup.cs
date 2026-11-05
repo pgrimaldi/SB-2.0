@@ -1,4 +1,5 @@
-using System.Threading.RateLimiting;
+﻿using System.Threading.RateLimiting;
+using BuildingBlocks.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -6,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Shared.Contracts.Audit;
 using Shared.Contracts.Errors;
 using Shared.Contracts.Events;
+using Shared.Localization;
 using Shared.Security;
 
 namespace Boot.Web;
@@ -29,8 +31,28 @@ public static class SecuritySetup
 		services.AddScoped<HttpRequestUser>();
 		services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<HttpRequestUser>());
 		services.AddScoped<IRequestContext>(sp => sp.GetRequiredService<HttpRequestUser>());
+		services.AddScoped<IRequestLanguage>(sp => sp.GetRequiredService<HttpRequestUser>());
 		services.AddScoped<IIntegrationEventPublisher, InProcessEventPublisher>();
 		services.AddScoped<IAuditTrail, AuditTrail>();
+
+		// Anti-robot dei form pubblici: prova di lavoro (nessun servizio esterno) o Cloudflare Turnstile.
+		var humanVerification = configuration.GetSection(HumanVerificationOptions.Section).Get<HumanVerificationOptions>() ?? new HumanVerificationOptions();
+		services.AddSingleton(humanVerification);
+		services.AddMemoryCache();
+		services.AddSingleton<ProofOfWorkHumanVerification>();
+		services.AddSingleton<IHumanChallengeIssuer>(sp => sp.GetRequiredService<ProofOfWorkHumanVerification>());
+		if (humanVerification.Provider == HumanVerificationOptions.Turnstile)
+		{
+			if (humanVerification.Enabled && string.IsNullOrEmpty(humanVerification.SecretKey))
+				throw new InvalidOperationException($"{HumanVerificationOptions.Section}:SecretKey obbligatoria con Turnstile attivo.");
+			services.AddHttpClient<IHumanVerification, TurnstileHumanVerification>(c => c.Timeout = TimeSpan.FromSeconds(10));
+		}
+		else
+		{
+			if (humanVerification.Enabled && string.IsNullOrEmpty(humanVerification.HmacKey))
+				throw new InvalidOperationException($"{HumanVerificationOptions.Section}:HmacKey obbligatoria con la prova di lavoro attiva.");
+			services.AddSingleton<IHumanVerification>(sp => sp.GetRequiredService<ProofOfWorkHumanVerification>());
+		}
 
 		services.AddAuthentication(AuthSchemes.UserBearer)
 			.AddJwtBearer(AuthSchemes.UserBearer, o =>
@@ -46,8 +68,8 @@ public static class SecuritySetup
 				o.Events = ProblemEvents();
 				o.Events.OnMessageReceived = context =>
 				{
-					// Contratti legacy dei partner: header x-access-token (OfSale, Transactions) e
-					// access_token in querystring (TeamSystem), come nel vecchio backend.
+					// Contratti già in uso dai partner: header x-access-token (OfSale, Transactions) e
+					// access_token in querystring (TeamSystem).
 					if (string.IsNullOrEmpty(context.Request.Headers.Authorization))
 					{
 						context.Token = context.Request.Headers["x-access-token"].FirstOrDefault()
@@ -83,6 +105,11 @@ public static class SecuritySetup
 			options.AddPolicy(RateLimitPolicies.Auth, context => RateLimitPartition.GetFixedWindowLimiter(
 				context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
 				_ => new FixedWindowRateLimiterOptions { PermitLimit = permitPerMinute, Window = TimeSpan.FromMinutes(1) }));
+			// form pubblici (es. «Registra la tua struttura»): pochi invii per indirizzo IP
+			var formsPer10Minutes = configuration.GetValue("Security:PublicForms:PermitPer10Minutes", 5);
+			options.AddPolicy(RateLimitPolicies.PublicForms, context => RateLimitPartition.GetFixedWindowLimiter(
+				context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+				_ => new FixedWindowRateLimiterOptions { PermitLimit = formsPer10Minutes, Window = TimeSpan.FromMinutes(10) }));
 			options.OnRejected = (context, _) => new ValueTask(
 				ProblemDetailsWriter.WriteAsync(context.HttpContext, StatusCodes.Status429TooManyRequests, CommonErrorCodes.TooManyRequests));
 		});

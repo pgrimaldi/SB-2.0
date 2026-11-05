@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Infra.Domain.Entities;
 
@@ -51,7 +51,7 @@ public sealed class ApiClientConfiguration : IEntityTypeConfiguration<ApiClient>
 
 		builder.Property(x => x.ExpiresAt)
 			.HasColumnName("expires_at")
-			.HasComment("Scadenza effettiva del client, quando impostata; a differenza del legacy va verificata dal servizio di autenticazione.");
+			.HasComment("Scadenza effettiva del client, quando impostata; la verifica il servizio di autenticazione.");
 
 		builder.Property(x => x.RotatedAt)
 			.HasColumnName("rotated_at")

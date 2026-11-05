@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -10,10 +10,18 @@ public sealed class BathhousePhotoConfiguration : IEntityTypeConfiguration<Bathh
 	public void Configure(EntityTypeBuilder<BathhousePhoto> builder)
 	{
 		builder.ToTable("bathhouse_photos", "catalog", t => t.HasComment(
-			"Elenco ordinato delle foto della galleria pubblica di una vetrina. Sostituisce l'array JSON bathouses.photos."));
+			"Elenco ordinato delle foto della galleria pubblica di una vetrina."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_bathhouse_photos");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
+
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasComment("Id pubblico (UUIDv7) usato dalle API.");
+
+		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_bathhouse_photos_public_id");
 
 		builder.Property(x => x.BathhouseId)
 			.HasColumnName("bathhouse_id")

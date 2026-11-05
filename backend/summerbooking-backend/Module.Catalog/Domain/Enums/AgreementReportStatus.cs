@@ -1,12 +1,10 @@
-namespace Module.Catalog.Domain.Enums;
+﻿namespace Module.Catalog.Domain.Enums;
 
 /// <summary>
-/// Stato di un report alle strutture partner. Legacy:
-/// <c>hotel_reports.status ENUM('pending','created','cancelled')</c>.
+/// Stato di un report alle strutture partner.
 /// </summary>
 /// <remarks>
-/// Nel legacy <c>cancelled</c> conviveva con <c>isDeleted = 1</c> — due modi di dire la stessa cosa
-/// scritti insieme su tutte le righe annullate. Qui restano separati e con significati distinti:
+/// Stato e soft-delete hanno significati distinti:
 /// <c>cancelled</c> e' lo stato del report (annullato da chi lo gestisce, resta visibile nello
 /// storico), <c>deleted_at</c> e' il soft-delete della riga.
 /// </remarks>

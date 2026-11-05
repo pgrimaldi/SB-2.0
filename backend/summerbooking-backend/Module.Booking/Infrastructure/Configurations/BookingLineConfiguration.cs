@@ -46,7 +46,7 @@ public sealed class BookingLineConfiguration : IEntityTypeConfiguration<BookingL
 
 			.IsRequired()
 
-			.HasComment("Id pubblico stabile della riga, copiato cross-modulo da C3 (righe economiche) e C4 (line item scontrino).");
+			.HasComment("Id pubblico stabile della riga, copiato cross-modulo da Payment (righe economiche) e Fiskaly (line item scontrino).");
 
 
 
@@ -80,7 +80,7 @@ public sealed class BookingLineConfiguration : IEntityTypeConfiguration<BookingL
 
 			.IsRequired()
 
-			.HasComment("Numero prenotazione copiato dalla testata, per correlazioni dirette con C3/C4 senza join.");
+			.HasComment("Numero prenotazione copiato dalla testata, per correlazioni dirette con Payment/Fiskaly senza join.");
 
 
 

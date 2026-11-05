@@ -1,8 +1,8 @@
-namespace Module.Catalog.Domain.Entities;
+﻿namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
 /// Read-model di ricerca pubblica: una riga per vetrina pubblicata, ricostruibile da catalog_bathhouses +
-/// catalog_pricing_* + catalog_bathhouse_amenities + identity_customer_bathhouse_likes (C5). Proiezione
+/// catalog_pricing_* + catalog_bathhouse_amenities + identity_customer_bathhouse_likes. Proiezione
 /// denormalizzata scritta solo dal processo di rebuild, mai da un aggregate di dominio. Chiave naturale
 /// (nessun id surrogato), nessuna FK reale in uscita (id copiati per valore). Non implementa
 /// IAuditable/ISoftDeletable nel senso pieno: ha timestamp ma la visibilità è governata da
@@ -27,6 +27,13 @@ public sealed class SearchBathhouse
 	public short[] AmenityIds { get; private set; } = [];
 	public int LikeCount { get; private set; }
 	public bool IsPublished { get; private set; }
+	public long? RegionId { get; private set; }
+	/// <summary>Inizio dell'abbonamento al gestionale: a parità di «mi piace» viene prima il più anziano.</summary>
+	public DateOnly? SubscribedSince { get; private set; }
+	/// <summary>Prenotabile online adesso: approvata, vendite non sospese, abbonamento attivo, almeno un pacchetto online.</summary>
+	public bool IsOnlineBookable { get; private set; }
+	/// <summary>Importata nel 2023: solo contatti, niente prenotazione.</summary>
+	public bool IsContactOnly { get; private set; }
 	public string Card { get; private set; } = "{}";
 	public byte[] ContentHash { get; private set; } = [];
 	public DateTime BuiltAt { get; private set; }

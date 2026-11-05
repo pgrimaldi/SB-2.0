@@ -280,6 +280,69 @@ Correzioni rispetto al legacy:
 | `onlineBookingOptions.locationOptionObj.enablePlaceOnMap` / `enableResrInPeriod` / `enableResrInSelectedLoc` | varianti UI ridondanti di `is_map_pick` / `is_period_restricted` / `is_location_restricted` |
 | `onlineBookingOptions.period[].key` | artefatto `react-date-range` |
 
+### afternoon_conversion_time
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Le prenotazioni del giorno fatte dopo questo orario diventano pomeridiane; NULL = nessuna conversione.
+- **Tipo**: `time without time zone`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### afternoon_from
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Mezza giornata: inizio del pomeriggio.
+- **Tipo**: `time without time zone`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### afternoon_to
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Mezza giornata: fine del pomeriggio.
+- **Tipo**: `time without time zone`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### booking_horizon_days
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Blocca le prenotazioni online oltre questo numero di giorni dal giorno corrente; NULL = nessun blocco.
+- **Tipo**: `smallint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### max_bookings_per_day
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Numero massimo di prenotazioni online al giorno; NULL = nessun limite.
+- **Tipo**: `smallint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### morning_from
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Mezza giornata: inizio della mattina.
+- **Tipo**: `time without time zone`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### morning_to
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Mezza giornata: fine della mattina.
+- **Tipo**: `time without time zone`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. `onlineBookingOptions` (il JSON più articolato del legacy) è interamente scomposto: scalari

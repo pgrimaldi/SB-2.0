@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -43,6 +43,20 @@ public sealed class MapIconConfiguration : IEntityTypeConfiguration<MapIcon>
 			.HasDefaultValue(true)
 			.HasComment("Icona selezionabile nel pannello SuperAdmin.");
 
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasComment("Id pubblico (UUIDv7) usato dalle API.");
+
+		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_map_icons_public_id");
+
+		builder.Property(x => x.IsDefault)
+			.HasColumnName("is_default")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Icona predefinita della categoria e dello stato: sostituisce quella eliminata dal systemadmin nelle mappe che la usavano.");
+
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired().HasDefaultValueSql("now()").HasComment("Creazione della riga.");
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired().HasDefaultValueSql("now()").HasComment("Ultima modifica della riga.");
 		builder.Property(x => x.DeletedAt).HasColumnName("deleted_at").HasComment("Soft-delete; la rimozione del file su storage è demandata a un job asincrono.");
@@ -50,6 +64,11 @@ public sealed class MapIconConfiguration : IEntityTypeConfiguration<MapIcon>
 		builder.HasIndex(x => new { x.CategoryId, x.Type })
 			.HasFilter("is_active AND deleted_at IS NULL")
 			.HasDatabaseName("ix_catalog_map_icons_category_type");
+
+		builder.HasIndex(x => new { x.CategoryId, x.Type }, "uq_catalog_map_icons_default")
+			.IsUnique()
+			.HasFilter("is_default AND deleted_at IS NULL")
+			.HasDatabaseName("uq_catalog_map_icons_default");
 
 		builder.HasIndex(x => x.MediaAssetId)
 			.HasDatabaseName("ix_catalog_map_icons_media_asset");

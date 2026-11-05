@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Booking.Domain.Entities;
 
@@ -62,14 +62,14 @@ public sealed class BookingDiscountConfiguration : IEntityTypeConfiguration<Book
 			.HasColumnType("booking.discount_scope")
 			.IsRequired()
 			.HasDefaultValueSql("'all'")
-			.HasComment("Ambito di validità del voucher, congelato dalla regola di C2.");
+			.HasComment("Ambito di validità del voucher, congelato dalla regola di Catalog.");
 
 		builder.Property(x => x.AppliedChannel)
 			.HasColumnName("applied_channel")
 			.HasColumnType("booking.discount_channel")
 			.IsRequired()
 			.HasDefaultValueSql("'any'")
-			.HasComment("Canale su cui il voucher era ammesso, congelato dalla regola di C2.");
+			.HasComment("Canale su cui il voucher era ammesso, congelato dalla regola di Catalog.");
 
 		builder.Property(x => x.AppliesToCategories)
 			.HasColumnName("applies_to_categories")
@@ -95,7 +95,7 @@ public sealed class BookingDiscountConfiguration : IEntityTypeConfiguration<Book
 			.HasColumnName("consumed_usage")
 			.IsRequired()
 			.HasDefaultValue(false)
-			.HasComment("True se questa prenotazione ha consumato un utilizzo del voucher; l'incremento/decremento del contatore è atomico su C2.");
+			.HasComment("True se questa prenotazione ha consumato un utilizzo del voucher; l'incremento/decremento del contatore è atomico su Catalog.");
 
 		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
 		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions

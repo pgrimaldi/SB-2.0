@@ -25,7 +25,11 @@ tabella è l'anagrafica + la capienza totale.
 Correzioni rispetto al legacy:
 
 - **1 riga per articolo**; `quantity`/`threshold` → interi.
-- **`isEnable`** (int 0/1) → `is_active boolean`.
+- **`isEnable`** (int 0/1) → `low_stock_alert_enabled boolean`: nel gestionale è l'interruttore «Abilita»
+  dell'avviso soglia (decisione del committente, 2026-10; nel legacy escludeva anche l'articolo dal
+  controllo di giacenza, comportamento non ripreso).
+- **Elenco fisso** degli articoli → `article_code` (enum `catalog.inventory_article`), riconosciuto dal nome;
+  NULL per gli articoli inseriti con «Altro».
 - **`currentId`** (numero casuale client-side) → scartato.
 - il mascheramento delle quantità per richieste non autenticate (`maskDecimal`) resta una regola
   applicativa, non uno schema.
@@ -38,8 +42,7 @@ Correzioni rispetto al legacy:
 |---|---|---|---|
 | `pk_catalog_inventory_items` | `id` | PK | — |
 | `uq_catalog_inventory_items_public_id` | `(public_id)` | UNIQUE | referenziato cross-modulo (C1 consumi) |
-| `uq_..._property_name` | `(property_id, lower(name)) WHERE deleted_at IS NULL` | UNIQUE parziale | articolo univoco per stabilimento |
-| `ix_..._property_active` | `(property_id) WHERE is_active AND deleted_at IS NULL` | parziale | magazzino attivo dello stabilimento |
+| `uq_..._property_name` | `(property_id, lower(name)) WHERE deleted_at IS NULL` | UNIQUE parziale | articolo univoco per stabilimento ✅ espressione `lower(name)` applicata il 2026-10-25 (migration `InventoryArticlesAndLowStockAlert`; prima era sulla colonna) |
 
 ## Campi
 
@@ -103,11 +106,25 @@ Correzioni rispetto al legacy:
 - **Note**: nel target un servizio/notifica può usarla realmente (C6); qui resta il dato di
   configurazione.
 
-### is_active
-- **Legacy**: `warehouses.items[].isEnable` (int 0/1)
-- **Descrizione**: articolo attivo/visibile.
+### article_code
+- **Legacy**: `warehouses.items[].name`/`it` confrontato con l'elenco fisso del frontend (`WEREHOUSE_COMMON_SETTING`)
+- **Descrizione**: articolo dell'elenco fisso (ombrellone, lettino, sdraio, sedia regista, gazebo, lettino maxi,
+  articoli personalizzati 1–8, aree, ticket, …); il frontend traduce il codice. Gli articoli dell'elenco che si
+  posizionano sulla mappa sono indicati dal codice applicativo (`InventoryArticles.IsMapPlaceable`).
+- **Tipo**: `enum catalog.inventory_article`.
+- **Default**: `NULL`.
+- **Nullabile**: Sì (NULL = articolo inserito con «Altro», nome libero).
+- **Relazioni**: —.
+- **Note**: migrazione e ETL riconoscono il codice dal nome italiano o inglese del legacy (al 2026-10-25: 862
+  articoli riconosciuti, 182 «Altro»).
+
+### low_stock_alert_enabled
+- **Legacy**: `warehouses.items[].isEnable` (int 0/1, interruttore «Abilita» della lista)
+- **Descrizione**: avviso nella campanella e nella sezione News quando la disponibilità del **giorno corrente**
+  scende **sotto** la soglia; si ripete solo dopo che la scorta è risalita. Non lo ricevono cameriere,
+  affiliato e marketing.
 - **Tipo**: `boolean`.
-- **Default**: `true`.
+- **Default**: `false`.
 - **Nullabile**: No.
 - **Relazioni**: —.
 
@@ -173,7 +190,8 @@ public sealed class InventoryItem : AggregateRoot, IAuditable, ISoftDeletable
 	public string Name { get; private set; } = null!;
 	public int TotalQuantity { get; private set; }
 	public int? LowStockThreshold { get; private set; }
-	public bool IsActive { get; private set; }
+	public InventoryArticle? ArticleCode { get; private set; }
+	public bool LowStockAlertEnabled { get; private set; }
 	public Guid? CreatedByUserId { get; private set; } // public_id di identity_access_users (C5), copiato
 
 	public DateTime CreatedAt { get; private set; }
@@ -189,11 +207,12 @@ public sealed class InventoryItem : AggregateRoot, IAuditable, ISoftDeletable
 // Module.Catalog.Infrastructure.Configurations/InventoryItemConfiguration.cs
 namespace Module.Catalog.Infrastructure.Configurations;
 
+/// <summary>Mapping EF Core di <see cref="InventoryItem"/> su catalog.inventory_items.</summary>
 public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<InventoryItem>
 {
 	public void Configure(EntityTypeBuilder<InventoryItem> builder)
 	{
-		builder.ToTable("catalog_inventory_items", "catalog", t =>
+		builder.ToTable("inventory_items", "catalog", t =>
 		{
 			t.HasComment("Articolo fisico a corredo (ombrellone, lettino, tenda, sdraio, …) di cui uno stabilimento tiene la quantità disponibile.");
 			t.HasCheckConstraint("ck_catalog_inventory_items_total_quantity", "total_quantity >= 0");
@@ -229,11 +248,16 @@ public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Invent
 			.HasColumnName("low_stock_threshold")
 			.HasComment("Soglia minima sotto la quale segnalare scorta bassa.");
 
-		builder.Property(x => x.IsActive)
-			.HasColumnName("is_active")
+		builder.Property(x => x.ArticleCode)
+			.HasColumnName("article_code")
+			.HasColumnType("catalog.inventory_article")
+			.HasComment("Articolo dell'elenco fisso; NULL per gli articoli inseriti con «Altro».");
+
+		builder.Property(x => x.LowStockAlertEnabled)
+			.HasColumnName("low_stock_alert_enabled")
 			.IsRequired()
-			.HasDefaultValue(true)
-			.HasComment("Articolo attivo/visibile.");
+			.HasDefaultValue(false)
+			.HasComment("Avviso nella campanella e nella sezione News quando la disponibilità del giorno scende sotto la soglia.");
 
 		builder.Property(x => x.CreatedByUserId)
 			.HasColumnName("created_by_user_id")
@@ -256,22 +280,17 @@ public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Invent
 			.IsUnique()
 			.HasDatabaseName("uq_catalog_inventory_items_public_id");
 
-		// Univocità su lower(name): espressione funzionale — l'IndexBuilder fluente non genera
-		// l'espressione, va rifinita a mano nella migration generata (colonna Name come base).
+		// Univocità su lower(name): l'indice fluente è sulla colonna, l'espressione è nella migration.
 		builder.HasIndex(x => new { x.PropertyId, x.Name })
 			.IsUnique()
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("uq_catalog_inventory_items_property_name");
-
-		builder.HasIndex(x => x.PropertyId)
-			.HasFilter("is_active AND deleted_at IS NULL")
-			.HasDatabaseName("ix_catalog_inventory_items_property_active");
 	}
 }
 ```
 
 **Note di migrazione**: esplosione di `warehouses.items[]` in una riga per articolo; `quantity`/
-`threshold` (stringhe) → `TotalQuantity`/`LowStockThreshold` (interi); `isEnable` (int) → `IsActive`
+`threshold` (stringhe) → `TotalQuantity`/`LowStockThreshold` (interi); `isEnable` (int) → `LowStockAlertEnabled`
 (bool); `currentId` (pseudo-id casuale client-side) **scartato**, nuova identità `bigint` assegnata
 dall'`IDENTITY`; `public_id` generato ex-novo (UUIDv7). I riferimenti storici
 `PackageItemSelected[].name` (in `catalog_pricing_price_list_items` / `catalog_agreement_price_list_items`)

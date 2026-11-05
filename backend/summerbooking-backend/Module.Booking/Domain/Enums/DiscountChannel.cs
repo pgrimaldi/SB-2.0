@@ -1,7 +1,7 @@
-namespace Module.Booking.Domain.Enums;
+﻿namespace Module.Booking.Domain.Enums;
 
 /// <summary>
-/// Canale su cui il voucher era ammesso, congelato dalla regola di C2.
+/// Canale su cui il voucher era ammesso, congelato dalla regola di Catalog.
 /// </summary>
 public enum DiscountChannel
 {

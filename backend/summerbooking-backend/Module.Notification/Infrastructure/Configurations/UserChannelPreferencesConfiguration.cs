@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Notification.Domain.Entities;
 
@@ -9,7 +9,7 @@ public sealed class UserChannelPreferencesConfiguration : IEntityTypeConfigurati
 	public void Configure(EntityTypeBuilder<UserChannelPreferences> builder)
 	{
 		builder.ToTable("user_channel_preferences", "notification", t => t.HasComment(
-			"Preferenze di notifica di un utente C5 (staff/gestore): canali abilitati, non disturbare, tipi silenziati."));
+			"Preferenze di notifica di un utente di Identity (staff/gestore): canali abilitati, non disturbare, tipi silenziati."));
 
 		builder.HasKey(x => x.Id).HasName("pk_notification_user_channel_preferences");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -38,7 +38,7 @@ public sealed class UserChannelPreferencesConfiguration : IEntityTypeConfigurati
 			.HasColumnName("is_muted")
 			.HasDefaultValue(false)
 			.IsRequired()
-			.HasComment("\"Non disturbare\" globale: nessuna notifica operativa finché attivo (rispettato dal modulo, il legacy lo ignorava).");
+			.HasComment("\"Non disturbare\" globale: nessuna notifica operativa finché attivo (rispettato dal modulo).");
 
 		builder.Property(x => x.MutedKinds)
 			.HasColumnName("muted_kinds")

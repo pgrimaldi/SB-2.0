@@ -1,10 +1,10 @@
-using Module.Notification.Domain.Enums;
+﻿using Module.Notification.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Notification.Domain.Entities;
 
 /// <summary>
-/// Preferenze di notifica di un utente C5 (staff/gestore): canali abilitati, non disturbare, tipi
+/// Preferenze di notifica di un utente di Identity (staff/gestore): canali abilitati, non disturbare, tipi
 /// silenziati. Assenza di riga = valgono i default di modulo.
 /// </summary>
 public sealed class UserChannelPreferences : IAuditable, ISoftDeletable

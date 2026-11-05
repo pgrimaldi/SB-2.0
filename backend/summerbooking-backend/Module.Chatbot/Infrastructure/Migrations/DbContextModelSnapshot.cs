@@ -57,7 +57,7 @@ namespace Module.Chatbot.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()")
-                        .HasComment("Istante del messaggio; colonna di riferimento per il conteggio giornaliero del rate limit (non updated_at, a differenza del legacy).");
+                        .HasComment("Istante del messaggio; colonna di riferimento per il conteggio giornaliero del rate limit (non updated_at).");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")

@@ -99,8 +99,8 @@
   gestite in punti diversi dell'applicazione. **Verificato**: dopo la registrazione questo campo non risulta
   più modificabile da nessun endpoint raggiungibile dal frontend disponibile — l'unico altro punto che scrive
   sulla tabella `properties` con dati anagrafici, `sysadmin.controller.js:updateproperty` (righe 508-535),
-  aggiorna `city`, `mobile`, `email`, `status`, `adminComment`, `propertyOwner`, `commissionAmount`, ma **non**
-  `propertyName`.
+  aggiorna `propertyName` (riga 524), `fullName`, `city`, `mobile`, `email`, `status`, `adminComment`,
+  `propertyOwner`, `commissionAmount`: il nome è quindi modificabile dal system admin.
 - **Nullabile**: Sì
 - **Esempio di valori**: `"Lido Playa Blanca"`, `"Stabilimento Balneare La Conchiglia"`
 
@@ -159,8 +159,8 @@
 - **Descrizione**: nome e cognome della persona di riferimento/proprietario, raccolto dal campo
   "Nome e Cognome" del form `RegisterProperty.js` (stato `FullName`, righe 34/229-240) e inviato come
   `fullName` (`register`, riga 70). È un dato di contatto interno, distinto dal nome dello stabilimento.
-  **Verificato**: come `propertyName`, non risulta più modificabile da nessun endpoint raggiungibile dal
-  frontend disponibile dopo la registrazione (`updateproperty` non lo include tra i campi aggiornabili).
+  **Verificato**: come `propertyName`, dopo la registrazione è modificabile solo dal system admin
+  (`updateproperty` lo scrive da `req.body.propertyOwnerName`, `sysadmin.controller.js:525`).
 - **Nullabile**: Sì
 - **Esempio di valori**: `"Aditya "`, `"vikey joshi"` — su un campione più ampio del DB di sviluppo (4135
   righe), **3819 righe su 4135 hanno `fullName = NULL`** (quasi il 92%): il campo, pur raccolto dal form di
@@ -259,44 +259,52 @@
     impostato da `register`, riga 74)
   - `1` = stabilimento approvato dal system admin (`sysadmin.controller.js:approvedproperties`)
   - `2` = stabilimento rifiutato dal system admin (`rejectedproperties`)
-  - `3` = valore descritto **solo** in un commento nel model (*"status = 3 for properties that are added
-    from csv"*), ma **non riscontrato in nessun punto reale del codice controller**.
-  - `4` = valore realmente usato per l'import massivo da CSV: `user.controller.js:csvUpload` (riga 2063)
-    crea la proprietà con `Property.create({ ..., status: 4 })`. **Il commento nel model (`3`) è quindi
-    disallineato dal codice reale (`4`)** — probabile refuso di documentazione mai corretto, dato che è
-    solo un commento e non incide sull'esecuzione. Da verificare col committente quale dei due valori sia
-    quello voluto.
+  - `3` = stabilimento importato da CSV (commento nel model: *"status = 3 for properties that are added
+    from csv"*). È il valore presente **in produzione** per gli importati: **9.516** righe dell'import del
+    19/07/2023.
+  - `4` = valore scritto oggi da `user.controller.js:csvUpload` (riga 2063, `status: 4`), ma in produzione
+    gli importati hanno `3`: l'import del 2023 non ha usato questo valore. `csvUpload` va considerato
+    disallineato dai dati.
+  - `5` = **731** righe dello stesso import del 2023, portate a `5` direttamente sul DB per nasconderle;
+    nessun codice legge o scrive `5`. Analisi sul dump dell'8 settembre 2026: 626 doppioni dell'import
+    (stesso nome e città di una visibile), 14 corrispondenti a uno stabilimento poi registrato, 91 senza
+    spiegazione, da decidere col committente
+    ([PROMEMORIA-85-14](../../progettazione/85-promemoria.md)).
 - **Relazioni**: —
 - **Default**: nessun default a livello DB; il valore iniziale `0` è impostato esplicitamente dal codice
   applicativo alla creazione
 - **Descrizione**: stato del ciclo di vita amministrativo dello stabilimento. Determina se lo stabilimento è
   visibile/operativo: `serchProperty` (`property.controller.js`) filtra esplicitamente `status: [1, 3]` per
-  la ricerca pubblica — sulla base del codice attuale mostra quindi solo gli stabilimenti approvati (`1`),
-  dato che nessun punto del codice crea più righe con `status=3`. **Incongruenza verificata**: gli
-  stabilimenti importati da CSV, che secondo `csvUpload` ricevono `status=4`, **non compaiono** in questo
-  filtro — restano invisibili nella ricerca pubblica finché un system admin non li porta a `1`
-  manualmente, a meno che l'intento originale non fosse farli comparire subito con `status=3` (nel qual
-  caso è il valore scritto da `csvUpload`, `4`, ad essere sbagliato). Nella copia dati locale: 65 righe con
-  `status=1`, 35 con `status=0`.
+  la ricerca pubblica (`property.controller.js:282`): mostra gli approvati (`1`) e gli **importati (`3`)**,
+  questi ultimi come scheda «solo contatto» (non prenotabili online). Gli stati `0`, `2`, `4` e `5` non
+  compaiono. Nella copia dati locale: 65 righe con `status=1`, 35 con `status=0`.
 - **Distribuzione osservata nel DB locale**: `1` → 65 righe, `0` → 35 righe (nessuna riga con `status=2`,
   `status=3` o `status=4` nel campione — il campione non contiene stabilimenti importati da CSV).
-  **Aggiornamento rilevante (verifica su un campione molto più ampio, 4135 righe)**: il quadro cambia in modo
-  sostanziale — `4` risulta il valore **nettamente più frequente** (3808 righe, la stragrande maggioranza
-  della tabella), seguito da `0` (176), `1` (121), `3` (20), `2` (10). Se l'interpretazione di `status=4`
-  come "import da CSV" (`csvUpload`, sopra) è corretta, e se il filtro `serchProperty` che mostra solo
-  `status: [1, 3]` è ancora quello realmente in uso, questo aggiornamento suggerisce che **la stragrande
-  maggioranza degli stabilimenti nel DB non compaia nella ricerca pubblica** — un'implicazione di business
-  potenzialmente rilevante da verificare col committente prima della riscrittura (chiarire se `status=4`
-  debba davvero restare escluso dalla ricerca pubblica su questa scala, o se il filtro/il valore scritto da
-  `csvUpload` andasse comunque rivisto, come già ipotizzato sopra).
+  Sul DB di sviluppo (4135 righe) prevale `4` (3808), seguito da `0` (176), `1` (121), `3` (20), `2` (10):
+  è un ambiente di test popolato con `csvUpload` e non rappresenta la produzione. **In produzione** gli
+  importati hanno `3` (9.516, visibili come «solo contatto») e 731 righe hanno `5` (nascoste).
 - **Nullabile**: Sì
-- **Esempio di valori**: `4`, `0`, `1`, `3`, `2` (i 5 valori osservati, vedi distribuzione sopra)
+- **Esempio di valori**: `0`, `1`, `2`, `3`, `4`, `5` (vedi distribuzione sopra)
 - **Candidato a enumerazione**: vocabolario chiuso e già in parte documentato nel codice (commento nel model
   + uso nei controller sysadmin), ma **non modellato come enum reale**: oggi è un intero arbitrario senza
-  nomi leggibili nello schema, con almeno un disallineamento noto tra commento (`3`) e codice reale (`4`).
+  nomi leggibili nello schema, con un disallineamento noto tra dati di produzione (`3`) e `csvUpload` (`4`)
+  e un valore (`5`) impostato solo a mano.
   Da modellare nel nuovo schema come `ENUM` DB tipizzato (C#: enum dedicato, es. `PropertyStatus { Pending,
   Approved, Rejected, ImportedFromCsv }`) — è un vocabolario di stato del ciclo di vita, stabile e non
   soggetto a traduzione, quindi non richiede necessariamente una tabella di lookup separata.
+
+> **Decisione del committente (2026-10)**
+>
+> - **Approvazione** (E1): motivo del rifiuto facoltativo; una struttura approvata o rifiutata può
+>   tornare «in attesa»; il salvataggio che approva automaticamente va corretto. Una struttura «in attesa»
+>   sparisce dal sito, perde la prenotazione online e il gestore non entra nel gestionale.
+> - **Importate nel 2023** (E2): le 9.516 con stato `3` restano visibili («solo contatto»); le 731 con
+>   stato `5` vanno chiarite (PROMEMORIA-85-14).
+> - **Eliminazione** (E3): cestino delle strutture con «Ripristina»; le prenotazioni future e i pagamenti
+>   in sospeso si annullano senza rimborso automatico né email e tornano attivi al ripristino; i tempi di
+>   conservazione partono dall'eliminazione definitiva.
+> - **Registrazione** (E4): foto facoltative; email a info@ a ogni registrazione; verifica anti-robot.
+> - **Titolare** (E5): il dato serve; in Catalog è alimentato dall'evento di Identity.
 
 ### photos
 - **Tipo**: dichiarato `Sequelize.JSON` nel model; a livello fisico la colonna è `longtext` con un vincolo
@@ -328,8 +336,9 @@
   troncato a `true` in JavaScript, il backend (`if (photos)`, riga 82) esegue comunque l'update che
   sovrascrive il valore iniziale non-JSON `""` con un array valido — quindi, per **tutti e tre** gli entry
   point oggi raggiungibili, il rischio di lasciare la riga con `photos = ""` non si presenta in pratica.
-  Resta un rischio reale solo per chiamate dirette all'endpoint pubblico che omettano del tutto la chiave
-  `photos` dal body (bypassando tutti e tre i frontend), condizione in cui `if (photos)` sarebbe `false` e
+  Con `photos: []` la registrazione funziona: «senza foto va in errore» è impreciso. L'errore si ha
+  solo se la chiave `photos` manca del tutto, cioè per chiamate dirette all'endpoint pubblico che
+  omettano la chiave `photos` dal body (bypassando tutti e tre i frontend), condizione in cui `if (photos)` sarebbe `false` e
   l'update non scatterebbe, lasciando la riga con `photos = ""` — valore che rompe
   `JSON.parse(property.photos)` fatto altrove (es. `serchProperty`, riga 309).
 - **Nullabile**: Sì

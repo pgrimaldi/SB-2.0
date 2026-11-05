@@ -91,6 +91,42 @@ qui sostituita da FK verso il **gruppo di periodo** di
 - **Nullabile**: Sì.
 - **Relazioni**: —.
 
+### half_day_14_price
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Mezza giornata per 14 giorni nel periodo.
+- **Tipo**: `numeric(12,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### half_day_7_price
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Mezza giornata per 7 giorni nel periodo: riferimento del calcolo; NULL = prezzo mezza giornata x giorni.
+- **Tipo**: `numeric(12,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### half_day_monthly_price
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Mezza giornata per il mese nel periodo.
+- **Tipo**: `numeric(12,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### sector_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Fila/settore a cui si applicano i prezzi; NULL = tutte le file.
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_map_sectors.id`](catalog_map_sectors.md) `ON DELETE RESTRICT`.
+
 ## Valutazione JSON
 
 Nessun JSON. `detailPrices[]` → una riga per periodo con 7 colonne prezzo tipizzate; `edit_price_data[]` (griglia per numero di giorni) → [`catalog_pricing_price_list_stay_prices`](catalog_pricing_price_list_stay_prices.md); `name` `LIKE` → FK al

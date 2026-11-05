@@ -194,6 +194,87 @@ Correzioni rispetto al legacy:
 | `hourlyServices[].day_constant[]` | → colonna `active_weekdays` (in origine la figlia [`catalog_service_sale_item_weekdays`](_Zcatalog_service_sale_item_weekdays.md), eliminata) |
 | `hourlyServices[].timeslot_constants[]` | → [`catalog_service_sale_item_time_slots`](catalog_service_sale_item_time_slots.md) |
 
+### allergens
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Allergeni dichiarati sui prodotti del bar (i 14 del Reg. UE 1169/2011).
+- **Tipo**: `catalog.allergen[]`.
+- **Default**: `'{}'::catalog.allergen[]`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### category
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Categoria dei servizi bar (bar, pizzeria, bibite, ...); NULL per gli altri tipi.
+- **Tipo**: `catalog.bar_category`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### description
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Descrizione mostrata al cliente.
+- **Tipo**: `text`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### has_fixed_time_slots
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Servizi orari: fasce orarie fisse (inizio e fine in service_sale_item_time_slots).
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### has_period_prices
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Variazioni di prezzo per periodo attive: valgono i prezzi di service_sale_item_period_prices.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### is_highlighted
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Metti in evidenza: proposto al cliente quando prenota la spiaggia.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### is_sector_restricted
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Acquistabile solo nelle file/settori di service_sale_item_sectors.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### vat_nature
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Natura dell'esenzione IVA (n1..n6), solo senza aliquota.
+- **Tipo**: `catalog.vat_nature`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### vat_rate
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration ServicesCatalog).
+- **Descrizione**: Aliquota IVA in percentuale; NULL = esente, con la natura in vat_nature.
+- **Tipo**: `numeric(5,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. I 3 array JSON (`barServices` fino a 4 MB) → una tabella con `kind` discriminatore, un array
@@ -412,3 +493,5 @@ public sealed class ServiceSaleItemConfiguration : IEntityTypeConfiguration<Serv
   `icon_asset_id` (upload S3 diretto tramite `catalog_media_assets`).
 - `currentId` (id client-side casuale) scartato: non è un identificatore stabile.
 - `day_constant[]`/`timeslot_constants[]` migrano nelle due tabelle figlie (vedi le rispettive schede).
+
+> **Nota 2026-11-05** (migration ServicesAndNextSeason): per i servizi orari `hour_from`, `hour_to`, `active_weekdays` e `vat_rate` sono il punto di partenza della disponibilità migrata ([`catalog_service_hourly_options`](catalog_service_hourly_options.md)), che da quel momento fa fede; `has_fixed_time_slots` vale true se una delle disponibilità ha le fasce fisse.

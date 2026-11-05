@@ -22,9 +22,11 @@ public sealed class PriceListConfiguration : IEntityTypeConfiguration<PriceList>
 
 	{
 
-		builder.ToTable("pricing_price_lists", "catalog", t => t.HasComment(
-
-			"Voce di listino di uno stabilimento: un pacchetto o un articolo aggiuntivo."));
+		builder.ToTable("pricing_price_lists", "catalog", t =>
+		{
+			t.HasComment("Voce di listino di uno stabilimento: un pacchetto o un articolo aggiuntivo.");
+			t.HasCheckConstraint("ck_catalog_pricing_price_lists_vat", "(vat_rate IS NULL) <> (vat_nature IS NULL)");
+		});
 
 
 
@@ -42,7 +44,7 @@ public sealed class PriceListConfiguration : IEntityTypeConfiguration<PriceList>
 
 			.IsRequired()
 
-			.HasComment("Id pubblico stabile, copiato in C1 booking_lines.price_list_package_id.");
+			.HasComment("Id pubblico stabile, copiato in Booking booking_lines.price_list_package_id.");
 
 		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
 
@@ -79,6 +81,32 @@ public sealed class PriceListConfiguration : IEntityTypeConfiguration<PriceList>
 
 
 		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_pricing_price_lists_public_id");
+
+		builder.Property(x => x.MaxAdditionalItems)
+			.HasColumnName("max_additional_items")
+			.HasComment("Pacchetti: numero massimo di articoli aggiuntivi; NULL = nessun limite.");
+
+		builder.Property(x => x.VatRate)
+			.HasColumnName("vat_rate")
+			.HasPrecision(5, 2)
+			.HasComment("Aliquota IVA in percentuale; NULL = esente, con la natura in vat_nature.");
+
+		builder.Property(x => x.VatNature)
+			.HasColumnName("vat_nature")
+			.HasColumnType("catalog.vat_nature")
+			.HasComment("Natura dell'esenzione IVA (n1..n6), solo senza aliquota.");
+
+		builder.Property(x => x.IsSectorRestricted)
+			.HasColumnName("is_sector_restricted")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Aree abilitate: solo le file/settori con un prezzo in pricing_price_list_sector_prices; false = tutte.");
+
+		builder.Property(x => x.IsMapAssignable)
+			.HasColumnName("is_map_assignable")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Articoli aggiuntivi: assegnabile su mappa.");
 
 
 
@@ -294,7 +322,6 @@ public sealed class PriceListConfiguration : IEntityTypeConfiguration<PriceList>
 
 		builder.HasMany(x => x.DatePrices).WithOne().HasForeignKey("PriceListId");
 
-		builder.HasMany(x => x.ReducedWindows).WithOne().HasForeignKey("PriceListId");
 
 	}
 

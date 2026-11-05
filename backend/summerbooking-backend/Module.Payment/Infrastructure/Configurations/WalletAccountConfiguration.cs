@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Payment.Domain.Entities;
 using Module.Payment.Domain.Enums;
@@ -20,7 +20,7 @@ public sealed class WalletAccountConfiguration : IEntityTypeConfiguration<Wallet
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, esposto al cliente e copiato da C1 sulla riga servizio pagata col borsellino.");
+			.HasComment("Id pubblico stabile, esposto al cliente e copiato da Booking sulla riga servizio pagata col borsellino.");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")

@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using BuildingBlocks.Infrastructure.Retention;
@@ -211,8 +211,8 @@ public sealed class CeasedPropertyPhotoRetentionJob(
 	/// </remarks>
 	/// <remarks>
 	/// ⚠️ <c>internal</c> e non <c>private</c> perche' <c>Module.Catalog.Tests</c> lo esegue contro un
-	/// PostgreSQL vero. E' il solo modo di verificarlo: il legacy non ha mai avuto gli abbonamenti
-	/// (Q10 del 2026-10-02), quindi sui dati migrati questo perimetro trova zero righe per costruzione,
+	/// PostgreSQL vero. E' il solo modo di verificarlo: nei dati importati non ci sono abbonamenti, quindi questo
+	/// perimetro trova zero righe per costruzione,
 	/// e un doppio proverebbe solo che il doppio funziona. Il test costruisce la SQL da QUESTO metodo,
 	/// non da una copia: una copia divergerebbe al primo join cambiato.
 	/// </remarks>

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Fiskaly.Domain.Entities;
 using Module.Fiskaly.Domain.Enums;
@@ -29,7 +29,7 @@ public sealed class ReceiptConfiguration : IEntityTypeConfiguration<Receipt>
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile (UUIDv7); usato in URL gestionale e copiato cross-modulo da C3/C6.");
+			.HasComment("Id pubblico stabile (UUIDv7); usato in URL gestionale e copiato cross-modulo da Payment/Notification.");
 		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_fiskaly_receipts_public_id");
 
 		builder.Property(x => x.PropertyId)

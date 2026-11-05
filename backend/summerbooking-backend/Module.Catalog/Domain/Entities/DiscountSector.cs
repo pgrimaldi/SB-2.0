@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -18,4 +18,6 @@ public sealed class DiscountSector : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private DiscountSector() { }
+
+	internal static DiscountSector Create(long sectorId) => new() { SectorId = sectorId };
 }

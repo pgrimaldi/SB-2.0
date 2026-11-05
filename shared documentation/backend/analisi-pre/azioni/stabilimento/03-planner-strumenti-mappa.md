@@ -4,7 +4,7 @@
 > spiaggia** con postazioni numerate, settori, bar/ingresso/passerelle e una **barra strumenti**
 > (occhio/anteprima, stampa, lista, zoom + / −, e sul lato destro calendario e vista affiancata); il
 > **calendario del planner** ("Giugno 2026", giorno 1 selezionato); i tre strumenti operativi
-> **Selezione multipla**, **Sposta prenotazione**, **Crea gruppo**.
+> **Selezione multipla**, **Sposta prenotazione**, **Crea gruppo** (di prenotazioni).
 > **Schermate**: mappa pp. 29, 35 (`immagine Mappa interattiva 1.png`, `Mappa postazioni libere.2*.svg`);
 > strumenti pp. 31, 34; calendario pp. 32, 33.
 >
@@ -143,24 +143,24 @@ ombrellone a un altro libero (stesse date).
 
 ---
 
-## 8. Creazione di un gruppo di postazioni
+## 8. Creazione di un gruppo di prenotazioni
 
-**Descrizione**: attivato "Crea gruppo", il gestore unisce più postazioni in un gruppo gestito come
-un'unica unità (es. per famiglie numerose o eventi privati).
+**Descrizione**: attivato "Crea gruppo", il gestore raggruppa più **prenotazioni** sotto un nome (es.
+famiglie numerose o comitive) per gestirle insieme. Nel legacy il gruppo è una riga di `booking_groups`
+(`name`, `property_id`, `groupBookings` = elenco degli id prenotazione); non raggruppa postazioni.
+È un'operazione del modulo Booking.
 **Schermata**: pp. 31, 34 (bottone "Crea gruppo").
 **Ruolo**: gestore.
 
-**Input → API** (`sb/createLocationGroup` — da definire)
-- `propertyId` / `bathHouseId` (int)
-- `elementIds` (int[]) — postazioni del gruppo
+**Input → API** (legacy `POST sb/booking-group/add`; elenco `GET sb/booking-group/list`, dettaglio
+`GET sb/booking-group/details/:id`, eliminazione `sb/booking-group/delete/:id`)
+- `property_id` (int)
 - `name` (string) — etichetta del gruppo
-- `validFrom` (date) / `validTo` (date, opzionali) — validità temporanea
+- `groupBookings` (int[]) — prenotazioni del gruppo
 
 **Output ← API**
 - `status` / `message`
-- `groupId` (int)
-- `elements` (int[]) — postazioni effettivamente aggregate
-- `conflicts` (array) — `{ elementId, reason }` per postazioni già prenotate/non aggregabili
+- `id` (int) — gruppo creato
 
 ---
 
@@ -187,18 +187,24 @@ un cliente presentatosi allo stabilimento (dati minimi + pagamento cassa/online)
 
 ---
 
-## 10. Liberazione / reset della mappa
+## 10. Reimposta mappa
 
-**Descrizione**: strumento per rimuovere assegnazioni provvisorie o ripristinare lo stato della mappa
-(es. a fine giornata).
-**Schermata**: non disegnata esplicitamente → firma ipotizzata (endpoint `reset-beach-map` presente).
+**Descrizione**: «Reimposta mappa» (Configura mappa) **azzera la configurazione della mappa**; non libera
+fermi né prenotazioni. Nel legacy `confimaps.controller.js:resetBeachMap` porta `configure_maps.rows` e
+`items` a 0 e `configurations.beachMapData` a `[]`, poi svuota la cache della configurazione. La rotta è
+ad autenticazione facoltativa (`authJwt.optionalAuth`): chiunque conosca il `propertyId` può azzerare la
+mappa.
+**Schermata**: Configura mappa (mockup aggiornati).
 **Ruolo**: gestore.
 
-**Input → API** (`sb/reset-beach-map`)
-- `propertyId` / `bathHouseId` (int)
-- `date` (date)
-- `scope` (string) — `"holdsOnly"|"all"` (solo fermi non pagati / tutto)
+**Input → API** (`POST sb/reset-beach-map`)
+- `propertyId` (int)
 
 **Output ← API**
-- `status` / `message`
-- `clearedCount` (int)
+- `status` / `message` — `"Beach map reset successfully"`
+
+**Decisione del committente (2026-10)** (C4): «Reimposta mappa» resta. Un'impostazione fissa nel
+pannello del gestore decide cosa succede alle prenotazioni: «mantieni le prenotazioni ricollegandole per
+nome» (**predefinita**) oppure «elimina tutto»; con «elimina tutto» le prenotazioni si cancellano anche se
+pagate o scontrinate. La stessa regola vale per svuotare o eliminare una riga o colonna. Il
+ricollegamento per nome è di Booking.

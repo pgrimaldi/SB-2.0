@@ -1,10 +1,10 @@
-using Module.Notification.Domain.Enums;
+﻿using Module.Notification.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Notification.Domain.Entities;
 
 /// <summary>
-/// Un token di dispositivo registrato da un utente C5 per ricevere notifiche push, con piattaforma,
+/// Un token di dispositivo registrato da un utente di Identity per ricevere notifiche push, con piattaforma,
 /// ultimo uso e stato.
 /// </summary>
 public sealed class PushDeviceToken : IAuditable, ISoftDeletable

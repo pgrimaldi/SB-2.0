@@ -22,7 +22,7 @@ public sealed class MarketingEventConfiguration : IEntityTypeConfiguration<Marke
 		builder.Property(x => x.PublicId)
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
-			.HasComment("Id pubblico stabile (API/URL), copiato anche nella proiezione verso la vetrina C2.");
+			.HasComment("Id pubblico stabile (API/URL), copiato anche nella proiezione verso la vetrina Catalog.");
 		builder.HasIndex(x => x.PublicId).IsUnique()
 			.HasDatabaseName("uq_notification_marketing_events_public_id");
 
@@ -101,7 +101,7 @@ public sealed class MarketingEventConfiguration : IEntityTypeConfiguration<Marke
 			.HasColumnName("is_public")
 			.IsRequired()
 			.HasDefaultValue(false)
-			.HasComment("Se l'evento è mostrato sulla pagina pubblica dello stabilimento (filtra davvero la proiezione verso C2).");
+			.HasComment("Se l'evento è mostrato sulla pagina pubblica dello stabilimento (filtra davvero la proiezione verso Catalog).");
 
 		builder.Property(x => x.RemindersEnabled)
 			.HasColumnName("reminders_enabled")

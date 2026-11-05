@@ -22,9 +22,9 @@ Documenti numerati, uno per tema. Il numero raggruppa per area, non indica un or
 | 05–07 | Database | ottimizzazioni ([05](progettazione/05-ottimizzazioni-db.md), [07](progettazione/07-ottimizzazioni-db-2.md)), partizioni e manutenzione ([06](progettazione/06-partizioni-manutenzione.md)) |
 | 11–35 | Componenti trasversali | privacy, lingue e date, log, Redis, segreti, frontend offline, job, chatbot, MCP, observability, multitenant, integrazioni esterne |
 | 40–54 | Operatività e codice | backup, migrazione dal legacy ([42](progettazione/42-migration.md), [43](progettazione/43-migration-procedure.md)), standard di codifica ([50](progettazione/50-standard-di-codifica.md)), prestazioni, database di test |
+| 79 | Sicurezza | copie di sicurezza ([79](progettazione/79-copie-sicurezza.md)) |
 | 80–83 | Retention | regole ([80](progettazione/80-retention.md)), motore ([81](progettazione/81-retention-motore.md)), dati validati dal titolare ([82](progettazione/82-retention-data.md)), file ([83](progettazione/83-retention-file.md)) |
-| 84–88 | Riferimento e API | dizionario dei termini ([84](progettazione/84-dizionario.md)), promemoria `PROMEMORIA-85-n` ([85](progettazione/85-promemoria.md)), modulo Audit ([86](progettazione/86-modulo-audit.md)), API Identity ([87](progettazione/87-api-identity.md)), API Audit ([88](progettazione/88-api-audit.md)) |
-| 92 | Sicurezza | copie di sicurezza ([92](progettazione/92-copie-sicurezza.md)) |
+| 84–89 | Riferimento e API | dizionario dei termini ([84](progettazione/84-dizionario.md)), promemoria `PROMEMORIA-85-n` ([85](progettazione/85-promemoria.md)), modulo Audit ([86](progettazione/86-modulo-audit.md)), API Identity ([87](progettazione/87-api-identity.md)), API Audit ([88](progettazione/88-api-audit.md)), API Catalog ([89](progettazione/89-api-catalog.md)) |
 
 - [`pre/`](progettazione/pre/): documenti di partenza: piano di refactoring, linee guida implementative
   .NET, autenticazione e autorizzazione, identificatori e UUID, evoluzione verso i microservizi.

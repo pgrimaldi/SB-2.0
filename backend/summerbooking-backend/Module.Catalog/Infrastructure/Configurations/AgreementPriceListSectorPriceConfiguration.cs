@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -11,7 +11,7 @@ public sealed class AgreementPriceListSectorPriceConfiguration
 	public void Configure(EntityTypeBuilder<AgreementPriceListSectorPrice> builder)
 	{
 		builder.ToTable("agreement_price_list_sector_prices", "catalog", t => t.HasComment(
-			"Prezzo base / mezza giornata / stagionale di un listino/voucher hotel per settore."));
+			"Prezzo base / mezza giornata / stagionale di un listino/voucher di una convenzione per settore."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_agreement_price_list_sector_prices");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -20,7 +20,7 @@ public sealed class AgreementPriceListSectorPriceConfiguration
 			.HasColumnName("price_list_id")
 			.HasColumnType("integer")
 			.IsRequired()
-			.HasComment("Listino/voucher hotel a cui appartiene il prezzo di settore.");
+			.HasComment("Listino/voucher della convenzione a cui appartiene il prezzo di settore.");
 
 		builder.Property(x => x.SectorId)
 			.HasColumnName("sector_id")

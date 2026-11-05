@@ -56,7 +56,7 @@ public static class LedgerEntryLineConfiguration
 			.HasColumnName("description_snapshot")
 			.HasMaxLength(255)
 			.IsRequired()
-			.HasComment("Descrizione dell'articolo congelata al momento del movimento; il nome vivo si legge da C1 quando reservation_line_public_id è valorizzato.");
+			.HasComment("Descrizione dell'articolo congelata al momento del movimento; il nome vivo si legge da Booking quando reservation_line_public_id è valorizzato.");
 
 		builder.Property(x => x.ReservationLinePublicId)
 			.HasColumnName("reservation_line_public_id")

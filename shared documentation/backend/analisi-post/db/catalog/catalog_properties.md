@@ -375,6 +375,33 @@ Correzioni strutturali rispetto al legacy:
 > lista di lavoro costruita dal PostgreSQL, quindi `utility/02-migrazione-file` non le porterebbe
 > via. Dopo questa modifica entrano nella lista normale.
 
+### is_subscription_active
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration SystemAdminCatalog).
+- **Descrizione**: Abbonamento al gestionale attivo (evento di Identity): senza, niente vendite online.
+- **Tipo**: `boolean`.
+- **Default**: `true`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### purged_at
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration SystemAdminCatalog).
+- **Descrizione**: Eliminazione definitiva dal cestino (deleted_at = spostamento nel cestino): da qui partono i tempi di conservazione.
+- **Tipo**: `timestamp with time zone`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### subscribed_since
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration PublicShowcase).
+- **Descrizione**: Primo abbonamento attivo al gestionale (da Identity): ordina la popolarità a parità di «mi piace».
+- **Tipo**: `date`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. Tutti i JSON legacy della tabella (`paymentOptions`, `onlineBookingOptions`,
@@ -564,3 +591,6 @@ public sealed class PropertyConfiguration : IEntityTypeConfiguration<Property>
   `legacy_id → public_id` prodotta dalla migrazione di C5, valorizzando `owner_user_public_id`.
 - Evento in ingresso da C5 (`SubscriptionExpired` / `SubscriptionReactivated`) aggiorna
   `is_online_sales_suspended` via un consumer applicativo, non un trigger DB.
+> **Allineamento 2026-10-26** (migration SystemAdminCatalog): l'enum `catalog.property_status` ha il valore `hidden`
+> (le 731 strutture con stato legacy 5, fuori dal sito e fuori dalla coda «in attesa»). `deleted_at` = nel cestino,
+> `purged_at` = eliminata definitivamente (da qui partono i tempi di conservazione).

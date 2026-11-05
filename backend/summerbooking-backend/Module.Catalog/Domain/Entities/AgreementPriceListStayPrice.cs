@@ -1,14 +1,12 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
 /// Override manuale del prezzo per una durata specifica (1-90 giorni) di un periodo tariffario di un
-/// listino/voucher hotel. Entità figlia di secondo livello, appesa a
-/// <see cref="AgreementPriceListPeriodPrice"/> — gemella di <see cref="PriceListStayPrice"/> lato
-/// pricing (la griglia legacy
-/// `hotel_price_lists.detailPrices[].edit_price_data` è identica a quella di `price_lists`, mancava
-/// solo la tabella target).
+/// listino/voucher di una convenzione. Entità figlia di secondo livello, appesa a
+/// <see cref="AgreementPriceListPeriodPrice"/> — gemella di <see cref="PriceListStayPrice"/> dei listini dello
+/// stabilimento.
 /// </summary>
 public sealed class AgreementPriceListStayPrice : IAuditable, ISoftDeletable
 {
@@ -23,4 +21,9 @@ public sealed class AgreementPriceListStayPrice : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private AgreementPriceListStayPrice() { }
+
+	internal static AgreementPriceListStayPrice Create(long? sectorId, short stayDays, decimal price)
+		=> new() { SectorId = sectorId, StayDays = stayDays, Price = price, IsManualOverride = true };
+
+	internal void SetPrice(decimal price) => Price = price;
 }

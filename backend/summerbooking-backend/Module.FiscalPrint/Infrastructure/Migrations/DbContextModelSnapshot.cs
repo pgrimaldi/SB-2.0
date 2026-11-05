@@ -247,7 +247,7 @@ namespace Module.FiscalPrint.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at")
-                        .HasComment("Soft-delete: valorizzato alla rimozione; is_active riportato a false in automatico (corregge il bug legacy che scollegava i due flag).");
+                        .HasComment("Soft-delete: valorizzato alla rimozione; is_active riportato a false in automatico, così i due flag restano coerenti.");
 
                     b.Property<string>("FooterLine")
                         .HasMaxLength(160)
@@ -378,7 +378,7 @@ namespace Module.FiscalPrint.Infrastructure.Migrations
                     b.Property<short>("DeptNumber")
                         .HasColumnType("smallint")
                         .HasColumnName("dept_number")
-                        .HasComment("Numero del reparto fisico sul registratore RT (esplicito, non più posizionale come nel legacy).");
+                        .HasComment("Numero del reparto fisico sul registratore RT (esplicito, non posizionale).");
 
                     b.Property<long>("PrinterId")
                         .HasColumnType("bigint")

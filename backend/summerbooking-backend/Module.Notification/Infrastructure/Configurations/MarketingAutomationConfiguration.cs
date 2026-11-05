@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Notification.Domain.Entities;
 using Module.Notification.Domain.Enums;
@@ -90,7 +90,7 @@ public sealed class MarketingAutomationConfiguration : IEntityTypeConfiguration<
 			.HasColumnName("also_send_push")
 			.IsRequired()
 			.HasDefaultValue(false)
-			.HasComment("Se inviare anche una push FCM ai destinatari utenti C5 con device token.");
+			.HasComment("Se inviare anche una push FCM ai destinatari utenti di Identity con device token.");
 
 		builder.Property(x => x.LastRunAt)
 			.HasColumnName("last_run_at")

@@ -126,7 +126,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico, copiato cross-modulo verso C3 che tiene importo/stato pagamento della voce.");
+                        .HasComment("Id pubblico, copiato cross-modulo verso Payment che tiene importo/stato pagamento della voce.");
 
                     b.Property<short>("Quantity")
                         .ValueGeneratedOnAdd()
@@ -199,7 +199,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("booking.discount_channel")
                         .HasColumnName("applied_channel")
                         .HasDefaultValueSql("'any'")
-                        .HasComment("Canale su cui il voucher era ammesso, congelato dalla regola di C2.");
+                        .HasComment("Canale su cui il voucher era ammesso, congelato dalla regola di Catalog.");
 
                     b.PrimitiveCollection<int[]>("AppliesToCategories")
                         .IsRequired()
@@ -226,7 +226,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("consumed_usage")
-                        .HasComment("True se questa prenotazione ha consumato un utilizzo del voucher; l'incremento/decremento del contatore è atomico su C2.");
+                        .HasComment("True se questa prenotazione ha consumato un utilizzo del voucher; l'incremento/decremento del contatore è atomico su Catalog.");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -278,7 +278,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("booking.discount_scope")
                         .HasColumnName("scope")
                         .HasDefaultValueSql("'all'")
-                        .HasComment("Ambito di validità del voucher, congelato dalla regola di C2.");
+                        .HasComment("Ambito di validità del voucher, congelato dalla regola di Catalog.");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -420,7 +420,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<long>("ReservationId")
                         .HasColumnType("bigint")
                         .HasColumnName("reservation_id")
-                        .HasComment("Prenotazione membro del gruppo (l'intera prenotazione, non una singola riga postazione come nel legacy)");
+                        .HasComment("Prenotazione membro del gruppo (l'intera prenotazione, non una singola riga postazione)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -553,7 +553,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("booking_number")
-                        .HasComment("Numero prenotazione copiato dalla testata, per correlazioni dirette con C3/C4 senza join.");
+                        .HasComment("Numero prenotazione copiato dalla testata, per correlazioni dirette con Payment/Fiskaly senza join.");
 
                     b.Property<int>("BookingPeriod")
                         .ValueGeneratedOnAdd()
@@ -633,7 +633,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile della riga, copiato cross-modulo da C3 (righe economiche) e C4 (line item scontrino).");
+                        .HasComment("Id pubblico stabile della riga, copiato cross-modulo da Payment (righe economiche) e Fiskaly (line item scontrino).");
 
                     b.Property<short>("Quantity")
                         .ValueGeneratedOnAdd()
@@ -867,7 +867,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("number_prefix")
-                        .HasComment("Prefisso stabile e immutabile del numero prenotazione per la property (di norma il suo id legacy)");
+                        .HasComment("Prefisso stabile e immutabile del numero prenotazione per la property (di norma il suo id interno)");
 
                     b.Property<Guid>("PropertyId")
                         .HasColumnType("uuid")
@@ -1065,7 +1065,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_paid_with_wallet")
-                        .HasComment("La riga è stata pagata col borsellino/tessera prepagata; il movimento wallet è in C3.");
+                        .HasComment("La riga è stata pagata col borsellino/tessera prepagata; il movimento wallet è in Payment.");
 
                     b.Property<int>("Kind")
                         .HasColumnType("booking.service_category")
@@ -1094,7 +1094,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico della riga servizio, copiato cross-modulo da C4 (line item) e C3 (riga economica).");
+                        .HasComment("Id pubblico della riga servizio, copiato cross-modulo da Fiskaly (line item) e Payment (riga economica).");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
@@ -1373,7 +1373,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("wallet_event_emitted")
-                        .HasComment("True quando l'evento ResaleCreditEarned è stato consegnato a Payment (C3) per la riconciliazione col borsellino");
+                        .HasComment("True quando l'evento ResaleCreditEarned è stato consegnato a Payment (Payment) per la riconciliazione col borsellino");
 
                     b.HasKey("Id")
                         .HasName("pk_booking_resale_credit_ledger");
@@ -1692,7 +1692,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("numeric(12,2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("deposit")
-                        .HasComment("Importo acconto/caparra corrente (riepilogo); i singoli acconti sono movimenti C3.");
+                        .HasComment("Importo acconto/caparra corrente (riepilogo); i singoli acconti sono movimenti Payment.");
 
                     b.Property<decimal>("Discount")
                         .ValueGeneratedOnAdd()
@@ -1756,7 +1756,7 @@ namespace Module.Booking.Infrastructure.Migrations
                         .HasColumnType("numeric(12,2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("paid")
-                        .HasComment("Totale già incassato, proiezione dagli eventi di pagamento di C3.");
+                        .HasComment("Totale già incassato, proiezione dagli eventi di pagamento di Payment.");
 
                     b.Property<bool>("PayNow")
                         .ValueGeneratedOnAdd()
@@ -1791,7 +1791,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile, copiato cross-modulo da C3/C4/C6.");
+                        .HasComment("Id pubblico stabile, copiato cross-modulo da Payment/Fiskaly/Notification.");
 
                     b.Property<string>("ReservationCode")
                         .IsRequired()
@@ -1968,7 +1968,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid?>("ResourceId")
                         .HasColumnType("uuid")
                         .HasColumnName("resource_id")
-                        .HasComment("public_id C2 della risorsa (proiezione fine); NULL per la proiezione grossolana per tipo");
+                        .HasComment("public_id (Catalog) della risorsa (proiezione fine); NULL per la proiezione grossolana per tipo");
 
                     b.Property<int>("ResourceType")
                         .HasColumnType("booking.resource_type")
@@ -2013,7 +2013,7 @@ namespace Module.Booking.Infrastructure.Migrations
 
                     b.ToTable("resource_availability_daily", "booking", t =>
                         {
-                            t.HasComment("Proiezione di disponibilità per (risorsa/tipo × giorno), mantenuta dal DB via trigger su booking_resource_consumptions: sostituisce il GROUP BY a runtime del legacy.");
+                            t.HasComment("Proiezione di disponibilità per (risorsa/tipo × giorno), mantenuta dal DB via trigger su booking_resource_consumptions: evita il GROUP BY a ogni lettura.");
                         });
                 });
 
@@ -2080,7 +2080,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<Guid?>("ResourceId")
                         .HasColumnType("uuid")
                         .HasColumnName("resource_id")
-                        .HasComment("public_id C2 della risorsa (map_spots / service_sale_items / inventory_items secondo resource_type), copiato — nessuna FK cross-schema; NULL per articolo personalizzato non a catalogo");
+                        .HasComment("public_id (Catalog) della risorsa (map_spots / service_sale_items / inventory_items secondo resource_type), copiato — nessuna FK cross-schema; NULL per articolo personalizzato non a catalogo");
 
                     b.Property<string>("ResourceNameSnapshot")
                         .HasMaxLength(160)
@@ -2106,7 +2106,7 @@ namespace Module.Booking.Infrastructure.Migrations
                     b.Property<long?>("SourceId")
                         .HasColumnType("bigint")
                         .HasColumnName("source_id")
-                        .HasComment("Id (interno C1) dell'entità di origine indicata da source_kind — nessuna FK polimorfa DB, coerenza gestita in applicazione; NULL per manual_hold senza entità a monte");
+                        .HasComment("Id (interno di Booking) dell'entità di origine indicata da source_kind — nessuna FK polimorfa DB, coerenza gestita in applicazione; NULL per manual_hold senza entità a monte");
 
                     b.Property<int>("SourceKind")
                         .HasColumnType("booking.consumption_source")

@@ -186,6 +186,234 @@
   <data name="Action_identity_external_token_denied" xml:space="preserve">
     <value>تم رفض رمز لشريك</value>
   </data>
+  <data name="Action_catalog_inventory_item_created" xml:space="preserve">
+    <value>تم إنشاء صنف المخزون</value>
+  </data>
+  <data name="Action_catalog_inventory_item_updated" xml:space="preserve">
+    <value>تم تعديل صنف المخزون</value>
+  </data>
+  <data name="Action_catalog_inventory_item_deleted" xml:space="preserve">
+    <value>تم حذف صنف المخزون</value>
+  </data>
+  <data name="Action_catalog_season_updated" xml:space="preserve">
+    <value>تم تعديل تواريخ الموسم</value>
+  </data>
+  <data name="Action_catalog_tariff_period_created" xml:space="preserve">
+    <value>تم إنشاء فترة التسعير</value>
+  </data>
+  <data name="Action_catalog_tariff_period_updated" xml:space="preserve">
+    <value>تم تعديل فترة التسعير</value>
+  </data>
+  <data name="Action_catalog_tariff_period_deleted" xml:space="preserve">
+    <value>تم حذف فترة التسعير</value>
+  </data>
+  <data name="Action_catalog_sector_created" xml:space="preserve">
+    <value>تم إنشاء القطاع</value>
+  </data>
+  <data name="Action_catalog_sector_updated" xml:space="preserve">
+    <value>تم تعديل القطاع</value>
+  </data>
+  <data name="Action_catalog_sector_deleted" xml:space="preserve">
+    <value>تم حذف القطاع</value>
+  </data>
+  <data name="Action_catalog_map_settings_updated" xml:space="preserve">
+    <value>تم تعديل إعدادات الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_background_updated" xml:space="preserve">
+    <value>تم تعديل خلفية الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_icons_updated" xml:space="preserve">
+    <value>تم تعديل أيقونات الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_spots_created" xml:space="preserve">
+    <value>تمت إضافة أماكن إلى الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_spot_updated" xml:space="preserve">
+    <value>تم تعديل مكان على الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_spots_deleted" xml:space="preserve">
+    <value>تم حذف أماكن من الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_grid_changed" xml:space="preserve">
+    <value>تم تعديل صفوف أو أعمدة الخريطة</value>
+  </data>
+  <data name="Action_catalog_map_reset" xml:space="preserve">
+    <value>تمت إعادة تعيين الخريطة</value>
+  </data>
+  <data name="Action_catalog_property_info_updated" xml:space="preserve">
+    <value>تم تعديل معلومات المنشأة</value>
+  </data>
+  <data name="Action_catalog_property_amenities_updated" xml:space="preserve">
+    <value>تم تعديل مرافق المنشأة</value>
+  </data>
+  <data name="Action_catalog_property_photos_updated" xml:space="preserve">
+    <value>تم تعديل صور المنشأة</value>
+  </data>
+  <data name="Action_catalog_property_documents_updated" xml:space="preserve">
+    <value>تم تعديل قائمة الأسعار أو القائمة بصيغة PDF</value>
+  </data>
+  <data name="Action_catalog_online_settings_updated" xml:space="preserve">
+    <value>تم تعديل خيارات الحجز عبر الإنترنت</value>
+  </data>
+  <data name="Action_catalog_service_online_settings_updated" xml:space="preserve">
+    <value>تم تعديل خيارات حجز الخدمات عبر الإنترنت</value>
+  </data>
+  <data name="Action_catalog_stay_limits_updated" xml:space="preserve">
+    <value>تم تعديل حدود الحجز عبر الإنترنت</value>
+  </data>
+  <data name="Action_catalog_online_legend_updated" xml:space="preserve">
+    <value>تم تعديل مفتاح الخريطة عبر الإنترنت</value>
+  </data>
+  <data name="Action_catalog_service_created" xml:space="preserve">
+    <value>تم إنشاء الخدمة</value>
+  </data>
+  <data name="Action_catalog_service_updated" xml:space="preserve">
+    <value>تم تعديل الخدمة</value>
+  </data>
+  <data name="Action_catalog_service_deleted" xml:space="preserve">
+    <value>تم حذف الخدمة</value>
+  </data>
+  <data name="Action_catalog_automatic_price_created" xml:space="preserve">
+    <value>تم إنشاء السعر التلقائي</value>
+  </data>
+  <data name="Action_catalog_automatic_price_updated" xml:space="preserve">
+    <value>تم تعديل السعر التلقائي</value>
+  </data>
+  <data name="Action_catalog_automatic_price_deleted" xml:space="preserve">
+    <value>تم حذف السعر التلقائي</value>
+  </data>
+  <data name="Action_catalog_table_service_created" xml:space="preserve">
+    <value>تم إنشاء خدمة الطاولات</value>
+  </data>
+  <data name="Action_catalog_table_service_updated" xml:space="preserve">
+    <value>تم تعديل خدمة الطاولات</value>
+  </data>
+  <data name="Action_catalog_table_service_deleted" xml:space="preserve">
+    <value>تم حذف خدمة الطاولات</value>
+  </data>
+  <data name="Action_catalog_price_list_created" xml:space="preserve">
+    <value>تم إنشاء عنصر قائمة الأسعار</value>
+  </data>
+  <data name="Action_catalog_price_list_updated" xml:space="preserve">
+    <value>تم تعديل عنصر قائمة الأسعار</value>
+  </data>
+  <data name="Action_catalog_price_list_deleted" xml:space="preserve">
+    <value>تم حذف عنصر قائمة الأسعار</value>
+  </data>
+  <data name="Action_catalog_price_list_duplicated" xml:space="preserve">
+    <value>تم نسخ عنصر قائمة الأسعار</value>
+  </data>
+  <data name="Action_catalog_price_lists_imported" xml:space="preserve">
+    <value>تم استيراد قائمة الأسعار من ملف</value>
+  </data>
+  <data name="Action_catalog_reduced_season_created" xml:space="preserve">
+    <value>تم إنشاء السعر الموسمي المخفض</value>
+  </data>
+  <data name="Action_catalog_reduced_season_updated" xml:space="preserve">
+    <value>تم تعديل السعر الموسمي المخفض</value>
+  </data>
+  <data name="Action_catalog_reduced_season_deleted" xml:space="preserve">
+    <value>تم حذف السعر الموسمي المخفض</value>
+  </data>
+  <data name="Action_catalog_discount_created" xml:space="preserve">
+    <value>تم إنشاء الخصم</value>
+  </data>
+  <data name="Action_catalog_discount_updated" xml:space="preserve">
+    <value>تم تعديل الخصم</value>
+  </data>
+  <data name="Action_catalog_discount_deleted" xml:space="preserve">
+    <value>تم حذف الخصم</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_created" xml:space="preserve">
+    <value>تم إنشاء الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_updated" xml:space="preserve">
+    <value>تم تعديل الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_deleted" xml:space="preserve">
+    <value>تم حذف الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_duplicated" xml:space="preserve">
+    <value>تم نسخ الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_created" xml:space="preserve">
+    <value>تم إنشاء قائمة أسعار الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_updated" xml:space="preserve">
+    <value>تم تعديل قائمة أسعار الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_deleted" xml:space="preserve">
+    <value>تم حذف قائمة أسعار الشريك</value>
+  </data>
+  <data name="Action_catalog_agreement_report_cancelled" xml:space="preserve">
+    <value>تم إلغاء تقرير الشريك</value>
+  </data>
+  <data name="Action_catalog_revenue_settings_updated" xml:space="preserve">
+    <value>تم تعديل إعدادات الإيرادات</value>
+  </data>
+  <data name="Action_catalog_suggested_prices_computed" xml:space="preserve">
+    <value>تم حساب الأسعار المقترحة</value>
+  </data>
+  <data name="Action_catalog_suggested_prices_applied" xml:space="preserve">
+    <value>تم تطبيق الأسعار المقترحة</value>
+  </data>
+  <data name="Action_catalog_revenue_weights_updated" xml:space="preserve">
+    <value>تم تعديل أوزان السعر المقترح</value>
+  </data>
+  <data name="Action_catalog_revenue_standard_periods_updated" xml:space="preserve">
+    <value>تم تعديل الفترات القياسية للسعر المقترح</value>
+  </data>
+  <data name="Action_catalog_platform_property_status_changed" xml:space="preserve">
+    <value>تم تغيير حالة المنشأة</value>
+  </data>
+  <data name="Action_catalog_platform_property_trashed" xml:space="preserve">
+    <value>تم نقل المنشأة إلى سلة المهملات</value>
+  </data>
+  <data name="Action_catalog_platform_property_restored" xml:space="preserve">
+    <value>تمت استعادة المنشأة</value>
+  </data>
+  <data name="Action_catalog_platform_property_purged" xml:space="preserve">
+    <value>تم حذف المنشأة نهائيًا</value>
+  </data>
+  <data name="Action_catalog_platform_property_showcase_updated" xml:space="preserve">
+    <value>تم تعديل منطقة المنشأة أو شاراتها</value>
+  </data>
+  <data name="Action_catalog_platform_map_icon_saved" xml:space="preserve">
+    <value>تم حفظ أيقونة الكتالوج</value>
+  </data>
+  <data name="Action_catalog_platform_map_icon_deleted" xml:space="preserve">
+    <value>تم حذف أيقونة الكتالوج</value>
+  </data>
+  <data name="Action_catalog_platform_beach_element_saved" xml:space="preserve">
+    <value>تم حفظ عنصر الشاطئ</value>
+  </data>
+  <data name="Action_catalog_platform_beach_element_deleted" xml:space="preserve">
+    <value>تم حذف عنصر الشاطئ</value>
+  </data>
+  <data name="Action_catalog_platform_badge_saved" xml:space="preserve">
+    <value>تم حفظ الشارة</value>
+  </data>
+  <data name="Action_catalog_platform_badge_deleted" xml:space="preserve">
+    <value>تم حذف الشارة</value>
+  </data>
+  <data name="Action_catalog_platform_region_saved" xml:space="preserve">
+    <value>تم حفظ المنطقة</value>
+  </data>
+  <data name="Action_catalog_platform_region_deleted" xml:space="preserve">
+    <value>تم حذف المنطقة</value>
+  </data>
+  <data name="Action_catalog_platform_showcase_updated" xml:space="preserve">
+    <value>تم تعديل الواجهة</value>
+  </data>
+  <data name="Action_catalog_service_duplicated" xml:space="preserve">
+    <value>تم نسخ الخدمة</value>
+  </data>
+  <data name="Action_catalog_automatic_price_duplicated" xml:space="preserve">
+    <value>تم نسخ السعر التلقائي</value>
+  </data>
+  <data name="Action_catalog_table_service_duplicated" xml:space="preserve">
+    <value>تم نسخ خدمة الطاولات</value>
+  </data>
   <data name="Action_audit_entries_exported" xml:space="preserve">
     <value>تم تصدير سجل النشاط</value>
   </data>

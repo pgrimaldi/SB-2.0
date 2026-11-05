@@ -1,10 +1,9 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
-/// Giunzione N:N: quali dotazioni/servizi (amenity) offre una vetrina. Sostituisce la copia JSON
-/// integrale bathouses.services.
+/// Giunzione N:N: quali dotazioni/servizi (amenity) offre una vetrina.
 /// </summary>
 public sealed class BathhouseAmenity : IAuditable, ISoftDeletable
 {
@@ -18,4 +17,6 @@ public sealed class BathhouseAmenity : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private BathhouseAmenity() { }
+
+	internal static BathhouseAmenity Create(int amenityId) => new() { AmenityId = amenityId };
 }

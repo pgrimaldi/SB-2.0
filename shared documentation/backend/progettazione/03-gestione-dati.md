@@ -1056,6 +1056,9 @@ numerici.
   composizione (postazioni, pacchetti, servizi, sconti) e restituisce il breakdown completo
   (imponibili, IVA, sconti, totale). È lo stesso motore che poi usa la conferma, così non c'è
   divergenza;
+  *realizzato il 2026-10-27 per la parte di prezzo*: `POST /api/catalog/quotes` (gestionale) e
+  `POST /api/catalog/public/bathhouses/{slug}/quote` (sito), motore in `Module.Catalog/Domain/Pricing`
+  ([89-api-catalog.md](89-api-catalog.md)). La disponibilità delle postazioni non c'è: resta a Booking;
 - il frontend **può** fare una stima ottimistica locale per feedback immediato (somma
   `prezzo × quantità` mentre l'utente clicca), ma è puramente indicativa e va **riconciliata** con la
   risposta del backend prima di poter confermare/pagare. Non deve reimplementare sconti, supplementi,
@@ -1607,6 +1610,11 @@ rigenerare gli snapshot, e il `content_hash` (quindi gli `ETag` dei client) rest
 
 **Escape hatch** (solo se una misura lo richiede): un singolo `kind` costoso passa ad **asincrono**
 (evento → coda → job idempotente, `stale_since` valorizzata nel frattempo), senza toccare gli altri.
+
+> **✅ Realizzazione in Catalog (2026-10-27).** Il punto 1 non passa da eventi di dominio: la `UnitOfWork`,
+> dopo il commit, ricostruisce gli snapshot in base ai tipi di entità salvati. Il punto 3 è il solo endpoint
+> `POST /api/catalog/admin/snapshots/rebuild`, senza CLI né `verify`. Dettaglio in testa a
+> [`_config-snapshot-proposta.md`](../analisi-post/db/_config-snapshot-proposta.md).
 
 ### 7.6 Cosa NON mettere negli snapshot
 

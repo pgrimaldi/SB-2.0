@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -18,4 +18,6 @@ public sealed class RevenueDiscountedSpot : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private RevenueDiscountedSpot() { }
+
+	internal static RevenueDiscountedSpot Create(long spotId) => new() { SpotId = spotId };
 }

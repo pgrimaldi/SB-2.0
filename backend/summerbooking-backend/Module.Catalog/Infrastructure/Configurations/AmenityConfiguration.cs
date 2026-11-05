@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -14,6 +14,14 @@ public sealed class AmenityConfiguration : IEntityTypeConfiguration<Amenity>
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_service_amenities");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
+
+		builder.Property(x => x.Code)
+			.HasColumnName("code")
+			.HasMaxLength(60)
+			.IsRequired()
+			.HasComment("Codice stabile della dotazione usato dalle API (es. wifi, pets_allowed).");
+
+		builder.HasIndex(x => x.Code).IsUnique().HasFilter("deleted_at IS NULL").HasDatabaseName("uq_catalog_service_amenities_code");
 
 		builder.Property(x => x.Name)
 			.HasColumnName("name")

@@ -59,6 +59,8 @@
     in altri punti del sistema — in particolare `property.controller.js:getLowestPrice` cerca, dentro
     `price_lists.detailPrices`, le voci il cui nome **contiene** (`LIKE '%periodName%'`) il nome di questo
     periodo, per calcolare il prezzo minimo del periodo corrente (vedi [`price_lists.md`](price_lists.md)).
+    Il motore di prezzo del gestionale invece abbina per **uguaglianza esatta** `"<fila> <periodo>"`
+    (vedi [`../business-logic/stabilimento/_motore-di-prezzo-e-sconti.md`](../business-logic/stabilimento/_motore-di-prezzo-e-sconti.md)).
   - **selectedRanges**: Tipo `array` di oggetti `{ startDate, endDate, key }` — uno o più intervalli di
     date che compongono il periodo (un periodo può quindi essere **non contiguo**, es. "bassa stagione" a
     inizio **e** fine estate nello stesso periodo, come osservato nel campione reale: due `selectedRanges`

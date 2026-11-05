@@ -1,4 +1,4 @@
-using Module.Identity.Domain.Entities;
+﻿using Module.Identity.Domain.Entities;
 using Shared.Utils;
 
 namespace Module.Identity.Application.Dtos;
@@ -70,7 +70,7 @@ public sealed record CustomerDetailDto(
 }
 
 public sealed record SaveCustomerRequest(
-	string? FullName,
+	string FullName,
 	string? PhoneCountryCode,
 	string? Phone,
 	string? PhoneSecondary,

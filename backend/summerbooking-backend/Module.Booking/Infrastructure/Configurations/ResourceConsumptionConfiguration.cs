@@ -37,7 +37,7 @@ public sealed class ResourceConsumptionConfiguration : IEntityTypeConfiguration<
 
 		builder.Property(x => x.ResourceId)
 			.HasColumnName("resource_id")
-			.HasComment("public_id C2 della risorsa (map_spots / service_sale_items / inventory_items secondo resource_type), copiato — nessuna FK cross-schema; NULL per articolo personalizzato non a catalogo");
+			.HasComment("public_id (Catalog) della risorsa (map_spots / service_sale_items / inventory_items secondo resource_type), copiato — nessuna FK cross-schema; NULL per articolo personalizzato non a catalogo");
 
 		builder.Property(x => x.ResourceNameSnapshot)
 			.HasColumnName("resource_name_snapshot")
@@ -96,7 +96,7 @@ public sealed class ResourceConsumptionConfiguration : IEntityTypeConfiguration<
 
 		builder.Property(x => x.SourceId)
 			.HasColumnName("source_id")
-			.HasComment("Id (interno C1) dell'entità di origine indicata da source_kind — nessuna FK polimorfa DB, coerenza gestita in applicazione; NULL per manual_hold senza entità a monte");
+			.HasComment("Id (interno di Booking) dell'entità di origine indicata da source_kind — nessuna FK polimorfa DB, coerenza gestita in applicazione; NULL per manual_hold senza entità a monte");
 
 		builder.Property(x => x.BookingNumber)
 			.HasColumnName("booking_number")

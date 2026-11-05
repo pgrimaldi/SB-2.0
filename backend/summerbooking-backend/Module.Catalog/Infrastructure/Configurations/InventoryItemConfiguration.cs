@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -22,7 +22,7 @@ public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Invent
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico (UUIDv7), copiato — C1 lo referenzia come resource_id nei consumi di magazzino.");
+			.HasComment("Id pubblico (UUIDv7), copiato — Booking lo referenzia come resource_id nei consumi di magazzino.");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -39,28 +39,33 @@ public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Invent
 			.HasColumnName("total_quantity")
 			.IsRequired()
 			.HasDefaultValue(0)
-			.HasComment("Quantità totale disponibile dell'articolo; la disponibilità per data è total_quantity meno i consumi (C1).");
+			.HasComment("Quantità totale disponibile dell'articolo; la disponibilità per data è total_quantity meno i consumi (Booking).");
 
 		builder.Property(x => x.LowStockThreshold)
 			.HasColumnName("low_stock_threshold")
 			.HasComment("Soglia minima sotto la quale segnalare scorta bassa.");
 
-		builder.Property(x => x.IsActive)
-			.HasColumnName("is_active")
+		builder.Property(x => x.ArticleCode)
+			.HasColumnName("article_code")
+			.HasColumnType("catalog.inventory_article")
+			.HasComment("Articolo dell'elenco fisso; NULL per gli articoli inseriti con «Altro».");
+
+		builder.Property(x => x.LowStockAlertEnabled)
+			.HasColumnName("low_stock_alert_enabled")
 			.IsRequired()
-			.HasDefaultValue(true)
-			.HasComment("Articolo attivo/visibile.");
+			.HasDefaultValue(false)
+			.HasComment("Avviso nella campanella e nella sezione News quando la disponibilità del giorno scende sotto la soglia.");
 
 		builder.Property(x => x.CreatedByUserId)
 			.HasColumnName("created_by_user_id")
-			.HasComment("public_id di identity_access_users (C5), copiato — operatore che ha configurato l'articolo, nessuna FK cross-schema.");
+			.HasComment("public_id di identity.access_users, copiato — operatore che ha configurato l'articolo, nessuna FK cross-schema.");
 
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at")
 			.HasDefaultValueSql("now()").HasComment("Data/ora di creazione della riga.");
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at")
 			.HasDefaultValueSql("now()").HasComment("Data/ora di ultima modifica della riga.");
 		builder.Property(x => x.DeletedAt).HasColumnName("deleted_at")
-			.HasComment("Soft-delete; un articolo con consumi storici (C1) non si cancella fisicamente.");
+			.HasComment("Soft-delete; un articolo con consumi storici (Booking) non si cancella fisicamente.");
 
 		builder.HasOne(x => x.Property)
 			.WithMany()
@@ -72,15 +77,10 @@ public sealed class InventoryItemConfiguration : IEntityTypeConfiguration<Invent
 			.IsUnique()
 			.HasDatabaseName("uq_catalog_inventory_items_public_id");
 
-		// Univocità su lower(name): espressione funzionale — l'IndexBuilder fluente non genera
-		// l'espressione, va rifinita a mano nella migration generata (colonna Name come base).
+		// Univocità su lower(name): l'indice fluente è sulla colonna, l'espressione è nella migration.
 		builder.HasIndex(x => new { x.PropertyId, x.Name })
 			.IsUnique()
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("uq_catalog_inventory_items_property_name");
-
-		builder.HasIndex(x => x.PropertyId)
-			.HasFilter("is_active AND deleted_at IS NULL")
-			.HasDatabaseName("ix_catalog_inventory_items_property_active");
 	}
 }

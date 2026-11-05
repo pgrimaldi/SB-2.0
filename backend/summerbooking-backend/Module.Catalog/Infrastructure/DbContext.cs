@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Module.Catalog.Domain.Entities;
 using Module.Catalog.Domain.Enums;
+using Shared.Localization;
 using Shared.Infrastructure;
 
 namespace Module.Catalog.Infrastructure;
@@ -29,6 +30,7 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public DbSet<BathhousePhoto> BathhousePhotos => Set<BathhousePhoto>();
 	public DbSet<CalculationMethod> CalculationMethods => Set<CalculationMethod>();
 	public DbSet<MapIcon> MapIcons => Set<MapIcon>();
+	public DbSet<MapBeachElement> MapBeachElements => Set<MapBeachElement>();
 	public DbSet<MapIconCategory> MapIconCategories => Set<MapIconCategory>();
 	public DbSet<MapLayout> MapLayouts => Set<MapLayout>();
 	public DbSet<MapLayoutSpecialIcon> MapLayoutSpecialIcons => Set<MapLayoutSpecialIcon>();
@@ -52,7 +54,8 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public DbSet<PriceListPeriodPrice> PriceListPeriodPrices => Set<PriceListPeriodPrice>();
 	public DbSet<PriceListStayPrice> PriceListStayPrices => Set<PriceListStayPrice>();
 	public DbSet<PriceListDatePrice> PriceListDatePrices => Set<PriceListDatePrice>();
-	public DbSet<PriceListReducedWindow> PriceListReducedWindows => Set<PriceListReducedWindow>();
+	public DbSet<ReducedSeason> ReducedSeasons => Set<ReducedSeason>();
+	public DbSet<PriceListTranslation> PriceListTranslations => Set<PriceListTranslation>();
 	public DbSet<PriceListReducedPrice> PriceListReducedPrices => Set<PriceListReducedPrice>();
 	public DbSet<SuggestedPrice> SuggestedPrices => Set<SuggestedPrice>();
 
@@ -60,8 +63,14 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public DbSet<Discount> Discounts => Set<Discount>();
 	public DbSet<DiscountDateRange> DiscountDateRanges => Set<DiscountDateRange>();
 	public DbSet<DiscountSector> DiscountSectors => Set<DiscountSector>();
+	public DbSet<DiscountTimeRange> DiscountTimeRanges => Set<DiscountTimeRange>();
 	public DbSet<RevenueSettings> RevenueSettings => Set<RevenueSettings>();
 	public DbSet<RevenueDiscountedSpot> RevenueDiscountedSpots => Set<RevenueDiscountedSpot>();
+	public DbSet<RevenueStandardPeriod> RevenueStandardPeriods => Set<RevenueStandardPeriod>();
+	public DbSet<RevenueWeights> RevenueWeights => Set<RevenueWeights>();
+	public DbSet<ShowcaseRegion> ShowcaseRegions => Set<ShowcaseRegion>();
+	public DbSet<ShowcaseBadge> ShowcaseBadges => Set<ShowcaseBadge>();
+	public DbSet<ShowcaseEntry> ShowcaseEntries => Set<ShowcaseEntry>();
 
 	// Service — dotazioni e servizi venduti
 	public DbSet<AmenityCategory> AmenityCategories => Set<AmenityCategory>();
@@ -70,11 +79,28 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	public DbSet<ServiceTypeIcon> ServiceTypeIcons => Set<ServiceTypeIcon>();
 	public DbSet<ServiceSaleItem> ServiceSaleItems => Set<ServiceSaleItem>();
 	public DbSet<ServiceSaleItemTimeSlot> ServiceSaleItemTimeSlots => Set<ServiceSaleItemTimeSlot>();
+	public DbSet<ServiceSaleItemVariant> ServiceSaleItemVariants => Set<ServiceSaleItemVariant>();
+	public DbSet<ServiceSaleItemTranslation> ServiceSaleItemTranslations => Set<ServiceSaleItemTranslation>();
+	public DbSet<ServiceBookingOption> ServiceBookingOptions => Set<ServiceBookingOption>();
+	public DbSet<ServiceHourlyOption> ServiceHourlyOptions => Set<ServiceHourlyOption>();
+	public DbSet<ServiceSaleItemPeriodPrice> ServiceSaleItemPeriodPrices => Set<ServiceSaleItemPeriodPrice>();
+	public DbSet<ServiceSaleItemSector> ServiceSaleItemSectors => Set<ServiceSaleItemSector>();
+	public DbSet<AutomaticPrice> AutomaticPrices => Set<AutomaticPrice>();
+	public DbSet<AutomaticPriceTranslation> AutomaticPriceTranslations => Set<AutomaticPriceTranslation>();
+	public DbSet<AutomaticPriceService> AutomaticPriceServices => Set<AutomaticPriceService>();
+	public DbSet<AutomaticPricePeriod> AutomaticPricePeriods => Set<AutomaticPricePeriod>();
+	public DbSet<AutomaticPriceTimeRange> AutomaticPriceTimeRanges => Set<AutomaticPriceTimeRange>();
+	public DbSet<AutomaticPriceSector> AutomaticPriceSectors => Set<AutomaticPriceSector>();
+	public DbSet<TableService> TableServices => Set<TableService>();
+	public DbSet<TableServiceTranslation> TableServiceTranslations => Set<TableServiceTranslation>();
+	public DbSet<TableServiceTableType> TableServiceTableTypes => Set<TableServiceTableType>();
+	public DbSet<TableServiceAvailability> TableServiceAvailabilities => Set<TableServiceAvailability>();
+	public DbSet<TableServiceSlot> TableServiceSlots => Set<TableServiceSlot>();
 
 	// Inventory
 	public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
-	// Agreement — convenzioni/hotel partner
+	// Agreement — convenzioni
 	public DbSet<AgreementPartner> AgreementPartners => Set<AgreementPartner>();
 	public DbSet<AgreementPriceList> AgreementPriceLists => Set<AgreementPriceList>();
 	public DbSet<AgreementReport> AgreementReports => Set<AgreementReport>();
@@ -87,6 +113,7 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 	// Lookup di dominio
 	public DbSet<Country> Countries => Set<Country>();
 	public DbSet<CountryTranslation> CountryTranslations => Set<CountryTranslation>();
+	public DbSet<CountryVatRate> CountryVatRates => Set<CountryVatRate>();
 
 	// Read-model
 	public DbSet<ConfigSnapshot> ConfigSnapshots => Set<ConfigSnapshot>();
@@ -136,6 +163,16 @@ public sealed class DbContext : Microsoft.EntityFrameworkCore.DbContext
 		modelBuilder.HasPostgresEnum<AgreementReportSearchType>(Schema, "agreement_report_search_type");
 		modelBuilder.HasPostgresEnum<AgreementReportStatus>(Schema, "agreement_report_status");
 		modelBuilder.HasPostgresEnum<ConfigSnapshotKind>(Schema, "config_snapshot_kind");
+		modelBuilder.HasPostgresEnum<InventoryArticle>(Schema, "inventory_article");
+		modelBuilder.HasPostgresEnum<VatNature>(Schema, "vat_nature");
+		modelBuilder.HasPostgresEnum<BarCategory>(Schema, "bar_category");
+		modelBuilder.HasPostgresEnum<Allergen>(Schema, "allergen");
+		modelBuilder.HasPostgresEnum<TableCapacityMode>(Schema, "table_capacity_mode");
+		modelBuilder.HasPostgresEnum<DepositMode>(Schema, "deposit_mode");
+		modelBuilder.HasPostgresEnum<DepositType>(Schema, "deposit_type");
+		modelBuilder.HasPostgresEnum<AppLanguage>(Schema, "content_language");
+		modelBuilder.HasPostgresEnum<RevenueSeasonTier>(Schema, "revenue_season_tier");
+		modelBuilder.HasPostgresEnum<ShowcaseSection>(Schema, "showcase_section");
 
 		modelBuilder.ApplyConfigurationsFromAssembly(typeof(DbContext).Assembly);
 

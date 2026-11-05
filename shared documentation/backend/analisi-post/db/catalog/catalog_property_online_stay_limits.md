@@ -127,6 +127,15 @@ motore di prenotazione C1.
 - **Nullabile**: Sì.
 - **Relazioni**: —.
 
+### public_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration OnlineBookingOptions).
+- **Descrizione**: Id pubblico (UUIDv7) usato dalle API.
+- **Tipo**: `uuid`.
+- **Default**: `'00000000-0000-0000-0000-000000000000'::uuid`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON — elimina `bookingLimit[]` (tabella-nel-JSON). `minvalue`/`maxValue` stringa → `smallint`;

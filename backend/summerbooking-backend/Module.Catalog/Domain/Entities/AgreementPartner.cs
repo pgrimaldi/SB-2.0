@@ -1,9 +1,9 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
-/// Struttura partner ("convenzione"/hotel) con cui uno stabilimento ha un accordo commerciale. Aggregate
+/// Struttura convenzionata con cui uno stabilimento ha un accordo commerciale. Aggregate
 /// root dell'area Agreement, radice della gerarchia listini/voucher partner.
 /// </summary>
 public sealed class AgreementPartner : IAuditable, ISoftDeletable
@@ -28,5 +28,22 @@ public sealed class AgreementPartner : IAuditable, ISoftDeletable
 	public ICollection<AgreementPriceList> PriceLists { get; private set; } = new List<AgreementPriceList>();
 	public ICollection<AgreementReport> Reports { get; private set; } = new List<AgreementReport>();
 
+	public const int NameMaxLength = 255;
+
 	private AgreementPartner() { }
+
+	public static AgreementPartner Create(long propertyId) => new() { PublicId = Guid.CreateVersion7(), PropertyId = propertyId };
+
+	public void Update(AgreementPartnerData d)
+	{
+		Name = d.Name.Trim();
+		City = d.City;
+		PostalCode = d.PostalCode;
+		Province = d.Province;
+		StreetName = d.StreetName;
+		StreetNumber = d.StreetNumber;
+		Phone = d.Phone;
+		Email = d.Email;
+		Note = d.Note;
+	}
 }

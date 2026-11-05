@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -10,6 +10,7 @@ namespace Module.Catalog.Domain.Entities;
 public sealed class Amenity : IAuditable, ISoftDeletable
 {
 	public int Id { get; private set; }
+	public string Code { get; private set; } = null!;
 	public string Name { get; private set; } = null!;
 	public short? CategoryId { get; private set; }
 	public long? IconAssetId { get; private set; }

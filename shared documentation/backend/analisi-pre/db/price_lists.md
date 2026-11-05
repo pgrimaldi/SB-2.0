@@ -84,11 +84,16 @@
         esplicito nel codice sorgente).
       - **setReducedPrice**: array di fasce data con prezzi ridotti
         (`{startDate, endDate, additionalData: [{name, value}]}`), consumato da `getReducedPrices` in
-        `front-customer-pre/src/services/BookingCalcService.js` (righe 11-32): se la data prenotata rientra
-        in una fascia, il calcolo usa quel prezzo ridotto al posto dello standard.
-      - **isCumulativeFlag**: salvato insieme al pacchetto (`PriceParent.js` riga 334) ma non risulta
-        collegato agli altri 3 campi nella stessa area UI — effetto specifico non determinato con certezza
-        in questa scheda.
+        `front-customer-pre/src/services/BookingCalcService.js` (righe 11-32) e, nel gestionale, da
+        `front-pre/src/services/BookingCalcService.js:34-55` quando l'operatore spunta il prezzo ridotto
+        (`getReducedPriceFlag`): vale solo se le date della prenotazione coincidono **esattamente** con
+        `startDate` e `endDate` della finestra.
+      - **isCumulativeFlag**: interruttore del **prezzo cumulativo**, presente sia sul pacchetto
+        (`AddPackage.js`) sia sull'articolo aggiuntivo (`AddAdditionalItem.js`), salvato da `PriceParent.js`
+        e letto dal motore del gestionale (`front-pre/src/services/BookingCalcService.js:142, 941-1063`):
+        se attivo, più postazioni dello stesso pacchetto e fila nella stessa prenotazione si prezzano sul
+        totale dei giorni. Il sito clienti non lo usa. Vedi
+        [`_motore-di-prezzo-e-sconti.md`](../business-logic/stabilimento/_motore-di-prezzo-e-sconti.md) §3.
       - Tutti e 4 vanno quindi considerati **Deprecato: No** — sono usati realmente lato client, solo non
         elaborati/validati lato backend (il backend li accetta e restituisce senza rielaborarli, come
         `packageItemString`).
@@ -107,31 +112,41 @@
 
 ### mainPrices
 - **Tipo**: `Sequelize.JSON` (solo per `type = "package"`)
-- **Descrizione**: array `[{ name, value }]` — un prezzo base per settore (`name` = nome del settore da
-  `sectors_rows`, `value` = prezzo stagionale forfettario). Usato come fallback/prezzo di riferimento
-  rispetto ai prezzi più granulari di `detailPrices`.
+- **Descrizione**: array `[{ name, value, halfday, seasonal }]` — il prezzo **stagionale** per settore
+  (`name` = nome del settore da `sectors_rows`):
+  - **value**: prezzo stagionale a giornata intera;
+  - **halfday**: prezzo stagionale per mezza giornata, letto da `getSeasonalDatesPrices`
+    (`front-pre/src/services/BookingCalcService.js:14-30`) quando la prenotazione è mattina o pomeriggio;
+  - **seasonal**: chiave **orfana**, presente nei dati ma non letta né scritta da alcun codice.
+
+  Nel calcolo alla prenotazione lo stagionale ha la precedenza sui prezzi di `detailPrices`.
 - **Nullabile**: Sì
-- **Esempio di valori**: `[{"name":"Fila 1","value":"120"},{"name":"Fila 2","value":"100"}]`
+- **Esempio di valori**: `[{"name":"Fila 1","value":"120","halfday":"80"},{"name":"Fila 2","value":"100"}]`
 
 ### detailPrices
 - **Tipo**: `Sequelize.JSON` (solo per `type = "package"`)
 - **Descrizione**: array di oggetti con il dettaglio tariffario per periodo, verificato sui dati reali:
   `{ id, name, half_day_price, half_day_weekend_price, daily_price, weekend_price, days_7_price,
   days_14_price, monthly_price, edit_price_data: [{ date, day, price }] }`.
-  - **name** è il nome del periodo tariffario (es. `"Alta stagione"`) — matchato per substring (`LIKE`)
-    contro `seasons_periods.periods[].name`, come già documentato in
-    [`seasons_periods.md`](seasons_periods.md#osservazioni-verificate-nel-codice-criticità).
-  - **edit_price_data**: override di prezzo per singole date specifiche all'interno del periodo (deroghe
-    puntuali, es. Ferragosto), verificato come struttura presente ma il consumo lato backend non è stato
-    tracciato in questa scheda (nessun controller esaminato la legge; presumibilmente calcolata solo lato
-    frontend al momento della prenotazione).
+  - **name** è la combinazione `"<fila> <periodo>"`; il motore di prezzo del gestionale la abbina per
+    **uguaglianza esatta** (a meno degli spazi finali, `getMatchedPkgObj` in
+    `front-pre/src/services/BookingCalcService.js`), non per sottostringa. La ricerca pubblica
+    (`getLowestPrice`) usa invece `LIKE` (vedi
+    [`seasons_periods.md`](seasons_periods.md#osservazioni-verificate-nel-codice-criticità)).
+  - **edit_price_data**: **griglia prezzo per durata**, non prezzo per data. È generata dal gestionale al
+    salvataggio del pacchetto (`front-pre/src/services/PriceCalcService.js`, `getPriceForDate`) con una
+    voce per ogni numero di giorni 1..N (N = giorni della stagione, massimo 90) secondo il metodo
+    `priceCalculation`; il campo `day` è la durata, `date` è solo la data della stagione usata per
+    generarla. Alla prenotazione il prezzo si legge per durata (`getSelectedRecPrice`, confronto su
+    `day`); le celle corrette a mano dal gestore hanno `isPriceChange`.
   - `getLowestPrice` calcola il minimo tra `daily_price` e `half_day_price` su tutte le voci il cui `name`
     matcha il periodo corrente, solo se `details.enableOnlineReservation = true` e `type = 'package'`
     (query SQL con `JSON_TABLE`, vedi `property.controller.js:1064-1110`).
 - **Nullabile**: Sì
 - **Esempio di valori**: `[{"id":1,"name":"Alta stagione","half_day_price":"25","half_day_weekend_price":
   "30","daily_price":"45","weekend_price":"50","days_7_price":"280","days_14_price":"520",
-  "monthly_price":"1100","edit_price_data":[{"date":"15/08/2024","day":"Thursday","price":"60"}]}]`
+  "monthly_price":"1100","edit_price_data":[{"date":"2024-06-01","day":1,"price":45},{"date":"2024-06-02","day":2,"price":90}]}]`
+  (esempio illustrativo della struttura della griglia)
 
 ### priceCalculation
 - **Tipo**: `varchar`

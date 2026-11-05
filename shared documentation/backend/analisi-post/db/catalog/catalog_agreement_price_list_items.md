@@ -97,6 +97,15 @@ inclusi, pacchetti collegati (per gli `additional`). Una riga per componente.
 - **Nullabile**: No / No / Sì.
 - **Relazioni**: —.
 
+### included_sale_item_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Servizio venduto incluso nel pacchetto.
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_service_sale_items.id`](catalog_service_sale_items.md) `ON DELETE RESTRICT`.
+
 ## Valutazione JSON
 
 Nessun JSON — vedi [`catalog_pricing_price_list_items`](catalog_pricing_price_list_items.md) (stesso principio).
@@ -232,3 +241,4 @@ risolto contro `catalog_inventory_items` della property del partner (`item_kind 
 `area_item`), `IncludedServices[]` → righe `included_service`, `selectedPackages[]` → righe
 `linked_package` con `linked_price_list_id`; nomi non risolvibili → riga scartata con log. `LinkedPriceList`
 è una self-reference sulla stessa tabella genitrice, non una FK circolare sull'item stesso.
+> **Allineamento 2026-10-26**: nel DB non ci sono più le colonne `included_service_id` (sostituite o spostate dalle API Catalog; vedi le sezioni aggiunte).

@@ -152,7 +152,7 @@ namespace Module.Payment.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile, copiato cross-modulo (C4 autoreceipt; URL gestionale).");
+                        .HasComment("Id pubblico stabile, copiato cross-modulo (Fiskaly autoreceipt; URL gestionale).");
 
                     b.Property<Guid?>("ReservationPublicId")
                         .HasColumnType("uuid")
@@ -189,7 +189,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("stripe_payment_intent_id")
-                        .HasComment("Id del PaymentIntent Stripe; NULL per paga-in-struttura. 255 (non 40): il legacy ha dimostrato che questo campo puo' contenere anche un Checkout Session id (\"cs_live_...\", fino a 66+ caratteri) invece di un vero PaymentIntent id (\"pi_...\") - bug reale osservato il 2026-09-15, 190 righe scartate a NULL dalla migrazione perche' il varchar(40) le rifiutava.");
+                        .HasComment("Id del PaymentIntent Stripe; NULL per paga-in-struttura. 255 caratteri perche' puo' contenere anche un Checkout Session id (\"cs_live_...\", 66+ caratteri) invece di un PaymentIntent id (\"pi_...\").");
 
                     b.Property<string>("StripeStatus")
                         .HasMaxLength(40)
@@ -501,7 +501,7 @@ namespace Module.Payment.Infrastructure.Migrations
                     b.Property<Guid?>("AgreementLinePublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("agreement_line_public_id")
-                        .HasComment("public_id di booking.booking_agreement_lines, copiato — nessuna FK cross-schema; valorizzato per addebiti reali su voucher hotel.");
+                        .HasComment("public_id di booking.booking_agreement_lines, copiato — nessuna FK cross-schema; valorizzato per addebiti reali su voucher di una convenzione.");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -584,7 +584,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasColumnType("payment.payment_mode")
                         .HasColumnName("payment_mode")
                         .HasDefaultValueSql("'other'")
-                        .HasComment("Modalità con cui è avvenuto il movimento; NULL sui movimenti legacy non normalizzabili.");
+                        .HasComment("Modalità con cui è avvenuto il movimento; NULL sui movimenti importati non normalizzabili.");
 
                     b.Property<Guid>("PropertyId")
                         .HasColumnType("uuid")
@@ -594,7 +594,7 @@ namespace Module.Payment.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile, copiato cross-modulo (C4 righe payments[] dello scontrino; export contabile).");
+                        .HasComment("Id pubblico stabile, copiato cross-modulo (Fiskaly, righe payments[] dello scontrino; export contabile).");
 
                     b.Property<Guid?>("RecordedByUserId")
                         .HasColumnType("uuid")
@@ -830,7 +830,7 @@ namespace Module.Payment.Infrastructure.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("booking_number")
-                        .HasComment("Numero prenotazione, denormalizzato per correlazione col legacy.");
+                        .HasComment("Numero prenotazione, denormalizzato per la correlazione con la cassa.");
 
                     b.Property<DateTime>("ChargedAt")
                         .ValueGeneratedOnAdd()
@@ -1009,7 +1009,7 @@ namespace Module.Payment.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile, per il gestionale e per eventuale riferimento da C4/C6.");
+                        .HasComment("Id pubblico stabile, per il gestionale e per eventuale riferimento da Fiskaly/Notification.");
 
                     b.Property<int>("Reason")
                         .ValueGeneratedOnAdd()
@@ -1152,7 +1152,7 @@ namespace Module.Payment.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile, esposto al cliente e copiato da C1 sulla riga servizio pagata col borsellino.");
+                        .HasComment("Id pubblico stabile, esposto al cliente e copiato da Booking sulla riga servizio pagata col borsellino.");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
@@ -1279,7 +1279,7 @@ namespace Module.Payment.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile, copiato da C1 (riga servizio pagata col borsellino) e da C4 (pagamento VOUCHER/OUTSTANDING dello scontrino).");
+                        .HasComment("Id pubblico stabile, copiato da Booking (riga servizio pagata col borsellino) e da Fiskaly (pagamento VOUCHER/OUTSTANDING dello scontrino).");
 
                     b.Property<Guid?>("ResaleOfferRef")
                         .HasColumnType("uuid")
@@ -1502,7 +1502,7 @@ namespace Module.Payment.Infrastructure.Migrations
                                 .HasMaxLength(255)
                                 .HasColumnType("character varying(255)")
                                 .HasColumnName("description_snapshot")
-                                .HasComment("Descrizione dell'articolo congelata al momento del movimento; il nome vivo si legge da C1 quando reservation_line_public_id è valorizzato.");
+                                .HasComment("Descrizione dell'articolo congelata al momento del movimento; il nome vivo si legge da Booking quando reservation_line_public_id è valorizzato.");
 
                             b1.Property<long>("EntryId")
                                 .HasColumnType("bigint")
@@ -1784,14 +1784,14 @@ namespace Module.Payment.Infrastructure.Migrations
                                 .HasMaxLength(160)
                                 .HasColumnType("character varying(160)")
                                 .HasColumnName("description_snapshot")
-                                .HasComment("Nome dell'articolo congelato al momento del consumo; il nome vivo si legge da C2 quando sale_item_public_id è valorizzato.");
+                                .HasComment("Nome dell'articolo congelato al momento del consumo; il nome vivo si legge da Catalog quando sale_item_public_id è valorizzato.");
 
                             b1.Property<decimal>("LineTotal")
                                 .ValueGeneratedOnAddOrUpdate()
                                 .HasColumnType("numeric(12,2)")
                                 .HasColumnName("line_total")
                                 .HasComputedColumnSql("quantity * unit_price + variants_surcharge", true)
-                                .HasComment("Totale della riga — colonna generata (quantity * unit_price + variants_surcharge). Sola lettura: le rettifiche sono un nuovo movimento con source = 'adjustment'. Chiude anche un bug storico del legacy, dove il totale arrivava spesso null o incoerente con le sue componenti.");
+                                .HasComment("Totale della riga — colonna generata (quantity * unit_price + variants_surcharge). Sola lettura: le rettifiche sono un nuovo movimento con source = 'adjustment'. Il totale non puo' mai essere null o incoerente con le sue componenti.");
 
                             b1.Property<Guid>("PropertyId")
                                 .HasColumnType("uuid")

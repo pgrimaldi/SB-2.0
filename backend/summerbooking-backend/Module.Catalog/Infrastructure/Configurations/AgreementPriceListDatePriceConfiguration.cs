@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -11,7 +11,7 @@ public sealed class AgreementPriceListDatePriceConfiguration
 	public void Configure(EntityTypeBuilder<AgreementPriceListDatePrice> builder)
 	{
 		builder.ToTable("agreement_price_list_date_prices", "catalog", t => t.HasComment(
-			"Override di prezzo per data di calendario (festivi, deroghe puntuali) di un listino/voucher hotel."));
+			"Override di prezzo per data di calendario (festivi, deroghe puntuali) di un listino/voucher di una convenzione."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_agreement_price_list_date_prices");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -20,7 +20,7 @@ public sealed class AgreementPriceListDatePriceConfiguration
 			.HasColumnName("price_list_id")
 			.HasColumnType("integer")
 			.IsRequired()
-			.HasComment("Listino/voucher hotel a cui si applica la deroga.");
+			.HasComment("Listino/voucher della convenzione a cui si applica la deroga.");
 
 		builder.Property(x => x.PeriodPriceId)
 			.HasColumnName("period_price_id")

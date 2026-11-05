@@ -7,7 +7,7 @@
 > Home > Italia > Calabria > Montauro > On the beach Club.
 >
 > Logica di business correlata: [`business-logic/systemadmin/01-gestione-stabilimenti.md`](../../business-logic/systemadmin/01-gestione-stabilimenti.md)
-> §3.2 (`getPropertyWithBathHouseDetails`, mascheramento contatti se non autenticato) e §7
+> §3.2 (`getPropertyWithBathHouseDetails`, mascheramento dei dati del titolare se non autenticato) e §7
 > (`getOnlineReservationStatusByAdmin`).
 
 ---
@@ -23,13 +23,17 @@ estratto di "Disponibilità".
 **Input → API** (`sb/getPropertyWithBathHouseDetails`; risoluzione slug: `sb/getPropertyIdAndBathhouseFromSlug`)
 - `propertyId` (int) **o** `slug` (string)
 - `bathHouseId` (int) — `0` ammesso se sconosciuto
-- `userId` (int, opzionale) — se loggato: abilita flag "mi piace" e contatti in chiaro
+- `userId` (int, opzionale) — se loggato: abilita flag "mi piace" (e, nel legacy, i dati del titolare in chiaro)
 - `languageCode` (int)
 
 **Output ← API**
 - `property` ({ id, slug, name, description, address: { street, zip, city, province, region, country },
-  phonePrefix, phone, email, whatsapp, lat, lng }) — **contatti mascherati** (`maskEmail`/`maskName`/
-  `maskPhone`) se la richiesta **non** è autenticata
+  phonePrefix, phone, email, whatsapp, lat, lng }) — i **contatti della struttura** sono restituiti **in
+  chiaro** anche agli anonimi. Nel legacy (`sysadmin.controller.js:283-310`) solo i dati del **titolare**
+  (`userData`: username, email, nome, cognome) sono mascherati con `maskEmail`/`maskName` se la richiesta
+  non è autenticata; il telefono del titolare (`mobile`) resta in chiaro e `maskPhone` non è usato.
+  **Decisione del committente (2026-10)**: contatti della struttura in chiaro; i dati del titolare non
+  vanno **mai** esposti dalla scheda pubblica, nemmeno mascherati o agli utenti autenticati.
 - `photos` (string[]) — URL foto per la galleria
 - `virtualTourUrl` (string|null) — per il tab "Tour virtuale"
 - `services` (array) — `{ key, label, icon, category }` per il tab "Servizi"

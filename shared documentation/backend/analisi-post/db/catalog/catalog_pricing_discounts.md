@@ -201,6 +201,24 @@ Correzioni rispetto al legacy:
 - **Nullabile**: Sì.
 - **Relazioni**: —.
 
+### requires_code
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration DiscountsCatalog).
+- **Descrizione**: true = si applica digitando il codice; false = automatico nei periodi, giorni e fasce di validità.
+- **Tipo**: `boolean`.
+- **Default**: `true`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### weekdays
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration DiscountsCatalog).
+- **Descrizione**: Giorni di validità; vuoto = tutti.
+- **Tipo**: `catalog.weekday[]`.
+- **Default**: `'{}'::catalog.weekday[]`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. `discounts.items` (doppiamente incapsulato) → una riga per voucher; array figli

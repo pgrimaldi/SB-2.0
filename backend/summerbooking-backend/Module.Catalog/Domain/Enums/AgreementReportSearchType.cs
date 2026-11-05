@@ -1,8 +1,8 @@
-namespace Module.Catalog.Domain.Enums;
+﻿namespace Module.Catalog.Domain.Enums;
 
 /// <summary>
 /// Dice se l'intervallo di date di un report alle strutture partner si riferisce agli <b>arrivi</b> o
-/// alle <b>partenze</b>. Legacy: <c>hotel_reports.searchType ENUM('CHECK_IN','CHECK_OUT')</c>.
+/// alle <b>partenze</b>.
 /// </summary>
 public enum AgreementReportSearchType
 {

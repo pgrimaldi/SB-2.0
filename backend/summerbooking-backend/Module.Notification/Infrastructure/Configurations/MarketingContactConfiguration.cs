@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Notification.Domain.Entities;
 using Module.Notification.Domain.Enums;
@@ -40,7 +40,7 @@ public sealed class MarketingContactConfiguration : IEntityTypeConfiguration<Mar
 		builder.Property(x => x.FullName)
 			.HasColumnName("full_name")
 			.HasMaxLength(160)
-			.HasComment("Nome del contatto, denormalizzato per la personalizzazione senza join a C5.");
+			.HasComment("Nome del contatto, denormalizzato per la personalizzazione senza join a Identity.");
 
 		builder.Property(x => x.Phone)
 			.HasColumnName("phone")
