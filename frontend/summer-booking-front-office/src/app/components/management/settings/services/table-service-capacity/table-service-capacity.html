@@ -46,6 +46,7 @@
         <app-icon-button
           class="table__service__capacity__remove"
           [pathIcon]="deleteIcon"
+          [disabled]="isReadonly()"
           (click)="removeTableGroup(groupIndex)"
         />
       </div>
@@ -55,6 +56,7 @@
       [appearance]="ButtonAppearance.Secondary"
       [size]="ButtonSize.Small"
       [pathIcon]="addIcon"
+      [disabled]="isReadonly()"
       (clicked)="addTableGroup()"
     >
       {{ 'management.settings.services.form.tables.add_tables' | translate }}

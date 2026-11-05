@@ -1267,6 +1267,7 @@
           "title": "Réservation du service à table",
           "create": "Ajouter un service à table",
           "add_title": "Ajouter un nouveau service à table",
+          "edit_title": "Modifier le service à table",
           "table": {
             "service_name": "Nom du service"
           },

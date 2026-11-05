@@ -40,6 +40,8 @@ export class TableServiceCapacity {
   readonly availabilityMode = input.required<FieldTree<TableServiceAvailabilityMode>>();
   readonly tableGroups = input.required<FieldTree<TableServiceTableGroup[]>>();
   readonly totalSeatQuantity = input.required<FieldTree<number | null>>();
+  /** Only to look at: adding and removing tables are off. */
+  readonly isReadonly = input(false);
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);

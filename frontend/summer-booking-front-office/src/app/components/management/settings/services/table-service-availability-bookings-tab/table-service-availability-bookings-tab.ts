@@ -23,4 +23,6 @@ import { TableServiceCapacity } from '../table-service-capacity/table-service-ca
 })
 export class TableServiceAvailabilityBookingsTab {
   readonly form = input.required<FieldTree<TableServiceAddItemRequest>>();
+  /** Only to look at: adding and removing availabilities and tables are off. */
+  readonly isReadonly = input(false);
 }

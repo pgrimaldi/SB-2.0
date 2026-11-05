@@ -40,6 +40,8 @@ type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 export class TableServiceAvailabilities {
   /** The availabilities of the form of the panel, which validates and saves them. */
   readonly form = input.required<FieldTree<TableServiceAvailability[]>>();
+  /** Only to look at: adding and removing availabilities are off. */
+  readonly isReadonly = input(false);
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);

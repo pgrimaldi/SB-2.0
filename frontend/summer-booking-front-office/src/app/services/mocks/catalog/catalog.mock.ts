@@ -47,6 +47,8 @@ import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/s
 import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
 import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
+import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
+import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
 import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -2377,6 +2379,58 @@ const TABLE_SERVICES: TableServiceRow[] = (
 const TABLE_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
 /**
+ * The data of the add panel of a table service, by id: those created with the panel and Pranzo; the
+ * other example rows get theirs from the list (see `tableDetailsOf`).
+ */
+const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
+  [
+    '2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701',
+    Object.assign(new TableServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: 'Pranzo',
+          description: 'Tavoli del ristorante per il pranzo.',
+        },
+        {
+          language: Language.En,
+          serviceName: 'Lunch',
+          description: 'Restaurant tables for lunch.',
+        },
+      ],
+      isHighlighted: true,
+      availabilities: [
+        {
+          dateFrom: '2026-06-01T00:00:00.000Z',
+          dateTo: '2026-09-30T00:00:00.000Z',
+          isSameTimeForAllDays: true,
+          startTime: '12:00',
+          endTime: '15:00',
+          days: [1, 2, 3, 4, 5, 6, 7].map((dayOfWeek) => ({
+            dayOfWeek,
+            isEnabled: dayOfWeek !== 1,
+            startTime: '12:00',
+            endTime: '15:00',
+          })),
+        },
+      ],
+      availabilityMode: TableServiceAvailabilityMode.Tables,
+      tableGroups: [
+        { tableQuantity: 10, seatPerTableQuantity: 2 },
+        { tableQuantity: 8, seatPerTableQuantity: 4 },
+        { tableQuantity: 6, seatPerTableQuantity: 5 },
+      ],
+      averageMealDuration: TableServiceMealDuration.OneHourThirtyMinutes,
+      maxBookingPerTimeSlotQuantity: 8,
+      bookingPayment: TableServiceBookingPayment.Deposit,
+      depositMode: TableServiceDepositMode.Total,
+      depositPercentage: 20,
+      isOnlineBookingEnabled: true,
+    }),
+  ],
+]);
+
+/**
  * `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) of the
  * requested property, searched in the name. 401 without a valid access token; 403 for a missing or
  * unknown property.
@@ -2763,13 +2817,184 @@ export const createTableServiceMock = (
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }
   const main = body.translations?.find((translation) => translation.language === language);
+  const idTableService = crypto.randomUUID();
+  TABLE_SERVICE_DETAILS.set(
+    idTableService,
+    structuredClone(onlyFieldsOf(TableServiceAddItemRequest, body as TableServiceAddItemRequest)),
+  );
   TABLE_SERVICES.push({
     propertyId: property.id,
-    idTableService: crypto.randomUUID(),
+    idTableService,
     serviceName: main?.serviceName?.trim() ?? null,
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/** The data of the add panel of a table service: the saved one, or a minimal one from the list. */
+function tableDetailsOf(row: TableServiceRow): TableServiceAddItemRequest {
+  return (
+    TABLE_SERVICE_DETAILS.get(row.idTableService ?? '') ??
+    Object.assign(new TableServiceAddItemRequest(), {
+      translations: [
+        {
+          language: Language.It,
+          serviceName: row.serviceName,
+          description: 'Servizio tavoli dello stabilimento.',
+        },
+      ],
+    })
+  );
+}
+
+/** The table service of the `idTableService` of the query string, if it exists. */
+function requestedTableService(request: HttpRequest<unknown>): TableServiceRow | undefined {
+  const idTableService = request.params.get('idTableService');
+  return TABLE_SERVICES.find((row) => row.idTableService === idTableService);
+}
+
+/**
+ * `GET /api/catalog/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
+ * edit panel. 200 with `TableServiceSelectedGeneralInfo`, only the languages written; 401 without a
+ * valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const tableServiceGeneralInfoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedTableService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = tableDetailsOf(row);
+  const answer: TableServiceSelectedGeneralInfo = {
+    idTableService: row.idTableService,
+    translations: details.translations.filter(
+      ({ serviceName, description }) => serviceName || description,
+    ),
+    isHighlighted: details.isHighlighted,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+/**
+ * `GET /api/catalog/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
+ * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings`; 401
+ * without a valid access token; 404 `resource.not_found` for an unknown id.
+ */
+export const tableServiceAvailabilityBookingsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = requestedTableService(request);
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const details = tableDetailsOf(row);
+  const answer: TableServiceSelectedAvailabilityBookings = {
+    availabilities: details.availabilities,
+    availabilityMode: details.availabilityMode,
+    tableGroups: details.tableGroups,
+    totalSeatQuantity: details.totalSeatQuantity,
+    averageMealDuration: details.averageMealDuration,
+    maxBookingPerTimeSlotQuantity: details.maxBookingPerTimeSlotQuantity,
+    bookingPayment: details.bookingPayment,
+    depositMode: details.depositMode,
+    depositPercentage: details.depositPercentage,
+    isOnlineBookingEnabled: details.isOnlineBookingEnabled,
+  };
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
+  ).pipe(delay(300));
+};
+
+type UpdateTableServiceBody = CreateTableServiceBody & { idTableService?: unknown };
+
+/**
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 403 for an
+ * unknown property; 404 `resource.not_found` for an `idTableService` that is not one of its table
+ * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and
+ * the answer is 204 without a body.
+ */
+function updateTableService(
+  request: HttpRequest<unknown>,
+  errorsOf: (body: UpdateTableServiceBody) => MockFieldError[],
+  apply: (
+    details: TableServiceAddItemRequest,
+    body: UpdateTableServiceBody,
+    row: TableServiceRow,
+  ) => void,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as UpdateTableServiceBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const row = TABLE_SERVICES.find(
+    (item) => item.idTableService === body.idTableService && item.propertyId === property.id,
+  );
+  if (!row?.idTableService) {
+    return resourceNotFound(request);
+  }
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const details = structuredClone(tableDetailsOf(row));
+  apply(details, structuredClone(body), row);
+  TABLE_SERVICE_DETAILS.set(row.idTableService, details);
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+}
+
+/**
+ * `POST /api/catalog/update-table-service-general` with `TableServiceUpdateGeneralRequest` and
+ * `idProperty`: names, descriptions and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`). Errors as the creation.
+ */
+export const updateTableServiceGeneralMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  return updateTableService(
+    request,
+    (body) => standardGeneralErrors({ translations: body.translations }, language),
+    (details, body, row) => {
+      details.translations = body.translations ?? [];
+      details.isHighlighted = body.isHighlighted === true;
+      const main = details.translations.find((translation) => translation.language === language);
+      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+    },
+  );
+};
+
+/**
+ * `POST /api/catalog/update-table-service-availability-bookings` with
+ * `TableServiceUpdateAvailabilityBookingsRequest` and `idProperty`: the Disponibilità e Prenotazioni
+ * tab. Errors as the creation (see `tableServiceErrors`).
+ */
+export const updateTableServiceAvailabilityBookingsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  updateTableService(request, tableServiceErrors, (details, body) => {
+    details.availabilities = body.availabilities ?? [];
+    details.availabilityMode = body.availabilityMode ?? TableServiceAvailabilityMode.Tables;
+    details.tableGroups = body.tableGroups ?? [];
+    details.totalSeatQuantity = body.totalSeatQuantity ?? null;
+    details.averageMealDuration = body.averageMealDuration ?? null;
+    details.maxBookingPerTimeSlotQuantity = body.maxBookingPerTimeSlotQuantity ?? null;
+    details.bookingPayment = body.bookingPayment ?? TableServiceBookingPayment.None;
+    details.depositMode = body.depositMode ?? TableServiceDepositMode.Total;
+    details.depositPercentage = body.depositPercentage ?? null;
+    details.isOnlineBookingEnabled = body.isOnlineBookingEnabled === true;
+  });
 
 function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
   const errors: MockFieldError[] = [];

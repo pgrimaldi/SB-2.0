@@ -1,9 +1,10 @@
-<app-table-service-availabilities [form]="form().availabilities" />
+<app-table-service-availabilities [form]="form().availabilities" [isReadonly]="isReadonly()" />
 
 <app-table-service-capacity
   [availabilityMode]="form().availabilityMode"
   [tableGroups]="form().tableGroups"
   [totalSeatQuantity]="form().totalSeatQuantity"
+  [isReadonly]="isReadonly()"
 />
 
 <app-table-service-booking-options

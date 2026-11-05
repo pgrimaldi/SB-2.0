@@ -29,6 +29,8 @@ import { StandardServiceUpdateBookingRequest } from '../../../entities/settings/
 import { StandardServiceUpdateGeneralRequest } from '../../../entities/settings/services/standard-service-update-general-request';
 import { StandardServiceUpdatePricesRequest } from '../../../entities/settings/services/standard-service-update-prices-request';
 import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
+import { TableServiceUpdateAvailabilityBookingsRequest } from '../../../entities/settings/services/table-service-update-availability-bookings-request';
+import { TableServiceUpdateGeneralRequest } from '../../../entities/settings/services/table-service-update-general-request';
 import { Language } from '../../../entities/shared/language';
 import { CatalogService } from './catalog.service';
 
@@ -969,6 +971,112 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-table-service`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should ask for the general information of the table service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.tableServiceGeneralInfo('t1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-table-service-general-info` &&
+        params.get('idTableService') === 't1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask for the availability and bookings of the table service in the query string', () => {
+    const { catalog, controller } = setup();
+
+    catalog.tableServiceAvailabilityBookings('t1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url, params }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-table-service-availability-bookings` &&
+        params.get('idTableService') === 't1',
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should save the Info Generali of the table service with the property in the body', () => {
+    const { catalog, controller } = setup();
+    const translation = { language: Language.It, serviceName: 'Cena', description: 'Ai tavoli' };
+    const request = { idTableService: 't1', translations: [translation], isHighlighted: true };
+
+    catalog
+      .updateTableServiceGeneral(
+        'p1',
+        Object.assign(new TableServiceUpdateGeneralRequest(), {
+          ...request,
+          translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-table-service-general`,
+    ).request.body;
+    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    controller.verify();
+  });
+
+  it('should save the Disponibilità e Prenotazioni of the table service with only its fields', () => {
+    const { catalog, controller } = setup();
+    const day = { dayOfWeek: 6, isEnabled: true, startTime: '19:00', endTime: '23:00' };
+    const availability = {
+      dateFrom: '2026-07-01T00:00:00.000Z',
+      dateTo: '2026-07-31T00:00:00.000Z',
+      isSameTimeForAllDays: false,
+      startTime: null,
+      endTime: null,
+      days: [day],
+    };
+    const request = {
+      idTableService: 't1',
+      availabilities: [availability],
+      availabilityMode: TableServiceAvailabilityMode.Seats,
+      tableGroups: [],
+      totalSeatQuantity: 40,
+      averageMealDuration: TableServiceMealDuration.TwoHours,
+      maxBookingPerTimeSlotQuantity: 10,
+      bookingPayment: TableServiceBookingPayment.None,
+      depositMode: TableServiceDepositMode.Total,
+      depositPercentage: null,
+      isOnlineBookingEnabled: false,
+    };
+
+    catalog
+      .updateTableServiceAvailabilityBookings(
+        'p1',
+        Object.assign(new TableServiceUpdateAvailabilityBookingsRequest(), {
+          ...request,
+          availabilities: [
+            {
+              ...availability,
+              days: [{ ...day, unexpectedFlag: 'extra-field' }],
+              unexpectedFlag: 'extra-field',
+            },
+          ],
+          unexpectedFlag: 'extra-field',
+        }),
+      )
+      .subscribe();
+
+    const body = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`,
     ).request.body;
     expect(body).toEqual({ ...request, idProperty: 'p1' });
     controller.verify();

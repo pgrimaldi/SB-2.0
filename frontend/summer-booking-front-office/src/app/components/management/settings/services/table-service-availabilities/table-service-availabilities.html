@@ -2,7 +2,12 @@
   <app-section-title
     [text]="'management.settings.services.form.tables.availability_title' | translate"
   >
-    <app-button [size]="ButtonSize.Small" [pathIcon]="addIcon" (clicked)="addAvailability()">
+    <app-button
+      [size]="ButtonSize.Small"
+      [pathIcon]="addIcon"
+      [disabled]="isReadonly()"
+      (clicked)="addAvailability()"
+    >
       {{ 'management.settings.services.form.tables.add_availability' | translate }}
     </app-button>
   </app-section-title>
@@ -11,6 +16,7 @@
       <app-icon-button
         class="table__service__availabilities__remove"
         [pathIcon]="removeIcon"
+        [disabled]="isReadonly()"
         (click)="removeAvailability(availabilityIndex)"
       />
 

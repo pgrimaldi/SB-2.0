@@ -59,7 +59,11 @@ import { TableServiceAddItemRequest } from '../../../entities/settings/services/
 import { TableServiceAvailability } from '../../../entities/settings/services/table-service-availability';
 import { TableServiceAvailabilityDay } from '../../../entities/settings/services/table-service-availability-day';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
+import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
+import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
 import { TableServiceTableGroup } from '../../../entities/settings/services/table-service-table-group';
+import { TableServiceUpdateAvailabilityBookingsRequest } from '../../../entities/settings/services/table-service-update-availability-bookings-request';
+import { TableServiceUpdateGeneralRequest } from '../../../entities/settings/services/table-service-update-general-request';
 import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
@@ -518,6 +522,51 @@ export class CatalogService {
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
+      availabilities: request.availabilities.map(tableAvailabilityFields),
+      tableGroups: request.tableGroups.map((tableGroup) =>
+        onlyFieldsOf(TableServiceTableGroup, tableGroup),
+      ),
+      idProperty,
+    });
+
+  /** The Info Generali tab of a table service, for the edit panel. */
+  readonly tableServiceGeneralInfo = (
+    idTableService: string,
+  ): Observable<TableServiceSelectedGeneralInfo> =>
+    this.httpClient.get<TableServiceSelectedGeneralInfo>(
+      `${this.endpoint}/get-table-service-general-info`,
+      { params: { idTableService } },
+    );
+
+  /** The Disponibilità e Prenotazioni tab of a table service, for the edit panel. */
+  readonly tableServiceAvailabilityBookings = (
+    idTableService: string,
+  ): Observable<TableServiceSelectedAvailabilityBookings> =>
+    this.httpClient.get<TableServiceSelectedAvailabilityBookings>(
+      `${this.endpoint}/get-table-service-availability-bookings`,
+      { params: { idTableService } },
+    );
+
+  /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
+  readonly updateTableServiceGeneral = (
+    idProperty: string,
+    request: TableServiceUpdateGeneralRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-table-service-general`, {
+      ...onlyFieldsOf(TableServiceUpdateGeneralRequest, request),
+      translations: request.translations.map((translation) =>
+        onlyFieldsOf(ServiceTranslation, translation),
+      ),
+      idProperty,
+    });
+
+  /** Salva of the Disponibilità e Prenotazioni tab of the edit panel. Answers 204 with no body. */
+  readonly updateTableServiceAvailabilityBookings = (
+    idProperty: string,
+    request: TableServiceUpdateAvailabilityBookingsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-table-service-availability-bookings`, {
+      ...onlyFieldsOf(TableServiceUpdateAvailabilityBookingsRequest, request),
       availabilities: request.availabilities.map(tableAvailabilityFields),
       tableGroups: request.tableGroups.map((tableGroup) =>
         onlyFieldsOf(TableServiceTableGroup, tableGroup),

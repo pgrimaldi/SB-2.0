@@ -1267,6 +1267,7 @@
           "title": "Tischservice-Reservierung",
           "create": "Tischservice hinzufügen",
           "add_title": "Neuen Tischservice hinzufügen",
+          "edit_title": "Tischservice bearbeiten",
           "table": {
             "service_name": "Leistungsname"
           },

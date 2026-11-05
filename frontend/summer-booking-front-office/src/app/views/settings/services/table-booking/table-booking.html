@@ -29,6 +29,12 @@
   [(open)]="adding"
   (created)="table.reload()"
 />
+<app-table-service-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idTableService]="idTableServiceToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idTableServicesToDelete()"
