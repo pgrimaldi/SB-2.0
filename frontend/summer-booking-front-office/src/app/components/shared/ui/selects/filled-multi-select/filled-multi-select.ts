@@ -35,11 +35,12 @@ export class FilledMultiSelect<K extends string = string> {
   /** The panel was closed: a Signal Forms `[formField]` marks the select as touched. */
   readonly touch = output<void>();
 
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+
   /** As in the filled select: the error look follows our `error`, not a classic form control. */
   protected readonly errorMatcher: ErrorStateMatcher = { isErrorState: () => !!this.error() };
   private readonly matSelect = viewChild.required(MatSelect);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly injector = inject(Injector);
 
   constructor() {
     effect(() => {

@@ -49,10 +49,11 @@ export class ServicesPeriodPrices implements OnDestroy {
   readonly periodPrices = input<FieldTree<ServicePeriodPrice[]>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
-  protected readonly content = contentChild(ServicesPeriodContent);
 
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   protected readonly validationText = inject(ValidationTextBehaviour);
+
+  protected readonly content = contentChild(ServicesPeriodContent);
 
   protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
   /** [X, before the title]. */
