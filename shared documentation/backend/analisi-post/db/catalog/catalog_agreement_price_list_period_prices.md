@@ -79,6 +79,51 @@ Gli override per singola data (`detailPrices[].edit_price_data`) → tabella fig
 - **Nullabile**: No / No / Sì.
 - **Relazioni**: —.
 
+### half_day_14_price
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Mezza giornata per 14 giorni nel periodo.
+- **Tipo**: `numeric(12,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### half_day_7_price
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Mezza giornata per 7 giorni nel periodo.
+- **Tipo**: `numeric(12,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### half_day_monthly_price
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Mezza giornata per il mese nel periodo.
+- **Tipo**: `numeric(12,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### sector_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Fila/settore; NULL = tutte le file.
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_map_sectors.id`](catalog_map_sectors.md) `ON DELETE RESTRICT`.
+
+### tariff_period_group
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Periodo tariffario della stagione (pricing_tariff_periods.period_group_key); NULL = senza periodo.
+- **Tipo**: `smallint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Tabella figlia `catalog_agreement_price_list_date_prices` (se usata)
 
 Analoga a [`catalog_pricing_price_list_date_prices`](catalog_pricing_price_list_date_prices.md):

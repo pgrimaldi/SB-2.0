@@ -66,7 +66,8 @@
   altri moduli. Per le **email** (reset password, OTP, benvenuto) c'è un'implementazione minima di invio
   in Notification. Gli altri restano eventi **senza gestore**: preferenze «email/cellulare come contatto»
   dello staff (`notification_user_channel_preferences`), consenso newsletter alla registrazione,
-  titolare dello stabilimento e prenotazione online abilitata dal systemadmin (Catalog).
+  attivazione del contratto per stabilimento (Catalog). Dal 2026-10-26 Catalog gestisce titolare, prenotazione online,
+  abbonamento e «mi piace».
 - **Quando chiuderlo**: scrivendo i gestori in Notification e Catalog; ogni punto è marcato nel codice
   con questa etichetta.
 - **Email di Identity come template**: oggi `SmtpTransactionalEmailSender` ha testi provvisori nel codice. Le
@@ -121,3 +122,81 @@
   fiscale, legata a ciò che accetta il provider).
 - **Quando chiuderlo**: Notification con i modelli di email (PROMEMORIA-85-5); Fiskaly verificando le lingue
   supportate da SIGN IT, e solo allora migration su `fiskaly.language_code`.
+
+## Catalog e moduli collegati
+
+Domande per il committente da riprendere quando si sviluppa il modulo indicato. Nascono dall'analisi del modulo
+Catalog (2026-10); non hanno ancora punti nel codice.
+
+### PROMEMORIA-85-13 — Struttura eliminata: prenotazioni pagate online
+
+- **Situazione**: il committente ha deciso che, eliminando uno stabilimento, le prenotazioni future si annullano
+  **senza rimborso e senza email** ai clienti (riattivate se lo stabilimento viene ripristinato dal cestino). Chi ha
+  pagato online con carta può contestare l'addebito o reclamare.
+- **Quando chiuderlo**: sviluppando l'eliminazione in Booking/Payment, rifare la domanda al committente proponendo
+  l'elenco delle prenotazioni pagate da rimborsare a mano, mostrato al systemadmin prima di confermare.
+- ✅ **Chiuso il 2026-11-02**: il committente conferma che **non si rimborsa nulla**, nemmeno i pagamenti online, e
+  non serve l'elenco per il systemadmin.
+
+### PROMEMORIA-85-14 — Le 91 strutture nascoste senza spiegazione
+
+- **Situazione**: delle 731 strutture importate nel 2023 con stato 5 (nascoste a mano), 626 sono doppioni e 14
+  corrispondono a stabilimenti poi registrati; per le altre **91** il committente non ha ancora deciso se tenerle
+  nascoste, cancellarle o renderle visibili. Elenco in `strutture-nascoste-stato5.xlsx` (root del progetto, fuori
+  dal repo). Dal 2026-10-26 l'ETL le migra con lo stato `hidden` (fuori dal sito e fuori dalla coda «in attesa»): il
+  systemadmin può approvarle o spostarle nel cestino dal pannello.
+- **Quando chiuderlo**: prima della migrazione finale, rifacendo la domanda al committente.
+
+### PROMEMORIA-85-15 — Carta salvata e pre-autorizzazione: caparra tavoli e «paga in struttura»
+
+- **Situazione**: per la caparra dei tavoli si salva la carta alla prenotazione e si pre-autorizza la caparra a
+  ridosso della data (una pre-autorizzazione Stripe dura circa 7 giorni); se il gestore non la trattiene entro la
+  fine del giorno della prenotazione viene rilasciata. Il committente vuole approfondire la stessa logica per il
+  **«paga in struttura»** (prenotazione online, pagamento allo stabilimento con la carta a garanzia).
+- **Quando chiuderlo**: sviluppando Payment, discutendo con il committente il «paga in struttura».
+
+### PROMEMORIA-85-16 — Postazioni eliminate dalla configurazione della mappa: le prenotazioni
+
+- **Situazione**: dal 2026-10-25 Catalog elimina (cancellazione logica) le postazioni con l'eliminazione singola o
+  multipla, lo svuotamento o l'eliminazione di righe e colonne e «Reimposta mappa», ma le prenotazioni di quelle
+  postazioni restano come sono. L'impostazione del gestore `map_layouts.reset_deletes_bookings` (decisione C4)
+  dice cosa farne: `false` = ricollegarle per numero quando la postazione viene ricreata, `true` = cancellarle
+  anche se pagate o scontrinate. Le voci di registro `catalog.map_spots_deleted`, `catalog.map_grid_changed` e
+  `catalog.map_reset` hanno il numero di postazioni coinvolte.
+- **Quando chiuderlo**: sviluppando Booking (evento di Catalog con le postazioni eliminate e l'impostazione, oppure
+  conferma con l'elenco delle prenotazioni coinvolte prima dell'eliminazione).
+- **Decisione del committente (2026-11-02)**: il ricollegamento avviene **per posizione nel reticolo** (fila e
+  colonna) e, se la posizione non esiste più, **per nome** della postazione; mai se il tipo è cambiato (lettino al
+  posto di ombrellone). A fine reimpostazione il gestore scarica un **report PDF** con i cambi di postazione e i
+  ricollegamenti non riusciti; le prenotazioni senza postazione si vedono nella pagina Prenotazioni.
+
+### PROMEMORIA-85-17 — Registrazione di una struttura: le email
+
+- **Situazione**: dal 2026-10-25 il form pubblico «Registra la tua struttura» (`POST /api/catalog/property-registrations`)
+  crea lo stabilimento in attesa e pubblica l'evento `PropertyRegistered` (Shared/Contracts/Catalog), ma nessun modulo
+  lo gestisce. Servono in Notification: il benvenuto al referente nella sua lingua (con le foto, come nel legacy),
+  l'avviso a info@ a ogni registrazione (decisione E4) e l'iscrizione dell'email alla lista contatti (`subscribes`).
+- **Quando chiuderlo**: sviluppando i modelli di email di Notification.
+
+### PROMEMORIA-85-18 — Stato e cestino degli stabilimenti: effetti sugli altri moduli
+
+- **Situazione**: dal 2026-10-26 il pannello di amministrazione (`/api/catalog/admin/properties`) cambia lo stato degli
+  stabilimenti e li sposta nel cestino, pubblicando `PropertyStatusChanged` e `PropertyTrashChanged`
+  (Shared/Contracts/Catalog), ma nessun modulo li gestisce. Servono: in Identity, il blocco dell'accesso al gestionale
+  per gli stabilimenti in attesa, rifiutati, nascosti o nel cestino; in Booking/Payment, l'annullamento delle
+  prenotazioni future e dei pagamenti in sospeso quando uno stabilimento va nel cestino (senza rimborso né email,
+  PROMEMORIA-85-13) e la riattivazione col ripristino; in Notification, l'email al titolare con il motivo
+  dell'approvazione o del rifiuto; in Privacy, l'avvio dei tempi di conservazione con l'eliminazione definitiva.
+- **Quando chiuderlo**: sviluppando ciascun modulo; la vetrina pubblica (fase 2) filtrerà da sé stato e cestino.
+
+### PROMEMORIA-85-19 — Periodi della stagione successiva: il passaggio alla stagione corrente
+
+- **Situazione**: dal 2026-11-05 il gestore prepara in anticipo i periodi tariffari della stagione successiva
+  (`/api/catalog/next-season/tariff-periods`, tabella `catalog.pricing_next_season_periods`), separati da quelli della
+  stagione corrente. Quando la stagione successiva diventa la corrente (il gestore aggiorna le date con `PUT /season`)
+  i suoi periodi restano dove sono: non diventano i periodi correnti, e quelli vecchi restano attivi. Il passaggio
+  non è automatico perché i prezzi di listini, convenzioni e servizi sono legati ai periodi correnti per chiave:
+  sostituirli cambierebbe il significato dei prezzi già inseriti.
+- **Da decidere**: se il passaggio sostituisce i periodi correnti e come si portano i prezzi (copiati per nome del
+  periodo, oppure da reinserire), e se avviene da sé alla data di inizio o con un'azione del gestore.
+- **Quando chiuderlo**: prima della prima stagione gestita con il nuovo sistema.

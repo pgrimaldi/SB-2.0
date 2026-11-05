@@ -18,7 +18,7 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, copiato cross-modulo da C3/C4/C6.");
+			.HasComment("Id pubblico stabile, copiato cross-modulo da Payment/Fiskaly/Notification.");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -187,14 +187,14 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
 			.HasColumnType("numeric(12,2)")
 			.IsRequired()
 			.HasDefaultValue(0m)
-			.HasComment("Importo acconto/caparra corrente (riepilogo); i singoli acconti sono movimenti C3.");
+			.HasComment("Importo acconto/caparra corrente (riepilogo); i singoli acconti sono movimenti Payment.");
 
 		builder.Property(x => x.Paid)
 			.HasColumnName("paid")
 			.HasColumnType("numeric(12,2)")
 			.IsRequired()
 			.HasDefaultValue(0m)
-			.HasComment("Totale già incassato, proiezione dagli eventi di pagamento di C3.");
+			.HasComment("Totale già incassato, proiezione dagli eventi di pagamento di Payment.");
 
 		builder.Property(x => x.BalanceDue)
 			.HasColumnName("balance_due")

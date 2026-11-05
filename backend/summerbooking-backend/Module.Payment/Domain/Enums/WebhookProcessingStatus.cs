@@ -1,4 +1,4 @@
-namespace Module.Payment.Domain.Enums;
+﻿namespace Module.Payment.Domain.Enums;
 
 /// <summary>Esito dell'elaborazione di un evento webhook (<see cref="Entities.WebhookEvent"/>).</summary>
 public enum WebhookProcessingStatus
@@ -10,9 +10,8 @@ public enum WebhookProcessingStatus
 	Processed = 1,
 
 	/// <summary>
-	/// Riconosciuto ma volutamente non gestito. Nel legacy questi eventi arrivavano, ricevevano un
-	/// 200 e sparivano senza lasciare traccia: qui restano registrati, cosi' "non lo gestiamo" e
-	/// "lo abbiamo perso" diventano due stati distinguibili.
+	/// Riconosciuto ma volutamente non gestito: resta registrato, cosi' "non lo gestiamo" e
+	/// "lo abbiamo perso" sono due stati distinguibili.
 	/// </summary>
 	Ignored = 2,
 

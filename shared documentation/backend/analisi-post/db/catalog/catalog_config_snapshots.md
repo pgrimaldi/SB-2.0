@@ -9,7 +9,12 @@
 > [`_config-snapshot-proposta.md`](../_config-snapshot-proposta.md).
 >
 > **Nota sulla voce "Legacy"**: `— (nuovo)` ovunque. In migrazione la tabella nasce vuota e viene
-> popolata da un rebuild di massa (`snapshots rebuild --all`).
+> popolata da un rebuild di massa: lo fa da sé l'host all'avvio (costruisce gli snapshot mancanti), oppure
+> `POST /api/catalog/admin/snapshots/rebuild`.
+>
+> **✅ Realizzata il 2026-10-27**: aggiornata al salvataggio, all'avvio (solo mancanti) e di notte (tutti).
+> Stato e differenze dal disegno in testa a [`_config-snapshot-proposta.md`](../_config-snapshot-proposta.md);
+> API in [89-api-catalog.md](../../../progettazione/89-api-catalog.md).
 
 ---
 
@@ -412,3 +417,8 @@ mappatura (converter + discriminatore polimorfico), non l'elenco completo dei ca
 dominio (`OnlineBookingSettingsChanged`, `MapSpotsChanged`, `PriceListChanged`, …), `HostedService`
 notturno e comando CLI `snapshots rebuild`/`verify` restano application/infrastructure concern esterni a
 questa `Configuration` (non EF).
+
+> **Aggiornamento 2026-10-27**: non serve un rebuild dopo la migrazione, perché l'host all'avvio costruisce
+> gli snapshot mancanti. Al posto degli handler di dominio c'è `SnapshotTriggers` (regole per tipo di entità,
+> applicate dalla `UnitOfWork` dopo il commit), il notturno è `CatalogNightlyJob`, e al posto della CLI c'è
+> `POST /api/catalog/admin/snapshots/rebuild`.

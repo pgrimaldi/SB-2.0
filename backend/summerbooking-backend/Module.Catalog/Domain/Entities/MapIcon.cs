@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -10,6 +10,7 @@ namespace Module.Catalog.Domain.Entities;
 public sealed class MapIcon : IAuditable, ISoftDeletable
 {
 	public long Id { get; private set; }
+	public Guid PublicId { get; private set; }
 	public short CategoryId { get; private set; }
 	public MapIconCategory? Category { get; private set; }
 	public MapIconState Type { get; private set; }
@@ -17,9 +18,32 @@ public sealed class MapIcon : IAuditable, ISoftDeletable
 	public long MediaAssetId { get; private set; }
 	public MediaAsset? MediaAsset { get; private set; }
 	public bool IsActive { get; private set; }
+	public bool IsDefault { get; private set; }
 	public DateTime CreatedAt { get; private set; }
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
 
 	private MapIcon() { }
+
+	public const int NameMaxLength = 120;
+
+	public static MapIcon Create(short categoryId, MapIconState type, string name, long mediaAssetId) => new()
+	{
+		PublicId = Guid.CreateVersion7(),
+		CategoryId = categoryId,
+		Type = type,
+		Name = name.Trim(),
+		MediaAssetId = mediaAssetId,
+		IsActive = true,
+	};
+
+	public void Update(string name, bool isActive)
+	{
+		Name = name.Trim();
+		IsActive = isActive;
+	}
+
+	public void SetDefault(bool isDefault) => IsDefault = isDefault;
+
+	public void ReplaceImage(long mediaAssetId) => MediaAssetId = mediaAssetId;
 }

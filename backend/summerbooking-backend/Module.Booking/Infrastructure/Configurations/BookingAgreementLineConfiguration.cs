@@ -21,7 +21,7 @@ public sealed class BookingAgreementLineConfiguration : IEntityTypeConfiguration
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico, copiato cross-modulo verso C3 che tiene importo/stato pagamento della voce.");
+			.HasComment("Id pubblico, copiato cross-modulo verso Payment che tiene importo/stato pagamento della voce.");
 
 		builder.Property(x => x.ReservationId)
 			.HasColumnName("reservation_id")

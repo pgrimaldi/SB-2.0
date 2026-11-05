@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -14,6 +14,14 @@ public sealed class ServiceTypeIconConfiguration : IEntityTypeConfiguration<Serv
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_service_type_icons");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
+
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasComment("Id pubblico (UUIDv7) usato dalle API.");
+
+		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_service_type_icons_public_id");
 
 		builder.Property(x => x.Type)
 			.HasColumnName("type")

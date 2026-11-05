@@ -17,6 +17,7 @@ public sealed class AgreementPriceListConfiguration : IEntityTypeConfiguration<A
 				"list_type = 'voucher' OR min_booking_days IS NULL");
 			t.HasCheckConstraint("ck_catalog_agreement_price_lists_max_voucher_quantity",
 				"list_type = 'voucher' OR max_voucher_quantity IS NULL");
+			t.HasCheckConstraint("ck_catalog_agreement_price_lists_vat", "(vat_rate IS NULL) <> (vat_nature IS NULL)");
 		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_agreement_price_lists");
@@ -26,7 +27,7 @@ public sealed class AgreementPriceListConfiguration : IEntityTypeConfiguration<A
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico (UUIDv7), copiato — C1 booking_agreement_lines referenzia il listino/voucher consumato.");
+			.HasComment("Id pubblico (UUIDv7), copiato — booking_agreement_lines (Booking) referenzia il listino/voucher consumato.");
 
 		builder.Property(x => x.PartnerId)
 			.HasColumnName("partner_id")
@@ -95,7 +96,7 @@ public sealed class AgreementPriceListConfiguration : IEntityTypeConfiguration<A
 
 		builder.Property(x => x.CreatedByUserId)
 			.HasColumnName("created_by_user_id")
-			.HasComment("public_id di identity_access_users (C5), copiato — operatore che ha creato il listino, nessuna FK cross-schema.");
+			.HasComment("public_id di identity.access_users, copiato — operatore che ha creato il listino, nessuna FK cross-schema.");
 
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at")
 			.HasDefaultValueSql("now()").HasComment("Data/ora di creazione della riga.");
@@ -132,6 +133,20 @@ public sealed class AgreementPriceListConfiguration : IEntityTypeConfiguration<A
 		builder.HasIndex(x => x.PublicId)
 			.IsUnique()
 			.HasDatabaseName("uq_catalog_agreement_price_lists_public_id");
+
+		builder.Property(x => x.IsCumulative)
+			.HasColumnName("is_cumulative")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Prezzo cumulativo: prezzo dei giorni totali su più postazioni.");
+		builder.Property(x => x.VatRate)
+			.HasColumnName("vat_rate")
+			.HasPrecision(5, 2)
+			.HasComment("Aliquota IVA in percentuale; NULL = esente, con la natura in vat_nature.");
+		builder.Property(x => x.VatNature)
+			.HasColumnName("vat_nature")
+			.HasColumnType("catalog.vat_nature")
+			.HasComment("Natura dell'esenzione IVA (n1..n6), solo senza aliquota.");
 
 		builder.HasIndex(x => new { x.PartnerId, x.ListType })
 			.HasFilter("deleted_at IS NULL")

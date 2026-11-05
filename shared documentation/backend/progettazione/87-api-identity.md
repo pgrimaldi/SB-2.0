@@ -122,7 +122,7 @@ header `x-access-token` o, per TeamSystem, come `access_token` in querystring.
 `ICustomerDirectory` (Shared): `FindOrCreateAsync`, `IsBlacklistedAsync`, `IsRegisteredContactAsync`, per Booking
 e Payment. Eventi pubblicati: `AccountRegistered`, `AccountDeleted`, `StaffContactChannelsChanged`,
 `PropertyOwnerAssigned`, `PropertyOnlineReservationSet`, `PropertySubscriptionChanged`, `BathhouseLikeChanged`,
-`AuditEntryRecorded` (salvato da Module.Audit, [88-api-audit.md](88-api-audit.md)) — gli altri oggi senza gestori (PROMEMORIA-85-5).
+`AuditEntryRecorded` (salvato da Module.Audit, [88-api-audit.md](88-api-audit.md)); `PropertyOwnerAssigned`, `PropertyOnlineReservationSet`, `PropertySubscriptionChanged` e `BathhouseLikeChanged` li gestisce Catalog ([89-api-catalog.md](89-api-catalog.md)), gli altri oggi senza gestori (PROMEMORIA-85-5).
 
 ## Configurazione da fornire per ambiente
 

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -10,7 +10,7 @@ public sealed class BathhouseAmenityConfiguration : IEntityTypeConfiguration<Bat
 	public void Configure(EntityTypeBuilder<BathhouseAmenity> builder)
 	{
 		builder.ToTable("bathhouse_amenities", "catalog", t => t.HasComment(
-			"Giunzione N:N: quali dotazioni/servizi (amenity) offre una vetrina. Sostituisce la copia JSON integrale bathouses.services."));
+			"Giunzione N:N: quali dotazioni/servizi (amenity) offre una vetrina."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_bathhouse_amenities");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();

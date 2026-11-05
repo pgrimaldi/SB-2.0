@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -59,6 +59,28 @@ public sealed class PriceListPeriodPriceConfiguration : IEntityTypeConfiguration
 			.HasColumnType("numeric(12,2)")
 			.HasComment("Prezzo per soggiorno di 14 giorni nel periodo.");
 
+		builder.Property(x => x.SectorId)
+			.HasColumnName("sector_id")
+			.HasComment("Fila/settore a cui si applicano i prezzi; NULL = tutte le file.");
+		builder.HasOne<MapSector>()
+			.WithMany()
+			.HasForeignKey(x => x.SectorId)
+			.HasConstraintName("fk_catalog_pricing_price_list_period_prices_sector")
+			.OnDelete(DeleteBehavior.Restrict);
+
+		builder.Property(x => x.HalfDay7Price)
+			.HasColumnName("half_day_7_price")
+			.HasPrecision(12, 2)
+			.HasComment("Mezza giornata per 7 giorni nel periodo: riferimento del calcolo; NULL = prezzo mezza giornata x giorni.");
+		builder.Property(x => x.HalfDay14Price)
+			.HasColumnName("half_day_14_price")
+			.HasPrecision(12, 2)
+			.HasComment("Mezza giornata per 14 giorni nel periodo.");
+		builder.Property(x => x.HalfDayMonthlyPrice)
+			.HasColumnName("half_day_monthly_price")
+			.HasPrecision(12, 2)
+			.HasComment("Mezza giornata per il mese nel periodo.");
+
 		builder.Property(x => x.MonthlyPrice)
 			.HasColumnName("monthly_price")
 			.HasColumnType("numeric(12,2)")
@@ -85,10 +107,15 @@ public sealed class PriceListPeriodPriceConfiguration : IEntityTypeConfiguration
 			.HasColumnName("deleted_at")
 			.HasComment("Soft-delete della riga tariffaria.");
 
-		builder.HasIndex(x => new { x.PriceListId, x.TariffPeriodGroup })
+		builder.HasIndex(x => new { x.PriceListId, x.SectorId, x.TariffPeriodGroup })
 			.IsUnique()
+			.AreNullsDistinct(false)
 			.HasFilter("deleted_at IS NULL")
-			.HasDatabaseName("uq_catalog_pricing_price_list_period_prices_package_period");
+			.HasDatabaseName("uq_catalog_pricing_price_list_period_prices_sector_period");
+
+		builder.HasIndex(x => x.SectorId)
+			.HasFilter("deleted_at IS NULL")
+			.HasDatabaseName("ix_catalog_pricing_price_list_period_prices_sector");
 
 		builder.HasIndex(x => x.TariffPeriodGroup)
 			.HasDatabaseName("ix_catalog_pricing_price_list_period_prices_period");

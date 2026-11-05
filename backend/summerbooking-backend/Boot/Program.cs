@@ -1,9 +1,11 @@
 ﻿using Boot.Web;
+using FluentValidation;
 using Microsoft.OpenApi;
 using Module.Audit;
 using Module.Audit.Endpoints;
 using Module.Booking;
 using Module.Catalog;
+using Module.Catalog.Endpoints;
 using Module.Chatbot;
 using Module.FiscalPrint;
 using Module.Fiskaly;
@@ -14,6 +16,7 @@ using Module.Notification;
 using Module.Payment;
 using Module.Privacy;
 using Module.Switchboard;
+using Shared.Security;
 
 namespace Boot
 {
@@ -51,6 +54,10 @@ namespace Boot
 			if (args.Length > 0 && args[0] == RetentionEnableCommand.Verb)
 				return RetentionEnableCommand.RunAsync(args).GetAwaiter().GetResult();
 
+			// Validazione: su un campo ci si ferma al primo errore. Senza, dopo NotEmpty() le regole successive
+			// (Must, Count…) girano anche sul valore mancante e finiscono in un'eccezione invece che in un 400.
+			ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
+
 			var builder = WebApplication.CreateBuilder(args);
 
 			// Add services to the container.
@@ -77,12 +84,11 @@ namespace Boot
 					Scheme = "bearer",
 					BearerFormat = "JWT",
 				});
-				// Senza il requisito Swagger UI mostra "Authorize" ma non invia il token. Sugli endpoint
-				// anonimi l'header viene ignorato.
-				x.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-				{
-					[new OpenApiSecuritySchemeReference("Bearer", document)] = [],
-				});
+				// Lucchetto (e invio del token da Swagger UI) solo sugli endpoint che lo chiedono.
+				x.OperationFilter<BearerOnlyWhenRequired>();
+				// Nullable e campi obbligatori dai tipi C# e dai validatori.
+				x.SupportNonNullableReferenceTypes();
+				x.SchemaFilter<RequiredFromTypesAndValidators>();
 			});
 
 			// Moduli — uno per schema PostgreSQL, registrati tutti qui: Boot e' il composition
@@ -145,7 +151,14 @@ namespace Boot
 			app.MapHealthChecks("/health").AllowAnonymous();
 
 			// Endpoint dei moduli
+			// Sfida anti-robot per i form pubblici (prova di lavoro, la risolve il browser).
+			app.MapGet("/api/security/human-challenge", (IHumanChallengeIssuer issuer) => Results.Ok(issuer.Create()))
+				.WithTags("Sicurezza")
+				.Produces<HumanChallenge>()
+				.AllowAnonymous()
+				.RequireRateLimiting(RateLimitPolicies.Auth);
 			app.MapIdentityEndpoints();
+			app.MapCatalogEndpoints();
 			app.MapAuditEndpoints();
 
 			app.Run();

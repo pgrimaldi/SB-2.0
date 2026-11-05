@@ -100,6 +100,15 @@ Correzioni rispetto al legacy:
 |---|---|
 | `servicetypes_icons.category` (`varchar(500)`) | colonna morta al 100% — `NULL`/`''` su tutte le 61 righe, mai letta |
 
+### public_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration CatalogLookups).
+- **Descrizione**: Id pubblico (UUIDv7) usato dalle API.
+- **Tipo**: `uuid`.
+- **Default**: `'00000000-0000-0000-0000-000000000000'::uuid`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON.

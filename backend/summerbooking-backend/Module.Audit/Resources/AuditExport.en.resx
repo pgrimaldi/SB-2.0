@@ -186,6 +186,234 @@
   <data name="Action_identity_external_token_denied" xml:space="preserve">
     <value>Token denied to a partner</value>
   </data>
+  <data name="Action_catalog_inventory_item_created" xml:space="preserve">
+    <value>Inventory item created</value>
+  </data>
+  <data name="Action_catalog_inventory_item_updated" xml:space="preserve">
+    <value>Inventory item updated</value>
+  </data>
+  <data name="Action_catalog_inventory_item_deleted" xml:space="preserve">
+    <value>Inventory item deleted</value>
+  </data>
+  <data name="Action_catalog_season_updated" xml:space="preserve">
+    <value>Season dates updated</value>
+  </data>
+  <data name="Action_catalog_tariff_period_created" xml:space="preserve">
+    <value>Rate period created</value>
+  </data>
+  <data name="Action_catalog_tariff_period_updated" xml:space="preserve">
+    <value>Rate period updated</value>
+  </data>
+  <data name="Action_catalog_tariff_period_deleted" xml:space="preserve">
+    <value>Rate period deleted</value>
+  </data>
+  <data name="Action_catalog_sector_created" xml:space="preserve">
+    <value>Sector created</value>
+  </data>
+  <data name="Action_catalog_sector_updated" xml:space="preserve">
+    <value>Sector updated</value>
+  </data>
+  <data name="Action_catalog_sector_deleted" xml:space="preserve">
+    <value>Sector deleted</value>
+  </data>
+  <data name="Action_catalog_map_settings_updated" xml:space="preserve">
+    <value>Map settings changed</value>
+  </data>
+  <data name="Action_catalog_map_background_updated" xml:space="preserve">
+    <value>Map background changed</value>
+  </data>
+  <data name="Action_catalog_map_icons_updated" xml:space="preserve">
+    <value>Map icons changed</value>
+  </data>
+  <data name="Action_catalog_map_spots_created" xml:space="preserve">
+    <value>Spots added to the map</value>
+  </data>
+  <data name="Action_catalog_map_spot_updated" xml:space="preserve">
+    <value>Map spot changed</value>
+  </data>
+  <data name="Action_catalog_map_spots_deleted" xml:space="preserve">
+    <value>Spots removed from the map</value>
+  </data>
+  <data name="Action_catalog_map_grid_changed" xml:space="preserve">
+    <value>Map rows or columns changed</value>
+  </data>
+  <data name="Action_catalog_map_reset" xml:space="preserve">
+    <value>Map reset</value>
+  </data>
+  <data name="Action_catalog_property_info_updated" xml:space="preserve">
+    <value>Property information changed</value>
+  </data>
+  <data name="Action_catalog_property_amenities_updated" xml:space="preserve">
+    <value>Property amenities changed</value>
+  </data>
+  <data name="Action_catalog_property_photos_updated" xml:space="preserve">
+    <value>Property photos changed</value>
+  </data>
+  <data name="Action_catalog_property_documents_updated" xml:space="preserve">
+    <value>PDF price list or menu changed</value>
+  </data>
+  <data name="Action_catalog_online_settings_updated" xml:space="preserve">
+    <value>Online booking options changed</value>
+  </data>
+  <data name="Action_catalog_service_online_settings_updated" xml:space="preserve">
+    <value>Online service booking options changed</value>
+  </data>
+  <data name="Action_catalog_stay_limits_updated" xml:space="preserve">
+    <value>Online booking limits changed</value>
+  </data>
+  <data name="Action_catalog_online_legend_updated" xml:space="preserve">
+    <value>Online map legend changed</value>
+  </data>
+  <data name="Action_catalog_service_created" xml:space="preserve">
+    <value>Service created</value>
+  </data>
+  <data name="Action_catalog_service_updated" xml:space="preserve">
+    <value>Service changed</value>
+  </data>
+  <data name="Action_catalog_service_deleted" xml:space="preserve">
+    <value>Service deleted</value>
+  </data>
+  <data name="Action_catalog_automatic_price_created" xml:space="preserve">
+    <value>Automatic price created</value>
+  </data>
+  <data name="Action_catalog_automatic_price_updated" xml:space="preserve">
+    <value>Automatic price changed</value>
+  </data>
+  <data name="Action_catalog_automatic_price_deleted" xml:space="preserve">
+    <value>Automatic price deleted</value>
+  </data>
+  <data name="Action_catalog_table_service_created" xml:space="preserve">
+    <value>Table service created</value>
+  </data>
+  <data name="Action_catalog_table_service_updated" xml:space="preserve">
+    <value>Table service changed</value>
+  </data>
+  <data name="Action_catalog_table_service_deleted" xml:space="preserve">
+    <value>Table service deleted</value>
+  </data>
+  <data name="Action_catalog_price_list_created" xml:space="preserve">
+    <value>Price list item created</value>
+  </data>
+  <data name="Action_catalog_price_list_updated" xml:space="preserve">
+    <value>Price list item changed</value>
+  </data>
+  <data name="Action_catalog_price_list_deleted" xml:space="preserve">
+    <value>Price list item deleted</value>
+  </data>
+  <data name="Action_catalog_price_list_duplicated" xml:space="preserve">
+    <value>Price list item duplicated</value>
+  </data>
+  <data name="Action_catalog_price_lists_imported" xml:space="preserve">
+    <value>Price list imported from file</value>
+  </data>
+  <data name="Action_catalog_reduced_season_created" xml:space="preserve">
+    <value>Reduced seasonal price created</value>
+  </data>
+  <data name="Action_catalog_reduced_season_updated" xml:space="preserve">
+    <value>Reduced seasonal price changed</value>
+  </data>
+  <data name="Action_catalog_reduced_season_deleted" xml:space="preserve">
+    <value>Reduced seasonal price deleted</value>
+  </data>
+  <data name="Action_catalog_discount_created" xml:space="preserve">
+    <value>Discount created</value>
+  </data>
+  <data name="Action_catalog_discount_updated" xml:space="preserve">
+    <value>Discount changed</value>
+  </data>
+  <data name="Action_catalog_discount_deleted" xml:space="preserve">
+    <value>Discount deleted</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_created" xml:space="preserve">
+    <value>Partner created</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_updated" xml:space="preserve">
+    <value>Partner changed</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_deleted" xml:space="preserve">
+    <value>Partner deleted</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_duplicated" xml:space="preserve">
+    <value>Partner duplicated</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_created" xml:space="preserve">
+    <value>Partner price list created</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_updated" xml:space="preserve">
+    <value>Partner price list changed</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_deleted" xml:space="preserve">
+    <value>Partner price list deleted</value>
+  </data>
+  <data name="Action_catalog_agreement_report_cancelled" xml:space="preserve">
+    <value>Partner report cancelled</value>
+  </data>
+  <data name="Action_catalog_revenue_settings_updated" xml:space="preserve">
+    <value>Revenue settings changed</value>
+  </data>
+  <data name="Action_catalog_suggested_prices_computed" xml:space="preserve">
+    <value>Suggested prices computed</value>
+  </data>
+  <data name="Action_catalog_suggested_prices_applied" xml:space="preserve">
+    <value>Suggested prices applied</value>
+  </data>
+  <data name="Action_catalog_revenue_weights_updated" xml:space="preserve">
+    <value>Suggested price weights changed</value>
+  </data>
+  <data name="Action_catalog_revenue_standard_periods_updated" xml:space="preserve">
+    <value>Suggested price standard periods changed</value>
+  </data>
+  <data name="Action_catalog_platform_property_status_changed" xml:space="preserve">
+    <value>Property status changed</value>
+  </data>
+  <data name="Action_catalog_platform_property_trashed" xml:space="preserve">
+    <value>Property moved to trash</value>
+  </data>
+  <data name="Action_catalog_platform_property_restored" xml:space="preserve">
+    <value>Property restored</value>
+  </data>
+  <data name="Action_catalog_platform_property_purged" xml:space="preserve">
+    <value>Property permanently deleted</value>
+  </data>
+  <data name="Action_catalog_platform_property_showcase_updated" xml:space="preserve">
+    <value>Property region or badges changed</value>
+  </data>
+  <data name="Action_catalog_platform_map_icon_saved" xml:space="preserve">
+    <value>Catalogue icon saved</value>
+  </data>
+  <data name="Action_catalog_platform_map_icon_deleted" xml:space="preserve">
+    <value>Catalogue icon deleted</value>
+  </data>
+  <data name="Action_catalog_platform_beach_element_saved" xml:space="preserve">
+    <value>Beach element saved</value>
+  </data>
+  <data name="Action_catalog_platform_beach_element_deleted" xml:space="preserve">
+    <value>Beach element deleted</value>
+  </data>
+  <data name="Action_catalog_platform_badge_saved" xml:space="preserve">
+    <value>Badge saved</value>
+  </data>
+  <data name="Action_catalog_platform_badge_deleted" xml:space="preserve">
+    <value>Badge deleted</value>
+  </data>
+  <data name="Action_catalog_platform_region_saved" xml:space="preserve">
+    <value>Region saved</value>
+  </data>
+  <data name="Action_catalog_platform_region_deleted" xml:space="preserve">
+    <value>Region deleted</value>
+  </data>
+  <data name="Action_catalog_platform_showcase_updated" xml:space="preserve">
+    <value>Showcase changed</value>
+  </data>
+  <data name="Action_catalog_service_duplicated" xml:space="preserve">
+    <value>Service duplicated</value>
+  </data>
+  <data name="Action_catalog_automatic_price_duplicated" xml:space="preserve">
+    <value>Automatic price duplicated</value>
+  </data>
+  <data name="Action_catalog_table_service_duplicated" xml:space="preserve">
+    <value>Table service duplicated</value>
+  </data>
   <data name="Action_audit_entries_exported" xml:space="preserve">
     <value>Activity log exported</value>
   </data>

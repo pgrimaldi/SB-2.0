@@ -274,6 +274,12 @@ Correzioni rispetto al legacy:
 - **Default**: `NULL`.
 - **Nullabile**: Sì.
 - **Relazioni**: —.
+- **Decisione del committente (2026-10-30)**: check-in e check-out valgono per **l'intera prenotazione**, non per
+  postazione: le tre colonne `checked_in_at` / `checked_out_at` / `checkout_effective_at` vanno spostate sulla
+  testata [`booking_reservations`](booking_reservations.md) con la prima migration delle API di Booking (lo
+  storico migrato le ha solo sulla riga legacy più vecchia, quindi il passaggio è diretto). Un check-out anticipato
+  libera i giorni rimasti per altri clienti, senza rimborso né credito. Gli **ingressi** («Segnala ingresso»),
+  invece, sono per **ombrellone** e per giorno: tabella nuova legata alla riga, non alla testata.
 
 ### checked_out_at
 - **Legacy**: `bookings.checkOut` (`tinyint`)

@@ -172,9 +172,14 @@
     concorrenti sulla stessa postazione/data.
     *(→ [cliente-finale/04](cliente-finale/04-prenotazione-postazioni.md) §5)*
 38. **Controllo magazzino** — solo sui nuovi inserimenti, non atomico, accoppiamento per **nome
-    stringa** con alias hardcoded (`"sedia regista"` → `"Directors Chair"`). Nessun evento di
-    sotto‑scorta al superamento della soglia.
-    *(→ [stabilimento/08-magazzino.md](stabilimento/08-magazzino.md) §5)*
+    stringa** con alias hardcoded (`"sedia regista"` → `"Directors Chair"`). Nessun evento server di
+    sotto‑scorta: esiste solo l'avviso «in esaurimento» calcolato dal client nella sezione News della
+    mappa (disponibilità nelle date selezionate < soglia, `front-pre/src/services/WarehouseItemService.js:44-57`).
+    *(→ [stabilimento/08-magazzino.md](stabilimento/08-magazzino.md) §4bis, §5)*
+    **Decisione del committente (2026-10)**: `isEnable` è l'interruttore dell'avviso soglia (non
+    esclude più l'articolo dal controllo di giacenza); avviso sul giorno corrente sotto soglia, in
+    campanella e News, una sola volta finché la scorta non risale, non a cameriere/affiliato/marketing;
+    elenco fisso degli articoli; eliminazione bloccata se l'articolo è usato in pacchetti (A1–A4).
 39. **Capienza/sovrapposizione slot orari servizi** — verificata solo lato client.
     *(→ [stabilimento/03-cassa.md](stabilimento/03-cassa.md) §1,
     [cliente-finale/05](cliente-finale/05-prenotazione-servizi-e-listino.md) §1)*

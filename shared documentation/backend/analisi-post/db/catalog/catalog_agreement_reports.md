@@ -97,6 +97,22 @@ righe annullate: due modi di dire la stessa cosa. Qui restano separati con signi
 `cancelled` è lo stato del report (annullato da chi lo gestisce, resta visibile nello storico),
 `deleted_at` è il soft-delete della riga. Chi porta avanti la feature non deve riallinearli.
 
+### created_at
+- **Nota**: colonna presente dalla prima versione dello schema; mancava solo in questa scheda (aggiunta il 2026-10-26).
+- **Descrizione**: Creazione della riga.
+- **Tipo**: `timestamp with time zone`.
+- **Default**: `now()`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### updated_at
+- **Nota**: colonna presente dalla prima versione dello schema; mancava solo in questa scheda (aggiunta il 2026-10-26).
+- **Descrizione**: Ultima modifica della riga.
+- **Tipo**: `timestamp with time zone`.
+- **Default**: `now()`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Dati da migrare
 
 **Nessuno.** Verificato sui tre database il 2026-10-02:

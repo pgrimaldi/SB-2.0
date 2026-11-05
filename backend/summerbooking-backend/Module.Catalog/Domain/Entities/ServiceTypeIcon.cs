@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -10,6 +10,7 @@ namespace Module.Catalog.Domain.Entities;
 public sealed class ServiceTypeIcon : IAuditable, ISoftDeletable
 {
 	public int Id { get; private set; }
+	public Guid PublicId { get; private set; }
 	public ServiceSaleKind Type { get; private set; }
 	public string Name { get; private set; } = null!;
 	public long IconAssetId { get; private set; }

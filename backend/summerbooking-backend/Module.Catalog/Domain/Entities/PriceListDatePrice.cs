@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -20,4 +20,6 @@ public sealed class PriceListDatePrice : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private PriceListDatePrice() { }
+
+	internal static PriceListDatePrice Holiday(DateOnly date) => new() { Kind = DatePriceKind.Holiday, PriceDate = date };
 }

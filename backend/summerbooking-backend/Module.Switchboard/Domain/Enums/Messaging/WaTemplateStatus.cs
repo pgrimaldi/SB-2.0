@@ -1,6 +1,6 @@
-namespace Module.Switchboard.Domain.Enums.Messaging;
+﻿namespace Module.Switchboard.Domain.Enums.Messaging;
 
-/// <summary>Stato di approvazione del template lato Meta (passthrough esteso oltre i 3 valori del legacy).</summary>
+/// <summary>Stato di approvazione del template lato Meta (passthrough dei valori di Meta).</summary>
 public enum WaTemplateStatus
 {
 	Pending = 0,

@@ -1,5 +1,8 @@
 # Tabella `catalog_pricing_price_list_reduced_windows`
 
+> **SOSTITUITA il 2026-10-25** (migration PriceListsCatalog): le finestre ridotte per pacchetto sono diventate voci dello stabilimento, [`catalog_pricing_reduced_seasons`](catalog_pricing_reduced_seasons.md), con il prezzo per pacchetto e fila in [`catalog_pricing_price_list_reduced_prices`](catalog_pricing_price_list_reduced_prices.md) (decisione P2). La tabella non esiste più; scheda tenuta come storico.
+
+
 > **Dominio**: C2 — `catalog` · **sottoarea**: `pricing` · **schema**: `catalog` · **nome flat**:
 > `catalog_pricing_price_list_reduced_windows` · **forma canonica**:
 > `catalog.pricing_price_list_reduced_windows`.

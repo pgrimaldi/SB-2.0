@@ -244,6 +244,51 @@ Correzioni rispetto al legacy:
 - **Note**: ~59% delle righe legacy sono `isDeleted = 1` — in migrazione vanno portate con `deleted_at`
   valorizzato (servono per risolvere gli snapshot pacchetto delle prenotazioni storiche).
 
+### is_map_assignable
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Articoli aggiuntivi: assegnabile su mappa.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### is_sector_restricted
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Aree abilitate: solo le file/settori con un prezzo in pricing_price_list_sector_prices; false = tutte.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### max_additional_items
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Pacchetti: numero massimo di articoli aggiuntivi; NULL = nessun limite.
+- **Tipo**: `smallint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### vat_nature
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Natura dell'esenzione IVA (n1..n6), solo senza aliquota.
+- **Tipo**: `catalog.vat_nature`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### vat_rate
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Aliquota IVA in percentuale; NULL = esente, con la natura in vat_nature.
+- **Tipo**: `numeric(5,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Lookup `catalog_pricing_calculation_methods`
 
 | Colonna | Tipo | Note |

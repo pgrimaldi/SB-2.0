@@ -103,6 +103,19 @@ checkout `held` da troppo tempo, sessioni di pagamento orfane, proiezioni di dis
 disallineate. È la rete di sicurezza per i casi che il job frequente `ReleaseExpiredHolds` non ha
 intercettato (host fermo, coda bloccata, bug).
 
+> **✅ Job notturno di Catalog (implementato il 2026-10-27).** `Module.Catalog/Infrastructure/Infras/CatalogNightlyJob.cs`,
+> un `BackgroundService` nel processo dell'host (finché non esiste un host dedicato ai job; con più istanze il lavoro
+> si ripete, ed è innocuo).
+>
+> | Quando | Cosa fa |
+> |---|---|
+> | all'avvio dell'host | ricostruisce tutta la proiezione di ricerca `catalog.search_bathhouses` (pochi secondi) e costruisce **solo gli snapshot mancanti**, così dopo una migrazione dei dati ricerca e snapshot sono subito allineati |
+> | ogni notte alle **00:05** (Europe/Rome) | azzera i contatori del banner sconto, ricostruisce tutta la proiezione di ricerca (i prezzi «da» dipendono dal giorno) e **tutti** gli snapshot di configurazione (rete di sicurezza) |
+>
+> Nel corso della giornata proiezione e snapshot non aspettano il job: si aggiornano al salvataggio, dalla
+> `UnitOfWork` di Catalog, per i soli stabilimenti e tipi di snapshot toccati. Una ricostruzione a mano si fa con
+> `POST /api/catalog/admin/snapshots/rebuild` ([89-api-catalog.md](89-api-catalog.md)). Un errore si logga e si riprova la notte dopo.
+
 ### 1.5 Job di retention e archiviazione (nuovi, politica validata dal titolare)
 
 Il legacy **non ha mai cancellato né archiviato nulla**: tutto resta a tempo indeterminato nel DB caldo.

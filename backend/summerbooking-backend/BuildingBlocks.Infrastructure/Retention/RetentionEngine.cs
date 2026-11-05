@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -703,7 +703,7 @@ public sealed class RetentionEngine(IArchiveStore archive, ILogger<RetentionEngi
 		{
 			outcome.Status = PolicyRunStatus.Skipped;
 			// Il motivo vero, quando c'e' un evento, e' che l'evento va derivato: dirlo come «manca la
-			// colonna» mandava a cercare una colonna che non deve esistere (era P8). L'unico evento che
+			// colonna» mandava a cercare una colonna che non deve esistere. L'unico evento che
 			// il motore sa derivare e' property_ceased, vedi PropertyCeasedPredicate.
 			outcome.SkipReason = string.IsNullOrEmpty(policy.ReferenceEvent)
 				? "azione su storage senza colonna di decorrenza e senza evento: niente da cui contare"

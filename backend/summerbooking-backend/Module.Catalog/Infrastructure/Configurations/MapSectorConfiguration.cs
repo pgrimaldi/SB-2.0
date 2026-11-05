@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -10,7 +10,7 @@ public sealed class MapSectorConfiguration : IEntityTypeConfiguration<MapSector>
 	public void Configure(EntityTypeBuilder<MapSector> builder)
 	{
 		builder.ToTable("map_sectors", "catalog", t => t.HasComment(
-			"Settori/file in cui è divisa la spiaggia di uno stabilimento. Sostituisce l'array JSON sectors_rows.sectors."));
+			"Settori/file in cui è divisa la spiaggia di uno stabilimento."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_map_sectors");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -19,7 +19,7 @@ public sealed class MapSectorConfiguration : IEntityTypeConfiguration<MapSector>
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, copiato cross-modulo da C1 (booking_lines.sector_id, resource_availability_daily.sector_id).");
+			.HasComment("Id pubblico stabile, copiato cross-modulo da Booking (booking_lines.sector_id, resource_availability_daily.sector_id).");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")

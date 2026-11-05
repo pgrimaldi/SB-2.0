@@ -225,6 +225,10 @@ Correzioni rispetto al legacy:
 - **Note**: semantica da riconfermare col team prodotto in fase di migrazione
   ([`docs/03-gestione-dati.md` §2.4bis](../../../progettazione/03-gestione-dati.md)); `status 2` legacy è raro e
   transitorio.
+- **Decisione del committente (2026-10-30)**: lo stato «non presentato» **non serve** (basta il check-in):
+  `no_show` va tolto dall'enum con la prima migration delle API di Booking. Da aggiungere invece il motivo
+  dell'annullamento (`cancellation_reason`), che serve a riattivare solo le prenotazioni annullate per il cestino
+  dello stabilimento.
 
 ### online_confirmation_state
 - **Legacy**: `bookings.is_booking_confirmed` (`int`, semantica invertita: `1` = "da confermare", mai avanzato — bug)
@@ -237,6 +241,12 @@ Correzioni rispetto al legacy:
 - **Nullabile**: No.
 - **Relazioni**: `confirmBookingByReservationCode` porta `pending → confirmed` (nel legacy lo stato
   **non** avanzava: si limitava a inviare l'email).
+- **Correzione (2026-10-30)**: a confermare è il **gestore**, non il cliente: nel legacy l'email allo
+  stabilimento ha i pulsanti «Conferma» e «Annulla» che aprono `/confirmationbooking/manager/{lingua}/{codice}`
+  ([BL cliente-finale/04 §4](../../../analisi-pre/business-logic/cliente-finale/04-prenotazione-postazioni.md)).
+  Decisioni del committente: postazione occupata finché è in attesa, incasso dopo la conferma, **scadenza dopo
+  48 ore** senza conferma. Servono quindi la scadenza (`confirmation_expires_at`) e chi ha confermato
+  (`confirmed_by_user_id`, `confirmed_at`); un rifiuto del gestore diventa un annullamento con motivo.
 
 ### operator_user_id
 - **Legacy**: `bookings.booking_agent` (stringa id, dal body, immutabile) / `service_reservation.agent`

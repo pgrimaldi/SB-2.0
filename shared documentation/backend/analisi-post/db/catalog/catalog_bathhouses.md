@@ -274,6 +274,42 @@ Correzioni rispetto al legacy:
 | `bathouses.services` (JSON) | → [`catalog_bathhouse_amenities`](catalog_bathhouse_amenities.md) |
 | `bathouses.photos` (JSON) | → [`catalog_bathhouse_photos`](catalog_bathhouse_photos.md) |
 
+### virtual_tour_url
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PropertyInfo).
+- **Descrizione**: Link al tour virtuale (Matterport, 360°), mostrato sulla pagina pubblica se valorizzato.
+- **Tipo**: `character varying(500)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### is_region_manual
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration SystemAdminCatalog).
+- **Descrizione**: Regione scelta a mano dal systemadmin: non si ricalcola dall'indirizzo.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### like_count
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration SystemAdminCatalog).
+- **Descrizione**: «Mi piace» dei clienti, aggiornati dagli eventi di Identity.
+- **Tipo**: `integer`.
+- **Default**: `0`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### region_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration SystemAdminCatalog).
+- **Descrizione**: Regione della vetrina: automatica dalla colonna region, o scelta a mano.
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_showcase_regions.id`](catalog_showcase_regions.md) `ON DELETE SET NULL`.
+
 ## Valutazione JSON
 
 Nessun JSON. `photos` → giunzione ordinata; `services` → giunzione N:N. Coordinate e politiche → colonne

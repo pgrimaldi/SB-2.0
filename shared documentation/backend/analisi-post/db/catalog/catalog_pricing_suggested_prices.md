@@ -151,6 +151,24 @@ riscritto per intero ad ogni ricalcolo, senza invalidazione della cache. Solo ~1
 - **Note**: tabella di puro output algoritmico: le righe vecchie (date passate) si possono
   hard-deletare con un job di retention; `deleted_at` presente per uniformità.
 
+### sector_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration RevenueCatalog).
+- **Descrizione**: Fila del prezzo di listino di partenza; NULL = tutte le file.
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_map_sectors.id`](catalog_map_sectors.md) `ON DELETE RESTRICT`.
+
+### tariff_period_group
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration RevenueCatalog).
+- **Descrizione**: Periodo tariffario della data, al momento del calcolo.
+- **Tipo**: `smallint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. Il JSON per-anno riscritto in-place → righe per (pacchetto, data). Elimina anche il bug
@@ -311,3 +329,7 @@ public sealed class SuggestedPriceConfiguration : IEntityTypeConfiguration<Sugge
   l'"anno" del JSON diventa la parte anno di `price_date`; i 3 booleani mutuamente esclusivi
   (`isSuggestedPriceApplied`/`isOriginalPriceApplied`/`isDiscountApplied`) → `applied_mode`.
 - Retention: job periodico che rimuove (hard-delete) le righe con `price_date` nel passato.
+> **Allineamento 2026-10-26** (migration RevenueCatalog): la chiave unica è ora
+> `uq_catalog_pricing_suggested_prices_package_date_sector` su `(price_list_id, price_date, sector_id)` con
+> `NULLS NOT DISTINCT`, filtrata su `deleted_at IS NULL`; `period_label` resta come traccia dell'etichetta legacy. Una
+> riga per giorno e fila: delle varianti legacy resta quella del periodo che vale nel giorno.

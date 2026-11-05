@@ -10,7 +10,7 @@ public sealed class ServiceSaleItemTimeSlotConfiguration : IEntityTypeConfigurat
 	public void Configure(EntityTypeBuilder<ServiceSaleItemTimeSlot> builder)
 	{
 		builder.ToTable("service_sale_item_time_slots", "catalog", t => t.HasComment(
-			"Fascia oraria interna prenotabile di un servizio a fascia oraria (kind = hourly), con eventuale prezzo dedicato."));
+			"Durata prenotabile di un servizio orario (kind = hourly) con il suo prezzo, dentro una disponibilità (service_hourly_options)."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_service_sale_item_time_slots");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -18,19 +18,28 @@ public sealed class ServiceSaleItemTimeSlotConfiguration : IEntityTypeConfigurat
 		builder.Property(x => x.PublicId)
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
-			.HasComment("Id pubblico, copiato cross-modulo: C1 lo usa come time_slot_id in booking_service_time_slots.");
+			.HasComment("Id pubblico, copiato cross-modulo: Booking lo usa come time_slot_id in booking_service_time_slots.");
 
 		builder.Property(x => x.SaleItemId)
 			.HasColumnName("sale_item_id")
 			.IsRequired()
 			.HasComment("Servizio a fascia oraria a cui appartiene la fascia.");
 
+		builder.Property(x => x.OptionId)
+			.HasColumnName("option_id")
+			.HasComment("Disponibilità a cui appartiene la durata (service_hourly_options).");
+
+		builder.Property(x => x.IsCustom)
+			.HasColumnName("is_custom")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Durata personalizzata dal gestore, oltre a quelle standard.");
+
 		builder.Property(x => x.Label)
 			.HasColumnName("label")
 			.HasMaxLength(40)
 			.IsRequired()
-			.HasComment("Etichetta della fascia mostrata al cliente. Nei dati legacy è sempre una "
-				+ "durata (\"30 min\", \"1 hr 30 min\"), mai un intervallo: vedi duration_minutes.");
+			.HasComment("Etichetta della fascia mostrata al cliente (es. \"30 min\", \"1 hr 30 min\").");
 
 		builder.Property(x => x.SlotStart)
 			.HasColumnName("slot_start")
@@ -43,9 +52,7 @@ public sealed class ServiceSaleItemTimeSlotConfiguration : IEntityTypeConfigurat
 		builder.Property(x => x.DurationMinutes)
 			.HasColumnName("duration_minutes")
 			.HasComment("Durata della fascia in minuti, quando il servizio è venduto a durata invece che a "
-				+ "orario fisso. I dati legacy sono tutti di questa forma (undici valori: 10/15/30/45/60/90/"
-				+ "120/180/240/300/360 minuti), quindi per lo storico migrato è questa la colonna valorizzata "
-				+ "e slot_start/slot_end restano NULL. Per una fascia a orario assoluto vale il contrario: la "
+				+ "orario fisso (slot_start/slot_end NULL). Per una fascia a orario assoluto vale il contrario: la "
 				+ "durata si calcola e questa resta NULL.");
 
 		builder.Property(x => x.Price)
@@ -73,6 +80,10 @@ public sealed class ServiceSaleItemTimeSlotConfiguration : IEntityTypeConfigurat
 		builder.HasIndex(x => x.PublicId)
 			.IsUnique()
 			.HasDatabaseName("uq_catalog_service_sale_item_time_slots_public_id");
+
+		builder.HasIndex(x => x.OptionId, "ix_catalog_service_sale_item_time_slots_option")
+			.HasFilter("option_id IS NOT NULL")
+			.HasDatabaseName("ix_catalog_service_sale_item_time_slots_option");
 
 		builder.HasIndex(x => new { x.SaleItemId, x.SortOrder })
 			.HasFilter("deleted_at IS NULL")

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -10,7 +10,7 @@ public sealed class AgreementPriceListItemConfiguration : IEntityTypeConfigurati
 	public void Configure(EntityTypeBuilder<AgreementPriceListItem> builder)
 	{
 		builder.ToTable("agreement_price_list_items", "catalog", t => t.HasComment(
-			"Componente di un listino/voucher hotel: articolo di magazzino, servizio incluso o pacchetto collegato."));
+			"Componente di un listino/voucher di una convenzione: articolo di magazzino, servizio incluso o pacchetto collegato."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_agreement_price_list_items");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -31,14 +31,14 @@ public sealed class AgreementPriceListItemConfiguration : IEntityTypeConfigurati
 			.HasColumnName("inventory_item_id")
 			.HasComment("Articolo di magazzino incluso (valorizzato solo per item_kind inventory_item/area_item).");
 
-		builder.Property(x => x.IncludedServiceId)
-			.HasColumnName("included_service_id")
-			.HasComment("Dotazione/servizio incluso.");
+		builder.Property(x => x.IncludedSaleItemId)
+			.HasColumnName("included_sale_item_id")
+			.HasComment("Servizio venduto incluso nel pacchetto.");
 
 		builder.Property(x => x.LinkedPriceListId)
 			.HasColumnName("linked_price_list_id")
 			.HasColumnType("integer")
-			.HasComment("Listino hotel a cui questo additional è vincolato.");
+			.HasComment("Listino della convenzione a cui questo additional è vincolato.");
 
 		builder.Property(x => x.Quantity)
 			.HasColumnName("quantity")
@@ -66,10 +66,10 @@ public sealed class AgreementPriceListItemConfiguration : IEntityTypeConfigurati
 			.HasConstraintName("fk_catalog_agreement_price_list_items_inventory_item")
 			.OnDelete(DeleteBehavior.Restrict);
 
-		builder.HasOne(x => x.IncludedService)
+		builder.HasOne<ServiceSaleItem>()
 			.WithMany()
-			.HasForeignKey(x => x.IncludedServiceId)
-			.HasConstraintName("fk_catalog_agreement_price_list_items_included_service")
+			.HasForeignKey(x => x.IncludedSaleItemId)
+			.HasConstraintName("fk_catalog_agreement_price_list_items_included_sale_item")
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.HasOne(x => x.LinkedPriceList)

@@ -52,6 +52,13 @@ toccando una card il client carica poi lo snapshot `public_showcase`
 > Il flag che distingue i due casi è lo stato della property — oggi non ancora modellato: vedi la nota
 > "Manca lo stato cessato" in [`catalog_properties`](catalog_properties.md).
 
+> **✅ Realizzata il 2026-10-27.** Non c'è rebuild per evento: la `UnitOfWork` di Catalog, dopo il commit,
+> riscrive in SQL (`SearchProjection`) le righe degli stabilimenti toccati; il conteggio dei «mi piace»
+> arriva da Identity con un evento. All'avvio dell'host e ogni notte alle 00:05 si ricostruisce tutta
+> (i prezzi «da» dipendono dal giorno). Colonne aggiunte: `region_id`, `subscribed_since`,
+> `is_online_bookable`, `is_contact_only`. API: ricerca pubblica in
+> [89-api-catalog.md](../../../progettazione/89-api-catalog.md).
+
 **Aggiornamento**: stesso modello degli snapshot — rebuild **sincrono** su evento
 (`BathhousePublished`, `AmenitiesChanged`, `PriceListChanged`, `BathhouseLikeCountChanged` da C5, …) +
 job **notturno** di ricostruzione totale + utility manuale
@@ -215,6 +222,42 @@ job **notturno** di ricostruzione totale + utility manuale
 - **Default**: `NULL`.
 - **Nullabile**: Sì.
 - **Relazioni**: —.
+
+### is_contact_only
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration PublicShowcase).
+- **Descrizione**: Struttura importata: solo contatti.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### is_online_bookable
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration PublicShowcase).
+- **Descrizione**: Prenotabile online adesso (stato, vendite, abbonamento, pacchetti online).
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### region_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration PublicShowcase).
+- **Descrizione**: Regione della vetrina (copiata da catalog.bathhouses.region_id, nessuna FK).
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### subscribed_since
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration PublicShowcase).
+- **Descrizione**: Inizio dell'abbonamento al gestionale: secondo criterio della popolarità.
+- **Tipo**: `date`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
 
 ## Valutazione JSON
 
@@ -414,6 +457,9 @@ intra-modulo perché qui non è un vincolo di integrità ma una copia derivata).
   `BathhouseUpdated`, `AmenitiesChanged`, `PriceListChanged`, `BathhouseLikeCountChanged` (da C5).
 - Job notturno `RebuildAllSearchBathhouses()` come rete di sicurezza contro drift; comando manuale
   `snapshots rebuild --search` per un rebuild mirato.
+  *Realizzato (2026-10-27)*: niente handler per evento né comando manuale; `SearchProjection` riscrive
+  in SQL le righe toccate dopo ogni salvataggio di Catalog, e `CatalogNightlyJob` ricostruisce tutto
+  all'avvio e alle 00:05.
 - Repository di **sola lettura** con query specifiche (per città/regione, per geo+raggio, per servizi via
   `amenity_ids @> ARRAY[...]`, per fascia di prezzo, per nome via trigram) — nessun metodo di scrittura
   esposto all'Application al di fuori del builder di rebuild.

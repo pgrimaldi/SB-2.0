@@ -96,14 +96,16 @@ Vocabolario chiuso, oggi un intero senza enum a DB (vedi [`properties.md`](../..
 | `0` | Registrato dall'utente, **in attesa di approvazione** | `property.register` alla creazione |
 | `1` | **Approvato** dal systemadmin | `updateproperty` con `status = 1` |
 | `2` | **Rifiutato** dal systemadmin | `updateproperty` con `status = 2` |
-| `3` | "aggiunto da CSV" — descritto solo in un commento del modello, **mai scritto** dal codice reale | — |
-| `4` | Valore realmente scritto dall'import CSV (`csvUpload`) | `csvUpload` |
+| `3` | **Importato da CSV** (commento del modello). In produzione sono le **9.516** strutture dell'import del 19/07/2023 | import del 2023 |
+| `4` | Valore scritto oggi da `csvUpload`; in produzione gli importati hanno `3`, non `4` | `csvUpload` |
+| `5` | **Nascosto a mano**: 731 righe dello stesso import, portate a `5` direttamente sul DB; nessun codice lo legge o scrive | — |
 
-Solo `status 1` (e, nel filtro pubblico, teoricamente `3`) rende lo stabilimento visibile nella ricerca
-del sito cliente. Gli stabilimenti importati da CSV (`status 4`) **non compaiono** nella ricerca finché
-un systemadmin non li porta manualmente a `1`. Su un campione DB ampio, `status 4` è il valore di gran
-lunga più frequente: la maggioranza degli stabilimenti a DB non sarebbe quindi visibile pubblicamente —
-punto da chiarire col committente (vedi §11).
+La ricerca pubblica del sito cliente (`property.controller.js:282`) mostra gli stati `1` e `3`: gli
+importati (`3`) **sono visibili**, come scheda «solo contatto». Gli stati `4` e `5` non compaiono. Delle
+731 strutture con `5` (analisi sul dump dell'8 settembre 2026): 626 sono doppioni dell'import (stesso
+nome e città di una visibile), 14 corrispondono a uno stabilimento poi registrato, 91 restano da
+decidere col committente ([PROMEMORIA-85-14](../../../progettazione/85-promemoria.md)). Il campione del DB
+di sviluppo, dove prevale `4`, non rappresenta la produzione.
 
 ### 0.4 Log e sotto-sistemi toccati
 
@@ -170,11 +172,11 @@ che rispetta la regex di formato; telefono che accetta solo cifre; il prefisso i
 
 **Anomalie / debito**:
 
-- Se il body non contiene `photos`, il codice usa comunque una variabile lista di URL che in
-  quel ramo non è stata inizializzata: la registrazione **senza foto va in errore** per riferimento a
-  variabile non definita. In pratica la registrazione richiede almeno una foto, anche se il form la
-  presenta come opzionale (e nell'attuale UI il caricamento foto è commentato). Contraddizione da
-  sciogliere: decidere se le foto sono obbligatorie.
+- Se il body **non contiene affatto** la chiave `photos`, il codice usa comunque la lista di URL
+  (`imgurls.map`, `property.controller.js:98`) che in quel ramo non è stata inizializzata e la
+  registrazione va in errore. Con `photos: []` (ciò che inviano i form, anche quando non si allega
+  nulla) l'array vuoto è considerato presente e la registrazione funziona: «senza foto va in errore» è
+  quindi impreciso. **Decisione del committente (2026-10)** (E4): foto facoltative.
 - `country` non valorizzato e prefisso non mappato: lo stabilimento nasce senza paese.
 
 ---
@@ -199,10 +201,10 @@ che rispetta la regex di formato; telefono che accetta solo cifre; il prefisso i
   payload a ciò che serve alla lista.
 - Se il filtro non trova nulla, la risposta è `status: false` con messaggio "properties not found"
   (semanticamente una lista vuota, non un errore).
-- **Gli stati `3` e `4` non hanno una coda**: gli stabilimenti importati da CSV (`status 4`) non
-  compaiono in nessuna delle tre viste; per portarli operativi il systemadmin deve conoscerne l'id e
+- **Gli stati `3`, `4` e `5` non hanno una coda**: gli stabilimenti importati (`status 3` in
+  produzione, `4` se creati da `csvUpload`) e quelli nascosti (`5`) non compaiono in nessuna delle tre viste; per portarli operativi il systemadmin deve conoscerne l'id e
   agire via `updateproperty`. Gap funzionale da colmare (una coda "importati" o l'inclusione di `status
-  4` fra i "da lavorare").
+  3` fra i "da lavorare").
 - La riga "eliminata" (`isDelete = true`) è esclusa da tutte e tre: non esiste una vista "cestino".
 
 **Calcoli**: nessuno. **Eventi**: nessuno (sola lettura).
@@ -527,10 +529,10 @@ meccanismo da chiarire/rifare.
 - **Nessuna email**, nessuna notifica, nessun avviso ai gestori importati (che non hanno ancora un
   account).
 
-**Conseguenza di business rilevante**: gli stabilimenti importati (`status = 4`, bagno `status = 0`)
-**non compaiono** né nelle code del systemadmin (§2) né nella ricerca pubblica (che filtra `status` in
-`[1, 3]`). Restano "in limbo" finché qualcuno non li porta manualmente a `status = 1` con
-`updateproperty`. Da chiarire col committente se è il comportamento voluto (vedi §11).
+**Conseguenza di business**: gli stabilimenti creati da questo endpoint (`status = 4`, bagno
+`status = 0`) **non compaiono** né nelle code del systemadmin (§2) né nella ricerca pubblica (che filtra
+`status` in `[1, 3]`). In produzione però l'import del 2023 ha scritto `status = 3`: quelle 9.516
+strutture sono visibili nella ricerca pubblica come «solo contatto» (vedi §0.3).
 
 ---
 
@@ -600,10 +602,17 @@ solo non riuscendo più a ricevere prenotazioni online.
 
 ## 11. Elementi da chiarire col committente
 
-1. **`status = 4` (import CSV) e visibilità pubblica**: la maggior parte degli stabilimenti a DB ha
-   `status = 4` e non compare nella ricerca pubblica (filtro `[1, 3]`). È voluto (staging) o è un bug
-   storico (il valore giusto doveva essere `3`, o il filtro doveva includere `4`)? Serve una coda
-   "importati" nel portale?
+> **Decisione del committente (2026-10)**
+>
+> - **Approvazione** (E1): motivo del rifiuto facoltativo; una struttura approvata o rifiutata può
+>   tornare «in attesa»; il salvataggio che approva automaticamente va corretto. Una struttura «in attesa»
+>   sparisce dal sito, perde la prenotazione online, il gestore non riceve email e non entra nel gestionale.
+> - **Importate nel 2023** (E2), **eliminazione** (E3), **registrazione** (E4): vedi punti 1, 9 e 10.
+> - **Titolare** (E5): il dato serve; in Catalog resta, alimentato dall'evento di Identity.
+
+1. **Stato degli importati e visibilità pubblica**: in produzione gli importati hanno `status = 3`
+   (9.516, visibili come «solo contatto»), non `4`. ✅ **Deciso (2026-10, E2)**: restano visibili. Le 731
+   con `status = 5` vanno chiarite (PROMEMORIA-85-14).
 2. **Portale systemadmin** (~~assente dal repo~~ — **reperito**: cartella [`front-admin/`](../../../../../../../front-admin/),
    React/Metronic, WIP): ✅ **deciso** — il nuovo back-office **verrà riscritto da zero**. `front-admin/`
    e queste schede sono la **base dei requisiti**; `front-admin/` non va evoluto né migrato. Da scartare
@@ -625,10 +634,13 @@ solo non riuscendo più a ricevere prenotazioni online.
    stabilimento e va modellata una volta sola.
 8. **Semantica `superAdminOnlineFlag` / `isAdminDisableOnLinePayment`**: `1` = online abilitato o
    disabilitato? Il consumatore lo interpreta in modo potenzialmente invertito rispetto al produttore.
-9. **Eliminazione stabilimento**: serve reversibilità esplicita? Come gestire prenotazioni future e
-   pagamenti pendenti al momento dell'eliminazione?
-10. **Foto obbligatorie in registrazione**: il form le tratta come opzionali ma il backend va in errore
-    senza foto. Obbligatorie sì/no?
+9. **Eliminazione stabilimento**: ✅ **deciso (2026-10, E3)** — cestino delle strutture con «Ripristina»;
+   prenotazioni future e pagamenti in sospeso annullati senza rimborso automatico né email, riattivati al
+   ripristino; tempi di conservazione dall'eliminazione definitiva. Domanda sul rimborso da rifare
+   (PROMEMORIA-85-13).
+10. **Foto in registrazione**: il backend va in errore solo se manca la chiave `photos`, non con un
+    array vuoto. ✅ **Deciso (2026-10, E4)**: foto facoltative; email a info@ a ogni registrazione;
+    verifica anti-robot.
 11. **`csvUpload`, `propertydetails`, `getPropertyWithBathHouseDetails`, `getOnlineReservationStatusByAdmin`,
     `importcsvdata`**: oggi senza controllo di ruolo effettivo. Confermare che vanno messe sotto
     `systemadmin` (e quali di esse servono anche ad altri attori, es. la scheda pubblica dello

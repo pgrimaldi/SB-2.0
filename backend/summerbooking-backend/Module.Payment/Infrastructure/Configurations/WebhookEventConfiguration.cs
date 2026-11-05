@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Payment.Domain.Entities;
 
@@ -83,7 +83,7 @@ public sealed class WebhookEventConfiguration : IEntityTypeConfiguration<Webhook
 			.HasComment("Ultima modifica (cambio di stato dell'elaborazione).");
 
 		// LA ragione d'essere della tabella: senza questo indice l'idempotenza tornerebbe a essere
-		// un SELECT + INSERT applicativo, con la finestra di corsa che aveva il legacy.
+		// un SELECT + INSERT applicativo, con una finestra di corsa fra due webhook concorrenti.
 		builder.HasIndex(x => new { x.Provider, x.ExternalEventId })
 			.IsUnique()
 			.HasDatabaseName("uq_payment_webhook_events_external");

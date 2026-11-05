@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -40,13 +40,13 @@ public sealed class PriceListItemConfiguration : IEntityTypeConfiguration<PriceL
 			.HasConstraintName("fk_catalog_pricing_price_list_items_inventory_item")
 			.OnDelete(DeleteBehavior.Restrict);
 
-		builder.Property(x => x.IncludedServiceId)
-			.HasColumnName("included_service_id")
-			.HasComment("Servizio/dotazione incluso nel pacchetto (per included_service).");
-		builder.HasOne<Amenity>()
+		builder.Property(x => x.IncludedSaleItemId)
+			.HasColumnName("included_sale_item_id")
+			.HasComment("Servizio venduto incluso nel pacchetto (per included_service).");
+		builder.HasOne<ServiceSaleItem>()
 			.WithMany()
-			.HasForeignKey(x => x.IncludedServiceId)
-			.HasConstraintName("fk_catalog_pricing_price_list_items_included_service")
+			.HasForeignKey(x => x.IncludedSaleItemId)
+			.HasConstraintName("fk_catalog_pricing_price_list_items_included_sale_item")
 			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.Property(x => x.LinkedPriceListId)

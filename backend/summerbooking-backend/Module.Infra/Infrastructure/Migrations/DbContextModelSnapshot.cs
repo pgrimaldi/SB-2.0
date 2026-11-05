@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Module.Infra.Domain.Enums;
 using Module.Infra.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -33,7 +34,7 @@ namespace Module.Infra.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("AppName")
+                    b.Property<IntegrationApp>("AppName")
                         .HasColumnType("infra.integration_app")
                         .HasColumnName("app_name")
                         .HasComment("Applicazione/integrazione partner a cui il client appartiene; instrada le autorizzazioni (es. lo scambio OAuth di TeamSystem).");
@@ -67,7 +68,7 @@ namespace Module.Infra.Infrastructure.Migrations
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at")
-                        .HasComment("Scadenza effettiva del client, quando impostata; a differenza del legacy va verificata dal servizio di autenticazione.");
+                        .HasComment("Scadenza effettiva del client, quando impostata; la verifica il servizio di autenticazione.");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()

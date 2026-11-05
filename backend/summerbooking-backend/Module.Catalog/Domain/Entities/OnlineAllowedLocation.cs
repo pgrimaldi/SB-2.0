@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -13,4 +13,6 @@ public sealed class OnlineAllowedLocation : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private OnlineAllowedLocation() { }
+
+	internal static OnlineAllowedLocation Create(long spotId) => new() { SpotId = spotId };
 }

@@ -104,7 +104,6 @@ public sealed class SubscriptionService
 		await _uow.SaveChangesAsync(ct);
 		var dto = SubscriptionDto.FromEntity(subscription);
 
-		// PROMEMORIA-85-5: nessun gestore in Catalog per ora.
 		await _events.PublishAsync(new PropertySubscriptionChanged(
 			Guid.CreateVersion7(), _clock.UtcNow, subscription.PropertyId, dto.Status, dto.LicensePlanCode, dto.EndsAt), ct);
 		await _audit.RecordAsync(new AuditEntry(

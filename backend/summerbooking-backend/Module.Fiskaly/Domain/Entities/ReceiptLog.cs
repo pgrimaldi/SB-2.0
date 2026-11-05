@@ -1,12 +1,12 @@
-using Module.Fiskaly.Domain.Enums;
+﻿using Module.Fiskaly.Domain.Enums;
 
 namespace Module.Fiskaly.Domain.Entities;
 
 /// <summary>
 /// Log append-only del flusso di emissione/annullamento dello scontrino elettronico: una riga per
 /// transizione di stato o errore nel dialogo con l'API SIGN IT. Non implementa IAuditable/ISoftDeletable:
-/// deve poter scrivere anche quando l'aggregato Receipt fa rollback (come createLog/createErrorLog
-/// legacy, che "non lanciano mai"); UpdatedAt/DeletedAt sono esposti solo per uniformità di schema
+/// deve poter scrivere anche quando l'aggregato Receipt fa rollback, e non deve mai far fallire l'operazione;
+/// UpdatedAt/DeletedAt sono esposti solo per uniformità di schema
 /// (mai un vero aggiornamento, nessun Global Query Filter).
 /// </summary>
 public sealed class ReceiptLog

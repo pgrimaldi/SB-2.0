@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Notification.Domain.Entities;
 using Module.Notification.Domain.Enums;
@@ -10,7 +10,7 @@ public sealed class PushDeviceTokenConfiguration : IEntityTypeConfiguration<Push
 	public void Configure(EntityTypeBuilder<PushDeviceToken> builder)
 	{
 		builder.ToTable("push_device_tokens", "notification", t => t.HasComment(
-			"Un token di dispositivo registrato da un utente C5 per ricevere notifiche push, con piattaforma, ultimo uso e stato."));
+			"Un token di dispositivo registrato da un utente di Identity per ricevere notifiche push, con piattaforma, ultimo uso e stato."));
 
 		builder.HasKey(x => x.Id).HasName("pk_notification_push_device_tokens");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();

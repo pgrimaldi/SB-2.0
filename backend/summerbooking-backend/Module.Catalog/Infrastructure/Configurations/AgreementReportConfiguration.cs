@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -65,7 +65,7 @@ public sealed class AgreementReportConfiguration : IEntityTypeConfiguration<Agre
 			.IsRequired()
 			.HasDefaultValueSql("'pending'")
 			.HasComment("Stato del report: pending, created o cancelled. Distinto da deleted_at, che e' il " +
-				"soft-delete della riga: nel legacy i due erano scritti sempre insieme.");
+				"soft-delete della riga.");
 
 		builder.Property(x => x.ReportData)
 			.HasColumnName("report_data")
@@ -105,8 +105,7 @@ public sealed class AgreementReportConfiguration : IEntityTypeConfiguration<Agre
 			.HasComment("PDF archiviato all'invio: riferimento logico a notification.media_assets " +
 				"(kind = 'rendered_pdf'), NON una FK perche' attraversa lo schema di un altro modulo. NULL " +
 				"finche' il report non e' stato inviato. ATTENZIONE: sostituire il PDF richiede di accodare " +
-				"il vecchio oggetto in privacy.privacy_file_deletions, altrimenti si ripete il difetto del " +
-				"legacy che ha lasciato 24 oggetti orfani su 28.");
+				"il vecchio oggetto in privacy.privacy_file_deletions, altrimenti resta sul bucket senza riga che lo nomini.");
 
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired().HasDefaultValueSql("now()").HasComment("Creazione della riga.");
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired().HasDefaultValueSql("now()").HasComment("Ultima modifica della riga.");
@@ -131,7 +130,7 @@ public sealed class AgreementReportConfiguration : IEntityTypeConfiguration<Agre
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("ix_catalog_agreement_reports_period");
 
-		// La retention del PDF (policy F5) parte da notification.media_assets, ma da qui serve la
+		// La retention del PDF parte da notification.media_assets, ma da qui serve la
 		// risalita inversa: "quale report nominava questo asset", per azzerare il riferimento quando
 		// l'oggetto viene cancellato a 24 mesi.
 		builder.HasIndex(x => x.PdfMediaAssetId)

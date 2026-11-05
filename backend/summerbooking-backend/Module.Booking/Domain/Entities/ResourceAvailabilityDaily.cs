@@ -1,10 +1,10 @@
-using Module.Booking.Domain.Enums;
+﻿using Module.Booking.Domain.Enums;
 
 namespace Module.Booking.Domain.Entities;
 
 /// <summary>
 /// Proiezione di disponibilità per (risorsa/tipo × giorno), mantenuta dal DB via trigger su
-/// booking_resource_consumptions: sostituisce il GROUP BY a runtime del legacy. Nessun ciclo di vita
+/// booking_resource_consumptions, così la disponibilità non si ricalcola con un GROUP BY a ogni lettura. Nessun ciclo di vita
 /// applicativo da tracciare: non implementa ISoftDeletable/IAuditable, i timestamp sono mappati solo
 /// per uniformità di schema.
 /// </summary>

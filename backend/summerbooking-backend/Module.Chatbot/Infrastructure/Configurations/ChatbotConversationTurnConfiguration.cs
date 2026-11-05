@@ -84,7 +84,7 @@ public sealed class ChatbotConversationTurnConfiguration : IEntityTypeConfigurat
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.HasDefaultValueSql("now()")
-			.HasComment("Istante del messaggio; colonna di riferimento per il conteggio giornaliero del rate limit (non updated_at, a differenza del legacy).");
+			.HasComment("Istante del messaggio; colonna di riferimento per il conteggio giornaliero del rate limit (non updated_at).");
 
 		builder.Property(x => x.UpdatedAt)
 			.HasColumnName("updated_at")

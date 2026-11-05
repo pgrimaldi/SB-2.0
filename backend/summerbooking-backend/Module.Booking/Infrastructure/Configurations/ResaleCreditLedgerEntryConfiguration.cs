@@ -64,7 +64,7 @@ public sealed class ResaleCreditLedgerEntryConfiguration : IEntityTypeConfigurat
 			.HasColumnName("wallet_event_emitted")
 			.HasDefaultValue(false)
 			.IsRequired()
-			.HasComment("True quando l'evento ResaleCreditEarned è stato consegnato a Payment (C3) per la riconciliazione col borsellino");
+			.HasComment("True quando l'evento ResaleCreditEarned è stato consegnato a Payment (Payment) per la riconciliazione col borsellino");
 
 		builder.Property(x => x.Note)
 			.HasColumnName("note")

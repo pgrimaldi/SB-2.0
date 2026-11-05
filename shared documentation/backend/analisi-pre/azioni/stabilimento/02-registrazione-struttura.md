@@ -34,8 +34,10 @@ approvazione".
 - `phonePrefix` (string) — prefisso internazionale, default `+39`
 - `phone` (string) — numero di telefono
 - `email` (string) — email del referente
-- `photos` (array, opzionale) — immagini come data URL base64 (nell'attuale UI il caricamento è
-  disattivato; lato server oggi la registrazione **senza foto va in errore** — vedi business-logic §1)
+- `photos` (array, opzionale) — immagini come data URL base64 (nel form del gestionale il caricamento è
+  disattivato, ma il form invia comunque `photos: []`). Lato server la registrazione va in errore solo se
+  la chiave `photos` **manca del tutto**; con un array vuoto funziona — vedi
+  [business-logic systemadmin §1](../../business-logic/systemadmin/01-gestione-stabilimenti.md)
 - `languageCode` (int) — `1` = EN, `2` = IT (default `2`); determina la lingua dell'email di benvenuto
 - `privacyAccepted` (bool)
 - `country` (string) — oggi **non raccolto** (il prefisso non viene mappato su un paese) → sempre
@@ -51,12 +53,15 @@ foto in allegato; inserimento in `email_logs`; aggiunta dell'email alla lista `s
 su S3. L'email di notifica al systemadmin è oggi disattivata (codice commentato).
 
 **Note per la riscrittura**:
-- decidere se le **foto** sono obbligatorie (contraddizione form opzionale ↔ backend in errore senza
-  foto);
+- **foto facoltative** (decisione del committente, sotto);
 - raccogliere e valorizzare `country` (dal prefisso o da un selettore paese);
-- ripristinare una notifica al systemadmin all'arrivo di una nuova candidatura;
+- ripristinare una notifica al systemadmin all'arrivo di una nuova candidatura (deciso: email a info@);
 - nessun utente (`users`) viene creato in questo passo: l'account del gestore nasce in un secondo
   momento (flusso `auth/usersignup` con ruolo `superadmin`, che imposta `properties.propertyOwner`).
+
+> **Decisione del committente (2026-10)** (E4): foto facoltative; email a info@ a ogni registrazione;
+> verifica anti-robot sul form. La struttura registrata resta «in attesa» (E1): non compare sul sito e il
+> gestore non entra nel gestionale finché il systemadmin non la approva.
 
 ---
 

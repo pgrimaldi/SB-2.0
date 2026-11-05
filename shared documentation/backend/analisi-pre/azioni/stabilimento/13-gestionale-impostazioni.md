@@ -18,6 +18,12 @@
 > Per la maggior parte delle pagine il docx dichiara «struttura e funzionalità invariate, solo
 > restyling»: le firme sotto ricalcano quindi l'implementazione attuale. Firme **ipotizzate** dove
 > l'endpoint non è noto; endpoint attuali fra parentesi.
+>
+> **Mockup aggiornati (2026-10)**: i mockup Figma aggiornati aggiungono contenuti che il docx non
+> descrive: servizi con **opzioni di prenotazione** (periodo, orari, giorni, limiti, durate prezzate),
+> **prezzi automatici** (es. «Coperto»), **servizio tavoli**, **sconti** a quattro tipologie e
+> impostazioni di **sharing**. L'elenco completo e le decisioni del committente sono nel resoconto
+> `documentazione-locale/catalog-api-analisi.md` §4 e §5.
 
 ---
 
@@ -227,9 +233,12 @@ Per riga: Modifica (matita, campi + soglia/flag precompilati) ed Elimina (cestin
 Selezione singola o checkbox, con «seleziona tutti» **separate** per pacchetti e per articoli.
 Azioni multiple (in alto a sinistra e per riga, con conferma): Duplica, Elimina. Pulsanti in alto a
 destra: nuovo pacchetto / nuovo articolo aggiuntivo. Novità:
-- **Prezzo cumulativo** nel menu «Calcolo del prezzo» del pacchetto: per una prenotazione su più
-  postazioni (es. 5 giorni + 2 giorni) calcola direttamente il prezzo dei 7 giorni da listino,
-  invece di sommare i due tratti.
+- **Prezzo cumulativo** nel menu «Calcolo del prezzo» del pacchetto (secondo il docx): per una
+  prenotazione su più postazioni (es. 5 giorni + 2 giorni) calcola direttamente il prezzo dei 7 giorni
+  da listino, invece di sommare i due tratti. **Decisione del committente (2026-10)** (B2): il
+  cumulativo resta un **interruttore** separato dal metodo di calcolo, come nel legacy
+  (`details.isCumulativeFlag`), anche sui listini delle convenzioni; il centesimo residuo va all'ultima
+  postazione.
 - **Articoli/servizi aggiuntivi**: menu (dopo la selezione dell'articolo) «Tutti i pacchetti»
   (default) / «Pacchetti specifici» (elenco dei pacchetti del listino).
 - **Prezzi mezza giornata**: nuove colonne nella tabella prezzi (incluso «Prezzo stagionale mezza
@@ -244,8 +253,11 @@ destra: nuovo pacchetto / nuovo articolo aggiuntivo. Novità:
 analogo a `sb/hotel/pricelist*`)
 - lista: `{ propertyId }` → `{ packages: [ … ], articles: [ … ] }`
 - crea/modifica pacchetto: `{ propertyId, packageId?, name, priceCalc:
-  "perDay"|"fixed"|"cumulative", priceRows: [ { periodId?, seasonal (bool), fullDay, halfDay,
-  seasonalFullDay, seasonalHalfDay } ], ... }`
+  "proportional"|"daily"|"logarithmic"|"daily_with_weekend", isCumulative (bool), priceRows: [
+  { periodId?, seasonal (bool), fullDay, halfDay, seasonalFullDay, seasonalHalfDay } ], ... }`.
+  Un calcolo «fixed» non esiste: i metodi sono quelli del legacy (`price_lists.priceCalculation`, vedi
+  [`_motore-di-prezzo-e-sconti.md`](../../business-logic/stabilimento/_motore-di-prezzo-e-sconti.md) §1) e
+  il cumulativo è un interruttore a parte.
 - crea/modifica articolo: `{ propertyId, articleId?, name, appliesToPackages: "all" | [packageId],
   priceRows: [ … come sopra ] }`
 - bulk: `{ propertyId, kind: "package"|"article", ids: [int], op: "duplicate"|"delete" }`
@@ -254,7 +266,9 @@ analogo a `sb/hotel/pricelist*`)
 
 **Output ← API**: `packages` / `articles` aggiornati; `status` / `message`.
 
-**Note**: il listino dedicato / voucher per hotel è in
+**Note**: le aggiunte del listino nei mockup aggiornati (mezza giornata a 7, 14 giorni e mensile,
+«prezzo stagionale ridotto», max persone e articoli aggiuntivi, servizi inclusi, aree abilitate,
+«assegnabile su mappa») sono nel resoconto `catalog-api-analisi.md` §5. Il listino dedicato / voucher per hotel è in
 [`10-gestionale-convenzioni.md`](10-gestionale-convenzioni.md) az. 4–5 (stessa struttura di pagina).
 
 ---

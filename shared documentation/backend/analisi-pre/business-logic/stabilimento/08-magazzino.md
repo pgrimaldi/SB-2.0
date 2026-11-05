@@ -22,7 +22,8 @@
 
 - **Una sola riga `warehouses` per stabilimento**, campo `items` = **JSON array** di oggetti:
   `{ name, it, quantity, threshold, isEnable }` — nome (EN), nome (IT), quantità disponibile, soglia di
-  riordino/allarme, flag attivo.
+  riordino/allarme, flag `isEnable` (nel codice esclude l'articolo dal controllo di giacenza, §5; per
+  il committente è l'interruttore dell'avviso soglia).
 - I consumi non sono sottratti da `quantity`: la disponibilità **residua** per una data si calcola
   come `quantity − quantità già prenotata per quelle date` (letta dai contatori di prenotazione).
 
@@ -52,8 +53,8 @@ aggiornando `createdBy`.
 **Logiche**: nessuna validazione server (quantità negative ammesse); nessun diff/merge — è una
 riscrittura totale dell'array.
 
-**Calcoli**: nessuno. **Eventi**: **nessuno** (nessuna email/notifica, nemmeno al superamento della
-soglia — la soglia è solo un dato visualizzato in UI).
+**Calcoli**: nessuno. **Eventi**: **nessuno** lato server (nessuna email/notifica). La soglia però non
+è solo un dato visualizzato: il gestionale la usa per l'avviso «in esaurimento» in mappa (§4bis).
 
 ---
 
@@ -71,6 +72,22 @@ ogni prenotazione (`serviceReservationCounts` / helper dedicati).
 `residuo = quantity − impegnato`.
 
 **Eventi**: nessuno (lettura).
+
+---
+
+## 4bis. Avviso «in esaurimento» in mappa (lato client)
+
+**Dove**: gestionale, mappa (`components/reserveArticle/ReserveArticle.js` → `callWarehouseAPI` in
+`front-pre/src/services/WarehouseItemService.js:44-57`), sezione **News** della mappa.
+
+**Logiche e calcoli**: al cambio delle date selezionate il client legge `viewwarehouse` e
+`sb/booking/counts` sulle date della mappa; per ogni articolo, se `quantity − total < threshold`
+aggiunge il messaggio «<nome IT> in esaurimento» / «<name> running out» agli avvisi
+(`reservationWarning`). `total` è la somma delle prenotazioni dell'intervallo, non il minimo giorno
+per giorno, e ignora la fascia. Il confronto non legge `isEnable`: l'avviso compare per tutti gli
+articoli.
+
+**Eventi**: nessuno lato server; l'avviso è ricalcolato a ogni apertura e non viene memorizzato.
 
 ---
 
@@ -108,5 +125,20 @@ inserimenti, non alle modifiche; l'accoppiamento per **nome stringa** (con alias
 - **Logiche**: una riga JSON per stabilimento; upsert con riscrittura totale dell'array; esclusione
   articoli `isEnable = 0`; normalizzazione nomi + alias hardcoded; mascheramento quantità/soglia se non
   autenticato; controllo disponibilità solo su nuove prenotazioni e non atomico.
-- **Eventi**: **nessuno**. La "soglia" (`threshold`) non genera alcun avviso/email/notifica: è solo un
-  indicatore visivo. Da valutare nella riscrittura un evento di sotto‑scorta.
+- **Eventi**: **nessuno** lato server. La soglia (`threshold`) produce solo l'avviso «in esaurimento»
+  calcolato dal client nella sezione News della mappa (§4bis); nessuna email o notifica.
+
+> **Decisione del committente (2026-10)**
+>
+> - **Avviso soglia** (A1, A2): `isEnable` («Abilita») è l'interruttore dell'avviso soglia, non
+>   l'esclusione dal controllo di giacenza; l'esclusione del §5 punto 2 sparisce. L'avviso scatta quando
+>   la disponibilità del **giorno corrente** scende **sotto** la soglia, compare nella campanella e nella
+>   sezione News della mappa, lo ricevono i ruoli che vedono il magazzino (non cameriere, affiliato,
+>   marketing) e si invia **una volta**, di nuovo solo dopo che la scorta è risalita sopra la soglia.
+> - **Elenco fisso** (A3): gli articoli principali sono un elenco fisso di piattaforma; il gestore crea
+>   solo quelli con «Altro». L'elenco non si amplia dal pannello.
+> - **Eliminazione** (A4): bloccata se l'articolo è usato in pacchetti (anche listini convenzione), con
+>   l'elenco dei pacchetti.
+> - Quantità 0 ammessa, soglia ≤ quantità.
+>
+> Dettaglio in `documentazione-locale/catalog-api-analisi.md` §4.1.

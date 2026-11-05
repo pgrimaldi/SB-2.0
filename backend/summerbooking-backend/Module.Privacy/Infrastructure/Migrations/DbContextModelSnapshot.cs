@@ -396,7 +396,7 @@ namespace Module.Privacy.Infrastructure.Migrations
                     b.Property<int>("SubjectKind")
                         .HasColumnType("privacy.subject_kind")
                         .HasColumnName("subject_kind")
-                        .HasComment("Tipo di entità interessata: customer (rubrica C5) o user (account di login C5).");
+                        .HasComment("Tipo di entità interessata: customer (rubrica di Identity) o user (account di login di Identity).");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()

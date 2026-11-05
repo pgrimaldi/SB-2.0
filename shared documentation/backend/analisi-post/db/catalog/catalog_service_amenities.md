@@ -126,6 +126,15 @@ Correzioni rispetto al legacy:
 |---|---|
 | `services.isChecked` | flag di stato della *copia* per-stabilimento — sostituito dall'esistenza della riga in `catalog_bathhouse_amenities` |
 
+### code
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration CatalogLookups).
+- **Descrizione**: Codice stabile della dotazione usato dalle API (es. wifi, pets_allowed).
+- **Tipo**: `character varying(60)`.
+- **Default**: `''::character varying`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. Elimina la copia integrale JSON `bathouses.services`: la relazione vetrina↔dotazione è la

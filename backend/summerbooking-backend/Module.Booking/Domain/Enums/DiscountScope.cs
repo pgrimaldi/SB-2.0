@@ -1,7 +1,7 @@
-namespace Module.Booking.Domain.Enums;
+﻿namespace Module.Booking.Domain.Enums;
 
 /// <summary>
-/// Ambito di validità del voucher, congelato dalla regola di C2 al momento dell'applicazione.
+/// Ambito di validità del voucher, congelato dalla regola di Catalog al momento dell'applicazione.
 /// </summary>
 public enum DiscountScope
 {

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -14,10 +14,19 @@ public sealed class OnlineStayLimitConfiguration : IEntityTypeConfiguration<Onli
 			t.HasComment("Limite minimo/massimo di giorni consecutivi prenotabili online, per settore e finestra di date.");
 			t.HasCheckConstraint("ck_catalog_property_online_stay_limits_range", "ends_on >= starts_on");
 			t.HasCheckConstraint("ck_catalog_property_online_stay_limits_days", "max_days IS NULL OR min_days IS NULL OR max_days >= min_days");
+			t.HasCheckConstraint("ck_catalog_property_online_stay_limits_bound", "min_days IS NOT NULL OR max_days IS NOT NULL");
 		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_property_online_stay_limits");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
+
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasComment("Id pubblico (UUIDv7) usato dalle API.");
+
+		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_property_online_stay_limits_public_id");
 
 		builder.Property(x => x.SettingsId)
 			.HasColumnName("settings_id")

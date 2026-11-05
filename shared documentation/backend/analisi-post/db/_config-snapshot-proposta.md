@@ -5,6 +5,23 @@
 > tabella: [`catalog_config_snapshots`](catalog/catalog_config_snapshots.md),
 > [`catalog_search_bathhouses`](catalog/catalog_search_bathhouses.md). Decisione architetturale recepita anche in
 > [`docs/03-gestione-dati.md` §7](../../progettazione/03-gestione-dati.md).
+>
+> **✅ Realizzato il 2026-10-27** (Catalog). Com'è fatto nel codice, rispetto al disegno:
+>
+> - **al salvataggio**: la `UnitOfWork` di Catalog, dopo il commit, guarda i tipi di entità toccati e
+>   ricostruisce solo gli snapshot interessati degli stabilimenti coinvolti (`SnapshotTriggers`, una regola
+>   per tipo di entità). Non passa da eventi di dominio. Costo misurato: 0,08–0,5 s per salvataggio;
+> - **all'avvio dell'host** si costruiscono solo gli snapshot **mancanti**; **di notte** (00:05) tutti
+>   (`CatalogNightlyJob`, [20-jobs.md](../../progettazione/20-jobs.md));
+> - **a mano**: `POST /api/catalog/admin/snapshots/rebuild` (systemadmin), con stabilimenti, tipi e
+>   «solo mancanti» facoltativi. **Non** esistono la CLI né `snapshots verify`: il rebuild salta già da sé
+>   gli snapshot il cui `content_hash` non cambia (il conteggio «invariati» della risposta fa da verifica);
+>   `source_hash` coincide con `content_hash`; l'escape hatch asincrono e `stale_since` non sono usati;
+> - lettura: `GET /api/catalog/snapshots/{kind}` (gestore, tutti i tipi) e
+>   `GET /api/catalog/public/bathhouses/{slug}/snapshots/{kind}` (pubblico, solo `public_showcase` e
+>   `beach_map`), con `ETag`/`304`; i file sono `{origin, path}` risolti con `GET /api/catalog/public/media-origins`.
+>   Contratto in [89-api-catalog.md](../../progettazione/89-api-catalog.md);
+> - 13.200 snapshot costruiti sul DB locale, 0 errori.
 
 ---
 
@@ -358,7 +375,7 @@ suo `ETag` indipendente.)*
 
 ---
 
-## 8. Utility di rigenerazione manuale *(da realizzare — annotato in [`docs/note.md`](../../progettazione/note.md))*
+## 8. Utility di rigenerazione manuale *(realizzata come endpoint il 2026-10-27, senza CLI né `verify`: vedi lo stato in testa)*
 
 CLI + endpoint amministrativo per rigenerare gli snapshot su richiesta:
 

@@ -11,7 +11,7 @@
 >
 > Per le copie che devono restare leggibili **fuori** da questo account AWS — altra AZ/altro account,
 > altro server in Europa, server locale ad hoc — e per il rapporto fra copia e retention, vedi
-> [92-copie-sicurezza.md](92-copie-sicurezza.md).
+> [79-copie-sicurezza.md](79-copie-sicurezza.md).
 >
 > **Documento vivo**: da aggiornare quando si definiscono RTO/RPO contrattuali o si aggiunge una
 > regione di DR.

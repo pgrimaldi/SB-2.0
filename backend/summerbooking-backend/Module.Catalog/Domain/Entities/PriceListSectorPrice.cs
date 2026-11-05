@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -19,4 +19,13 @@ public sealed class PriceListSectorPrice : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private PriceListSectorPrice() { }
+
+	internal static PriceListSectorPrice Create(long sectorId, decimal? seasonal, decimal? halfDay)
+		=> new() { SectorId = sectorId, BasePrice = seasonal, HalfDayPrice = halfDay };
+
+	internal void SetPrices(decimal? seasonal, decimal? halfDay)
+	{
+		BasePrice = seasonal;
+		HalfDayPrice = halfDay;
+	}
 }

@@ -21,7 +21,7 @@ public sealed class BookingServiceLineConfiguration : IEntityTypeConfiguration<B
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico della riga servizio, copiato cross-modulo da C4 (line item) e C3 (riga economica).");
+			.HasComment("Id pubblico della riga servizio, copiato cross-modulo da Fiskaly (line item) e Payment (riga economica).");
 
 		builder.Property(x => x.ReservationId)
 			.HasColumnName("reservation_id")
@@ -113,7 +113,7 @@ public sealed class BookingServiceLineConfiguration : IEntityTypeConfiguration<B
 			.HasColumnName("is_paid_with_wallet")
 			.IsRequired()
 			.HasDefaultValue(false)
-			.HasComment("La riga è stata pagata col borsellino/tessera prepagata; il movimento wallet è in C3.");
+			.HasComment("La riga è stata pagata col borsellino/tessera prepagata; il movimento wallet è in Payment.");
 
 
 		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a

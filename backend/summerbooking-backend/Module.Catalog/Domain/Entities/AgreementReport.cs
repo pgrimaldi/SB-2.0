@@ -1,28 +1,24 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
 /// Report periodico (arrivi/partenze/ricavi) che uno stabilimento invia a una struttura partner.
-/// Entità figlia di <see cref="AgreementPartner"/>. Rimpiazza la legacy <c>hotel_reports</c>.
+/// Entità figlia di <see cref="AgreementPartner"/>.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Due difetti del legacy che questa tabella non riproduce</b>:
+/// <b>Due regole sul PDF</b>:
 /// </para>
 /// <para>
-/// 1. il legacy teneva una colonna <c>path</c> sola, sovrascritta a ogni rigenerazione del PDF e senza
-/// cancellare il file precedente: è così che 4 report hanno prodotto 28 oggetti su S3, 24 dei quali
-/// versioni superate che nessuna riga nominava più. Qui il riferimento al PDF è
-/// <see cref="PdfMediaAssetId"/> e la sostituzione deve passare dalla coda
-/// <c>privacy.privacy_file_deletions</c>, che rimuove l'oggetto vecchio.
+/// 1. il riferimento al PDF è <see cref="PdfMediaAssetId"/>; sostituirlo deve passare dalla coda
+/// <c>privacy.privacy_file_deletions</c>, che rimuove l'oggetto vecchio: altrimenti ogni rigenerazione
+/// lascia sul bucket una versione superata che nessuna riga nomina più.
 /// </para>
 /// <para>
-/// 2. il legacy archiviava anche la semplice <b>anteprima</b>: l'endpoint "scarica il PDF" chiamava la
-/// stessa funzione dell'invio e caricava su S3. Si archivia <b>all'invio</b>, non quando qualcuno
-/// guarda il documento — un solo report, nel legacy, ha lasciato 11 oggetti che nessuno ha mai
-/// mandato a nessuno.
+/// 2. si archivia <b>all'invio</b>, non quando qualcuno guarda l'anteprima: un'anteprima archiviata
+/// diventa un oggetto che nessuno ha mai mandato a nessuno.
 /// </para>
 /// <para>
 /// <b>Dati migrati: nessuno.</b> Le 2 righe di produzione hanno <c>path</c> NULL e nessun PDF, e i 28
@@ -69,4 +65,7 @@ public sealed class AgreementReport : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private AgreementReport() { }
+
+	/// <summary>Report annullato: resta nell'elenco con lo stato.</summary>
+	public void Cancel() => Status = AgreementReportStatus.Cancelled;
 }

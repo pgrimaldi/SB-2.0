@@ -1,10 +1,10 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
 /// Settore/fila in cui è divisa la spiaggia di uno stabilimento. PublicId è referenziato cross-modulo da
-/// C1 (booking_lines.sector_id, booking_resource_availability_daily.sector_id).
+/// Booking (booking_lines.sector_id, booking_resource_availability_daily.sector_id).
 /// </summary>
 public sealed class MapSector : IAuditable, ISoftDeletable
 {
@@ -20,4 +20,27 @@ public sealed class MapSector : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private MapSector() { }
+
+	public const int NameMaxLength = 100;
+
+	public static MapSector Create(long propertyId, string name, short sortOrder, Guid? createdByUserPublicId)
+	{
+		var sector = new MapSector
+		{
+			PublicId = Guid.CreateVersion7(),
+			PropertyId = propertyId,
+			SortOrder = sortOrder,
+			CreatedByUserPublicId = createdByUserPublicId,
+		};
+		sector.Rename(name);
+		return sector;
+	}
+
+	public void Rename(string name)
+	{
+		var trimmed = name.Trim();
+		if (trimmed.Length is 0 or > NameMaxLength)
+			throw new ArgumentException("Nome del settore vuoto o troppo lungo.", nameof(name));
+		Name = trimmed;
+	}
 }

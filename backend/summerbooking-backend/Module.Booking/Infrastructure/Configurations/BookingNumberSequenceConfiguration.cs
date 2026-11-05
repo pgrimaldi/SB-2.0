@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Booking.Domain.Entities;
 
@@ -24,7 +24,7 @@ public sealed class BookingNumberSequenceConfiguration : IEntityTypeConfiguratio
 			.HasColumnName("number_prefix")
 			.HasMaxLength(20)
 			.IsRequired()
-			.HasComment("Prefisso stabile e immutabile del numero prenotazione per la property (di norma il suo id legacy)");
+			.HasComment("Prefisso stabile e immutabile del numero prenotazione per la property (di norma il suo id interno)");
 
 		builder.Property(x => x.LastSequence)
 			.HasColumnName("last_sequence")

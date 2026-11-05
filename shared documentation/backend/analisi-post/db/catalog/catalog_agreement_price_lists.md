@@ -191,6 +191,33 @@ Differenze da `catalog_pricing_price_lists`:
 - **Nullabile**: Sì.
 - **Relazioni**: —.
 
+### is_cumulative
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Prezzo cumulativo: prezzo dei giorni totali su più postazioni.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+- **Relazioni**: —
+
+### vat_nature
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Natura dell'esenzione IVA (n1..n6), solo senza aliquota.
+- **Tipo**: `catalog.vat_nature`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
+### vat_rate
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-26 (migration AgreementsCatalog).
+- **Descrizione**: Aliquota IVA in percentuale; NULL = esente, con la natura in vat_nature.
+- **Tipo**: `numeric(5,2)`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: —
+
 ## Valutazione JSON
 
 Nessun JSON. Stesso trattamento di [`catalog_pricing_price_lists`](catalog_pricing_price_lists.md): scalari +

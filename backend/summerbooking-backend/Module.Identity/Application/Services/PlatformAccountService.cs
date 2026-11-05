@@ -84,7 +84,6 @@ public sealed class PlatformAccountService
 		_accounts.Add(owner);
 		await _uow.SaveChangesAsync(ct);
 
-		// PROMEMORIA-85-5: nessun gestore in Catalog per ora.
 		await _events.PublishAsync(new PropertyOwnerAssigned(Guid.CreateVersion7(), _clock.UtcNow, propertyId, owner.PublicId), ct);
 		await PublishOnlineReservationAsync(propertyId, request.OnlineReservationEnabled, ct);
 		await RecordAsync(IdentityAudit.OwnerCreated, owner, ct);

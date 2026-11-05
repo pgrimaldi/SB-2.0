@@ -23,7 +23,7 @@ public sealed class LedgerEntryConfiguration : IEntityTypeConfiguration<LedgerEn
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, copiato cross-modulo (C4 righe payments[] dello scontrino; export contabile).");
+			.HasComment("Id pubblico stabile, copiato cross-modulo (Fiskaly, righe payments[] dello scontrino; export contabile).");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -36,7 +36,7 @@ public sealed class LedgerEntryConfiguration : IEntityTypeConfiguration<LedgerEn
 
 		builder.Property(x => x.AgreementLinePublicId)
 			.HasColumnName("agreement_line_public_id")
-			.HasComment("public_id di booking.booking_agreement_lines, copiato — nessuna FK cross-schema; valorizzato per addebiti reali su voucher hotel.");
+			.HasComment("public_id di booking.booking_agreement_lines, copiato — nessuna FK cross-schema; valorizzato per addebiti reali su voucher di una convenzione.");
 
 		builder.Property(x => x.EntryType)
 			.HasColumnName("entry_type")
@@ -56,7 +56,7 @@ public sealed class LedgerEntryConfiguration : IEntityTypeConfiguration<LedgerEn
 			.HasColumnName("payment_mode")
 			.HasColumnType("payment.payment_mode")
 			.HasDefaultValueSql("'other'")
-			.HasComment("Modalità con cui è avvenuto il movimento; NULL sui movimenti legacy non normalizzabili.");
+			.HasComment("Modalità con cui è avvenuto il movimento; NULL sui movimenti importati non normalizzabili.");
 
 		builder.Property(x => x.Source)
 			.HasColumnName("source")

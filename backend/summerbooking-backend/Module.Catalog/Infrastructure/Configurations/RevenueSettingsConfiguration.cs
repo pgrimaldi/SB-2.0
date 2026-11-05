@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -20,6 +20,12 @@ public sealed class RevenueSettingsConfiguration : IEntityTypeConfiguration<Reve
 			.IsRequired()
 			.HasComment("Stabilimento a cui si applica la configurazione Revenue Management.");
 
+		builder.Property(x => x.IsSuggestedPriceEnabled)
+			.HasColumnName("is_suggested_price_enabled")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Prezzo suggerito attivo: il motore di prezzo usa la scelta del gestore.");
+
 		builder.Property(x => x.IsPriceDiscountEnabled)
 			.HasColumnName("is_price_discount_enabled")
 			.IsRequired()
@@ -30,7 +36,7 @@ public sealed class RevenueSettingsConfiguration : IEntityTypeConfiguration<Reve
 			.HasColumnName("is_shown_on_public_page")
 			.IsRequired()
 			.HasDefaultValue(false)
-			.HasComment("Il banner sconto è visibile sulla pagina pubblica dello stabilimento / flusso di prenotazione (indipendente da marketing_event.showOnEstablishmentPage di C6).");
+			.HasComment("Il banner sconto è visibile sulla pagina pubblica dello stabilimento / flusso di prenotazione (indipendente dalle campagne marketing).");
 
 		builder.Property(x => x.DailyBannerCount)
 			.HasColumnName("daily_banner_count")

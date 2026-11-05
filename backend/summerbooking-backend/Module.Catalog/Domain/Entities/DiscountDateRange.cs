@@ -1,4 +1,4 @@
-using Shared.Contracts;
+﻿using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
@@ -17,4 +17,6 @@ public sealed class DiscountDateRange : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private DiscountDateRange() { }
+
+	internal static DiscountDateRange Create(DateOnly startsOn, DateOnly endsOn) => new() { StartsOn = startsOn, EndsOn = endsOn };
 }

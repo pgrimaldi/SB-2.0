@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Infrastructure.Storage;
+﻿namespace BuildingBlocks.Infrastructure.Storage;
 
 /// <summary>Sezione <c>Storage</c>: indirizzo pubblico di ogni origine (<c>s3_us_east_2</c>, <c>cloudfront</c>, …).</summary>
 public sealed class PublicFileOptions
@@ -19,6 +19,9 @@ public sealed class PublicFileUrlResolver
 	private readonly PublicFileOptions _options;
 
 	public PublicFileUrlResolver(PublicFileOptions options) => _options = options;
+
+	/// <summary>Indirizzo base di ogni origine (senza la barra finale); external non c'è, il suo path è già l'URL.</summary>
+	public IReadOnlyDictionary<string, string> Origins => _options.PublicBaseUrls.ToDictionary(o => o.Key, o => o.Value.TrimEnd('/'));
 
 	public string? Resolve(string? origin, string? path)
 	{

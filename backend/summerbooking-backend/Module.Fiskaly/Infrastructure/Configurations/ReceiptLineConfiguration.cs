@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Fiskaly.Domain.Entities;
 using Module.Fiskaly.Domain.Enums;
@@ -61,7 +61,7 @@ public sealed class ReceiptLineConfiguration : IEntityTypeConfiguration<ReceiptL
 
 		builder.Property(x => x.SourceLinePublicId)
 			.HasColumnName("source_line_public_id")
-			.HasComment("public_id della riga prenotazione C1 di provenienza (booking_lines / booking_service_lines / booking_line_additional_items secondo line_kind), copiato — nessuna FK cross-schema. NULL per voci sintetiche non mappabili.");
+			.HasComment("public_id della riga prenotazione di Booking di provenienza (booking_lines / booking_service_lines / booking_line_additional_items secondo line_kind), copiato — nessuna FK cross-schema. NULL per voci sintetiche non mappabili.");
 		builder.HasIndex(x => x.SourceLinePublicId)
 			.HasFilter("source_line_public_id IS NOT NULL")
 			.HasDatabaseName("ix_fiskaly_receipt_lines_source");

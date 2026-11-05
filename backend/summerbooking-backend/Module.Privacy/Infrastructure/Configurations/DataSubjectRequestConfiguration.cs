@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Privacy.Domain.Entities;
 
@@ -28,7 +28,7 @@ public sealed class DataSubjectRequestConfiguration : IEntityTypeConfiguration<D
 		builder.Property(x => x.SubjectKind)
 			.HasColumnName("subject_kind")
 			.HasColumnType("privacy.subject_kind")
-			.HasComment("Tipo di entità interessata: customer (rubrica C5) o user (account di login C5).");
+			.HasComment("Tipo di entità interessata: customer (rubrica di Identity) o user (account di login di Identity).");
 
 		builder.Property(x => x.SubjectId)
 			.HasColumnName("subject_id")

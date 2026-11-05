@@ -661,7 +661,7 @@ namespace Module.Notification.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("also_send_push")
-                        .HasComment("Se, dopo l'email, inviare anche una push FCM ai destinatari utenti C5 con device token.");
+                        .HasComment("Se, dopo l'email, inviare anche una push FCM ai destinatari utenti di Identity con device token.");
 
                     b.Property<long?>("ContactListId")
                         .HasColumnType("bigint")
@@ -1343,7 +1343,7 @@ namespace Module.Notification.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("also_send_push")
-                        .HasComment("Se inviare anche una push FCM ai destinatari utenti C5 con device token.");
+                        .HasComment("Se inviare anche una push FCM ai destinatari utenti di Identity con device token.");
 
                     b.Property<int>("AutomationKind")
                         .ValueGeneratedOnAdd()
@@ -1543,7 +1543,7 @@ namespace Module.Notification.Infrastructure.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)")
                         .HasColumnName("full_name")
-                        .HasComment("Nome del contatto, denormalizzato per la personalizzazione senza join a C5.");
+                        .HasComment("Nome del contatto, denormalizzato per la personalizzazione senza join a Identity.");
 
                     b.Property<bool>("IsSeedFromBooking")
                         .ValueGeneratedOnAdd()
@@ -1686,7 +1686,7 @@ namespace Module.Notification.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_public")
-                        .HasComment("Se l'evento è mostrato sulla pagina pubblica dello stabilimento (filtra davvero la proiezione verso C2).");
+                        .HasComment("Se l'evento è mostrato sulla pagina pubblica dello stabilimento (filtra davvero la proiezione verso Catalog).");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1703,7 +1703,7 @@ namespace Module.Notification.Infrastructure.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasComment("Id pubblico stabile (API/URL), copiato anche nella proiezione verso la vetrina C2.");
+                        .HasComment("Id pubblico stabile (API/URL), copiato anche nella proiezione verso la vetrina Catalog.");
 
                     b.Property<bool>("RemindersEnabled")
                         .ValueGeneratedOnAdd()
@@ -2021,7 +2021,7 @@ namespace Module.Notification.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at")
-                        .HasComment("Soft-delete: ex status=0 di custom_templates / isDeleted di hotel_message_templates.");
+                        .HasComment("Soft-delete.");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -2140,7 +2140,7 @@ namespace Module.Notification.Infrastructure.Migrations
                     b.Property<Guid?>("CustomerPublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("customer_public_id")
-                        .HasComment("public_id di identity_access... customers (C5), copiato — nessuna FK cross-schema.");
+                        .HasComment("public_id di identity_access... customers (Identity), copiato — nessuna FK cross-schema.");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
@@ -2334,7 +2334,7 @@ namespace Module.Notification.Infrastructure.Migrations
 
                     b.ToTable("push_device_tokens", "notification", t =>
                         {
-                            t.HasComment("Un token di dispositivo registrato da un utente C5 per ricevere notifiche push, con piattaforma, ultimo uso e stato.");
+                            t.HasComment("Un token di dispositivo registrato da un utente di Identity per ricevere notifiche push, con piattaforma, ultimo uso e stato.");
                         });
                 });
 
@@ -2444,7 +2444,7 @@ namespace Module.Notification.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_muted")
-                        .HasComment("\"Non disturbare\" globale: nessuna notifica operativa finché attivo (rispettato dal modulo, il legacy lo ignorava).");
+                        .HasComment("\"Non disturbare\" globale: nessuna notifica operativa finché attivo (rispettato dal modulo).");
 
                     b.PrimitiveCollection<int[]>("MutedKinds")
                         .IsRequired()
@@ -2491,7 +2491,7 @@ namespace Module.Notification.Infrastructure.Migrations
 
                     b.ToTable("user_channel_preferences", "notification", t =>
                         {
-                            t.HasComment("Preferenze di notifica di un utente C5 (staff/gestore): canali abilitati, non disturbare, tipi silenziati.");
+                            t.HasComment("Preferenze di notifica di un utente di Identity (staff/gestore): canali abilitati, non disturbare, tipi silenziati.");
                         });
                 });
 

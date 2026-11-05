@@ -37,6 +37,8 @@ Correzioni rispetto al legacy:
 | `pk_catalog_map_icons` | `id` | PK | — |
 | `ix_catalog_map_icons_category_type` | `(category_id, type) WHERE is_active AND deleted_at IS NULL` | parziale | selettore icone (attive per categoria/stato) |
 | `ix_catalog_map_icons_media_asset` | `(media_asset_id)` | — | GC asset |
+| `uq_catalog_map_icons_public_id` | `(public_id)` | UNIQUE | id esposto dalle API |
+| `uq_catalog_map_icons_default` | `(category_id, type) WHERE is_default AND deleted_at IS NULL` | UNIQUE parziale | una sola icona predefinita per categoria e stato |
 
 ## Campi
 
@@ -47,6 +49,14 @@ Correzioni rispetto al legacy:
 - **Default**: identità (id legacy preservati).
 - **Nullabile**: No.
 - **Relazioni**: PK.
+
+### public_id
+- **Legacy**: —
+- **Descrizione**: id pubblico dell'icona, usato dalle API della mappa (aggiunto il 2026-10-25).
+- **Tipo**: `uuid` (UUIDv7).
+- **Default**: nessuno; per le righe esistenti la migration `MapIconsPublicId` lo ha calcolato da `created_at`,
+  l'ETL lo genera.
+- **Nullabile**: No.
 
 ### category_id
 - **Legacy**: `configure_images.category` (stringa: `umbrella` 77, `template` 8, `sunbed` 2, `cabin` 2; `tent` 0 icone)
@@ -93,6 +103,14 @@ Correzioni rispetto al legacy:
 - **Default**: `true`.
 - **Nullabile**: No.
 - **Relazioni**: —.
+
+### is_default
+- **Legacy**: — (decisione C5 del committente, 2026-10)
+- **Descrizione**: icona predefinita della categoria e dello stato: la mostrano i layout senza una scelta e
+  sostituisce un'icona eliminata dal systemadmin nelle mappe che la usavano.
+- **Tipo**: `boolean`.
+- **Default**: `false`; migration ed ETL marcano la prima icona attiva (id più basso) di ogni categoria e stato.
+- **Nullabile**: No.
 
 ### created_at / updated_at
 - **Legacy**: `configure_images.createdAt` / `configure_images.updatedAt`
@@ -155,6 +173,7 @@ dataSourceBuilder.MapEnum<MapIconState>("catalog.map_icon_state");
 ```csharp
 namespace Module.Catalog.Infrastructure.Configurations;
 
+/// <summary>Mapping EF Core di <see cref="MapIcon"/> su catalog.map_icons.</summary>
 public sealed class MapIconConfiguration : IEntityTypeConfiguration<MapIcon>
 {
 	public void Configure(EntityTypeBuilder<MapIcon> builder)
@@ -193,6 +212,20 @@ public sealed class MapIconConfiguration : IEntityTypeConfiguration<MapIcon>
 			.HasDefaultValue(true)
 			.HasComment("Icona selezionabile nel pannello SuperAdmin.");
 
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasComment("Id pubblico (UUIDv7) usato dalle API.");
+
+		builder.HasIndex(x => x.PublicId).IsUnique().HasDatabaseName("uq_catalog_map_icons_public_id");
+
+		builder.Property(x => x.IsDefault)
+			.HasColumnName("is_default")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Icona predefinita della categoria e dello stato: sostituisce quella eliminata dal systemadmin nelle mappe che la usavano.");
+
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired().HasDefaultValueSql("now()").HasComment("Creazione della riga.");
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired().HasDefaultValueSql("now()").HasComment("Ultima modifica della riga.");
 		builder.Property(x => x.DeletedAt).HasColumnName("deleted_at").HasComment("Soft-delete; la rimozione del file su storage è demandata a un job asincrono.");
@@ -200,6 +233,11 @@ public sealed class MapIconConfiguration : IEntityTypeConfiguration<MapIcon>
 		builder.HasIndex(x => new { x.CategoryId, x.Type })
 			.HasFilter("is_active AND deleted_at IS NULL")
 			.HasDatabaseName("ix_catalog_map_icons_category_type");
+
+		builder.HasIndex(x => new { x.CategoryId, x.Type }, "uq_catalog_map_icons_default")
+			.IsUnique()
+			.HasFilter("is_default AND deleted_at IS NULL")
+			.HasDatabaseName("uq_catalog_map_icons_default");
 
 		builder.HasIndex(x => x.MediaAssetId)
 			.HasDatabaseName("ix_catalog_map_icons_media_asset");

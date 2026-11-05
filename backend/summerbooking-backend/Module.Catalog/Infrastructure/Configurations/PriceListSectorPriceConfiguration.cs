@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -43,7 +43,7 @@ public sealed class PriceListSectorPriceConfiguration : IEntityTypeConfiguration
 		builder.Property(x => x.HalfDayPrice)
 			.HasColumnName("half_day_price")
 			.HasColumnType("numeric(12,2)")
-			.HasComment("Prezzo forfettario mezza giornata nel settore (allineamento con i listini hotel; spesso NULL sui price_lists puri).");
+			.HasComment("Prezzo forfettario mezza giornata nel settore (come nei listini delle convenzioni; spesso NULL).");
 
 		builder.Property(x => x.SeasonalPrice)
 			.HasColumnName("seasonal_price")

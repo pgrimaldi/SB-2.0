@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -13,6 +13,7 @@ public sealed class MapLayoutConfiguration : IEntityTypeConfiguration<MapLayout>
 		{
 			t.HasComment("Layout grafico della mappa spiaggia di uno stabilimento: griglia, sfondo, colore, icone per tipo elemento nei due stati.");
 			t.HasCheckConstraint("ck_catalog_map_layouts_background_color", "background_color IS NULL OR background_color ~ '^#[0-9A-Fa-f]{6}$'");
+			t.HasCheckConstraint("ck_catalog_map_layouts_tilt", "tilt_degrees BETWEEN -45 AND 45");
 		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_map_layouts");
@@ -33,7 +34,7 @@ public sealed class MapLayoutConfiguration : IEntityTypeConfiguration<MapLayout>
 			.HasColumnName("grid_columns")
 			.IsRequired()
 			.HasDefaultValue((short)0)
-			.HasComment("Numero di colonne della griglia (legacy: configure_maps.items, rinominato per eliminare l'ambiguità).");
+			.HasComment("Numero di colonne della griglia (articoli per fila).");
 
 		builder.Property(x => x.IsCustomTemplate)
 			.HasColumnName("is_custom_template")
@@ -56,6 +57,18 @@ public sealed class MapLayoutConfiguration : IEntityTypeConfiguration<MapLayout>
 		builder.Property(x => x.UmbrellaFreeAssetId)
 			.HasColumnName("umbrella_free_asset_id")
 			.HasComment("Icona dell'ombrellone standard nello stato libero.");
+
+		builder.Property(x => x.TiltDegrees)
+			.HasColumnName("tilt_degrees")
+			.IsRequired()
+			.HasDefaultValue((short)0)
+			.HasComment("Inclinazione del reticolo in gradi (da -45 a 45), applicata anche sul sito.");
+
+		builder.Property(x => x.ResetDeletesBookings)
+			.HasColumnName("reset_deletes_bookings")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Impostazione del gestore: false = «Reimposta mappa» e l'eliminazione di righe o colonne mantengono le prenotazioni e le ricollegano per numero; true = le cancellano.");
 
 		builder.Property(x => x.CreatedByUserPublicId)
 			.HasColumnName("created_by_user_id")

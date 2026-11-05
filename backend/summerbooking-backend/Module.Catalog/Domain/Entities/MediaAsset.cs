@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Module.Catalog.Domain.ValueObjects;
 using Shared.Contracts;
 
@@ -6,7 +6,7 @@ namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
 /// Catalogo locale al modulo catalog di tutti i riferimenti a file (foto, PDF, icone) usati dalle
-/// entità C2; referenziata solo internamente allo schema catalog (nessun public_id).
+/// entità Catalog; referenziata solo internamente allo schema catalog (nessun public_id).
 /// </summary>
 public sealed class MediaAsset : IAuditable, ISoftDeletable
 {
@@ -40,4 +40,25 @@ public sealed class MediaAsset : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private MediaAsset() { }
+
+	/// <summary>File caricato da uno stabilimento.</summary>
+	/// <summary>File della piattaforma (icone del catalogo, elementi spiaggia): nessuno stabilimento.</summary>
+	public static MediaAsset UploadShared(MediaRef reference, MediaKind kind, byte[] checksum, int byteSize, string contentType) => new()
+	{
+		Ref = reference,
+		Kind = kind,
+		Checksum = checksum,
+		ByteSize = byteSize,
+		ContentType = contentType,
+	};
+
+	public static MediaAsset Upload(MediaRef reference, MediaKind kind, byte[] checksum, int byteSize, string contentType, long propertyId) => new()
+	{
+		Ref = reference,
+		Kind = kind,
+		Checksum = checksum,
+		ByteSize = byteSize,
+		ContentType = contentType,
+		PropertyId = propertyId,
+	};
 }

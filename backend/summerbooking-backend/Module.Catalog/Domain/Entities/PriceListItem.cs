@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -13,7 +13,7 @@ public sealed class PriceListItem : IAuditable, ISoftDeletable
 	public long PriceListId { get; private set; }
 	public PackageItemKind ItemKind { get; private set; }
 	public long? InventoryItemId { get; private set; }
-	public int? IncludedServiceId { get; private set; }
+	public long? IncludedSaleItemId { get; private set; }
 	public long? LinkedPriceListId { get; private set; }
 	public short Quantity { get; private set; }
 	public DateTime CreatedAt { get; private set; }
@@ -21,4 +21,13 @@ public sealed class PriceListItem : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private PriceListItem() { }
+
+	internal static PriceListItem Create(PriceListItemData d) => new()
+	{
+		ItemKind = d.Kind,
+		InventoryItemId = d.InventoryItemId,
+		IncludedSaleItemId = d.IncludedSaleItemId,
+		LinkedPriceListId = d.LinkedPriceListId,
+		Quantity = d.Quantity,
+	};
 }

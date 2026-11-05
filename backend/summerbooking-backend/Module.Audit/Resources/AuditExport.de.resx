@@ -186,6 +186,234 @@
   <data name="Action_identity_external_token_denied" xml:space="preserve">
     <value>Token für Partner verweigert</value>
   </data>
+  <data name="Action_catalog_inventory_item_created" xml:space="preserve">
+    <value>Lagerartikel erstellt</value>
+  </data>
+  <data name="Action_catalog_inventory_item_updated" xml:space="preserve">
+    <value>Lagerartikel geändert</value>
+  </data>
+  <data name="Action_catalog_inventory_item_deleted" xml:space="preserve">
+    <value>Lagerartikel gelöscht</value>
+  </data>
+  <data name="Action_catalog_season_updated" xml:space="preserve">
+    <value>Saisondaten geändert</value>
+  </data>
+  <data name="Action_catalog_tariff_period_created" xml:space="preserve">
+    <value>Tarifzeitraum erstellt</value>
+  </data>
+  <data name="Action_catalog_tariff_period_updated" xml:space="preserve">
+    <value>Tarifzeitraum geändert</value>
+  </data>
+  <data name="Action_catalog_tariff_period_deleted" xml:space="preserve">
+    <value>Tarifzeitraum gelöscht</value>
+  </data>
+  <data name="Action_catalog_sector_created" xml:space="preserve">
+    <value>Sektor erstellt</value>
+  </data>
+  <data name="Action_catalog_sector_updated" xml:space="preserve">
+    <value>Sektor geändert</value>
+  </data>
+  <data name="Action_catalog_sector_deleted" xml:space="preserve">
+    <value>Sektor gelöscht</value>
+  </data>
+  <data name="Action_catalog_map_settings_updated" xml:space="preserve">
+    <value>Karteneinstellungen geändert</value>
+  </data>
+  <data name="Action_catalog_map_background_updated" xml:space="preserve">
+    <value>Kartenhintergrund geändert</value>
+  </data>
+  <data name="Action_catalog_map_icons_updated" xml:space="preserve">
+    <value>Kartensymbole geändert</value>
+  </data>
+  <data name="Action_catalog_map_spots_created" xml:space="preserve">
+    <value>Plätze zur Karte hinzugefügt</value>
+  </data>
+  <data name="Action_catalog_map_spot_updated" xml:space="preserve">
+    <value>Platz auf der Karte geändert</value>
+  </data>
+  <data name="Action_catalog_map_spots_deleted" xml:space="preserve">
+    <value>Plätze von der Karte entfernt</value>
+  </data>
+  <data name="Action_catalog_map_grid_changed" xml:space="preserve">
+    <value>Zeilen oder Spalten der Karte geändert</value>
+  </data>
+  <data name="Action_catalog_map_reset" xml:space="preserve">
+    <value>Karte zurückgesetzt</value>
+  </data>
+  <data name="Action_catalog_property_info_updated" xml:space="preserve">
+    <value>Informationen zum Betrieb geändert</value>
+  </data>
+  <data name="Action_catalog_property_amenities_updated" xml:space="preserve">
+    <value>Ausstattung des Betriebs geändert</value>
+  </data>
+  <data name="Action_catalog_property_photos_updated" xml:space="preserve">
+    <value>Fotos des Betriebs geändert</value>
+  </data>
+  <data name="Action_catalog_property_documents_updated" xml:space="preserve">
+    <value>PDF-Preisliste oder -Menü geändert</value>
+  </data>
+  <data name="Action_catalog_online_settings_updated" xml:space="preserve">
+    <value>Optionen der Online-Buchung geändert</value>
+  </data>
+  <data name="Action_catalog_service_online_settings_updated" xml:space="preserve">
+    <value>Optionen der Online-Buchung von Leistungen geändert</value>
+  </data>
+  <data name="Action_catalog_stay_limits_updated" xml:space="preserve">
+    <value>Grenzen der Online-Buchung geändert</value>
+  </data>
+  <data name="Action_catalog_online_legend_updated" xml:space="preserve">
+    <value>Legende der Online-Karte geändert</value>
+  </data>
+  <data name="Action_catalog_service_created" xml:space="preserve">
+    <value>Leistung erstellt</value>
+  </data>
+  <data name="Action_catalog_service_updated" xml:space="preserve">
+    <value>Leistung geändert</value>
+  </data>
+  <data name="Action_catalog_service_deleted" xml:space="preserve">
+    <value>Leistung gelöscht</value>
+  </data>
+  <data name="Action_catalog_automatic_price_created" xml:space="preserve">
+    <value>Automatischer Preis erstellt</value>
+  </data>
+  <data name="Action_catalog_automatic_price_updated" xml:space="preserve">
+    <value>Automatischer Preis geändert</value>
+  </data>
+  <data name="Action_catalog_automatic_price_deleted" xml:space="preserve">
+    <value>Automatischer Preis gelöscht</value>
+  </data>
+  <data name="Action_catalog_table_service_created" xml:space="preserve">
+    <value>Tischservice erstellt</value>
+  </data>
+  <data name="Action_catalog_table_service_updated" xml:space="preserve">
+    <value>Tischservice geändert</value>
+  </data>
+  <data name="Action_catalog_table_service_deleted" xml:space="preserve">
+    <value>Tischservice gelöscht</value>
+  </data>
+  <data name="Action_catalog_price_list_created" xml:space="preserve">
+    <value>Preislisteneintrag erstellt</value>
+  </data>
+  <data name="Action_catalog_price_list_updated" xml:space="preserve">
+    <value>Preislisteneintrag geändert</value>
+  </data>
+  <data name="Action_catalog_price_list_deleted" xml:space="preserve">
+    <value>Preislisteneintrag gelöscht</value>
+  </data>
+  <data name="Action_catalog_price_list_duplicated" xml:space="preserve">
+    <value>Preislisteneintrag dupliziert</value>
+  </data>
+  <data name="Action_catalog_price_lists_imported" xml:space="preserve">
+    <value>Preisliste aus Datei importiert</value>
+  </data>
+  <data name="Action_catalog_reduced_season_created" xml:space="preserve">
+    <value>Reduzierter Saisonpreis erstellt</value>
+  </data>
+  <data name="Action_catalog_reduced_season_updated" xml:space="preserve">
+    <value>Reduzierter Saisonpreis geändert</value>
+  </data>
+  <data name="Action_catalog_reduced_season_deleted" xml:space="preserve">
+    <value>Reduzierter Saisonpreis gelöscht</value>
+  </data>
+  <data name="Action_catalog_discount_created" xml:space="preserve">
+    <value>Rabatt erstellt</value>
+  </data>
+  <data name="Action_catalog_discount_updated" xml:space="preserve">
+    <value>Rabatt geändert</value>
+  </data>
+  <data name="Action_catalog_discount_deleted" xml:space="preserve">
+    <value>Rabatt gelöscht</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_created" xml:space="preserve">
+    <value>Partner erstellt</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_updated" xml:space="preserve">
+    <value>Partner geändert</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_deleted" xml:space="preserve">
+    <value>Partner gelöscht</value>
+  </data>
+  <data name="Action_catalog_agreement_partner_duplicated" xml:space="preserve">
+    <value>Partner dupliziert</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_created" xml:space="preserve">
+    <value>Partnerpreisliste erstellt</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_updated" xml:space="preserve">
+    <value>Partnerpreisliste geändert</value>
+  </data>
+  <data name="Action_catalog_agreement_price_list_deleted" xml:space="preserve">
+    <value>Partnerpreisliste gelöscht</value>
+  </data>
+  <data name="Action_catalog_agreement_report_cancelled" xml:space="preserve">
+    <value>Partnerbericht storniert</value>
+  </data>
+  <data name="Action_catalog_revenue_settings_updated" xml:space="preserve">
+    <value>Revenue-Einstellungen geändert</value>
+  </data>
+  <data name="Action_catalog_suggested_prices_computed" xml:space="preserve">
+    <value>Preisvorschläge berechnet</value>
+  </data>
+  <data name="Action_catalog_suggested_prices_applied" xml:space="preserve">
+    <value>Preisvorschläge übernommen</value>
+  </data>
+  <data name="Action_catalog_revenue_weights_updated" xml:space="preserve">
+    <value>Gewichte des Preisvorschlags geändert</value>
+  </data>
+  <data name="Action_catalog_revenue_standard_periods_updated" xml:space="preserve">
+    <value>Standardzeiträume des Preisvorschlags geändert</value>
+  </data>
+  <data name="Action_catalog_platform_property_status_changed" xml:space="preserve">
+    <value>Status des Betriebs geändert</value>
+  </data>
+  <data name="Action_catalog_platform_property_trashed" xml:space="preserve">
+    <value>Betrieb in den Papierkorb verschoben</value>
+  </data>
+  <data name="Action_catalog_platform_property_restored" xml:space="preserve">
+    <value>Betrieb wiederhergestellt</value>
+  </data>
+  <data name="Action_catalog_platform_property_purged" xml:space="preserve">
+    <value>Betrieb endgültig gelöscht</value>
+  </data>
+  <data name="Action_catalog_platform_property_showcase_updated" xml:space="preserve">
+    <value>Region oder Abzeichen des Betriebs geändert</value>
+  </data>
+  <data name="Action_catalog_platform_map_icon_saved" xml:space="preserve">
+    <value>Katalogsymbol gespeichert</value>
+  </data>
+  <data name="Action_catalog_platform_map_icon_deleted" xml:space="preserve">
+    <value>Katalogsymbol gelöscht</value>
+  </data>
+  <data name="Action_catalog_platform_beach_element_saved" xml:space="preserve">
+    <value>Strandelement gespeichert</value>
+  </data>
+  <data name="Action_catalog_platform_beach_element_deleted" xml:space="preserve">
+    <value>Strandelement gelöscht</value>
+  </data>
+  <data name="Action_catalog_platform_badge_saved" xml:space="preserve">
+    <value>Abzeichen gespeichert</value>
+  </data>
+  <data name="Action_catalog_platform_badge_deleted" xml:space="preserve">
+    <value>Abzeichen gelöscht</value>
+  </data>
+  <data name="Action_catalog_platform_region_saved" xml:space="preserve">
+    <value>Region gespeichert</value>
+  </data>
+  <data name="Action_catalog_platform_region_deleted" xml:space="preserve">
+    <value>Region gelöscht</value>
+  </data>
+  <data name="Action_catalog_platform_showcase_updated" xml:space="preserve">
+    <value>Schaufenster geändert</value>
+  </data>
+  <data name="Action_catalog_service_duplicated" xml:space="preserve">
+    <value>Leistung dupliziert</value>
+  </data>
+  <data name="Action_catalog_automatic_price_duplicated" xml:space="preserve">
+    <value>Automatischer Preis dupliziert</value>
+  </data>
+  <data name="Action_catalog_table_service_duplicated" xml:space="preserve">
+    <value>Tischservice dupliziert</value>
+  </data>
   <data name="Action_audit_entries_exported" xml:space="preserve">
     <value>Aktivitätsprotokoll exportiert</value>
   </data>

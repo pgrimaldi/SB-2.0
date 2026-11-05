@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -10,7 +10,7 @@ public sealed class AgreementPartnerConfiguration : IEntityTypeConfiguration<Agr
 	public void Configure(EntityTypeBuilder<AgreementPartner> builder)
 	{
 		builder.ToTable("agreement_partners", "catalog", t => t.HasComment(
-			"Struttura partner (\"convenzione\"/hotel) con cui uno stabilimento ha un accordo commerciale."));
+			"Struttura convenzionata con cui uno stabilimento ha un accordo commerciale."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_agreement_partners");
 		builder.Property(x => x.Id).HasColumnType("integer").UseIdentityAlwaysColumn();
@@ -19,7 +19,7 @@ public sealed class AgreementPartnerConfiguration : IEntityTypeConfiguration<Agr
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico (UUIDv7), copiato cross-modulo da C1 (booking_reservations.agreement_partner_id).");
+			.HasComment("Id pubblico (UUIDv7), copiato cross-modulo da Booking (booking_reservations.agreement_partner_id).");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")

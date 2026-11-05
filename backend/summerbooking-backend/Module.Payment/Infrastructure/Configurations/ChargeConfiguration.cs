@@ -20,7 +20,7 @@ public sealed class ChargeConfiguration : IEntityTypeConfiguration<Charge>
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
 			.IsRequired()
-			.HasComment("Id pubblico stabile, copiato cross-modulo (C4 autoreceipt; URL gestionale).");
+			.HasComment("Id pubblico stabile, copiato cross-modulo (Fiskaly autoreceipt; URL gestionale).");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -75,10 +75,8 @@ public sealed class ChargeConfiguration : IEntityTypeConfiguration<Charge>
 		builder.Property(x => x.StripePaymentIntentId)
 			.HasColumnName("stripe_payment_intent_id")
 			.HasMaxLength(255)
-			.HasComment("Id del PaymentIntent Stripe; NULL per paga-in-struttura. 255 (non 40): il legacy ha " +
-				"dimostrato che questo campo puo' contenere anche un Checkout Session id (\"cs_live_...\", fino a " +
-				"66+ caratteri) invece di un vero PaymentIntent id (\"pi_...\") - bug reale osservato il " +
-				"2026-09-15, 190 righe scartate a NULL dalla migrazione perche' il varchar(40) le rifiutava.");
+			.HasComment("Id del PaymentIntent Stripe; NULL per paga-in-struttura. 255 caratteri perche' puo' contenere anche " +
+				"un Checkout Session id (\"cs_live_...\", 66+ caratteri) invece di un PaymentIntent id (\"pi_...\").");
 
 		builder.Property(x => x.StripeChargeId)
 			.HasColumnName("stripe_charge_id")

@@ -1,10 +1,10 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
-/// Componente di un listino/voucher hotel: articolo di magazzino, servizio incluso o pacchetto collegato.
+/// Componente di un listino/voucher di una convenzione: articolo di magazzino, servizio incluso o pacchetto collegato.
 /// Entità figlia di <see cref="AgreementPriceList"/>.
 /// </summary>
 public sealed class AgreementPriceListItem : IAuditable, ISoftDeletable
@@ -15,8 +15,7 @@ public sealed class AgreementPriceListItem : IAuditable, ISoftDeletable
 	public PackageItemKind ItemKind { get; private set; }
 	public long? InventoryItemId { get; private set; }
 	public InventoryItem? InventoryItemRef { get; private set; }
-	public int? IncludedServiceId { get; private set; }
-	public Amenity? IncludedService { get; private set; }
+	public long? IncludedSaleItemId { get; private set; }
 	public long? LinkedPriceListId { get; private set; }
 	public AgreementPriceList? LinkedPriceList { get; private set; }
 	public short Quantity { get; private set; }
@@ -25,4 +24,13 @@ public sealed class AgreementPriceListItem : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private AgreementPriceListItem() { }
+
+	internal static AgreementPriceListItem Create(PriceListItemData d) => new()
+	{
+		ItemKind = d.Kind,
+		InventoryItemId = d.InventoryItemId,
+		IncludedSaleItemId = d.IncludedSaleItemId,
+		LinkedPriceListId = d.LinkedPriceListId,
+		Quantity = d.Quantity,
+	};
 }

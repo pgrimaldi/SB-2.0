@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -10,7 +10,7 @@ public sealed class MediaAssetConfiguration : IEntityTypeConfiguration<MediaAsse
 	public void Configure(EntityTypeBuilder<MediaAsset> builder)
 	{
 		builder.ToTable("media_assets", "catalog", t => t.HasComment(
-			"Catalogo locale al modulo catalog di tutti i riferimenti a file (foto, PDF, icone) usati dalle entità C2."));
+			"Catalogo locale al modulo catalog di tutti i riferimenti a file (foto, PDF, icone) usati dalle entità Catalog."));
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_media_assets");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -42,7 +42,7 @@ public sealed class MediaAssetConfiguration : IEntityTypeConfiguration<MediaAsse
 		builder.Property(x => x.Checksum)
 			.HasColumnName("checksum")
 			.HasColumnType("bytea")
-			.HasComment("Hash SHA-256 del contenuto, calcolato all'upload, per deduplica e verifica integrità. NULL per i file migrati dal legacy.");
+			.HasComment("Hash SHA-256 del contenuto, calcolato all'upload, per deduplica e verifica integrità. NULL per i file importati finché non se ne calcolano i metadati.");
 
 		builder.Property(x => x.ByteSize)
 			.HasColumnName("byte_size")

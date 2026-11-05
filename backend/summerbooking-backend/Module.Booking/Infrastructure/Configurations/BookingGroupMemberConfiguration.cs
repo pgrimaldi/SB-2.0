@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Booking.Domain.Entities;
 
@@ -22,7 +22,7 @@ public sealed class BookingGroupMemberConfiguration : IEntityTypeConfiguration<B
 		builder.Property(x => x.ReservationId)
 			.HasColumnName("reservation_id")
 			.IsRequired()
-			.HasComment("Prenotazione membro del gruppo (l'intera prenotazione, non una singola riga postazione come nel legacy)");
+			.HasComment("Prenotazione membro del gruppo (l'intera prenotazione, non una singola riga postazione)");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")

@@ -114,6 +114,15 @@ codice/numero incoerente). Qui: una riga per componente, riferimento **per FK**.
 - **Nullabile**: Sì.
 - **Relazioni**: —.
 
+### included_sale_item_id
+- **Legacy**: nessuno (campo nuovo).
+- **Nota**: campo aggiunto il 2026-10-25 (migration PriceListsCatalog).
+- **Descrizione**: Servizio venduto incluso nel pacchetto (per included_service).
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì.
+- **Relazioni**: **FK** → [`catalog_service_sale_items.id`](catalog_service_sale_items.md) `ON DELETE RESTRICT`.
+
 ## Valutazione JSON
 
 Nessun JSON. Tre array `details.*` → una tabella con `item_kind` discriminatore + FK reali (elimina i
@@ -251,3 +260,4 @@ evento di dominio proprio (non è un aggregate root).
   `"2S+1U"`) dalle righe, per lingua — non persistito.
 - Migrazione: risoluzione `PackageItemSelected[].name` (`"Umbrella"`, `"Sunbed"`, …) → `inventory_item_id`
   per property; nomi non risolvibili → riga scartata con log.
+> **Allineamento 2026-10-26**: nel DB non ci sono più le colonne `included_service_id` (sostituite o spostate dalle API Catalog; vedi le sezioni aggiunte).

@@ -13,8 +13,10 @@
 
 ## Descrizione
 
-**Anagrafica delle postazioni** (ombrelloni, lettini, cabine, parcheggi, tende, biglietti, aree…) di uno
-stabilimento: **una riga per postazione**. È il registro delle *risorse prenotabili* che C1 referenzia
+**Elementi del reticolo della mappa** di uno stabilimento: le postazioni prenotabili (ombrelloni, lettini,
+cabine, parcheggi, tende, biglietti, aree…), **una riga per postazione**, e dal 2026-10-25 gli **elementi
+spiaggia** solo grafici (passerella, doccia, bar…, catalogo in
+[`catalog_map_beach_elements`](catalog_map_beach_elements.md)), anche su più caselle. È il registro delle *risorse prenotabili* che C1 referenzia
 come `resource_id` in `resource_consumptions` e nelle righe prenotazione (`booking_lines.resource_id`).
 
 Nel legacy la griglia era un unico JSON `beachMapData` (`[{row, rec:[{cell, id, items:{name, it, itemIcon,
@@ -45,6 +47,12 @@ Correzioni rispetto al legacy:
 | `ix_..._property_type` | `(property_id, spot_type) WHERE deleted_at IS NULL` | parziale | "tutti gli ombrelloni di X" |
 | `ix_..._sector` | `(sector_id) WHERE deleted_at IS NULL` | parziale | postazioni di un settore (prezzi/limiti/sconti) |
 | `ix_..._grid` | `(property_id, grid_row, grid_column)` | — | rendering griglia |
+| `ix_..._beach_element` | `(beach_element_id) WHERE deleted_at IS NULL` | parziale | FK verso il catalogo degli elementi spiaggia |
+
+Vincoli `CHECK`: `ck_catalog_map_spots_rotation` (0–315 a passi di 45), `ck_catalog_map_spots_offset` (da −2 a 2),
+`ck_catalog_map_spots_span` (almeno 1), `ck_catalog_map_spots_beach_element` (`beach_element_id` valorizzato
+solo e sempre per `spot_type = beach_element`; `label` obbligatoria per tutti gli altri tipi). Il vincolo
+confronta `spot_type::text`: l'etichetta `beach_element` è aggiunta nella stessa transazione della migration.
 
 ## Campi
 
@@ -86,18 +94,20 @@ Correzioni rispetto al legacy:
 - **Descrizione**: etichetta/numero della postazione visibile al cliente e all'operatore.
 - **Tipo**: `varchar(32)`.
 - **Default**: nessuno.
-- **Nullabile**: No.
+- **Nullabile**: Sì, solo per gli elementi spiaggia (vincolo `ck_catalog_map_spots_beach_element`).
 - **Relazioni**: —.
-- **Note**: `UNIQUE` per property (case-insensitive); i riferimenti legacy per etichetta
+- **Note**: `UNIQUE` per property senza distinguere maiuscole e minuscole (indice su `lower(label)` dal
+  2026-10-25, prima era sensibile alle maiuscole); i riferimenti legacy per etichetta
   (`onlineBookingOptions.locations`) si risolvono su questa colonna in migrazione.
 
 ### spot_type
 - **Legacy**: `beachMapData[].rec[].items.name` (elenco chiuso `itmNames` hardcoded nel backend)
 - **Descrizione**: tipo di elemento posizionato nella cella.
-- **Tipo**: `enum catalog.spot_type` — valori: `umbrella`, `sunbed`, `sunbed_xl`, `cabin`, `special_cabin`,
-  `special_umbrella1`, `special_umbrella2`, `special_umbrella3`, `special_umbrella4`,
-  `special_umbrella5`, `tent`, `parking`, `ticket`, `umbrella_area`, `cabin_area`, `sunbed_area`,
-  `parking_area`.
+- **Tipo**: `enum catalog.spot_type` — valori: `umbrella`, `sunbed`, `sunbed_xl`, `cabin`, `custom_cabin`,
+  `custom_article1`…`custom_article5`, `tent`, `parking`, `ticket`, `umbrella_area`, `cabin_area`, `sunbed_area`,
+  `parking_area`, `custom_article6`…`custom_article8`, `beach_element`. Fino al 2026-10-25 `custom_cabin` e
+  `custom_article1..5` si chiamavano `special_cabin` e `special_umbrella1..5` (etichette rinominate dalla
+  migration `MapEditorLayout`, nessuna riga riscritta).
 - **Default**: nessuno.
 - **Nullabile**: No.
 - **Relazioni**: allineato all'enum `resource_type` di
@@ -131,6 +141,45 @@ Correzioni rispetto al legacy:
 - **Relazioni**: coerenti con `grid_rows` / `grid_columns` di
   [`catalog_map_layouts`](catalog_map_layouts.md) (validazione applicativa; il resize non le tronca in
   silenzio).
+
+### row_span / column_span
+- **Legacy**: — (nel legacy ogni elemento occupava una casella)
+- **Descrizione**: caselle occupate dall'elemento a partire da `grid_row`/`grid_column`.
+- **Tipo**: `smallint` ciascuna.
+- **Default**: `1`.
+- **Nullabile**: No.
+- **Note**: più di 1 solo per gli elementi spiaggia; l'inserimento o l'eliminazione di una riga o colonna che
+  attraversa l'elemento ne allarga o riduce l'ampiezza.
+
+### rotation_degrees
+- **Legacy**: —
+- **Descrizione**: rotazione dell'articolo sul proprio asse, a passi di 45° (decisione C1 del committente).
+- **Tipo**: `smallint`, da 0 a 315.
+- **Default**: `0` (le mappe migrate restano dritte).
+- **Nullabile**: No.
+
+### offset_x / offset_y
+- **Legacy**: —
+- **Descrizione**: spostamento dell'articolo dentro la casella, in quinti di casella (0 = centro).
+- **Tipo**: `smallint` ciascuna, da −2 a 2.
+- **Default**: `0` (le mappe migrate restano centrate).
+- **Nullabile**: No.
+
+### is_agreement_only
+- **Legacy**: —
+- **Descrizione**: «Riserva per strutture convenzionate»: la postazione non è prenotabile online.
+- **Tipo**: `boolean`.
+- **Default**: `false`.
+- **Nullabile**: No.
+
+### beach_element_id
+- **Legacy**: —
+- **Descrizione**: elemento spiaggia del catalogo di piattaforma.
+- **Tipo**: `bigint`.
+- **Default**: nessuno.
+- **Nullabile**: Sì; valorizzato solo per `spot_type = beach_element`.
+- **Relazioni**: FK `fk_catalog_map_spots_beach_element` → [`catalog_map_beach_elements.id`](catalog_map_beach_elements.md),
+  `ON DELETE RESTRICT`.
 
 ### is_bookable
 - **Legacy**: — (nel legacy la "prenotabilità" dipendeva da `isReserved` locale e da altre tabelle)
@@ -206,25 +255,35 @@ tabella `map_spots`.
 
 ```csharp
 // Module.Catalog/Domain/Enums/SpotType.cs
+/// <summary>
+/// Tipo di elemento posizionato in una cella della mappa spiaggia (catalog_map_spots). Gli articoli coincidono con
+/// quelli dell'elenco fisso del magazzino che si posizionano sulla mappa.
+/// </summary>
 public enum SpotType
 {
 	Umbrella = 0,
 	Sunbed = 1,
 	SunbedXl = 2,
 	Cabin = 3,
-	SpecialCabin = 4,
-	SpecialUmbrella1 = 5,
-	SpecialUmbrella2 = 6,
-	SpecialUmbrella3 = 7,
-	SpecialUmbrella4 = 8,
-	SpecialUmbrella5 = 9,
+	CustomCabin = 4,
+	CustomArticle1 = 5,
+	CustomArticle2 = 6,
+	CustomArticle3 = 7,
+	CustomArticle4 = 8,
+	CustomArticle5 = 9,
 	Tent = 10,
 	Parking = 11,
 	Ticket = 12,
 	UmbrellaArea = 13,
 	CabinArea = 14,
 	SunbedArea = 15,
-	ParkingArea = 16
+	ParkingArea = 16,
+	CustomArticle6 = 17,
+	CustomArticle7 = 18,
+	CustomArticle8 = 19,
+
+	/// <summary>Elemento solo grafico (passerella, doccia, ecc.), non prenotabile e senza numero.</summary>
+	BeachElement = 20,
 }
 ```
 
@@ -240,14 +299,20 @@ bordo del modulo (nessun enum condiviso cross-schema).
 ### `MapSpotConfiguration`
 
 ```csharp
-namespace Module.Catalog.Infrastructure.Configurations;
-
+/// <summary>Mapping EF Core di <see cref="MapSpot"/> su catalog.map_spots.</summary>
 public sealed class MapSpotConfiguration : IEntityTypeConfiguration<MapSpot>
 {
 	public void Configure(EntityTypeBuilder<MapSpot> builder)
 	{
-		builder.ToTable("map_spots", "catalog", t => t.HasComment(
-			"Anagrafica delle postazioni (ombrelloni, lettini, cabine, parcheggi, ...) di uno stabilimento: una riga per postazione. Sostituisce il blob JSON configurations.beachMapData."));
+		builder.ToTable("map_spots", "catalog", t =>
+		{
+			t.HasComment("Elementi del reticolo della mappa: postazioni prenotabili (ombrelloni, lettini, cabine, aree, ...) ed elementi spiaggia solo grafici. Sostituisce il blob JSON configurations.beachMapData.");
+			t.HasCheckConstraint("ck_catalog_map_spots_rotation", "rotation_degrees >= 0 AND rotation_degrees < 360 AND rotation_degrees % 45 = 0");
+			t.HasCheckConstraint("ck_catalog_map_spots_offset", "offset_x BETWEEN -2 AND 2 AND offset_y BETWEEN -2 AND 2");
+			t.HasCheckConstraint("ck_catalog_map_spots_span", "row_span >= 1 AND column_span >= 1");
+			t.HasCheckConstraint("ck_catalog_map_spots_beach_element",
+				"(spot_type::text = 'beach_element') = (beach_element_id IS NOT NULL) AND (spot_type::text = 'beach_element' OR label IS NOT NULL)");
+		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_map_spots");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -269,9 +334,8 @@ public sealed class MapSpotConfiguration : IEntityTypeConfiguration<MapSpot>
 
 		builder.Property(x => x.Label)
 			.HasColumnName("label")
-			.HasMaxLength(32)
-			.IsRequired()
-			.HasComment("Etichetta/numero della postazione visibile al cliente e all'operatore (es. A12); univoca per stabilimento.");
+			.HasMaxLength(MapSpot.LabelMaxLength)
+			.HasComment("Etichetta/numero della postazione visibile al cliente e all'operatore (es. A12); univoca per stabilimento. NULL solo per gli elementi spiaggia.");
 
 		builder.Property(x => x.SpotType)
 			.HasColumnName("spot_type")
@@ -295,6 +359,49 @@ public sealed class MapSpotConfiguration : IEntityTypeConfiguration<MapSpot>
 		builder.Property(x => x.GridColumn)
 			.HasColumnName("grid_column")
 			.HasComment("Colonna della postazione nella griglia del layout.");
+
+		builder.Property(x => x.RowSpan)
+			.HasColumnName("row_span")
+			.IsRequired()
+			.HasDefaultValue((short)1)
+			.HasComment("Righe occupate dall'elemento (più di una solo per gli elementi spiaggia).");
+		builder.Property(x => x.ColumnSpan)
+			.HasColumnName("column_span")
+			.IsRequired()
+			.HasDefaultValue((short)1)
+			.HasComment("Colonne occupate dall'elemento (più di una solo per gli elementi spiaggia).");
+
+		builder.Property(x => x.RotationDegrees)
+			.HasColumnName("rotation_degrees")
+			.IsRequired()
+			.HasDefaultValue((short)0)
+			.HasComment("Rotazione dell'articolo sul proprio asse, a passi di 45 gradi.");
+		builder.Property(x => x.OffsetX)
+			.HasColumnName("offset_x")
+			.IsRequired()
+			.HasDefaultValue((short)0)
+			.HasComment("Spostamento orizzontale dentro la casella, in quinti di casella (da -2 a 2; 0 = centro).");
+		builder.Property(x => x.OffsetY)
+			.HasColumnName("offset_y")
+			.IsRequired()
+			.HasDefaultValue((short)0)
+			.HasComment("Spostamento verticale dentro la casella, in quinti di casella (da -2 a 2; 0 = centro).");
+
+		builder.Property(x => x.IsAgreementOnly)
+			.HasColumnName("is_agreement_only")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Riservata alle strutture convenzionate: non prenotabile online.");
+
+		builder.Property(x => x.BeachElementId)
+			.HasColumnName("beach_element_id")
+			.HasComment("Elemento spiaggia del catalogo di piattaforma; valorizzato solo per spot_type = beach_element.");
+
+		builder.HasOne(x => x.BeachElement)
+			.WithMany()
+			.HasForeignKey(x => x.BeachElementId)
+			.HasConstraintName("fk_catalog_map_spots_beach_element")
+			.OnDelete(DeleteBehavior.Restrict);
 
 		builder.Property(x => x.IsBookable)
 			.HasColumnName("is_bookable")
@@ -321,9 +428,14 @@ public sealed class MapSpotConfiguration : IEntityTypeConfiguration<MapSpot>
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("ix_catalog_map_spots_property_type");
 
+		builder.HasIndex(x => x.BeachElementId)
+			.HasFilter("deleted_at IS NULL")
+			.HasDatabaseName("ix_catalog_map_spots_beach_element");
+
 		builder.HasIndex(x => x.SectorId)
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("ix_catalog_map_spots_sector");
+
 
 		builder.HasIndex(x => new { x.PropertyId, x.GridRow, x.GridColumn })
 			.HasDatabaseName("ix_catalog_map_spots_grid");
@@ -349,6 +461,7 @@ public sealed class MapSpotConfiguration : IEntityTypeConfiguration<MapSpot>
 
 - `PropertyId` → `Property` (stesso schema): FK reale, `ON DELETE CASCADE`.
 - `SectorId` → `MapSector` (stesso schema): FK reale, `ON DELETE RESTRICT`.
+- `BeachElementId` → `MapBeachElement` (stesso schema): FK reale, `ON DELETE RESTRICT`.
 - `CreatedByUserPublicId`: id copiato da C5 — solo `.HasComment`, nessuna FK.
 - `PublicId` copiato in uscita da C1 (`booking_lines.resource_id`, `resource_consumptions.resource_id`):
   nessuna FK, contratto cross-modulo. Il modulo Catalog non conosce C1: la risoluzione `public_id ↔ id`
@@ -365,3 +478,6 @@ public sealed class MapSpotConfiguration : IEntityTypeConfiguration<MapSpot>
 - `sector_id` risolto dal nome riga → settore (correlazione fragile nel legacy, qui deterministica sulla
   `map_sectors` già migrata).
 - `isReserved`/`isSelected`/`currentRow` (stato transazionale) **non** migrati: vivono in C1.
+- Rotazione, spostamento, ampiezza e riserva per le convenzioni non esistono nel legacy: restano ai default.
+- A fine passo l'ETL allarga `grid_rows`/`grid_columns` del layout fino a contenere ogni postazione (544
+  postazioni stavano oltre il numero di righe e 418 oltre le colonne del layout: 4 layout corretti).

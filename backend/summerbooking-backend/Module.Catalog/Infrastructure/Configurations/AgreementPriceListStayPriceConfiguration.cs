@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Module.Catalog.Domain.Entities;
 
@@ -14,7 +14,7 @@ public sealed class AgreementPriceListStayPriceConfiguration : IEntityTypeConfig
 	{
 		builder.ToTable("agreement_price_list_stay_prices", "catalog", t =>
 		{
-			t.HasComment("Override manuale del prezzo per una durata specifica (1-90 giorni) di un periodo tariffario di un listino/voucher hotel.");
+			t.HasComment("Override manuale del prezzo per una durata specifica (1-90 giorni) di un periodo tariffario di un listino/voucher di una convenzione.");
 			t.HasCheckConstraint("ck_catalog_agreement_price_list_stay_prices_stay_days", "stay_days BETWEEN 1 AND 90");
 		});
 
@@ -24,7 +24,7 @@ public sealed class AgreementPriceListStayPriceConfiguration : IEntityTypeConfig
 		builder.Property(x => x.PeriodPriceId)
 			.HasColumnName("period_price_id")
 			.IsRequired()
-			.HasComment("Periodo tariffario (e, tramite esso, listino/voucher hotel) a cui si applica il prezzo per durata.");
+			.HasComment("Periodo tariffario (e, tramite esso, listino/voucher di una convenzione) a cui si applica il prezzo per durata.");
 		builder.HasOne<AgreementPriceListPeriodPrice>()
 			.WithMany(p => p.StayPriceOverrides)
 			.HasForeignKey(x => x.PeriodPriceId)
@@ -55,7 +55,7 @@ public sealed class AgreementPriceListStayPriceConfiguration : IEntityTypeConfig
 			.HasColumnName("is_manual_override")
 			.HasDefaultValue(true)
 			.IsRequired()
-			.HasComment("Sempre true per le righe presenti: si persistono solo gli override manuali (isPriceChange legacy).");
+			.HasComment("Sempre true per le righe presenti: si persistono solo le celle corrette a mano dal gestore.");
 
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")

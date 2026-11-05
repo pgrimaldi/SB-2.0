@@ -1,4 +1,4 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
@@ -21,5 +21,23 @@ public sealed class TariffPeriod : IAuditable, ISoftDeletable
 	public DateTime UpdatedAt { get; private set; }
 	public DateTime? DeletedAt { get; private set; }
 
+	public const int NameMaxLength = 80;
+
 	private TariffPeriod() { }
+
+	/// <summary>Un intervallo del periodo; più intervalli con la stessa chiave formano lo stesso periodo.</summary>
+	public static TariffPeriod Create(long seasonId, short groupKey, string name, DateOnly startsOn, DateOnly endsOn)
+	{
+		if (endsOn < startsOn)
+			throw new ArgumentException("Fine dell'intervallo prima dell'inizio.", nameof(endsOn));
+		return new TariffPeriod
+		{
+			SeasonId = seasonId,
+			PeriodGroupKey = groupKey,
+			Name = name.Trim(),
+			Tier = TariffTier.Custom,
+			StartsOn = startsOn,
+			EndsOn = endsOn,
+		};
+	}
 }

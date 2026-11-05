@@ -9,8 +9,12 @@ public sealed class ServiceSaleItemConfiguration : IEntityTypeConfiguration<Serv
 {
 	public void Configure(EntityTypeBuilder<ServiceSaleItem> builder)
 	{
-		builder.ToTable("service_sale_items", "catalog", t => t.HasComment(
-			"Servizio (bar/normale/a fascia oraria) venduto da uno stabilimento a corredo della prenotazione."));
+		builder.ToTable("service_sale_items", "catalog", t =>
+		{
+			t.HasComment("Servizio (bar/normale/a fascia oraria) venduto da uno stabilimento a corredo della prenotazione.");
+			t.HasCheckConstraint("ck_catalog_service_sale_items_vat", "(vat_rate IS NULL) <> (vat_nature IS NULL)");
+			t.HasCheckConstraint("ck_catalog_service_sale_items_category", "category IS NULL OR kind = 'bar'");
+		});
 
 		builder.HasKey(x => x.Id).HasName("pk_catalog_service_sale_items");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
@@ -18,7 +22,7 @@ public sealed class ServiceSaleItemConfiguration : IEntityTypeConfiguration<Serv
 		builder.Property(x => x.PublicId)
 			.HasColumnName("public_id")
 			.ValueGeneratedNever()
-			.HasComment("Id pubblico, copiato cross-modulo: C1 lo usa per contatori/consumi del servizio.");
+			.HasComment("Id pubblico, copiato cross-modulo: Booking lo usa per contatori/consumi del servizio.");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -42,6 +46,57 @@ public sealed class ServiceSaleItemConfiguration : IEntityTypeConfiguration<Serv
 			.HasColumnType("numeric(12,2)")
 			.IsRequired()
 			.HasComment("Prezzo unitario del servizio (sovrascrivibile dalla fascia oraria per kind = hourly).");
+
+		builder.Property(x => x.Description)
+			.HasColumnName("description")
+			.HasColumnType("text")
+			.HasComment("Descrizione mostrata al cliente.");
+
+		builder.Property(x => x.Category)
+			.HasColumnName("category")
+			.HasColumnType("catalog.bar_category")
+			.HasComment("Categoria dei servizi bar (bar, pizzeria, bibite, ...); NULL per gli altri tipi.");
+
+		builder.Property(x => x.VatRate)
+			.HasColumnName("vat_rate")
+			.HasPrecision(5, 2)
+			.HasComment("Aliquota IVA in percentuale; NULL = esente, con la natura in vat_nature.");
+
+		builder.Property(x => x.VatNature)
+			.HasColumnName("vat_nature")
+			.HasColumnType("catalog.vat_nature")
+			.HasComment("Natura dell'esenzione IVA (n1..n6), solo senza aliquota.");
+
+		builder.Property(x => x.IsHighlighted)
+			.HasColumnName("is_highlighted")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Metti in evidenza: proposto al cliente quando prenota la spiaggia.");
+
+		builder.Property(x => x.HasPeriodPrices)
+			.HasColumnName("has_period_prices")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Variazioni di prezzo per periodo attive: valgono i prezzi di service_sale_item_period_prices.");
+
+		builder.Property(x => x.IsSectorRestricted)
+			.HasColumnName("is_sector_restricted")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Acquistabile solo nelle file/settori di service_sale_item_sectors.");
+
+		builder.Property(x => x.Allergens)
+			.HasColumnName("allergens")
+			.HasColumnType("catalog.allergen[]")
+			.HasDefaultValueSql("'{}'")
+			.IsRequired()
+			.HasComment("Allergeni dichiarati sui prodotti del bar (i 14 del Reg. UE 1169/2011).");
+
+		builder.Property(x => x.HasFixedTimeSlots)
+			.HasColumnName("has_fixed_time_slots")
+			.IsRequired()
+			.HasDefaultValue(false)
+			.HasComment("Servizi orari: fasce orarie fisse (inizio e fine in service_sale_item_time_slots).");
 
 		builder.Property(x => x.IconId)
 			.HasColumnName("icon_id")
@@ -76,14 +131,14 @@ public sealed class ServiceSaleItemConfiguration : IEntityTypeConfiguration<Serv
 
 		builder.Property(x => x.CreatedByUserId)
 			.HasColumnName("created_by_user_id")
-			.HasComment("public_id di identity_access_users (C5), copiato — nessuna FK cross-schema.");
+			.HasComment("public_id di identity.access_users, copiato — nessuna FK cross-schema.");
 
 		builder.Property(x => x.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()").IsRequired()
 			.HasComment("Creazione del servizio.");
 		builder.Property(x => x.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()").IsRequired()
 			.HasComment("Ultima modifica del servizio.");
 		builder.Property(x => x.DeletedAt).HasColumnName("deleted_at")
-			.HasComment("Soft-delete; un servizio con consumi storici (C1) non si cancella fisicamente.");
+			.HasComment("Soft-delete; un servizio con consumi storici (Booking) non si cancella fisicamente.");
 
 		builder.HasIndex(x => x.PublicId)
 			.IsUnique()

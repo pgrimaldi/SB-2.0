@@ -109,5 +109,18 @@ public sealed class PropertyConfiguration : IEntityTypeConfiguration<Property>
 			.HasForeignKey(x => x.CountryId)
 			.HasConstraintName("fk_catalog_properties_country")
 			.OnDelete(DeleteBehavior.Restrict);
+	
+		builder.Property(x => x.IsSubscriptionActive)
+			.HasColumnName("is_subscription_active")
+			.IsRequired()
+			.HasDefaultValue(true)
+			.HasComment("Abbonamento al gestionale attivo (evento di Identity): senza, niente vendite online.");
+		builder.Property(x => x.PurgedAt)
+			.HasColumnName("purged_at")
+			.HasComment("Eliminazione definitiva dal cestino (deleted_at = spostamento nel cestino): da qui partono i tempi di conservazione.");
+	
+		builder.Property(x => x.SubscribedSince)
+			.HasColumnName("subscribed_since")
+			.HasComment("Primo abbonamento attivo al gestionale (da Identity): ordina la popolarità a parità di «mi piace».");
 	}
 }

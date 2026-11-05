@@ -1,10 +1,10 @@
-using Module.Catalog.Domain.Enums;
+﻿using Module.Catalog.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Catalog.Domain.Entities;
 
 /// <summary>
-/// Override di prezzo per data di calendario (festivi, deroghe puntuali) di un listino/voucher hotel.
+/// Override di prezzo per data di calendario (festivi, deroghe puntuali) di un listino/voucher di una convenzione.
 /// Entità figlia di <see cref="AgreementPriceList"/>, agganciata opzionalmente a un
 /// <see cref="AgreementPriceListPeriodPrice"/>. Tabella tipicamente vuota in produzione (feature
 /// Convenzioni recente); modellata per simmetria col lato pricing.
@@ -24,4 +24,6 @@ public sealed class AgreementPriceListDatePrice : IAuditable, ISoftDeletable
 	public DateTime? DeletedAt { get; private set; }
 
 	private AgreementPriceListDatePrice() { }
+
+	internal static AgreementPriceListDatePrice Holiday(DateOnly date) => new() { Kind = DatePriceKind.Holiday, PriceDate = date };
 }

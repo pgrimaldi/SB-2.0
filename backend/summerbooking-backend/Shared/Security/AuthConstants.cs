@@ -1,4 +1,4 @@
-namespace Shared.Security;
+﻿namespace Shared.Security;
 
 /// <summary>Schemi di autenticazione.</summary>
 public static class AuthSchemes
@@ -17,6 +17,9 @@ public static class RateLimitPolicies
 {
 	/// <summary>Login, OTP, registrazione, recupero password: per indirizzo IP.</summary>
 	public const string Auth = "auth";
+
+	/// <summary>Form pubblici senza login (registrazione di una struttura): per indirizzo IP.</summary>
+	public const string PublicForms = "public_forms";
 }
 
 /// <summary>Nomi dei claim nei JWT emessi da Identity.</summary>

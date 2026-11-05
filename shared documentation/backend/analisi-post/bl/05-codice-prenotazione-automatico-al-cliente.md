@@ -2,6 +2,12 @@
 
 > **Stato**: comportamento **richiesto dal committente** il 2026-10-21, da implementare. Moduli
 > `booking` (codice) e `notification` (email e WhatsApp). Decisioni del committente del 2026-10-21 nel §4.
+>
+> ⚠️ **Rivista in parte il 2026-10-30** (risposte del committente sulle prenotazioni, §6): email e telefono
+> **non** sono più obbligatori (solo il nome); il cliente **non usa più il codice** per vedere le sue
+> prenotazioni, ma l'account registrato con l'email della prenotazione; la conferma delle prenotazioni online
+> la dà il **gestore**. I §3.1 e §3.5 e la decisione 3 del §4 non valgono più; il resto (codice sempre
+> generato, messaggio al cliente quando ha un contatto) resta da confermare con le domande di ritorno.
 
 ## 1. Com'era nel legacy
 
@@ -48,10 +54,10 @@ condivisibile, e il gestore doveva ricordarsi di crearlo.
      da Meta.
 4. **Link**: l'URL pubblico si costruisce dal codice e dalla lingua del cliente; l'indirizzo base sta
    in configurazione, non nel template.
-5. Il cliente che apre il link e si autentica diventa partecipante
+5. ~~Il cliente che apre il link e si autentica diventa partecipante
    ([`booking_participants`](../db/booking/booking_participants.md), ruolo `viewer`); se la
    prenotazione richiede conferma (`online_confirmation_state = pending`), è lo stesso codice a
-   confermarla.
+   confermarla.~~ Superato il 2026-10-30 (§6): accesso con l'account, conferma del gestore.
 
 ## 4. Decisioni del committente (2026-10-21)
 
@@ -66,8 +72,25 @@ condivisibile, e il gestore doveva ricordarsi di crearlo.
 
 ## 5. Cosa resta da fare
 
-- [ ] Validazione «email o telefono obbligatorio» nella creazione della prenotazione da gestore.
+- [ ] ~~Validazione «email o telefono obbligatorio» nella creazione della prenotazione da gestore.~~ Annullata
+  il 2026-10-30 (§6): obbligatorio solo il nome.
 - [ ] Segnaposto `reservationCode` / `reservationUrl` nei template email e WhatsApp, in tutte le lingue.
 - [ ] Invio email dal backend; per WhatsApp, risposta con testo composto e numero del cliente.
 - [ ] Front: scelta del canale quando ci sono entrambi i contatti; finestra WhatsApp precompilata.
 - [ ] Togliere dal front il passaggio «crea codice» (resta solo la consultazione).
+
+## 6. Risposte del committente del 2026-10-30
+
+1. **Contatti**: nel nuovo gestionale email e cellulare sono **facoltativi**; obbligatorio solo il nome.
+   «Utente generico» è un contatto unico dello stabilimento senza email né telefono; «Giornaliero» è lo stesso
+   contatto con in più la data di oggi.
+2. **Accesso del cliente**: «il codice non servirà più»; il cliente vede le sue prenotazioni registrandosi con
+   l'email usata nella prenotazione. Può annullarle e metterle in sharing se lo stabilimento lo permette, non
+   modificarle.
+3. **Conferma delle prenotazioni online**: la dà il gestore (come nel legacy, dal link nell'email allo
+   stabilimento — `analisi-pre/business-logic/cliente-finale/04-prenotazione-postazioni.md` §4), non il cliente.
+4. **Messaggi**: nessun messaggio al cliente per modifica, spostamento o rinnovo, nessun promemoria.
+
+Aperti (domande di ritorno): se il codice resta per altri usi (link di conferma del gestore, QR all'ingresso);
+verifica dell'email prima di mostrare le prenotazioni all'account; se il messaggio con il codice al cliente
+creato dal gestore resta.

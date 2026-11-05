@@ -90,7 +90,7 @@ public sealed class ReceiptLogConfiguration : IEntityTypeConfiguration<ReceiptLo
 
 		builder.Property(x => x.FiskalyErrorMessage)
 			.HasColumnName("fiskaly_error_message")
-			.HasComment("Messaggio d'errore Fiskaly completo, non troncato (a differenza del legacy).");
+			.HasComment("Messaggio d'errore Fiskaly completo, non troncato.");
 
 		builder.Property(x => x.FiskalyLogPayload)
 			.HasColumnName("fiskaly_log_payload")

@@ -22,7 +22,11 @@
   [`docs/01`](../../../progettazione/01-criticita-e-indicazioni-backend.md) §11.8). `checkHourlyServiceAvailability`
   è un pre‑check informativo.
 - **Sconto/voucher**: `checkdiscount` valida il codice; per i servizi l'importo scontato percentuale è
-  `totale − (totale × valore / 100)`; fisso = `valore`. Calcolo lato client.
+  `totale − (totale × valore / 100)`; fisso = `totale − valore`. Calcolo lato client. Il codice dei
+  servizi (`voucherServices.js:103-111`, `_calculateDiscountForServices`) restituisce invece `valore`
+  come totale scontato (la riga corretta è commentata): è un bug, non una regola.
+  **Decisione del committente (2026-10)**: lo sconto fisso è `totale − valore`, sul totale, prima
+  della commissione online; al massimo uno sconto per prenotazione.
 
 **Calcoli**: sopra. **Eventi**: nessuno in fase di composizione.
 
@@ -81,7 +85,7 @@ annullamento + `email_logs`; **rimborso Stripe** se applicabile.
 ## 5. Riepilogo "calcoli / logiche / eventi"
 
 - **Calcoli**: totali servizi bar/normali/orari; sconto servizi (`totale − totale×valore/100` o
-  fisso); ore alla cancellazione vs soglia.
+  `totale − valore`); ore alla cancellazione vs soglia.
 - **Logiche**: email cliente **obbligatoria** per i servizi consumer; blacklist senza deroga; slot
   orari validati solo client; regole di cancellazione per soglia oraria.
 - **Eventi**: alla **creazione consumer**: nessuna email/notifica/WhatsApp (divergenza dal percorso

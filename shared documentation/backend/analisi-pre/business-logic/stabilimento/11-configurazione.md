@@ -50,8 +50,10 @@
 
 - 1 riga per stabilimento: confini della **stagione corrente** e **successiva**, più i **periodi
   tariffari** (`periods[]`: nome + fasce di date, es. "Alta stagione" 01/07–31/08).
-- I nomi dei periodi sono la chiave (per **substring/LIKE**) con cui il motore di prezzo abbina le voci
-  di `detailPrices` (vedi [`_motore-di-prezzo-e-sconti.md`](_motore-di-prezzo-e-sconti.md) §1).
+- I nomi dei periodi sono la chiave con cui il motore di prezzo del gestionale abbina le voci di
+  `detailPrices`, per **uguaglianza esatta** `"<fila> <periodo>"` (vedi
+  [`_motore-di-prezzo-e-sconti.md`](_motore-di-prezzo-e-sconti.md) §1); solo il prezzo minimo della ricerca
+  pubblica (`getLowestPrice`) usa un `LIKE` sul nome.
 
 **Calcoli**: nessuno. **Eventi**: nessuno.
 
@@ -96,8 +98,8 @@ salvano solo i **parametri**.
 - `adddiscounts` è un **upsert** per `propertyId`: riscrive l'intero array `items` (per ogni voucher:
   codice, `type` `fixed`/percentuale, `voucher_value`, validità, righe/postazioni ammesse,
   `maximunNoUse`, `totalNoOfUsage`).
-- La **validazione** in prenotazione (`checkdiscount`) controlla esistenza codice, data corrente nella
-  validità, utilizzi residui (`maximunNoUse − totalNoOfUsage > 0`). Il **calcolo dell'importo
+- La **validazione** in prenotazione (`checkdiscount`) controlla esistenza codice, **date della prenotazione**
+  nella validità (il controllo sulla data corrente è commentato, `globalConstants.js:240-310`), utilizzi residui (`maximunNoUse − totalNoOfUsage > 0`). Il **calcolo dell'importo
   scontato** è lato client (vedi [`_motore-di-prezzo-e-sconti.md`](_motore-di-prezzo-e-sconti.md) §5).
 
 **Calcoli**: nessuno qui. **Eventi**: nessuno.
