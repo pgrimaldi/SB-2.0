@@ -28,9 +28,9 @@
         <app-icon-button
           appFilledTextFieldLabelAction
           class="user__add__item__popup__info"
-          [label]="'management.settings.user_management.form.password_rules' | translate"
-          >i</app-icon-button
-        >
+          [pathIcon]="infoIcon"
+          (click)="showingInfo.set(true)"
+        />
       </app-filled-text-field>
       <div class="user__add__item__popup__row">
         <app-filled-text-field
@@ -71,3 +71,10 @@
     </div>
   </div>
 </ng-template>
+
+<app-info-popup
+  [title]="'management.settings.user_management.form.password' | translate"
+  [text]="'management.settings.user_management.form.password_rules' | translate"
+  [pathIcon]="infoPopupIcons"
+  [(open)]="showingInfo"
+/>

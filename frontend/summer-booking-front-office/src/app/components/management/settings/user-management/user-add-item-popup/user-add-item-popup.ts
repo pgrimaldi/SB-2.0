@@ -36,6 +36,7 @@ import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button'
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
+import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextFieldLabelAction } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field-label-action';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
@@ -78,6 +79,7 @@ const ASSIGNABLE_USER_ROLES: readonly { role: UserRole; key: keyof UserRoleTexts
     FilledTextFieldLabelAction,
     FormField,
     IconButton,
+    InfoPopup,
     SectionTitle,
     TranslatePipe,
   ],
@@ -102,6 +104,13 @@ export class UserAddItemPopup extends BasePopup implements UnsavedChanges, OnDes
     '/assets/images/GeneralIcon_EyeClose.svg',
     '/assets/images/GeneralIcon_EyeStart.svg',
   ] as const;
+  protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
+  /** [X, before the title]. */
+  protected readonly infoPopupIcons = [
+    '/assets/images/GeneralIcon_Close.svg',
+    '/assets/images/GeneralIcon_InfoTitle.svg',
+  ] as const;
+  protected readonly showingInfo = signal(false);
   protected readonly isLoading = signal(false);
   private readonly draft = signal(new CreateUserRequest());
   protected readonly draftForm = form(this.draft, (path) => {

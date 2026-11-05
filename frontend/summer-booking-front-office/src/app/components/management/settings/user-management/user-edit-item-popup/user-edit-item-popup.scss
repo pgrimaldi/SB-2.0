@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use '../../../../../styles/info-button' as info;
 
 // The popup renders in an overlay outside the component: these styles are global.
 .user__edit__item__popup__panel {
@@ -50,21 +51,8 @@ app-user-edit-item-popup {
   }
 }
 
-// Outlined in the light blue of the labels, as high as the label, the "i" in the middle.
 .user__edit__item__popup .user__edit__item__popup__info {
-  --icon-button-size: 1rem;
-  --icon-button-text-size: 0.6875rem;
-  --icon-button-background: var(--color__layout__surface);
-
-  .icon__button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 0.125rem solid var(--color__layout__text__soft);
-    color: var(--color__layout__text__soft);
-    font-weight: 700;
-    line-height: 1;
-  }
+  @include info.info-button;
 }
 
 .user__edit__item__popup__field {

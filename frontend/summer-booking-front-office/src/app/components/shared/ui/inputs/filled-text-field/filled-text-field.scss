@@ -2,7 +2,7 @@
 
 @include field.filled-field(filled__text__field);
 
-// The label, with what the page puts beside it (e.g. a button with a tooltip).
+// The label, with what the page puts beside it (e.g. an (i) button).
 .filled__text__field__heading {
   display: flex;
   align-items: center;

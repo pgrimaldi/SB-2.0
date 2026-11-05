@@ -154,7 +154,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
         if (await this.hasPeriodsOutside(idProperty, sent)) {
           this.cancel();
           this.isPeriodsOutsideShown.set(true);
-          return undefined;
+          return;
         }
         await firstValueFrom(this.seasons.saveSeasonDates(idProperty, sent));
         this.loaded = sent;
