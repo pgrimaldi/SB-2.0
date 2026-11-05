@@ -1,0 +1,186 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "IstanzaDb",
+      "Effect": "Allow",
+      "Action": [
+        "rds:CreateDBInstance",
+        "rds:DeleteDBInstance",
+        "rds:ModifyDBInstance",
+        "rds:RebootDBInstance",
+        "rds:StartDBInstance",
+        "rds:StopDBInstance",
+        "rds:AddTagsToResource",
+        "rds:RemoveTagsFromResource",
+        "rds:ListTagsForResource"
+      ],
+      "Resource": [
+        "arn:aws:rds:{{Region}}:{{Account}}:db:{{Output:DbInstanceId}}",
+        "arn:aws:rds:{{Region}}:{{Account}}:subgrp:sb-dev-*",
+        "arn:aws:rds:{{Region}}:{{Account}}:pg:sb-dev-*",
+        "arn:aws:rds:{{Region}}:{{Account}}:og:default:postgres-*"
+      ]
+    },
+    {
+      "Sid": "SnapshotManualiUtility22",
+      "Effect": "Allow",
+      "Action": [
+        "rds:CreateDBSnapshot",
+        "rds:DeleteDBSnapshot",
+        "rds:AddTagsToResource"
+      ],
+      "Resource": [
+        "arn:aws:rds:{{Region}}:{{Account}}:db:{{Output:DbInstanceId}}",
+        "arn:aws:rds:{{Region}}:{{Account}}:snapshot:{{Output:DbInstanceId}}-u22-*"
+      ]
+    },
+    {
+      "Sid": "LogDiPostgres",
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBLogFiles",
+        "rds:DownloadDBLogFilePortion"
+      ],
+      "Resource": "arn:aws:rds:{{Region}}:{{Account}}:db:{{Output:DbInstanceId}}"
+    },
+    {
+      "Sid": "LetturaRds",
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DescribeDBParameterGroups",
+        "rds:DescribeDBEngineVersions",
+        "rds:DescribeOrderableDBInstanceOptions",
+        "rds:DescribeDBSnapshots"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "UtenteDbSolaLetturaUtility22",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:CreateSecret",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:DeleteSecret",
+        "secretsmanager:TagResource"
+      ],
+      "Resource": "arn:aws:secretsmanager:{{Region}}:{{Account}}:secret:{{Stack}}/db-lettura-*"
+    },
+    {
+      "Sid": "CifraturaDelDb",
+      "Effect": "Allow",
+      "Action": [
+        "kms:DescribeKey",
+        "kms:CreateGrant"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "rds.{{Region}}.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "SegretoAgganciatoAlDb",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:UpdateSecret"
+      ],
+      "Resource": "{{Output:DbSecretArn}}"
+    },
+    {
+      "Sid": "TaskDiCaricamento",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:RunTask"
+      ],
+      "Resource": "arn:aws:ecs:{{Region}}:{{Account}}:task-definition/{{Output:DbLoaderTaskFamily}}:*",
+      "Condition": {
+        "ArnEquals": {
+          "ecs:cluster": "arn:aws:ecs:{{Region}}:{{Account}}:cluster/{{Output:ClusterName}}"
+        }
+      }
+    },
+    {
+      "Sid": "RuoloDelTaskDiCaricamento",
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": "{{Output:TaskExecutionRoleArn}}"
+    },
+    {
+      "Sid": "TaskInEsecuzione",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:StopTask",
+        "ecs:DescribeTasks",
+        "ecs:ListTasks"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnEquals": {
+          "ecs:cluster": "arn:aws:ecs:{{Region}}:{{Account}}:cluster/{{Output:ClusterName}}"
+        }
+      }
+    },
+    {
+      "Sid": "LogDelCaricamento",
+      "Effect": "Allow",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:{{Region}}:{{Account}}:log-group:{{Output:DbLoaderLogGroup}}:*"
+    },
+    {
+      "Sid": "DumpTemporanei",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": "arn:aws:s3:::{{Output:BuildBucketName}}/*"
+    },
+    {
+      "Sid": "RetentionComeTaskDelBackend",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:RunTask"
+      ],
+      "Resource": "arn:aws:ecs:{{Region}}:{{Account}}:task-definition/{{Output:TaskDefinitionFamily}}:*",
+      "Condition": {
+        "ArnEquals": {
+          "ecs:cluster": "arn:aws:ecs:{{Region}}:{{Account}}:cluster/{{Output:ClusterName}}"
+        }
+      }
+    },
+    {
+      "Sid": "RuoloDelTaskDelBackend",
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": "arn:aws:iam::{{Account}}:role/{{Stack}}-task"
+    },
+    {
+      "Sid": "LogDellaRetention",
+      "Effect": "Allow",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:{{Region}}:{{Account}}:log-group:{{Output:AppLogGroup}}:*"
+    }
+  ]
+}

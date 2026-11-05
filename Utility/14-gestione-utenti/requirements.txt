@@ -1,0 +1,6 @@
+# Dipendenze della utility 14 - gestione degli utenti IAM dell'account AWS.
+#
+# La GUI e' Tkinter (stdlib), le password si generano con secrets (stdlib).
+
+# SDK AWS: IAM, STS, CloudFormation (output dello stack sb-dev per le policy)
+boto3==1.43.114

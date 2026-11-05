@@ -1,0 +1,71 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Identita",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "StatoStack",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResources"
+      ],
+      "Resource": "arn:aws:cloudformation:{{Region}}:{{Account}}:stack/{{Stack}}/*"
+    },
+    {
+      "Sid": "StatoBuild",
+      "Effect": "Allow",
+      "Action": [
+        "codebuild:ListBuildsForProject",
+        "codebuild:BatchGetBuilds"
+      ],
+      "Resource": [
+        "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:BackendBuildProject}}",
+        "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:FrontendBuildProject}}"
+      ]
+    },
+    {
+      "Sid": "StatoServizioEDb",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeServices",
+        "rds:DescribeDBInstances",
+        "ecr:DescribeImages"
+      ],
+      "Resource": [
+        "arn:aws:ecs:{{Region}}:{{Account}}:service/{{Output:ClusterName}}/*",
+        "arn:aws:rds:{{Region}}:{{Account}}:db:{{Output:DbInstanceId}}",
+        "arn:aws:ecr:{{Region}}:{{Account}}:repository/sb-dev/api"
+      ]
+    },
+    {
+      "Sid": "StatoOrario",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "lambda:GetFunctionConfiguration",
+        "logs:FilterLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:ssm:{{Region}}:{{Account}}:parameter{{Output:PowerPlanParameter}}",
+        "arn:aws:lambda:{{Region}}:{{Account}}:function:{{Output:PowerLambdaName}}",
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:{{Output:PowerLogGroup}}:*"
+      ]
+    },
+    {
+      "Sid": "ConfigurazioneDelBackend",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeTaskDefinition"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

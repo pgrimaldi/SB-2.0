@@ -1,0 +1,4 @@
+# Pacchetti degli eseguibili: in Git LFS, non nella storia normale del repository
+dist/*.zip filter=lfs diff=lfs merge=lfs -text
+# Manuali Word: binari
+*.docx binary

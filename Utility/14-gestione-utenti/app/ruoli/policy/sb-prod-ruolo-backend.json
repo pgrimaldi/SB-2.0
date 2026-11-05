@@ -1,0 +1,38 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BuildBackend",
+      "Effect": "Allow",
+      "Action": ["codebuild:StartBuild", "codebuild:StopBuild", "codebuild:BatchGetBuilds", "codebuild:ListBuildsForProject", "codebuild:BatchGetProjects"],
+      "Resource": "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:BackendBuildProject}}"
+    },
+    {
+      "Sid": "SorgentiDellaBuild",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::{{Output:BuildBucketName}}/backend/*"
+    },
+    {
+      "Sid": "ImmaginiBackend",
+      "Effect": "Allow",
+      "Action": ["ecr:DescribeImages", "ecr:ListImages"],
+      "Resource": "arn:aws:ecr:{{Region}}:{{Account}}:repository/{{Output:EcrRepositoryName}}"
+    },
+    {
+      "Sid": "LogBackend",
+      "Effect": "Allow",
+      "Action": ["logs:GetLogEvents", "logs:FilterLogEvents", "logs:DescribeLogStreams", "logs:StartQuery"],
+      "Resource": [
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:/aws/codebuild/{{Output:BackendBuildProject}}:*",
+        "arn:aws:logs:{{Region}}:{{Account}}:log-group:{{Output:AppLogGroup}}:*"
+      ]
+    },
+    {
+      "Sid": "RisultatiQueryLog",
+      "Effect": "Allow",
+      "Action": ["logs:GetQueryResults", "logs:StopQuery", "logs:DescribeQueries", "logs:DescribeLogGroups"],
+      "Resource": "*"
+    }
+  ]
+}

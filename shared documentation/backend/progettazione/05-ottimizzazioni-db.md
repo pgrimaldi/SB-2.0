@@ -282,7 +282,7 @@ grandi da giustificare l'infrastruttura di partizionamento).
 
 | Tabella.colonna | Formula |
 |---|---|
-| `booking_resource_consumptions.period_mask` | `CASE booking_period WHEN 'full_day' THEN 3 WHEN 'morning' THEN 1 WHEN 'afternoon' THEN 2 END` |
+| ~~`booking_resource_consumptions.period_mask`~~ | mai creata; non serve: il vincolo `ex_booking_resource_consumptions_spot` (2026-11-05) calcola la fascia con un `int4range` |
 | `booking_resource_availability_daily.available_qty` | `total_qty - booked_qty` |
 | `catalog_pricing_discounts.code_normalized` | `upper(code)` |
 

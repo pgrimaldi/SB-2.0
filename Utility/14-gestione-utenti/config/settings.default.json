@@ -1,0 +1,18 @@
+{
+  "_comment": "Valori preimpostati della utility 14 (utenti IAM). Copiato in settings.local.json da setup.ps1 / al primo avvio: modifica QUELLO, non e' versionato. Nessun segreto qui: le chiavi di chi usa la utility stanno nel profilo della AWS CLI.",
+
+  "aws": {"profile": "", "region": "eu-south-1"},
+  "_aws_note": "profile = profilo della AWS CLI di un amministratore (serve AdministratorAccess o almeno IAM completo). region = dove stanno gli stack degli ambienti; IAM e' globale. Gli ambienti (dev, prod) e i loro stack sono in app/ruoli/ruoli.json.",
+
+  "account_atteso": "747862473836",
+  "_account_atteso_note": "La utility rifiuta di lavorare se il profilo appartiene a un altro account.",
+
+  "tag_gestione": {"chiave": "sb:gestito-da", "valore": "utility-14"},
+  "_tag_gestione_note": "Tag messo sugli utenti creati dalla utility. Si modificano e cancellano solo quelli: gli utenti creati a mano si vedono ma non si toccano.",
+
+  "lunghezza_password": 20,
+  "cartella_schede": "data",
+  "_schede_note": "lunghezza_password = password generate dal pulsante Genera. cartella_schede = dove si propone di salvare la scheda con le chiavi (testo in chiaro, cartella gitignorata).",
+
+  "log_dir": "logs"
+}

@@ -1,0 +1,22 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AggiornamentoStack",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:UpdateStack", "cloudformation:DescribeStacks", "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResource", "cloudformation:DescribeStackResources",
+        "cloudformation:GetTemplate", "cloudformation:GetTemplateSummary",
+        "cloudformation:CancelUpdateStack", "cloudformation:ContinueUpdateRollback"
+      ],
+      "Resource": "arn:aws:cloudformation:{{Region}}:{{Account}}:stack/{{Stack}}/*"
+    },
+    {
+      "Sid": "RuoloConCuiCloudFormationAggiorna",
+      "Effect": "Allow",
+      "Action": ["iam:PassRole"],
+      "Resource": "{{Output:CfnDeployRoleArn}}"
+    }
+  ]
+}

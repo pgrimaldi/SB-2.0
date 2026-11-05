@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BuildFrontend",
+      "Effect": "Allow",
+      "Action": ["codebuild:StartBuild", "codebuild:StopBuild", "codebuild:BatchGetBuilds", "codebuild:ListBuildsForProject", "codebuild:BatchGetProjects"],
+      "Resource": "arn:aws:codebuild:{{Region}}:{{Account}}:project/{{Output:FrontendBuildProject}}"
+    },
+    {
+      "Sid": "SorgentiDellaBuild",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::{{Output:BuildBucketName}}/frontend/*"
+    },
+    {
+      "Sid": "FrontOfficePubblicato",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetObject"],
+      "Resource": ["arn:aws:s3:::{{Output:FrontendBucketName}}", "arn:aws:s3:::{{Output:FrontendBucketName}}/*"]
+    },
+    {
+      "Sid": "Cdn",
+      "Effect": "Allow",
+      "Action": ["cloudfront:GetDistribution", "cloudfront:CreateInvalidation", "cloudfront:GetInvalidation", "cloudfront:ListInvalidations"],
+      "Resource": "arn:aws:cloudfront::{{Account}}:distribution/{{Output:FrontendDistributionId}}"
+    },
+    {
+      "Sid": "LogDellaBuild",
+      "Effect": "Allow",
+      "Action": ["logs:GetLogEvents", "logs:FilterLogEvents", "logs:DescribeLogStreams"],
+      "Resource": "arn:aws:logs:{{Region}}:{{Account}}:log-group:/aws/codebuild/{{Output:FrontendBuildProject}}:*"
+    }
+  ]
+}
