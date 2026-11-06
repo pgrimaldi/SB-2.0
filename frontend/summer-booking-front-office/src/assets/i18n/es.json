@@ -1484,9 +1484,30 @@
           "custom": "Fondo personalizado",
           "drop": "Arrastra una imagen aquí o haz clic para subirla"
         },
+        "grid": {
+          "title": "Configurar cuadrícula",
+          "rows": "Número de filas",
+          "row_items": "Máximo de artículos por fila",
+          "tilt": "Inclinación del mapa (°)",
+          "icons": {
+            "title": "Iconos de elementos",
+            "free": "Libre",
+            "occupied": "Ocupado",
+            "umbrella": "Sombrilla",
+            "custom_article": "Artículo personalizado {{number}}",
+            "select": "Elegir icono"
+          }
+        },
         "edit": "Editar",
         "cancel": "Cancelar",
-        "save": "Guardar"
+        "save": "Guardar",
+        "reset": "Restablecer mapa",
+        "reset_popup": {
+          "title": "Restablecer mapa",
+          "text": "Estás restableciendo todo el mapa.\n\nSe eliminará toda la configuración, con los artículos colocados en el mapa y el fondo elegido. Esta acción es irreversible.",
+          "cancel": "Cancelar y conservar el mapa",
+          "confirm": "Continuar y eliminar el mapa"
+        }
       }
     }
   },

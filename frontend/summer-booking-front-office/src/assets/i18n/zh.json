@@ -1484,9 +1484,30 @@
           "custom": "自定义背景",
           "drop": "将图片拖到此处或点击上传"
         },
+        "grid": {
+          "title": "设置网格",
+          "rows": "排数",
+          "row_items": "每排最多物品数",
+          "tilt": "地图倾斜度 (°)",
+          "icons": {
+            "title": "元素图标",
+            "free": "空闲",
+            "occupied": "已占用",
+            "umbrella": "遮阳伞",
+            "custom_article": "自定义物品 {{number}}",
+            "select": "选择图标"
+          }
+        },
         "edit": "编辑",
         "cancel": "取消",
-        "save": "保存"
+        "save": "保存",
+        "reset": "重置地图",
+        "reset_popup": {
+          "title": "重置地图",
+          "text": "您正在重置整个地图。\n\n整个配置将被删除，包括地图上放置的物品和所选背景。此操作无法撤销。",
+          "cancel": "取消并保留已配置的地图",
+          "confirm": "继续并删除已配置的地图"
+        }
       }
     }
   },

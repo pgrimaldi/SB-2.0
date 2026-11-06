@@ -1484,9 +1484,30 @@
           "custom": "Fond personnalisé",
           "drop": "Glissez une image ici ou cliquez pour la charger"
         },
+        "grid": {
+          "title": "Définir la grille",
+          "rows": "Nombre de rangées",
+          "row_items": "Articles max par rangée",
+          "tilt": "Inclinaison de la carte (°)",
+          "icons": {
+            "title": "Icônes des éléments",
+            "free": "Libre",
+            "occupied": "Occupé",
+            "umbrella": "Parasol",
+            "custom_article": "Article personnalisé {{number}}",
+            "select": "Choisir une icône"
+          }
+        },
         "edit": "Modifier",
         "cancel": "Annuler",
-        "save": "Enregistrer"
+        "save": "Enregistrer",
+        "reset": "Réinitialiser la carte",
+        "reset_popup": {
+          "title": "Réinitialiser la carte",
+          "text": "Vous réinitialisez toute la carte.\n\nToute la configuration sera supprimée, avec les articles placés sur la carte et le fond choisi. Cette action est irréversible.",
+          "cancel": "Annuler et garder la carte",
+          "confirm": "Continuer et supprimer la carte"
+        }
       }
     }
   },

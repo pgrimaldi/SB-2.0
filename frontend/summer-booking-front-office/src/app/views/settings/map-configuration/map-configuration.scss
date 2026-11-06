@@ -1,3 +1,4 @@
+@use '@angular/material' as mat;
 @use '../../../styles/settings-panel' as panel;
 
 .map__configuration {
@@ -15,4 +16,17 @@
   @include panel.settings-panel;
 
   padding: 1.25rem 1.5rem;
+}
+
+.map__configuration__reset {
+  --button-padding: 0.75rem;
+
+  align-self: flex-end;
+
+  @include mat.button-overrides(
+    (
+      text-label-text-color: var(--color__layout__error),
+      text-state-layer-color: var(--color__layout__error),
+    )
+  );
 }

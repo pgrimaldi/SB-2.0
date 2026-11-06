@@ -1,0 +1,9 @@
+<svg width="53" height="52" viewBox="0 0 53 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="outer" cx="26" cy="26" r="21.7" gradientUnits="userSpaceOnUse"><stop offset="0.68" stop-color="#33BF2B"/><stop offset="1" stop-color="#25BD1A"/></radialGradient><radialGradient id="middle" cx="26" cy="26" r="14.6" gradientUnits="userSpaceOnUse"><stop offset="0.55" stop-color="#46CB3C"/><stop offset="1" stop-color="#26BE1C"/></radialGradient><radialGradient id="top" cx="26" cy="25" r="8.8" gradientUnits="userSpaceOnUse"><stop stop-color="#74E46C"/><stop offset="1" stop-color="#2BC121"/></radialGradient><filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1"/></filter></defs>
+<circle cx="26" cy="26" r="22.3" fill="#0E4A10" opacity="0.3" filter="url(#soft)"/>
+<circle cx="26" cy="26" r="21.7" fill="url(#outer)"/>
+<circle cx="25.6" cy="28" r="14.6" fill="#176A17" opacity="0.6" filter="url(#soft)"/>
+<circle cx="26" cy="26" r="14.6" fill="url(#middle)"/>
+<circle cx="25.7" cy="27.7" r="8.8" fill="#176A17" opacity="0.6" filter="url(#soft)"/>
+<circle cx="26" cy="26" r="8.8" fill="url(#top)"/>
+</svg>

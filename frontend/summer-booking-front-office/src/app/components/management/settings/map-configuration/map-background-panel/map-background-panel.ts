@@ -1,3 +1,4 @@
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
@@ -8,11 +9,30 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { FileDropZone } from '../../../../shared/ui/uploads/file-drop-zone/file-drop-zone';
 
-const BACKGROUND_SLOTS = [1, 2, 3, 4] as const;
+const BACKGROUND_SLOTS = [
+  '/assets/images/MapConfiguration_BackgroundBeach.png',
+  '/assets/images/MapConfiguration_BackgroundBoardwalk.png',
+  null,
+  null,
+] as const;
+
+const PREVIEW_POSITIONS: ConnectedPosition[] = [
+  { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 8 },
+  { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -8 },
+  { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 8 },
+  { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -8 },
+];
 
 @Component({
   selector: 'app-map-background-panel',
-  imports: [Button, FileDropZone, SectionTitle, TranslatePipe],
+  imports: [
+    Button,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin,
+    FileDropZone,
+    SectionTitle,
+    TranslatePipe,
+  ],
   templateUrl: './map-background-panel.html',
   styleUrl: './map-background-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,10 +43,13 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly slots = BACKGROUND_SLOTS;
+  protected readonly previewPositions = PREVIEW_POSITIONS;
+  protected readonly titleIcon = ['/assets/images/MapConfiguration_Palette.svg'] as const;
   protected readonly chosenIcon = '/assets/images/MapConfiguration_Chosen.svg';
   protected readonly uploadIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
   protected readonly isEditing = signal(false);
   protected readonly chosenSlot = signal<number | null>(null);
+  protected readonly previewedSlot = signal<number | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   private readonly image = signal<File | null>(null);
   private savedSlot: number | null = null;
@@ -49,6 +72,12 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected chooseSlot(slot: number): void {
     this.chosenSlot.set(slot);
     this.setImage(null);
+  }
+
+  protected showPreview(slot: number, event: PointerEvent): void {
+    if (event.pointerType === 'mouse') {
+      this.previewedSlot.set(slot);
+    }
   }
 
   protected chooseImage([image]: File[]): void {

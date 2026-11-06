@@ -1,0 +1,89 @@
+<app-section-title
+  [text]="'management.settings.map_configuration.grid.title' | translate"
+  [pathIcon]="titleIcon"
+/>
+
+<div class="map__grid__panel__fields">
+  <app-filled-number-field
+    [label]="'management.settings.map_configuration.grid.rows' | translate"
+    [formField]="gridForm.rowQuantity"
+    [error]="fieldErrors.rowQuantity()"
+  />
+  <app-filled-number-field
+    [label]="'management.settings.map_configuration.grid.row_items' | translate"
+    [formField]="gridForm.maxRowItemQuantity"
+    [error]="fieldErrors.maxRowItemQuantity()"
+  />
+  <app-filled-number-field
+    [label]="'management.settings.map_configuration.grid.tilt' | translate"
+    [pathIcon]="tiltIcons"
+    [formField]="gridForm.tiltDegrees"
+    [error]="fieldErrors.tiltDegrees()"
+  />
+</div>
+
+<div class="map__grid__panel__icons">
+  <div class="map__grid__panel__icons__head">
+    <span class="map__grid__panel__label">
+      {{ 'management.settings.map_configuration.grid.icons.title' | translate }}
+    </span>
+    <span>{{ 'management.settings.map_configuration.grid.icons.free' | translate }}</span>
+    <span>{{ 'management.settings.map_configuration.grid.icons.occupied' | translate }}</span>
+  </div>
+  <ng-template #iconButtons>
+    <app-button
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [disabled]="!isEditing()"
+    >
+      {{ 'management.settings.map_configuration.grid.icons.select' | translate }}
+    </app-button>
+    <app-button
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [disabled]="!isEditing()"
+    >
+      {{ 'management.settings.map_configuration.grid.icons.select' | translate }}
+    </app-button>
+  </ng-template>
+  <div class="map__grid__panel__icons__row">
+    <span>{{ 'management.settings.map_configuration.grid.icons.umbrella' | translate }}</span>
+    <ng-container [ngTemplateOutlet]="iconButtons" />
+  </div>
+  @for (article of customArticles; track article) {
+    <div class="map__grid__panel__icons__row">
+      <span>
+        {{
+          'management.settings.map_configuration.grid.icons.custom_article'
+            | translate: { number: article }
+        }}
+      </span>
+      <ng-container [ngTemplateOutlet]="iconButtons" />
+    </div>
+  }
+</div>
+
+<div class="map__grid__panel__actions">
+  @if (isEditing()) {
+    <app-button
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      (clicked)="requestCancel()"
+    >
+      {{ 'management.settings.map_configuration.cancel' | translate }}
+    </app-button>
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="!canSave()"
+      (clicked)="save()"
+    >
+      {{ 'management.settings.map_configuration.save' | translate }}
+    </app-button>
+  } @else {
+    <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+      {{ 'management.settings.map_configuration.edit' | translate }}
+    </app-button>
+  }
+</div>

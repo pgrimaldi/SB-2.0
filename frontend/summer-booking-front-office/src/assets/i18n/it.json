@@ -1484,9 +1484,30 @@
           "custom": "Sfondo personalizzato",
           "drop": "Trascina un'immagine qui o clicca per caricare"
         },
+        "grid": {
+          "title": "Imposta reticolo",
+          "rows": "Numero di file",
+          "row_items": "Numero massimo articoli per fila",
+          "tilt": "Inclinazione mappa (°)",
+          "icons": {
+            "title": "Icone elementi",
+            "free": "Libero",
+            "occupied": "Occupato",
+            "umbrella": "Ombrellone",
+            "custom_article": "Articolo personalizzato {{number}}",
+            "select": "Seleziona icona"
+          }
+        },
         "edit": "Modifica",
         "cancel": "Annulla",
-        "save": "Salva"
+        "save": "Salva",
+        "reset": "Reimposta mappa",
+        "reset_popup": {
+          "title": "Reimposta mappa",
+          "text": "Stai reimpostando l'intera mappa.\n\nVerrà eliminata l'intera configurazione con gli articoli inseriti sulla mappa e lo sfondo impostato. L'azione è irreversibile.",
+          "cancel": "Annulla e mantieni la mappa configurata",
+          "confirm": "Procedi ed elimina la mappa configurata"
+        }
       }
     }
   },

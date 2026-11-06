@@ -1,3 +1,22 @@
 <main class="map__configuration">
   <app-map-background-panel class="map__configuration__panel" />
+  <app-map-grid-panel class="map__configuration__panel" />
+  <app-button
+    class="map__configuration__reset"
+    [appearance]="ButtonAppearance.Secondary"
+    [size]="ButtonSize.Small"
+    [pathIcon]="resetIcon"
+    (clicked)="isResetAsked.set(true)"
+  >
+    {{ 'management.settings.map_configuration.reset' | translate }}
+  </app-button>
 </main>
+
+<app-warning-popup
+  [title]="'management.settings.map_configuration.reset_popup.title' | translate"
+  [text]="'management.settings.map_configuration.reset_popup.text' | translate"
+  [texts]="'management.settings.map_configuration.reset_popup' | translate"
+  [pathIcon]="resetPopupIcons"
+  [(open)]="isResetAsked"
+  (confirmed)="isResetAsked.set(false)"
+/>

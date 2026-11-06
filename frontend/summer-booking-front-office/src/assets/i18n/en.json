@@ -1484,9 +1484,30 @@
           "custom": "Custom background",
           "drop": "Drag an image here or click to upload"
         },
+        "grid": {
+          "title": "Set grid",
+          "rows": "Number of rows",
+          "row_items": "Maximum items per row",
+          "tilt": "Map tilt (°)",
+          "icons": {
+            "title": "Element icons",
+            "free": "Free",
+            "occupied": "Occupied",
+            "umbrella": "Umbrella",
+            "custom_article": "Custom item {{number}}",
+            "select": "Select icon"
+          }
+        },
         "edit": "Edit",
         "cancel": "Cancel",
-        "save": "Save"
+        "save": "Save",
+        "reset": "Reset map",
+        "reset_popup": {
+          "title": "Reset map",
+          "text": "You are resetting the whole map.\n\nThe whole configuration will be deleted, with the items placed on the map and the chosen background. This cannot be undone.",
+          "cancel": "Cancel and keep the configured map",
+          "confirm": "Continue and delete the configured map"
+        }
       }
     }
   },

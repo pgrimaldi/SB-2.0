@@ -1,21 +1,49 @@
-<app-section-title [text]="'management.settings.map_configuration.background.title' | translate" />
+<app-section-title
+  [text]="'management.settings.map_configuration.background.title' | translate"
+  [pathIcon]="titleIcon"
+/>
 
 <span class="map__background__panel__label">
   {{ 'management.settings.map_configuration.background.templates' | translate }}
 </span>
 <div class="map__background__panel__slots">
-  @for (slot of slots; track slot) {
+  @for (image of slots; track $index) {
     <button
+      #origin="cdkOverlayOrigin"
       class="map__background__panel__slot"
       type="button"
+      cdkOverlayOrigin
       [disabled]="!isEditing()"
-      [class.map__background__panel__slot__chosen]="slot === chosenSlot()"
-      (click)="chooseSlot(slot)"
+      [class.map__background__panel__slot__chosen]="$index === chosenSlot()"
+      (click)="chooseSlot($index)"
+      (pointerenter)="showPreview($index, $event)"
+      (pointerleave)="previewedSlot.set(null)"
     >
-      @if (slot === chosenSlot()) {
+      @if (image) {
+        <img class="map__background__panel__thumb" [src]="image" width="1256" height="614" alt="" />
+      }
+      @if ($index === chosenSlot()) {
         <img [src]="chosenIcon" width="24" height="24" alt="" />
       }
     </button>
+    @if (image) {
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="origin"
+        [cdkConnectedOverlayOpen]="$index === previewedSlot()"
+        [cdkConnectedOverlayPositions]="previewPositions"
+        [cdkConnectedOverlayViewportMargin]="8"
+        [cdkConnectedOverlayPush]="true"
+      >
+        <img
+          class="map__background__panel__preview"
+          [src]="image"
+          width="1256"
+          height="614"
+          alt=""
+        />
+      </ng-template>
+    }
   }
 </div>
 

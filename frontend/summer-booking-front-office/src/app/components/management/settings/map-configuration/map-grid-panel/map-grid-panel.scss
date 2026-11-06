@@ -1,0 +1,91 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.map__grid__panel__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (width < 48rem) {
+  .map__grid__panel__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// Same look as the labels of the fields.
+.map__grid__panel__label {
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.map__grid__panel__icons {
+  --button-padding: 1rem;
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 1.5rem;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+}
+
+.map__grid__panel__icons__head,
+.map__grid__panel__icons__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  column-gap: 1rem;
+  padding-inline: 0.75rem;
+  border: 0.0625rem solid transparent;
+}
+
+.map__grid__panel__icons__head {
+  font-weight: 500;
+
+  // On the edge of the rows, not on their text.
+  .map__grid__panel__label {
+    margin-inline-start: -0.8125rem;
+  }
+}
+
+.map__grid__panel__icons__row {
+  padding-block: 0.75rem;
+  border-color: var(--color__layout__border);
+  border-radius: 0.3125rem;
+
+  app-button {
+    justify-self: start;
+  }
+}
+
+@media (width < 48rem) {
+  .map__grid__panel__icons__head,
+  .map__grid__panel__icons__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 0.5rem;
+  }
+
+  .map__grid__panel__icons__head .map__grid__panel__label,
+  .map__grid__panel__icons__row span {
+    grid-column: 1 / -1;
+  }
+}
+
+.map__grid__panel__actions {
+  --button-border-color: var(--color__layout__text__soft);
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  app-button {
+    width: 8rem;
+  }
+}

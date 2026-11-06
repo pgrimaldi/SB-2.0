@@ -26,6 +26,7 @@
 
 .map__background__panel__slot {
   display: grid;
+  overflow: hidden;
   width: 100%;
   aspect-ratio: 1;
   place-items: center;
@@ -38,12 +39,33 @@
   &:disabled {
     cursor: default;
   }
+
+  img {
+    grid-area: 1 / 1;
+  }
 }
 
-// Two lines thick without changing the size of the slot.
 .map__background__panel__slot__chosen {
+  border-width: 0.125rem;
   border-color: var(--color__main__theme__one);
-  box-shadow: inset 0 0 0 0.0625rem var(--color__main__theme__one);
+}
+
+.map__background__panel__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.map__background__panel__preview {
+  display: block;
+  width: min(40rem, 100vw - 2rem);
+  height: auto;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--color__main__theme__two);
+  border-radius: 0.25rem;
+  background: var(--color__layout__surface);
+  box-shadow: 0 0.25rem 1.25rem var(--color__layout__shadow);
+  pointer-events: none;
 }
 
 @media (hover: hover) {

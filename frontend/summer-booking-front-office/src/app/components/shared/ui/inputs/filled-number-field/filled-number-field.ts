@@ -46,9 +46,15 @@ export class FilledNumberField {
   readonly isCurrency = input(false);
   /** The digits are dots, as in a password field, with the eye after them to show them. */
   readonly isMasked = input(false);
-  /** Icons as Material icon names (Material Symbols font): [currency, content shown, content hidden]. */
+  /**
+   * Icons as Material icon names (Material Symbols font): [currency, content shown, content hidden,
+   * before the number].
+   */
   readonly matIcon = input<readonly string[] | null>();
-  /** Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden]. */
+  /**
+   * Icons as image paths, used when `matIcon` is not given: [currency, content shown, content hidden,
+   * before the number].
+   */
   readonly pathIcon = input<readonly string[] | null>();
   readonly error = input<string | null>();
   /** The field was left: a Signal Forms `[formField]` marks it as touched. */

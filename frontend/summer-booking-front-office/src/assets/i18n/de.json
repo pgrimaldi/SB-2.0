@@ -1484,9 +1484,30 @@
           "custom": "Eigener Hintergrund",
           "drop": "Bild hierher ziehen oder zum Hochladen klicken"
         },
+        "grid": {
+          "title": "Raster festlegen",
+          "rows": "Anzahl der Reihen",
+          "row_items": "Max. Artikel pro Reihe",
+          "tilt": "Kartenneigung (°)",
+          "icons": {
+            "title": "Element-Symbole",
+            "free": "Frei",
+            "occupied": "Belegt",
+            "umbrella": "Sonnenschirm",
+            "custom_article": "Eigener Artikel {{number}}",
+            "select": "Symbol wählen"
+          }
+        },
         "edit": "Bearbeiten",
         "cancel": "Abbrechen",
-        "save": "Speichern"
+        "save": "Speichern",
+        "reset": "Karte zurücksetzen",
+        "reset_popup": {
+          "title": "Karte zurücksetzen",
+          "text": "Du setzt die gesamte Karte zurück.\n\nDie gesamte Konfiguration wird gelöscht, mit den Artikeln auf der Karte und dem gewählten Hintergrund. Dies kann nicht rückgängig gemacht werden.",
+          "cancel": "Abbrechen und Karte behalten",
+          "confirm": "Fortfahren und Karte löschen"
+        }
       }
     }
   },
