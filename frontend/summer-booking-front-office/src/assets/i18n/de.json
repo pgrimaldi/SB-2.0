@@ -1476,6 +1476,17 @@
             "online_booking": "Online-Buchung aktivieren"
           }
         }
+      },
+      "map_configuration": {
+        "background": {
+          "title": "Hintergrund festlegen",
+          "templates": "Kartenhintergrund",
+          "custom": "Eigener Hintergrund",
+          "drop": "Bild hierher ziehen oder zum Hochladen klicken"
+        },
+        "edit": "Bearbeiten",
+        "cancel": "Abbrechen",
+        "save": "Speichern"
       }
     }
   },

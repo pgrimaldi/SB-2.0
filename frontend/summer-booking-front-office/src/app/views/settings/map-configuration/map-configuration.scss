@@ -1,0 +1,18 @@
+@use '../../../styles/settings-panel' as panel;
+
+.map__configuration {
+  --button-text-size: 0.75rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(100% - 2rem, 60.5rem);
+  margin-inline: auto;
+  padding-block: 0.8125rem 1.5rem;
+}
+
+.map__configuration__panel {
+  @include panel.settings-panel;
+
+  padding: 1.25rem 1.5rem;
+}

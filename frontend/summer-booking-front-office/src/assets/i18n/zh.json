@@ -1476,6 +1476,17 @@
             "online_booking": "启用在线预订"
           }
         }
+      },
+      "map_configuration": {
+        "background": {
+          "title": "设置背景",
+          "templates": "地图背景",
+          "custom": "自定义背景",
+          "drop": "将图片拖到此处或点击上传"
+        },
+        "edit": "编辑",
+        "cancel": "取消",
+        "save": "保存"
       }
     }
   },

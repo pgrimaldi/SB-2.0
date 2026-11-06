@@ -1,0 +1,53 @@
+<app-section-title [text]="'management.settings.map_configuration.background.title' | translate" />
+
+<span class="map__background__panel__label">
+  {{ 'management.settings.map_configuration.background.templates' | translate }}
+</span>
+<div class="map__background__panel__slots">
+  @for (slot of slots; track slot) {
+    <button
+      class="map__background__panel__slot"
+      type="button"
+      [disabled]="!isEditing()"
+      [class.map__background__panel__slot__chosen]="slot === chosenSlot()"
+      (click)="chooseSlot(slot)"
+    >
+      @if (slot === chosenSlot()) {
+        <img [src]="chosenIcon" width="24" height="24" alt="" />
+      }
+    </button>
+  }
+</div>
+
+<span class="map__background__panel__label">
+  {{ 'management.settings.map_configuration.background.custom' | translate }}
+</span>
+<app-file-drop-zone
+  class="map__background__panel__drop"
+  accept="image/jpeg,image/png"
+  [text]="'management.settings.map_configuration.background.drop' | translate"
+  [pathIcon]="uploadIcon"
+  [previewUrl]="imagePreviewUrl()"
+  [disabled]="!isEditing()"
+  (filesSelected)="chooseImage($event)"
+/>
+
+<div class="map__background__panel__actions">
+  @if (isEditing()) {
+    <app-button
+      [appearance]="ButtonAppearance.Light"
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      (clicked)="requestCancel()"
+    >
+      {{ 'management.settings.map_configuration.cancel' | translate }}
+    </app-button>
+    <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="save()">
+      {{ 'management.settings.map_configuration.save' | translate }}
+    </app-button>
+  } @else {
+    <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+      {{ 'management.settings.map_configuration.edit' | translate }}
+    </app-button>
+  }
+</div>

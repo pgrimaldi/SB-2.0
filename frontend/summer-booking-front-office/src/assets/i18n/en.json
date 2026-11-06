@@ -1476,6 +1476,17 @@
             "online_booking": "Enable online booking"
           }
         }
+      },
+      "map_configuration": {
+        "background": {
+          "title": "Set background",
+          "templates": "Map background",
+          "custom": "Custom background",
+          "drop": "Drag an image here or click to upload"
+        },
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "save": "Save"
       }
     }
   },
