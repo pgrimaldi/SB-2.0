@@ -43,7 +43,14 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
     loadChildren: () => import('./seasons/seasons.routes').then((routes) => routes.SEASONS_ROUTES),
   },
   { path: 'sectors', label: 'management.settings.menu.sectors' },
-  { path: 'map', label: 'management.settings.menu.map' },
+  {
+    path: 'map-configuration',
+    label: 'management.settings.menu.map',
+    loadComponent: () =>
+      import('./map-configuration/map-configuration').then(
+        (component) => component.MapConfiguration,
+      ),
+  },
   {
     path: 'warehouse-setting',
     label: 'management.settings.menu.warehouse',
