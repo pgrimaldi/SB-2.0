@@ -111,6 +111,10 @@
       "email_taken": "An account with this email already exists.",
       "cannot_modify_self": "You cannot delete or change your own account here.",
       "role_not_assignable": "This account cannot be managed from the panel."
+    },
+    "map": {
+      "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
+      "invalid_image": "Invalid image: use PNG, JPEG or WebP up to 5 MB."
     }
   },
   "alert": {
@@ -1504,7 +1508,7 @@
         "reset": "Reset map",
         "reset_popup": {
           "title": "Reset map",
-          "text": "You are resetting the whole map.\n\nThe whole configuration will be deleted, with the items placed on the map and the chosen background. This cannot be undone.",
+          "text": "You are resetting the whole map.\n\nThe items placed on the map will be deleted and the grid will go back to 1 row with 1 item and 0° tilt. Background and icons stay as they are. This cannot be undone.",
           "cancel": "Cancel and keep the configured map",
           "confirm": "Continue and delete the configured map"
         }
@@ -1630,7 +1634,9 @@
     "missing_digit": "At least 1 number",
     "missing_uppercase": "At least 1 uppercase letter",
     "missing_lowercase": "At least 1 lowercase letter",
-    "overlap": "These dates overlap another date range of the season"
+    "overlap": "These dates overlap another date range of the season",
+    "max_file_size": "The file is larger than {{max}} MB",
+    "unknown_icon": "Icon does not exist"
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

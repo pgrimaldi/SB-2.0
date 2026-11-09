@@ -111,6 +111,10 @@
       "email_taken": "Esiste già un account con questa email.",
       "cannot_modify_self": "Non puoi eliminare o modificare il tuo account da qui.",
       "role_not_assignable": "Questo account non si può gestire dal pannello."
+    },
+    "map": {
+      "spots_outside_grid": "Ci sono postazioni fuori da queste misure: servono almeno {{rows}} file e {{columns}} articoli per fila.",
+      "invalid_image": "Immagine non valida: usa PNG, JPEG o WebP fino a 5 MB."
     }
   },
   "alert": {
@@ -1504,7 +1508,7 @@
         "reset": "Reimposta mappa",
         "reset_popup": {
           "title": "Reimposta mappa",
-          "text": "Stai reimpostando l'intera mappa.\n\nVerrà eliminata l'intera configurazione con gli articoli inseriti sulla mappa e lo sfondo impostato. L'azione è irreversibile.",
+          "text": "Stai reimpostando l'intera mappa.\n\nVerranno eliminati gli articoli inseriti sulla mappa e il reticolo tornerà a 1 fila con 1 articolo e inclinazione 0°. Sfondo e icone restano come sono. L'azione è irreversibile.",
           "cancel": "Annulla e mantieni la mappa configurata",
           "confirm": "Procedi ed elimina la mappa configurata"
         }
@@ -1630,7 +1634,9 @@
     "missing_digit": "Almeno 1 numero",
     "missing_uppercase": "Almeno 1 Maiuscola",
     "missing_lowercase": "Almeno 1 Minuscola",
-    "overlap": "Le date si sovrappongono a un altro intervallo della stagione"
+    "overlap": "Le date si sovrappongono a un altro intervallo della stagione",
+    "max_file_size": "Il file supera i {{max}} MB",
+    "unknown_icon": "Icona non esistente"
   },
   "unsaved_changes": {
     "title": "Modifiche non salvate",

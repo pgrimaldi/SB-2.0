@@ -1136,6 +1136,505 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+## Configura mappa
+
+### GET `/api/catalog/map/settings`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "rows": "number (intero)",
+  "columns": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "backgroundColor": "string (#RRGGBB) | null",
+  "background": {
+    "iconId": "string (UUID) | null",
+    "name": "string | null",
+    "url": "string (URL) | null",
+    "isCustom": "boolean"
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      },
+      "occupied": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      }
+    },
+    "customArticles": [
+      {
+        "variant": "number (intero)",
+        "icons": {
+          "free": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          },
+          "occupied": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": "boolean"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rows` | number (intero) |
+| `columns` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `backgroundColor` | string (#RRGGBB) \| null |
+| `background` | MapBackground \| null |
+| `background.iconId` | string (UUID) \| null |
+| `background.name` | string \| null |
+| `background.url` | string (URL) \| null |
+| `background.isCustom` | boolean |
+| `icons` | MapIcons |
+| `icons.umbrella` | MapIconPair |
+| `icons.umbrella.free` | MapIcon |
+| `icons.umbrella.free.iconId` | string (UUID) \| null |
+| `icons.umbrella.free.name` | string \| null |
+| `icons.umbrella.free.url` | string (URL) \| null |
+| `icons.umbrella.free.isDefault` | boolean |
+| `icons.umbrella.occupied` | MapIcon |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `icons.umbrella.occupied.name` | string \| null |
+| `icons.umbrella.occupied.url` | string (URL) \| null |
+| `icons.umbrella.occupied.isDefault` | boolean |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `icons.customArticles[].variant` | number (intero) |
+| `icons.customArticles[].icons` | MapIconPair |
+| `icons.customArticles[].icons.free` | MapIcon |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.free.name` | string \| null |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `icons.customArticles[].icons.free.isDefault` | boolean |
+| `icons.customArticles[].icons.occupied` | MapIcon |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.occupied.name` | string \| null |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `resetDeletesBookings` | boolean |
+
+### PUT `/api/catalog/map/update-background`
+
+**Payload JSON**
+
+```json
+{
+  "backgroundName": "string"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `backgroundName` | string |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### PUT `/api/catalog/map/update-configuration`
+
+**Payload JSON**
+
+```json
+{
+  "rowQuantity": "number (intero)",
+  "maxRowItemQuantity": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "umbrellaIcons": {
+    "freeIcon": "string | null",
+    "occupiedIcon": "string | null"
+  },
+  "customArticleIcons": [
+    {
+      "variant": "number (intero)",
+      "freeIcon": "string | null",
+      "occupiedIcon": "string | null"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rowQuantity` | number (intero) |
+| `maxRowItemQuantity` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `umbrellaIcons` | MapElementIcons |
+| `umbrellaIcons.freeIcon` | string \| null |
+| `umbrellaIcons.occupiedIcon` | string \| null |
+| `customArticleIcons[]` | MapArticleIcons[] (array di oggetti) |
+| `customArticleIcons[].variant` | number (intero) |
+| `customArticleIcons[].freeIcon` | string \| null |
+| `customArticleIcons[].occupiedIcon` | string \| null |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/map/background`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "rows": "number (intero)",
+  "columns": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "backgroundColor": "string (#RRGGBB) | null",
+  "background": {
+    "iconId": "string (UUID) | null",
+    "name": "string | null",
+    "url": "string (URL) | null",
+    "isCustom": "boolean"
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      },
+      "occupied": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      }
+    },
+    "customArticles": [
+      {
+        "variant": "number (intero)",
+        "icons": {
+          "free": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          },
+          "occupied": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": "boolean"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rows` | number (intero) |
+| `columns` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `backgroundColor` | string (#RRGGBB) \| null |
+| `background` | MapBackground \| null |
+| `background.iconId` | string (UUID) \| null |
+| `background.name` | string \| null |
+| `background.url` | string (URL) \| null |
+| `background.isCustom` | boolean |
+| `icons` | MapIcons |
+| `icons.umbrella` | MapIconPair |
+| `icons.umbrella.free` | MapIcon |
+| `icons.umbrella.free.iconId` | string (UUID) \| null |
+| `icons.umbrella.free.name` | string \| null |
+| `icons.umbrella.free.url` | string (URL) \| null |
+| `icons.umbrella.free.isDefault` | boolean |
+| `icons.umbrella.occupied` | MapIcon |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `icons.umbrella.occupied.name` | string \| null |
+| `icons.umbrella.occupied.url` | string (URL) \| null |
+| `icons.umbrella.occupied.isDefault` | boolean |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `icons.customArticles[].variant` | number (intero) |
+| `icons.customArticles[].icons` | MapIconPair |
+| `icons.customArticles[].icons.free` | MapIcon |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.free.name` | string \| null |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `icons.customArticles[].icons.free.isDefault` | boolean |
+| `icons.customArticles[].icons.occupied` | MapIcon |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.occupied.name` | string \| null |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `resetDeletesBookings` | boolean |
+
+### DELETE `/api/catalog/map/background`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "rows": "number (intero)",
+  "columns": "number (intero)",
+  "tiltDegrees": "number (intero)",
+  "backgroundColor": "string (#RRGGBB) | null",
+  "background": {
+    "iconId": "string (UUID) | null",
+    "name": "string | null",
+    "url": "string (URL) | null",
+    "isCustom": "boolean"
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      },
+      "occupied": {
+        "iconId": "string (UUID) | null",
+        "name": "string | null",
+        "url": "string (URL) | null",
+        "isDefault": "boolean"
+      }
+    },
+    "customArticles": [
+      {
+        "variant": "number (intero)",
+        "icons": {
+          "free": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          },
+          "occupied": {
+            "iconId": "string (UUID) | null",
+            "name": "string | null",
+            "url": "string (URL) | null",
+            "isDefault": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": "boolean"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `rows` | number (intero) |
+| `columns` | number (intero) |
+| `tiltDegrees` | number (intero) |
+| `backgroundColor` | string (#RRGGBB) \| null |
+| `background` | MapBackground \| null |
+| `background.iconId` | string (UUID) \| null |
+| `background.name` | string \| null |
+| `background.url` | string (URL) \| null |
+| `background.isCustom` | boolean |
+| `icons` | MapIcons |
+| `icons.umbrella` | MapIconPair |
+| `icons.umbrella.free` | MapIcon |
+| `icons.umbrella.free.iconId` | string (UUID) \| null |
+| `icons.umbrella.free.name` | string \| null |
+| `icons.umbrella.free.url` | string (URL) \| null |
+| `icons.umbrella.free.isDefault` | boolean |
+| `icons.umbrella.occupied` | MapIcon |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `icons.umbrella.occupied.name` | string \| null |
+| `icons.umbrella.occupied.url` | string (URL) \| null |
+| `icons.umbrella.occupied.isDefault` | boolean |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `icons.customArticles[].variant` | number (intero) |
+| `icons.customArticles[].icons` | MapIconPair |
+| `icons.customArticles[].icons.free` | MapIcon |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.free.name` | string \| null |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `icons.customArticles[].icons.free.isDefault` | boolean |
+| `icons.customArticles[].icons.occupied` | MapIcon |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `icons.customArticles[].icons.occupied.name` | string \| null |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `resetDeletesBookings` | boolean |
+
+### POST `/api/catalog/map/reset`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "settings": {
+    "rows": "number (intero)",
+    "columns": "number (intero)",
+    "tiltDegrees": "number (intero)",
+    "backgroundColor": "string (#RRGGBB) | null",
+    "background": {
+      "iconId": "string (UUID) | null",
+      "name": "string | null",
+      "url": "string (URL) | null",
+      "isCustom": "boolean"
+    },
+    "icons": {
+      "umbrella": {
+        "free": {
+          "iconId": "string (UUID) | null",
+          "name": "string | null",
+          "url": "string (URL) | null",
+          "isDefault": "boolean"
+        },
+        "occupied": {
+          "iconId": "string (UUID) | null",
+          "name": "string | null",
+          "url": "string (URL) | null",
+          "isDefault": "boolean"
+        }
+      },
+      "customArticles": [
+        {
+          "variant": "number (intero)",
+          "icons": {
+            "free": {
+              "iconId": "string (UUID) | null",
+              "name": "string | null",
+              "url": "string (URL) | null",
+              "isDefault": "boolean"
+            },
+            "occupied": {
+              "iconId": "string (UUID) | null",
+              "name": "string | null",
+              "url": "string (URL) | null",
+              "isDefault": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "resetDeletesBookings": "boolean"
+  },
+  "spots": "array di oggetti",
+  "sectors": "array di oggetti",
+  "beachElements": "array di oggetti"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `settings` | MapSettings |
+| `settings.rows` | number (intero) |
+| `settings.columns` | number (intero) |
+| `settings.tiltDegrees` | number (intero) |
+| `settings.backgroundColor` | string (#RRGGBB) \| null |
+| `settings.background` | MapBackground \| null |
+| `settings.background.iconId` | string (UUID) \| null |
+| `settings.background.name` | string \| null |
+| `settings.background.url` | string (URL) \| null |
+| `settings.background.isCustom` | boolean |
+| `settings.icons` | MapIcons |
+| `settings.icons.umbrella` | MapIconPair |
+| `settings.icons.umbrella.free` | MapIcon |
+| `settings.icons.umbrella.free.iconId` | string (UUID) \| null |
+| `settings.icons.umbrella.free.name` | string \| null |
+| `settings.icons.umbrella.free.url` | string (URL) \| null |
+| `settings.icons.umbrella.free.isDefault` | boolean |
+| `settings.icons.umbrella.occupied` | MapIcon |
+| `settings.icons.umbrella.occupied.iconId` | string (UUID) \| null |
+| `settings.icons.umbrella.occupied.name` | string \| null |
+| `settings.icons.umbrella.occupied.url` | string (URL) \| null |
+| `settings.icons.umbrella.occupied.isDefault` | boolean |
+| `settings.icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) |
+| `settings.icons.customArticles[].variant` | number (intero) |
+| `settings.icons.customArticles[].icons` | MapIconPair |
+| `settings.icons.customArticles[].icons.free` | MapIcon |
+| `settings.icons.customArticles[].icons.free.iconId` | string (UUID) \| null |
+| `settings.icons.customArticles[].icons.free.name` | string \| null |
+| `settings.icons.customArticles[].icons.free.url` | string (URL) \| null |
+| `settings.icons.customArticles[].icons.free.isDefault` | boolean |
+| `settings.icons.customArticles[].icons.occupied` | MapIcon |
+| `settings.icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null |
+| `settings.icons.customArticles[].icons.occupied.name` | string \| null |
+| `settings.icons.customArticles[].icons.occupied.url` | string (URL) \| null |
+| `settings.icons.customArticles[].icons.occupied.isDefault` | boolean |
+| `settings.resetDeletesBookings` | boolean |
+| `spots` | array di oggetti |
+| `sectors` | array di oggetti |
+| `beachElements` | array di oggetti |
+
 ## Impostazioni magazzino
 
 ### POST `/api/warehouse/list`

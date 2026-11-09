@@ -5839,6 +5839,563 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### GET `/api/catalog/map/settings`
+
+Configura mappa: impostazioni.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "rows": 6,
+  "columns": 16,
+  "tiltDegrees": 8,
+  "backgroundColor": "#F0D8CC",
+  "background": {
+    "iconId": null,
+    "name": "BackgroundBeach",
+    "url": null,
+    "isCustom": false
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": null,
+        "name": "Umbrella3",
+        "url": null,
+        "isDefault": false
+      },
+      "occupied": {
+        "iconId": null,
+        "name": "MixedSpot4",
+        "url": null,
+        "isDefault": false
+      }
+    },
+    "customArticles": [
+      {
+        "variant": 1,
+        "icons": {
+          "free": {
+            "iconId": null,
+            "name": "MixedSpot1",
+            "url": null,
+            "isDefault": false
+          },
+          "occupied": {
+            "iconId": null,
+            "name": "MixedSpot13",
+            "url": null,
+            "isDefault": false
+          }
+        }
+      },
+      {
+        "variant": 2,
+        "icons": {
+          "free": {
+            "iconId": null,
+            "name": "MixedSpot8",
+            "url": null,
+            "isDefault": false
+          },
+          "occupied": {
+            "iconId": null,
+            "name": null,
+            "url": null,
+            "isDefault": true
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `rows` | number (intero) | `6` |
+| `columns` | number (intero) | `16` |
+| `tiltDegrees` | number (intero) | `8` |
+| `backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
+| `background` | MapBackground \| null | `{"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}` |
+| `background.iconId` | string (UUID) \| null | `null` |
+| `background.name` | string \| null | `BackgroundBeach` |
+| `background.url` | string (URL) \| null | `null` |
+| `background.isCustom` | boolean | `false` |
+| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
+| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
+| `icons.umbrella.free.name` | string \| null | `Umbrella3` |
+| `icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `icons.umbrella.free.isDefault` | boolean | `false` |
+| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
+| `icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
+| `icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `icons.umbrella.occupied.isDefault` | boolean | `false` |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `icons.customArticles[].variant` | number (intero) | `1` |
+| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
+| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
+| `icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.free.isDefault` | boolean | `false` |
+| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
+| `icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
+| `resetDeletesBookings` | boolean | `false` |
+
+### PUT `/api/catalog/map/update-background`
+
+Configura mappa: salvataggio dello sfondo.
+
+#### Payload
+
+```json
+{
+  "backgroundName": "BackgroundBoardwalk"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `backgroundName` | string | `BackgroundBoardwalk` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### PUT `/api/catalog/map/update-configuration`
+
+Configura mappa: salvataggio del reticolo.
+
+#### Payload
+
+```json
+{
+  "rowQuantity": 6,
+  "maxRowItemQuantity": 16,
+  "tiltDegrees": 8,
+  "umbrellaIcons": {
+    "freeIcon": "Umbrella3",
+    "occupiedIcon": "MixedSpot4"
+  },
+  "customArticleIcons": [
+    {
+      "variant": 1,
+      "freeIcon": "MixedSpot1",
+      "occupiedIcon": "MixedSpot13"
+    },
+    {
+      "variant": 2,
+      "freeIcon": "MixedSpot8",
+      "occupiedIcon": null
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `rowQuantity` | number (intero) | `6` |
+| `maxRowItemQuantity` | number (intero) | `16` |
+| `tiltDegrees` | number (intero) | `8` |
+| `umbrellaIcons` | MapElementIcons | `{"freeIcon": "Umbrella3", "occupiedIcon": "MixedSpot4"}` |
+| `umbrellaIcons.freeIcon` | string \| null | `Umbrella3` |
+| `umbrellaIcons.occupiedIcon` | string \| null | `MixedSpot4` |
+| `customArticleIcons[]` | MapArticleIcons[] (array di oggetti) | `[{"variant": 1, "freeIcon": "MixedSpot1", "occupiedIcon": "MixedSpot13"}, {"variant": 2, "freeIcon": "MixedSpot8", "occupiedIcon": null}]` |
+| `customArticleIcons[].variant` | number (intero) | `1` |
+| `customArticleIcons[].freeIcon` | string \| null | `MixedSpot1` |
+| `customArticleIcons[].occupiedIcon` | string \| null | `MixedSpot13` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/map/background`
+
+Configura mappa: caricamento dello sfondo personalizzato.
+
+#### Payload
+
+```json
+{
+  "file": "sfondo-lido-azzurro.png (image/png, 1,8 MB)"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `file` | file (multipart/form-data) | `sfondo-lido-azzurro.png (image/png, 1,8 MB)` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "rows": 6,
+  "columns": 16,
+  "tiltDegrees": 8,
+  "backgroundColor": "#F0D8CC",
+  "background": {
+    "iconId": null,
+    "name": null,
+    "url": "https://cdn.summerbooking.it/backgrounds/sfondo-lido-azzurro.png",
+    "isCustom": true
+  },
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": null,
+        "name": "Umbrella3",
+        "url": null,
+        "isDefault": false
+      },
+      "occupied": {
+        "iconId": null,
+        "name": "MixedSpot4",
+        "url": null,
+        "isDefault": false
+      }
+    },
+    "customArticles": [
+      {
+        "variant": 1,
+        "icons": {
+          "free": {
+            "iconId": null,
+            "name": "MixedSpot1",
+            "url": null,
+            "isDefault": false
+          },
+          "occupied": {
+            "iconId": null,
+            "name": "MixedSpot13",
+            "url": null,
+            "isDefault": false
+          }
+        }
+      },
+      {
+        "variant": 2,
+        "icons": {
+          "free": {
+            "iconId": null,
+            "name": "MixedSpot8",
+            "url": null,
+            "isDefault": false
+          },
+          "occupied": {
+            "iconId": null,
+            "name": null,
+            "url": null,
+            "isDefault": true
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `rows` | number (intero) | `6` |
+| `columns` | number (intero) | `16` |
+| `tiltDegrees` | number (intero) | `8` |
+| `backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
+| `background` | MapBackground \| null | `{"iconId": null, "name": null, "url": "https://cdn.summerbooking.it/backgrounds/sfondo-lido-azzurro.png", "isCustom": true}` |
+| `background.iconId` | string (UUID) \| null | `null` |
+| `background.name` | string \| null | `null` |
+| `background.url` | string (URL) \| null | `https://cdn.summerbooking.it/backgrounds/sfondo-lido-azzurro.png` |
+| `background.isCustom` | boolean | `true` |
+| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
+| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
+| `icons.umbrella.free.name` | string \| null | `Umbrella3` |
+| `icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `icons.umbrella.free.isDefault` | boolean | `false` |
+| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
+| `icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
+| `icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `icons.umbrella.occupied.isDefault` | boolean | `false` |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `icons.customArticles[].variant` | number (intero) | `1` |
+| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
+| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
+| `icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.free.isDefault` | boolean | `false` |
+| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
+| `icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
+| `resetDeletesBookings` | boolean | `false` |
+
+### DELETE `/api/catalog/map/background`
+
+Configura mappa: eliminazione dello sfondo personalizzato.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "rows": 6,
+  "columns": 16,
+  "tiltDegrees": 8,
+  "backgroundColor": "#F0D8CC",
+  "background": null,
+  "icons": {
+    "umbrella": {
+      "free": {
+        "iconId": null,
+        "name": "Umbrella3",
+        "url": null,
+        "isDefault": false
+      },
+      "occupied": {
+        "iconId": null,
+        "name": "MixedSpot4",
+        "url": null,
+        "isDefault": false
+      }
+    },
+    "customArticles": [
+      {
+        "variant": 1,
+        "icons": {
+          "free": {
+            "iconId": null,
+            "name": "MixedSpot1",
+            "url": null,
+            "isDefault": false
+          },
+          "occupied": {
+            "iconId": null,
+            "name": "MixedSpot13",
+            "url": null,
+            "isDefault": false
+          }
+        }
+      },
+      {
+        "variant": 2,
+        "icons": {
+          "free": {
+            "iconId": null,
+            "name": "MixedSpot8",
+            "url": null,
+            "isDefault": false
+          },
+          "occupied": {
+            "iconId": null,
+            "name": null,
+            "url": null,
+            "isDefault": true
+          }
+        }
+      }
+    ]
+  },
+  "resetDeletesBookings": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `rows` | number (intero) | `6` |
+| `columns` | number (intero) | `16` |
+| `tiltDegrees` | number (intero) | `8` |
+| `backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
+| `background` | MapBackground \| null | `null` |
+| `icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
+| `icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
+| `icons.umbrella.free.name` | string \| null | `Umbrella3` |
+| `icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `icons.umbrella.free.isDefault` | boolean | `false` |
+| `icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
+| `icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
+| `icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `icons.umbrella.occupied.isDefault` | boolean | `false` |
+| `icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `icons.customArticles[].variant` | number (intero) | `1` |
+| `icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
+| `icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
+| `icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
+| `icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.free.isDefault` | boolean | `false` |
+| `icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
+| `icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
+| `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
+| `resetDeletesBookings` | boolean | `false` |
+
+### POST `/api/catalog/map/reset`
+
+Configura mappa: reimpostazione della mappa.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "settings": {
+    "rows": 1,
+    "columns": 1,
+    "tiltDegrees": 0,
+    "backgroundColor": "#F0D8CC",
+    "background": {
+      "iconId": null,
+      "name": "BackgroundBeach",
+      "url": null,
+      "isCustom": false
+    },
+    "icons": {
+      "umbrella": {
+        "free": {
+          "iconId": null,
+          "name": "Umbrella3",
+          "url": null,
+          "isDefault": false
+        },
+        "occupied": {
+          "iconId": null,
+          "name": "MixedSpot4",
+          "url": null,
+          "isDefault": false
+        }
+      },
+      "customArticles": [
+        {
+          "variant": 1,
+          "icons": {
+            "free": {
+              "iconId": null,
+              "name": "MixedSpot1",
+              "url": null,
+              "isDefault": false
+            },
+            "occupied": {
+              "iconId": null,
+              "name": "MixedSpot13",
+              "url": null,
+              "isDefault": false
+            }
+          }
+        },
+        {
+          "variant": 2,
+          "icons": {
+            "free": {
+              "iconId": null,
+              "name": "MixedSpot8",
+              "url": null,
+              "isDefault": false
+            },
+            "occupied": {
+              "iconId": null,
+              "name": null,
+              "url": null,
+              "isDefault": true
+            }
+          }
+        }
+      ]
+    },
+    "resetDeletesBookings": false
+  },
+  "spots": [],
+  "sectors": [
+    {
+      "id": "3f6b2a1c-8d4e-4c7a-9b5f-2e1d0c9a8b71",
+      "name": "Fila A",
+      "sortOrder": 1
+    }
+  ],
+  "beachElements": []
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `settings` | MapSettings | `{"rows": 1, "columns": 1, "tiltDegrees": 0, "backgroundColor": "#F0D8CC", "background": {"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}, "icons": {"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}, "resetDeletesBookings": false}` |
+| `settings.rows` | number (intero) | `1` |
+| `settings.columns` | number (intero) | `1` |
+| `settings.tiltDegrees` | number (intero) | `0` |
+| `settings.backgroundColor` | string (#RRGGBB) \| null | `#F0D8CC` |
+| `settings.background` | MapBackground \| null | `{"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}` |
+| `settings.background.iconId` | string (UUID) \| null | `null` |
+| `settings.background.name` | string \| null | `BackgroundBeach` |
+| `settings.background.url` | string (URL) \| null | `null` |
+| `settings.background.isCustom` | boolean | `false` |
+| `settings.icons` | MapIcons | `{"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}` |
+| `settings.icons.umbrella` | MapIconPair | `{"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}` |
+| `settings.icons.umbrella.free` | MapIcon | `{"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}` |
+| `settings.icons.umbrella.free.iconId` | string (UUID) \| null | `null` |
+| `settings.icons.umbrella.free.name` | string \| null | `Umbrella3` |
+| `settings.icons.umbrella.free.url` | string (URL) \| null | `null` |
+| `settings.icons.umbrella.free.isDefault` | boolean | `false` |
+| `settings.icons.umbrella.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}` |
+| `settings.icons.umbrella.occupied.iconId` | string (UUID) \| null | `null` |
+| `settings.icons.umbrella.occupied.name` | string \| null | `MixedSpot4` |
+| `settings.icons.umbrella.occupied.url` | string (URL) \| null | `null` |
+| `settings.icons.umbrella.occupied.isDefault` | boolean | `false` |
+| `settings.icons.customArticles[]` | MapCustomArticleIcons[] (array di oggetti) | `[{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]` |
+| `settings.icons.customArticles[].variant` | number (intero) | `1` |
+| `settings.icons.customArticles[].icons` | MapIconPair | `{"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}` |
+| `settings.icons.customArticles[].icons.free` | MapIcon | `{"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}` |
+| `settings.icons.customArticles[].icons.free.iconId` | string (UUID) \| null | `null` |
+| `settings.icons.customArticles[].icons.free.name` | string \| null | `MixedSpot1` |
+| `settings.icons.customArticles[].icons.free.url` | string (URL) \| null | `null` |
+| `settings.icons.customArticles[].icons.free.isDefault` | boolean | `false` |
+| `settings.icons.customArticles[].icons.occupied` | MapIcon | `{"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}` |
+| `settings.icons.customArticles[].icons.occupied.iconId` | string (UUID) \| null | `null` |
+| `settings.icons.customArticles[].icons.occupied.name` | string \| null | `MixedSpot13` |
+| `settings.icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
+| `settings.icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
+| `settings.resetDeletesBookings` | boolean | `false` |
+| `spots` | array di oggetti | `[]` |
+| `sectors` | array di oggetti | `[{"id": "3f6b2a1c-8d4e-4c7a-9b5f-2e1d0c9a8b71", "name": "Fila A", "sortOrder": 1}]` |
+| `beachElements` | array di oggetti | `[]` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

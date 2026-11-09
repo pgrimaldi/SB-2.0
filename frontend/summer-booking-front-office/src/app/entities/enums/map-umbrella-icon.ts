@@ -1,0 +1,15 @@
+export enum MapUmbrellaIcon {
+  Umbrella1 = 'Umbrella1',
+  Umbrella2 = 'Umbrella2',
+  Umbrella3 = 'Umbrella3',
+  Umbrella4 = 'Umbrella4',
+  Umbrella5 = 'Umbrella5',
+  Umbrella6 = 'Umbrella6',
+  Umbrella7 = 'Umbrella7',
+  Umbrella8 = 'Umbrella8',
+  Umbrella9 = 'Umbrella9',
+  Umbrella10 = 'Umbrella10',
+  Umbrella11 = 'Umbrella11',
+  Umbrella12 = 'Umbrella12',
+  Umbrella13 = 'Umbrella13',
+}

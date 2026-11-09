@@ -63,6 +63,18 @@ describe('FilledNumberField', () => {
     expect(host.threshold()).toBeNull();
   });
 
+  it('should drop the zeros before the number, keeping a lone zero', async () => {
+    const { host, input, type } = await setup();
+
+    await type('0005');
+    expect(input.value).toBe('5');
+    expect(host.threshold()).toBe(5);
+
+    await type('000');
+    expect(input.value).toBe('0');
+    expect(host.threshold()).toBe(0);
+  });
+
   it('should accept one separator, comma or dot, with decimal', async () => {
     const { host, input, type } = await setup(true);
 
@@ -77,6 +89,10 @@ describe('FilledNumberField', () => {
 
     await type('0.25');
     expect(host.threshold()).toBe(0.25);
+
+    await type('00,5');
+    expect(input.value).toBe('0,5');
+    expect(host.threshold()).toBe(0.5);
   });
 
   it('should keep at most 2 decimal digits of an amount', async () => {

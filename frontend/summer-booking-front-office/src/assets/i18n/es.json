@@ -111,6 +111,10 @@
       "email_taken": "Ya existe una cuenta con este correo electrónico.",
       "cannot_modify_self": "No puedes eliminar ni modificar tu propia cuenta desde aquí.",
       "role_not_assignable": "Esta cuenta no se puede gestionar desde el panel."
+    },
+    "map": {
+      "spots_outside_grid": "Hay puestos fuera de estas medidas: se necesitan al menos {{rows}} filas y {{columns}} artículos por fila.",
+      "invalid_image": "Imagen no válida: usa PNG, JPEG o WebP de hasta 5 MB."
     }
   },
   "alert": {
@@ -1504,7 +1508,7 @@
         "reset": "Restablecer mapa",
         "reset_popup": {
           "title": "Restablecer mapa",
-          "text": "Estás restableciendo todo el mapa.\n\nSe eliminará toda la configuración, con los artículos colocados en el mapa y el fondo elegido. Esta acción es irreversible.",
+          "text": "Estás restableciendo todo el mapa.\n\nSe eliminarán los artículos colocados en el mapa y la cuadrícula volverá a 1 fila con 1 artículo e inclinación 0°. El fondo y los iconos no cambian. Esta acción es irreversible.",
           "cancel": "Cancelar y conservar el mapa",
           "confirm": "Continuar y eliminar el mapa"
         }
@@ -1630,7 +1634,9 @@
     "missing_digit": "Al menos 1 número",
     "missing_uppercase": "Al menos 1 mayúscula",
     "missing_lowercase": "Al menos 1 minúscula",
-    "overlap": "Estas fechas se solapan con otro intervalo de la temporada"
+    "overlap": "Estas fechas se solapan con otro intervalo de la temporada",
+    "max_file_size": "El archivo supera los {{max}} MB",
+    "unknown_icon": "Icono inexistente"
   },
   "unsaved_changes": {
     "title": "Cambios sin guardar",

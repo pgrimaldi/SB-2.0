@@ -1,12 +1,21 @@
 <main class="map__configuration">
-  <app-map-background-panel class="map__configuration__panel" />
-  <app-map-grid-panel class="map__configuration__panel" />
+  <app-map-background-panel
+    class="map__configuration__panel"
+    [settings]="settings()"
+    [loadError]="loadError()"
+  />
+  <app-map-grid-panel
+    class="map__configuration__panel"
+    [settings]="settings()"
+    [loadError]="loadError()"
+  />
   <app-button
     class="map__configuration__reset"
     [appearance]="ButtonAppearance.Secondary"
     [size]="ButtonSize.Small"
     [pathIcon]="resetIcon"
-    (clicked)="isResetAsked.set(true)"
+    [disabled]="!settings()"
+    (clicked)="askReset()"
   >
     {{ 'management.settings.map_configuration.reset' | translate }}
   </app-button>
@@ -17,6 +26,8 @@
   [text]="'management.settings.map_configuration.reset_popup.text' | translate"
   [texts]="'management.settings.map_configuration.reset_popup' | translate"
   [pathIcon]="resetPopupIcons"
+  [isLoading]="isResetting()"
+  [error]="resetErrorMessage()"
   [(open)]="isResetAsked"
-  (confirmed)="isResetAsked.set(false)"
+  (confirmed)="reset()"
 />

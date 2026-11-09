@@ -95,11 +95,14 @@ export class FilledNumberField {
 
   protected changeValue(field: HTMLInputElement): void {
     const decimals = this.decimals();
-    const text = keepNumber(field.value, decimals);
+    const kept = keepNumber(field.value, decimals);
+    const zeros = leadingZeros(kept);
+    const text = kept.slice(zeros);
     if (text !== field.value) {
       const cursor = keepNumber(field.value.slice(0, field.selectionStart ?? 0), decimals).length;
+      const position = Math.max(0, cursor - zeros);
       field.value = text;
-      field.setSelectionRange(cursor, cursor);
+      field.setSelectionRange(position, position);
     }
     this.text.set(text);
     this.value.set(toNumber(text));
@@ -126,6 +129,15 @@ function keepNumber(text: string, decimals: number): string {
     }
   }
   return kept;
+}
+
+/** Zeros before another digit: "007" has 2, while "0" and "0,5" keep their zero. */
+function leadingZeros(text: string): number {
+  let zeros = 0;
+  while (text[zeros] === '0' && /[0-9]/.test(text[zeros + 1] ?? '')) {
+    zeros++;
+  }
+  return zeros;
 }
 
 /** Empty text or a lone separator is `null`. */

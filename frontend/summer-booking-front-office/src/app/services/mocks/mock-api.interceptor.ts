@@ -59,6 +59,14 @@ import {
   tableServiceListMock,
 } from './catalog/catalog.mock';
 import {
+  mapSettingsMock,
+  removeMapBackgroundMock,
+  resetMapMock,
+  updateMapBackgroundMock,
+  updateMapConfigurationMock,
+  uploadMapBackgroundMock,
+} from './catalog/map.mock';
+import {
   affiliatedHotelComboboxMock,
   deleteSelectedItemMock,
   emptyTrashMock,
@@ -872,6 +880,48 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`
   ) {
     return updateTableServiceAvailabilityBookingsMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/settings`
+  ) {
+    return mapSettingsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/background`
+  ) {
+    return uploadMapBackgroundMock(request);
+  }
+
+  if (
+    request.method === 'DELETE' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/background`
+  ) {
+    return removeMapBackgroundMock(request);
+  }
+
+  if (
+    request.method === 'PUT' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/update-background`
+  ) {
+    return updateMapBackgroundMock(request);
+  }
+
+  if (
+    request.method === 'PUT' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/update-configuration`
+  ) {
+    return updateMapConfigurationMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/reset`
+  ) {
+    return resetMapMock(request);
   }
 
   return next(request);

@@ -111,6 +111,10 @@
       "email_taken": "Un compte existe déjà avec cet e-mail.",
       "cannot_modify_self": "Vous ne pouvez pas supprimer ou modifier votre propre compte ici.",
       "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau."
+    },
+    "map": {
+      "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
+      "invalid_image": "Image non valide : utilisez PNG, JPEG ou WebP jusqu'à 5 Mo."
     }
   },
   "alert": {
@@ -1504,7 +1508,7 @@
         "reset": "Réinitialiser la carte",
         "reset_popup": {
           "title": "Réinitialiser la carte",
-          "text": "Vous réinitialisez toute la carte.\n\nToute la configuration sera supprimée, avec les articles placés sur la carte et le fond choisi. Cette action est irréversible.",
+          "text": "Vous réinitialisez toute la carte.\n\nLes articles placés sur la carte seront supprimés et la grille reviendra à 1 rangée de 1 article, inclinaison 0°. Le fond et les icônes restent inchangés. Cette action est irréversible.",
           "cancel": "Annuler et garder la carte",
           "confirm": "Continuer et supprimer la carte"
         }
@@ -1630,7 +1634,9 @@
     "missing_digit": "Au moins 1 chiffre",
     "missing_uppercase": "Au moins 1 majuscule",
     "missing_lowercase": "Au moins 1 minuscule",
-    "overlap": "Ces dates chevauchent une autre plage de dates de la saison"
+    "overlap": "Ces dates chevauchent une autre plage de dates de la saison",
+    "max_file_size": "Le fichier dépasse {{max}} Mo",
+    "unknown_icon": "Icône inexistante"
   },
   "unsaved_changes": {
     "title": "Modifications non enregistrées",

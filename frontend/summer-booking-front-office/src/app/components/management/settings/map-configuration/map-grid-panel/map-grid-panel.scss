@@ -59,10 +59,34 @@
   padding-block: 0.75rem;
   border-color: var(--color__layout__border);
   border-radius: 0.3125rem;
+}
 
-  app-button {
-    justify-self: start;
-  }
+.map__grid__panel__icon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.map__grid__panel__icon__button {
+  position: relative;
+  display: inline-flex;
+}
+
+.map__grid__panel__icon__empty {
+  --icon-button-background: var(--color__layout__surface);
+  --icon-button-size: 1.25rem;
+
+  position: absolute;
+  inset-block-start: -0.5rem;
+  inset-inline-end: -0.5rem;
+  filter: drop-shadow(0 0.0625rem 0.25rem var(--color__layout__shadow));
+}
+
+.map__grid__panel__chosen {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
 }
 
 @media (width < 48rem) {
@@ -76,6 +100,18 @@
   .map__grid__panel__icons__row span {
     grid-column: 1 / -1;
   }
+}
+
+.map__grid__panel__error,
+.map__grid__panel__icon__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.map__grid__panel__error {
+  margin-top: -0.5rem;
 }
 
 .map__grid__panel__actions {

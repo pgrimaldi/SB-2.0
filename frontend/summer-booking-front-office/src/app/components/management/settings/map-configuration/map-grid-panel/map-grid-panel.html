@@ -30,25 +30,42 @@
     <span>{{ 'management.settings.map_configuration.grid.icons.free' | translate }}</span>
     <span>{{ 'management.settings.map_configuration.grid.icons.occupied' | translate }}</span>
   </div>
-  <ng-template #iconButtons>
-    <app-button
-      [appearance]="ButtonAppearance.Light"
-      [size]="ButtonSize.Small"
-      [disabled]="!isEditing()"
-    >
-      {{ 'management.settings.map_configuration.grid.icons.select' | translate }}
-    </app-button>
-    <app-button
-      [appearance]="ButtonAppearance.Light"
-      [size]="ButtonSize.Small"
-      [disabled]="!isEditing()"
-    >
-      {{ 'management.settings.map_configuration.grid.icons.select' | translate }}
-    </app-button>
+  <ng-template #iconButtons let-article>
+    @for (isOccupied of iconColumns; track isOccupied) {
+      <div class="map__grid__panel__icon">
+        <span class="map__grid__panel__icon__button">
+          <app-button
+            [appearance]="ButtonAppearance.Light"
+            [size]="ButtonSize.Small"
+            [disabled]="!isEditing() || isSaving()"
+            (clicked)="picking.set({ article, isOccupied })"
+          >
+            @if (chosenIconUrl(article, isOccupied); as url) {
+              <img class="map__grid__panel__chosen" [src]="url" width="20" height="20" alt="" />
+            }
+            {{ 'management.settings.map_configuration.grid.icons.select' | translate }}
+          </app-button>
+          @if (chosenIconUrl(article, isOccupied)) {
+            <app-icon-button
+              class="map__grid__panel__icon__empty"
+              [pathIcon]="emptyIcon"
+              [disabled]="!isEditing() || isSaving()"
+              (click)="emptyIconButton(article, isOccupied)"
+            />
+          }
+        </span>
+        @if (isUnknownIcon(article, isOccupied)) {
+          <p class="map__grid__panel__icon__error">{{ 'invalidate.unknown_icon' | translate }}</p>
+        }
+      </div>
+    }
   </ng-template>
   <div class="map__grid__panel__icons__row">
     <span>{{ 'management.settings.map_configuration.grid.icons.umbrella' | translate }}</span>
-    <ng-container [ngTemplateOutlet]="iconButtons" />
+    <ng-container
+      [ngTemplateOutlet]="iconButtons"
+      [ngTemplateOutletContext]="{ $implicit: null }"
+    />
   </div>
   @for (article of customArticles; track article) {
     <div class="map__grid__panel__icons__row">
@@ -58,17 +75,59 @@
             | translate: { number: article }
         }}
       </span>
-      <ng-container [ngTemplateOutlet]="iconButtons" />
+      <ng-container
+        [ngTemplateOutlet]="iconButtons"
+        [ngTemplateOutletContext]="{ $implicit: article }"
+      />
     </div>
   }
 </div>
 
+<app-icon-picker-popup
+  [title]="'management.settings.map_configuration.grid.icons.select' | translate"
+  [text]="
+    ('management.settings.map_configuration.grid.icons.umbrella' | translate) +
+    ' · ' +
+    ('management.settings.map_configuration.grid.icons.free' | translate)
+  "
+  [choices]="umbrellaIcons"
+  [chosenIcon]="pickedUmbrellaIcon()"
+  [pathIcon]="closeIcon"
+  [open]="isPickingUmbrella()"
+  (openChange)="$event || picking.set(null)"
+  (iconChosen)="chooseUmbrellaIcon($event)"
+/>
+<app-icon-picker-popup
+  [title]="'management.settings.map_configuration.grid.icons.select' | translate"
+  [text]="
+    (picking()?.article
+      ? ('management.settings.map_configuration.grid.icons.custom_article'
+        | translate: { number: picking()?.article })
+      : ('management.settings.map_configuration.grid.icons.umbrella' | translate)) +
+    ' · ' +
+    ((picking()?.isOccupied
+      ? 'management.settings.map_configuration.grid.icons.occupied'
+      : 'management.settings.map_configuration.grid.icons.free'
+    ) | translate)
+  "
+  [choices]="mixedSpotChoices()"
+  [chosenIcon]="pickedMixedSpotIcon()"
+  [pathIcon]="closeIcon"
+  [open]="isPickingMixedSpot()"
+  (openChange)="$event || picking.set(null)"
+  (iconChosen)="chooseMixedSpotIcon($event)"
+/>
+
+@if (errorMessage(); as errorMessage) {
+  <p class="map__grid__panel__error">{{ errorMessage }}</p>
+}
 <div class="map__grid__panel__actions">
   @if (isEditing()) {
     <app-button
       [appearance]="ButtonAppearance.Light"
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
+      [disabled]="isSaving()"
       (clicked)="requestCancel()"
     >
       {{ 'management.settings.map_configuration.cancel' | translate }}
@@ -76,13 +135,19 @@
     <app-button
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
-      [disabled]="!canSave()"
+      [disabled]="!canSave() && !isSaving()"
+      [isLoading]="isSaving()"
       (clicked)="save()"
     >
       {{ 'management.settings.map_configuration.save' | translate }}
     </app-button>
   } @else {
-    <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="!settings()"
+      (clicked)="edit()"
+    >
       {{ 'management.settings.map_configuration.edit' | translate }}
     </app-button>
   }

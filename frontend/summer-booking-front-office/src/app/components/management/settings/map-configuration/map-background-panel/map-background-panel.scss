@@ -74,8 +74,40 @@
   }
 }
 
+.map__background__panel__custom {
+  position: relative;
+}
+
 .map__background__panel__drop {
   height: 10rem;
+}
+
+.map__background__panel__spinner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 0.3125rem;
+  background: color-mix(in srgb, var(--color__layout__surface) 50%, transparent);
+  color: var(--color__main__theme__one);
+}
+
+.map__background__panel__error {
+  margin: -0.5rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// White circle with a shadow, visible on any image.
+.map__background__panel__delete {
+  --icon-button-background: var(--color__layout__surface);
+  --icon-button-size: 2.25rem;
+
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.5rem;
+  filter: drop-shadow(0 0.0625rem 0.25rem var(--color__layout__shadow));
 }
 
 .map__background__panel__actions {

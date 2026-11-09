@@ -111,6 +111,10 @@
       "email_taken": "已存在使用此电子邮件的账户。",
       "cannot_modify_self": "您不能在此删除或修改自己的账户。",
       "role_not_assignable": "无法在面板中管理此账户。"
+    },
+    "map": {
+      "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
+      "invalid_image": "图片无效：请使用不超过 5 MB 的 PNG、JPEG 或 WebP。"
     }
   },
   "alert": {
@@ -1504,7 +1508,7 @@
         "reset": "重置地图",
         "reset_popup": {
           "title": "重置地图",
-          "text": "您正在重置整个地图。\n\n整个配置将被删除，包括地图上放置的物品和所选背景。此操作无法撤销。",
+          "text": "您正在重置整个地图。\n\n地图上放置的物品将被删除，网格将恢复为 1 排 1 个物品，倾斜度为 0°。背景和图标保持不变。此操作无法撤销。",
           "cancel": "取消并保留已配置的地图",
           "confirm": "继续并删除已配置的地图"
         }
@@ -1630,7 +1634,9 @@
     "missing_digit": "至少 1 个数字",
     "missing_uppercase": "至少 1 个大写字母",
     "missing_lowercase": "至少 1 个小写字母",
-    "overlap": "这些日期与本季节的另一个日期区间重叠"
+    "overlap": "这些日期与本季节的另一个日期区间重叠",
+    "max_file_size": "文件超过 {{max}} MB",
+    "unknown_icon": "图标不存在"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

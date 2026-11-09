@@ -13,7 +13,7 @@
       class="map__background__panel__slot"
       type="button"
       cdkOverlayOrigin
-      [disabled]="!isEditing()"
+      [disabled]="!isEditing() || isBusy() || !image"
       [class.map__background__panel__slot__chosen]="$index === chosenSlot()"
       (click)="chooseSlot($index)"
       (pointerenter)="showPreview($index, $event)"
@@ -50,31 +50,66 @@
 <span class="map__background__panel__label">
   {{ 'management.settings.map_configuration.background.custom' | translate }}
 </span>
-<app-file-drop-zone
-  class="map__background__panel__drop"
-  accept="image/jpeg,image/png"
-  [text]="'management.settings.map_configuration.background.drop' | translate"
-  [pathIcon]="uploadIcon"
-  [previewUrl]="imagePreviewUrl()"
-  [disabled]="!isEditing()"
-  (filesSelected)="chooseImage($event)"
-/>
+<div class="map__background__panel__custom">
+  <app-file-drop-zone
+    class="map__background__panel__drop"
+    accept="image/jpeg,image/png"
+    [text]="'management.settings.map_configuration.background.drop' | translate"
+    [pathIcon]="uploadIcon"
+    [previewUrl]="imagePreviewUrl()"
+    [disabled]="!isEditing() || isBusy()"
+    (filesSelected)="chooseImage($event)"
+  />
+  @if (imagePreviewUrl()) {
+    <app-icon-button
+      class="map__background__panel__delete"
+      [pathIcon]="deleteIcon"
+      [disabled]="!isEditing() || isBusy()"
+      (click)="removeImage()"
+    />
+  }
+  @if (isBusy() && !isSaving()) {
+    <app-spinner class="map__background__panel__spinner" [diameter]="32" />
+  }
+</div>
+@if (isImageTooLarge()) {
+  <p class="map__background__panel__error">
+    {{ 'invalidate.max_file_size' | translate: { max: maxImageMegabytes } }}
+  </p>
+} @else if (errorMessage(); as errorMessage) {
+  <p class="map__background__panel__error">{{ errorMessage }}</p>
+}
 
+@if (saveErrorMessage(); as saveErrorMessage) {
+  <p class="map__background__panel__error">{{ saveErrorMessage }}</p>
+}
 <div class="map__background__panel__actions">
   @if (isEditing()) {
     <app-button
       [appearance]="ButtonAppearance.Light"
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
+      [disabled]="isBusy()"
       (clicked)="requestCancel()"
     >
       {{ 'management.settings.map_configuration.cancel' | translate }}
     </app-button>
-    <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="save()">
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="isBusy() && !isSaving()"
+      [isLoading]="isSaving()"
+      (clicked)="save()"
+    >
       {{ 'management.settings.map_configuration.save' | translate }}
     </app-button>
   } @else {
-    <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+    <app-button
+      [size]="ButtonSize.Small"
+      [isFullWidth]="true"
+      [disabled]="!settings()"
+      (clicked)="edit()"
+    >
       {{ 'management.settings.map_configuration.edit' | translate }}
     </app-button>
   }

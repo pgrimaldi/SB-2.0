@@ -111,6 +111,10 @@
       "email_taken": "Es gibt bereits ein Konto mit dieser E-Mail.",
       "cannot_modify_self": "Du kannst dein eigenes Konto hier nicht löschen oder ändern.",
       "role_not_assignable": "Dieses Konto kann nicht über das Panel verwaltet werden."
+    },
+    "map": {
+      "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
+      "invalid_image": "Ungültiges Bild: PNG, JPEG oder WebP bis 5 MB verwenden."
     }
   },
   "alert": {
@@ -1504,7 +1508,7 @@
         "reset": "Karte zurücksetzen",
         "reset_popup": {
           "title": "Karte zurücksetzen",
-          "text": "Du setzt die gesamte Karte zurück.\n\nDie gesamte Konfiguration wird gelöscht, mit den Artikeln auf der Karte und dem gewählten Hintergrund. Dies kann nicht rückgängig gemacht werden.",
+          "text": "Du setzt die gesamte Karte zurück.\n\nDie Artikel auf der Karte werden gelöscht und das Raster wird auf 1 Reihe mit 1 Artikel und 0° Neigung zurückgesetzt. Hintergrund und Symbole bleiben unverändert. Dies kann nicht rückgängig gemacht werden.",
           "cancel": "Abbrechen und Karte behalten",
           "confirm": "Fortfahren und Karte löschen"
         }
@@ -1630,7 +1634,9 @@
     "missing_digit": "Mindestens 1 Zahl",
     "missing_uppercase": "Mindestens 1 Großbuchstabe",
     "missing_lowercase": "Mindestens 1 Kleinbuchstabe",
-    "overlap": "Diese Daten überschneiden sich mit einem anderen Datumsbereich der Saison"
+    "overlap": "Diese Daten überschneiden sich mit einem anderen Datumsbereich der Saison",
+    "max_file_size": "Die Datei ist größer als {{max}} MB",
+    "unknown_icon": "Symbol existiert nicht"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",
