@@ -45,11 +45,11 @@
             }
             {{ 'management.settings.map_configuration.grid.icons.select' | translate }}
           </app-button>
-          @if (chosenIconUrl(article, isOccupied)) {
+          @if (isEditing() && chosenIconUrl(article, isOccupied)) {
             <app-icon-button
               class="map__grid__panel__icon__empty"
               [pathIcon]="emptyIcon"
-              [disabled]="!isEditing() || isSaving()"
+              [disabled]="isSaving()"
               (click)="emptyIconButton(article, isOccupied)"
             />
           }
