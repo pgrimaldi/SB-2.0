@@ -1512,6 +1512,13 @@
           "cancel": "Annulla e mantieni la mappa configurata",
           "confirm": "Procedi ed elimina la mappa configurata"
         }
+      },
+      "rows_and_sectors": {
+        "title": "Settori e file",
+        "create": "Aggiungi settore/fila",
+        "table": {
+          "sector_name": "Nome"
+        }
       }
     }
   },

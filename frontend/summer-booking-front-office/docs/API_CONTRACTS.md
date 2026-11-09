@@ -6396,6 +6396,65 @@ Stato: 200 OK.
 | `sectors` | array di oggetti | `[{"id": "3f6b2a1c-8d4e-4c7a-9b5f-2e1d0c9a8b71", "name": "Fila A", "sortOrder": 1}]` |
 | `beachElements` | array di oggetti | `[]` |
 
+### POST `/api/catalog/sectors-list`
+
+Settori e file: elenco.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "fila",
+  "filters": [],
+  "sortField": "sectorName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `fila` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `sectorName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 3,
+  "rows": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "sectorName": "Fila 1"
+    },
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
+      "sectorName": "Fila 2"
+    },
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03",
+      "sectorName": "Fila 3"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `3` |
+| `rows[]` | SectorItem[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "sectorName": "Fila 1"}, {"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "sectorName": "Fila 2"}, {"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03", "sectorName": "Fila 3"}]` |
+| `rows[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `rows[].sectorName` | string \| null | `Fila 1` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

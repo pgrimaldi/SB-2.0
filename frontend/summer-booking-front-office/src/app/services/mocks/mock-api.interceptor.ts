@@ -66,6 +66,7 @@ import {
   updateMapConfigurationMock,
   uploadMapBackgroundMock,
 } from './catalog/map.mock';
+import { sectorListMock } from './catalog/sectors.mock';
 import {
   affiliatedHotelComboboxMock,
   deleteSelectedItemMock,
@@ -880,6 +881,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`
   ) {
     return updateTableServiceAvailabilityBookingsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/sectors-list`
+  ) {
+    return sectorListMock(request);
   }
 
   if (

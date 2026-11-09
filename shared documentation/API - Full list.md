@@ -1136,6 +1136,66 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+## Settori e file
+
+### POST `/api/catalog/sectors-list`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idSector": "string (UUID)",
+      "sectorName": "string | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | SectorItem[] (array di oggetti) |
+| `rows[].idSector` | string (UUID) |
+| `rows[].sectorName` | string \| null |
+
 ## Configura mappa
 
 ### GET `/api/catalog/map/settings`

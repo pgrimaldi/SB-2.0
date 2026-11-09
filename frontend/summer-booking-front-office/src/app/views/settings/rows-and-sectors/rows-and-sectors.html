@@ -1,0 +1,33 @@
+<main class="rows__and__sectors">
+  <app-page-title
+    class="rows__and__sectors__title"
+    [text]="'management.settings.rows_and_sectors.title' | translate"
+    [pathIcon]="titleIcon"
+  />
+  <app-table
+    #table
+    [columns]="columns()"
+    [params]="params()"
+    [load]="load"
+    idField="idSector"
+    [texts]="'table' | translate"
+    [isSearchable]="true"
+    [useAppTheme]="false"
+    [areMassiveActionsHidden]="false"
+    [isCreateButtonHidden]="false"
+    [createLabel]="'management.settings.rows_and_sectors.create' | translate"
+    [rowActions]="rowActions()"
+    [(selection)]="idSelectedSectors"
+    [pathIcon]="tableIcons"
+    (loadError)="loadFailed.set(true)"
+  />
+</main>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

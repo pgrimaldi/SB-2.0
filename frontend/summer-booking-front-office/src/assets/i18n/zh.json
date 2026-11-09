@@ -1512,6 +1512,13 @@
           "cancel": "取消并保留已配置的地图",
           "confirm": "继续并删除已配置的地图"
         }
+      },
+      "rows_and_sectors": {
+        "title": "区域和排",
+        "create": "添加区域/排",
+        "table": {
+          "sector_name": "名称"
+        }
       }
     }
   },
