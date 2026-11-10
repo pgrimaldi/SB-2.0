@@ -2387,6 +2387,40 @@ Nessun corpo (204).
 | `rows[].category` | string (enum BarServiceCategory) \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
+### POST `/api/catalog/sector-combobox`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
 ### POST `/api/catalog/create-bar-service`
 
 **Payload JSON**
