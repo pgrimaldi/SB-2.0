@@ -1559,6 +1559,12 @@
           "cancel": "Cancelar",
           "save": "Guardar"
         }
+      },
+      "catalog": {
+        "tabs": {
+          "packages": "Paquetes",
+          "additional_items": "Artículos/Servicios adicionales"
+        }
       }
     }
   },

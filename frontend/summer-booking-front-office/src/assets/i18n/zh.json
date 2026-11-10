@@ -1559,6 +1559,12 @@
           "cancel": "取消",
           "save": "保存"
         }
+      },
+      "catalog": {
+        "tabs": {
+          "packages": "套餐",
+          "additional_items": "附加物品/服务"
+        }
       }
     }
   },

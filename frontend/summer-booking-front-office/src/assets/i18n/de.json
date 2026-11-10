@@ -1559,6 +1559,12 @@
           "cancel": "Abbrechen",
           "save": "Speichern"
         }
+      },
+      "catalog": {
+        "tabs": {
+          "packages": "Pakete",
+          "additional_items": "Zusätzliche Artikel/Leistungen"
+        }
       }
     }
   },

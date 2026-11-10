@@ -64,7 +64,11 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
         (component) => component.WarehouseSetting,
       ),
   },
-  { path: 'price-list', label: 'management.settings.menu.price_list' },
+  {
+    path: 'catalog',
+    label: 'management.settings.menu.price_list',
+    loadChildren: () => import('./catalog/catalog.routes').then((routes) => routes.CATALOG_ROUTES),
+  },
   {
     path: 'services',
     label: 'management.settings.menu.services',

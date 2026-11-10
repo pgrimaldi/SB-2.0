@@ -1559,6 +1559,12 @@
           "cancel": "إلغاء",
           "save": "حفظ"
         }
+      },
+      "catalog": {
+        "tabs": {
+          "packages": "الباقات",
+          "additional_items": "عناصر/خدمات إضافية"
+        }
       }
     }
   },
