@@ -74,7 +74,11 @@ import {
   sectorListMock,
   updateSectorItemMock,
 } from './catalog/sectors.mock';
-import { deletePackageItemsMock, packageListMock } from './catalog/price-lists.mock';
+import {
+  deletePackageItemsMock,
+  duplicatePackageItemsMock,
+  packageListMock,
+} from './catalog/price-lists.mock';
 import {
   affiliatedHotelComboboxMock,
   deleteSelectedItemMock,
@@ -945,6 +949,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/delete-package-item`
   ) {
     return deletePackageItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`
+  ) {
+    return duplicatePackageItemsMock(request);
   }
 
   if (

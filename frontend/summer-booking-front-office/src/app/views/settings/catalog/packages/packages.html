@@ -19,6 +19,7 @@
   [pathIcon]="tableIcons"
   (loadError)="loadFailed.set(true)"
   (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
 />
 
 <app-delete-items-popup
@@ -29,6 +30,15 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idPackagesToDuplicate()"
+  [itemName]="packageNameToDuplicate()"
+  translationKey="management.settings.catalog.packages.duplicate"
+  [action]="duplicatePackages"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
 />
 
 <app-table-error-popup

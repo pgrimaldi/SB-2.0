@@ -2113,6 +2113,32 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### POST `/api/catalog/duplicate-package-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idPackages": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idPackages` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ## Sconti e voucher
 
 ### POST `/api/vouchers/voucher-list`

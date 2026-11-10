@@ -1582,6 +1582,18 @@
               "title": "Delete packages",
               "text": "Do you want to delete the {{count}} selected packages?"
             }
+          },
+          "duplicate": {
+            "cancel": "Cancel",
+            "confirm": "Duplicate",
+            "one": {
+              "title": "Duplicate package",
+              "text": "Do you want to duplicate the package {{name}}?"
+            },
+            "many": {
+              "title": "Duplicate packages",
+              "text": "Do you want to duplicate the {{count}} selected packages?"
+            }
           }
         }
       }

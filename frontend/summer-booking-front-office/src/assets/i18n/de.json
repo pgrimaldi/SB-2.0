@@ -1582,6 +1582,18 @@
               "title": "Pakete löschen",
               "text": "Möchtest du die {{count}} ausgewählten Pakete löschen?"
             }
+          },
+          "duplicate": {
+            "cancel": "Abbrechen",
+            "confirm": "Duplizieren",
+            "one": {
+              "title": "Paket duplizieren",
+              "text": "Möchtest du das Paket {{name}} duplizieren?"
+            },
+            "many": {
+              "title": "Pakete duplizieren",
+              "text": "Möchtest du die {{count}} ausgewählten Pakete duplizieren?"
+            }
           }
         }
       }

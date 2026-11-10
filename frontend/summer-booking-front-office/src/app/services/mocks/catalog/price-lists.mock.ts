@@ -2,6 +2,7 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
+import { DuplicatePackageItemsRequest } from '../../../entities/settings/catalog/duplicate-package-items-request';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -90,6 +91,49 @@ export const deletePackageItemsMock = (
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/**
+ * `POST /api/catalog/duplicate-package-item`: one copy of each given package at the end of the list,
+ * all or nothing, named by the backend ("X (copia)", then "X (copia 2)"…). 204 with no body;
+ * 404 when an id is not a package of the property; 401 / 403 as the list.
+ */
+export const duplicatePackageItemsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<DuplicatePackageItemsRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const packages = packagesOf(property.id, body.idPackages);
+  if (!packages) {
+    return resourceNotFound(request);
+  }
+  for (const item of packages) {
+    PACKAGES.push({
+      propertyId: item.propertyId,
+      idPackage: crypto.randomUUID(),
+      packageName: copyName(item),
+    });
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+function copyName(item: PackageRow): string {
+  const taken = new Set(
+    PACKAGES.filter((row) => row.propertyId === item.propertyId).map((row) =>
+      row.packageName?.toLowerCase(),
+    ),
+  );
+  let copy = `${item.packageName} (copia)`;
+  for (let number = 2; taken.has(copy.toLowerCase()); number++) {
+    copy = `${item.packageName} (copia ${number})`;
+  }
+  return copy;
+}
 
 function packagesOf(propertyId: number, idPackages: unknown): PackageRow[] | null {
   const ids = Array.isArray(idPackages) ? [...new Set(idPackages)] : [];

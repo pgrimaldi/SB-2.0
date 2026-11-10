@@ -1582,6 +1582,18 @@
               "title": "删除套餐",
               "text": "要删除所选的 {{count}} 个套餐吗？"
             }
+          },
+          "duplicate": {
+            "cancel": "取消",
+            "confirm": "复制",
+            "one": {
+              "title": "复制套餐",
+              "text": "要复制套餐 {{name}} 吗？"
+            },
+            "many": {
+              "title": "复制套餐",
+              "text": "要复制所选的 {{count}} 个套餐吗？"
+            }
           }
         }
       }

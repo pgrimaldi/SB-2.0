@@ -56,4 +56,21 @@ describe('PriceListService', () => {
     expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
     controller.verify();
   });
+
+  it('should duplicate the chosen packages in one call', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    priceLists.duplicatePackageItems({ idProperty: 'p1', idPackages: ['k1', 'k2'] }).subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    controller.verify();
+  });
 });

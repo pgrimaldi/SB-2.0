@@ -1582,6 +1582,18 @@
               "title": "Elimina pacchetti",
               "text": "Vuoi eliminare i {{count}} pacchetti selezionati?"
             }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica pacchetto",
+              "text": "Vuoi duplicare il pacchetto {{name}}?"
+            },
+            "many": {
+              "title": "Duplica pacchetti",
+              "text": "Vuoi duplicare i {{count}} pacchetti selezionati?"
+            }
           }
         }
       }

@@ -4,6 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
+import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -22,7 +23,14 @@ interface PackagesTableTexts {
 
 @Component({
   selector: 'app-packages',
-  imports: [DeleteItemsPopup, PageTitle, Table, TableErrorPopup, TranslatePipe],
+  imports: [
+    DeleteItemsPopup,
+    DuplicateItemsPopup,
+    PageTitle,
+    Table,
+    TableErrorPopup,
+    TranslatePipe,
+  ],
   templateUrl: './packages.html',
   styleUrl: './packages.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +45,9 @@ export class Packages {
   protected readonly deleting = signal(false);
   protected readonly idPackagesToDelete = signal<readonly string[]>([]);
   protected readonly packageNameToDelete = signal<string | null>(null);
+  protected readonly duplicating = signal(false);
+  protected readonly idPackagesToDuplicate = signal<readonly string[]>([]);
+  protected readonly packageNameToDuplicate = signal<string | null>(null);
   protected readonly params = computed<{ idProperty: string } | null>(() => {
     const idProperty = this.auth.user()?.propertyId;
     return idProperty ? { idProperty } : null;
@@ -66,7 +77,8 @@ export class Packages {
   ]);
   protected readonly rowActions = standardRowActions<PackageItem>({
     delete: ({ idPackage, packageName }) => idPackage && this.askDelete([idPackage], packageName),
-    duplicate: () => undefined,
+    duplicate: ({ idPackage, packageName }) =>
+      idPackage && this.askDuplicate([idPackage], packageName),
     edit: () => undefined,
   });
 
@@ -75,11 +87,29 @@ export class Packages {
 
   protected readonly deletePackages = (idProperty: string, idPackages: string[]) =>
     this.priceLists.deletePackageItems({ idProperty, idPackages });
+  protected readonly duplicatePackages = (idProperty: string, idPackages: string[]) =>
+    this.priceLists.duplicatePackageItems({ idProperty, idPackages });
 
   protected askDelete(idPackages: readonly TableRowId[], packageName: string | null = null): void {
     this.idPackagesToDelete.set(idPackages.map(String));
     this.packageNameToDelete.set(packageName);
     this.deleting.set(true);
+  }
+
+  protected askDuplicate(
+    idPackages: readonly TableRowId[],
+    packageName: string | null = null,
+  ): void {
+    this.idPackagesToDuplicate.set(idPackages.map(String));
+    this.packageNameToDuplicate.set(packageName);
+    this.duplicating.set(true);
+  }
+
+  /** Only after "Duplica selezione" (no name): the chosen rows are done with. */
+  protected afterDuplicate(): void {
+    if (this.packageNameToDuplicate() === null) {
+      this.idSelectedPackages.set([]);
+    }
   }
 
   protected forgetDeleted(idPackages: readonly string[]): void {

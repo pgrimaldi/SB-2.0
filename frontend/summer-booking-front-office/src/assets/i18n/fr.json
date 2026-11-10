@@ -1582,6 +1582,18 @@
               "title": "Supprimer les forfaits",
               "text": "Voulez-vous supprimer les {{count}} forfaits sélectionnés ?"
             }
+          },
+          "duplicate": {
+            "cancel": "Annuler",
+            "confirm": "Dupliquer",
+            "one": {
+              "title": "Dupliquer le forfait",
+              "text": "Voulez-vous dupliquer le forfait {{name}} ?"
+            },
+            "many": {
+              "title": "Dupliquer les forfaits",
+              "text": "Voulez-vous dupliquer les {{count}} forfaits sélectionnés ?"
+            }
           }
         }
       }
