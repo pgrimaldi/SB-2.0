@@ -730,7 +730,7 @@ Nessun corpo (204).
 | `rows[].actionCode` | string \| null |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null |
 
-### POST `/api/audit/get-user-combobox`
+### POST `/api/audit/user-combobox`
 
 **Payload JSON**
 
@@ -1195,6 +1195,60 @@ Nessun corpo (204).
 | `rows[]` | SectorItem[] (array di oggetti) |
 | `rows[].idSector` | string (UUID) |
 | `rows[].sectorName` | string \| null |
+
+### POST `/api/catalog/add-sector-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "sectorName": "string"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `sectorName` | string |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/update-sector-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idSector": "string (UUID)",
+  "sectorName": "string"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idSector` | string (UUID) |
+| `sectorName` | string |
+
+**Response tabella**
+
+Nessun corpo (204).
 
 ### POST `/api/catalog/delete-sector-item`
 
@@ -1815,7 +1869,7 @@ Nessun payload.
 | `rows[].thresholdQuantity` | number (intero) \| null |
 | `rows[].isThresholdWarningActive` | boolean |
 
-### POST `/api/warehouse/combobox-list`
+### POST `/api/warehouse/article-combobox`
 
 **Payload JSON**
 
@@ -4992,6 +5046,40 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### POST `/api/catalog/sector-combobox`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
 ## Fiscalizzazione
 
 ### POST `/api/taxation/printer-list`
@@ -5476,7 +5564,7 @@ Nessun corpo (204).
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null |
 | `rows[].isTrashed` | boolean |
 
-### POST `/api/database/get-affiliated-hotel-combobox`
+### POST `/api/database/affiliated-hotel-combobox`
 
 **Payload JSON**
 

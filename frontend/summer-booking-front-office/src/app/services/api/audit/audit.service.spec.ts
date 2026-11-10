@@ -41,9 +41,7 @@ describe('AuditService', () => {
 
     audit.userCombobox('p1').subscribe();
 
-    const request = controller.expectOne(
-      `${environment.apiBaseUrl}/audit/get-user-combobox`,
-    ).request;
+    const request = controller.expectOne(`${environment.apiBaseUrl}/audit/user-combobox`).request;
     expect(request.method).toBe('POST');
     expect(request.body).toEqual({ idProperty: 'p1' });
     controller.verify();

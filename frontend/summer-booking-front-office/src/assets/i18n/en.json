@@ -117,7 +117,8 @@
       "invalid_image": "Invalid image: use PNG, JPEG or WebP up to 5 MB."
     },
     "catalog": {
-      "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}."
+      "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}.",
+      "sector_name_taken": "A sector/row with this name already exists."
     }
   },
   "alert": {
@@ -1545,6 +1546,18 @@
             "title": "Duplicate sectors/rows",
             "text": "Do you want to duplicate the {{count}} selected sectors/rows?"
           }
+        },
+        "add_popup": {
+          "title": "Sector/row name",
+          "placeholder": "Row 1",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "edit_popup": {
+          "title": "Sector/row name",
+          "placeholder": "Row 1",
+          "cancel": "Cancel",
+          "save": "Save"
         }
       }
     }

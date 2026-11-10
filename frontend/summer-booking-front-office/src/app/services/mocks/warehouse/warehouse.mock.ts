@@ -198,11 +198,11 @@ const TODAY_CONSUMPTIONS: { resourceId: string; quantity: number; state: Consump
 ];
 
 /**
- * `POST /api/warehouse/combobox-list` with `{ idProperty }`: the active articles of the property
+ * `POST /api/warehouse/article-combobox` with `{ idProperty }`: the active articles of the property
  * (never of other properties), id and name only, by name. 401 without a valid access token; 403 for
  * a missing or unknown property.
  */
-export const warehouseComboboxMock = (
+export const articleComboboxMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {

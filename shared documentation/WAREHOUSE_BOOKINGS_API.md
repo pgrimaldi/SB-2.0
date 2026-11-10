@@ -92,11 +92,11 @@
 | `rows[].thresholdQuantity` | number (intero) \| null | `10` |
 | `rows[].isThresholdWarningActive` | boolean | `true` |
 
-### POST `/api/warehouse/combobox-list`
+### POST `/api/warehouse/article-combobox`
 
 **Usata da:** Popup "Aggiungi articolo" (`FormWarehouseAddItemPopup`, Impostazioni magazzino): tendina degli articoli
 
-**Rotta:** `POST /api/warehouse/combobox-list`
+**Rotta:** `POST /api/warehouse/article-combobox`
 
 #### Payload
 
@@ -381,11 +381,11 @@
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Confirmed` |
 | `rows[].isTrashed` | boolean | `false` |
 
-### POST `/api/database/get-affiliated-hotel-combobox`
+### POST `/api/database/affiliated-hotel-combobox`
 
 **Usata da:** Popup Filtri (`ExistingBookingFiltersPopup`, pagina Database): tendina Strutture convenzionate
 
-**Rotta:** `POST /api/database/get-affiliated-hotel-combobox`
+**Rotta:** `POST /api/database/affiliated-hotel-combobox`
 
 #### Payload
 

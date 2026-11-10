@@ -34,6 +34,7 @@ export const API_ERROR_CODES = [
   'map.spots_outside_grid',
   'map.invalid_image',
   'catalog.sector_in_use',
+  'catalog.sector_name_taken',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

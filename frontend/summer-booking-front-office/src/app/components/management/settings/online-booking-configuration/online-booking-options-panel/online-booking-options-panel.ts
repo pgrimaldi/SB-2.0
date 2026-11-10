@@ -13,18 +13,21 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormField, applyWhen, form, max } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { OnlineBookingAudience } from '../../../../../entities/enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
 import { BookingLimitRule } from '../../../../../entities/settings/online-booking-configuration/booking-limit-rule';
 import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
+import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { greaterThan } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
@@ -109,6 +112,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   readonly pathIcon = input<readonly string[] | null>();
 
   private readonly translateService = inject(TranslateService);
+  private readonly auth = inject(AuthBehaviour);
+  private readonly sectorService = inject(SectorService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
@@ -133,12 +138,11 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     '/assets/images/GeneralIcon_OrderedList.svg',
     '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
-  /** Example rows until an API gives the rows and sectors of the property. */
-  protected readonly sectorOptions: readonly SelectOption[] = [
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01', label: 'Fila 1' },
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e02', label: 'Fila 2' },
-    { value: '7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e03', label: 'Fila 3' },
-  ];
+  private readonly sectors = signal<readonly ComboboxItem[]>([]);
+  private sectorsSubscription?: Subscription;
+  protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
+    this.sectors().map(({ id, value }) => ({ value: id, label: value })),
+  );
 
   private readonly draft = signal(new OnlineBookingOptions());
   protected readonly draftForm = form(this.draft, (path) => {
@@ -218,7 +222,10 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
-        untracked(() => this.reset());
+        untracked(() => {
+          this.reset();
+          this.loadSectors();
+        });
       }
     });
     effect(() => {
@@ -292,7 +299,21 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.draftForm().reset();
   }
 
+  /** At every opening: a slower answer of an earlier opening must not replace this list. */
+  private loadSectors(): void {
+    this.sectorsSubscription?.unsubscribe();
+    const idProperty = this.auth.user()?.propertyId;
+    if (!idProperty) {
+      return;
+    }
+    this.sectorsSubscription = this.sectorService.sectorCombobox(idProperty).subscribe({
+      next: (sectors) => this.sectors.set(sectors),
+      error: () => this.sectors.set([]),
+    });
+  }
+
   ngOnDestroy(): void {
+    this.sectorsSubscription?.unsubscribe();
     this.unsaved.unwatch(this);
   }
 }

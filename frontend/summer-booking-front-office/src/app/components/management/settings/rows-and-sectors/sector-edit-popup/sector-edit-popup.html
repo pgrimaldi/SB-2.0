@@ -1,0 +1,39 @@
+<ng-template #content>
+  <div class="sector__edit__popup">
+    <h2 class="sector__edit__popup__title">
+      {{ 'management.settings.rows_and_sectors.edit_popup.title' | translate }}
+    </h2>
+
+    <app-filled-text-field
+      autocomplete="off"
+      [placeholder]="'management.settings.rows_and_sectors.edit_popup.placeholder' | translate"
+      [formField]="sectorForm.sectorName"
+      [error]="sectorNameError()"
+    />
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="sector__edit__popup__error">{{ errorMessage }}</p>
+    }
+
+    <div class="sector__edit__popup__buttons">
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isLoading()"
+        (clicked)="leave()"
+      >
+        {{ 'management.settings.rows_and_sectors.edit_popup.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!canSave()"
+        [isLoading]="isLoading()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.rows_and_sectors.edit_popup.save' | translate }}
+      </app-button>
+    </div>
+  </div>
+</ng-template>

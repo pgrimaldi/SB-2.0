@@ -420,7 +420,7 @@ Stato: 200 OK.
 | `rows[].actionCode` | string \| null | `booking.spot_added` |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null | `2026-10-23T11:11:00.000Z` |
 
-### POST `/api/audit/get-user-combobox`
+### POST `/api/audit/user-combobox`
 
 Gestione utenti: utenti del filtro dei log.
 
@@ -946,7 +946,7 @@ Stato: 200 OK.
 | `rows[].thresholdQuantity` | number (intero) \| null | `10` |
 | `rows[].isThresholdWarningActive` | boolean | `true` |
 
-### POST `/api/warehouse/combobox-list`
+### POST `/api/warehouse/article-combobox`
 
 Magazzino: articoli per la tendina.
 
@@ -1231,7 +1231,7 @@ Stato: 200 OK.
 | `rows[].reservationStatus` | string (enum ReservationStatus) \| null | `Confirmed` |
 | `rows[].isTrashed` | boolean | `false` |
 
-### POST `/api/database/get-affiliated-hotel-combobox`
+### POST `/api/database/affiliated-hotel-combobox`
 
 Database: hotel convenzionati per la tendina.
 
@@ -6507,6 +6507,98 @@ Settori e file: duplicazione.
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
+
+### POST `/api/catalog/add-sector-item`
+
+Settori e file: aggiunta.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "sectorName": "Fila 9"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `sectorName` | string | `Fila 9` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/update-sector-item`
+
+Settori e file: modifica.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
+  "sectorName": "Fila 2 lato mare"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02` |
+| `sectorName` | string | `Fila 2 lato mare` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/sector-combobox`
+
+Settori e file: settori per la tendina.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+    "value": "Fila 1"
+  },
+  {
+    "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
+    "value": "Fila 2"
+  },
+  {
+    "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a09",
+    "value": "Settore Est"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `value` | string | `Fila 1` |
 
 ## /booking
 

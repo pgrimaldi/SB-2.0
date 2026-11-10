@@ -1,9 +1,13 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { DeleteSectorItemsRequest } from '../../../entities/settings/rows-and-sectors/delete-sector-items-request';
 import { DuplicateSectorItemsRequest } from '../../../entities/settings/rows-and-sectors/duplicate-sector-items-request';
-import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
+import {
+  MAX_SECTOR_NAME_LENGTH,
+  SectorItem,
+} from '../../../entities/settings/rows-and-sectors/sector-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { forbidden, problem, resourceNotFound } from '../errors/problem.mock';
@@ -77,6 +81,94 @@ export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEv
 };
 
 /**
+ * `POST /api/catalog/sector-combobox` with `{ idProperty }`: every sector of the property, in its
+ * order, as `{ id, value }`. 401 without a valid access token; 403 for a missing or unknown property.
+ */
+export const sectorComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const property = propertyOf((request.body as { idProperty?: unknown } | null)?.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const items: ComboboxItem[] = SECTORS.filter((row) => row.propertyId === property.id).map(
+    (row) => ({ id: row.idSector ?? '', value: row.sectorName ?? '' }),
+  );
+  return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
+};
+
+/**
+ * `POST /api/catalog/add-sector-item` with `idProperty` and `sectorName`: the new sector goes at the
+ * end of the order. 400 with validation.required / validation.max_length on sectorName; 409
+ * `catalog.sector_name_taken` for a name the property has already (case-insensitive). 204 without a
+ * body; 401 without a valid access token; 403 for an unknown property.
+ */
+export const addSectorItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as { idProperty?: unknown; sectorName?: unknown };
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const sectorName = typeof body.sectorName === 'string' ? body.sectorName.trim() : '';
+  const nameError = sectorNameError(request, sectorName);
+  if (nameError) {
+    return nameError;
+  }
+  if (isNameTaken(property.id, sectorName)) {
+    return problem(request, 409, 'catalog.sector_name_taken', { title: 'Sector name taken' });
+  }
+  SECTORS.push({ propertyId: property.id, idSector: crypto.randomUUID(), sectorName });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/catalog/update-sector-item` with `idProperty`, `idSector` and `sectorName`: the sector is
+ * renamed. 404 `resource.not_found` for an id that is not a sector of the property; the same name
+ * errors as the add (the sector's own name does not count as taken). 204 without a body; 401 without
+ * a valid access token; 403 for an unknown property.
+ */
+export const updateSectorItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as {
+    idProperty?: unknown;
+    idSector?: unknown;
+    sectorName?: unknown;
+  };
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const sector = SECTORS.find(
+    (row) => row.idSector === body.idSector && row.propertyId === property.id,
+  );
+  if (!sector) {
+    return resourceNotFound(request);
+  }
+  const sectorName = typeof body.sectorName === 'string' ? body.sectorName.trim() : '';
+  const nameError = sectorNameError(request, sectorName);
+  if (nameError) {
+    return nameError;
+  }
+  if (isNameTaken(property.id, sectorName, sector)) {
+    return problem(request, 409, 'catalog.sector_name_taken', { title: 'Sector name taken' });
+  }
+  sector.sectorName = sectorName;
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
  * `POST /api/catalog/delete-sector-item` with `DeleteSectorItemsRequest`: all or nothing. If one id
  * is not a sector of the property nothing is deleted (404 `resource.not_found`); a sector still used
  * by the map, a price list, a stay limit or a discount stops it too (409 `catalog.sector_in_use`, the
@@ -141,6 +233,36 @@ export const duplicateSectorItemsMock = (
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+function sectorNameError(
+  request: HttpRequest<unknown>,
+  sectorName: string,
+): Observable<never> | null {
+  if (sectorName && sectorName.length <= MAX_SECTOR_NAME_LENGTH) {
+    return null;
+  }
+  return problem(request, 400, 'validation.failed', {
+    title: 'Invalid request',
+    errors: [
+      sectorName
+        ? {
+            field: 'sectorName',
+            code: 'validation.max_length',
+            args: { max: MAX_SECTOR_NAME_LENGTH },
+          }
+        : { field: 'sectorName', code: 'validation.required' },
+    ],
+  });
+}
+
+function isNameTaken(propertyId: number, sectorName: string, renamed?: SectorRow): boolean {
+  return SECTORS.some(
+    (row) =>
+      row !== renamed &&
+      row.propertyId === propertyId &&
+      row.sectorName?.toLowerCase() === sectorName.toLowerCase(),
+  );
+}
 
 function sectorsOf(propertyId: number, idSectors: unknown): SectorRow[] | null {
   const ids = Array.isArray(idSectors) ? [...new Set(idSectors)] : [];

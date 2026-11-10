@@ -67,9 +67,12 @@ import {
   uploadMapBackgroundMock,
 } from './catalog/map.mock';
 import {
+  addSectorItemMock,
   deleteSectorItemsMock,
   duplicateSectorItemsMock,
+  sectorComboboxMock,
   sectorListMock,
+  updateSectorItemMock,
 } from './catalog/sectors.mock';
 import {
   affiliatedHotelComboboxMock,
@@ -127,7 +130,7 @@ import {
 } from './taxation/taxation.mock';
 import {
   warehouseAddMock,
-  warehouseComboboxMock,
+  articleComboboxMock,
   warehouseDeleteMock,
   warehouseDuplicateMock,
   warehouseEditMock,
@@ -198,7 +201,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/audit/get-user-combobox`
+    request.url === `${environment.apiBaseUrl}/audit/user-combobox`
   ) {
     return userComboboxMock(request);
   }
@@ -209,9 +212,9 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/warehouse/combobox-list`
+    request.url === `${environment.apiBaseUrl}/warehouse/article-combobox`
   ) {
-    return warehouseComboboxMock(request);
+    return articleComboboxMock(request);
   }
 
   if (
@@ -363,7 +366,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/database/get-affiliated-hotel-combobox`
+    request.url === `${environment.apiBaseUrl}/database/affiliated-hotel-combobox`
   ) {
     return affiliatedHotelComboboxMock(request);
   }
@@ -892,6 +895,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/sectors-list`
   ) {
     return sectorListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/sector-combobox`
+  ) {
+    return sectorComboboxMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/add-sector-item`
+  ) {
+    return addSectorItemMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-sector-item`
+  ) {
+    return updateSectorItemMock(request);
   }
 
   if (

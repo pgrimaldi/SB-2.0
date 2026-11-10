@@ -305,7 +305,7 @@ function bookingPageMock(
 }
 
 /**
- * `POST /api/database/get-affiliated-hotel-combobox` with `{ idProperty }`: the hotels of the property,
+ * `POST /api/database/affiliated-hotel-combobox` with `{ idProperty }`: the hotels of the property,
  * id and name. 401 without a valid access token; 403 for a missing or unknown property.
  */
 export const affiliatedHotelComboboxMock = (

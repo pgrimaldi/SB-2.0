@@ -25,7 +25,7 @@ class FormWarehouseAddItemPopupHost {
 
 describe('FormWarehouseAddItemPopup', () => {
   const setup = async () => {
-    const comboboxList = vi.fn(() =>
+    const articleCombobox = vi.fn(() =>
       of([
         { id: 'a1', value: 'Lettino' },
         { id: 'a2', value: 'Ombrellone' },
@@ -36,7 +36,7 @@ describe('FormWarehouseAddItemPopup', () => {
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: WarehouseService, useValue: { comboboxList, addWarehouseItem } },
+        { provide: WarehouseService, useValue: { articleCombobox, addWarehouseItem } },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
@@ -56,7 +56,7 @@ describe('FormWarehouseAddItemPopup', () => {
       popup,
       trigger,
       openSelect,
-      comboboxList,
+      articleCombobox,
       addWarehouseItem,
     };
   };
@@ -102,9 +102,9 @@ describe('FormWarehouseAddItemPopup', () => {
   });
 
   it('should offer the articles of the property in the select', async () => {
-    const { openSelect, comboboxList } = await setup();
+    const { openSelect, articleCombobox } = await setup();
 
-    expect(comboboxList).toHaveBeenCalledWith('p1');
+    expect(articleCombobox).toHaveBeenCalledWith('p1');
     expect((await openSelect()).map((option) => option.textContent?.trim())).toEqual([
       'Lettino',
       'Ombrellone',
@@ -112,7 +112,7 @@ describe('FormWarehouseAddItemPopup', () => {
   });
 
   it('should start from an empty form, with the articles loaded again, every time it opens', async () => {
-    const { fixture, host, trigger, openSelect, comboboxList } = await setup();
+    const { fixture, host, trigger, openSelect, articleCombobox } = await setup();
 
     (await openSelect())[1].click();
     await fixture.whenStable();
@@ -124,20 +124,20 @@ describe('FormWarehouseAddItemPopup', () => {
     await fixture.whenStable();
 
     expect(trigger().textContent?.trim()).toBe('management.settings.warehouse.form.choose');
-    expect(comboboxList).toHaveBeenCalledTimes(2);
+    expect(articleCombobox).toHaveBeenCalledTimes(2);
   });
 
   it('should keep the articles of the last opening when an earlier answer arrives late', async () => {
-    const { fixture, host, openSelect, comboboxList } = await setup();
+    const { fixture, host, openSelect, articleCombobox } = await setup();
     const late = new Subject<{ id: string; value: string }[]>();
     host.open.set(false);
     await fixture.whenStable();
-    comboboxList.mockReturnValueOnce(late);
+    articleCombobox.mockReturnValueOnce(late);
     host.open.set(true);
     await fixture.whenStable();
     host.open.set(false);
     await fixture.whenStable();
-    comboboxList.mockReturnValueOnce(of([{ id: 'a3', value: 'Sdraio' }]));
+    articleCombobox.mockReturnValueOnce(of([{ id: 'a3', value: 'Sdraio' }]));
     host.open.set(true);
     await fixture.whenStable();
 

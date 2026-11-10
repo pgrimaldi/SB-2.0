@@ -117,7 +117,8 @@
       "invalid_image": "Imagen no válida: usa PNG, JPEG o WebP de hasta 5 MB."
     },
     "catalog": {
-      "sector_in_use": "El sector/fila {{sectorName}} está en uso y no se puede eliminar: puestos en el mapa {{mapSpots}}, tarifas {{priceLists}}, límites de estancia {{stayLimits}}, descuentos {{discounts}}."
+      "sector_in_use": "El sector/fila {{sectorName}} está en uso y no se puede eliminar: puestos en el mapa {{mapSpots}}, tarifas {{priceLists}}, límites de estancia {{stayLimits}}, descuentos {{discounts}}.",
+      "sector_name_taken": "Ya existe un sector/fila con este nombre."
     }
   },
   "alert": {
@@ -1545,6 +1546,18 @@
             "title": "Duplicar sectores/filas",
             "text": "¿Quieres duplicar los {{count}} sectores/filas seleccionados?"
           }
+        },
+        "add_popup": {
+          "title": "Nombre del sector/fila",
+          "placeholder": "Fila 1",
+          "cancel": "Cancelar",
+          "save": "Guardar"
+        },
+        "edit_popup": {
+          "title": "Nombre del sector/fila",
+          "placeholder": "Fila 1",
+          "cancel": "Cancelar",
+          "save": "Guardar"
         }
       }
     }

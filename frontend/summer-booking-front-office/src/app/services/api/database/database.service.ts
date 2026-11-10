@@ -25,7 +25,7 @@ export class DatabaseService {
     this.httpClient.post<Page<ExistingBookingItem>>(`${this.endpoint}/trash-item-list`, request);
 
   readonly affiliatedHotelCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/get-affiliated-hotel-combobox`, {
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/affiliated-hotel-combobox`, {
       idProperty,
     });
 

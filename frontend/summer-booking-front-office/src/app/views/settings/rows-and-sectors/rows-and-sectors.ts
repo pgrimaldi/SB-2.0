@@ -4,6 +4,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
+import { SectorAddPopup } from '../../../components/management/settings/rows-and-sectors/sector-add-popup/sector-add-popup';
+import { SectorEditPopup } from '../../../components/management/settings/rows-and-sectors/sector-edit-popup/sector-edit-popup';
 import { DuplicateItemsPopup } from '../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { standardRowActions } from '../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -27,6 +29,8 @@ interface RowsAndSectorsTableTexts {
     DeleteItemsPopup,
     DuplicateItemsPopup,
     PageTitle,
+    SectorAddPopup,
+    SectorEditPopup,
     Table,
     TableErrorPopup,
     TranslatePipe,
@@ -41,6 +45,9 @@ export class RowsAndSectors {
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly sectorToEdit = signal<SectorItem | null>(null);
   protected readonly idSelectedSectors = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idSectorsToDelete = signal<readonly string[]>([]);
@@ -79,7 +86,7 @@ export class RowsAndSectors {
   protected readonly rowActions = standardRowActions<SectorItem>({
     delete: ({ idSector, sectorName }) => idSector && this.askDelete([idSector], sectorName),
     duplicate: ({ idSector, sectorName }) => idSector && this.askDuplicate([idSector], sectorName),
-    edit: () => undefined,
+    edit: (sector) => this.openEdit(sector),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, SectorItem> = (request) =>
@@ -107,6 +114,11 @@ export class RowsAndSectors {
     if (this.sectorNameToDuplicate() === null) {
       this.idSelectedSectors.set([]);
     }
+  }
+
+  protected openEdit(sector: SectorItem): void {
+    this.sectorToEdit.set({ ...sector });
+    this.editing.set(true);
   }
 
   protected forgetDeleted(idSectors: readonly string[]): void {

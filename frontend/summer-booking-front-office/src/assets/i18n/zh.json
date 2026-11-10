@@ -117,7 +117,8 @@
       "invalid_image": "图片无效：请使用不超过 5 MB 的 PNG、JPEG 或 WebP。"
     },
     "catalog": {
-      "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}。"
+      "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}。",
+      "sector_name_taken": "已存在同名的区域/排。"
     }
   },
   "alert": {
@@ -1545,6 +1546,18 @@
             "title": "复制区域/排",
             "text": "要复制所选的 {{count}} 个区域/排吗？"
           }
+        },
+        "add_popup": {
+          "title": "区域/排名称",
+          "placeholder": "第1排",
+          "cancel": "取消",
+          "save": "保存"
+        },
+        "edit_popup": {
+          "title": "区域/排名称",
+          "placeholder": "第1排",
+          "cancel": "取消",
+          "save": "保存"
         }
       }
     }

@@ -18,7 +18,7 @@ export class AuditService {
 
   /** The users that can be chosen in the filters of the log: id and name. */
   readonly userCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/get-user-combobox`, { idProperty });
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/user-combobox`, { idProperty });
 
   /** The log with the filters of the table, as a file: its name is in `Content-Disposition`. */
   readonly exportLog = (request: AuditLogFiltersRequest): Observable<HttpResponse<Blob>> =>

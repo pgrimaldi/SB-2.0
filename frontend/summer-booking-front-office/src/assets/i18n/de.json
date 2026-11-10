@@ -117,7 +117,8 @@
       "invalid_image": "Ungültiges Bild: PNG, JPEG oder WebP bis 5 MB verwenden."
     },
     "catalog": {
-      "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}."
+      "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}.",
+      "sector_name_taken": "Ein Sektor/eine Reihe mit diesem Namen existiert bereits."
     }
   },
   "alert": {
@@ -1545,6 +1546,18 @@
             "title": "Sektoren/Reihen duplizieren",
             "text": "Möchtest du die {{count}} ausgewählten Sektoren/Reihen duplizieren?"
           }
+        },
+        "add_popup": {
+          "title": "Name des Sektors/der Reihe",
+          "placeholder": "Reihe 1",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
+        },
+        "edit_popup": {
+          "title": "Name des Sektors/der Reihe",
+          "placeholder": "Reihe 1",
+          "cancel": "Abbrechen",
+          "save": "Speichern"
         }
       }
     }

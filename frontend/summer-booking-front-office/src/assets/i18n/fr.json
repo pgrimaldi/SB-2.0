@@ -117,7 +117,8 @@
       "invalid_image": "Image non valide : utilisez PNG, JPEG ou WebP jusqu'à 5 Mo."
     },
     "catalog": {
-      "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}."
+      "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}.",
+      "sector_name_taken": "Un secteur/une rangée porte déjà ce nom."
     }
   },
   "alert": {
@@ -1545,6 +1546,18 @@
             "title": "Dupliquer secteurs/rangées",
             "text": "Voulez-vous dupliquer les {{count}} secteurs/rangées sélectionnés ?"
           }
+        },
+        "add_popup": {
+          "title": "Nom du secteur/de la rangée",
+          "placeholder": "Rangée 1",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
+        },
+        "edit_popup": {
+          "title": "Nom du secteur/de la rangée",
+          "placeholder": "Rangée 1",
+          "cancel": "Annuler",
+          "save": "Enregistrer"
         }
       }
     }

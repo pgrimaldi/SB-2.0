@@ -189,7 +189,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     if (!idProperty) {
       return;
     }
-    this.articlesSubscription = this.warehouse.comboboxList(idProperty).subscribe({
+    this.articlesSubscription = this.warehouse.articleCombobox(idProperty).subscribe({
       next: (articles) => this.articles.set(articles),
       error: () => this.articles.set([]),
     });

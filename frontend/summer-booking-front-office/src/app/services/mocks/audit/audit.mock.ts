@@ -106,7 +106,7 @@ export const entriesListMock = (request: HttpRequest<unknown>): Observable<HttpE
 };
 
 /**
- * `POST /api/audit/get-user-combobox` with `{ idProperty }`: the users that appear in the log of the
+ * `POST /api/audit/user-combobox` with `{ idProperty }`: the users that appear in the log of the
  * property, id and name, sorted by name. 401 without a valid access token; 403 for a missing or
  * unknown property.
  */
