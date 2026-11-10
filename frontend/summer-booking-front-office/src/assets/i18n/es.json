@@ -115,6 +115,9 @@
     "map": {
       "spots_outside_grid": "Hay puestos fuera de estas medidas: se necesitan al menos {{rows}} filas y {{columns}} artículos por fila.",
       "invalid_image": "Imagen no válida: usa PNG, JPEG o WebP de hasta 5 MB."
+    },
+    "catalog": {
+      "sector_in_use": "El sector/fila {{sectorName}} está en uso y no se puede eliminar: puestos en el mapa {{mapSpots}}, tarifas {{priceLists}}, límites de estancia {{stayLimits}}, descuentos {{discounts}}."
     }
   },
   "alert": {
@@ -1518,6 +1521,30 @@
         "create": "Añadir sector/fila",
         "table": {
           "sector_name": "Nombre"
+        },
+        "delete": {
+          "cancel": "Cancelar",
+          "confirm": "Eliminar",
+          "one": {
+            "title": "Eliminar sector/fila",
+            "text": "¿Quieres eliminar el sector/fila {{name}}?"
+          },
+          "many": {
+            "title": "Eliminar sectores/filas",
+            "text": "¿Quieres eliminar los {{count}} sectores/filas seleccionados?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Cancelar",
+          "confirm": "Duplicar",
+          "one": {
+            "title": "Duplicar sector/fila",
+            "text": "¿Quieres duplicar el sector/fila {{name}}?"
+          },
+          "many": {
+            "title": "Duplicar sectores/filas",
+            "text": "¿Quieres duplicar los {{count}} sectores/filas seleccionados?"
+          }
         }
       }
     }

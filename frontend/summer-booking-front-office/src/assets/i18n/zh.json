@@ -115,6 +115,9 @@
     "map": {
       "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
       "invalid_image": "图片无效：请使用不超过 5 MB 的 PNG、JPEG 或 WebP。"
+    },
+    "catalog": {
+      "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}。"
     }
   },
   "alert": {
@@ -1518,6 +1521,30 @@
         "create": "添加区域/排",
         "table": {
           "sector_name": "名称"
+        },
+        "delete": {
+          "cancel": "取消",
+          "confirm": "删除",
+          "one": {
+            "title": "删除区域/排",
+            "text": "要删除区域/排 {{name}} 吗？"
+          },
+          "many": {
+            "title": "删除区域/排",
+            "text": "要删除所选的 {{count}} 个区域/排吗？"
+          }
+        },
+        "duplicate": {
+          "cancel": "取消",
+          "confirm": "复制",
+          "one": {
+            "title": "复制区域/排",
+            "text": "要复制区域/排 {{name}} 吗？"
+          },
+          "many": {
+            "title": "复制区域/排",
+            "text": "要复制所选的 {{count}} 个区域/排吗？"
+          }
         }
       }
     }

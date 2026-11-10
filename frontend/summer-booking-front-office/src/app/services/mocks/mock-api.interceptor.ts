@@ -66,7 +66,11 @@ import {
   updateMapConfigurationMock,
   uploadMapBackgroundMock,
 } from './catalog/map.mock';
-import { sectorListMock } from './catalog/sectors.mock';
+import {
+  deleteSectorItemsMock,
+  duplicateSectorItemsMock,
+  sectorListMock,
+} from './catalog/sectors.mock';
 import {
   affiliatedHotelComboboxMock,
   deleteSelectedItemMock,
@@ -891,6 +895,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-sector-item`
+  ) {
+    return deleteSectorItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-sector-item`
+  ) {
+    return duplicateSectorItemsMock(request);
+  }
+
+  if (
     request.method === 'GET' &&
     request.url === `${environment.apiBaseUrl}/catalog/map/settings`
   ) {
@@ -925,10 +943,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return updateMapConfigurationMock(request);
   }
 
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/map/reset`
-  ) {
+  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/catalog/map/reset`) {
     return resetMapMock(request);
   }
 

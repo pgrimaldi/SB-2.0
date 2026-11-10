@@ -39,4 +39,38 @@ describe('SectorService', () => {
     expect(answer).toEqual(page);
     controller.verify();
   });
+
+  it('should delete the chosen sectors in one call', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const sectors = TestBed.inject(SectorService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    sectors.deleteSectorItems({ idProperty: 'p1', idSectors: ['s1', 's2'] }).subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/delete-sector-item`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1', idSectors: ['s1', 's2'] });
+    controller.verify();
+  });
+
+  it('should duplicate the chosen sectors in one call', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const sectors = TestBed.inject(SectorService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    sectors.duplicateSectorItems({ idProperty: 'p1', idSectors: ['s1', 's2'] }).subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-sector-item`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1', idSectors: ['s1', 's2'] });
+    controller.verify();
+  });
 });

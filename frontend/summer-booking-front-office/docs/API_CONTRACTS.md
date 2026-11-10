@@ -6455,6 +6455,59 @@ Stato: 200 OK.
 | `rows[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `rows[].sectorName` | string \| null | `Fila 1` |
 
+### POST `/api/catalog/delete-sector-item`
+
+Settori e file: eliminazione.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idSectors": [
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-sector-item`
+
+Settori e file: duplicazione.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idSectors": [
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

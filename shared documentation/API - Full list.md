@@ -1196,6 +1196,58 @@ Nessun corpo (204).
 | `rows[].idSector` | string (UUID) |
 | `rows[].sectorName` | string \| null |
 
+### POST `/api/catalog/delete-sector-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idSectors": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idSectors` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/duplicate-sector-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idSectors": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idSectors` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ## Configura mappa
 
 ### GET `/api/catalog/map/settings`

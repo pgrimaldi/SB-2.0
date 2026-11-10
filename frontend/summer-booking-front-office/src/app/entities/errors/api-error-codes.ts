@@ -33,6 +33,7 @@ export const API_ERROR_CODES = [
   'account.role_not_assignable',
   'map.spots_outside_grid',
   'map.invalid_image',
+  'catalog.sector_in_use',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

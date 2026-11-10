@@ -20,8 +20,29 @@
     [(selection)]="idSelectedSectors"
     [pathIcon]="tableIcons"
     (loadError)="loadFailed.set(true)"
+    (deleteSelected)="askDelete($event)"
+    (duplicateSelected)="askDuplicate($event)"
   />
 </main>
+
+<app-delete-items-popup
+  [idItems]="idSectorsToDelete()"
+  [itemName]="sectorNameToDelete()"
+  translationKey="management.settings.rows_and_sectors.delete"
+  [action]="deleteSectors"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idSectorsToDuplicate()"
+  [itemName]="sectorNameToDuplicate()"
+  translationKey="management.settings.rows_and_sectors.duplicate"
+  [action]="duplicateSectors"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
+/>
 
 <app-table-error-popup
   [pathIcon]="closeIcon"

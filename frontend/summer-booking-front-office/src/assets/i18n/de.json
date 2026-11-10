@@ -115,6 +115,9 @@
     "map": {
       "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
       "invalid_image": "Ungültiges Bild: PNG, JPEG oder WebP bis 5 MB verwenden."
+    },
+    "catalog": {
+      "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}."
     }
   },
   "alert": {
@@ -1518,6 +1521,30 @@
         "create": "Sektor/Reihe hinzufügen",
         "table": {
           "sector_name": "Name"
+        },
+        "delete": {
+          "cancel": "Abbrechen",
+          "confirm": "Löschen",
+          "one": {
+            "title": "Sektor/Reihe löschen",
+            "text": "Möchtest du den Sektor/die Reihe {{name}} löschen?"
+          },
+          "many": {
+            "title": "Sektoren/Reihen löschen",
+            "text": "Möchtest du die {{count}} ausgewählten Sektoren/Reihen löschen?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Abbrechen",
+          "confirm": "Duplizieren",
+          "one": {
+            "title": "Sektor/Reihe duplizieren",
+            "text": "Möchtest du den Sektor/die Reihe {{name}} duplizieren?"
+          },
+          "many": {
+            "title": "Sektoren/Reihen duplizieren",
+            "text": "Möchtest du die {{count}} ausgewählten Sektoren/Reihen duplizieren?"
+          }
         }
       }
     }

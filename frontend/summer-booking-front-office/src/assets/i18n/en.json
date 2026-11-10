@@ -115,6 +115,9 @@
     "map": {
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
       "invalid_image": "Invalid image: use PNG, JPEG or WebP up to 5 MB."
+    },
+    "catalog": {
+      "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}."
     }
   },
   "alert": {
@@ -1518,6 +1521,30 @@
         "create": "Add sector/row",
         "table": {
           "sector_name": "Name"
+        },
+        "delete": {
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "one": {
+            "title": "Delete sector/row",
+            "text": "Do you want to delete the sector/row {{name}}?"
+          },
+          "many": {
+            "title": "Delete sectors/rows",
+            "text": "Do you want to delete the {{count}} selected sectors/rows?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Cancel",
+          "confirm": "Duplicate",
+          "one": {
+            "title": "Duplicate sector/row",
+            "text": "Do you want to duplicate the sector/row {{name}}?"
+          },
+          "many": {
+            "title": "Duplicate sectors/rows",
+            "text": "Do you want to duplicate the {{count}} selected sectors/rows?"
+          }
         }
       }
     }

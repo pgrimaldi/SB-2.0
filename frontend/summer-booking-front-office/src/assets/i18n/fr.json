@@ -115,6 +115,9 @@
     "map": {
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
       "invalid_image": "Image non valide : utilisez PNG, JPEG ou WebP jusqu'à 5 Mo."
+    },
+    "catalog": {
+      "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}."
     }
   },
   "alert": {
@@ -1518,6 +1521,30 @@
         "create": "Ajouter secteur/rangée",
         "table": {
           "sector_name": "Nom"
+        },
+        "delete": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "one": {
+            "title": "Supprimer secteur/rangée",
+            "text": "Voulez-vous supprimer le secteur/la rangée {{name}} ?"
+          },
+          "many": {
+            "title": "Supprimer secteurs/rangées",
+            "text": "Voulez-vous supprimer les {{count}} secteurs/rangées sélectionnés ?"
+          }
+        },
+        "duplicate": {
+          "cancel": "Annuler",
+          "confirm": "Dupliquer",
+          "one": {
+            "title": "Dupliquer secteur/rangée",
+            "text": "Voulez-vous dupliquer le secteur/la rangée {{name}} ?"
+          },
+          "many": {
+            "title": "Dupliquer secteurs/rangées",
+            "text": "Voulez-vous dupliquer les {{count}} secteurs/rangées sélectionnés ?"
+          }
         }
       }
     }
