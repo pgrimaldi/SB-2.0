@@ -6600,6 +6600,61 @@ Stato: 200 OK.
 | `id` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `value` | string | `Fila 1` |
 
+### POST `/api/catalog/packages-list`
+
+Listino: elenco dei pacchetti.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "ombrellone",
+  "filters": [],
+  "sortField": "packageName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `ombrellone` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `packageName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idPackage": "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01",
+      "packageName": "Ombrellone e 2 lettini"
+    },
+    {
+      "idPackage": "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a02",
+      "packageName": "Ombrellone, sdraio e lettino"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | PackageItem[] (array di oggetti) | `[{"idPackage": "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01", "packageName": "Ombrellone e 2 lettini"}, {"idPackage": "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a02", "packageName": "Ombrellone, sdraio e lettino"}]` |
+| `rows[].idPackage` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
+| `rows[].packageName` | string \| null | `Ombrellone e 2 lettini` |
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

@@ -1564,6 +1564,13 @@
         "tabs": {
           "packages": "套餐",
           "additional_items": "附加物品/服务"
+        },
+        "packages": {
+          "title": "套餐",
+          "create": "添加套餐",
+          "table": {
+            "package_name": "名称"
+          }
         }
       }
     }

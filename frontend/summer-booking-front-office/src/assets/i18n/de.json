@@ -1564,6 +1564,13 @@
         "tabs": {
           "packages": "Pakete",
           "additional_items": "Zusätzliche Artikel/Leistungen"
+        },
+        "packages": {
+          "title": "Pakete",
+          "create": "Paket hinzufügen",
+          "table": {
+            "package_name": "Name"
+          }
         }
       }
     }

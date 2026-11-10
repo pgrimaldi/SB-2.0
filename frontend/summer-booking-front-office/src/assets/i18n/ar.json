@@ -1564,6 +1564,13 @@
         "tabs": {
           "packages": "الباقات",
           "additional_items": "عناصر/خدمات إضافية"
+        },
+        "packages": {
+          "title": "الباقات",
+          "create": "إضافة باقة",
+          "table": {
+            "package_name": "الاسم"
+          }
         }
       }
     }

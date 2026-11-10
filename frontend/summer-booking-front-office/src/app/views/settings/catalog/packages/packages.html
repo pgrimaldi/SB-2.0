@@ -1,0 +1,30 @@
+<app-page-title
+  class="packages__title"
+  [text]="'management.settings.catalog.packages.title' | translate"
+/>
+<app-table
+  #table
+  [columns]="columns()"
+  [params]="params()"
+  [load]="load"
+  idField="idPackage"
+  [texts]="'table' | translate"
+  [isSearchable]="true"
+  [useAppTheme]="false"
+  [areMassiveActionsHidden]="false"
+  [isCreateButtonHidden]="false"
+  [createLabel]="'management.settings.catalog.packages.create' | translate"
+  [rowActions]="rowActions()"
+  [(selection)]="idSelectedPackages"
+  [pathIcon]="tableIcons"
+  (loadError)="loadFailed.set(true)"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

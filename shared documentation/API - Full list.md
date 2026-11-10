@@ -2027,6 +2027,66 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+## Listino
+
+### POST `/api/catalog/packages-list`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idPackage": "string (UUID)",
+      "packageName": "string | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | PackageItem[] (array di oggetti) |
+| `rows[].idPackage` | string (UUID) |
+| `rows[].packageName` | string \| null |
+
 ## Sconti e voucher
 
 ### POST `/api/vouchers/voucher-list`

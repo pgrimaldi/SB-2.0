@@ -1564,6 +1564,13 @@
         "tabs": {
           "packages": "Forfaits",
           "additional_items": "Articles/Services supplémentaires"
+        },
+        "packages": {
+          "title": "Forfaits",
+          "create": "Ajouter un forfait",
+          "table": {
+            "package_name": "Nom"
+          }
         }
       }
     }
