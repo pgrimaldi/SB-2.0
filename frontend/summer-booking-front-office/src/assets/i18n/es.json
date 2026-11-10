@@ -1594,6 +1594,63 @@
               "title": "Duplicar paquetes",
               "text": "¿Quieres duplicar los {{count}} paquetes seleccionados?"
             }
+          },
+          "form": {
+            "add_title": "Añadir nuevo paquete",
+            "cancel": "Cancelar",
+            "save": "Crear paquete",
+            "tabs": {
+              "general_info": "Información general",
+              "price_list": "Tarifa"
+            },
+            "name": "Nombre del paquete",
+            "other_languages": "Otros idiomas",
+            "translated_name": "Nombre ({{language}})",
+            "choose": "Seleccionar",
+            "max_additional_items": "Número máx. de artículos adicionales",
+            "max_people": "Número máx. de personas",
+            "articles": {
+              "title": "Artículos del paquete",
+              "umbrella": "Sombrilla",
+              "sunbed": "Tumbona",
+              "deckchair": "Hamaca",
+              "director_chair": "Silla de director",
+              "cabin": "Caseta",
+              "tent": "Tienda"
+            },
+            "included_services": "Servicios incluidos (opcional)",
+            "enabled_areas": "Áreas habilitadas",
+            "sectors": "Sectores y filas",
+            "all_sectors": "Todos los sectores y filas",
+            "is_default": "Establecer como paquete predeterminado",
+            "is_default_online": "Establecer como paquete predeterminado online",
+            "online_enabled": "Habilitar también para reservas online",
+            "online_only": "Habilitar solo para reservas online",
+            "reduced_seasonal_price": "Precio de temporada reducido",
+            "price_list": {
+              "seasonal_half_day": "Precio de temporada medio día",
+              "seasonal": "Precio de temporada",
+              "half_day": "Precio medio día",
+              "daily": "Precio diario",
+              "weekend": "Precio fin de semana",
+              "half_day_weekend": "Precio medio día fin de semana",
+              "half_day_seven_days": "Precio medio día 7 días",
+              "seven_days": "Precio 7 días",
+              "half_day_fourteen_days": "Precio medio día 14 días",
+              "fourteen_days": "Precio 14 días",
+              "half_day_monthly": "Precio medio día mensual",
+              "monthly": "Precio mensual",
+              "no_sectors": "No hay sectores ni filas: añádelos en la página Sectores y filas.",
+              "no_periods": "Los precios por periodo necesitan al menos un sector o fila y un periodo de la temporada actual.",
+              "calculation_method": "Cálculo del precio",
+              "calculation_method_info": "Cómo se obtiene el precio de una reserva de varios días a partir de los precios de la tarifa.",
+              "cumulative": "Precio acumulado",
+              "cumulative_info": "Cuando una misma reserva tiene al menos dos puestos de este paquete en la misma fila, a día completo, el precio se calcula sobre el total de días de todos los puestos de cada periodo, en lugar de puesto por puesto.",
+              "monthly_setting": "Ajuste mensual",
+              "weekend_setting": "Ajuste de fin de semana",
+              "public_holidays": "También festivos",
+              "intermediate_prices": "Modificar precios intermedios"
+            }
           }
         }
       }

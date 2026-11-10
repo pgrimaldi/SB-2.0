@@ -1,0 +1,87 @@
+@if (mainTranslation(); as main) {
+  <app-filled-text-field
+    [label]="'management.settings.catalog.packages.form.name' | translate"
+    [isMandatory]="true"
+    [formField]="main.packageName"
+    [error]="validationText.text(main.packageName)"
+  />
+}
+<app-expansion-panel
+  [title]="'management.settings.catalog.packages.form.other_languages' | translate"
+  [pathIcon]="languagesIcons"
+>
+  <div class="package__general__info__tab__languages">
+    @for (translation of otherTranslations(); track translation) {
+      <app-form-row>
+        <span appFormRowLabel>
+          {{
+            'management.settings.catalog.packages.form.translated_name'
+              | translate: { language: languageName(translation.language().value()) }
+          }}
+        </span>
+        <app-filled-text-field
+          class="package__general__info__tab__translation"
+          [formField]="translation.packageName"
+          [error]="validationText.text(translation.packageName)"
+        />
+      </app-form-row>
+    }
+  </div>
+</app-expansion-panel>
+
+<app-filled-select
+  [label]="'management.settings.catalog.packages.form.max_additional_items' | translate"
+  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+/>
+<app-filled-select
+  [label]="'management.settings.catalog.packages.form.max_people' | translate"
+  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+/>
+
+<app-section-title
+  [text]="'management.settings.catalog.packages.form.articles.title' | translate"
+/>
+<div class="package__general__info__tab__articles">
+  @for (article of articles; track article) {
+    <app-filled-select
+      [label]="article | translate"
+      [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+    />
+  }
+</div>
+
+<app-filled-multi-select
+  [label]="'management.settings.catalog.packages.form.included_services' | translate"
+/>
+<app-filled-select
+  [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
+  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+/>
+<app-filled-multi-select
+  [label]="'management.settings.catalog.packages.form.sectors' | translate"
+  [placeholder]="'management.settings.catalog.packages.form.all_sectors' | translate"
+/>
+
+<div class="package__general__info__tab__options">
+  <app-checkbox class="package__general__info__tab__default" [formField]="form().isDefault">
+    {{ 'management.settings.catalog.packages.form.is_default' | translate }}
+  </app-checkbox>
+  <app-checkbox class="package__general__info__tab__default" [formField]="form().isDefaultOnline">
+    {{ 'management.settings.catalog.packages.form.is_default_online' | translate }}
+  </app-checkbox>
+  <app-checkbox [formField]="form().isOnlineEnabled">
+    {{ 'management.settings.catalog.packages.form.online_enabled' | translate }}
+  </app-checkbox>
+  <app-checkbox [formField]="form().isOnlineOnly">
+    {{ 'management.settings.catalog.packages.form.online_only' | translate }}
+  </app-checkbox>
+</div>
+
+<app-button
+  class="package__general__info__tab__reduced"
+  [appearance]="ButtonAppearance.Light"
+  [size]="ButtonSize.Small"
+  [pathIcon]="addIcon"
+>
+  {{ 'management.settings.catalog.packages.form.reduced_seasonal_price' | translate }}
+</app-button>

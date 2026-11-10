@@ -1594,6 +1594,63 @@
               "title": "Duplicate packages",
               "text": "Do you want to duplicate the {{count}} selected packages?"
             }
+          },
+          "form": {
+            "add_title": "Add new package",
+            "cancel": "Cancel",
+            "save": "Create package",
+            "tabs": {
+              "general_info": "General info",
+              "price_list": "Price list"
+            },
+            "name": "Package name",
+            "other_languages": "Other languages",
+            "translated_name": "{{language}} name",
+            "choose": "Select",
+            "max_additional_items": "Max number of additional items",
+            "max_people": "Max number of people",
+            "articles": {
+              "title": "Items in the package",
+              "umbrella": "Umbrella",
+              "sunbed": "Sunbed",
+              "deckchair": "Deckchair",
+              "director_chair": "Director's chair",
+              "cabin": "Cabin",
+              "tent": "Tent"
+            },
+            "included_services": "Included services (optional)",
+            "enabled_areas": "Enabled areas",
+            "sectors": "Sectors and rows",
+            "all_sectors": "All sectors and rows",
+            "is_default": "Set as default package",
+            "is_default_online": "Set as default online package",
+            "online_enabled": "Also enable for online bookings",
+            "online_only": "Enable only for online bookings",
+            "reduced_seasonal_price": "Reduced seasonal price",
+            "price_list": {
+              "seasonal_half_day": "Seasonal half-day price",
+              "seasonal": "Seasonal price",
+              "half_day": "Half-day price",
+              "daily": "Daily price",
+              "weekend": "Weekend price",
+              "half_day_weekend": "Weekend half-day price",
+              "half_day_seven_days": "7-day half-day price",
+              "seven_days": "7-day price",
+              "half_day_fourteen_days": "14-day half-day price",
+              "fourteen_days": "14-day price",
+              "half_day_monthly": "Monthly half-day price",
+              "monthly": "Monthly price",
+              "no_sectors": "There are no sectors or rows: add them in the Sectors and rows page.",
+              "no_periods": "Prices per period need at least one sector or row and one period of the current season.",
+              "calculation_method": "Price calculation",
+              "calculation_method_info": "How the price of a booking of several days is worked out from the prices of the price list.",
+              "cumulative": "Cumulative price",
+              "cumulative_info": "When the same booking has at least two spots of this package in the same row, for the full day, the price is worked out on the total days of all the spots in each period, instead of spot by spot.",
+              "monthly_setting": "Monthly setting",
+              "weekend_setting": "Weekend setting",
+              "public_holidays": "Public holidays too",
+              "intermediate_prices": "Edit intermediate prices"
+            }
           }
         }
       }

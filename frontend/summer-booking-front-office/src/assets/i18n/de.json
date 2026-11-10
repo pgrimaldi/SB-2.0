@@ -1594,6 +1594,63 @@
               "title": "Pakete duplizieren",
               "text": "Möchtest du die {{count}} ausgewählten Pakete duplizieren?"
             }
+          },
+          "form": {
+            "add_title": "Neues Paket hinzufügen",
+            "cancel": "Abbrechen",
+            "save": "Paket erstellen",
+            "tabs": {
+              "general_info": "Allgemeine Infos",
+              "price_list": "Preisliste"
+            },
+            "name": "Paketname",
+            "other_languages": "Weitere Sprachen",
+            "translated_name": "Name ({{language}})",
+            "choose": "Auswählen",
+            "max_additional_items": "Max. Anzahl Zusatzartikel",
+            "max_people": "Max. Anzahl Personen",
+            "articles": {
+              "title": "Artikel im Paket",
+              "umbrella": "Sonnenschirm",
+              "sunbed": "Liege",
+              "deckchair": "Liegestuhl",
+              "director_chair": "Regiestuhl",
+              "cabin": "Kabine",
+              "tent": "Zelt"
+            },
+            "included_services": "Inklusive Leistungen (optional)",
+            "enabled_areas": "Freigegebene Bereiche",
+            "sectors": "Sektoren und Reihen",
+            "all_sectors": "Alle Sektoren und Reihen",
+            "is_default": "Als Standardpaket festlegen",
+            "is_default_online": "Als Online-Standardpaket festlegen",
+            "online_enabled": "Auch für Online-Buchungen aktivieren",
+            "online_only": "Nur für Online-Buchungen aktivieren",
+            "reduced_seasonal_price": "Ermäßigter Saisonpreis",
+            "price_list": {
+              "seasonal_half_day": "Saisonpreis halber Tag",
+              "seasonal": "Saisonpreis",
+              "half_day": "Preis halber Tag",
+              "daily": "Tagespreis",
+              "weekend": "Wochenendpreis",
+              "half_day_weekend": "Preis halber Tag Wochenende",
+              "half_day_seven_days": "Preis halber Tag 7 Tage",
+              "seven_days": "Preis 7 Tage",
+              "half_day_fourteen_days": "Preis halber Tag 14 Tage",
+              "fourteen_days": "Preis 14 Tage",
+              "half_day_monthly": "Preis halber Tag Monat",
+              "monthly": "Monatspreis",
+              "no_sectors": "Keine Sektoren oder Reihen: füge sie auf der Seite Sektoren und Reihen hinzu.",
+              "no_periods": "Für Preise pro Zeitraum braucht es mindestens einen Sektor oder eine Reihe und einen Zeitraum der laufenden Saison.",
+              "calculation_method": "Preisberechnung",
+              "calculation_method_info": "Wie der Preis einer Buchung über mehrere Tage aus den Preisen der Preisliste berechnet wird.",
+              "cumulative": "Kumulierter Preis",
+              "cumulative_info": "Hat dieselbe Buchung mindestens zwei Plätze dieses Pakets in derselben Reihe, ganztägig, wird der Preis auf die Summe der Tage aller Plätze jedes Zeitraums berechnet statt Platz für Platz.",
+              "monthly_setting": "Monatseinstellung",
+              "weekend_setting": "Wochenendeinstellung",
+              "public_holidays": "Auch Feiertage",
+              "intermediate_prices": "Zwischenpreise bearbeiten"
+            }
           }
         }
       }

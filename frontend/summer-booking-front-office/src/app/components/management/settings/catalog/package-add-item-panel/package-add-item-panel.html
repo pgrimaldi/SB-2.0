@@ -1,0 +1,25 @@
+<app-side-panel
+  [title]="'management.settings.catalog.packages.form.add_title' | translate"
+  [texts]="'management.settings.catalog.packages.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-package-general-info-tab [form]="draftForm" [mainLanguage]="mainLanguage()" />
+    } @else if (selectedTab() === PanelTab.PriceList) {
+      <app-package-price-list-tab
+        [attr.inert]="isFetching() ? '' : null"
+        [form]="draftForm"
+        [sectors]="sectors()"
+        [periods]="periods()"
+        [isLoaded]="isPriceListLoaded()"
+      />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="package__add__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+</app-side-panel>

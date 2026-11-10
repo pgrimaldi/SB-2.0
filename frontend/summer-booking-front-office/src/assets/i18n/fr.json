@@ -1594,6 +1594,63 @@
               "title": "Dupliquer les forfaits",
               "text": "Voulez-vous dupliquer les {{count}} forfaits sélectionnés ?"
             }
+          },
+          "form": {
+            "add_title": "Ajouter un nouveau forfait",
+            "cancel": "Annuler",
+            "save": "Créer le forfait",
+            "tabs": {
+              "general_info": "Infos générales",
+              "price_list": "Liste de prix"
+            },
+            "name": "Nom du forfait",
+            "other_languages": "Autres langues",
+            "translated_name": "Nom ({{language}})",
+            "choose": "Sélectionner",
+            "max_additional_items": "Nombre max d'articles supplémentaires",
+            "max_people": "Nombre max de personnes",
+            "articles": {
+              "title": "Articles du forfait",
+              "umbrella": "Parasol",
+              "sunbed": "Bain de soleil",
+              "deckchair": "Transat",
+              "director_chair": "Fauteuil réalisateur",
+              "cabin": "Cabine",
+              "tent": "Tente"
+            },
+            "included_services": "Services inclus (facultatif)",
+            "enabled_areas": "Zones activées",
+            "sectors": "Secteurs et rangées",
+            "all_sectors": "Tous les secteurs et rangées",
+            "is_default": "Définir comme forfait par défaut",
+            "is_default_online": "Définir comme forfait par défaut en ligne",
+            "online_enabled": "Activer aussi pour les réservations en ligne",
+            "online_only": "Activer seulement pour les réservations en ligne",
+            "reduced_seasonal_price": "Prix saisonnier réduit",
+            "price_list": {
+              "seasonal_half_day": "Prix saisonnier demi-journée",
+              "seasonal": "Prix saisonnier",
+              "half_day": "Prix demi-journée",
+              "daily": "Prix journalier",
+              "weekend": "Prix week-end",
+              "half_day_weekend": "Prix demi-journée week-end",
+              "half_day_seven_days": "Prix demi-journée 7 jours",
+              "seven_days": "Prix 7 jours",
+              "half_day_fourteen_days": "Prix demi-journée 14 jours",
+              "fourteen_days": "Prix 14 jours",
+              "half_day_monthly": "Prix demi-journée mensuel",
+              "monthly": "Prix mensuel",
+              "no_sectors": "Aucun secteur ni rangée : ajoutez-les dans la page Secteurs et rangées.",
+              "no_periods": "Les prix par période demandent au moins un secteur ou une rangée et une période de la saison en cours.",
+              "calculation_method": "Calcul du prix",
+              "calculation_method_info": "La façon d'obtenir le prix d'une réservation de plusieurs jours à partir des prix des tarifs.",
+              "cumulative": "Prix cumulé",
+              "cumulative_info": "Quand une même réservation compte au moins deux emplacements de ce forfait dans la même rangée, à la journée entière, le prix se calcule sur le total des jours de tous les emplacements de chaque période, et non emplacement par emplacement.",
+              "monthly_setting": "Réglage du mois",
+              "weekend_setting": "Réglage du week-end",
+              "public_holidays": "Jours fériés aussi",
+              "intermediate_prices": "Modifier les prix intermédiaires"
+            }
           }
         }
       }

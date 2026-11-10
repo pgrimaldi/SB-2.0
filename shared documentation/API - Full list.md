@@ -2139,6 +2139,87 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### POST `/api/catalog/sector-combobox`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "isNextSeason": "boolean"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "idPeriod": "string (UUID)",
+    "periodName": "string",
+    "intervals": [
+      {
+        "idInterval": "string (UUID)",
+        "dateFrom": "string (ISO 8601, UTC)",
+        "dateTo": "string (ISO 8601, UTC)"
+      }
+    ]
+  }
+]
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `isNextSeason` | boolean |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].idPeriod` | string (UUID) |
+| `[].periodName` | string |
+| `[].intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) |
+| `[].intervals[].idInterval` | string (UUID) |
+| `[].intervals[].dateFrom` | string (ISO 8601, UTC) |
+| `[].intervals[].dateTo` | string (ISO 8601, UTC) |
+
 ## Sconti e voucher
 
 ### POST `/api/vouchers/voucher-list`

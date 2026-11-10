@@ -1,0 +1,47 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// One row per language: "Nome Inglese" on the left, the translation on the right, as long as the row.
+.package__general__info__tab__languages {
+  --form-row-columns: 10.5rem minmax(0, 1fr);
+  --form-row-label-offset: 0.3125rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.package__general__info__tab__translation {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// Three articles per row, as many rows as needed; one per row on phones.
+.package__general__info__tab__articles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.package__general__info__tab__options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+// The two "default" choices in a thin frame.
+.package__general__info__tab__default {
+  padding: 0 0.75rem 0 0.25rem;
+  border: 0.0625rem solid var(--color__layout__text__soft);
+  border-radius: 0.25rem;
+}
+
+.package__general__info__tab__reduced {
+  --button-border-color: var(--color__layout__text__soft);
+
+  align-self: flex-start;
+}

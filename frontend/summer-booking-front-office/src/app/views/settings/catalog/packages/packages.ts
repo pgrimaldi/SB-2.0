@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { PackageAddItemPanel } from '../../../../components/management/settings/catalog/package-add-item-panel/package-add-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -26,6 +27,7 @@ interface PackagesTableTexts {
   imports: [
     DeleteItemsPopup,
     DuplicateItemsPopup,
+    PackageAddItemPanel,
     PageTitle,
     Table,
     TableErrorPopup,
@@ -41,6 +43,7 @@ export class Packages {
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
   protected readonly idSelectedPackages = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idPackagesToDelete = signal<readonly string[]>([]);
