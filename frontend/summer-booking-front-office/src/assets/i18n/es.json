@@ -1570,6 +1570,18 @@
           "create": "Añadir paquete",
           "table": {
             "package_name": "Nombre"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar paquete",
+              "text": "¿Quieres eliminar el paquete {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar paquetes",
+              "text": "¿Quieres eliminar los {{count}} paquetes seleccionados?"
+            }
           }
         }
       }

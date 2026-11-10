@@ -39,4 +39,21 @@ describe('PriceListService', () => {
     expect(answer).toEqual(page);
     controller.verify();
   });
+
+  it('should delete the chosen packages in one call', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    priceLists.deletePackageItems({ idProperty: 'p1', idPackages: ['k1', 'k2'] }).subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/delete-package-item`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    controller.verify();
+  });
 });

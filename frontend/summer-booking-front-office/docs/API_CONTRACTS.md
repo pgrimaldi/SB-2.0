@@ -6655,6 +6655,33 @@ Stato: 200 OK.
 | `rows[].idPackage` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
 | `rows[].packageName` | string \| null | `Ombrellone e 2 lettini` |
 
+### POST `/api/catalog/delete-package-item`
+
+Listino: eliminazione dei pacchetti.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idPackages": [
+    "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01",
+    "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idPackages` | string[] (UUID, almeno uno) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01", "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

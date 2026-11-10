@@ -1570,6 +1570,18 @@
           "create": "添加套餐",
           "table": {
             "package_name": "名称"
+          },
+          "delete": {
+            "cancel": "取消",
+            "confirm": "删除",
+            "one": {
+              "title": "删除套餐",
+              "text": "要删除套餐 {{name}} 吗？"
+            },
+            "many": {
+              "title": "删除套餐",
+              "text": "要删除所选的 {{count}} 个套餐吗？"
+            }
           }
         }
       }

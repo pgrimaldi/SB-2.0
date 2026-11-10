@@ -2087,6 +2087,32 @@ Nessun corpo (204).
 | `rows[].idPackage` | string (UUID) |
 | `rows[].packageName` | string \| null |
 
+### POST `/api/catalog/delete-package-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idPackages": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idPackages` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ## Sconti e voucher
 
 ### POST `/api/vouchers/voucher-list`

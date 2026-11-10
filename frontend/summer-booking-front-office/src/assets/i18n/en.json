@@ -1570,6 +1570,18 @@
           "create": "Add package",
           "table": {
             "package_name": "Name"
+          },
+          "delete": {
+            "cancel": "Cancel",
+            "confirm": "Delete",
+            "one": {
+              "title": "Delete package",
+              "text": "Do you want to delete the package {{name}}?"
+            },
+            "many": {
+              "title": "Delete packages",
+              "text": "Do you want to delete the {{count}} selected packages?"
+            }
           }
         }
       }

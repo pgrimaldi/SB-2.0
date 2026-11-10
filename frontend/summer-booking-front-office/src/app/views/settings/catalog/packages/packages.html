@@ -18,6 +18,17 @@
   [(selection)]="idSelectedPackages"
   [pathIcon]="tableIcons"
   (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idPackagesToDelete()"
+  [itemName]="packageNameToDelete()"
+  translationKey="management.settings.catalog.packages.delete"
+  [action]="deletePackages"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
 />
 
 <app-table-error-popup

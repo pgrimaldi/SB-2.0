@@ -1570,6 +1570,18 @@
           "create": "Ajouter un forfait",
           "table": {
             "package_name": "Nom"
+          },
+          "delete": {
+            "cancel": "Annuler",
+            "confirm": "Supprimer",
+            "one": {
+              "title": "Supprimer le forfait",
+              "text": "Voulez-vous supprimer le forfait {{name}} ?"
+            },
+            "many": {
+              "title": "Supprimer les forfaits",
+              "text": "Voulez-vous supprimer les {{count}} forfaits sélectionnés ?"
+            }
           }
         }
       }
