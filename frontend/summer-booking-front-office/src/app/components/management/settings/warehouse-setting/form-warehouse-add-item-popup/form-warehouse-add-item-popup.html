@@ -8,7 +8,9 @@
       <app-filled-select
         [label]="'management.settings.warehouse.form.name' | translate"
         [isMandatory]="true"
-        [placeholder]="'management.settings.warehouse.form.choose' | translate"
+        [placeholder]="
+          articlesLoadError() ? '' : ('management.settings.warehouse.form.choose' | translate)
+        "
         [options]="articleOptions()"
         [formField]="draftForm.idArticle"
         [error]="articlesLoadError() ?? idArticleError()"

@@ -5,7 +5,11 @@
   </span>
   <app-filled-multi-select
     class="services__limits__sectors"
-    [placeholder]="'management.settings.services.form.prices.limits.all_sectors' | translate"
+    [placeholder]="
+      sectorsLoadError()
+        ? ''
+        : ('management.settings.services.form.prices.limits.all_sectors' | translate)
+    "
     [options]="sectorOptions()"
     [formField]="form()"
     [error]="sectorsLoadError()"

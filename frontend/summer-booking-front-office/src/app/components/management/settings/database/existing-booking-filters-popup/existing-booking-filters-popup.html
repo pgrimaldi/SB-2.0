@@ -19,7 +19,11 @@
       />
       <app-filled-multi-select
         [label]="'management.settings.database.filters.agreement_structure.label' | translate"
-        [placeholder]="'management.settings.database.filters.choose' | translate"
+        [placeholder]="
+          affiliatedHotelsLoadError()
+            ? ''
+            : ('management.settings.database.filters.choose' | translate)
+        "
         [options]="affiliatedHotelOptions()"
         [(value)]="idAffiliatedHotels"
         [error]="affiliatedHotelsLoadError()"

@@ -263,7 +263,10 @@
               | translate
           "
           [placeholder]="
-            'management.settings.online_booking_configuration.booking_options.choose' | translate
+            sectorsLoadError()
+              ? ''
+              : ('management.settings.online_booking_configuration.booking_options.choose'
+                | translate)
           "
           [options]="sectorOptions()"
           [formField]="rule.idSector"

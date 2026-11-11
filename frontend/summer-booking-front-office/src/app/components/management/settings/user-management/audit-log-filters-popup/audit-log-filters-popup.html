@@ -14,7 +14,11 @@
       />
       <app-filled-multi-select
         [label]="'management.settings.user_management.logs.filters_popup.user' | translate"
-        [placeholder]="'management.settings.user_management.logs.filters_popup.choose' | translate"
+        [placeholder]="
+          usersLoadError()
+            ? ''
+            : ('management.settings.user_management.logs.filters_popup.choose' | translate)
+        "
         [options]="userOptions()"
         [(value)]="idUsers"
         [error]="usersLoadError()"

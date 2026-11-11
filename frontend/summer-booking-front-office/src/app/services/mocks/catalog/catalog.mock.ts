@@ -1686,7 +1686,7 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
           availabilityOptions: [exampleAvailability()],
         },
       ],
-      idSectors: ['7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01'],
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01'],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
         {
@@ -2023,7 +2023,7 @@ const AUTOMATIC_PRICE_DETAILS = new Map<string, AutomaticPriceAddItemRequest>([
       idStandardServices: ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01'],
       idHourlyServices: ['4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01'],
       isPricePerServiceEnabled: true,
-      idSectors: ['7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01'],
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01'],
     }),
   ],
 ]);

@@ -2696,7 +2696,7 @@ Servizi: creazione servizio bar.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true,
   "bookingOptions": [
@@ -2736,7 +2736,7 @@ Servizi: creazione servizio bar.
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 1.8}]` |
 | `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.5` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "12:00", "onlineStartTime": "09:00", "onlineEndTime": "12:00", "maxBookingPerHourQuantity": 2, "maxBookingPerDayQuantity": 5, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
@@ -2847,7 +2847,7 @@ Stato: 200 OK.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true
 }
@@ -2864,7 +2864,7 @@ Stato: 200 OK.
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.2}]` |
 | `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.2` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 
 ### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
@@ -3020,7 +3020,7 @@ Servizi: servizio bar, salvataggio Prezzi.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true
 }
@@ -3039,7 +3039,7 @@ Servizi: servizio bar, salvataggio Prezzi.
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.2}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 1.5}]` |
 | `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.2` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 
 #### Response
@@ -3276,7 +3276,7 @@ Servizi: creazione servizio.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true,
   "bookingOptions": [
@@ -3312,7 +3312,7 @@ Servizi: creazione servizio.
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 3.5}]` |
 | `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
@@ -3415,7 +3415,7 @@ Stato: 200 OK.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true
 }
@@ -3429,7 +3429,7 @@ Stato: 200 OK.
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}]` |
 | `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 
 ### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
@@ -3577,7 +3577,7 @@ Servizi: servizio, salvataggio Prezzi.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true
 }
@@ -3593,7 +3593,7 @@ Servizi: servizio, salvataggio Prezzi.
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 3.5}]` |
 | `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 
 #### Response
@@ -3937,7 +3937,7 @@ Servizi Orari: creazione servizio orario.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true,
   "bookingOptions": [
@@ -4036,7 +4036,7 @@ Servizi Orari: creazione servizio orario.
 | `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null | `22` |
 | `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
 | `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
@@ -4204,7 +4204,7 @@ Stato: 200 OK.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true
 }
@@ -4229,7 +4229,7 @@ Stato: 200 OK.
 | `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null | `22` |
 | `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
 | `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 
 ### GET `/api/catalog/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
@@ -4490,7 +4490,7 @@ Servizi Orari: servizio orario, salvataggio Prezzi.
     }
   ],
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
   "isOnlinePurchaseEnabled": true
 }
@@ -4517,7 +4517,7 @@ Servizi Orari: servizio orario, salvataggio Prezzi.
 | `periodAvailabilities[].availabilityOptions[].vatRate` | number (decimale, %) \| null | `22` |
 | `periodAvailabilities[].availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
 | `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 
 #### Response
@@ -4838,7 +4838,7 @@ Prezzi Automatici: creazione prezzo automatico.
   ],
   "isPricePerServiceEnabled": false,
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ]
 }
 ```
@@ -4865,7 +4865,7 @@ Prezzi Automatici: creazione prezzo automatico.
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
 | `isPricePerServiceEnabled` | boolean | `false` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 
 #### Response
 
@@ -4983,7 +4983,7 @@ Stato: 200 OK.
   ],
   "isPricePerServiceEnabled": true,
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ]
 }
 ```
@@ -5004,7 +5004,7 @@ Stato: 200 OK.
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
 | `isPricePerServiceEnabled` | boolean | `true` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 
 ### POST `/api/catalog/update-automatic-price-general`
 
@@ -5123,7 +5123,7 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
   ],
   "isPricePerServiceEnabled": true,
   "idSectors": [
-    "7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ]
 }
 ```
@@ -5146,7 +5146,7 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
 | `isPricePerServiceEnabled` | boolean | `true` |
-| `idSectors` | string[] (UUID) | `["7c0e2a51-3b9f-4d6e-8a21-5f4b9c1d0e01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 
 #### Response
 
