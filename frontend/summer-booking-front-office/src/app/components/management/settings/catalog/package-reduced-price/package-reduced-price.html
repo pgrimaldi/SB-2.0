@@ -1,0 +1,112 @@
+<app-button
+  class="package__reduced__price__button"
+  [appearance]="ButtonAppearance.Light"
+  [size]="ButtonSize.Small"
+  [pathIcon]="addIcon"
+  [disabled]="isOpen() || row() !== null"
+  (clicked)="add()"
+>
+  {{ 'management.settings.catalog.packages.form.reduced_seasonal_price' | translate }}
+</app-button>
+
+@if (isOpen()) {
+  @let draft = draftForm();
+  <div class="package__reduced__price__box">
+    <app-icon-button
+      class="package__reduced__price__close"
+      [pathIcon]="closeIcon"
+      (click)="close()"
+    />
+    <div class="package__reduced__price__row">
+      <div class="package__reduced__price__pair">
+        <span class="package__reduced__price__word">
+          {{ 'management.settings.catalog.packages.form.reduced_seasonal.date_from' | translate }}
+        </span>
+        <app-filled-date-field
+          class="package__reduced__price__field"
+          [pathIcon]="calendarIcon"
+          [formField]="draft.dateFrom"
+          [error]="validationText.text(draft.dateFrom)"
+        />
+      </div>
+      <div class="package__reduced__price__pair">
+        <span class="package__reduced__price__word">
+          {{ 'management.settings.catalog.packages.form.reduced_seasonal.date_to' | translate }}
+        </span>
+        <app-filled-date-field
+          class="package__reduced__price__field"
+          [pathIcon]="calendarIcon"
+          [minDate]="draft.dateFrom().value()"
+          [formField]="draft.dateTo"
+          [error]="validationText.text(draft.dateTo)"
+        />
+      </div>
+    </div>
+    <div class="package__reduced__price__row">
+      <div class="package__reduced__price__pair">
+        <span class="package__reduced__price__word">
+          {{ 'management.settings.catalog.packages.form.reduced_seasonal.name' | translate }}
+        </span>
+        <app-filled-text-field
+          class="package__reduced__price__field"
+          [formField]="draft.reducedSeasonalPriceName"
+          [error]="validationText.text(draft.reducedSeasonalPriceName)"
+        />
+      </div>
+      <app-button
+        class="package__reduced__price__save"
+        [size]="ButtonSize.Small"
+        [disabled]="draft().invalid()"
+        (clicked)="save()"
+      >
+        @if (row() === null) {
+          {{ 'management.settings.catalog.packages.form.reduced_seasonal.add' | translate }}
+        } @else {
+          {{ 'management.settings.catalog.packages.form.reduced_seasonal.save' | translate }}
+        }
+      </app-button>
+    </div>
+  </div>
+} @else if (row(); as price) {
+  <div class="package__reduced__price__grid">
+    <table class="package__reduced__price__table">
+      <thead>
+        <tr>
+          <th>
+            {{ 'management.settings.catalog.packages.form.reduced_seasonal.name' | translate }}
+          </th>
+          <th>
+            {{ 'management.settings.catalog.packages.form.reduced_seasonal.date_from' | translate }}
+          </th>
+          <th>
+            {{ 'management.settings.catalog.packages.form.reduced_seasonal.date_to' | translate }}
+          </th>
+          <th class="package__reduced__price__actions">{{ 'table.actions.header' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="package__reduced__price__name">{{ price.reducedSeasonalPriceName }}</td>
+          <td>{{ day(price.dateFrom) }}</td>
+          <td>{{ day(price.dateTo) }}</td>
+          <td class="package__reduced__price__actions">
+            <span class="package__reduced__price__buttons">
+              <app-icon-button
+                class="package__reduced__price__action"
+                [label]="'table.actions.edit' | translate"
+                [pathIcon]="editIcon"
+                (click)="edit(price)"
+              />
+              <app-icon-button
+                class="package__reduced__price__action"
+                [label]="'table.actions.delete' | translate"
+                [pathIcon]="deleteIcon"
+                (click)="delete()"
+              />
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}

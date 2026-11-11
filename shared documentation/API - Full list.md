@@ -2139,7 +2139,161 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### POST `/api/catalog/price-lists`
+
+**Payload JSON**
+
+```json
+{
+  "translations": [
+    {
+      "language": "string",
+      "packageName": "string | null"
+    }
+  ],
+  "maxAdditionalItemQuantity": "number (intero) | null",
+  "maxPeopleQuantity": "number (intero) | null",
+  "umbrellaQuantity": "number (intero) | null",
+  "sunbedQuantity": "number (intero) | null",
+  "deckchairQuantity": "number (intero) | null",
+  "directorChairQuantity": "number (intero) | null",
+  "cabinQuantity": "number (intero) | null",
+  "tentQuantity": "number (intero) | null",
+  "includedServices": "string | null",
+  "idSectorAreas": "string[] (UUID)",
+  "idSectors": "string[] (UUID)",
+  "isDefault": "boolean",
+  "isDefaultOnline": "boolean",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "reducedSeasonalPrice": {
+    "dateFrom": "string (ISO 8601, mezzanotte UTC)",
+    "dateTo": "string (ISO 8601, mezzanotte UTC)",
+    "reducedSeasonalPriceName": "string"
+  },
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID)",
+      "idPeriod": "string (UUID)",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `translations[]` | PackageTranslation[] (array di oggetti, una per lingua) |
+| `translations[].language` | string |
+| `translations[].packageName` | string \| null |
+| `maxAdditionalItemQuantity` | number (intero) \| null |
+| `maxPeopleQuantity` | number (intero) \| null |
+| `umbrellaQuantity` | number (intero) \| null |
+| `sunbedQuantity` | number (intero) \| null |
+| `deckchairQuantity` | number (intero) \| null |
+| `directorChairQuantity` | number (intero) \| null |
+| `cabinQuantity` | number (intero) \| null |
+| `tentQuantity` | number (intero) \| null |
+| `includedServices` | string \| null |
+| `idSectorAreas` | string[] (UUID) |
+| `idSectors` | string[] (UUID) |
+| `isDefault` | boolean |
+| `isDefaultOnline` | boolean |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `reducedSeasonalPrice` | PackageReducedSeasonalPrice \| null |
+| `reducedSeasonalPrice.dateFrom` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrice.dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrice.reducedSeasonalPriceName` | string |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ### POST `/api/catalog/sector-combobox`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+[
+  {
+    "id": "string (UUID)",
+    "value": "string"
+  }
+]
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].id` | string (UUID) |
+| `[].value` | string |
+
+### POST `/api/catalog/map/sector-area-combobox`
 
 **Payload JSON**
 

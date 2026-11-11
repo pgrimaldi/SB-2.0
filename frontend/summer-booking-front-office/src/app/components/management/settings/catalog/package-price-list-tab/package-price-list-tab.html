@@ -1,77 +1,88 @@
-@if (form().sectorPrices().value().length) {
-  <div class="package__price__list__tab__grid package__price__list__tab__seasonal">
-    <table class="package__price__list__tab__table">
-      <thead>
-        <tr>
-          <th></th>
-          @for (column of seasonalColumns; track column.field) {
-            <th scope="col">{{ column.label | translate }}</th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of form().sectorPrices; track row) {
+<app-expansion-panel
+  class="package__price__list__tab__section"
+  [title]="'management.settings.catalog.packages.form.price_list.seasonal_prices' | translate"
+  [pathIcon]="sectionIcons"
+>
+  @if (form().sectorPrices().value().length) {
+    <div class="package__price__list__tab__grid">
+      <table class="package__price__list__tab__table">
+        <thead>
           <tr>
-            <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+            <th></th>
             @for (column of seasonalColumns; track column.field) {
-              <td>
-                <app-filled-number-field
-                  [isDecimal]="true"
-                  [isCurrency]="true"
-                  [formField]="row[column.field]"
-                />
-              </td>
+              <th scope="col">{{ column.label | translate }}</th>
             }
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-} @else if (isLoaded()) {
-  <p class="package__price__list__tab__empty">
-    {{ 'management.settings.catalog.packages.form.price_list.no_sectors' | translate }}
-  </p>
-}
-
-@if (form().periodPrices().value().length) {
-  <div class="package__price__list__tab__grid">
-    <table class="package__price__list__tab__table">
-      <thead>
-        <tr>
-          <th></th>
-          @for (column of periodColumns; track column.field) {
-            <th scope="col">{{ column.label | translate }}</th>
+        </thead>
+        <tbody>
+          @for (row of form().sectorPrices; track row) {
+            <tr>
+              <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+              @for (column of seasonalColumns; track column.field) {
+                <td>
+                  <app-filled-number-field
+                    [isDecimal]="true"
+                    [isCurrency]="true"
+                    [formField]="row[column.field]"
+                  />
+                </td>
+              }
+            </tr>
           }
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of form().periodPrices; track row) {
+        </tbody>
+      </table>
+    </div>
+  } @else if (isLoaded()) {
+    <p class="package__price__list__tab__empty">
+      {{ 'management.settings.catalog.packages.form.price_list.no_sectors' | translate }}
+    </p>
+  }
+</app-expansion-panel>
+<app-expansion-panel
+  class="package__price__list__tab__section"
+  [title]="'management.settings.catalog.packages.form.price_list.period_prices' | translate"
+  [pathIcon]="sectionIcons"
+>
+  @if (form().periodPrices().value().length) {
+    <div class="package__price__list__tab__grid">
+      <table class="package__price__list__tab__table">
+        <thead>
           <tr>
-            <th scope="row">
-              <span class="package__price__list__tab__sector">{{
-                sectorName(row.idSector().value())
-              }}</span>
-              {{ periodName(row.idPeriod().value()) }}
-            </th>
+            <th></th>
             @for (column of periodColumns; track column.field) {
-              <td>
-                <app-filled-number-field
-                  [isDecimal]="true"
-                  [isCurrency]="true"
-                  [formField]="row[column.field]"
-                />
-              </td>
+              <th scope="col">{{ column.label | translate }}</th>
             }
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-} @else if (isLoaded()) {
-  <p class="package__price__list__tab__empty">
-    {{ 'management.settings.catalog.packages.form.price_list.no_periods' | translate }}
-  </p>
-}
+        </thead>
+        <tbody>
+          @for (row of form().periodPrices; track row) {
+            <tr>
+              <th scope="row">
+                <span class="package__price__list__tab__sector">{{
+                  sectorName(row.idSector().value())
+                }}</span>
+                {{ periodName(row.idPeriod().value()) }}
+              </th>
+              @for (column of periodColumns; track column.field) {
+                <td>
+                  <app-filled-number-field
+                    [isDecimal]="true"
+                    [isCurrency]="true"
+                    [formField]="row[column.field]"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (isLoaded()) {
+    <p class="package__price__list__tab__empty">
+      {{ 'management.settings.catalog.packages.form.price_list.no_periods' | translate }}
+    </p>
+  }
+</app-expansion-panel>
 
 <div class="package__price__list__tab__field">
   <div class="package__price__list__tab__heading">
@@ -86,6 +97,8 @@
   </div>
   <app-filled-select
     [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+    [options]="calculationMethods()"
+    [formField]="form().calculationMethod"
   />
 </div>
 
@@ -103,10 +116,14 @@
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.price_list.monthly_setting' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [options]="monthlySettings()"
+  [formField]="form().monthlySetting"
 />
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.price_list.weekend_setting' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [options]="weekendSettings()"
+  [formField]="form().weekendSetting"
 />
 
 <app-checkbox [formField]="form().isPublicHolidaysIncluded">

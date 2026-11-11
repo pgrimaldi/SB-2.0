@@ -62,6 +62,7 @@ import {
   mapSettingsMock,
   removeMapBackgroundMock,
   resetMapMock,
+  sectorAreaComboboxMock,
   updateMapBackgroundMock,
   updateMapConfigurationMock,
   uploadMapBackgroundMock,
@@ -75,6 +76,7 @@ import {
   updateSectorItemMock,
 } from './catalog/sectors.mock';
 import {
+  createPackageMock,
   deletePackageItemsMock,
   duplicatePackageItemsMock,
   packageListMock,
@@ -959,6 +961,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists`
+  ) {
+    return createPackageMock(request);
+  }
+
+  if (
     request.method === 'GET' &&
     request.url === `${environment.apiBaseUrl}/catalog/map/settings`
   ) {
@@ -995,6 +1004,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/catalog/map/reset`) {
     return resetMapMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/map/sector-area-combobox`
+  ) {
+    return sectorAreaComboboxMock(request);
   }
 
   return next(request);

@@ -1627,7 +1627,16 @@
             "online_enabled": "Abilita anche per prenotazioni online",
             "online_only": "Abilita solo per prenotazioni online",
             "reduced_seasonal_price": "Prezzo stagionale ridotto",
+            "reduced_seasonal": {
+              "date_from": "Dal",
+              "date_to": "Al",
+              "name": "Nome",
+              "add": "Aggiungi",
+              "save": "Salva"
+            },
             "price_list": {
+              "seasonal_prices": "Prezzi stagionali",
+              "period_prices": "Prezzi per periodo",
               "seasonal_half_day": "Prezzo stagionale mezza giornata",
               "seasonal": "Prezzo stagionale",
               "half_day": "Prezzo mezza giornata",
@@ -1643,11 +1652,25 @@
               "no_sectors": "Non ci sono settori o file: aggiungili nella pagina Settori e file.",
               "no_periods": "Per i prezzi per periodo servono almeno un settore o una fila e un periodo della stagione in corso.",
               "calculation_method": "Calcolo del prezzo",
+              "calculation_methods": {
+                "proportional": "Prezzo proporzionale",
+                "daily": "Prezzo giornaliero",
+                "logarithmic": "Prezzo logaritmico",
+                "daily_with_weekend": "Prezzo giornaliero con weekend"
+              },
               "calculation_method_info": "Il modo in cui si ottiene il prezzo di una prenotazione di più giorni a partire dai prezzi del listino.",
               "cumulative": "Prezzo cumulativo",
               "cumulative_info": "Quando nella stessa prenotazione ci sono almeno due postazioni di questo pacchetto nella stessa fila, a giornata intera, il prezzo si calcola sul totale dei giorni di tutte le postazioni di ogni periodo, invece che postazione per postazione.",
               "monthly_setting": "Impostazione del mensile",
+              "monthly_settings": {
+                "effective_month_duration": "Durata effettiva del mese",
+                "thirty_days": "30 giorni"
+              },
               "weekend_setting": "Impostazione del weekend",
+              "weekend_settings": {
+                "saturday_sunday": "Considera weekend sabato e domenica",
+                "sunday_only": "Considera weekend solo domenica"
+              },
               "public_holidays": "Anche festivi",
               "intermediate_prices": "Modifica prezzi intermedi"
             }

@@ -23,7 +23,7 @@
   (create)="adding.set(true)"
 />
 
-<app-package-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" />
+<app-package-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" (created)="table.reload()" />
 
 <app-delete-items-popup
   [idItems]="idPackagesToDelete()"

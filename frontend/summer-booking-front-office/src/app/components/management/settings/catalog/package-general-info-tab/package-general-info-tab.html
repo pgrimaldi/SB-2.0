@@ -63,9 +63,14 @@
   [label]="'management.settings.catalog.packages.form.included_services' | translate"
   [formField]="form().includedServices"
 />
-<app-filled-select
+<app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
-  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [placeholder]="
+    sectorAreasLoadError() ? '' : ('management.settings.catalog.packages.form.choose' | translate)
+  "
+  [options]="sectorAreaOptions()"
+  [formField]="form().idSectorAreas"
+  [error]="sectorAreasLoadError()"
 />
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.sectors' | translate"
@@ -92,11 +97,8 @@
   </app-checkbox>
 </div>
 
-<app-button
-  class="package__general__info__tab__reduced"
-  [appearance]="ButtonAppearance.Light"
-  [size]="ButtonSize.Small"
-  [pathIcon]="addIcon"
->
-  {{ 'management.settings.catalog.packages.form.reduced_seasonal_price' | translate }}
-</app-button>
+<app-package-reduced-price
+  [reducedSeasonalPrice]="form().reducedSeasonalPrice"
+  [draftForm]="reducedSeasonalPriceForm()"
+  [(isOpen)]="isReducedSeasonalPriceOpen"
+/>

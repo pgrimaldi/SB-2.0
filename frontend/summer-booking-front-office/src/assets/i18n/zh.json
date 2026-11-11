@@ -1627,7 +1627,16 @@
             "online_enabled": "也用于在线预订",
             "online_only": "仅用于在线预订",
             "reduced_seasonal_price": "季节优惠价",
+            "reduced_seasonal": {
+              "date_from": "从",
+              "date_to": "至",
+              "name": "名称",
+              "add": "添加",
+              "save": "保存"
+            },
             "price_list": {
+              "seasonal_prices": "季节价",
+              "period_prices": "按时段定价",
               "seasonal_half_day": "季节半天价",
               "seasonal": "季节价",
               "half_day": "半天价",
@@ -1643,11 +1652,25 @@
               "no_sectors": "没有区域或排：请在“区域和排”页面中添加。",
               "no_periods": "按时段定价至少需要一个区域或排，以及本季的一个时段。",
               "calculation_method": "价格计算",
+              "calculation_methods": {
+                "proportional": "按比例价",
+                "daily": "日价",
+                "logarithmic": "对数价",
+                "daily_with_weekend": "含周末的日价"
+              },
               "calculation_method_info": "如何根据价目表中的价格计算多天预订的价格。",
               "cumulative": "累计价格",
               "cumulative_info": "同一预订中至少有两个本套餐位于同一排的全天位置时，价格按每个时段所有位置的总天数计算，而不是逐个位置计算。",
               "monthly_setting": "月份设置",
+              "monthly_settings": {
+                "effective_month_duration": "按月份实际天数",
+                "thirty_days": "30天"
+              },
               "weekend_setting": "周末设置",
+              "weekend_settings": {
+                "saturday_sunday": "周末为周六和周日",
+                "sunday_only": "周末仅为周日"
+              },
               "public_holidays": "包括节假日",
               "intermediate_prices": "修改中间价格"
             }

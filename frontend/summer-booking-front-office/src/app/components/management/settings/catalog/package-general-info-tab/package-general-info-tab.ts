@@ -5,6 +5,7 @@ import {
   computed,
   inject,
   input,
+  model,
   signal,
 } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
@@ -20,10 +21,11 @@ import {
   MAX_PACKAGE_PEOPLE_QUANTITY,
   PackageAddItemRequest,
 } from '../../../../../entities/settings/catalog/package-add-item-request';
+import { PackageReducedSeasonalPrice } from '../../../../../entities/settings/catalog/package-reduced-seasonal-price';
 import { Language } from '../../../../../entities/shared/language';
+import { MapService } from '../../../../../services/api/catalog/map.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
@@ -33,6 +35,7 @@ import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-se
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 
 /** The fields of the form that hold a quantity chosen in a dropdown. */
 type QuantityField = {
@@ -44,7 +47,6 @@ const ARTICLES_KEY = 'management.settings.catalog.packages.form.articles';
 @Component({
   selector: 'app-package-general-info-tab',
   imports: [
-    Button,
     Checkbox,
     ExpansionPanel,
     FilledMultiSelect,
@@ -53,6 +55,7 @@ const ARTICLES_KEY = 'management.settings.catalog.packages.form.articles';
     FormField,
     FormRow,
     FormRowLabel,
+    PackageReducedPrice,
     SectionTitle,
     TranslatePipe,
   ],
@@ -64,17 +67,18 @@ export class PackageGeneralInfoTab implements OnDestroy {
   readonly form = input.required<FieldTree<PackageAddItemRequest>>();
   /** Language of the main name: the user's; the others are translations. */
   readonly mainLanguage = input.required<Language>();
+  /** The box of the reduced seasonal price: kept by the panel so that it outlives the tab. */
+  readonly reducedSeasonalPriceForm = input.required<FieldTree<PackageReducedSeasonalPrice>>();
+  readonly isReducedSeasonalPriceOpen = model.required<boolean>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly sectorService = inject(SectorService);
+  private readonly mapService = inject(MapService);
   private readonly errorText = inject(ErrorTextBehaviour);
   protected readonly validationText = inject(ValidationTextBehaviour);
 
-  protected readonly ButtonAppearance = ButtonAppearance;
-  protected readonly ButtonSize = ButtonSize;
   /** [before the title, arrow]. */
   protected readonly languagesIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
-  protected readonly addIcon = ['/assets/images/GeneralIcon_AddBlue.svg'] as const;
   protected readonly additionalItemOptions = quantityOptions(MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY);
   protected readonly peopleOptions = quantityOptions(MAX_PACKAGE_PEOPLE_QUANTITY);
   protected readonly articleOptions = quantityOptions(MAX_PACKAGE_ARTICLE_QUANTITY);
@@ -93,6 +97,12 @@ export class PackageGeneralInfoTab implements OnDestroy {
   protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
     this.sectors().map(({ id, value }) => ({ value: id, label: value })),
   );
+  private readonly sectorAreas = signal<readonly ComboboxItem[]>([]);
+  protected readonly sectorAreasLoadError = signal<string | null>(null);
+  private readonly sectorAreasSubscription?: Subscription;
+  protected readonly sectorAreaOptions = computed<readonly SelectOption[]>(() =>
+    this.sectorAreas().map(({ id, value }) => ({ value: id, label: value })),
+  );
 
   protected readonly mainTranslation = computed(
     () =>
@@ -109,7 +119,7 @@ export class PackageGeneralInfoTab implements OnDestroy {
     () => new Intl.DisplayNames([this.mainLanguage()], { type: 'language' }),
   );
 
-  /** The sectors are read every time the tab is shown. */
+  /** The sectors and the areas are read every time the tab is shown. */
   constructor() {
     const idProperty = this.auth.user()?.propertyId;
     if (idProperty) {
@@ -119,6 +129,14 @@ export class PackageGeneralInfoTab implements OnDestroy {
           const problem = toApiProblem(error);
           this.sectors.set([]);
           this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
+        },
+      });
+      this.sectorAreasSubscription = this.mapService.sectorAreaCombobox(idProperty).subscribe({
+        next: (sectorAreas) => this.sectorAreas.set(sectorAreas),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.sectorAreas.set([]);
+          this.sectorAreasLoadError.set(this.errorText.instant(problem.code, problem.args));
         },
       });
     }
@@ -141,6 +159,7 @@ export class PackageGeneralInfoTab implements OnDestroy {
 
   ngOnDestroy(): void {
     this.sectorsSubscription?.unsubscribe();
+    this.sectorAreasSubscription?.unsubscribe();
   }
 }
 

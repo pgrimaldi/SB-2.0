@@ -1,4 +1,8 @@
+import { PriceCalculationMethod } from '../../enums/price-calculation-method';
+import { PriceMonthlySetting } from '../../enums/price-monthly-setting';
+import { PriceWeekendSetting } from '../../enums/price-weekend-setting';
 import { PackagePeriodPrice } from './package-period-price';
+import { PackageReducedSeasonalPrice } from './package-reduced-seasonal-price';
 import { PackageSectorPrice } from './package-sector-price';
 import { PackageTranslation } from './package-translation';
 
@@ -17,13 +21,18 @@ export class PackageAddItemRequest {
   cabinQuantity: number | null = null;
   tentQuantity: number | null = null;
   includedServices: string | null = null;
+  idSectorAreas: string[] = [];
   idSectors: string[] = [];
   isDefault = false;
   isDefaultOnline = false;
   isOnlineEnabled = false;
   isOnlineOnly = false;
+  reducedSeasonalPrice: PackageReducedSeasonalPrice | null = null;
   sectorPrices: PackageSectorPrice[] = [];
   periodPrices: PackagePeriodPrice[] = [];
+  calculationMethod: PriceCalculationMethod | null = null;
   isCumulative = false;
+  monthlySetting: PriceMonthlySetting | null = null;
+  weekendSetting: PriceWeekendSetting | null = null;
   isPublicHolidaysIncluded = false;
 }

@@ -1627,7 +1627,16 @@
             "online_enabled": "تفعيل أيضًا للحجوزات عبر الإنترنت",
             "online_only": "تفعيل فقط للحجوزات عبر الإنترنت",
             "reduced_seasonal_price": "سعر موسمي مخفّض",
+            "reduced_seasonal": {
+              "date_from": "من",
+              "date_to": "إلى",
+              "name": "الاسم",
+              "add": "إضافة",
+              "save": "حفظ"
+            },
             "price_list": {
+              "seasonal_prices": "الأسعار الموسمية",
+              "period_prices": "الأسعار حسب الفترة",
               "seasonal_half_day": "السعر الموسمي لنصف يوم",
               "seasonal": "السعر الموسمي",
               "half_day": "سعر نصف يوم",
@@ -1643,11 +1652,25 @@
               "no_sectors": "لا توجد قطاعات أو صفوف: أضفها في صفحة القطاعات والصفوف.",
               "no_periods": "تحتاج الأسعار حسب الفترة إلى قطاع أو صف واحد على الأقل وفترة من الموسم الحالي.",
               "calculation_method": "حساب السعر",
+              "calculation_methods": {
+                "proportional": "السعر النسبي",
+                "daily": "السعر اليومي",
+                "logarithmic": "السعر اللوغاريتمي",
+                "daily_with_weekend": "السعر اليومي مع عطلة نهاية الأسبوع"
+              },
               "calculation_method_info": "طريقة حساب سعر حجز لعدة أيام انطلاقًا من أسعار قائمة الأسعار.",
               "cumulative": "سعر تراكمي",
               "cumulative_info": "عندما يضم الحجز نفسه موقعين على الأقل من هذه الباقة في الصف نفسه ليوم كامل، يُحسب السعر على مجموع أيام كل المواقع في كل فترة بدلًا من حسابه لكل موقع على حدة.",
               "monthly_setting": "إعداد الشهر",
+              "monthly_settings": {
+                "effective_month_duration": "المدة الفعلية للشهر",
+                "thirty_days": "30 يومًا"
+              },
               "weekend_setting": "إعداد عطلة نهاية الأسبوع",
+              "weekend_settings": {
+                "saturday_sunday": "عطلة نهاية الأسبوع السبت والأحد",
+                "sunday_only": "عطلة نهاية الأسبوع الأحد فقط"
+              },
               "public_holidays": "العطل الرسمية أيضًا",
               "intermediate_prices": "تعديل الأسعار الوسيطة"
             }

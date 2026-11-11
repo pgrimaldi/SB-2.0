@@ -7,13 +7,21 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { applyEach, applyWhen, form } from '@angular/forms/signals';
+import {
+  TreeValidationResult,
+  applyEach,
+  applyWhen,
+  form,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, forkJoin, of, switchMap } from 'rxjs';
+import { Observable, Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -21,13 +29,16 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
+import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
+import { PackageReducedSeasonalPrice } from '../../../../../entities/settings/catalog/package-reduced-seasonal-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
 import { PackageTranslation } from '../../../../../entities/settings/catalog/package-translation';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
+import { PriceListService } from '../../../../../services/api/catalog/price-list.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
@@ -62,9 +73,11 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   readonly open = model(false);
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
+  readonly created = output<void>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly sectorService = inject(SectorService);
+  private readonly priceLists = inject(PriceListService);
   private readonly seasons = inject(SeasonService);
   private readonly language = inject(LanguageBehaviour);
   private readonly translateService = inject(TranslateService);
@@ -94,6 +107,13 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
       );
     });
   });
+  private readonly reducedSeasonalPrice = signal(new PackageReducedSeasonalPrice());
+  protected readonly reducedSeasonalPriceForm = form(this.reducedSeasonalPrice, (path) => {
+    required(path.dateFrom);
+    required(path.dateTo);
+    requiredText(path.reducedSeasonalPriceName);
+  });
+  protected readonly isReducedSeasonalPriceOpen = signal(false);
   /** The form with nothing typed: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(JSON.stringify(newDraft()));
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
@@ -101,6 +121,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   /** The rows of the price list are read once per opening, the first time its tab is shown. */
   protected readonly isPriceListLoaded = signal(false);
   protected readonly isFetching = signal(false);
+  protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
     () => this.isFetching() || this.draftForm().invalid(),
   );
@@ -128,7 +149,42 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== this.pristine();
+    return (
+      this.open() &&
+      (JSON.stringify(this.draft()) !== this.pristine() || this.isReducedSeasonalPriceTyped())
+    );
+  }
+
+  /** The open box differs from what it showed when opened: empty, or the row being edited. */
+  private isReducedSeasonalPriceTyped(): boolean {
+    const shown = this.draft().reducedSeasonalPrice ?? new PackageReducedSeasonalPrice();
+    return (
+      this.isReducedSeasonalPriceOpen() &&
+      JSON.stringify(this.reducedSeasonalPrice()) !== JSON.stringify(shown)
+    );
+  }
+
+  protected save(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
+    void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      this.isSaving.set(true);
+      this.error.set(null);
+      try {
+        await firstValueFrom(this.priceLists.createPackage(this.draft()));
+        this.isSaving.set(false);
+        this.open.set(false);
+        this.created.emit();
+      } catch (error: unknown) {
+        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
+          this.error.set(problem),
+        );
+      } finally {
+        this.isSaving.set(false);
+      }
+    });
   }
 
   protected async leave(): Promise<void> {
@@ -144,6 +200,9 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draft.set(newDraft());
     this.draftForm().reset();
     this.pristine.set(JSON.stringify(newDraft()));
+    this.reducedSeasonalPrice.set(new PackageReducedSeasonalPrice());
+    this.reducedSeasonalPriceForm().reset();
+    this.isReducedSeasonalPriceOpen.set(false);
     this.sectors.set([]);
     this.periods.set([]);
     this.isPriceListLoaded.set(false);

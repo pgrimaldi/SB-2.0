@@ -1627,7 +1627,16 @@
             "online_enabled": "Habilitar también para reservas online",
             "online_only": "Habilitar solo para reservas online",
             "reduced_seasonal_price": "Precio de temporada reducido",
+            "reduced_seasonal": {
+              "date_from": "Del",
+              "date_to": "Al",
+              "name": "Nombre",
+              "add": "Añadir",
+              "save": "Guardar"
+            },
             "price_list": {
+              "seasonal_prices": "Precios de temporada",
+              "period_prices": "Precios por periodo",
               "seasonal_half_day": "Precio de temporada medio día",
               "seasonal": "Precio de temporada",
               "half_day": "Precio medio día",
@@ -1643,11 +1652,25 @@
               "no_sectors": "No hay sectores ni filas: añádelos en la página Sectores y filas.",
               "no_periods": "Los precios por periodo necesitan al menos un sector o fila y un periodo de la temporada actual.",
               "calculation_method": "Cálculo del precio",
+              "calculation_methods": {
+                "proportional": "Precio proporcional",
+                "daily": "Precio diario",
+                "logarithmic": "Precio logarítmico",
+                "daily_with_weekend": "Precio diario con fin de semana"
+              },
               "calculation_method_info": "Cómo se obtiene el precio de una reserva de varios días a partir de los precios de la tarifa.",
               "cumulative": "Precio acumulado",
               "cumulative_info": "Cuando una misma reserva tiene al menos dos puestos de este paquete en la misma fila, a día completo, el precio se calcula sobre el total de días de todos los puestos de cada periodo, en lugar de puesto por puesto.",
               "monthly_setting": "Ajuste mensual",
+              "monthly_settings": {
+                "effective_month_duration": "Duración real del mes",
+                "thirty_days": "30 días"
+              },
               "weekend_setting": "Ajuste de fin de semana",
+              "weekend_settings": {
+                "saturday_sunday": "Fin de semana: sábado y domingo",
+                "sunday_only": "Fin de semana: solo domingo"
+              },
               "public_holidays": "También festivos",
               "intermediate_prices": "Modificar precios intermedios"
             }

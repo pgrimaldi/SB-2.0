@@ -113,4 +113,20 @@ describe('MapService', () => {
     expect(request.body).toBeNull();
     controller.verify();
   });
+
+  it('should ask the areas of the dropdowns with the property only', () => {
+    const { map, controller } = setup();
+    let answer: unknown;
+
+    map.sectorAreaCombobox('p1').subscribe((read) => (answer = read));
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/map/sector-area-combobox`,
+    );
+    expect(request.request.body).toEqual({ idProperty: 'p1' });
+    request.flush([{ id: 'a1', value: 'Area lettini' }]);
+    expect(answer).toEqual([{ id: 'a1', value: 'Area lettini' }]);
+    controller.verify();
+  });
 });

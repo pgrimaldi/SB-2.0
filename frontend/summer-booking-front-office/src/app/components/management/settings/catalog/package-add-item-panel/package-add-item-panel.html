@@ -2,13 +2,20 @@
   [title]="'management.settings.catalog.packages.form.add_title' | translate"
   [texts]="'management.settings.catalog.packages.form' | translate"
   [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
   [isSaveDisabled]="isSaveDisabled()"
   [(open)]="open"
   (closeRequest)="leave()"
+  (save)="save()"
 >
   <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
     @if (selectedTab() === PanelTab.GeneralInfo) {
-      <app-package-general-info-tab [form]="draftForm" [mainLanguage]="mainLanguage()" />
+      <app-package-general-info-tab
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [reducedSeasonalPriceForm]="reducedSeasonalPriceForm"
+        [(isReducedSeasonalPriceOpen)]="isReducedSeasonalPriceOpen"
+      />
     } @else if (selectedTab() === PanelTab.PriceList) {
       <app-package-price-list-tab
         [attr.inert]="isFetching() ? '' : null"

@@ -2,13 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
 import { MapGrid } from '../../../entities/settings/map-configuration/map-grid';
 import { MapLayout } from '../../../entities/settings/map-configuration/map-layout';
 import { MapSettings } from '../../../entities/settings/map-configuration/map-settings';
 import { onlyFieldsOf } from '../only-fields-of';
 
-/** The property comes from the access token: no request carries idProperty. */
+/**
+ * The property comes from the access token: only the combobox carries idProperty, like every
+ * other combobox.
+ */
 @Injectable({ providedIn: 'root' })
 export class MapService {
   private readonly httpClient = inject(HttpClient);
@@ -38,4 +42,8 @@ export class MapService {
   /** Deletes the spots on the map and brings the grid back to 1 row of 1 item, tilt 0. */
   readonly reset = (): Observable<MapLayout> =>
     this.httpClient.post<MapLayout>(`${this.endpoint}/reset`, null);
+
+  /** Every area of the property's map: `id` is the idSectorArea, `value` the name. */
+  readonly sectorAreaCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sector-area-combobox`, { idProperty });
 }

@@ -3,7 +3,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
+import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
+import { Language } from '../../../entities/shared/language';
 import { PriceListService } from './price-list.service';
 
 describe('PriceListService', () => {
@@ -71,6 +73,37 @@ describe('PriceListService', () => {
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`,
     );
     expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    controller.verify();
+  });
+
+  it('should create the package sending the whole form without the property', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    const reducedSeasonalPrice = {
+      dateFrom: '2026-06-01T00:00:00.000Z',
+      dateTo: '2026-06-30T00:00:00.000Z',
+      reducedSeasonalPriceName: 'Giugno',
+    };
+    const request: PackageAddItemRequest = Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: Language.It, packageName: 'Ombrellone e 2 lettini' }],
+      maxPeopleQuantity: 4,
+      umbrellaQuantity: 1,
+      idSectors: ['s1'],
+      sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 500, seasonalPrice: 900 }],
+      reducedSeasonalPrice: { ...reducedSeasonalPrice, extra: 'not sent' },
+    });
+
+    priceLists.createPackage(request).subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/price-lists`,
+    );
+    expect(call.request.body).toEqual({ ...request, reducedSeasonalPrice });
+    expect(call.request.body).not.toHaveProperty('idProperty');
     controller.verify();
   });
 });

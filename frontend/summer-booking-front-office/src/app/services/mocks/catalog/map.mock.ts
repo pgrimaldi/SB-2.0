@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
 import { MapMixedSpotIcon } from '../../../entities/enums/map-mixed-spot-icon';
 import { MapUmbrellaIcon } from '../../../entities/enums/map-umbrella-icon';
@@ -17,10 +18,17 @@ import {
   MapSettings,
 } from '../../../entities/settings/map-configuration/map-settings';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, problem } from '../errors/problem.mock';
+import { MockFieldError, forbidden, problem } from '../errors/problem.mock';
+import { propertyOf } from '../properties/properties.mock';
 
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const MAX_BYTES = MAX_MAP_BACKGROUND_MEGABYTES * 1024 * 1024;
+const SECTOR_AREAS: (ComboboxItem & { propertyId: number })[] = [
+  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01', value: 'Area lettini' },
+  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a02', value: 'Area ombrelloni' },
+  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a03', value: 'Area cabine' },
+  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a04', value: 'Parcheggio' },
+];
 
 function icon(name: string | null): MapIcon {
   return { iconId: null, name, url: null, isDefault: name === null };
@@ -227,4 +235,25 @@ export const updateMapConfigurationMock = (
     },
   };
   return noContent(request);
+};
+
+/**
+ * `POST /api/catalog/map/sector-area-combobox` with `{ idProperty }`: every area of the property's
+ * map, in its order, as `{ id, value }`. 401 without a valid access token; 403 for a missing or
+ * unknown property.
+ */
+export const sectorAreaComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const property = propertyOf((request.body as { idProperty?: unknown } | null)?.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const items: ComboboxItem[] = SECTOR_AREAS.filter((area) => area.propertyId === property.id).map(
+    ({ id, value }) => ({ id, value }),
+  );
+  return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };

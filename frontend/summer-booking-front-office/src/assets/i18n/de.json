@@ -1627,7 +1627,16 @@
             "online_enabled": "Auch für Online-Buchungen aktivieren",
             "online_only": "Nur für Online-Buchungen aktivieren",
             "reduced_seasonal_price": "Ermäßigter Saisonpreis",
+            "reduced_seasonal": {
+              "date_from": "Vom",
+              "date_to": "Bis",
+              "name": "Name",
+              "add": "Hinzufügen",
+              "save": "Speichern"
+            },
             "price_list": {
+              "seasonal_prices": "Saisonpreise",
+              "period_prices": "Preise je Zeitraum",
               "seasonal_half_day": "Saisonpreis halber Tag",
               "seasonal": "Saisonpreis",
               "half_day": "Preis halber Tag",
@@ -1643,11 +1652,25 @@
               "no_sectors": "Keine Sektoren oder Reihen: füge sie auf der Seite Sektoren und Reihen hinzu.",
               "no_periods": "Für Preise pro Zeitraum braucht es mindestens einen Sektor oder eine Reihe und einen Zeitraum der laufenden Saison.",
               "calculation_method": "Preisberechnung",
+              "calculation_methods": {
+                "proportional": "Proportionaler Preis",
+                "daily": "Tagespreis",
+                "logarithmic": "Logarithmischer Preis",
+                "daily_with_weekend": "Tagespreis mit Wochenende"
+              },
               "calculation_method_info": "Wie der Preis einer Buchung über mehrere Tage aus den Preisen der Preisliste berechnet wird.",
               "cumulative": "Kumulierter Preis",
               "cumulative_info": "Hat dieselbe Buchung mindestens zwei Plätze dieses Pakets in derselben Reihe, ganztägig, wird der Preis auf die Summe der Tage aller Plätze jedes Zeitraums berechnet statt Platz für Platz.",
               "monthly_setting": "Monatseinstellung",
+              "monthly_settings": {
+                "effective_month_duration": "Tatsächliche Monatslänge",
+                "thirty_days": "30 Tage"
+              },
               "weekend_setting": "Wochenendeinstellung",
+              "weekend_settings": {
+                "saturday_sunday": "Wochenende: Samstag und Sonntag",
+                "sunday_only": "Wochenende: nur Sonntag"
+              },
               "public_holidays": "Auch Feiertage",
               "intermediate_prices": "Zwischenpreise bearbeiten"
             }
