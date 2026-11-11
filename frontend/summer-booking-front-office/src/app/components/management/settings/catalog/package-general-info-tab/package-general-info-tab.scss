@@ -33,14 +33,18 @@
   gap: 0.5rem;
 }
 
-// The two "default" choices in a thin frame.
+// The two "default" choices in a thin frame, moved back by its border and inner space: every box in one column.
 .package__general__info__tab__default {
+  margin-inline-start: calc(-0.25rem - 0.0625rem);
   padding: 0 0.75rem 0 0.25rem;
   border: 0.0625rem solid var(--color__layout__text__soft);
   border-radius: 0.25rem;
 }
 
 .package__general__info__tab__reduced {
+  --button-text-size: 0.75rem;
+  --button-icon-size: 0.625rem;
+  --button-height: 1.75rem;
   --button-border-color: var(--color__layout__text__soft);
 
   align-self: flex-start;

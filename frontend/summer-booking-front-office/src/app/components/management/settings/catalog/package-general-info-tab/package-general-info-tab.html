@@ -32,26 +32,36 @@
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.max_additional_items' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [options]="additionalItemOptions"
+  [value]="optionOf(form().maxAdditionalItemQuantity().value())"
+  (valueChange)="setQuantity(form().maxAdditionalItemQuantity, $event)"
 />
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.max_people' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [options]="peopleOptions"
+  [value]="optionOf(form().maxPeopleQuantity().value())"
+  (valueChange)="setQuantity(form().maxPeopleQuantity, $event)"
 />
 
 <app-section-title
   [text]="'management.settings.catalog.packages.form.articles.title' | translate"
 />
 <div class="package__general__info__tab__articles">
-  @for (article of articles; track article) {
+  @for (article of articles; track article.field) {
     <app-filled-select
-      [label]="article | translate"
+      [label]="article.label | translate"
       [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+      [options]="articleOptions"
+      [value]="optionOf(form()[article.field]().value())"
+      (valueChange)="setQuantity(form()[article.field], $event)"
     />
   }
 </div>
 
-<app-filled-multi-select
+<app-filled-text-field
   [label]="'management.settings.catalog.packages.form.included_services' | translate"
+  [formField]="form().includedServices"
 />
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
@@ -59,7 +69,12 @@
 />
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.sectors' | translate"
-  [placeholder]="'management.settings.catalog.packages.form.all_sectors' | translate"
+  [placeholder]="
+    sectorsLoadError() ? '' : ('management.settings.catalog.packages.form.all_sectors' | translate)
+  "
+  [options]="sectorOptions()"
+  [formField]="form().idSectors"
+  [error]="sectorsLoadError()"
 />
 
 <div class="package__general__info__tab__options">
