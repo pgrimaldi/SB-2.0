@@ -13,6 +13,7 @@ import {
   PackageAddItemRequest,
 } from '../../../entities/settings/catalog/package-add-item-request';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
+import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
@@ -39,6 +40,42 @@ const PACKAGES: PackageRow[] = PACKAGE_NAMES.map((packageName, index) => ({
   idPackage: `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a${String(index + 1).padStart(2, '0')}`,
   packageName,
 }));
+
+/** What the panels saved, by idPackage; a package never saved has only its name. */
+const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
+  [
+    PACKAGES[0].idPackage ?? '',
+    Object.assign(new PackageAddItemRequest(), {
+      translations: [
+        { language: 'it', packageName: PACKAGES[0].packageName },
+        { language: 'en', packageName: 'Umbrella and 2 sunbeds' },
+      ],
+      maxAdditionalItemQuantity: 2,
+      maxPeopleQuantity: 4,
+      umbrellaQuantity: 1,
+      sunbedQuantity: 2,
+      includedServices: 'Cassetta di sicurezza',
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01', '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02'],
+      isDefault: true,
+      isOnlineEnabled: true,
+      reducedSeasonalPrice: {
+        dateFrom: '2026-06-01T00:00:00.000Z',
+        dateTo: '2026-06-30T00:00:00.000Z',
+        reducedSeasonalPriceName: 'Giugno',
+      },
+      sectorPrices: [
+        {
+          idSector: '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01',
+          seasonalHalfDayPrice: 600,
+          seasonalPrice: 1100,
+        },
+      ],
+      calculationMethod: PriceCalculationMethod.Daily,
+      monthlySetting: PriceMonthlySetting.EffectiveMonthDuration,
+      weekendSetting: PriceWeekendSetting.SaturdaySunday,
+    }),
+  ],
+]);
 
 const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['packageName'] as const;
@@ -97,6 +134,7 @@ export const deletePackageItemsMock = (
   }
   for (const item of packages) {
     PACKAGES.splice(PACKAGES.indexOf(item), 1);
+    PACKAGE_DETAILS.delete(item.idPackage ?? '');
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -122,11 +160,25 @@ export const duplicatePackageItemsMock = (
     return resourceNotFound(request);
   }
   for (const item of packages) {
-    PACKAGES.push({
+    const copy: PackageRow = {
       propertyId: item.propertyId,
       idPackage: crypto.randomUUID(),
       packageName: copyName(item),
-    });
+    };
+    const detail = PACKAGE_DETAILS.get(item.idPackage ?? '');
+    if (detail) {
+      PACKAGE_DETAILS.set(copy.idPackage ?? '', {
+        ...structuredClone(detail),
+        translations: detail.translations.map((translation) =>
+          translation.language === 'it'
+            ? { ...translation, packageName: copy.packageName }
+            : { ...translation },
+        ),
+        isDefault: false,
+        isDefaultOnline: false,
+      });
+    }
+    PACKAGES.push(copy);
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -166,10 +218,10 @@ function positiveInteger(value: unknown, fallback: number): number {
 type CreatePackageBody = Partial<PackageAddItemRequest>;
 
 /**
- * `POST /api/catalog/price-lists` with `PackageAddItemRequest`, the property from the access token:
- * the new package goes into the list, with the name in the language of `Accept-Language`. 201 with
- * the new row; 401 without a valid access token; 400 with one error per wrong field (see
- * `packageErrors`).
+ * `POST /api/catalog/packages/create-package` with `PackageAddItemRequest`, the property from the
+ * access token: the new package goes into the list, with the name in the language of
+ * `Accept-Language`. 204 without a body; 401 without a valid access token; 400 with one error per
+ * wrong field (see `packageErrors`).
  */
 export const createPackageMock = (
   request: HttpRequest<unknown>,
@@ -190,9 +242,11 @@ export const createPackageMock = (
     packageName: main?.packageName?.trim() ?? null,
   };
   PACKAGES.push(row);
-  return of(
-    new HttpResponse({ status: 201, url: request.url, body: onlyFieldsOf(PackageItem, row) }),
-  ).pipe(delay(600));
+  PACKAGE_DETAILS.set(
+    row.idPackage ?? '',
+    structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
+  );
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
@@ -262,3 +316,71 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
   }
   return errors;
 }
+
+/** The id at the end of `/api/catalog/packages/{idPackage}`. */
+function idPackageOf(request: HttpRequest<unknown>): string {
+  return decodeURIComponent(request.url.slice(request.url.lastIndexOf('/') + 1));
+}
+
+/** The package of the token's property, null when it is not one of them. */
+function packageOf(idPackage: string): PackageRow | null {
+  return (
+    PACKAGES.find((row) => row.idPackage === idPackage && row.propertyId === DEMO_PROPERTY.id) ??
+    null
+  );
+}
+
+/**
+ * `GET /api/catalog/packages/{idPackage}`, the property from the access token: everything the
+ * package has, as the panels send it; a package never saved has only its name in Italian. 200;
+ * 401 without a valid access token; 404 `resource.not_found` for a package that is not one of its.
+ */
+export const selectedPackageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = packageOf(idPackageOf(request));
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const detail =
+    PACKAGE_DETAILS.get(row.idPackage ?? '') ??
+    Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: 'it', packageName: row.packageName }],
+    });
+  const answer: PackageSelectedItem = { ...structuredClone(detail), idPackage: row.idPackage };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+};
+
+/**
+ * `POST /api/catalog/packages/update-package` with `PackageAddItemRequest` and `idPackage`, the
+ * property from the access token: the package takes all the values sent, its name in the list the
+ * one in the language of `Accept-Language`. 204 without a body; 401 without a valid access token;
+ * 404 `resource.not_found` for a package that is not one of its; 400 as `createPackageMock`.
+ */
+export const updatePackageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreatePackageBody & { idPackage?: unknown };
+  const row = typeof body.idPackage === 'string' ? packageOf(body.idPackage) : null;
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const errors = packageErrors(body, language);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  const main = body.translations?.find((translation) => translation.language === language);
+  row.packageName = main?.packageName?.trim() ?? row.packageName;
+  PACKAGE_DETAILS.set(
+    row.idPackage ?? '',
+    structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
+  );
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};

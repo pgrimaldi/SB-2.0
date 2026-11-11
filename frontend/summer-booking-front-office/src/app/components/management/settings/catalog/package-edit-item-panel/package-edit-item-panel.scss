@@ -1,0 +1,11 @@
+.package__edit__item__panel__error {
+  margin: 1rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// Alone, Modifica takes both columns of the buttons.
+.package__edit__item__panel__edit {
+  grid-column: 1 / -1;
+}

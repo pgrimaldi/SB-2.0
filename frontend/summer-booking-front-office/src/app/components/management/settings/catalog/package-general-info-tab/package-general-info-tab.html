@@ -3,7 +3,7 @@
     [label]="'management.settings.catalog.packages.form.name' | translate"
     [isMandatory]="true"
     [formField]="main.packageName"
-    [error]="validationText.text(main.packageName)"
+    [error]="validationText.text(main.packageName) ?? validationText.text(form().translations)"
   />
 }
 <app-expansion-panel
@@ -34,6 +34,8 @@
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
   [options]="additionalItemOptions"
   [value]="optionOf(form().maxAdditionalItemQuantity().value())"
+  [readonly]="form().maxAdditionalItemQuantity().readonly()"
+  [error]="validationText.text(form().maxAdditionalItemQuantity)"
   (valueChange)="setQuantity(form().maxAdditionalItemQuantity, $event)"
 />
 <app-filled-select
@@ -41,6 +43,8 @@
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
   [options]="peopleOptions"
   [value]="optionOf(form().maxPeopleQuantity().value())"
+  [readonly]="form().maxPeopleQuantity().readonly()"
+  [error]="validationText.text(form().maxPeopleQuantity)"
   (valueChange)="setQuantity(form().maxPeopleQuantity, $event)"
 />
 
@@ -54,6 +58,8 @@
       [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
       [options]="articleOptions"
       [value]="optionOf(form()[article.field]().value())"
+      [readonly]="form()[article.field]().readonly()"
+      [error]="validationText.text(form()[article.field])"
       (valueChange)="setQuantity(form()[article.field], $event)"
     />
   }
@@ -62,6 +68,7 @@
 <app-filled-text-field
   [label]="'management.settings.catalog.packages.form.included_services' | translate"
   [formField]="form().includedServices"
+  [error]="validationText.text(form().includedServices)"
 />
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
@@ -70,7 +77,7 @@
   "
   [options]="sectorAreaOptions()"
   [formField]="form().idSectorAreas"
-  [error]="sectorAreasLoadError()"
+  [error]="sectorAreasLoadError() ?? validationText.text(form().idSectorAreas)"
 />
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.sectors' | translate"
@@ -79,20 +86,34 @@
   "
   [options]="sectorOptions()"
   [formField]="form().idSectors"
-  [error]="sectorsLoadError()"
+  [error]="sectorsLoadError() ?? validationText.text(form().idSectors)"
 />
 
 <div class="package__general__info__tab__options">
-  <app-checkbox class="package__general__info__tab__default" [formField]="form().isDefault">
+  <app-checkbox
+    class="package__general__info__tab__default"
+    [formField]="form().isDefault"
+    [error]="validationText.text(form().isDefault)"
+  >
     {{ 'management.settings.catalog.packages.form.is_default' | translate }}
   </app-checkbox>
-  <app-checkbox class="package__general__info__tab__default" [formField]="form().isDefaultOnline">
+  <app-checkbox
+    class="package__general__info__tab__default"
+    [formField]="form().isDefaultOnline"
+    [error]="validationText.text(form().isDefaultOnline)"
+  >
     {{ 'management.settings.catalog.packages.form.is_default_online' | translate }}
   </app-checkbox>
-  <app-checkbox [formField]="form().isOnlineEnabled">
+  <app-checkbox
+    [formField]="form().isOnlineEnabled"
+    [error]="validationText.text(form().isOnlineEnabled)"
+  >
     {{ 'management.settings.catalog.packages.form.online_enabled' | translate }}
   </app-checkbox>
-  <app-checkbox [formField]="form().isOnlineOnly">
+  <app-checkbox
+    [formField]="form().isOnlineOnly"
+    [error]="validationText.text(form().isOnlineOnly)"
+  >
     {{ 'management.settings.catalog.packages.form.online_only' | translate }}
   </app-checkbox>
 </div>

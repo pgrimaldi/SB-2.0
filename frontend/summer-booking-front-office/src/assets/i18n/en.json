@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "Add new package",
+            "edit_title": "Edit package",
             "cancel": "Cancel",
             "save": "Create package",
+            "edit": "Edit",
+            "save_changes": "Save",
             "tabs": {
               "general_info": "General info",
               "price_list": "Price list"

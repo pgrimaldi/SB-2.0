@@ -6,6 +6,7 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { PackageAddItemPanel } from '../../../../components/management/settings/catalog/package-add-item-panel/package-add-item-panel';
+import { PackageEditItemPanel } from '../../../../components/management/settings/catalog/package-edit-item-panel/package-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
 import {
@@ -28,6 +29,7 @@ interface PackagesTableTexts {
     DeleteItemsPopup,
     DuplicateItemsPopup,
     PackageAddItemPanel,
+    PackageEditItemPanel,
     PageTitle,
     Table,
     TableErrorPopup,
@@ -44,6 +46,8 @@ export class Packages {
 
   protected readonly loadFailed = signal(false);
   protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idPackageToEdit = signal<string | null>(null);
   protected readonly idSelectedPackages = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idPackagesToDelete = signal<readonly string[]>([]);
@@ -82,7 +86,7 @@ export class Packages {
     delete: ({ idPackage, packageName }) => idPackage && this.askDelete([idPackage], packageName),
     duplicate: ({ idPackage, packageName }) =>
       idPackage && this.askDuplicate([idPackage], packageName),
-    edit: () => undefined,
+    edit: ({ idPackage }) => idPackage && this.askEdit(idPackage),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, PackageItem> = (request) =>
@@ -97,6 +101,11 @@ export class Packages {
     this.idPackagesToDelete.set(idPackages.map(String));
     this.packageNameToDelete.set(packageName);
     this.deleting.set(true);
+  }
+
+  protected askEdit(idPackage: string): void {
+    this.idPackageToEdit.set(idPackage);
+    this.editing.set(true);
   }
 
   protected askDuplicate(

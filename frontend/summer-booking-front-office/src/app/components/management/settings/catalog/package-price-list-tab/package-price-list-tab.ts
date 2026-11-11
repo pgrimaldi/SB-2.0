@@ -7,6 +7,7 @@ import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { PriceCalculationMethod } from '../../../../../entities/enums/price-calculation-method';
 import { PriceMonthlySetting } from '../../../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../../../entities/enums/price-weekend-setting';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
@@ -99,6 +100,7 @@ export class PackagePriceListTab {
   readonly isLoaded = input(false);
 
   private readonly translateService = inject(TranslateService);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonSize = ButtonSize;
   protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;

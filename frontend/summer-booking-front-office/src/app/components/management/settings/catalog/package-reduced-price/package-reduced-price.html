@@ -3,7 +3,7 @@
   [appearance]="ButtonAppearance.Light"
   [size]="ButtonSize.Small"
   [pathIcon]="addIcon"
-  [disabled]="isOpen() || row() !== null"
+  [disabled]="isOpen() || row() !== null || isLocked()"
   (clicked)="add()"
 >
   {{ 'management.settings.catalog.packages.form.reduced_seasonal_price' | translate }}
@@ -95,12 +95,14 @@
                 class="package__reduced__price__action"
                 [label]="'table.actions.edit' | translate"
                 [pathIcon]="editIcon"
+                [disabled]="isLocked()"
                 (click)="edit(price)"
               />
               <app-icon-button
                 class="package__reduced__price__action"
                 [label]="'table.actions.delete' | translate"
                 [pathIcon]="deleteIcon"
+                [disabled]="isLocked()"
                 (click)="delete()"
               />
             </span>
@@ -109,4 +111,8 @@
       </tbody>
     </table>
   </div>
+}
+
+@if (error(); as error) {
+  <p class="package__reduced__price__error">{{ error }}</p>
 }

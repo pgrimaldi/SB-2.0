@@ -6750,7 +6750,7 @@ Stato: 200 OK.
 | `id` | string (UUID) | `9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01` |
 | `value` | string | `Area lettini` |
 
-### POST `/api/catalog/price-lists`
+### POST `/api/catalog/packages/create-package`
 
 Listino: creazione pacchetto.
 
@@ -6892,7 +6892,276 @@ Listino: creazione pacchetto.
 
 #### Response
 
-Stato: 201 Created (il frontend non legge il corpo).
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/packages/{idPackage}`
+
+Listino: pacchetto da modificare.
+
+#### Payload
+
+Nessun corpo: la richiesta porta solo il cookie del refresh token, inviato dal browser in automatico.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idPackage": "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01",
+  "translations": [
+    {
+      "language": "it",
+      "packageName": "Ombrellone e 2 lettini"
+    },
+    {
+      "language": "en",
+      "packageName": "Umbrella and 2 sunbeds"
+    }
+  ],
+  "maxAdditionalItemQuantity": 2,
+  "maxPeopleQuantity": 4,
+  "umbrellaQuantity": 1,
+  "sunbedQuantity": 2,
+  "deckchairQuantity": null,
+  "directorChairQuantity": null,
+  "cabinQuantity": null,
+  "tentQuantity": null,
+  "includedServices": "Cassetta di sicurezza",
+  "idSectorAreas": [
+    "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"
+  ],
+  "idSectors": [
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
+  ],
+  "isDefault": true,
+  "isDefaultOnline": false,
+  "isOnlineEnabled": true,
+  "isOnlineOnly": false,
+  "reducedSeasonalPrice": {
+    "dateFrom": "2026-06-01T00:00:00.000Z",
+    "dateTo": "2026-06-30T00:00:00.000Z",
+    "reducedSeasonalPriceName": "Giugno"
+  },
+  "sectorPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "seasonalHalfDayPrice": 600,
+      "seasonalPrice": 1100
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "halfDayPrice": 15,
+      "dailyPrice": 25,
+      "weekendPrice": 30,
+      "halfDayWeekendPrice": 18,
+      "halfDaySevenDaysPrice": 90,
+      "sevenDaysPrice": 150,
+      "halfDayFourteenDaysPrice": 170,
+      "fourteenDaysPrice": 280,
+      "halfDayMonthlyPrice": 320,
+      "monthlyPrice": 520
+    }
+  ],
+  "calculationMethod": "Daily",
+  "isCumulative": false,
+  "monthlySetting": "EffectiveMonthDuration",
+  "weekendSetting": "SaturdaySunday",
+  "isPublicHolidaysIncluded": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idPackage` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
+| `translations[]` | PackageTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "packageName": "Ombrellone e 2 lettini"}, {"language": "en", "packageName": "Umbrella and 2 sunbeds"}]` |
+| `translations[].language` | string | `it` |
+| `translations[].packageName` | string \| null | `Ombrellone e 2 lettini` |
+| `maxAdditionalItemQuantity` | number (intero) \| null | `2` |
+| `maxPeopleQuantity` | number (intero) \| null | `4` |
+| `umbrellaQuantity` | number (intero) \| null | `1` |
+| `sunbedQuantity` | number (intero) \| null | `2` |
+| `deckchairQuantity` | number (intero) \| null | `null` |
+| `directorChairQuantity` | number (intero) \| null | `null` |
+| `cabinQuantity` | number (intero) \| null | `null` |
+| `tentQuantity` | number (intero) \| null | `null` |
+| `includedServices` | string \| null | `Cassetta di sicurezza` |
+| `idSectorAreas` | string[] (UUID) | `["9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
+| `isDefault` | boolean | `true` |
+| `isDefaultOnline` | boolean | `false` |
+| `isOnlineEnabled` | boolean | `true` |
+| `isOnlineOnly` | boolean | `false` |
+| `reducedSeasonalPrice` | PackageReducedSeasonalPrice \| null | `{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno"}` |
+| `reducedSeasonalPrice.dateFrom` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
+| `reducedSeasonalPrice.dateTo` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
+| `reducedSeasonalPrice.reducedSeasonalPriceName` | string | `Giugno` |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 600, "seasonalPrice": 1100}]` |
+| `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1100` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
+| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null | `18` |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null | `90` |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null | `150` |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null | `170` |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `280` |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `320` |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `520` |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
+| `isCumulative` | boolean | `false` |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
+| `isPublicHolidaysIncluded` | boolean | `false` |
+
+### POST `/api/catalog/packages/update-package`
+
+Listino: modifica pacchetto.
+
+#### Payload
+
+```json
+{
+  "idPackage": "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01",
+  "translations": [
+    {
+      "language": "it",
+      "packageName": "Ombrellone e 2 lettini premium"
+    },
+    {
+      "language": "en",
+      "packageName": "Umbrella and 2 sunbeds"
+    },
+    {
+      "language": "fr",
+      "packageName": null
+    },
+    {
+      "language": "de",
+      "packageName": null
+    },
+    {
+      "language": "es",
+      "packageName": null
+    },
+    {
+      "language": "ar",
+      "packageName": null
+    },
+    {
+      "language": "zh",
+      "packageName": null
+    }
+  ],
+  "maxAdditionalItemQuantity": 2,
+  "maxPeopleQuantity": 4,
+  "umbrellaQuantity": 1,
+  "sunbedQuantity": 2,
+  "deckchairQuantity": null,
+  "directorChairQuantity": null,
+  "cabinQuantity": null,
+  "tentQuantity": null,
+  "includedServices": "Cassetta di sicurezza",
+  "idSectorAreas": [
+    "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"
+  ],
+  "idSectors": [
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
+  ],
+  "isDefault": true,
+  "isDefaultOnline": false,
+  "isOnlineEnabled": true,
+  "isOnlineOnly": false,
+  "reducedSeasonalPrice": null,
+  "sectorPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "seasonalHalfDayPrice": 600,
+      "seasonalPrice": 1200
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "halfDayPrice": 15,
+      "dailyPrice": 25,
+      "weekendPrice": 30,
+      "halfDayWeekendPrice": 18,
+      "halfDaySevenDaysPrice": 90,
+      "sevenDaysPrice": 150,
+      "halfDayFourteenDaysPrice": 170,
+      "fourteenDaysPrice": 280,
+      "halfDayMonthlyPrice": 320,
+      "monthlyPrice": 520
+    }
+  ],
+  "calculationMethod": "Daily",
+  "isCumulative": false,
+  "monthlySetting": "EffectiveMonthDuration",
+  "weekendSetting": "SaturdaySunday",
+  "isPublicHolidaysIncluded": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idPackage` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
+| `translations[]` | PackageTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "packageName": "Ombrellone e 2 lettini premium"}, {"language": "en", "packageName": "Umbrella and 2 sunbeds"}, {"language": "fr", "packageName": null}, {"language": "de", "packageName": null}, {"language": "es", "packageName": null}, {"language": "ar", "packageName": null}, {"language": "zh", "packageName": null}]` |
+| `translations[].language` | string | `it` |
+| `translations[].packageName` | string \| null | `Ombrellone e 2 lettini premium` |
+| `maxAdditionalItemQuantity` | number (intero) \| null | `2` |
+| `maxPeopleQuantity` | number (intero) \| null | `4` |
+| `umbrellaQuantity` | number (intero) \| null | `1` |
+| `sunbedQuantity` | number (intero) \| null | `2` |
+| `deckchairQuantity` | number (intero) \| null | `null` |
+| `directorChairQuantity` | number (intero) \| null | `null` |
+| `cabinQuantity` | number (intero) \| null | `null` |
+| `tentQuantity` | number (intero) \| null | `null` |
+| `includedServices` | string \| null | `Cassetta di sicurezza` |
+| `idSectorAreas` | string[] (UUID) | `["9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"]` |
+| `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
+| `isDefault` | boolean | `true` |
+| `isDefaultOnline` | boolean | `false` |
+| `isOnlineEnabled` | boolean | `true` |
+| `isOnlineOnly` | boolean | `false` |
+| `reducedSeasonalPrice` | PackageReducedSeasonalPrice \| null | `null` |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 600, "seasonalPrice": 1200}]` |
+| `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1200` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
+| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null | `18` |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null | `90` |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null | `150` |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null | `170` |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `280` |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `320` |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `520` |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
+| `isCumulative` | boolean | `false` |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
+| `isPublicHolidaysIncluded` | boolean | `false` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 

@@ -80,6 +80,8 @@ import {
   deletePackageItemsMock,
   duplicatePackageItemsMock,
   packageListMock,
+  selectedPackageMock,
+  updatePackageMock,
 } from './catalog/price-lists.mock';
 import {
   affiliatedHotelComboboxMock,
@@ -962,9 +964,23 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/price-lists`
+    request.url === `${environment.apiBaseUrl}/catalog/packages/create-package`
   ) {
     return createPackageMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/packages/update-package`
+  ) {
+    return updatePackageMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url.startsWith(`${environment.apiBaseUrl}/catalog/packages/`)
+  ) {
+    return selectedPackageMock(request);
   }
 
   if (

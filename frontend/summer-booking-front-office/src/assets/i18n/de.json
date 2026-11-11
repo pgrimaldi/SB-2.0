@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "Neues Paket hinzufügen",
+            "edit_title": "Paket bearbeiten",
             "cancel": "Abbrechen",
             "save": "Paket erstellen",
+            "edit": "Bearbeiten",
+            "save_changes": "Speichern",
             "tabs": {
               "general_info": "Allgemeine Infos",
               "price_list": "Preisliste"

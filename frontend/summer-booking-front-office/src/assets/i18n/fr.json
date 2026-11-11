@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "Ajouter un nouveau forfait",
+            "edit_title": "Modifier le forfait",
             "cancel": "Annuler",
             "save": "Créer le forfait",
+            "edit": "Modifier",
+            "save_changes": "Enregistrer",
             "tabs": {
               "general_info": "Infos générales",
               "price_list": "Liste de prix"

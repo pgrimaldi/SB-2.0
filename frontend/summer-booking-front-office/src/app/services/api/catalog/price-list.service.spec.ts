@@ -100,10 +100,52 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/price-lists`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages/create-package`,
     );
     expect(call.request.body).toEqual({ ...request, reducedSeasonalPrice });
     expect(call.request.body).not.toHaveProperty('idProperty');
+    controller.verify();
+  });
+
+  it('should read the package to edit by its id', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    let answer: unknown;
+
+    priceLists.selectedPackage('k1').subscribe((read) => (answer = read));
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'GET' && url === `${environment.apiBaseUrl}/catalog/packages/k1`,
+    );
+    call.flush({ idPackage: 'k1', maxPeopleQuantity: 4 });
+    expect(answer).toEqual({ idPackage: 'k1', maxPeopleQuantity: 4 });
+    controller.verify();
+  });
+
+  it('should update the package sending the whole form with its id', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    const request: PackageAddItemRequest = Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: Language.It, packageName: 'Ombrellone e 3 lettini' }],
+      sunbedQuantity: 3,
+    });
+
+    priceLists
+      .updatePackage('k1', { ...request, extra: 'not sent' } as PackageAddItemRequest)
+      .subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages/update-package`,
+    );
+    expect(call.request.body).toEqual({ ...request, idPackage: 'k1' });
     controller.verify();
   });
 });

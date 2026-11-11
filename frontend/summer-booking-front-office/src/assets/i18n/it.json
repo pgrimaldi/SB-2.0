@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "Aggiungi nuovo pacchetto",
+            "edit_title": "Modifica pacchetto",
             "cancel": "Annulla",
             "save": "Crea pacchetto",
+            "edit": "Modifica",
+            "save_changes": "Salva",
             "tabs": {
               "general_info": "Info Generali",
               "price_list": "Listino"

@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "إضافة باقة جديدة",
+            "edit_title": "تعديل الباقة",
             "cancel": "إلغاء",
             "save": "إنشاء الباقة",
+            "edit": "تعديل",
+            "save_changes": "حفظ",
             "tabs": {
               "general_info": "معلومات عامة",
               "price_list": "قائمة الأسعار"

@@ -1,0 +1,64 @@
+<app-side-panel
+  [title]="'management.settings.catalog.packages.form.edit_title' | translate"
+  [texts]="'management.settings.catalog.packages.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+>
+  <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
+    @if (selectedTab() === PanelTab.GeneralInfo) {
+      <app-package-general-info-tab
+        [attr.inert]="isLoading() ? '' : null"
+        [form]="draftForm"
+        [mainLanguage]="mainLanguage()"
+        [reducedSeasonalPriceForm]="reducedSeasonalPriceForm"
+        [(isReducedSeasonalPriceOpen)]="isReducedSeasonalPriceOpen"
+      />
+    } @else if (selectedTab() === PanelTab.PriceList) {
+      <app-package-price-list-tab
+        [attr.inert]="isLoading() ? '' : null"
+        [form]="draftForm"
+        [sectors]="sectors()"
+        [periods]="periods()"
+        [isLoaded]="isLoaded()"
+      />
+    }
+    @if (errorMessage(); as errorMessage) {
+      <p class="package__edit__item__panel__error">{{ errorMessage }}</p>
+    }
+  </app-tab-group>
+
+  <div appSidePanelButtons>
+    @if (isEditing()) {
+      <app-button
+        [appearance]="ButtonAppearance.Light"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaving()"
+        (clicked)="requestCancel()"
+      >
+        {{ 'management.settings.catalog.packages.form.cancel' | translate }}
+      </app-button>
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isSaveDisabled()"
+        [isLoading]="isSaving()"
+        (clicked)="save()"
+      >
+        {{ 'management.settings.catalog.packages.form.save_changes' | translate }}
+      </app-button>
+    } @else {
+      <app-button
+        class="package__edit__item__panel__edit"
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="isEditDisabled()"
+        (clicked)="startEdit()"
+      >
+        {{ 'management.settings.catalog.packages.form.edit' | translate }}
+      </app-button>
+    }
+  </div>
+</app-side-panel>

@@ -38,6 +38,9 @@
     </p>
   }
 </app-expansion-panel>
+@if (validationText.text(form().sectorPrices); as error) {
+  <p class="package__price__list__tab__error">{{ error }}</p>
+}
 <app-expansion-panel
   class="package__price__list__tab__section"
   [title]="'management.settings.catalog.packages.form.price_list.period_prices' | translate"
@@ -83,6 +86,9 @@
     </p>
   }
 </app-expansion-panel>
+@if (validationText.text(form().periodPrices); as error) {
+  <p class="package__price__list__tab__error">{{ error }}</p>
+}
 
 <div class="package__price__list__tab__field">
   <div class="package__price__list__tab__heading">
@@ -99,11 +105,15 @@
     [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
     [options]="calculationMethods()"
     [formField]="form().calculationMethod"
+    [error]="validationText.text(form().calculationMethod)"
   />
 </div>
 
 <div class="package__price__list__tab__heading">
-  <app-checkbox [formField]="form().isCumulative">
+  <app-checkbox
+    [formField]="form().isCumulative"
+    [error]="validationText.text(form().isCumulative)"
+  >
     {{ 'management.settings.catalog.packages.form.price_list.cumulative' | translate }}
   </app-checkbox>
   <app-icon-button
@@ -118,19 +128,28 @@
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
   [options]="monthlySettings()"
   [formField]="form().monthlySetting"
+  [error]="validationText.text(form().monthlySetting)"
 />
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.price_list.weekend_setting' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
   [options]="weekendSettings()"
   [formField]="form().weekendSetting"
+  [error]="validationText.text(form().weekendSetting)"
 />
 
-<app-checkbox [formField]="form().isPublicHolidaysIncluded">
+<app-checkbox
+  [formField]="form().isPublicHolidaysIncluded"
+  [error]="validationText.text(form().isPublicHolidaysIncluded)"
+>
   {{ 'management.settings.catalog.packages.form.price_list.public_holidays' | translate }}
 </app-checkbox>
 
-<app-button class="package__price__list__tab__intermediate" [size]="ButtonSize.Small">
+<app-button
+  class="package__price__list__tab__intermediate"
+  [size]="ButtonSize.Small"
+  [disabled]="form()().readonly()"
+>
   {{ 'management.settings.catalog.packages.form.price_list.intermediate_prices' | translate }}
 </app-button>
 

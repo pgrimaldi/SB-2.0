@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "添加新套餐",
+            "edit_title": "编辑套餐",
             "cancel": "取消",
             "save": "创建套餐",
+            "edit": "编辑",
+            "save_changes": "保存",
             "tabs": {
               "general_info": "基本信息",
               "price_list": "价目表"

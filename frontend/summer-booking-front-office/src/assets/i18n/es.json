@@ -1597,8 +1597,11 @@
           },
           "form": {
             "add_title": "Añadir nuevo paquete",
+            "edit_title": "Editar paquete",
             "cancel": "Cancelar",
             "save": "Crear paquete",
+            "edit": "Editar",
+            "save_changes": "Guardar",
             "tabs": {
               "general_info": "Información general",
               "price_list": "Tarifa"

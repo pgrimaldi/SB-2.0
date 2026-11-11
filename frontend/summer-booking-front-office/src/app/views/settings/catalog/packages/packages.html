@@ -24,6 +24,12 @@
 />
 
 <app-package-add-item-panel [pathIcon]="closeIcon" [(open)]="adding" (created)="table.reload()" />
+<app-package-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idPackage]="idPackageToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idPackagesToDelete()"

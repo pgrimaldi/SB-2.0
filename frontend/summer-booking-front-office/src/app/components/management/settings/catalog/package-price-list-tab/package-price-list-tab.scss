@@ -75,6 +75,14 @@
   display: block;
 }
 
+// An error of a whole grid (e.g. from the backend), under its section.
+.package__price__list__tab__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 .package__price__list__tab__empty {
   margin: 0;
   color: var(--color__layout__text__soft);

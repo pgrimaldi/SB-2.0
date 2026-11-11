@@ -37,6 +37,12 @@ export class PackageReducedPrice {
   protected readonly editIcon = ['/assets/images/Manager_Table_Edit.svg'] as const;
   protected readonly deleteIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
   protected readonly row = computed(() => this.reducedSeasonalPrice()().value());
+  /** An error of the whole price (e.g. from the backend), under it. */
+  protected readonly error = computed(() => this.validationText.text(this.reducedSeasonalPrice()));
+  /** The package is only to look at (or being saved). */
+  protected readonly isLocked = computed(
+    () => this.reducedSeasonalPrice()().readonly() || this.reducedSeasonalPrice()().disabled(),
+  );
   private readonly dayFormat = computed(
     () =>
       new Intl.DateTimeFormat(this.dateLanguage.locale(), {
