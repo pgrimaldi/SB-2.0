@@ -65,6 +65,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   protected readonly ButtonSize = ButtonSize;
 
   private readonly articles = signal<readonly ComboboxItem[]>([]);
+  protected readonly articlesLoadError = signal<string | null>(null);
   private articlesSubscription?: Subscription;
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
     this.articles().map(({ id, value }) => ({ value: id, label: value })),
@@ -185,13 +186,18 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   private loadArticles(): void {
     // A slower answer of an earlier opening must not replace the list of this one.
     this.articlesSubscription?.unsubscribe();
+    this.articlesLoadError.set(null);
     const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
     }
     this.articlesSubscription = this.warehouse.articleCombobox(idProperty).subscribe({
       next: (articles) => this.articles.set(articles),
-      error: () => this.articles.set([]),
+      error: (error: unknown) => {
+        const problem = toApiProblem(error);
+        this.articles.set([]);
+        this.articlesLoadError.set(this.errorText.instant(problem.code, problem.args));
+      },
     });
   }
 

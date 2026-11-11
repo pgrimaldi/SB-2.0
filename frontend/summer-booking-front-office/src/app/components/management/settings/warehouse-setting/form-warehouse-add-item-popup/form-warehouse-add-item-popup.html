@@ -11,7 +11,7 @@
         [placeholder]="'management.settings.warehouse.form.choose' | translate"
         [options]="articleOptions()"
         [formField]="draftForm.idArticle"
-        [error]="idArticleError()"
+        [error]="articlesLoadError() ?? idArticleError()"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.quantity' | translate"

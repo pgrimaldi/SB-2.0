@@ -11,8 +11,10 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../../behaviours/errors/error-text.behaviour';
 import { ComboboxItem } from '../../../../../../entities/combobox/combobox-item';
 import { SectorService } from '../../../../../../services/api/catalog/sector.service';
+import { toApiProblem } from '../../../../../../services/api/errors/to-api-problem';
 import { FormRow } from '../../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../../shared/ui/forms/form-row/form-row-label';
 import { FilledMultiSelect } from '../../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
@@ -32,8 +34,10 @@ export class ServicesLimits implements OnDestroy {
 
   private readonly auth = inject(AuthBehaviour);
   private readonly sectorService = inject(SectorService);
+  private readonly errorText = inject(ErrorTextBehaviour);
 
   private readonly sectors = signal<readonly ComboboxItem[]>([]);
+  protected readonly sectorsLoadError = signal<string | null>(null);
   private readonly sectorsSubscription?: Subscription;
   protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
     this.sectors().map(({ id, value }) => ({ value: id, label: value })),
@@ -45,7 +49,11 @@ export class ServicesLimits implements OnDestroy {
     if (idProperty) {
       this.sectorsSubscription = this.sectorService.sectorCombobox(idProperty).subscribe({
         next: (sectors) => this.sectors.set(sectors),
-        error: () => this.sectors.set([]),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.sectors.set([]);
+          this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
+        },
       });
     }
   }

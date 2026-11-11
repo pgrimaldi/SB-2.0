@@ -17,6 +17,7 @@
         [placeholder]="'management.settings.user_management.logs.filters_popup.choose' | translate"
         [options]="userOptions()"
         [(value)]="idUsers"
+        [error]="usersLoadError()"
       />
     </div>
 

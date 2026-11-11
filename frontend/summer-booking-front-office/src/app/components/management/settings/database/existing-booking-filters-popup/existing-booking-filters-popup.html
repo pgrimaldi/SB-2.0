@@ -22,6 +22,7 @@
         [placeholder]="'management.settings.database.filters.choose' | translate"
         [options]="affiliatedHotelOptions()"
         [(value)]="idAffiliatedHotels"
+        [error]="affiliatedHotelsLoadError()"
       />
       <app-filled-multi-select
         [label]="'management.settings.database.filters.payment_status.label' | translate"

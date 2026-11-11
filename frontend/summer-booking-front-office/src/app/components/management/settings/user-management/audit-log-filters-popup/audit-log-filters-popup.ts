@@ -16,6 +16,7 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -24,6 +25,7 @@ import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behav
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../../entities/settings/user-management/audit-log-filters';
 import { AuditService } from '../../../../../services/api/audit/audit.service';
+import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
@@ -50,6 +52,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   private readonly translateService = inject(TranslateService);
   private readonly audit = inject(AuditService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
   private readonly language = inject(LanguageBehaviour).current;
   private readonly unsaved = inject(UnsavedChangesBehaviour);
 
@@ -58,6 +61,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   protected readonly actionCodes = signal<readonly string[]>([]);
   protected readonly idUsers = signal<readonly string[]>([]);
   private readonly users = signal<readonly ComboboxItem[]>([]);
+  protected readonly usersLoadError = signal<string | null>(null);
   private pristineChoices = '';
   private usersSubscription?: Subscription;
   private readonly actionTexts = toSignal(
@@ -142,13 +146,18 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   private loadUsers(): void {
     // A slower answer of an earlier opening must not replace the list of this one.
     this.usersSubscription?.unsubscribe();
+    this.usersLoadError.set(null);
     const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
     }
     this.usersSubscription = this.audit.userCombobox(idProperty).subscribe({
       next: (users) => this.users.set(users),
-      error: () => this.users.set([]),
+      error: (error: unknown) => {
+        const problem = toApiProblem(error);
+        this.users.set([]);
+        this.usersLoadError.set(this.errorText.instant(problem.code, problem.args));
+      },
     });
   }
 

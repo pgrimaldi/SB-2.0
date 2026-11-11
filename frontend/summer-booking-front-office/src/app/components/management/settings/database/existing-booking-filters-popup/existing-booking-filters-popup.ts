@@ -16,6 +16,7 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   ExistingBookingFilterTexts,
   filterOptionsOf,
@@ -32,6 +33,7 @@ import {
   PaymentStatusFilter,
 } from '../../../../../entities/database/existing-booking-filters';
 import { DatabaseService } from '../../../../../services/api/database/database.service';
+import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
@@ -53,6 +55,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
   private readonly translateService = inject(TranslateService);
   private readonly database = inject(DatabaseService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
@@ -62,6 +65,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
   protected readonly idAffiliatedHotels = signal<readonly string[]>([]);
   protected readonly paymentStatuses = signal<readonly PaymentStatusFilter[]>([]);
   private readonly affiliatedHotels = signal<readonly ComboboxItem[]>([]);
+  protected readonly affiliatedHotelsLoadError = signal<string | null>(null);
   private pristineChoices = '';
   private affiliatedHotelsSubscription?: Subscription;
   private readonly texts = toSignal(
@@ -162,6 +166,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
   private loadAffiliatedHotels(): void {
     // A slower answer of an earlier opening must not replace the list of this one.
     this.affiliatedHotelsSubscription?.unsubscribe();
+    this.affiliatedHotelsLoadError.set(null);
     const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
@@ -170,7 +175,11 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
       .affiliatedHotelCombobox(idProperty)
       .subscribe({
         next: (hotels) => this.affiliatedHotels.set(hotels),
-        error: () => this.affiliatedHotels.set([]),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.affiliatedHotels.set([]);
+          this.affiliatedHotelsLoadError.set(this.errorText.instant(problem.code, problem.args));
+        },
       });
   }
 

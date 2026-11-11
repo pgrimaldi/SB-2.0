@@ -15,6 +15,7 @@ import { FormField, applyWhen, form, max } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -28,6 +29,7 @@ import { BookingLimitRule } from '../../../../../entities/settings/online-bookin
 import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
+import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { greaterThan } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
@@ -114,6 +116,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private readonly translateService = inject(TranslateService);
   private readonly auth = inject(AuthBehaviour);
   private readonly sectorService = inject(SectorService);
+  private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
 
@@ -139,6 +142,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
   private readonly sectors = signal<readonly ComboboxItem[]>([]);
+  protected readonly sectorsLoadError = signal<string | null>(null);
   private sectorsSubscription?: Subscription;
   protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
     this.sectors().map(({ id, value }) => ({ value: id, label: value })),
@@ -302,13 +306,18 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   /** At every opening: a slower answer of an earlier opening must not replace this list. */
   private loadSectors(): void {
     this.sectorsSubscription?.unsubscribe();
+    this.sectorsLoadError.set(null);
     const idProperty = this.auth.user()?.propertyId;
     if (!idProperty) {
       return;
     }
     this.sectorsSubscription = this.sectorService.sectorCombobox(idProperty).subscribe({
       next: (sectors) => this.sectors.set(sectors),
-      error: () => this.sectors.set([]),
+      error: (error: unknown) => {
+        const problem = toApiProblem(error);
+        this.sectors.set([]);
+        this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
+      },
     });
   }
 
