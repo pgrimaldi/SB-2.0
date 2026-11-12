@@ -2333,6 +2333,182 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### GET `/api/catalog/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idAdditionalItem": "string (UUID)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "idAdditionalItem": "string (UUID)",
+  "idArticle": "string (UUID)",
+  "idPackages": "string[] (UUID)",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "isMapAssignable": "boolean",
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID)",
+      "idPeriod": "string (UUID)",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean"
+}
+```
+
+**Payload tabella** (query string)
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItem` | string (UUID) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItem` | string (UUID) |
+| `idArticle` | string (UUID) |
+| `idPackages` | string[] (UUID) |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `isMapAssignable` | boolean |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+
+### POST `/api/catalog/update-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idAdditionalItem": "string (UUID)",
+  "idProperty": "string (UUID)",
+  "idArticle": "string (UUID)",
+  "idPackages": "string[] (UUID)",
+  "isOnlineEnabled": "boolean",
+  "isOnlineOnly": "boolean",
+  "isMapAssignable": "boolean",
+  "sectorPrices": [
+    {
+      "idSector": "string (UUID)",
+      "seasonalHalfDayPrice": "number (decimale, €) | null",
+      "seasonalPrice": "number (decimale, €) | null"
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "string (UUID)",
+      "idPeriod": "string (UUID)",
+      "halfDayPrice": "number (decimale, €) | null",
+      "dailyPrice": "number (decimale, €) | null",
+      "weekendPrice": "number (decimale, €) | null",
+      "halfDayWeekendPrice": "number (decimale, €) | null",
+      "halfDaySevenDaysPrice": "number (decimale, €) | null",
+      "sevenDaysPrice": "number (decimale, €) | null",
+      "halfDayFourteenDaysPrice": "number (decimale, €) | null",
+      "fourteenDaysPrice": "number (decimale, €) | null",
+      "halfDayMonthlyPrice": "number (decimale, €) | null",
+      "monthlyPrice": "number (decimale, €) | null"
+    }
+  ],
+  "calculationMethod": "string (enum PriceCalculationMethod) | null",
+  "isCumulative": "boolean",
+  "monthlySetting": "string (enum PriceMonthlySetting) | null",
+  "weekendSetting": "string (enum PriceWeekendSetting) | null",
+  "isPublicHolidaysIncluded": "boolean"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idAdditionalItem` | string (UUID) |
+| `idProperty` | string (UUID) |
+| `idArticle` | string (UUID) |
+| `idPackages` | string[] (UUID) |
+| `isOnlineEnabled` | boolean |
+| `isOnlineOnly` | boolean |
+| `isMapAssignable` | boolean |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `sectorPrices[].idSector` | string (UUID) |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
+| `periodPrices[].idSector` | string (UUID) |
+| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null |
+| `isCumulative` | boolean |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null |
+| `isPublicHolidaysIncluded` | boolean |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ### POST `/api/catalog/package-combobox`
 
 **Payload JSON**

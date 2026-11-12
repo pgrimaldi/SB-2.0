@@ -7395,6 +7395,185 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### GET `/api/catalog/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
+
+Listino: articolo/servizio aggiuntivo da modificare.
+
+#### Payload
+
+Nessun corpo: è una GET, l'id dell'articolo aggiuntivo va nella query string e lo stabilimento viene dal token.
+
+```text
+/api/catalog/get-additional-services-article-item?idAdditionalItem=2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idAdditionalItem` | string (UUID) | `2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "idAdditionalItem": "2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02",
+  "idArticle": "afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62",
+  "idPackages": [
+    "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"
+  ],
+  "isOnlineEnabled": true,
+  "isOnlineOnly": false,
+  "isMapAssignable": true,
+  "sectorPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "seasonalHalfDayPrice": 60,
+      "seasonalPrice": 120
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "halfDayPrice": 4,
+      "dailyPrice": 7,
+      "weekendPrice": 9,
+      "halfDayWeekendPrice": 5,
+      "halfDaySevenDaysPrice": 25,
+      "sevenDaysPrice": 42,
+      "halfDayFourteenDaysPrice": 46,
+      "fourteenDaysPrice": 80,
+      "halfDayMonthlyPrice": 90,
+      "monthlyPrice": 150
+    }
+  ],
+  "calculationMethod": "Daily",
+  "isCumulative": false,
+  "monthlySetting": "EffectiveMonthDuration",
+  "weekendSetting": "SaturdaySunday",
+  "isPublicHolidaysIncluded": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idAdditionalItem` | string (UUID) | `2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02` |
+| `idArticle` | string (UUID) | `afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62` |
+| `idPackages` | string[] (UUID) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"]` |
+| `isOnlineEnabled` | boolean | `true` |
+| `isOnlineOnly` | boolean | `false` |
+| `isMapAssignable` | boolean | `true` |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 60, "seasonalPrice": 120}]` |
+| `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `120` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
+| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null | `5` |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null | `25` |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null | `42` |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null | `46` |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `80` |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `90` |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `150` |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
+| `isCumulative` | boolean | `false` |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
+| `isPublicHolidaysIncluded` | boolean | `false` |
+
+### POST `/api/catalog/update-additional-services-article-item`
+
+Listino: modifica articolo/servizio aggiuntivo.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idAdditionalItem": "2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02",
+  "idArticle": "afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62",
+  "idPackages": [
+    "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01",
+    "4e2a9c71-3b5d-4f6e-8a1b-2c3d4e5f6a02"
+  ],
+  "isOnlineEnabled": true,
+  "isOnlineOnly": true,
+  "isMapAssignable": true,
+  "sectorPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "seasonalHalfDayPrice": 60,
+      "seasonalPrice": 130
+    }
+  ],
+  "periodPrices": [
+    {
+      "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "halfDayPrice": 4,
+      "dailyPrice": 7,
+      "weekendPrice": 9,
+      "halfDayWeekendPrice": 5,
+      "halfDaySevenDaysPrice": 25,
+      "sevenDaysPrice": 42,
+      "halfDayFourteenDaysPrice": 46,
+      "fourteenDaysPrice": 80,
+      "halfDayMonthlyPrice": 90,
+      "monthlyPrice": 150
+    }
+  ],
+  "calculationMethod": "Daily",
+  "isCumulative": false,
+  "monthlySetting": "EffectiveMonthDuration",
+  "weekendSetting": "SaturdaySunday",
+  "isPublicHolidaysIncluded": false
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idAdditionalItem` | string (UUID) | `2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02` |
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idArticle` | string (UUID) | `afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62` |
+| `idPackages` | string[] (UUID) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01", "4e2a9c71-3b5d-4f6e-8a1b-2c3d4e5f6a02"]` |
+| `isOnlineEnabled` | boolean | `true` |
+| `isOnlineOnly` | boolean | `true` |
+| `isMapAssignable` | boolean | `true` |
+| `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 60, "seasonalPrice": 130}]` |
+| `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
+| `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `130` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
+| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
+| `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
+| `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
+| `periodPrices[].halfDayWeekendPrice` | number (decimale, €) \| null | `5` |
+| `periodPrices[].halfDaySevenDaysPrice` | number (decimale, €) \| null | `25` |
+| `periodPrices[].sevenDaysPrice` | number (decimale, €) \| null | `42` |
+| `periodPrices[].halfDayFourteenDaysPrice` | number (decimale, €) \| null | `46` |
+| `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `80` |
+| `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `90` |
+| `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `150` |
+| `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
+| `isCumulative` | boolean | `false` |
+| `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
+| `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
+| `isPublicHolidaysIncluded` | boolean | `false` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`

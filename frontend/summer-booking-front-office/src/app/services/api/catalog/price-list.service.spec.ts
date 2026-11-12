@@ -127,6 +127,57 @@ describe('PriceListService', () => {
     controller.verify();
   });
 
+  it('should read the additional item to edit by its id', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    let answer: unknown;
+
+    priceLists.selectedAdditionalItem('a1').subscribe((read) => (answer = read));
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'GET' &&
+        url === `${environment.apiBaseUrl}/catalog/get-additional-services-article-item`,
+    );
+    expect(call.request.params.get('idAdditionalItem')).toBe('a1');
+    call.flush({ idAdditionalItem: 'a1', idArticle: 'r1' });
+    expect(answer).toEqual({ idAdditionalItem: 'a1', idArticle: 'r1' });
+    controller.verify();
+  });
+
+  it('should update the additional item sending the whole form, its id and the property', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    const request: AdditionalItemAddItemRequest = Object.assign(
+      new AdditionalItemAddItemRequest(),
+      {
+        idArticle: 'r1',
+        isOnlineOnly: true,
+      },
+    );
+
+    priceLists
+      .updateAdditionalItem('p1', 'a1', {
+        ...request,
+        extra: 'not sent',
+      } as AdditionalItemAddItemRequest)
+      .subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/update-additional-services-article-item`,
+    );
+    expect(call.request.body).toEqual({ ...request, idAdditionalItem: 'a1', idProperty: 'p1' });
+    controller.verify();
+  });
+
   it('should ask a page of additional items with the request of the table', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],

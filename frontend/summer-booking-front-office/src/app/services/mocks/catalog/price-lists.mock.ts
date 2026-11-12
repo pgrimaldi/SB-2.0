@@ -4,6 +4,7 @@ import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/paginati
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
 import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
+import { AdditionalItemSelectedItem } from '../../../entities/settings/catalog/additional-item-selected-item';
 import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
 import { PriceCalculationMethod } from '../../../entities/enums/price-calculation-method';
@@ -23,7 +24,7 @@ import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
 import { DEMO_PROPERTY, propertyOf } from '../properties/properties.mock';
-import { activeArticleName } from '../warehouse/warehouse.mock';
+import { activeArticleIdNamed, activeArticleName } from '../warehouse/warehouse.mock';
 
 type PackageRow = PackageItem & { propertyId: number };
 
@@ -398,6 +399,9 @@ const ADDITIONAL_ITEMS: AdditionalItemRow[] = ADDITIONAL_ITEM_NAMES.map(
   }),
 );
 
+/** What the panels saved, by idAdditionalItem; an item never saved has only its article. */
+const ADDITIONAL_ITEM_DETAILS = new Map<string, AdditionalItemAddItemRequest>();
+
 const ADDITIONAL_ITEM_SORT_FIELDS = ['additionalItemName'] as const;
 
 /**
@@ -458,6 +462,7 @@ export const deleteAdditionalItemsMock = (
   }
   for (const item of items) {
     ADDITIONAL_ITEMS.splice(ADDITIONAL_ITEMS.indexOf(item), 1);
+    ADDITIONAL_ITEM_DETAILS.delete(item.idAdditionalItem ?? '');
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -484,11 +489,16 @@ export const duplicateAdditionalItemsMock = (
     return resourceNotFound(request);
   }
   for (const item of items) {
-    ADDITIONAL_ITEMS.push({
+    const copy: AdditionalItemRow = {
       propertyId: item.propertyId,
       idAdditionalItem: crypto.randomUUID(),
       additionalItemName: additionalItemCopyName(item),
-    });
+    };
+    const detail = ADDITIONAL_ITEM_DETAILS.get(item.idAdditionalItem ?? '');
+    if (detail) {
+      ADDITIONAL_ITEM_DETAILS.set(copy.idAdditionalItem ?? '', structuredClone(detail));
+    }
+    ADDITIONAL_ITEMS.push(copy);
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -580,22 +590,106 @@ export const createAdditionalItemMock = (
   if (!property) {
     return forbidden(request);
   }
-  const name = activeArticleName(property.id, body.idArticle);
-  const idPackages = Array.isArray(body.idPackages) ? body.idPackages : [];
-  const isEveryPackageKnown = idPackages.every((idPackage) =>
-    PACKAGES.some((row) => row.idPackage === idPackage && row.propertyId === property.id),
-  );
-  if (name === null || !isEveryPackageKnown) {
+  const name = additionalItemName(property.id, body);
+  if (name === null) {
     return resourceNotFound(request);
   }
   const errors = choiceErrors(body);
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }
-  ADDITIONAL_ITEMS.push({
+  const row: AdditionalItemRow = {
     propertyId: property.id,
     idAdditionalItem: crypto.randomUUID(),
     additionalItemName: name,
-  });
+  };
+  ADDITIONAL_ITEMS.push(row);
+  ADDITIONAL_ITEM_DETAILS.set(
+    row.idAdditionalItem ?? '',
+    structuredClone(
+      onlyFieldsOf(AdditionalItemAddItemRequest, body as AdditionalItemAddItemRequest),
+    ),
+  );
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * The name of the article of the item (the item takes it), null when the article is not an active
+ * one of the property or a package is not one of its.
+ */
+function additionalItemName(propertyId: number, body: CreateAdditionalItemBody): string | null {
+  const idPackages = Array.isArray(body.idPackages) ? body.idPackages : [];
+  const isEveryPackageKnown = idPackages.every((idPackage) =>
+    PACKAGES.some((row) => row.idPackage === idPackage && row.propertyId === propertyId),
+  );
+  return isEveryPackageKnown ? activeArticleName(propertyId, body.idArticle) : null;
+}
+
+/**
+ * `GET /api/catalog/get-additional-services-article-item?idAdditionalItem=…`, the property of the
+ * access token: everything the item has, as the panels send it; an item never saved has only the
+ * article with its name. 200; 401 without a valid access token; 404 `resource.not_found` for an item
+ * that is not one of its.
+ */
+export const selectedAdditionalItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const idAdditionalItem = request.params.get('idAdditionalItem');
+  const row = ADDITIONAL_ITEMS.find(
+    (item) => item.idAdditionalItem === idAdditionalItem && item.propertyId === DEMO_PROPERTY.id,
+  );
+  if (!row) {
+    return resourceNotFound(request);
+  }
+  const detail =
+    ADDITIONAL_ITEM_DETAILS.get(row.idAdditionalItem ?? '') ??
+    Object.assign(new AdditionalItemAddItemRequest(), {
+      idArticle: activeArticleIdNamed(row.propertyId, row.additionalItemName),
+    });
+  const answer: AdditionalItemSelectedItem = {
+    ...structuredClone(detail),
+    idAdditionalItem: row.idAdditionalItem,
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+};
+
+/**
+ * `POST /api/catalog/update-additional-services-article-item` with `AdditionalItemAddItemRequest`,
+ * `idAdditionalItem` and `idProperty`: the item takes all the values sent and the name of its
+ * article. 204 without a body; 401 / 403 / 404 / 400 as `createAdditionalItemMock`, 404 also for an
+ * item that is not one of the property.
+ */
+export const updateAdditionalItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreateAdditionalItemBody & { idAdditionalItem?: unknown };
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const row = ADDITIONAL_ITEMS.find(
+    (item) => item.idAdditionalItem === body.idAdditionalItem && item.propertyId === property.id,
+  );
+  const name = additionalItemName(property.id, body);
+  if (!row || name === null) {
+    return resourceNotFound(request);
+  }
+  const errors = choiceErrors(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  row.additionalItemName = name;
+  ADDITIONAL_ITEM_DETAILS.set(
+    row.idAdditionalItem ?? '',
+    structuredClone(
+      onlyFieldsOf(AdditionalItemAddItemRequest, body as AdditionalItemAddItemRequest),
+    ),
+  );
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };

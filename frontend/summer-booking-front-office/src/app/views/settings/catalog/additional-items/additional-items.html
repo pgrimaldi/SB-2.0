@@ -28,6 +28,12 @@
   [(open)]="adding"
   (created)="table.reload()"
 />
+<app-additional-item-edit-item-panel
+  [pathIcon]="closeIcon"
+  [idAdditionalItem]="idAdditionalItemToEdit()"
+  [(open)]="editing"
+  (updated)="table.reload()"
+/>
 
 <app-delete-items-popup
   [idItems]="idAdditionalItemsToDelete()"

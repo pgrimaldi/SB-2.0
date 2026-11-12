@@ -1671,8 +1671,11 @@
           },
           "form": {
             "add_title": "Add new additional item/service",
+            "edit_title": "Edit additional item/service",
             "cancel": "Cancel",
             "save": "Create item/service",
+            "edit": "Edit",
+            "save_changes": "Save",
             "article": "Select item",
             "choose": "Select",
             "packages": "Packages",

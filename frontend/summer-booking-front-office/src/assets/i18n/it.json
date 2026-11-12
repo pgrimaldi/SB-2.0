@@ -1671,8 +1671,11 @@
           },
           "form": {
             "add_title": "Aggiungi nuovo articolo/servizio aggiuntivo",
+            "edit_title": "Modifica articolo/servizio aggiuntivo",
             "cancel": "Annulla",
             "save": "Crea articolo/servizio",
+            "edit": "Modifica",
+            "save_changes": "Salva",
             "article": "Seleziona articolo",
             "choose": "Seleziona",
             "packages": "Pacchetti",

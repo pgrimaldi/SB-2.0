@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
 import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
+import { AdditionalItemSelectedItem } from '../../../entities/settings/catalog/additional-item-selected-item';
 import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
 import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
@@ -71,13 +72,28 @@ export class PriceListService {
     request: AdditionalItemAddItemRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-additional-services-article-item`, {
-      ...onlyFieldsOf(AdditionalItemAddItemRequest, request),
-      sectorPrices: request.sectorPrices.map((sectorPrice) =>
-        onlyFieldsOf(PackageSectorPrice, sectorPrice),
-      ),
-      periodPrices: request.periodPrices.map((periodPrice) =>
-        onlyFieldsOf(PackagePeriodPrice, periodPrice),
-      ),
+      ...additionalItemBody(request),
+      idProperty,
+    });
+
+  /** Everything the edit panel of an additional item shows. */
+  readonly selectedAdditionalItem = (
+    idAdditionalItem: string,
+  ): Observable<AdditionalItemSelectedItem> =>
+    this.httpClient.get<AdditionalItemSelectedItem>(
+      `${this.endpoint}/get-additional-services-article-item`,
+      { params: { idAdditionalItem } },
+    );
+
+  /** The whole form, as in `createAdditionalItem`, with its id. Answers 204 with no body. */
+  readonly updateAdditionalItem = (
+    idProperty: string,
+    idAdditionalItem: string,
+    request: AdditionalItemAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/update-additional-services-article-item`, {
+      ...additionalItemBody(request),
+      idAdditionalItem,
       idProperty,
     });
 
@@ -111,5 +127,18 @@ function packageBody(request: PackageAddItemRequest): PackageAddItemRequest {
     reducedSeasonalPrice:
       request.reducedSeasonalPrice &&
       onlyFieldsOf(PackageReducedSeasonalPrice, request.reducedSeasonalPrice),
+  };
+}
+
+/** Only the fields of the additional item, also inside its price rows. */
+function additionalItemBody(request: AdditionalItemAddItemRequest): AdditionalItemAddItemRequest {
+  return {
+    ...onlyFieldsOf(AdditionalItemAddItemRequest, request),
+    sectorPrices: request.sectorPrices.map((sectorPrice) =>
+      onlyFieldsOf(PackageSectorPrice, sectorPrice),
+    ),
+    periodPrices: request.periodPrices.map((periodPrice) =>
+      onlyFieldsOf(PackagePeriodPrice, periodPrice),
+    ),
   };
 }

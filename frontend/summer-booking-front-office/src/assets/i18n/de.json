@@ -1671,8 +1671,11 @@
           },
           "form": {
             "add_title": "Neuen Zusatzartikel/-leistung hinzufügen",
+            "edit_title": "Zusatzartikel/-leistung bearbeiten",
             "cancel": "Abbrechen",
             "save": "Artikel/Leistung erstellen",
+            "edit": "Bearbeiten",
+            "save_changes": "Speichern",
             "article": "Artikel auswählen",
             "choose": "Auswählen",
             "packages": "Pakete",

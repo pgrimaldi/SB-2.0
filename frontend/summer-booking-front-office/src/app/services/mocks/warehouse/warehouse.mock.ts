@@ -350,6 +350,19 @@ export const warehouseDuplicateMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
+/** The id of the active article of the property with this name, null when there is none. */
+export function activeArticleIdNamed(propertyId: number, name: string | null): string | null {
+  return (
+    INVENTORY_ITEMS.find(
+      (row) =>
+        row.name === name &&
+        row.propertyId === propertyId &&
+        row.isActive &&
+        row.deletedAt === null,
+    )?.publicId ?? null
+  );
+}
+
 /** The name of an active article of the property, null when it is not one. */
 export function activeArticleName(propertyId: number, idArticle: unknown): string | null {
   return articleOf(propertyId, idArticle)?.name ?? null;

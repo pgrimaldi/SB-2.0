@@ -85,7 +85,9 @@ import {
   duplicatePackageItemsMock,
   packageComboboxMock,
   packageListMock,
+  selectedAdditionalItemMock,
   selectedPackageMock,
+  updateAdditionalItemMock,
   updatePackageMock,
 } from './catalog/price-lists.mock';
 import {
@@ -1000,6 +1002,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/create-additional-services-article-item`
   ) {
     return createAdditionalItemMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/get-additional-services-article-item`
+  ) {
+    return selectedAdditionalItemMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/update-additional-services-article-item`
+  ) {
+    return updateAdditionalItemMock(request);
   }
 
   if (

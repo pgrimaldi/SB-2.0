@@ -1671,8 +1671,11 @@
           },
           "form": {
             "add_title": "添加新的附加物品/服务",
+            "edit_title": "编辑附加物品/服务",
             "cancel": "取消",
             "save": "创建物品/服务",
+            "edit": "编辑",
+            "save_changes": "保存",
             "article": "选择物品",
             "choose": "选择",
             "packages": "套餐",

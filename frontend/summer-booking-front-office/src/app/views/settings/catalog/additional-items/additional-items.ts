@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { AdditionalItemAddItemPanel } from '../../../../components/management/settings/catalog/additional-item-add-item-panel/additional-item-add-item-panel';
+import { AdditionalItemEditItemPanel } from '../../../../components/management/settings/catalog/additional-item-edit-item-panel/additional-item-edit-item-panel';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -26,6 +27,7 @@ interface AdditionalItemsTableTexts {
   selector: 'app-additional-items',
   imports: [
     AdditionalItemAddItemPanel,
+    AdditionalItemEditItemPanel,
     DeleteItemsPopup,
     DuplicateItemsPopup,
     PageTitle,
@@ -44,6 +46,8 @@ export class AdditionalItems {
 
   protected readonly loadFailed = signal(false);
   protected readonly adding = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly idAdditionalItemToEdit = signal<string | null>(null);
   protected readonly idSelectedAdditionalItems = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idAdditionalItemsToDelete = signal<readonly string[]>([]);
@@ -83,7 +87,7 @@ export class AdditionalItems {
       idAdditionalItem && this.askDelete([idAdditionalItem], additionalItemName),
     duplicate: ({ idAdditionalItem, additionalItemName }) =>
       idAdditionalItem && this.askDuplicate([idAdditionalItem], additionalItemName),
-    edit: () => undefined,
+    edit: ({ idAdditionalItem }) => idAdditionalItem && this.askEdit(idAdditionalItem),
   });
 
   protected readonly load: TableLoad<{ idProperty: string }, AdditionalItem> = (request) =>
@@ -93,6 +97,11 @@ export class AdditionalItems {
     this.priceLists.deleteAdditionalItems({ idProperty, idAdditionalItems });
   protected readonly duplicateAdditionalItems = (idProperty: string, idAdditionalItems: string[]) =>
     this.priceLists.duplicateAdditionalItems({ idProperty, idAdditionalItems });
+
+  protected askEdit(idAdditionalItem: string): void {
+    this.idAdditionalItemToEdit.set(idAdditionalItem);
+    this.editing.set(true);
+  }
 
   protected askDelete(
     idAdditionalItems: readonly TableRowId[],
