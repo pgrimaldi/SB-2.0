@@ -153,8 +153,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isLoading = signal(false);
   protected readonly isLoaded = signal(false);
   protected readonly isEditDisabled = computed(() => this.isLoading() || !this.isLoaded());
+  /** Also while the reduced seasonal price box is open: its values are not in the package yet. */
   protected readonly isSaveDisabled = computed(
-    () => this.isLoading() || this.draftForm().invalid(),
+    () => this.isLoading() || this.draftForm().invalid() || this.isReducedSeasonalPriceOpen(),
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -196,7 +197,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
 
   protected save(): void {
     const idPackage = this.idPackage();
-    if (this.isSaving() || !idPackage) {
+    if (this.isSaving() || this.isReducedSeasonalPriceOpen() || !idPackage) {
       return;
     }
 

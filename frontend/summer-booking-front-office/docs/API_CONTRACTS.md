@@ -6902,7 +6902,7 @@ Listino: pacchetto da modificare.
 
 #### Payload
 
-Nessun corpo: la richiesta porta solo il cookie del refresh token, inviato dal browser in automatico.
+Nessun corpo: l'id del pacchetto va nell'indirizzo e lo stabilimento viene dal token (header Authorization: Bearer <accessToken>, come ogni chiamata).
 
 #### Response
 

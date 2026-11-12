@@ -122,8 +122,9 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isPriceListLoaded = signal(false);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
+  /** Also while the reduced seasonal price box is open: its values are not in the package yet. */
   protected readonly isSaveDisabled = computed(
-    () => this.isFetching() || this.draftForm().invalid(),
+    () => this.isFetching() || this.draftForm().invalid() || this.isReducedSeasonalPriceOpen(),
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -165,7 +166,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    if (this.isSaving()) {
+    if (this.isSaving() || this.isReducedSeasonalPriceOpen()) {
       return;
     }
 
