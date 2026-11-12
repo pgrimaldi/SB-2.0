@@ -24,12 +24,33 @@
 }
 
 .info__popup__text {
-  margin: 0;
+  align-self: stretch;
   font-size: 0.8125rem;
   line-height: 1.25rem;
-  white-space: pre-line;
 
   strong {
     font-weight: 600;
   }
+}
+
+.info__popup__paragraph,
+.info__popup__heading {
+  margin: 0;
+  white-space: pre-line;
+}
+
+// In the colour of the labels of the fields.
+.info__popup__heading {
+  color: var(--color__layout__text__soft);
+  font-weight: 600;
+}
+
+.info__popup__list {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+// A blank line of the text.
+.info__popup__spaced {
+  margin-top: 1.25rem;
 }

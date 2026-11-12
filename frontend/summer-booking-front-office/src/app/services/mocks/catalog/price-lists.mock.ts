@@ -1,10 +1,13 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
+import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
 import { PriceCalculationMethod } from '../../../entities/enums/price-calculation-method';
 import { PriceMonthlySetting } from '../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../entities/enums/price-weekend-setting';
+import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
 import { DuplicatePackageItemsRequest } from '../../../entities/settings/catalog/duplicate-package-items-request';
 import {
   MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
@@ -384,3 +387,148 @@ export const updatePackageMock = (
   );
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+type AdditionalItemRow = AdditionalItem & { propertyId: number };
+
+const ADDITIONAL_ITEM_NAMES = [
+  'Lettino',
+  'Sdraio',
+  'Sedia regista',
+  'Ombrellone aggiuntivo',
+  'Telo mare',
+  'Cassetta di sicurezza',
+  'Doccia calda',
+  'Posto auto',
+  'Cabina giornaliera',
+  'Tenda',
+  'Lettino extra famiglia',
+];
+
+const ADDITIONAL_ITEMS: AdditionalItemRow[] = ADDITIONAL_ITEM_NAMES.map(
+  (additionalItemName, index) => ({
+    propertyId: 1,
+    idAdditionalItem: `4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a${String(index + 1).padStart(2, '0')}`,
+    additionalItemName,
+  }),
+);
+
+const ADDITIONAL_ITEM_SORT_FIELDS = ['additionalItemName'] as const;
+
+/**
+ * `POST /api/catalog/additional-services-articles-list`: one page of the additional items/services of
+ * the requested property, in their own order unless sorted. 401 without a valid access token; 403
+ * for a missing or unknown property.
+ */
+export const additionalItemListMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<PageRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const page = positiveInteger(body.page, 1);
+  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const found = ADDITIONAL_ITEMS.filter(
+    (row) =>
+      row.propertyId === property.id &&
+      (!search || row.additionalItemName?.toLowerCase().includes(search)),
+  ).map((row) => onlyFieldsOf(AdditionalItem, row));
+  const field = ADDITIONAL_ITEM_SORT_FIELDS.find((name) => name === body.sortField);
+  if (field) {
+    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+    found.sort((first, second) => sign * compare(first[field], second[field]));
+  }
+  const answer: Page<AdditionalItem> = {
+    total: found.length,
+    rows: found.slice((page - 1) * pageSize, page * pageSize),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+/**
+ * `POST /api/catalog/delete-additional-services-article-item`: deletes the given additional
+ * items/services, all or nothing. 204 with no body; 404 when an id is not an additional item of the
+ * property; 401 / 403 as the list.
+ */
+export const deleteAdditionalItemsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<DeleteAdditionalItemsRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const items = additionalItemsOf(property.id, body.idAdditionalItems);
+  if (!items) {
+    return resourceNotFound(request);
+  }
+  for (const item of items) {
+    ADDITIONAL_ITEMS.splice(ADDITIONAL_ITEMS.indexOf(item), 1);
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * `POST /api/catalog/duplicate-additional-services-article-item`: one copy of each given additional
+ * item/service at the end of the list, all or nothing, named by the backend ("X (copia)", then
+ * "X (copia 2)"…). 204 with no body; 404 when an id is not an additional item of the property;
+ * 401 / 403 as the list.
+ */
+export const duplicateAdditionalItemsMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<DuplicateAdditionalItemsRequest>;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const items = additionalItemsOf(property.id, body.idAdditionalItems);
+  if (!items) {
+    return resourceNotFound(request);
+  }
+  for (const item of items) {
+    ADDITIONAL_ITEMS.push({
+      propertyId: item.propertyId,
+      idAdditionalItem: crypto.randomUUID(),
+      additionalItemName: additionalItemCopyName(item),
+    });
+  }
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+function additionalItemCopyName(item: AdditionalItemRow): string {
+  const taken = new Set(
+    ADDITIONAL_ITEMS.filter((row) => row.propertyId === item.propertyId).map((row) =>
+      row.additionalItemName?.toLowerCase(),
+    ),
+  );
+  let copy = `${item.additionalItemName} (copia)`;
+  for (let number = 2; taken.has(copy.toLowerCase()); number++) {
+    copy = `${item.additionalItemName} (copia ${number})`;
+  }
+  return copy;
+}
+
+function additionalItemsOf(
+  propertyId: number,
+  idAdditionalItems: unknown,
+): AdditionalItemRow[] | null {
+  const ids = Array.isArray(idAdditionalItems) ? [...new Set(idAdditionalItems)] : [];
+  const items = ids
+    .map((id) =>
+      ADDITIONAL_ITEMS.find((row) => row.idAdditionalItem === id && row.propertyId === propertyId),
+    )
+    .filter((item): item is AdditionalItemRow => item !== undefined);
+  return ids.length && items.length === ids.length ? items : null;
+}

@@ -2139,6 +2139,116 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
+### POST `/api/catalog/additional-services-articles-list`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "page": "number (intero, da 1)",
+  "pageSize": "number (intero)",
+  "search": "string",
+  "filters": [
+    {
+      "field": "string",
+      "value": "string[] (array di stringhe, almeno una)"
+    }
+  ],
+  "sortField": "string",
+  "sortDirection": "string (enum SortDirection)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "total": "number (intero)",
+  "rows": [
+    {
+      "idAdditionalItem": "string (UUID)",
+      "additionalItemName": "string | null"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `page` | number (intero, da 1) |
+| `pageSize` | number (intero) |
+| `search` | string |
+| `filters[]` | PageFilter[] (array di oggetti) |
+| `filters[].field` | string |
+| `filters[].value` | string[] (array di stringhe, almeno una) |
+| `sortField` | string |
+| `sortDirection` | string (enum SortDirection) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `total` | number (intero) |
+| `rows[]` | AdditionalItem[] (array di oggetti) |
+| `rows[].idAdditionalItem` | string (UUID) |
+| `rows[].additionalItemName` | string \| null |
+
+### POST `/api/catalog/delete-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idAdditionalItems": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idAdditionalItems` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/duplicate-additional-services-article-item`
+
+**Payload JSON**
+
+```json
+{
+  "idProperty": "string (UUID)",
+  "idAdditionalItems": "string[] (UUID, almeno uno)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `idProperty` | string (UUID) |
+| `idAdditionalItems` | string[] (UUID, almeno uno) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
 ### POST `/api/catalog/packages/create-package`
 
 **Payload JSON**

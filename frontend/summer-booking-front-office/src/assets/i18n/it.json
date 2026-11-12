@@ -1661,9 +1661,9 @@
                 "logarithmic": "Prezzo logaritmico",
                 "daily_with_weekend": "Prezzo giornaliero con weekend"
               },
-              "calculation_method_info": "Il modo in cui si ottiene il prezzo di una prenotazione di più giorni a partire dai prezzi del listino.",
+              "calculation_method_info": "## 1. Prezzo proporzionale\nIl prezzo viene calcolato in modo lineare rispetto ai giorni di utilizzo.\nIl gestionale moltiplica il prezzo giornaliero per il numero di giorni, applicando gli eventuali coefficienti previsti dal listino (es. coefficienti per settimanale, quattordicinale, mensile, stagionale).\n\n**Esempio:**\n- Prezzo giornaliero: 20 €\n- Coefficiente settimanale (7 giorni): 0,95\n- Calcolo: 20 × 7 × 0,95 = 133 €\nCon questo metodo il gestionale fa un calcolo lineare: prende il prezzo giornaliero, lo moltiplica per i giorni e applica il coefficiente previsto dal listino. Il coefficiente serve a creare sconti “standard” (es. settimanale, mensile, stagionale).\n\n**Utilizzo consigliato:** quando si desidera un calcolo semplice e coerente, con sconti proporzionali già definiti nel listino.\n\n## 2. Prezzo logaritmico\nIl prezzo aumenta in modo progressivamente meno incisivo man mano che cresce la durata.\nI primi giorni hanno un costo unitario più alto, mentre i giorni successivi vengono “scontati” automaticamente secondo una curva logaritmica.\n\n**Esempio:**\n- Prezzo 1 giorno: 20 €\n- Prezzo 3 giorni (non proporzionale): invece di 60 €, il sistema calcola 55 €\n- Prezzo 7 giorni: invece di 140 €, il sistema calcola 110 €\nQui il gestionale non usa una moltiplicazione lineare.\nApplica una curva logaritmica, cioè una formula matematica che riduce il costo medio per giorno man mano che la durata aumenta.\n- I primi giorni hanno un costo più alto.\n- I giorni successivi “pesano” meno sul totale.\n\n**Utilizzo consigliato:** quando si vuole favorire le prenotazioni lunghe con sconti più marcati rispetto al calcolo proporzionale.\n\n## 3. Prezzo giornaliero\nOgni giorno ha lo stesso prezzo, senza sconti o coefficienti.\nIl totale è semplicemente la somma dei giorni prenotati.\n**Esempio:**\n- Prezzo giornaliero: 25 €\n- Prenotazione di 10 giorni: 25 × 10 = 250 €\nIl gestionale qui non applica nessun tipo di sconto.\nOgni giorno costa esattamente la stessa cifra, indipendentemente dalla durata. Nessun coefficiente o riduzione.\n\n**Utilizzo consigliato:** quando non si vogliono applicare riduzioni per periodi più lunghi e si preferisce un listino rigido e uniforme.\n\n## 4. Prezzo giornaliero con weekend\nIl prezzo viene calcolato distinguendo automaticamente tra giorni feriali e giorni festivi/weekend.\nIl gestionale applica il prezzo feriale ai giorni infrasettimanali e il prezzo weekend ai sabati, alle domeniche e agli eventuali festivi.\n\n**Esempio:**\n- Prezzo feriale: 22 €\n- Prezzo weekend: 30 €\n- Prenotazione di 7 giorni:\n  - 5 feriali → 5 × 22 = 110 €\n  - 2 weekend → 2 × 30 = 60 €\n- Totale: 170 €\nIl gestionale analizza il calendario della prenotazione e distingue automaticamente:\n- giorni feriali\n- sabati\n- domeniche\n- eventuali festivi\nApplica il prezzo corretto a ciascun giorno e somma i risultati. Non usa coefficienti né sconti: semplicemente calcola in base al tipo di giorno.\n\n**Utilizzo consigliato:** quando lo stabilimento applica tariffe diverse nei weekend o nei giorni di maggiore affluenza.",
               "cumulative": "Prezzo cumulativo",
-              "cumulative_info": "Quando nella stessa prenotazione ci sono almeno due postazioni di questo pacchetto nella stessa fila, a giornata intera, il prezzo si calcola sul totale dei giorni di tutte le postazioni di ogni periodo, invece che postazione per postazione.",
+              "cumulative_info": "Il Prezzo Cumulativo è una modalità di calcolo che permette di ottenere un prezzo finale più preciso quando una prenotazione copre più periodi.\n## Come funziona\nQuando attivato, il sistema calcola il totale usando una media ponderata dei prezzi delle diverse stagioni, basata sul numero di giorni che ricadono in ciascuna di esse.\n## Quando si applica\n- **Prenotazione in una sola stagione**: viene usato il prezzo della tabella della stagione corrispondente, senza calcoli aggiuntivi.\n- **Prenotazione su più stagioni**: il sistema combina i prezzi delle tabelle stagionali in proporzione ai giorni in bassa e alta stagione.\n- **Prenotazioni multiple**: invece di sommare i prezzi dei singoli periodi, il sistema ricalcola il totale usando il numero complessivo di giorni.",
               "monthly_setting": "Impostazione del mensile",
               "monthly_settings": {
                 "effective_month_duration": "Durata effettiva del mese",
@@ -1676,6 +1676,37 @@
               },
               "public_holidays": "Anche festivi",
               "intermediate_prices": "Modifica prezzi intermedi"
+            }
+          }
+        },
+        "additional_items": {
+          "title": "Articoli/servizi aggiuntivi",
+          "create": "Aggiungi articoli/servizi aggiuntivi",
+          "table": {
+            "additional_item_name": "Nome"
+          },
+          "delete": {
+            "cancel": "Annulla",
+            "confirm": "Elimina",
+            "one": {
+              "title": "Elimina articolo/servizio aggiuntivo",
+              "text": "Vuoi eliminare l'articolo/servizio aggiuntivo {{name}}?"
+            },
+            "many": {
+              "title": "Elimina articoli/servizi aggiuntivi",
+              "text": "Vuoi eliminare i {{count}} articoli/servizi aggiuntivi selezionati?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Annulla",
+            "confirm": "Duplica",
+            "one": {
+              "title": "Duplica articolo/servizio aggiuntivo",
+              "text": "Vuoi duplicare l'articolo/servizio aggiuntivo {{name}}?"
+            },
+            "many": {
+              "title": "Duplica articoli/servizi aggiuntivi",
+              "text": "Vuoi duplicare i {{count}} articoli/servizi aggiuntivi selezionati?"
             }
           }
         }

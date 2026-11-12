@@ -1661,9 +1661,9 @@
                 "logarithmic": "Precio logarítmico",
                 "daily_with_weekend": "Precio diario con fin de semana"
               },
-              "calculation_method_info": "Cómo se obtiene el precio de una reserva de varios días a partir de los precios de la tarifa.",
+              "calculation_method_info": "## 1. Precio proporcional\nEl precio se calcula de forma lineal según los días de uso.\nEl sistema multiplica el precio diario por el número de días, aplicando los posibles coeficientes previstos en la tarifa (p. ej. coeficientes semanal, quincenal, mensual, de temporada).\n\n**Ejemplo:**\n- Precio diario: 20 €\n- Coeficiente semanal (7 días): 0,95\n- Cálculo: 20 × 7 × 0,95 = 133 €\nCon este método el sistema hace un cálculo lineal: toma el precio diario, lo multiplica por los días y aplica el coeficiente previsto en la tarifa. El coeficiente sirve para crear descuentos «estándar» (p. ej. semanal, mensual, de temporada).\n\n**Uso recomendado:** cuando se quiere un cálculo sencillo y coherente, con descuentos proporcionales ya definidos en la tarifa.\n\n## 2. Precio logarítmico\nEl precio aumenta cada vez menos a medida que crece la duración.\nLos primeros días tienen un coste unitario más alto, mientras que los siguientes se «descuentan» automáticamente según una curva logarítmica.\n\n**Ejemplo:**\n- Precio de 1 día: 20 €\n- Precio de 3 días (no proporcional): en lugar de 60 €, el sistema calcula 55 €\n- Precio de 7 días: en lugar de 140 €, el sistema calcula 110 €\nAquí el sistema no usa una multiplicación lineal.\nAplica una curva logarítmica, es decir, una fórmula matemática que reduce el coste medio por día a medida que aumenta la duración.\n- Los primeros días cuestan más.\n- Los días siguientes «pesan» menos en el total.\n\n**Uso recomendado:** cuando se quiere favorecer las reservas largas con descuentos más marcados que el cálculo proporcional.\n\n## 3. Precio diario\nCada día tiene el mismo precio, sin descuentos ni coeficientes.\nEl total es simplemente la suma de los días reservados.\n**Ejemplo:**\n- Precio diario: 25 €\n- Reserva de 10 días: 25 × 10 = 250 €\nAquí el sistema no aplica ningún tipo de descuento.\nCada día cuesta exactamente lo mismo, sea cual sea la duración. Ningún coeficiente ni reducción.\n\n**Uso recomendado:** cuando no se quieren reducciones para periodos más largos y se prefiere una tarifa fija y uniforme.\n\n## 4. Precio diario con fin de semana\nEl precio se calcula distinguiendo automáticamente entre días laborables y festivos o fines de semana.\nEl sistema aplica el precio laborable a los días entre semana y el precio de fin de semana a los sábados, los domingos y los posibles festivos.\n\n**Ejemplo:**\n- Precio laborable: 22 €\n- Precio fin de semana: 30 €\n- Reserva de 7 días:\n  - 5 laborables → 5 × 22 = 110 €\n  - 2 de fin de semana → 2 × 30 = 60 €\n- Total: 170 €\nEl sistema analiza el calendario de la reserva y distingue automáticamente:\n- días laborables\n- sábados\n- domingos\n- posibles festivos\nAplica el precio correcto a cada día y suma los resultados. No usa coeficientes ni descuentos: simplemente calcula según el tipo de día.\n\n**Uso recomendado:** cuando el establecimiento aplica tarifas distintas los fines de semana o en los días de mayor afluencia.",
               "cumulative": "Precio acumulado",
-              "cumulative_info": "Cuando una misma reserva tiene al menos dos puestos de este paquete en la misma fila, a día completo, el precio se calcula sobre el total de días de todos los puestos de cada periodo, en lugar de puesto por puesto.",
+              "cumulative_info": "El Precio acumulado es un método de cálculo que da un precio final más preciso cuando una reserva abarca varios periodos.\n## Cómo funciona\nCuando está activado, el sistema calcula el total con una media ponderada de los precios de las distintas temporadas, según el número de días que caen en cada una.\n## Cuándo se aplica\n- **Reserva en una sola temporada**: se usa el precio de la tabla de esa temporada, sin cálculos adicionales.\n- **Reserva en varias temporadas**: el sistema combina los precios de las tablas de temporada en proporción a los días de temporada baja y alta.\n- **Reservas múltiples**: en lugar de sumar los precios de cada periodo, el sistema recalcula el total con el número total de días.",
               "monthly_setting": "Ajuste mensual",
               "monthly_settings": {
                 "effective_month_duration": "Duración real del mes",
@@ -1676,6 +1676,37 @@
               },
               "public_holidays": "También festivos",
               "intermediate_prices": "Modificar precios intermedios"
+            }
+          }
+        },
+        "additional_items": {
+          "title": "Artículos/Servicios adicionales",
+          "create": "Añadir artículos/servicios adicionales",
+          "table": {
+            "additional_item_name": "Nombre"
+          },
+          "delete": {
+            "cancel": "Cancelar",
+            "confirm": "Eliminar",
+            "one": {
+              "title": "Eliminar artículo/servicio adicional",
+              "text": "¿Quieres eliminar el artículo/servicio adicional {{name}}?"
+            },
+            "many": {
+              "title": "Eliminar artículos/servicios adicionales",
+              "text": "¿Quieres eliminar los {{count}} artículos/servicios adicionales seleccionados?"
+            }
+          },
+          "duplicate": {
+            "cancel": "Cancelar",
+            "confirm": "Duplicar",
+            "one": {
+              "title": "Duplicar artículo/servicio adicional",
+              "text": "¿Quieres duplicar el artículo/servicio adicional {{name}}?"
+            },
+            "many": {
+              "title": "Duplicar artículos/servicios adicionales",
+              "text": "¿Quieres duplicar los {{count}} artículos/servicios adicionales seleccionados?"
             }
           }
         }

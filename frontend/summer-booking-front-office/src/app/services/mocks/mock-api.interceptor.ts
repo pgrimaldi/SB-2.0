@@ -76,8 +76,11 @@ import {
   updateSectorItemMock,
 } from './catalog/sectors.mock';
 import {
+  additionalItemListMock,
   createPackageMock,
+  deleteAdditionalItemsMock,
   deletePackageItemsMock,
+  duplicateAdditionalItemsMock,
   duplicatePackageItemsMock,
   packageListMock,
   selectedPackageMock,
@@ -960,6 +963,27 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`
   ) {
     return duplicatePackageItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/additional-services-articles-list`
+  ) {
+    return additionalItemListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/delete-additional-services-article-item`
+  ) {
+    return deleteAdditionalItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-additional-services-article-item`
+  ) {
+    return duplicateAdditionalItemsMock(request);
   }
 
   if (

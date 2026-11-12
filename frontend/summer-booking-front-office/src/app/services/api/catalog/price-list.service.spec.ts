@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
+import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
 import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { Language } from '../../../entities/shared/language';
@@ -73,6 +74,80 @@ describe('PriceListService', () => {
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`,
     );
     expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    controller.verify();
+  });
+
+  it('should ask a page of additional items with the request of the table', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    const request: PageRequest = {
+      idProperty: 'p1',
+      page: 1,
+      pageSize: 10,
+      search: 'lettino',
+      filters: [],
+      sortField: 'additionalItemName',
+      sortDirection: 'Ascending',
+    };
+    const page: Page<AdditionalItem> = {
+      total: 1,
+      rows: [{ idAdditionalItem: 'a1', additionalItemName: 'Lettino' }],
+    };
+    let answer: Page<AdditionalItem> | undefined;
+
+    priceLists.additionalItemList(request).subscribe((read) => (answer = read));
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/additional-services-articles-list`,
+    );
+    expect(call.request.body).toEqual(request);
+    call.flush(page);
+    expect(answer).toEqual(page);
+    controller.verify();
+  });
+
+  it('should delete the chosen additional items in one call', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    priceLists
+      .deleteAdditionalItems({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] })
+      .subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/delete-additional-services-article-item`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] });
+    controller.verify();
+  });
+
+  it('should duplicate the chosen additional items in one call', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    priceLists
+      .duplicateAdditionalItems({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] })
+      .subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/duplicate-additional-services-article-item`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] });
     controller.verify();
   });
 

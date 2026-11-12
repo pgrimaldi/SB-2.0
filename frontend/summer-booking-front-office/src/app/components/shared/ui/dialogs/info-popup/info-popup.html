@@ -8,14 +8,49 @@
       }
     }
     <h2 class="info__popup__title">{{ title() }}</h2>
-    <p class="info__popup__text">
-      @for (part of textParts(); track $index) {
-        @if (part.isBold) {
-          <strong>{{ part.text }}</strong>
-        } @else {
-          <span>{{ part.text }}</span>
+    <div class="info__popup__text">
+      @for (block of blocks(); track $index) {
+        @switch (block.kind) {
+          @case (TextBlockKind.Heading) {
+            <p class="info__popup__heading" [class.info__popup__spaced]="block.hasSpaceBefore">
+              <ng-container *ngTemplateOutlet="parts; context: { $implicit: block.parts }" />
+            </p>
+          }
+          @case (TextBlockKind.List) {
+            <ul class="info__popup__list" [class.info__popup__spaced]="block.hasSpaceBefore">
+              @for (item of block.items; track $index) {
+                <li>
+                  <ng-container *ngTemplateOutlet="parts; context: { $implicit: item.parts }" />
+                  @if (item.children.length) {
+                    <ul class="info__popup__list">
+                      @for (child of item.children; track $index) {
+                        <li>
+                          <ng-container *ngTemplateOutlet="parts; context: { $implicit: child }" />
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
+              }
+            </ul>
+          }
+          @default {
+            <p class="info__popup__paragraph" [class.info__popup__spaced]="block.hasSpaceBefore">
+              <ng-container *ngTemplateOutlet="parts; context: { $implicit: block.parts }" />
+            </p>
+          }
         }
       }
-    </p>
+    </div>
   </div>
+</ng-template>
+
+<ng-template #parts let-parts>
+  @for (part of parts; track $index) {
+    @if (part.isBold) {
+      <strong>{{ part.text }}</strong>
+    } @else {
+      <span>{{ part.text }}</span>
+    }
+  }
 </ng-template>

@@ -2,7 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
+import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
+import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
 import { DuplicatePackageItemsRequest } from '../../../entities/settings/catalog/duplicate-package-items-request';
 import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
@@ -29,6 +32,25 @@ export class PriceListService {
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicatePackageItems = (request: DuplicatePackageItemsRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/duplicate-package-item`, request);
+
+  readonly additionalItemList = (request: PageRequest): Observable<Page<AdditionalItem>> =>
+    this.httpClient.post<Page<AdditionalItem>>(
+      `${this.endpoint}/additional-services-articles-list`,
+      request,
+    );
+
+  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  readonly deleteAdditionalItems = (request: DeleteAdditionalItemsRequest): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-additional-services-article-item`, request);
+
+  /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
+  readonly duplicateAdditionalItems = (
+    request: DuplicateAdditionalItemsRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/duplicate-additional-services-article-item`,
+      request,
+    );
 
   /**
    * The whole package of the add panel; the property comes from the access token. Answers 204

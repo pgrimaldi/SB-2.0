@@ -1,0 +1,51 @@
+<app-page-title
+  class="additional__items__title"
+  [text]="'management.settings.catalog.additional_items.title' | translate"
+/>
+<app-table
+  #table
+  [columns]="columns()"
+  [params]="params()"
+  [load]="load"
+  idField="idAdditionalItem"
+  [texts]="'table' | translate"
+  [isSearchable]="true"
+  [useAppTheme]="false"
+  [areMassiveActionsHidden]="false"
+  [isCreateButtonHidden]="false"
+  [createLabel]="'management.settings.catalog.additional_items.create' | translate"
+  [rowActions]="rowActions()"
+  [(selection)]="idSelectedAdditionalItems"
+  [pathIcon]="tableIcons"
+  (loadError)="loadFailed.set(true)"
+  (deleteSelected)="askDelete($event)"
+  (duplicateSelected)="askDuplicate($event)"
+/>
+
+<app-delete-items-popup
+  [idItems]="idAdditionalItemsToDelete()"
+  [itemName]="additionalItemNameToDelete()"
+  translationKey="management.settings.catalog.additional_items.delete"
+  [action]="deleteAdditionalItems"
+  [pathIcon]="alertIcons"
+  [(open)]="deleting"
+  (deleted)="forgetDeleted($event); table.reload()"
+/>
+<app-duplicate-items-popup
+  [idItems]="idAdditionalItemsToDuplicate()"
+  [itemName]="additionalItemNameToDuplicate()"
+  translationKey="management.settings.catalog.additional_items.duplicate"
+  [action]="duplicateAdditionalItems"
+  [pathIcon]="alertIcons"
+  [(open)]="duplicating"
+  (duplicated)="afterDuplicate(); table.reload()"
+/>
+
+<app-table-error-popup
+  [pathIcon]="closeIcon"
+  [title]="'table.load_error.title' | translate"
+  [text]="'table.load_error.text' | translate"
+  [texts]="'table.load_error' | translate"
+  [(open)]="loadFailed"
+  (retry)="table.reload()"
+/>

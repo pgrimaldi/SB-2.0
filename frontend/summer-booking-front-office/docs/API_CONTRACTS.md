@@ -7165,6 +7165,114 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
+### POST `/api/catalog/additional-services-articles-list`
+
+Listino: elenco degli articoli/servizi aggiuntivi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "page": 1,
+  "pageSize": 10,
+  "search": "lettino",
+  "filters": [],
+  "sortField": "additionalItemName",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `lettino` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `additionalItemName` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01",
+      "additionalItemName": "Lettino"
+    },
+    {
+      "idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a11",
+      "additionalItemName": "Lettino extra famiglia"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | AdditionalItem[] (array di oggetti) | `[{"idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01", "additionalItemName": "Lettino"}, {"idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a11", "additionalItemName": "Lettino extra famiglia"}]` |
+| `rows[].idAdditionalItem` | string (UUID) | `4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01` |
+| `rows[].additionalItemName` | string \| null | `Lettino` |
+
+### POST `/api/catalog/delete-additional-services-article-item`
+
+Listino: eliminazione degli articoli/servizi aggiuntivi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idAdditionalItems": [
+    "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01",
+    "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a02"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idAdditionalItems` | string[] (UUID, almeno uno) | `["4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01", "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a02"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-additional-services-article-item`
+
+Listino: duplicazione degli articoli/servizi aggiuntivi.
+
+#### Payload
+
+```json
+{
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
+  "idAdditionalItems": [
+    "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `idAdditionalItems` | string[] (UUID, almeno uno) | `["4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ## /booking
 
 ### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
