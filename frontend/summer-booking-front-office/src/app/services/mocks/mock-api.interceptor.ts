@@ -77,11 +77,13 @@ import {
 } from './catalog/sectors.mock';
 import {
   additionalItemListMock,
+  createAdditionalItemMock,
   createPackageMock,
   deleteAdditionalItemsMock,
   deletePackageItemsMock,
   duplicateAdditionalItemsMock,
   duplicatePackageItemsMock,
+  packageComboboxMock,
   packageListMock,
   selectedPackageMock,
   updatePackageMock,
@@ -984,6 +986,20 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/duplicate-additional-services-article-item`
   ) {
     return duplicateAdditionalItemsMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/package-combobox`
+  ) {
+    return packageComboboxMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/create-additional-services-article-item`
+  ) {
+    return createAdditionalItemMock(request);
   }
 
   if (

@@ -2,7 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
+import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
 import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
 import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
@@ -33,6 +35,10 @@ export class PriceListService {
   readonly duplicatePackageItems = (request: DuplicatePackageItemsRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/duplicate-package-item`, request);
 
+  /** Every package of the property, in its order: `id` is the idPackage, `value` the name. */
+  readonly packageCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/package-combobox`, { idProperty });
+
   readonly additionalItemList = (request: PageRequest): Observable<Page<AdditionalItem>> =>
     this.httpClient.post<Page<AdditionalItem>>(
       `${this.endpoint}/additional-services-articles-list`,
@@ -58,6 +64,22 @@ export class PriceListService {
    */
   readonly createPackage = (request: PackageAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/packages/create-package`, packageBody(request));
+
+  /** The whole form of the add panel of the additional items. Answers 204 with no body. */
+  readonly createAdditionalItem = (
+    idProperty: string,
+    request: AdditionalItemAddItemRequest,
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/create-additional-services-article-item`, {
+      ...onlyFieldsOf(AdditionalItemAddItemRequest, request),
+      sectorPrices: request.sectorPrices.map((sectorPrice) =>
+        onlyFieldsOf(PackageSectorPrice, sectorPrice),
+      ),
+      periodPrices: request.periodPrices.map((periodPrice) =>
+        onlyFieldsOf(PackagePeriodPrice, periodPrice),
+      ),
+      idProperty,
+    });
 
   /** Everything the edit panel shows; the property comes from the access token. */
   readonly selectedPackage = (idPackage: string): Observable<PackageSelectedItem> =>

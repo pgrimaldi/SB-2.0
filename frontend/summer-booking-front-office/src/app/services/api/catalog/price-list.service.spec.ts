@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
+import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
 import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { Language } from '../../../entities/shared/language';
@@ -74,6 +75,55 @@ describe('PriceListService', () => {
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`,
     );
     expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    controller.verify();
+  });
+
+  it('should ask the packages of the dropdowns with the property only', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    let answer: unknown;
+
+    priceLists.packageCombobox('p1').subscribe((read) => (answer = read));
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/package-combobox`,
+    );
+    expect(call.request.body).toEqual({ idProperty: 'p1' });
+    call.flush([{ id: 'k1', value: 'Ombrellone e 2 lettini' }]);
+    expect(answer).toEqual([{ id: 'k1', value: 'Ombrellone e 2 lettini' }]);
+    controller.verify();
+  });
+
+  it('should create the additional item sending the whole form and the property', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    const request: AdditionalItemAddItemRequest = Object.assign(
+      new AdditionalItemAddItemRequest(),
+      {
+        idArticle: 'r1',
+        idPackages: ['k1'],
+        isMapAssignable: true,
+        sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 50, seasonalPrice: 90 }],
+      },
+    );
+
+    priceLists
+      .createAdditionalItem('p1', { ...request, extra: 'not sent' } as AdditionalItemAddItemRequest)
+      .subscribe();
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/create-additional-services-article-item`,
+    );
+    expect(call.request.body).toEqual({ ...request, idProperty: 'p1' });
     controller.verify();
   });
 

@@ -1636,46 +1636,6 @@
               "name": "Nom",
               "add": "Ajouter",
               "save": "Enregistrer"
-            },
-            "price_list": {
-              "seasonal_prices": "Prix saisonniers",
-              "period_prices": "Prix par période",
-              "seasonal_half_day": "Prix saisonnier demi-journée",
-              "seasonal": "Prix saisonnier",
-              "half_day": "Prix demi-journée",
-              "daily": "Prix journalier",
-              "weekend": "Prix week-end",
-              "half_day_weekend": "Prix demi-journée week-end",
-              "half_day_seven_days": "Prix demi-journée 7 jours",
-              "seven_days": "Prix 7 jours",
-              "half_day_fourteen_days": "Prix demi-journée 14 jours",
-              "fourteen_days": "Prix 14 jours",
-              "half_day_monthly": "Prix demi-journée mensuel",
-              "monthly": "Prix mensuel",
-              "no_sectors": "Aucun secteur ni rangée : ajoutez-les dans la page Secteurs et rangées.",
-              "no_periods": "Les prix par période demandent au moins un secteur ou une rangée et une période de la saison en cours.",
-              "calculation_method": "Calcul du prix",
-              "calculation_methods": {
-                "proportional": "Prix proportionnel",
-                "daily": "Prix journalier",
-                "logarithmic": "Prix logarithmique",
-                "daily_with_weekend": "Prix journalier avec week-end"
-              },
-              "calculation_method_info": "## 1. Prix proportionnel\nLe prix est calculé de façon linéaire selon les jours d'utilisation.\nLe logiciel multiplie le prix journalier par le nombre de jours, en appliquant les éventuels coefficients prévus par la grille tarifaire (ex. coefficients hebdomadaire, sur deux semaines, mensuel, saisonnier).\n\n**Exemple :**\n- Prix journalier : 20 €\n- Coefficient hebdomadaire (7 jours) : 0,95\n- Calcul : 20 × 7 × 0,95 = 133 €\nAvec cette méthode, le logiciel fait un calcul linéaire : il prend le prix journalier, le multiplie par les jours et applique le coefficient prévu par la grille. Le coefficient sert à créer des remises « standard » (ex. hebdomadaire, mensuelle, saisonnière).\n\n**Utilisation conseillée :** quand on veut un calcul simple et cohérent, avec des remises proportionnelles déjà définies dans la grille.\n\n## 2. Prix logarithmique\nLe prix augmente de moins en moins à mesure que la durée s'allonge.\nLes premiers jours ont un coût unitaire plus élevé, tandis que les jours suivants sont « remisés » automatiquement selon une courbe logarithmique.\n\n**Exemple :**\n- Prix pour 1 jour : 20 €\n- Prix pour 3 jours (non proportionnel) : au lieu de 60 €, le système calcule 55 €\n- Prix pour 7 jours : au lieu de 140 €, le système calcule 110 €\nIci, le logiciel n'utilise pas une multiplication linéaire.\nIl applique une courbe logarithmique, c'est-à-dire une formule mathématique qui réduit le coût moyen par jour à mesure que la durée augmente.\n- Les premiers jours coûtent plus cher.\n- Les jours suivants « pèsent » moins sur le total.\n\n**Utilisation conseillée :** quand on veut favoriser les longues réservations avec des remises plus marquées que le calcul proportionnel.\n\n## 3. Prix journalier\nChaque jour a le même prix, sans remises ni coefficients.\nLe total est simplement la somme des jours réservés.\n**Exemple :**\n- Prix journalier : 25 €\n- Réservation de 10 jours : 25 × 10 = 250 €\nIci, le logiciel n'applique aucune remise.\nChaque jour coûte exactement la même somme, quelle que soit la durée. Aucun coefficient ni réduction.\n\n**Utilisation conseillée :** quand on ne veut pas de réductions pour les périodes plus longues et qu'on préfère une grille fixe et uniforme.\n\n## 4. Prix journalier avec week-end\nLe prix est calculé en distinguant automatiquement les jours de semaine des jours fériés et des week-ends.\nLe logiciel applique le prix de semaine aux jours ouvrés et le prix week-end aux samedis, aux dimanches et aux éventuels jours fériés.\n\n**Exemple :**\n- Prix de semaine : 22 €\n- Prix week-end : 30 €\n- Réservation de 7 jours :\n  - 5 jours de semaine → 5 × 22 = 110 €\n  - 2 jours de week-end → 2 × 30 = 60 €\n- Total : 170 €\nLe logiciel analyse le calendrier de la réservation et distingue automatiquement :\n- les jours de semaine\n- les samedis\n- les dimanches\n- les éventuels jours fériés\nIl applique le bon prix à chaque jour et additionne les résultats. Il n'utilise ni coefficients ni remises : il calcule simplement selon le type de jour.\n\n**Utilisation conseillée :** quand l'établissement applique des tarifs différents le week-end ou les jours de forte affluence.",
-              "cumulative": "Prix cumulé",
-              "cumulative_info": "Le Prix cumulé est un mode de calcul qui donne un prix final plus précis quand une réservation couvre plusieurs périodes.\n## Comment ça marche\nLorsqu'il est activé, le système calcule le total avec une moyenne pondérée des prix des différentes saisons, selon le nombre de jours qui tombent dans chacune d'elles.\n## Quand il s'applique\n- **Réservation sur une seule saison** : le prix du tableau de cette saison est utilisé, sans calcul supplémentaire.\n- **Réservation sur plusieurs saisons** : le système combine les prix des tableaux saisonniers en proportion des jours en basse et en haute saison.\n- **Réservations multiples** : au lieu d'additionner les prix des différentes périodes, le système recalcule le total avec le nombre total de jours.",
-              "monthly_setting": "Réglage du mois",
-              "monthly_settings": {
-                "effective_month_duration": "Durée réelle du mois",
-                "thirty_days": "30 jours"
-              },
-              "weekend_setting": "Réglage du week-end",
-              "weekend_settings": {
-                "saturday_sunday": "Week-end : samedi et dimanche",
-                "sunday_only": "Week-end : dimanche seulement"
-              },
-              "public_holidays": "Jours fériés aussi",
-              "intermediate_prices": "Modifier les prix intermédiaires"
             }
           }
         },
@@ -1708,7 +1668,61 @@
               "title": "Dupliquer les articles/services supplémentaires",
               "text": "Voulez-vous dupliquer les {{count}} articles/services supplémentaires sélectionnés ?"
             }
+          },
+          "form": {
+            "add_title": "Ajouter un nouvel article/service supplémentaire",
+            "cancel": "Annuler",
+            "save": "Créer l'article/service",
+            "article": "Choisir l'article",
+            "choose": "Sélectionner",
+            "packages": "Forfaits",
+            "all_packages": "Tous les forfaits",
+            "online_enabled": "Réservations en ligne",
+            "online_only": "En ligne uniquement",
+            "map_assignable": "Définir comme article attribuable sur la carte",
+            "price_list": "Liste de prix"
           }
+        },
+        "price_list": {
+          "choose": "Sélectionner",
+          "seasonal_prices": "Prix saisonniers",
+          "period_prices": "Prix par période",
+          "seasonal_half_day": "Prix saisonnier demi-journée",
+          "seasonal": "Prix saisonnier",
+          "half_day": "Prix demi-journée",
+          "daily": "Prix journalier",
+          "weekend": "Prix week-end",
+          "half_day_weekend": "Prix demi-journée week-end",
+          "half_day_seven_days": "Prix demi-journée 7 jours",
+          "seven_days": "Prix 7 jours",
+          "half_day_fourteen_days": "Prix demi-journée 14 jours",
+          "fourteen_days": "Prix 14 jours",
+          "half_day_monthly": "Prix demi-journée mensuel",
+          "monthly": "Prix mensuel",
+          "no_sectors": "Aucun secteur ni rangée : ajoutez-les dans la page Secteurs et rangées.",
+          "no_periods": "Les prix par période demandent au moins un secteur ou une rangée et une période de la saison en cours.",
+          "calculation_method": "Calcul du prix",
+          "calculation_methods": {
+            "proportional": "Prix proportionnel",
+            "daily": "Prix journalier",
+            "logarithmic": "Prix logarithmique",
+            "daily_with_weekend": "Prix journalier avec week-end"
+          },
+          "calculation_method_info": "## 1. Prix proportionnel\nLe prix est calculé de façon linéaire selon les jours d'utilisation.\nLe logiciel multiplie le prix journalier par le nombre de jours, en appliquant les éventuels coefficients prévus par la grille tarifaire (ex. coefficients hebdomadaire, sur deux semaines, mensuel, saisonnier).\n\n**Exemple :**\n- Prix journalier : 20 €\n- Coefficient hebdomadaire (7 jours) : 0,95\n- Calcul : 20 × 7 × 0,95 = 133 €\nAvec cette méthode, le logiciel fait un calcul linéaire : il prend le prix journalier, le multiplie par les jours et applique le coefficient prévu par la grille. Le coefficient sert à créer des remises « standard » (ex. hebdomadaire, mensuelle, saisonnière).\n\n**Utilisation conseillée :** quand on veut un calcul simple et cohérent, avec des remises proportionnelles déjà définies dans la grille.\n\n## 2. Prix logarithmique\nLe prix augmente de moins en moins à mesure que la durée s'allonge.\nLes premiers jours ont un coût unitaire plus élevé, tandis que les jours suivants sont « remisés » automatiquement selon une courbe logarithmique.\n\n**Exemple :**\n- Prix pour 1 jour : 20 €\n- Prix pour 3 jours (non proportionnel) : au lieu de 60 €, le système calcule 55 €\n- Prix pour 7 jours : au lieu de 140 €, le système calcule 110 €\nIci, le logiciel n'utilise pas une multiplication linéaire.\nIl applique une courbe logarithmique, c'est-à-dire une formule mathématique qui réduit le coût moyen par jour à mesure que la durée augmente.\n- Les premiers jours coûtent plus cher.\n- Les jours suivants « pèsent » moins sur le total.\n\n**Utilisation conseillée :** quand on veut favoriser les longues réservations avec des remises plus marquées que le calcul proportionnel.\n\n## 3. Prix journalier\nChaque jour a le même prix, sans remises ni coefficients.\nLe total est simplement la somme des jours réservés.\n**Exemple :**\n- Prix journalier : 25 €\n- Réservation de 10 jours : 25 × 10 = 250 €\nIci, le logiciel n'applique aucune remise.\nChaque jour coûte exactement la même somme, quelle que soit la durée. Aucun coefficient ni réduction.\n\n**Utilisation conseillée :** quand on ne veut pas de réductions pour les périodes plus longues et qu'on préfère une grille fixe et uniforme.\n\n## 4. Prix journalier avec week-end\nLe prix est calculé en distinguant automatiquement les jours de semaine des jours fériés et des week-ends.\nLe logiciel applique le prix de semaine aux jours ouvrés et le prix week-end aux samedis, aux dimanches et aux éventuels jours fériés.\n\n**Exemple :**\n- Prix de semaine : 22 €\n- Prix week-end : 30 €\n- Réservation de 7 jours :\n  - 5 jours de semaine → 5 × 22 = 110 €\n  - 2 jours de week-end → 2 × 30 = 60 €\n- Total : 170 €\nLe logiciel analyse le calendrier de la réservation et distingue automatiquement :\n- les jours de semaine\n- les samedis\n- les dimanches\n- les éventuels jours fériés\nIl applique le bon prix à chaque jour et additionne les résultats. Il n'utilise ni coefficients ni remises : il calcule simplement selon le type de jour.\n\n**Utilisation conseillée :** quand l'établissement applique des tarifs différents le week-end ou les jours de forte affluence.",
+          "cumulative": "Prix cumulé",
+          "cumulative_info": "Le Prix cumulé est un mode de calcul qui donne un prix final plus précis quand une réservation couvre plusieurs périodes.\n## Comment ça marche\nLorsqu'il est activé, le système calcule le total avec une moyenne pondérée des prix des différentes saisons, selon le nombre de jours qui tombent dans chacune d'elles.\n## Quand il s'applique\n- **Réservation sur une seule saison** : le prix du tableau de cette saison est utilisé, sans calcul supplémentaire.\n- **Réservation sur plusieurs saisons** : le système combine les prix des tableaux saisonniers en proportion des jours en basse et en haute saison.\n- **Réservations multiples** : au lieu d'additionner les prix des différentes périodes, le système recalcule le total avec le nombre total de jours.",
+          "monthly_setting": "Réglage du mois",
+          "monthly_settings": {
+            "effective_month_duration": "Durée réelle du mois",
+            "thirty_days": "30 jours"
+          },
+          "weekend_setting": "Réglage du week-end",
+          "weekend_settings": {
+            "saturday_sunday": "Week-end : samedi et dimanche",
+            "sunday_only": "Week-end : dimanche seulement"
+          },
+          "public_holidays": "Jours fériés aussi",
+          "intermediate_prices": "Modifier les prix intermédiaires"
         }
       }
     }

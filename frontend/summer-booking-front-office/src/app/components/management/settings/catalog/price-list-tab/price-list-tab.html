@@ -1,11 +1,11 @@
 <app-expansion-panel
-  class="package__price__list__tab__section"
-  [title]="'management.settings.catalog.packages.form.price_list.seasonal_prices' | translate"
+  class="price__list__tab__section"
+  [title]="'management.settings.catalog.price_list.seasonal_prices' | translate"
   [pathIcon]="sectionIcons"
 >
   @if (form().sectorPrices().value().length) {
-    <div class="package__price__list__tab__grid">
-      <table class="package__price__list__tab__table">
+    <div class="price__list__tab__grid">
+      <table class="price__list__tab__table">
         <thead>
           <tr>
             <th></th>
@@ -33,22 +33,22 @@
       </table>
     </div>
   } @else if (isLoaded()) {
-    <p class="package__price__list__tab__empty">
-      {{ 'management.settings.catalog.packages.form.price_list.no_sectors' | translate }}
+    <p class="price__list__tab__empty">
+      {{ 'management.settings.catalog.price_list.no_sectors' | translate }}
     </p>
   }
 </app-expansion-panel>
 @if (validationText.text(form().sectorPrices); as error) {
-  <p class="package__price__list__tab__error">{{ error }}</p>
+  <p class="price__list__tab__error">{{ error }}</p>
 }
 <app-expansion-panel
-  class="package__price__list__tab__section"
-  [title]="'management.settings.catalog.packages.form.price_list.period_prices' | translate"
+  class="price__list__tab__section"
+  [title]="'management.settings.catalog.price_list.period_prices' | translate"
   [pathIcon]="sectionIcons"
 >
   @if (form().periodPrices().value().length) {
-    <div class="package__price__list__tab__grid">
-      <table class="package__price__list__tab__table">
+    <div class="price__list__tab__grid">
+      <table class="price__list__tab__table">
         <thead>
           <tr>
             <th></th>
@@ -61,7 +61,7 @@
           @for (row of form().periodPrices; track row) {
             <tr>
               <th scope="row">
-                <span class="package__price__list__tab__sector">{{
+                <span class="price__list__tab__sector">{{
                   sectorName(row.idSector().value())
                 }}</span>
                 {{ periodName(row.idPeriod().value()) }}
@@ -81,58 +81,58 @@
       </table>
     </div>
   } @else if (isLoaded()) {
-    <p class="package__price__list__tab__empty">
-      {{ 'management.settings.catalog.packages.form.price_list.no_periods' | translate }}
+    <p class="price__list__tab__empty">
+      {{ 'management.settings.catalog.price_list.no_periods' | translate }}
     </p>
   }
 </app-expansion-panel>
 @if (validationText.text(form().periodPrices); as error) {
-  <p class="package__price__list__tab__error">{{ error }}</p>
+  <p class="price__list__tab__error">{{ error }}</p>
 }
 
-<div class="package__price__list__tab__field">
-  <div class="package__price__list__tab__heading">
-    <span class="package__price__list__tab__label">
-      {{ 'management.settings.catalog.packages.form.price_list.calculation_method' | translate }}
+<div class="price__list__tab__field">
+  <div class="price__list__tab__heading">
+    <span class="price__list__tab__label">
+      {{ 'management.settings.catalog.price_list.calculation_method' | translate }}
     </span>
     <app-icon-button
-      class="package__price__list__tab__info"
+      class="price__list__tab__info"
       [pathIcon]="infoIcon"
       (click)="showingCalculationInfo.set(true)"
     />
   </div>
   <app-filled-select
-    [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+    [placeholder]="'management.settings.catalog.price_list.choose' | translate"
     [options]="calculationMethods()"
     [formField]="form().calculationMethod"
     [error]="validationText.text(form().calculationMethod)"
   />
 </div>
 
-<div class="package__price__list__tab__heading">
+<div class="price__list__tab__heading">
   <app-checkbox
     [formField]="form().isCumulative"
     [error]="validationText.text(form().isCumulative)"
   >
-    {{ 'management.settings.catalog.packages.form.price_list.cumulative' | translate }}
+    {{ 'management.settings.catalog.price_list.cumulative' | translate }}
   </app-checkbox>
   <app-icon-button
-    class="package__price__list__tab__info"
+    class="price__list__tab__info"
     [pathIcon]="infoIcon"
     (click)="showingCumulativeInfo.set(true)"
   />
 </div>
 
 <app-filled-select
-  [label]="'management.settings.catalog.packages.form.price_list.monthly_setting' | translate"
-  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [label]="'management.settings.catalog.price_list.monthly_setting' | translate"
+  [placeholder]="'management.settings.catalog.price_list.choose' | translate"
   [options]="monthlySettings()"
   [formField]="form().monthlySetting"
   [error]="validationText.text(form().monthlySetting)"
 />
 <app-filled-select
-  [label]="'management.settings.catalog.packages.form.price_list.weekend_setting' | translate"
-  [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
+  [label]="'management.settings.catalog.price_list.weekend_setting' | translate"
+  [placeholder]="'management.settings.catalog.price_list.choose' | translate"
   [options]="weekendSettings()"
   [formField]="form().weekendSetting"
   [error]="validationText.text(form().weekendSetting)"
@@ -142,28 +142,26 @@
   [formField]="form().isPublicHolidaysIncluded"
   [error]="validationText.text(form().isPublicHolidaysIncluded)"
 >
-  {{ 'management.settings.catalog.packages.form.price_list.public_holidays' | translate }}
+  {{ 'management.settings.catalog.price_list.public_holidays' | translate }}
 </app-checkbox>
 
 <app-button
-  class="package__price__list__tab__intermediate"
+  class="price__list__tab__intermediate"
   [size]="ButtonSize.Small"
-  [disabled]="form()().readonly()"
+  [disabled]="form().calculationMethod().readonly()"
 >
-  {{ 'management.settings.catalog.packages.form.price_list.intermediate_prices' | translate }}
+  {{ 'management.settings.catalog.price_list.intermediate_prices' | translate }}
 </app-button>
 
 <app-info-popup
-  [title]="'management.settings.catalog.packages.form.price_list.calculation_method' | translate"
-  [text]="
-    'management.settings.catalog.packages.form.price_list.calculation_method_info' | translate
-  "
+  [title]="'management.settings.catalog.price_list.calculation_method' | translate"
+  [text]="'management.settings.catalog.price_list.calculation_method_info' | translate"
   [pathIcon]="infoPopupIcons"
   [(open)]="showingCalculationInfo"
 />
 <app-info-popup
-  [title]="'management.settings.catalog.packages.form.price_list.cumulative' | translate"
-  [text]="'management.settings.catalog.packages.form.price_list.cumulative_info' | translate"
+  [title]="'management.settings.catalog.price_list.cumulative' | translate"
+  [text]="'management.settings.catalog.price_list.cumulative_info' | translate"
   [pathIcon]="infoPopupIcons"
   [(open)]="showingCumulativeInfo"
 />

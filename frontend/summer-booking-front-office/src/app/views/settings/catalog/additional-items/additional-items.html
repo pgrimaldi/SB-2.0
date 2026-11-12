@@ -20,6 +20,13 @@
   (loadError)="loadFailed.set(true)"
   (deleteSelected)="askDelete($event)"
   (duplicateSelected)="askDuplicate($event)"
+  (create)="adding.set(true)"
+/>
+
+<app-additional-item-add-item-panel
+  [pathIcon]="closeIcon"
+  [(open)]="adding"
+  (created)="table.reload()"
 />
 
 <app-delete-items-popup

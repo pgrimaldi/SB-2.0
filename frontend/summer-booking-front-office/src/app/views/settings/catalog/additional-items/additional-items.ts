@@ -4,6 +4,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
+import { AdditionalItemAddItemPanel } from '../../../../components/management/settings/catalog/additional-item-add-item-panel/additional-item-add-item-panel';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
 import { TableErrorPopup } from '../../../../components/shared/ui/dialogs/table-error-popup/table-error-popup';
@@ -24,6 +25,7 @@ interface AdditionalItemsTableTexts {
 @Component({
   selector: 'app-additional-items',
   imports: [
+    AdditionalItemAddItemPanel,
     DeleteItemsPopup,
     DuplicateItemsPopup,
     PageTitle,
@@ -41,6 +43,7 @@ export class AdditionalItems {
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
+  protected readonly adding = signal(false);
   protected readonly idSelectedAdditionalItems = signal<readonly TableRowId[]>([]);
   protected readonly deleting = signal(false);
   protected readonly idAdditionalItemsToDelete = signal<readonly string[]>([]);

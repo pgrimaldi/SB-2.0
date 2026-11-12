@@ -1,7 +1,9 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
+import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
 import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
 import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
 import { PriceCalculationMethod } from '../../../entities/enums/price-calculation-method';
@@ -21,6 +23,7 @@ import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
 import { DEMO_PROPERTY, propertyOf } from '../properties/properties.mock';
+import { activeArticleName } from '../warehouse/warehouse.mock';
 
 type PackageRow = PackageItem & { propertyId: number };
 
@@ -285,24 +288,7 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
       errors.push({ field, code: 'validation.invalid' });
     }
   }
-  if (
-    body.calculationMethod != null &&
-    !Object.values(PriceCalculationMethod).includes(body.calculationMethod)
-  ) {
-    errors.push({ field: 'calculationMethod', code: 'validation.invalid' });
-  }
-  if (
-    body.monthlySetting != null &&
-    !Object.values(PriceMonthlySetting).includes(body.monthlySetting)
-  ) {
-    errors.push({ field: 'monthlySetting', code: 'validation.invalid' });
-  }
-  if (
-    body.weekendSetting != null &&
-    !Object.values(PriceWeekendSetting).includes(body.weekendSetting)
-  ) {
-    errors.push({ field: 'weekendSetting', code: 'validation.invalid' });
-  }
+  errors.push(...choiceErrors(body));
   const reduced = body.reducedSeasonalPrice;
   if (reduced) {
     if (!reduced.reducedSeasonalPriceName?.trim()) {
@@ -532,3 +518,84 @@ function additionalItemsOf(
     .filter((item): item is AdditionalItemRow => item !== undefined);
   return ids.length && items.length === ids.length ? items : null;
 }
+
+/** Calculation method, monthly and weekend settings, when given, among the values of their enums. */
+function choiceErrors(body: {
+  calculationMethod?: unknown;
+  monthlySetting?: unknown;
+  weekendSetting?: unknown;
+}): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  const enums = [
+    ['calculationMethod', PriceCalculationMethod],
+    ['monthlySetting', PriceMonthlySetting],
+    ['weekendSetting', PriceWeekendSetting],
+  ] as const;
+  for (const [field, values] of enums) {
+    const value = body[field];
+    if (value != null && !(Object.values(values) as unknown[]).includes(value)) {
+      errors.push({ field, code: 'validation.invalid' });
+    }
+  }
+  return errors;
+}
+
+/**
+ * `POST /api/catalog/package-combobox` with `{ idProperty }`: every package of the property, in its
+ * order, as `{ id, value }`. 401 without a valid access token; 403 for a missing or unknown property.
+ */
+export const packageComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const property = propertyOf((request.body as { idProperty?: unknown } | null)?.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const items: ComboboxItem[] = PACKAGES.filter((row) => row.propertyId === property.id).map(
+    (row) => ({ id: row.idPackage ?? '', value: row.packageName ?? '' }),
+  );
+  return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
+};
+
+type CreateAdditionalItemBody = Partial<AdditionalItemAddItemRequest> & { idProperty?: unknown };
+
+/**
+ * `POST /api/catalog/create-additional-services-article-item` with `AdditionalItemAddItemRequest` and
+ * `idProperty`: the new additional item goes into the list with the name of its article. 204 without
+ * a body; 401 without a valid access token; 403 for an unknown property; 404 `resource.not_found`
+ * for an article that is not an active one of the property or a package that is not one of its; 400
+ * with one error per wrong choice (see `choiceErrors`).
+ */
+export const createAdditionalItemMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as CreateAdditionalItemBody;
+  const property = propertyOf(body.idProperty);
+  if (!property) {
+    return forbidden(request);
+  }
+  const name = activeArticleName(property.id, body.idArticle);
+  const idPackages = Array.isArray(body.idPackages) ? body.idPackages : [];
+  const isEveryPackageKnown = idPackages.every((idPackage) =>
+    PACKAGES.some((row) => row.idPackage === idPackage && row.propertyId === property.id),
+  );
+  if (name === null || !isEveryPackageKnown) {
+    return resourceNotFound(request);
+  }
+  const errors = choiceErrors(body);
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  ADDITIONAL_ITEMS.push({
+    propertyId: property.id,
+    idAdditionalItem: crypto.randomUUID(),
+    additionalItemName: name,
+  });
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};

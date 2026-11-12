@@ -8,7 +8,6 @@ import { PriceCalculationMethod } from '../../../../../entities/enums/price-calc
 import { PriceMonthlySetting } from '../../../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../../../entities/enums/price-weekend-setting';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
@@ -21,6 +20,17 @@ import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-fi
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 
+/** The fields the tab shows: those of the package form and of the additional item one. */
+export interface PriceListFields {
+  readonly sectorPrices: FieldTree<PackageSectorPrice[]>;
+  readonly periodPrices: FieldTree<PackagePeriodPrice[]>;
+  readonly calculationMethod: FieldTree<PriceCalculationMethod | null>;
+  readonly isCumulative: FieldTree<boolean>;
+  readonly monthlySetting: FieldTree<PriceMonthlySetting | null>;
+  readonly weekendSetting: FieldTree<PriceWeekendSetting | null>;
+  readonly isPublicHolidaysIncluded: FieldTree<boolean>;
+}
+
 /** The fields of a row that hold a price. */
 type PriceField<T> = { [K in keyof T]: T[K] extends number | null ? K : never }[keyof T];
 
@@ -30,7 +40,7 @@ interface PriceColumn<T> {
   label: string;
 }
 
-const KEY = 'management.settings.catalog.packages.form.price_list';
+const KEY = 'management.settings.catalog.price_list';
 
 /** The texts of the choices of the dropdowns, in the translation group of the tab. */
 interface ChoiceTexts {
@@ -74,7 +84,7 @@ const WEEKEND_SETTING_KEYS: Readonly<
 };
 
 @Component({
-  selector: 'app-package-price-list-tab',
+  selector: 'app-price-list-tab',
   imports: [
     Button,
     Checkbox,
@@ -86,12 +96,12 @@ const WEEKEND_SETTING_KEYS: Readonly<
     InfoPopup,
     TranslatePipe,
   ],
-  templateUrl: './package-price-list-tab.html',
-  styleUrl: './package-price-list-tab.scss',
+  templateUrl: './price-list-tab.html',
+  styleUrl: './price-list-tab.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PackagePriceListTab {
-  readonly form = input.required<FieldTree<PackageAddItemRequest>>();
+export class PriceListTab {
+  readonly form = input.required<PriceListFields>();
   /** The sectors of the property: a row each. */
   readonly sectors = input<readonly ComboboxItem[]>([]);
   /** The periods of the current season: a row each, for every sector. */

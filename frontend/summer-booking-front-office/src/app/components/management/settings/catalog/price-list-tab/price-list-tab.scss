@@ -7,19 +7,19 @@
 }
 
 // The two grids in their sections, as wide as them: more room for the prices on phones.
-.package__price__list__tab__section {
+.price__list__tab__section {
   --expansion-panel-content-padding: 1rem;
 }
 
 // A grid larger than its room scrolls on its own, with its header and its first column always in sight.
-.package__price__list__tab__grid {
+.price__list__tab__grid {
   max-width: 100%;
   max-height: 26rem;
   overflow: auto;
 }
 
 // The colours of the tables of the app: blue texts on white, thin lines between the rows.
-.package__price__list__tab__table {
+.price__list__tab__table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -64,55 +64,55 @@
   }
 }
 
-.package__price__list__tab__table td app-filled-number-field {
+.price__list__tab__table td app-filled-number-field {
   display: block;
   width: 5.5rem;
   margin-inline: auto;
 }
 
 // Sector above, period below.
-.package__price__list__tab__sector {
+.price__list__tab__sector {
   display: block;
 }
 
 // An error of a whole grid (e.g. from the backend), under its section.
-.package__price__list__tab__error {
+.price__list__tab__error {
   margin: 0;
   color: var(--color__layout__error);
   font-size: 0.75rem;
   line-height: 1rem;
 }
 
-.package__price__list__tab__empty {
+.price__list__tab__empty {
   margin: 0;
   color: var(--color__layout__text__soft);
   font-size: 0.75rem;
 }
 
-.package__price__list__tab__field {
+.price__list__tab__field {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
 // A label or a checkbox with its (i) right after.
-.package__price__list__tab__heading {
+.price__list__tab__heading {
   display: flex;
   align-items: center;
   gap: 0.375rem;
 }
 
-.package__price__list__tab__label {
+.price__list__tab__label {
   color: var(--color__layout__text__soft);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1rem;
 }
 
-.package__price__list__tab__info {
+.price__list__tab__info {
   @include info.info-button;
 }
 
-.package__price__list__tab__intermediate {
+.price__list__tab__intermediate {
   align-self: flex-start;
 }

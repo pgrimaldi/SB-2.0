@@ -350,6 +350,11 @@ export const warehouseDuplicateMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
+/** The name of an active article of the property, null when it is not one. */
+export function activeArticleName(propertyId: number, idArticle: unknown): string | null {
+  return articleOf(propertyId, idArticle)?.name ?? null;
+}
+
 function articleOf(propertyId: number, idArticle: unknown): InventoryRow | undefined {
   return INVENTORY_ITEMS.find(
     (row) =>

@@ -1,0 +1,28 @@
+// One part under the other, as in the tabs of the package panels.
+.additional__item__add__item__panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.additional__item__add__item__panel__options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+// In a thin frame, moved back by its border and inner space: every box in one column.
+.additional__item__add__item__panel__map {
+  margin-inline-start: calc(-0.25rem - 0.0625rem);
+  padding: 0 0.75rem 0 0.25rem;
+  border: 0.0625rem solid var(--color__layout__text__soft);
+  border-radius: 0.25rem;
+}
+
+.additional__item__add__item__panel__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}

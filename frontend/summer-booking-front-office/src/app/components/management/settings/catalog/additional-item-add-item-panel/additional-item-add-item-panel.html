@@ -1,0 +1,73 @@
+<app-side-panel
+  [title]="'management.settings.catalog.additional_items.form.add_title' | translate"
+  [texts]="'management.settings.catalog.additional_items.form' | translate"
+  [pathIcon]="pathIcon()"
+  [isLoading]="isSaving()"
+  [isSaveDisabled]="isSaveDisabled()"
+  [(open)]="open"
+  (closeRequest)="leave()"
+  (save)="save()"
+>
+  <div class="additional__item__add__item__panel__body">
+    <app-filled-select
+      [label]="'management.settings.catalog.additional_items.form.article' | translate"
+      [isMandatory]="true"
+      [placeholder]="
+        articlesLoadError()
+          ? ''
+          : ('management.settings.catalog.additional_items.form.choose' | translate)
+      "
+      [options]="articleOptions()"
+      [formField]="draftForm.idArticle"
+      [error]="articlesLoadError() ?? validationText.text(draftForm.idArticle)"
+    />
+    <app-filled-multi-select
+      [label]="'management.settings.catalog.additional_items.form.packages' | translate"
+      [placeholder]="
+        packagesLoadError()
+          ? ''
+          : ('management.settings.catalog.additional_items.form.all_packages' | translate)
+      "
+      [options]="packageOptions()"
+      [formField]="draftForm.idPackages"
+      [error]="packagesLoadError() ?? validationText.text(draftForm.idPackages)"
+    />
+
+    <div class="additional__item__add__item__panel__options">
+      <app-checkbox
+        [formField]="draftForm.isOnlineEnabled"
+        [error]="validationText.text(draftForm.isOnlineEnabled)"
+      >
+        {{ 'management.settings.catalog.additional_items.form.online_enabled' | translate }}
+      </app-checkbox>
+      <app-checkbox
+        [formField]="draftForm.isOnlineOnly"
+        [error]="validationText.text(draftForm.isOnlineOnly)"
+      >
+        {{ 'management.settings.catalog.additional_items.form.online_only' | translate }}
+      </app-checkbox>
+      <app-checkbox
+        class="additional__item__add__item__panel__map"
+        [formField]="draftForm.isMapAssignable"
+        [error]="validationText.text(draftForm.isMapAssignable)"
+      >
+        {{ 'management.settings.catalog.additional_items.form.map_assignable' | translate }}
+      </app-checkbox>
+    </div>
+
+    <app-section-title
+      [text]="'management.settings.catalog.additional_items.form.price_list' | translate"
+    />
+    <app-price-list-tab
+      [attr.inert]="isFetching() ? '' : null"
+      [form]="draftForm"
+      [sectors]="sectors()"
+      [periods]="periods()"
+      [isLoaded]="isPriceListLoaded()"
+    />
+
+    @if (errorMessage(); as errorMessage) {
+      <p class="additional__item__add__item__panel__error">{{ errorMessage }}</p>
+    }
+  </div>
+</app-side-panel>

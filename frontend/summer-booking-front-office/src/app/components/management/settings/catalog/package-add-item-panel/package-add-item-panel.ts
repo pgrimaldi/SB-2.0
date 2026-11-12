@@ -47,7 +47,7 @@ import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
-import { PackagePriceListTab } from '../package-price-list-tab/package-price-list-tab';
+import { PriceListTab } from '../price-list-tab/price-list-tab';
 
 interface PackageFormTexts {
   tabs: {
@@ -64,7 +64,7 @@ enum PanelTab {
 
 @Component({
   selector: 'app-package-add-item-panel',
-  imports: [PackageGeneralInfoTab, PackagePriceListTab, SidePanel, TabGroup, TranslatePipe],
+  imports: [PackageGeneralInfoTab, PriceListTab, SidePanel, TabGroup, TranslatePipe],
   templateUrl: './package-add-item-panel.html',
   styleUrl: './package-add-item-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

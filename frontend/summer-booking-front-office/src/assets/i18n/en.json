@@ -1636,46 +1636,6 @@
               "name": "Name",
               "add": "Add",
               "save": "Save"
-            },
-            "price_list": {
-              "seasonal_prices": "Seasonal prices",
-              "period_prices": "Prices by period",
-              "seasonal_half_day": "Seasonal half-day price",
-              "seasonal": "Seasonal price",
-              "half_day": "Half-day price",
-              "daily": "Daily price",
-              "weekend": "Weekend price",
-              "half_day_weekend": "Weekend half-day price",
-              "half_day_seven_days": "7-day half-day price",
-              "seven_days": "7-day price",
-              "half_day_fourteen_days": "14-day half-day price",
-              "fourteen_days": "14-day price",
-              "half_day_monthly": "Monthly half-day price",
-              "monthly": "Monthly price",
-              "no_sectors": "There are no sectors or rows: add them in the Sectors and rows page.",
-              "no_periods": "Prices per period need at least one sector or row and one period of the current season.",
-              "calculation_method": "Price calculation",
-              "calculation_methods": {
-                "proportional": "Proportional price",
-                "daily": "Daily price",
-                "logarithmic": "Logarithmic price",
-                "daily_with_weekend": "Daily price with weekend"
-              },
-              "calculation_method_info": "## 1. Proportional price\nThe price is calculated linearly on the days of use.\nThe system multiplies the daily price by the number of days, applying any coefficients set in the price list (e.g. weekly, two-week, monthly, seasonal coefficients).\n\n**Example:**\n- Daily price: €20\n- Weekly coefficient (7 days): 0.95\n- Calculation: 20 × 7 × 0.95 = €133\nWith this method the system makes a linear calculation: it takes the daily price, multiplies it by the days and applies the coefficient set in the price list. The coefficient is used to create “standard” discounts (e.g. weekly, monthly, seasonal).\n\n**Recommended use:** when you want a simple, consistent calculation, with proportional discounts already set in the price list.\n\n## 2. Logarithmic price\nThe price grows less and less as the length of stay increases.\nThe first days have a higher unit cost, while the following days are “discounted” automatically along a logarithmic curve.\n\n**Example:**\n- Price for 1 day: €20\n- Price for 3 days (not proportional): instead of €60, the system calculates €55\n- Price for 7 days: instead of €140, the system calculates €110\nHere the system does not use a linear multiplication.\nIt applies a logarithmic curve, a mathematical formula that lowers the average cost per day as the length of stay increases.\n- The first days cost more.\n- The following days “weigh” less on the total.\n\n**Recommended use:** when you want to favour long bookings with steeper discounts than the proportional calculation.\n\n## 3. Daily price\nEvery day has the same price, with no discounts or coefficients.\nThe total is simply the sum of the days booked.\n**Example:**\n- Daily price: €25\n- 10-day booking: 25 × 10 = €250\nHere the system applies no discount of any kind.\nEvery day costs exactly the same, whatever the length of stay. No coefficients or reductions.\n\n**Recommended use:** when you do not want reductions for longer periods and prefer a fixed, uniform price list.\n\n## 4. Daily price with weekend\nThe price is calculated by automatically telling weekdays apart from public holidays and weekends.\nThe system applies the weekday price to weekdays and the weekend price to Saturdays, Sundays and any public holidays.\n\n**Example:**\n- Weekday price: €22\n- Weekend price: €30\n- 7-day booking:\n  - 5 weekdays → 5 × 22 = €110\n  - 2 weekend days → 2 × 30 = €60\n- Total: €170\nThe system reads the calendar of the booking and automatically tells apart:\n- weekdays\n- Saturdays\n- Sundays\n- any public holidays\nIt applies the right price to each day and adds up the results. It uses no coefficients or discounts: it simply calculates by type of day.\n\n**Recommended use:** when the beach club charges different rates at weekends or on the busiest days.",
-              "cumulative": "Cumulative price",
-              "cumulative_info": "The Cumulative price is a calculation method that gives a more accurate final price when a booking covers more than one period.\n## How it works\nWhen it is on, the system calculates the total with a weighted average of the prices of the different seasons, based on the number of days that fall in each of them.\n## When it applies\n- **Booking in a single season**: the price of that season's table is used, with no extra calculation.\n- **Booking across several seasons**: the system combines the prices of the seasonal tables in proportion to the days in low and high season.\n- **Multiple bookings**: instead of adding up the prices of the single periods, the system recalculates the total using the overall number of days.",
-              "monthly_setting": "Monthly setting",
-              "monthly_settings": {
-                "effective_month_duration": "Actual length of the month",
-                "thirty_days": "30 days"
-              },
-              "weekend_setting": "Weekend setting",
-              "weekend_settings": {
-                "saturday_sunday": "Weekend is Saturday and Sunday",
-                "sunday_only": "Weekend is Sunday only"
-              },
-              "public_holidays": "Public holidays too",
-              "intermediate_prices": "Edit intermediate prices"
             }
           }
         },
@@ -1708,7 +1668,61 @@
               "title": "Duplicate additional items/services",
               "text": "Do you want to duplicate the {{count}} selected additional items/services?"
             }
+          },
+          "form": {
+            "add_title": "Add new additional item/service",
+            "cancel": "Cancel",
+            "save": "Create item/service",
+            "article": "Select item",
+            "choose": "Select",
+            "packages": "Packages",
+            "all_packages": "All packages",
+            "online_enabled": "Online bookings",
+            "online_only": "Online only",
+            "map_assignable": "Set as item assignable on the map",
+            "price_list": "Price list"
           }
+        },
+        "price_list": {
+          "choose": "Select",
+          "seasonal_prices": "Seasonal prices",
+          "period_prices": "Prices by period",
+          "seasonal_half_day": "Seasonal half-day price",
+          "seasonal": "Seasonal price",
+          "half_day": "Half-day price",
+          "daily": "Daily price",
+          "weekend": "Weekend price",
+          "half_day_weekend": "Weekend half-day price",
+          "half_day_seven_days": "7-day half-day price",
+          "seven_days": "7-day price",
+          "half_day_fourteen_days": "14-day half-day price",
+          "fourteen_days": "14-day price",
+          "half_day_monthly": "Monthly half-day price",
+          "monthly": "Monthly price",
+          "no_sectors": "There are no sectors or rows: add them in the Sectors and rows page.",
+          "no_periods": "Prices per period need at least one sector or row and one period of the current season.",
+          "calculation_method": "Price calculation",
+          "calculation_methods": {
+            "proportional": "Proportional price",
+            "daily": "Daily price",
+            "logarithmic": "Logarithmic price",
+            "daily_with_weekend": "Daily price with weekend"
+          },
+          "calculation_method_info": "## 1. Proportional price\nThe price is calculated linearly on the days of use.\nThe system multiplies the daily price by the number of days, applying any coefficients set in the price list (e.g. weekly, two-week, monthly, seasonal coefficients).\n\n**Example:**\n- Daily price: €20\n- Weekly coefficient (7 days): 0.95\n- Calculation: 20 × 7 × 0.95 = €133\nWith this method the system makes a linear calculation: it takes the daily price, multiplies it by the days and applies the coefficient set in the price list. The coefficient is used to create “standard” discounts (e.g. weekly, monthly, seasonal).\n\n**Recommended use:** when you want a simple, consistent calculation, with proportional discounts already set in the price list.\n\n## 2. Logarithmic price\nThe price grows less and less as the length of stay increases.\nThe first days have a higher unit cost, while the following days are “discounted” automatically along a logarithmic curve.\n\n**Example:**\n- Price for 1 day: €20\n- Price for 3 days (not proportional): instead of €60, the system calculates €55\n- Price for 7 days: instead of €140, the system calculates €110\nHere the system does not use a linear multiplication.\nIt applies a logarithmic curve, a mathematical formula that lowers the average cost per day as the length of stay increases.\n- The first days cost more.\n- The following days “weigh” less on the total.\n\n**Recommended use:** when you want to favour long bookings with steeper discounts than the proportional calculation.\n\n## 3. Daily price\nEvery day has the same price, with no discounts or coefficients.\nThe total is simply the sum of the days booked.\n**Example:**\n- Daily price: €25\n- 10-day booking: 25 × 10 = €250\nHere the system applies no discount of any kind.\nEvery day costs exactly the same, whatever the length of stay. No coefficients or reductions.\n\n**Recommended use:** when you do not want reductions for longer periods and prefer a fixed, uniform price list.\n\n## 4. Daily price with weekend\nThe price is calculated by automatically telling weekdays apart from public holidays and weekends.\nThe system applies the weekday price to weekdays and the weekend price to Saturdays, Sundays and any public holidays.\n\n**Example:**\n- Weekday price: €22\n- Weekend price: €30\n- 7-day booking:\n  - 5 weekdays → 5 × 22 = €110\n  - 2 weekend days → 2 × 30 = €60\n- Total: €170\nThe system reads the calendar of the booking and automatically tells apart:\n- weekdays\n- Saturdays\n- Sundays\n- any public holidays\nIt applies the right price to each day and adds up the results. It uses no coefficients or discounts: it simply calculates by type of day.\n\n**Recommended use:** when the beach club charges different rates at weekends or on the busiest days.",
+          "cumulative": "Cumulative price",
+          "cumulative_info": "The Cumulative price is a calculation method that gives a more accurate final price when a booking covers more than one period.\n## How it works\nWhen it is on, the system calculates the total with a weighted average of the prices of the different seasons, based on the number of days that fall in each of them.\n## When it applies\n- **Booking in a single season**: the price of that season's table is used, with no extra calculation.\n- **Booking across several seasons**: the system combines the prices of the seasonal tables in proportion to the days in low and high season.\n- **Multiple bookings**: instead of adding up the prices of the single periods, the system recalculates the total using the overall number of days.",
+          "monthly_setting": "Monthly setting",
+          "monthly_settings": {
+            "effective_month_duration": "Actual length of the month",
+            "thirty_days": "30 days"
+          },
+          "weekend_setting": "Weekend setting",
+          "weekend_settings": {
+            "saturday_sunday": "Weekend is Saturday and Sunday",
+            "sunday_only": "Weekend is Sunday only"
+          },
+          "public_holidays": "Public holidays too",
+          "intermediate_prices": "Edit intermediate prices"
         }
       }
     }

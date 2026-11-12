@@ -1636,46 +1636,6 @@
               "name": "Name",
               "add": "Hinzufügen",
               "save": "Speichern"
-            },
-            "price_list": {
-              "seasonal_prices": "Saisonpreise",
-              "period_prices": "Preise je Zeitraum",
-              "seasonal_half_day": "Saisonpreis halber Tag",
-              "seasonal": "Saisonpreis",
-              "half_day": "Preis halber Tag",
-              "daily": "Tagespreis",
-              "weekend": "Wochenendpreis",
-              "half_day_weekend": "Preis halber Tag Wochenende",
-              "half_day_seven_days": "Preis halber Tag 7 Tage",
-              "seven_days": "Preis 7 Tage",
-              "half_day_fourteen_days": "Preis halber Tag 14 Tage",
-              "fourteen_days": "Preis 14 Tage",
-              "half_day_monthly": "Preis halber Tag Monat",
-              "monthly": "Monatspreis",
-              "no_sectors": "Keine Sektoren oder Reihen: füge sie auf der Seite Sektoren und Reihen hinzu.",
-              "no_periods": "Für Preise pro Zeitraum braucht es mindestens einen Sektor oder eine Reihe und einen Zeitraum der laufenden Saison.",
-              "calculation_method": "Preisberechnung",
-              "calculation_methods": {
-                "proportional": "Proportionaler Preis",
-                "daily": "Tagespreis",
-                "logarithmic": "Logarithmischer Preis",
-                "daily_with_weekend": "Tagespreis mit Wochenende"
-              },
-              "calculation_method_info": "## 1. Proportionaler Preis\nDer Preis wird linear nach den Nutzungstagen berechnet.\nDas System multipliziert den Tagespreis mit der Anzahl der Tage und wendet die in der Preisliste vorgesehenen Koeffizienten an (z. B. Koeffizienten für Woche, zwei Wochen, Monat, Saison).\n\n**Beispiel:**\n- Tagespreis: 20 €\n- Wochenkoeffizient (7 Tage): 0,95\n- Berechnung: 20 × 7 × 0,95 = 133 €\nBei dieser Methode rechnet das System linear: Es nimmt den Tagespreis, multipliziert ihn mit den Tagen und wendet den Koeffizienten aus der Preisliste an. Der Koeffizient dient dazu, „Standard“-Rabatte zu bilden (z. B. für Woche, Monat, Saison).\n\n**Empfohlen:** wenn eine einfache, einheitliche Berechnung mit bereits in der Preisliste festgelegten proportionalen Rabatten gewünscht ist.\n\n## 2. Logarithmischer Preis\nDer Preis steigt immer weniger, je länger der Aufenthalt dauert.\nDie ersten Tage haben höhere Tageskosten, die folgenden Tage werden automatisch nach einer logarithmischen Kurve „rabattiert“.\n\n**Beispiel:**\n- Preis für 1 Tag: 20 €\n- Preis für 3 Tage (nicht proportional): statt 60 € berechnet das System 55 €\n- Preis für 7 Tage: statt 140 € berechnet das System 110 €\nHier rechnet das System nicht mit einer linearen Multiplikation.\nEs wendet eine logarithmische Kurve an, also eine mathematische Formel, die die durchschnittlichen Kosten pro Tag mit zunehmender Dauer senkt.\n- Die ersten Tage kosten mehr.\n- Die folgenden Tage fallen beim Gesamtbetrag weniger ins Gewicht.\n\n**Empfohlen:** wenn lange Buchungen mit stärkeren Rabatten als bei der proportionalen Berechnung gefördert werden sollen.\n\n## 3. Tagespreis\nJeder Tag hat denselben Preis, ohne Rabatte oder Koeffizienten.\nDer Gesamtbetrag ist einfach die Summe der gebuchten Tage.\n**Beispiel:**\n- Tagespreis: 25 €\n- Buchung von 10 Tagen: 25 × 10 = 250 €\nHier wendet das System keinerlei Rabatt an.\nJeder Tag kostet genau gleich viel, unabhängig von der Dauer. Keine Koeffizienten oder Ermäßigungen.\n\n**Empfohlen:** wenn für längere Zeiträume keine Ermäßigungen gelten sollen und eine feste, einheitliche Preisliste bevorzugt wird.\n\n## 4. Tagespreis mit Wochenende\nDer Preis wird berechnet, indem automatisch zwischen Werktagen und Feiertagen oder Wochenenden unterschieden wird.\nDas System wendet den Werktagspreis auf Wochentage an und den Wochenendpreis auf Samstage, Sonntage und eventuelle Feiertage.\n\n**Beispiel:**\n- Werktagspreis: 22 €\n- Wochenendpreis: 30 €\n- Buchung von 7 Tagen:\n  - 5 Werktage → 5 × 22 = 110 €\n  - 2 Wochenendtage → 2 × 30 = 60 €\n- Gesamt: 170 €\nDas System liest den Kalender der Buchung und unterscheidet automatisch:\n- Werktage\n- Samstage\n- Sonntage\n- eventuelle Feiertage\nEs wendet auf jeden Tag den richtigen Preis an und addiert die Ergebnisse. Es nutzt weder Koeffizienten noch Rabatte, sondern rechnet einfach nach Art des Tages.\n\n**Empfohlen:** wenn der Betrieb am Wochenende oder an besonders gefragten Tagen andere Tarife anwendet.",
-              "cumulative": "Kumulierter Preis",
-              "cumulative_info": "Der Kumulierte Preis ist eine Berechnungsart, die einen genaueren Endpreis ergibt, wenn eine Buchung mehrere Zeiträume umfasst.\n## So funktioniert es\nIst er aktiviert, berechnet das System den Gesamtbetrag mit einem gewichteten Durchschnitt der Preise der verschiedenen Saisons, je nach Anzahl der Tage, die in jede Saison fallen.\n## Wann er gilt\n- **Buchung in einer einzigen Saison**: Es gilt der Preis aus der Tabelle dieser Saison, ohne weitere Berechnung.\n- **Buchung über mehrere Saisons**: Das System kombiniert die Preise der Saisontabellen im Verhältnis zu den Tagen in Neben- und Hauptsaison.\n- **Mehrfachbuchungen**: Statt die Preise der einzelnen Zeiträume zu addieren, berechnet das System den Gesamtbetrag mit der Gesamtzahl der Tage neu.",
-              "monthly_setting": "Monatseinstellung",
-              "monthly_settings": {
-                "effective_month_duration": "Tatsächliche Monatslänge",
-                "thirty_days": "30 Tage"
-              },
-              "weekend_setting": "Wochenendeinstellung",
-              "weekend_settings": {
-                "saturday_sunday": "Wochenende: Samstag und Sonntag",
-                "sunday_only": "Wochenende: nur Sonntag"
-              },
-              "public_holidays": "Auch Feiertage",
-              "intermediate_prices": "Zwischenpreise bearbeiten"
             }
           }
         },
@@ -1708,7 +1668,61 @@
               "title": "Zusatzartikel/-leistungen duplizieren",
               "text": "Möchtest du die {{count}} ausgewählten Zusatzartikel/-leistungen duplizieren?"
             }
+          },
+          "form": {
+            "add_title": "Neuen Zusatzartikel/-leistung hinzufügen",
+            "cancel": "Abbrechen",
+            "save": "Artikel/Leistung erstellen",
+            "article": "Artikel auswählen",
+            "choose": "Auswählen",
+            "packages": "Pakete",
+            "all_packages": "Alle Pakete",
+            "online_enabled": "Online-Buchungen",
+            "online_only": "Nur online",
+            "map_assignable": "Als auf der Karte zuweisbaren Artikel festlegen",
+            "price_list": "Preisliste"
           }
+        },
+        "price_list": {
+          "choose": "Auswählen",
+          "seasonal_prices": "Saisonpreise",
+          "period_prices": "Preise je Zeitraum",
+          "seasonal_half_day": "Saisonpreis halber Tag",
+          "seasonal": "Saisonpreis",
+          "half_day": "Preis halber Tag",
+          "daily": "Tagespreis",
+          "weekend": "Wochenendpreis",
+          "half_day_weekend": "Preis halber Tag Wochenende",
+          "half_day_seven_days": "Preis halber Tag 7 Tage",
+          "seven_days": "Preis 7 Tage",
+          "half_day_fourteen_days": "Preis halber Tag 14 Tage",
+          "fourteen_days": "Preis 14 Tage",
+          "half_day_monthly": "Preis halber Tag Monat",
+          "monthly": "Monatspreis",
+          "no_sectors": "Keine Sektoren oder Reihen: füge sie auf der Seite Sektoren und Reihen hinzu.",
+          "no_periods": "Für Preise pro Zeitraum braucht es mindestens einen Sektor oder eine Reihe und einen Zeitraum der laufenden Saison.",
+          "calculation_method": "Preisberechnung",
+          "calculation_methods": {
+            "proportional": "Proportionaler Preis",
+            "daily": "Tagespreis",
+            "logarithmic": "Logarithmischer Preis",
+            "daily_with_weekend": "Tagespreis mit Wochenende"
+          },
+          "calculation_method_info": "## 1. Proportionaler Preis\nDer Preis wird linear nach den Nutzungstagen berechnet.\nDas System multipliziert den Tagespreis mit der Anzahl der Tage und wendet die in der Preisliste vorgesehenen Koeffizienten an (z. B. Koeffizienten für Woche, zwei Wochen, Monat, Saison).\n\n**Beispiel:**\n- Tagespreis: 20 €\n- Wochenkoeffizient (7 Tage): 0,95\n- Berechnung: 20 × 7 × 0,95 = 133 €\nBei dieser Methode rechnet das System linear: Es nimmt den Tagespreis, multipliziert ihn mit den Tagen und wendet den Koeffizienten aus der Preisliste an. Der Koeffizient dient dazu, „Standard“-Rabatte zu bilden (z. B. für Woche, Monat, Saison).\n\n**Empfohlen:** wenn eine einfache, einheitliche Berechnung mit bereits in der Preisliste festgelegten proportionalen Rabatten gewünscht ist.\n\n## 2. Logarithmischer Preis\nDer Preis steigt immer weniger, je länger der Aufenthalt dauert.\nDie ersten Tage haben höhere Tageskosten, die folgenden Tage werden automatisch nach einer logarithmischen Kurve „rabattiert“.\n\n**Beispiel:**\n- Preis für 1 Tag: 20 €\n- Preis für 3 Tage (nicht proportional): statt 60 € berechnet das System 55 €\n- Preis für 7 Tage: statt 140 € berechnet das System 110 €\nHier rechnet das System nicht mit einer linearen Multiplikation.\nEs wendet eine logarithmische Kurve an, also eine mathematische Formel, die die durchschnittlichen Kosten pro Tag mit zunehmender Dauer senkt.\n- Die ersten Tage kosten mehr.\n- Die folgenden Tage fallen beim Gesamtbetrag weniger ins Gewicht.\n\n**Empfohlen:** wenn lange Buchungen mit stärkeren Rabatten als bei der proportionalen Berechnung gefördert werden sollen.\n\n## 3. Tagespreis\nJeder Tag hat denselben Preis, ohne Rabatte oder Koeffizienten.\nDer Gesamtbetrag ist einfach die Summe der gebuchten Tage.\n**Beispiel:**\n- Tagespreis: 25 €\n- Buchung von 10 Tagen: 25 × 10 = 250 €\nHier wendet das System keinerlei Rabatt an.\nJeder Tag kostet genau gleich viel, unabhängig von der Dauer. Keine Koeffizienten oder Ermäßigungen.\n\n**Empfohlen:** wenn für längere Zeiträume keine Ermäßigungen gelten sollen und eine feste, einheitliche Preisliste bevorzugt wird.\n\n## 4. Tagespreis mit Wochenende\nDer Preis wird berechnet, indem automatisch zwischen Werktagen und Feiertagen oder Wochenenden unterschieden wird.\nDas System wendet den Werktagspreis auf Wochentage an und den Wochenendpreis auf Samstage, Sonntage und eventuelle Feiertage.\n\n**Beispiel:**\n- Werktagspreis: 22 €\n- Wochenendpreis: 30 €\n- Buchung von 7 Tagen:\n  - 5 Werktage → 5 × 22 = 110 €\n  - 2 Wochenendtage → 2 × 30 = 60 €\n- Gesamt: 170 €\nDas System liest den Kalender der Buchung und unterscheidet automatisch:\n- Werktage\n- Samstage\n- Sonntage\n- eventuelle Feiertage\nEs wendet auf jeden Tag den richtigen Preis an und addiert die Ergebnisse. Es nutzt weder Koeffizienten noch Rabatte, sondern rechnet einfach nach Art des Tages.\n\n**Empfohlen:** wenn der Betrieb am Wochenende oder an besonders gefragten Tagen andere Tarife anwendet.",
+          "cumulative": "Kumulierter Preis",
+          "cumulative_info": "Der Kumulierte Preis ist eine Berechnungsart, die einen genaueren Endpreis ergibt, wenn eine Buchung mehrere Zeiträume umfasst.\n## So funktioniert es\nIst er aktiviert, berechnet das System den Gesamtbetrag mit einem gewichteten Durchschnitt der Preise der verschiedenen Saisons, je nach Anzahl der Tage, die in jede Saison fallen.\n## Wann er gilt\n- **Buchung in einer einzigen Saison**: Es gilt der Preis aus der Tabelle dieser Saison, ohne weitere Berechnung.\n- **Buchung über mehrere Saisons**: Das System kombiniert die Preise der Saisontabellen im Verhältnis zu den Tagen in Neben- und Hauptsaison.\n- **Mehrfachbuchungen**: Statt die Preise der einzelnen Zeiträume zu addieren, berechnet das System den Gesamtbetrag mit der Gesamtzahl der Tage neu.",
+          "monthly_setting": "Monatseinstellung",
+          "monthly_settings": {
+            "effective_month_duration": "Tatsächliche Monatslänge",
+            "thirty_days": "30 Tage"
+          },
+          "weekend_setting": "Wochenendeinstellung",
+          "weekend_settings": {
+            "saturday_sunday": "Wochenende: Samstag und Sonntag",
+            "sunday_only": "Wochenende: nur Sonntag"
+          },
+          "public_holidays": "Auch Feiertage",
+          "intermediate_prices": "Zwischenpreise bearbeiten"
         }
       }
     }

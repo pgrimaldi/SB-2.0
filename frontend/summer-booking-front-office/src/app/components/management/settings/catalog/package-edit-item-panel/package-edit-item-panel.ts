@@ -52,7 +52,7 @@ import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
-import { PackagePriceListTab } from '../package-price-list-tab/package-price-list-tab';
+import { PriceListTab } from '../price-list-tab/price-list-tab';
 
 interface PackageFormTexts {
   tabs: {
@@ -72,7 +72,7 @@ enum PanelTab {
   imports: [
     Button,
     PackageGeneralInfoTab,
-    PackagePriceListTab,
+    PriceListTab,
     SidePanel,
     SidePanelButtons,
     TabGroup,

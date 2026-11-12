@@ -16,7 +16,7 @@
         [(isReducedSeasonalPriceOpen)]="isReducedSeasonalPriceOpen"
       />
     } @else if (selectedTab() === PanelTab.PriceList) {
-      <app-package-price-list-tab
+      <app-price-list-tab
         [attr.inert]="isLoading() ? '' : null"
         [form]="draftForm"
         [sectors]="sectors()"
