@@ -147,6 +147,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly pristine = signal(newDraft());
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  /** Saved prices of sectors or periods the panel does not show: sent back as they were. */
+  private readonly hiddenSectorPrices = signal<readonly PackageSectorPrice[]>([]);
+  private readonly hiddenPeriodPrices = signal<readonly PackagePeriodPrice[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly isLoaded = signal(false);
   protected readonly isEditDisabled = computed(() => this.isLoading() || !this.isLoaded());
@@ -201,7 +204,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.priceLists.updatePackage(idPackage, this.draft()));
+        await firstValueFrom(this.priceLists.updatePackage(idPackage, this.toRequest()));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
@@ -219,6 +222,16 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
     }
+  }
+
+  /** The form, with the hidden saved prices after the shown ones. */
+  private toRequest(): PackageAddItemRequest {
+    const draft = this.draft();
+    return {
+      ...draft,
+      sectorPrices: [...draft.sectorPrices, ...this.hiddenSectorPrices()],
+      periodPrices: [...draft.periodPrices, ...this.hiddenPeriodPrices()],
+    };
   }
 
   /** The open box differs from what it showed when opened: empty, or the row being edited. */
@@ -253,6 +266,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     this.isReducedSeasonalPriceOpen.set(false);
     this.sectors.set([]);
     this.periods.set([]);
+    this.hiddenSectorPrices.set([]);
+    this.hiddenPeriodPrices.set([]);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.load();
   }
@@ -282,7 +297,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /**
    * The values read, with a name for every language (empty where missing) and a price for every
-   * sector and for every sector in every period (the saved one, or empty).
+   * sector and for every sector in every period (the saved one, or empty). The saved prices of
+   * other sectors or periods (e.g. of another season) are kept aside.
    */
   private setLoaded(
     item: PackageSelectedItem,
@@ -338,6 +354,17 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       weekendSetting: item.weekendSetting,
       isPublicHolidaysIncluded: item.isPublicHolidaysIncluded,
     });
+    const idSectors = new Set(sectors.map(({ id }) => id));
+    const idPeriods = new Set(periods.map(({ idPeriod }) => idPeriod));
+    this.hiddenSectorPrices.set(
+      item.sectorPrices.filter(({ idSector }) => !idSector || !idSectors.has(idSector)),
+    );
+    this.hiddenPeriodPrices.set(
+      item.periodPrices.filter(
+        ({ idSector, idPeriod }) =>
+          !idSector || !idSectors.has(idSector) || !idPeriod || !idPeriods.has(idPeriod),
+      ),
+    );
     this.sectors.set(sectors);
     this.periods.set(periods);
     this.draft.set(draft);
