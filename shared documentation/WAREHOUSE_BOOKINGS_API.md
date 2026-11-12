@@ -94,7 +94,7 @@
 
 ### POST `/api/warehouse/article-combobox`
 
-**Usata da:** Popup "Aggiungi articolo" (`FormWarehouseAddItemPopup`, Impostazioni magazzino): tendina degli articoli
+**Usata da:** Popup "Aggiungi articolo" (`FormWarehouseAddItemPopup`, Impostazioni magazzino) e pannelli "Aggiungi nuovo articolo/servizio aggiuntivo" e "Modifica articolo/servizio aggiuntivo" (`AdditionalItemAddItemPanel`, `AdditionalItemEditItemPanel`, pagina Listino): tendina degli articoli
 
 **Rotta:** `POST /api/warehouse/article-combobox`
 
@@ -210,7 +210,7 @@
 
 ### POST `/api/warehouse/delete-warehouse-item`
 
-**Usata da:** Popup di conferma `DeleteWarehouseItemsPopup` (Impostazioni magazzino): elimina riga / elimina selezionati
+**Usata da:** Popup di conferma `DeleteItemsPopup` (Impostazioni magazzino): elimina riga / elimina selezionati
 
 **Rotta:** `POST /api/warehouse/delete-warehouse-item`
 
@@ -237,7 +237,7 @@
 
 ### POST `/api/warehouse/duplicate-warehouse-item`
 
-**Usata da:** Popup di conferma `DuplicateWarehouseItemsPopup` (Impostazioni magazzino): duplica riga / duplica selezionati
+**Usata da:** Popup di conferma `DuplicateItemsPopup` (Impostazioni magazzino): duplica riga / duplica selezionati
 
 **Rotta:** `POST /api/warehouse/duplicate-warehouse-item`
 
