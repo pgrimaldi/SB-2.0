@@ -1,6 +1,7 @@
 import { PriceCalculationMethod } from '../../enums/price-calculation-method';
 import { PriceMonthlySetting } from '../../enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../enums/price-weekend-setting';
+import { PackageIntermediatePrice } from './package-intermediate-price';
 import { PackagePeriodPrice } from './package-period-price';
 import { PackageReducedSeasonalPrice } from './package-reduced-seasonal-price';
 import { PackageSectorPrice } from './package-sector-price';
@@ -35,4 +36,7 @@ export class PackageAddItemRequest {
   monthlySetting: PriceMonthlySetting | null = null;
   weekendSetting: PriceWeekendSetting | null = null;
   isPublicHolidaysIncluded = false;
+  publicHolidayDates: string[] = [];
+  isIntermediatePricesIncluded = false;
+  intermediatePrices: PackageIntermediatePrice[] = [];
 }

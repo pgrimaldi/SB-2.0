@@ -1,0 +1,109 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// As the sections of the prices in the Listino tab.
+.intermediate__prices__section {
+  --expansion-panel-content-padding: 1rem;
+}
+
+// The choice of the row, in the title row before the arrow; it can get narrower than Material's field.
+.intermediate__prices__row {
+  display: block;
+  width: 14rem;
+  min-width: 0;
+}
+
+// As the grids of the prices: larger than its room it scrolls on its own, the header always in sight.
+.intermediate__prices__grid {
+  max-width: 100%;
+  max-height: 26rem;
+  overflow: auto;
+}
+
+// The colours of the grids of the prices: blue texts, white and light blue rows in turn, thin lines between them.
+.intermediate__prices__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--color__main__theme__one);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-align: center;
+
+  th {
+    background: var(--color__layout__surface);
+    font-weight: 600;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0 0.5rem 0.75rem;
+    border-bottom: 0.0625rem solid var(--color__layout__border);
+  }
+
+  tbody th,
+  td {
+    padding: 0.375rem 0.5rem;
+  }
+
+  tbody tr:not(:last-child) > * {
+    border-bottom: 0.0625rem solid var(--color__layout__border);
+  }
+
+  tbody tr:nth-child(even) > * {
+    background: var(--color__layout__highlight);
+  }
+}
+
+.intermediate__prices__table td app-filled-number-field {
+  display: block;
+  width: 5.5rem;
+  margin-inline: auto;
+}
+
+.intermediate__prices__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// Phones: more room for the title, which goes on more lines, as in the reduced prices; the choice of the row
+// goes under it.
+@media (width < 48rem) {
+  .intermediate__prices__section {
+    --expansion-panel-header-height: auto;
+    --expansion-panel-header-padding: 0.5rem 1rem 0.5rem 1.25rem;
+    --expansion-panel-header-wrap: wrap;
+    --expansion-panel-actions-order: 1;
+    --expansion-panel-actions-basis: calc(100% - 1rem);
+    --expansion-panel-content-padding: 1rem 0.5rem;
+  }
+
+  // On its own line under the title, up to the arrow (the actions keep 1rem after them): it starts from
+  // nothing and fills the line, so Material's field never makes the line wider than the header.
+  .intermediate__prices__row {
+    flex-grow: 1;
+    width: 0;
+    margin-top: 0.5rem;
+    margin-inline-end: -1rem;
+  }
+
+  // The three columns in the width of the phone, without breaking words: narrower cells and field.
+  .intermediate__prices__table {
+    thead th,
+    tbody th,
+    td {
+      padding-inline: 0.1875rem;
+    }
+  }
+
+  .intermediate__prices__table td app-filled-number-field {
+    width: 4rem;
+  }
+}

@@ -1,9 +1,11 @@
 @use '../../../../../styles/info-button' as info;
 
+// Room under the last section: its border and shadow stay off the end of the panel.
 :host {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  padding-bottom: 1.25rem;
 }
 
 // The two grids in their sections, as wide as them: more room for the prices on phones.
@@ -115,10 +117,6 @@
 
 .price__list__tab__info {
   @include info.info-button;
-}
-
-.price__list__tab__intermediate {
-  align-self: flex-start;
 }
 
 // Phones: more room for the titles, as in the sections of the reduced seasonal prices.

@@ -1732,8 +1732,34 @@
             "saturday_sunday": "Considera weekend sabato e domenica",
             "sunday_only": "Considera weekend solo domenica"
           },
-          "public_holidays": "Anche festivi",
-          "intermediate_prices": "Modifica prezzi intermedi"
+          "public_holidays": {
+            "title": "Festivi",
+            "add": "Aggiungi festivi",
+            "date": "Data",
+            "hint": "Clicca sui giorni per sceglierli o toglierli",
+            "cancel": "Annulla",
+            "confirm": "Conferma",
+            "disable": {
+              "title": "Disattiva festivi",
+              "text": "Disattivando questa opzione tutti i festivi selezionati verranno persi, sei sicuro?",
+              "cancel": "Annulla",
+              "confirm": "Disattiva"
+            }
+          },
+          "intermediate_prices": {
+            "title": "Modifica prezzi intermedi",
+            "first_row": "Fila 1 {{period}}",
+            "other_rows": "Altre file {{period}}",
+            "name": "Nome/articolo",
+            "days": "Giorni",
+            "price": "Prezzo",
+            "disable": {
+              "title": "Disattiva prezzi intermedi",
+              "text": "Disattivando questa opzione tutti i prezzi intermedi verranno persi, sei sicuro?",
+              "cancel": "Annulla",
+              "confirm": "Disattiva"
+            }
+          }
         }
       }
     }

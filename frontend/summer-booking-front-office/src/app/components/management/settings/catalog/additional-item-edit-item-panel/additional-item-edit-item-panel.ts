@@ -37,6 +37,7 @@ import { AdditionalItemAddItemRequest } from '../../../../../entities/settings/c
 import { AdditionalItemSelectedItem } from '../../../../../entities/settings/catalog/additional-item-selected-item';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
+import { PackageIntermediatePrice } from '../../../../../entities/settings/catalog/package-intermediate-price';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { PriceListService } from '../../../../../services/api/catalog/price-list.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
@@ -52,6 +53,7 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
+import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
 
 @Component({
   selector: 'app-additional-item-edit-item-panel',
@@ -102,12 +104,17 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.isMapAssignable, () => this.isLocked());
     disabled(path.isCumulative, () => this.isLocked());
     disabled(path.isPublicHolidaysIncluded, () => this.isLocked());
+    disabled(path.isIntermediatePricesIncluded, () => this.isLocked());
     required(path.idArticle);
   });
   /** The values as the API gave them: the form is compared with them. */
   private readonly pristine = signal(new AdditionalItemAddItemRequest());
   private readonly articles = signal<readonly ComboboxItem[]>([]);
   protected readonly articlesLoadError = signal<string | null>(null);
+  /** The name of the chosen article, in the rows of the intermediate prices. */
+  protected readonly articleName = computed(
+    () => this.articles().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
+  );
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
     this.articles().map(({ id, value }) => ({ value: id, label: value })),
   );
@@ -311,6 +318,11 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
       monthlySetting: item.monthlySetting,
       weekendSetting: item.weekendSetting,
       isPublicHolidaysIncluded: item.isPublicHolidaysIncluded,
+      publicHolidayDates: [...item.publicHolidayDates].sort(),
+      isIntermediatePricesIncluded: item.isIntermediatePricesIncluded,
+      intermediatePrices: item.intermediatePrices
+        .map((price) => Object.assign(new PackageIntermediatePrice(), price))
+        .sort(byIntermediatePrice),
     });
     const idSectors = new Set(sectors.map(({ id }) => id));
     const idPeriods = new Set(periods.map(({ idPeriod }) => idPeriod));

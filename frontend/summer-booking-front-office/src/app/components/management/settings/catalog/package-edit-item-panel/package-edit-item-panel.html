@@ -20,6 +20,8 @@
         [sectors]="sectors()"
         [periods]="periods()"
         [isLoaded]="isLoaded()"
+        [isIntermediatePricesEnabled]="!!packageName()"
+        [itemName]="packageName()"
       >
         <app-package-reduced-price
           [reducedSeasonalPrices]="draftForm.reducedSeasonalPrices"

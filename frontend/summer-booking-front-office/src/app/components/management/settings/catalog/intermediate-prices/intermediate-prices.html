@@ -1,0 +1,75 @@
+<app-expansion-panel
+  class="intermediate__prices__section"
+  [title]="'management.settings.catalog.price_list.intermediate_prices.title' | translate"
+  [pathIcon]="sectionIcons"
+  [disabled]="!isIncludedValue() || !choice()"
+  [(isExpanded)]="isExpanded"
+>
+  <app-checkbox
+    appExpansionPanelStart
+    [checked]="isChecked()"
+    [disabled]="isCheckboxLocked()"
+    (checkedChange)="toggle($event)"
+  />
+  <app-filled-select
+    appExpansionPanelAction
+    class="intermediate__prices__row"
+    [placeholder]="'management.settings.catalog.price_list.choose' | translate"
+    [options]="options()"
+    [disabled]="!isIncludedValue()"
+    [(value)]="selectedRow"
+  />
+  @if (isExpanded() && choice()) {
+    <div class="intermediate__prices__grid">
+      <table class="intermediate__prices__table">
+        <thead>
+          <tr>
+            <th scope="col">
+              {{ 'management.settings.catalog.price_list.intermediate_prices.name' | translate }}
+            </th>
+            <th scope="col">
+              {{ 'management.settings.catalog.price_list.intermediate_prices.days' | translate }}
+            </th>
+            <th scope="col">
+              {{ 'management.settings.catalog.price_list.intermediate_prices.price' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (day of days; track day) {
+            <tr>
+              <th scope="row">{{ name() }}</th>
+              <td>{{ day }}</td>
+              <td>
+                <app-filled-number-field
+                  [isDecimal]="true"
+                  [isCurrency]="true"
+                  [readonly]="isLocked()"
+                  [value]="shownPrices().get(day) ?? null"
+                  (valueChange)="setPrice(day, $event)"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</app-expansion-panel>
+@if (validationText.text(isIncluded()); as error) {
+  <p class="intermediate__prices__error">{{ error }}</p>
+}
+@if (validationText.text(prices()); as error) {
+  <p class="intermediate__prices__error">{{ error }}</p>
+}
+
+<app-confirm-popup
+  [pathIcon]="popupIcons"
+  [title]="'management.settings.catalog.price_list.intermediate_prices.disable.title' | translate"
+  [text]="'management.settings.catalog.price_list.intermediate_prices.disable.text' | translate"
+  [texts]="'management.settings.catalog.price_list.intermediate_prices.disable' | translate"
+  [danger]="true"
+  [open]="isAskingOff()"
+  (openChange)="closeOff($event)"
+  (confirmed)="confirmOff()"
+/>

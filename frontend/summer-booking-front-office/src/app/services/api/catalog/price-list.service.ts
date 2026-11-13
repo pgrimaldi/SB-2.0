@@ -11,6 +11,7 @@ import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/de
 import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
 import { DuplicatePackageItemsRequest } from '../../../entities/settings/catalog/duplicate-package-items-request';
 import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
+import { PackageIntermediatePrice } from '../../../entities/settings/catalog/package-intermediate-price';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { PackagePeriodPrice } from '../../../entities/settings/catalog/package-period-price';
 import { PackageReducedSeasonalPrice } from '../../../entities/settings/catalog/package-reduced-seasonal-price';
@@ -130,6 +131,9 @@ function packageBody(request: PackageAddItemRequest): PackageAddItemRequest {
         onlyFieldsOf(PackageSectorPrice, sectorPrice),
       ),
     })),
+    intermediatePrices: request.intermediatePrices.map((price) =>
+      onlyFieldsOf(PackageIntermediatePrice, price),
+    ),
   };
 }
 
@@ -142,6 +146,9 @@ function additionalItemBody(request: AdditionalItemAddItemRequest): AdditionalIt
     ),
     periodPrices: request.periodPrices.map((periodPrice) =>
       onlyFieldsOf(PackagePeriodPrice, periodPrice),
+    ),
+    intermediatePrices: request.intermediatePrices.map((price) =>
+      onlyFieldsOf(PackageIntermediatePrice, price),
     ),
   };
 }

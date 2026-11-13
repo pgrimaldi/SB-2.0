@@ -104,6 +104,7 @@ describe('PriceListService', () => {
     });
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
+    const intermediatePrice = { idPeriod: 'pe1', isFirstRow: false, dayQuantity: 3, price: 40 };
     const request: AdditionalItemAddItemRequest = Object.assign(
       new AdditionalItemAddItemRequest(),
       {
@@ -111,12 +112,19 @@ describe('PriceListService', () => {
         idPackages: ['k1'],
         isMapAssignable: true,
         sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 50, seasonalPrice: 90 }],
+        isPublicHolidaysIncluded: true,
+        publicHolidayDates: ['2026-06-02T00:00:00.000Z', '2026-08-15T00:00:00.000Z'],
+        isIntermediatePricesIncluded: true,
+        intermediatePrices: [intermediatePrice],
       },
     );
 
-    priceLists
-      .createAdditionalItem('p1', { ...request, extra: 'not sent' } as AdditionalItemAddItemRequest)
-      .subscribe();
+    const sent = Object.assign(new AdditionalItemAddItemRequest(), request, {
+      intermediatePrices: [{ ...intermediatePrice, extra: 'not sent' }],
+      extra: 'not sent',
+    });
+
+    priceLists.createAdditionalItem('p1', sent).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
@@ -159,6 +167,7 @@ describe('PriceListService', () => {
       {
         idArticle: 'r1',
         isOnlineOnly: true,
+        publicHolidayDates: ['2026-08-15T00:00:00.000Z'],
       },
     );
 
@@ -258,6 +267,7 @@ describe('PriceListService', () => {
     });
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
+    const intermediatePrice = { idPeriod: 'pe1', isFirstRow: true, dayQuantity: 2, price: 35 };
     const reducedSeasonalPrice = {
       dateFrom: '2026-06-01T00:00:00.000Z',
       dateTo: '2026-06-30T00:00:00.000Z',
@@ -270,6 +280,10 @@ describe('PriceListService', () => {
       umbrellaQuantity: 1,
       idSectors: ['s1'],
       sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 500, seasonalPrice: 900 }],
+      isPublicHolidaysIncluded: true,
+      publicHolidayDates: ['2026-06-02T00:00:00.000Z', '2026-08-15T00:00:00.000Z'],
+      isIntermediatePricesIncluded: true,
+      intermediatePrices: [{ ...intermediatePrice, extra: 'not sent' }],
       reducedSeasonalPrices: [
         {
           ...reducedSeasonalPrice,
@@ -288,6 +302,7 @@ describe('PriceListService', () => {
     expect(call.request.body).toEqual({
       ...request,
       reducedSeasonalPrices: [reducedSeasonalPrice],
+      intermediatePrices: [intermediatePrice],
     });
     expect(call.request.body).not.toHaveProperty('idProperty');
     controller.verify();
@@ -328,6 +343,7 @@ describe('PriceListService', () => {
       translations: [{ language: Language.It, packageName: 'Ombrellone e 3 lettini' }],
       sunbedQuantity: 3,
       reducedSeasonalPrices: [reducedSeasonalPrice],
+      publicHolidayDates: ['2026-08-15T00:00:00.000Z'],
     });
 
     const sent = Object.assign(new PackageAddItemRequest(), request, {

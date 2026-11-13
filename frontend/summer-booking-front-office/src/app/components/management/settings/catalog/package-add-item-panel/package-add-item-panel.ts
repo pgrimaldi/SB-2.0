@@ -134,6 +134,13 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   /** The rows of the price list are read once per opening, the first time its tab is shown. */
   protected readonly isPriceListLoaded = signal(false);
   protected readonly isFetching = signal(false);
+  /** The name of the package in the main language. */
+  protected readonly packageName = computed(
+    () =>
+      this.draft()
+        .translations.find(({ language }) => language === this.mainLanguage())
+        ?.packageName?.trim() ?? '',
+  );
   protected readonly isSaving = signal(false);
   /** Also while the reduced seasonal price box is open: its values are not in the package yet. */
   protected readonly isSaveDisabled = computed(

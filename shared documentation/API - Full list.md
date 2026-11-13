@@ -2288,7 +2288,17 @@ Nessun corpo (204).
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
   "weekendSetting": "string (enum PriceWeekendSetting) | null",
-  "isPublicHolidaysIncluded": "boolean"
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
 }
 ```
 
@@ -2328,6 +2338,13 @@ Nessun corpo (204).
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null |
 | `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
 
 **Response tabella**
 
@@ -2380,7 +2397,17 @@ Nessun corpo (204).
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
   "weekendSetting": "string (enum PriceWeekendSetting) | null",
-  "isPublicHolidaysIncluded": "boolean"
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
 }
 ```
 
@@ -2422,6 +2449,13 @@ Nessun corpo (204).
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null |
 | `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
 
 ### POST `/api/catalog/update-additional-services-article-item`
 
@@ -2463,7 +2497,17 @@ Nessun corpo (204).
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
   "weekendSetting": "string (enum PriceWeekendSetting) | null",
-  "isPublicHolidaysIncluded": "boolean"
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
 }
 ```
 
@@ -2504,6 +2548,13 @@ Nessun corpo (204).
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null |
 | `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
 
 **Response tabella**
 
@@ -2645,7 +2696,17 @@ Nessun corpo (204).
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
   "weekendSetting": "string (enum PriceWeekendSetting) | null",
-  "isPublicHolidaysIncluded": "boolean"
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
 }
 ```
 
@@ -2705,6 +2766,13 @@ Nessun corpo (204).
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null |
 | `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
 
 **Response tabella**
 
@@ -2783,7 +2851,17 @@ Nessun payload.
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
   "weekendSetting": "string (enum PriceWeekendSetting) | null",
-  "isPublicHolidaysIncluded": "boolean"
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
 }
 ```
 
@@ -2844,6 +2922,13 @@ Nessun payload.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null |
 | `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
 
 ### POST `/api/catalog/packages/update-package`
 
@@ -2914,7 +2999,17 @@ Nessun payload.
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
   "weekendSetting": "string (enum PriceWeekendSetting) | null",
-  "isPublicHolidaysIncluded": "boolean"
+  "isPublicHolidaysIncluded": "boolean",
+  "publicHolidayDates": "string[] (date UTC ISO 8601)",
+  "isIntermediatePricesIncluded": "boolean",
+  "intermediatePrices": [
+    {
+      "idPeriod": "string (UUID)",
+      "isFirstRow": "boolean",
+      "dayQuantity": "number (intero)",
+      "price": "number"
+    }
+  ]
 }
 ```
 
@@ -2975,6 +3070,13 @@ Nessun corpo (204).
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null |
 | `isPublicHolidaysIncluded` | boolean |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) |
+| `isIntermediatePricesIncluded` | boolean |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
+| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].isFirstRow` | boolean |
+| `intermediatePrices[].dayQuantity` | number (intero) |
+| `intermediatePrices[].price` | number |
 
 **Response tabella**
 

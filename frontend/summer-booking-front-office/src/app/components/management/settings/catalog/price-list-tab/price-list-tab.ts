@@ -8,10 +8,10 @@ import { PriceCalculationMethod } from '../../../../../entities/enums/price-calc
 import { PriceMonthlySetting } from '../../../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../../../entities/enums/price-weekend-setting';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { PackageIntermediatePrice } from '../../../../../entities/settings/catalog/package-intermediate-price';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
-import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -19,6 +19,8 @@ import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { IntermediatePrices } from '../intermediate-prices/intermediate-prices';
+import { PublicHolidays } from '../public-holidays/public-holidays';
 
 /** The fields the tab shows: those of the package form and of the additional item one. */
 export interface PriceListFields {
@@ -29,6 +31,9 @@ export interface PriceListFields {
   readonly monthlySetting: FieldTree<PriceMonthlySetting | null>;
   readonly weekendSetting: FieldTree<PriceWeekendSetting | null>;
   readonly isPublicHolidaysIncluded: FieldTree<boolean>;
+  readonly publicHolidayDates: FieldTree<string[]>;
+  readonly isIntermediatePricesIncluded: FieldTree<boolean>;
+  readonly intermediatePrices: FieldTree<PackageIntermediatePrice[]>;
 }
 
 /** The fields of a row that hold a price. */
@@ -86,7 +91,6 @@ const WEEKEND_SETTING_KEYS: Readonly<
 @Component({
   selector: 'app-price-list-tab',
   imports: [
-    Button,
     Checkbox,
     ExpansionPanel,
     FilledNumberField,
@@ -94,6 +98,8 @@ const WEEKEND_SETTING_KEYS: Readonly<
     FormField,
     IconButton,
     InfoPopup,
+    IntermediatePrices,
+    PublicHolidays,
     TranslatePipe,
   ],
   templateUrl: './price-list-tab.html',
@@ -108,11 +114,14 @@ export class PriceListTab {
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   /** Whether the rows have been read: until then no "no rows" message. */
   readonly isLoaded = input(false);
+  /** The checkbox of "Modifica prezzi intermedi" can be used (e.g. only once the package has a name). */
+  readonly isIntermediatePricesEnabled = input(true);
+  /** The name of the package or of the article, in the rows of Modifica prezzi intermedi. */
+  readonly itemName = input('');
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);
 
-  protected readonly ButtonSize = ButtonSize;
   protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
   /** [before the title, arrow]. */
   protected readonly sectionIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
@@ -165,6 +174,8 @@ export class PriceListTab {
     })),
   );
 
+  /** Fila 1 of Modifica prezzi intermedi: the first sector of the property. */
+  protected readonly idFirstSector = computed(() => this.sectors().at(0)?.id ?? null);
   private readonly sectorNames = computed(
     () => new Map(this.sectors().map(({ id, value }) => [id, value])),
   );

@@ -18,6 +18,10 @@ import {
   MAX_PACKAGE_PEOPLE_QUANTITY,
   PackageAddItemRequest,
 } from '../../../entities/settings/catalog/package-add-item-request';
+import {
+  MAX_INTERMEDIATE_PRICE_DAY_QUANTITY,
+  PackageIntermediatePrice,
+} from '../../../entities/settings/catalog/package-intermediate-price';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -95,6 +99,23 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
       calculationMethod: PriceCalculationMethod.Daily,
       monthlySetting: PriceMonthlySetting.EffectiveMonthDuration,
       weekendSetting: PriceWeekendSetting.SaturdaySunday,
+      isPublicHolidaysIncluded: true,
+      publicHolidayDates: ['2026-06-02T00:00:00.000Z', '2026-08-15T00:00:00.000Z'],
+      isIntermediatePricesIncluded: true,
+      intermediatePrices: [
+        {
+          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          isFirstRow: true,
+          dayQuantity: 2,
+          price: 35,
+        },
+        {
+          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          isFirstRow: true,
+          dayQuantity: 3,
+          price: 50,
+        },
+      ],
     }),
   ],
 ]);
@@ -553,11 +574,17 @@ function additionalItemsOf(
   return ids.length && items.length === ids.length ? items : null;
 }
 
-/** Calculation method, monthly and weekend settings, when given, among the values of their enums. */
+/**
+ * Calculation method, monthly and weekend settings, when given, among the values of their enums;
+ * the public holidays real days, each once; every intermediate price with its period, from 1 to 90
+ * days and not negative, once for each period, row group and number of days.
+ */
 function choiceErrors(body: {
   calculationMethod?: unknown;
   monthlySetting?: unknown;
   weekendSetting?: unknown;
+  publicHolidayDates?: unknown;
+  intermediatePrices?: unknown;
 }): MockFieldError[] {
   const errors: MockFieldError[] = [];
   const enums = [
@@ -571,7 +598,44 @@ function choiceErrors(body: {
       errors.push({ field, code: 'validation.invalid' });
     }
   }
+  const dates = body.publicHolidayDates ?? [];
+  if (
+    !Array.isArray(dates) ||
+    dates.some((date) => typeof date !== 'string' || Number.isNaN(Date.parse(date))) ||
+    new Set(dates.map((date: string) => date.slice(0, 10))).size !== dates.length
+  ) {
+    errors.push({ field: 'publicHolidayDates', code: 'validation.invalid' });
+  }
+  const prices = body.intermediatePrices ?? [];
+  if (
+    !Array.isArray(prices) ||
+    !prices.every(isIntermediatePrice) ||
+    new Set(
+      prices.map(
+        ({ idPeriod, isFirstRow, dayQuantity }: PackageIntermediatePrice) =>
+          `${idPeriod}|${isFirstRow}|${dayQuantity}`,
+      ),
+    ).size !== prices.length
+  ) {
+    errors.push({ field: 'intermediatePrices', code: 'validation.invalid' });
+  }
   return errors;
+}
+
+function isIntermediatePrice(value: unknown): boolean {
+  const { idPeriod, isFirstRow, dayQuantity, price } = (value ??
+    {}) as Partial<PackageIntermediatePrice>;
+  return (
+    typeof idPeriod === 'string' &&
+    !!idPeriod &&
+    typeof isFirstRow === 'boolean' &&
+    typeof dayQuantity === 'number' &&
+    Number.isInteger(dayQuantity) &&
+    dayQuantity >= 1 &&
+    dayQuantity <= MAX_INTERMEDIATE_PRICE_DAY_QUANTITY &&
+    typeof price === 'number' &&
+    price >= 0
+  );
 }
 
 /**

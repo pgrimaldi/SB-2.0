@@ -6860,7 +6860,20 @@ Listino: creazione pacchetto.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": true
+  "isPublicHolidaysIncluded": true,
+  "publicHolidayDates": [
+    "2026-06-02T00:00:00.000Z",
+    "2026-08-15T00:00:00.000Z"
+  ],
+  "isIntermediatePricesIncluded": false,
+  "intermediatePrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "isFirstRow": true,
+      "dayQuantity": 2,
+      "price": 35
+    }
+  ]
 }
 ```
 
@@ -6914,6 +6927,13 @@ Listino: creazione pacchetto.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `true` |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-06-02T00:00:00.000Z", "2026-08-15T00:00:00.000Z"]` |
+| `isIntermediatePricesIncluded` | boolean | `false` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[].isFirstRow` | boolean | `true` |
+| `intermediatePrices[].dayQuantity` | number (intero) | `2` |
+| `intermediatePrices[].price` | number | `35` |
 
 #### Response
 
@@ -7018,7 +7038,19 @@ Stato: 200 OK.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false
+  "isPublicHolidaysIncluded": false,
+  "publicHolidayDates": [
+    "2026-08-15T00:00:00.000Z"
+  ],
+  "isIntermediatePricesIncluded": false,
+  "intermediatePrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "isFirstRow": true,
+      "dayQuantity": 2,
+      "price": 35
+    }
+  ]
 }
 ```
 
@@ -7073,6 +7105,13 @@ Stato: 200 OK.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `false` |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
+| `isIntermediatePricesIncluded` | boolean | `false` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[].isFirstRow` | boolean | `true` |
+| `intermediatePrices[].dayQuantity` | number (intero) | `2` |
+| `intermediatePrices[].price` | number | `35` |
 
 ### POST `/api/catalog/packages/update-package`
 
@@ -7173,7 +7212,19 @@ Listino: modifica pacchetto.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false
+  "isPublicHolidaysIncluded": false,
+  "publicHolidayDates": [
+    "2026-08-15T00:00:00.000Z"
+  ],
+  "isIntermediatePricesIncluded": false,
+  "intermediatePrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "isFirstRow": true,
+      "dayQuantity": 2,
+      "price": 35
+    }
+  ]
 }
 ```
 
@@ -7228,6 +7279,13 @@ Listino: modifica pacchetto.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `false` |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
+| `isIntermediatePricesIncluded` | boolean | `false` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[].isFirstRow` | boolean | `true` |
+| `intermediatePrices[].dayQuantity` | number (intero) | `2` |
+| `intermediatePrices[].price` | number | `35` |
 
 #### Response
 
@@ -7424,7 +7482,19 @@ Listino: creazione articolo/servizio aggiuntivo.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false
+  "isPublicHolidaysIncluded": false,
+  "publicHolidayDates": [
+    "2026-08-15T00:00:00.000Z"
+  ],
+  "isIntermediatePricesIncluded": false,
+  "intermediatePrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "isFirstRow": true,
+      "dayQuantity": 2,
+      "price": 35
+    }
+  ]
 }
 ```
 
@@ -7458,6 +7528,13 @@ Listino: creazione articolo/servizio aggiuntivo.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `false` |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
+| `isIntermediatePricesIncluded` | boolean | `false` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[].isFirstRow` | boolean | `true` |
+| `intermediatePrices[].dayQuantity` | number (intero) | `2` |
+| `intermediatePrices[].price` | number | `35` |
 
 #### Response
 
@@ -7522,7 +7599,19 @@ Stato: 200 OK.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false
+  "isPublicHolidaysIncluded": false,
+  "publicHolidayDates": [
+    "2026-08-15T00:00:00.000Z"
+  ],
+  "isIntermediatePricesIncluded": false,
+  "intermediatePrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "isFirstRow": true,
+      "dayQuantity": 2,
+      "price": 35
+    }
+  ]
 }
 ```
 
@@ -7556,6 +7645,13 @@ Stato: 200 OK.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `false` |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
+| `isIntermediatePricesIncluded` | boolean | `false` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[].isFirstRow` | boolean | `true` |
+| `intermediatePrices[].dayQuantity` | number (intero) | `2` |
+| `intermediatePrices[].price` | number | `35` |
 
 ### POST `/api/catalog/update-additional-services-article-item`
 
@@ -7602,7 +7698,19 @@ Listino: modifica articolo/servizio aggiuntivo.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false
+  "isPublicHolidaysIncluded": false,
+  "publicHolidayDates": [
+    "2026-08-15T00:00:00.000Z"
+  ],
+  "isIntermediatePricesIncluded": false,
+  "intermediatePrices": [
+    {
+      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "isFirstRow": true,
+      "dayQuantity": 2,
+      "price": 35
+    }
+  ]
 }
 ```
 
@@ -7637,6 +7745,13 @@ Listino: modifica articolo/servizio aggiuntivo.
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `false` |
+| `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
+| `isIntermediatePricesIncluded` | boolean | `false` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[].isFirstRow` | boolean | `true` |
+| `intermediatePrices[].dayQuantity` | number (intero) | `2` |
+| `intermediatePrices[].price` | number | `35` |
 
 #### Response
 

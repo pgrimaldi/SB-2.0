@@ -40,6 +40,7 @@ import { PackageReducedSeasonalPrice } from '../../../../../entities/settings/ca
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
 import { PackageSelectedItem } from '../../../../../entities/settings/catalog/package-selected-item';
 import { PackageTranslation } from '../../../../../entities/settings/catalog/package-translation';
+import { PackageIntermediatePrice } from '../../../../../entities/settings/catalog/package-intermediate-price';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { PriceListService } from '../../../../../services/api/catalog/price-list.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
@@ -54,6 +55,7 @@ import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/s
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
 import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
+import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
 
 interface PackageFormTexts {
   tabs: {
@@ -130,6 +132,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.isOnlineOnly, () => this.isLocked());
     disabled(path.isCumulative, () => this.isLocked());
     disabled(path.isPublicHolidaysIncluded, () => this.isLocked());
+    disabled(path.isIntermediatePricesIncluded, () => this.isLocked());
     applyEach(path.translations, (translation) => {
       applyWhen(
         translation,
@@ -160,6 +163,13 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isLoading = signal(false);
   protected readonly isLoaded = signal(false);
   protected readonly isEditDisabled = computed(() => this.isLoading() || !this.isLoaded());
+  /** The name of the package in the main language. */
+  protected readonly packageName = computed(
+    () =>
+      this.draft()
+        .translations.find(({ language }) => language === this.mainLanguage())
+        ?.packageName?.trim() ?? '',
+  );
   /** Also while the reduced seasonal price box is open: its values are not in the package yet. */
   protected readonly isSaveDisabled = computed(
     () =>
@@ -378,6 +388,11 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       monthlySetting: item.monthlySetting,
       weekendSetting: item.weekendSetting,
       isPublicHolidaysIncluded: item.isPublicHolidaysIncluded,
+      publicHolidayDates: [...item.publicHolidayDates].sort(),
+      isIntermediatePricesIncluded: item.isIntermediatePricesIncluded,
+      intermediatePrices: item.intermediatePrices
+        .map((price) => Object.assign(new PackageIntermediatePrice(), price))
+        .sort(byIntermediatePrice),
     });
     const idSectors = new Set(sectors.map(({ id }) => id));
     const idPeriods = new Set(periods.map(({ idPeriod }) => idPeriod));

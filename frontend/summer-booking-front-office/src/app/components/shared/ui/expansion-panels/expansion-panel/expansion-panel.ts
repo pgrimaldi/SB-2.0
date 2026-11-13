@@ -13,6 +13,8 @@ import { resolveIcons } from '../../icons/icons';
 export class ExpansionPanel {
   readonly title = input<string>();
   readonly isExpanded = model(false);
+  /** The header does not open or close it: greyed title and icons. */
+  readonly disabled = input(false);
   /** Icons as Material icon names (Material Symbols font): [before the title, arrow]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Image paths, used when `matIcon` is not given: [before the title, arrow pointing right]. */

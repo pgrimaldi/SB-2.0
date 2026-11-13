@@ -81,6 +81,10 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly pristine = signal(JSON.stringify(new AdditionalItemAddItemRequest()));
   private readonly articles = signal<readonly ComboboxItem[]>([]);
   protected readonly articlesLoadError = signal<string | null>(null);
+  /** The name of the chosen article, in the rows of the intermediate prices. */
+  protected readonly articleName = computed(
+    () => this.articles().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
+  );
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
     this.articles().map(({ id, value }) => ({ value: id, label: value })),
   );

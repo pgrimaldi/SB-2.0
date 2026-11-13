@@ -139,20 +139,20 @@
   [error]="validationText.text(form().weekendSetting)"
 />
 
-<app-checkbox
-  [formField]="form().isPublicHolidaysIncluded"
-  [error]="validationText.text(form().isPublicHolidaysIncluded)"
->
-  {{ 'management.settings.catalog.price_list.public_holidays' | translate }}
-</app-checkbox>
+<app-public-holidays
+  [isIncluded]="form().isPublicHolidaysIncluded"
+  [dates]="form().publicHolidayDates"
+/>
 
-<app-button
-  class="price__list__tab__intermediate"
-  [size]="ButtonSize.Small"
-  [disabled]="form().calculationMethod().readonly()"
->
-  {{ 'management.settings.catalog.price_list.intermediate_prices' | translate }}
-</app-button>
+<app-intermediate-prices
+  [isIncluded]="form().isIntermediatePricesIncluded"
+  [isEnabled]="isIntermediatePricesEnabled()"
+  [prices]="form().intermediatePrices"
+  [periodPrices]="form().periodPrices"
+  [idFirstSector]="idFirstSector()"
+  [periods]="periods()"
+  [name]="itemName()"
+/>
 
 <app-info-popup
   [title]="'management.settings.catalog.price_list.calculation_method' | translate"

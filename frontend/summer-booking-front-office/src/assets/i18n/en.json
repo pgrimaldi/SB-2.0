@@ -1732,8 +1732,34 @@
             "saturday_sunday": "Weekend is Saturday and Sunday",
             "sunday_only": "Weekend is Sunday only"
           },
-          "public_holidays": "Public holidays too",
-          "intermediate_prices": "Edit intermediate prices"
+          "public_holidays": {
+            "title": "Public holidays",
+            "add": "Add public holidays",
+            "date": "Date",
+            "hint": "Click the days to choose or remove them",
+            "cancel": "Cancel",
+            "confirm": "Confirm",
+            "disable": {
+              "title": "Turn off public holidays",
+              "text": "Turning off this option will lose all the selected public holidays. Are you sure?",
+              "cancel": "Cancel",
+              "confirm": "Turn off"
+            }
+          },
+          "intermediate_prices": {
+            "title": "Edit intermediate prices",
+            "first_row": "Row 1 {{period}}",
+            "other_rows": "Other rows {{period}}",
+            "name": "Name/item",
+            "days": "Days",
+            "price": "Price",
+            "disable": {
+              "title": "Turn off intermediate prices",
+              "text": "Turning off this option will lose all the intermediate prices. Are you sure?",
+              "cancel": "Cancel",
+              "confirm": "Turn off"
+            }
+          }
         }
       }
     }

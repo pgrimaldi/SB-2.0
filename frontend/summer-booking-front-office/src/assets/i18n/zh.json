@@ -1732,8 +1732,34 @@
             "saturday_sunday": "周末为周六和周日",
             "sunday_only": "周末仅为周日"
           },
-          "public_holidays": "包括节假日",
-          "intermediate_prices": "修改中间价格"
+          "public_holidays": {
+            "title": "节假日",
+            "add": "添加节假日",
+            "date": "日期",
+            "hint": "点击日期即可选择或取消",
+            "cancel": "取消",
+            "confirm": "确认",
+            "disable": {
+              "title": "停用节假日",
+              "text": "停用此选项将丢失所有已选的节假日，确定吗？",
+              "cancel": "取消",
+              "confirm": "停用"
+            }
+          },
+          "intermediate_prices": {
+            "title": "修改中间价格",
+            "first_row": "第1排 {{period}}",
+            "other_rows": "其他排 {{period}}",
+            "name": "名称/物品",
+            "days": "天数",
+            "price": "价格",
+            "disable": {
+              "title": "停用中间价格",
+              "text": "停用此选项将丢失所有中间价格，确定吗？",
+              "cancel": "取消",
+              "confirm": "停用"
+            }
+          }
         }
       }
     }
