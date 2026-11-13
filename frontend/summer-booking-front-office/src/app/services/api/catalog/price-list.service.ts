@@ -124,9 +124,12 @@ function packageBody(request: PackageAddItemRequest): PackageAddItemRequest {
     periodPrices: request.periodPrices.map((periodPrice) =>
       onlyFieldsOf(PackagePeriodPrice, periodPrice),
     ),
-    reducedSeasonalPrice:
-      request.reducedSeasonalPrice &&
-      onlyFieldsOf(PackageReducedSeasonalPrice, request.reducedSeasonalPrice),
+    reducedSeasonalPrices: request.reducedSeasonalPrices.map((price) => ({
+      ...onlyFieldsOf(PackageReducedSeasonalPrice, price),
+      sectorPrices: price.sectorPrices.map((sectorPrice) =>
+        onlyFieldsOf(PackageSectorPrice, sectorPrice),
+      ),
+    })),
   };
 }
 

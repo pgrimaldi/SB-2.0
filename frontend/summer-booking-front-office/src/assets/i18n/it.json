@@ -1635,7 +1635,15 @@
               "date_to": "Al",
               "name": "Nome",
               "add": "Aggiungi",
-              "save": "Salva"
+              "save": "Salva",
+              "section_title": "Prezzi stagionali ridotti: {{name}} ({{dateFrom}} – {{dateTo}})",
+              "overlap": "Le date si sovrappongono a un altro prezzo stagionale ridotto",
+              "delete": {
+                "title": "Elimina prezzo stagionale ridotto",
+                "text": "Vuoi davvero cancellare questa sezione e tutti i dati inseriti?",
+                "cancel": "Annulla",
+                "confirm": "Elimina"
+              }
             }
           }
         },

@@ -65,11 +65,26 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
       idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01', '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02'],
       isDefault: true,
       isOnlineEnabled: true,
-      reducedSeasonalPrice: {
-        dateFrom: '2026-06-01T00:00:00.000Z',
-        dateTo: '2026-06-30T00:00:00.000Z',
-        reducedSeasonalPriceName: 'Giugno',
-      },
+      reducedSeasonalPrices: [
+        {
+          dateFrom: '2026-06-01T00:00:00.000Z',
+          dateTo: '2026-06-30T00:00:00.000Z',
+          reducedSeasonalPriceName: 'Giugno',
+          sectorPrices: [
+            {
+              idSector: '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01',
+              seasonalHalfDayPrice: 450,
+              seasonalPrice: 800,
+            },
+          ],
+        },
+        {
+          dateFrom: '2026-09-01T00:00:00.000Z',
+          dateTo: '2026-09-15T00:00:00.000Z',
+          reducedSeasonalPriceName: 'Inizio settembre',
+          sectorPrices: [],
+        },
+      ],
       sectorPrices: [
         {
           idSector: '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01',
@@ -259,8 +274,8 @@ export const createPackageMock = (
 /**
  * The name in the language of the request (the user's), as the panel requires; the quantities, when
  * given, within the choices of their dropdowns; calculation method, monthly and weekend settings,
- * when given, among the values of their enums; the reduced seasonal price, when given, with its
- * name and its days in order.
+ * when given, among the values of their enums; every reduced seasonal price with its name and its
+ * days in order, without days in common with another one.
  */
 function packageErrors(body: CreatePackageBody, language: string): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -290,20 +305,29 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
     }
   }
   errors.push(...choiceErrors(body));
-  const reduced = body.reducedSeasonalPrice;
-  if (reduced) {
+  const reducedPrices = Array.isArray(body.reducedSeasonalPrices) ? body.reducedSeasonalPrices : [];
+  reducedPrices.forEach((reduced, reducedIndex) => {
+    const field = `reducedSeasonalPrices[${reducedIndex}]`;
     if (!reduced.reducedSeasonalPriceName?.trim()) {
-      errors.push({
-        field: 'reducedSeasonalPrice.reducedSeasonalPriceName',
-        code: 'validation.required',
-      });
+      errors.push({ field: `${field}.reducedSeasonalPriceName`, code: 'validation.required' });
     }
     if (!reduced.dateFrom || !reduced.dateTo) {
-      errors.push({ field: 'reducedSeasonalPrice.dateFrom', code: 'validation.required' });
+      errors.push({ field: `${field}.dateFrom`, code: 'validation.required' });
     } else if (reduced.dateTo < reduced.dateFrom) {
-      errors.push({ field: 'reducedSeasonalPrice.dateTo', code: 'validation.end_before_start' });
+      errors.push({ field: `${field}.dateTo`, code: 'validation.end_before_start' });
+    } else if (
+      reducedPrices.some(
+        (other, otherIndex) =>
+          otherIndex !== reducedIndex &&
+          !!other.dateFrom &&
+          !!other.dateTo &&
+          (reduced.dateFrom as string).slice(0, 10) <= other.dateTo.slice(0, 10) &&
+          other.dateFrom.slice(0, 10) <= (reduced.dateTo as string).slice(0, 10),
+      )
+    ) {
+      errors.push({ field: `${field}.dateFrom`, code: 'validation.invalid' });
     }
-  }
+  });
   return errors;
 }
 

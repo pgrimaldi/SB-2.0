@@ -10,12 +10,7 @@
 >
   <app-tab-group [tabs]="tabs()" [(selectedIndex)]="selectedTab">
     @if (selectedTab() === PanelTab.GeneralInfo) {
-      <app-package-general-info-tab
-        [form]="draftForm"
-        [mainLanguage]="mainLanguage()"
-        [reducedSeasonalPriceForm]="reducedSeasonalPriceForm"
-        [(isReducedSeasonalPriceOpen)]="isReducedSeasonalPriceOpen"
-      />
+      <app-package-general-info-tab [form]="draftForm" [mainLanguage]="mainLanguage()" />
     } @else if (selectedTab() === PanelTab.PriceList) {
       <app-price-list-tab
         [attr.inert]="isFetching() ? '' : null"
@@ -23,7 +18,14 @@
         [sectors]="sectors()"
         [periods]="periods()"
         [isLoaded]="isPriceListLoaded()"
-      />
+      >
+        <app-package-reduced-price
+          [reducedSeasonalPrices]="draftForm.reducedSeasonalPrices"
+          [draftForm]="reducedSeasonalPriceForm"
+          [(editedIndex)]="reducedSeasonalPriceIndex"
+          [sectors]="sectors()"
+        />
+      </app-price-list-tab>
     }
     @if (errorMessage(); as errorMessage) {
       <p class="package__add__item__panel__error">{{ errorMessage }}</p>

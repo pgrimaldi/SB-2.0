@@ -117,9 +117,3 @@
     {{ 'management.settings.catalog.packages.form.online_only' | translate }}
   </app-checkbox>
 </div>
-
-<app-package-reduced-price
-  [reducedSeasonalPrice]="form().reducedSeasonalPrice"
-  [draftForm]="reducedSeasonalPriceForm()"
-  [(isOpen)]="isReducedSeasonalPriceOpen"
-/>

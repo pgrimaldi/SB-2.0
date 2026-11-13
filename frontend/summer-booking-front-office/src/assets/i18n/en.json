@@ -1635,7 +1635,15 @@
               "date_to": "To",
               "name": "Name",
               "add": "Add",
-              "save": "Save"
+              "save": "Save",
+              "section_title": "Reduced seasonal prices: {{name}} ({{dateFrom}} – {{dateTo}})",
+              "overlap": "These dates overlap another reduced seasonal price",
+              "delete": {
+                "title": "Delete reduced seasonal price",
+                "text": "Do you really want to delete this section and all the data entered?",
+                "cancel": "Cancel",
+                "confirm": "Delete"
+              }
             }
           }
         },

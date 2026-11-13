@@ -2604,11 +2604,20 @@ Nessun corpo (204).
   "isDefaultOnline": "boolean",
   "isOnlineEnabled": "boolean",
   "isOnlineOnly": "boolean",
-  "reducedSeasonalPrice": {
-    "dateFrom": "string (ISO 8601, mezzanotte UTC)",
-    "dateTo": "string (ISO 8601, mezzanotte UTC)",
-    "reducedSeasonalPriceName": "string"
-  },
+  "reducedSeasonalPrices": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC)",
+      "dateTo": "string (ISO 8601, mezzanotte UTC)",
+      "reducedSeasonalPriceName": "string",
+      "sectorPrices": [
+        {
+          "idSector": "string (UUID)",
+          "seasonalHalfDayPrice": "number (decimale, €) | null",
+          "seasonalPrice": "number (decimale, €) | null"
+        }
+      ]
+    }
+  ],
   "sectorPrices": [
     {
       "idSector": "string (UUID)",
@@ -2666,10 +2675,14 @@ Nessun corpo (204).
 | `isDefaultOnline` | boolean |
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
-| `reducedSeasonalPrice` | PackageReducedSeasonalPrice \| null |
-| `reducedSeasonalPrice.dateFrom` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrice.dateTo` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrice.reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
 | `sectorPrices[].idSector` | string (UUID) |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
@@ -2729,11 +2742,20 @@ Nessun payload.
   "isDefaultOnline": "boolean",
   "isOnlineEnabled": "boolean",
   "isOnlineOnly": "boolean",
-  "reducedSeasonalPrice": {
-    "dateFrom": "string (ISO 8601, mezzanotte UTC)",
-    "dateTo": "string (ISO 8601, mezzanotte UTC)",
-    "reducedSeasonalPriceName": "string"
-  },
+  "reducedSeasonalPrices": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC)",
+      "dateTo": "string (ISO 8601, mezzanotte UTC)",
+      "reducedSeasonalPriceName": "string",
+      "sectorPrices": [
+        {
+          "idSector": "string (UUID)",
+          "seasonalHalfDayPrice": "number (decimale, €) | null",
+          "seasonalPrice": "number (decimale, €) | null"
+        }
+      ]
+    }
+  ],
   "sectorPrices": [
     {
       "idSector": "string (UUID)",
@@ -2792,10 +2814,14 @@ Nessun payload.
 | `isDefaultOnline` | boolean |
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
-| `reducedSeasonalPrice` | PackageReducedSeasonalPrice \| null |
-| `reducedSeasonalPrice.dateFrom` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrice.dateTo` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrice.reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
 | `sectorPrices[].idSector` | string (UUID) |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
@@ -2847,11 +2873,20 @@ Nessun payload.
   "isDefaultOnline": "boolean",
   "isOnlineEnabled": "boolean",
   "isOnlineOnly": "boolean",
-  "reducedSeasonalPrice": {
-    "dateFrom": "string (ISO 8601, mezzanotte UTC)",
-    "dateTo": "string (ISO 8601, mezzanotte UTC)",
-    "reducedSeasonalPriceName": "string"
-  },
+  "reducedSeasonalPrices": [
+    {
+      "dateFrom": "string (ISO 8601, mezzanotte UTC)",
+      "dateTo": "string (ISO 8601, mezzanotte UTC)",
+      "reducedSeasonalPriceName": "string",
+      "sectorPrices": [
+        {
+          "idSector": "string (UUID)",
+          "seasonalHalfDayPrice": "number (decimale, €) | null",
+          "seasonalPrice": "number (decimale, €) | null"
+        }
+      ]
+    }
+  ],
   "sectorPrices": [
     {
       "idSector": "string (UUID)",
@@ -2910,10 +2945,14 @@ Nessun corpo (204).
 | `isDefaultOnline` | boolean |
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
-| `reducedSeasonalPrice` | PackageReducedSeasonalPrice \| null |
-| `reducedSeasonalPrice.dateFrom` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrice.dateTo` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrice.reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
+| `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
+| `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
+| `reducedSeasonalPrices[].sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
 | `sectorPrices[].idSector` | string (UUID) |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |

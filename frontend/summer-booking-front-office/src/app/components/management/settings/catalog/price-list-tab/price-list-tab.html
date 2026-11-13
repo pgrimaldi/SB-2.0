@@ -41,6 +41,7 @@
 @if (validationText.text(form().sectorPrices); as error) {
   <p class="price__list__tab__error">{{ error }}</p>
 }
+<ng-content />
 <app-expansion-panel
   class="price__list__tab__section"
   [title]="'management.settings.catalog.price_list.period_prices' | translate"

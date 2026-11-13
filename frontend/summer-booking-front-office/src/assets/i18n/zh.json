@@ -1635,7 +1635,15 @@
               "date_to": "至",
               "name": "名称",
               "add": "添加",
-              "save": "保存"
+              "save": "保存",
+              "section_title": "季节优惠价：{{name}}（{{dateFrom}} – {{dateTo}}）",
+              "overlap": "这些日期与另一个季节优惠价重叠",
+              "delete": {
+                "title": "删除季节优惠价",
+                "text": "确定要删除此部分及所有已输入的数据吗？",
+                "cancel": "取消",
+                "confirm": "删除"
+              }
             }
           }
         },

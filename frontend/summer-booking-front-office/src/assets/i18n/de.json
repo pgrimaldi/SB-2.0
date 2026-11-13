@@ -1635,7 +1635,15 @@
               "date_to": "Bis",
               "name": "Name",
               "add": "Hinzufügen",
-              "save": "Speichern"
+              "save": "Speichern",
+              "section_title": "Ermäßigte Saisonpreise: {{name}} ({{dateFrom}} – {{dateTo}})",
+              "overlap": "Diese Daten überschneiden sich mit einem anderen ermäßigten Saisonpreis",
+              "delete": {
+                "title": "Ermäßigten Saisonpreis löschen",
+                "text": "Möchtest du diesen Abschnitt und alle eingegebenen Daten wirklich löschen?",
+                "cancel": "Abbrechen",
+                "confirm": "Löschen"
+              }
             }
           }
         },

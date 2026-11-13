@@ -12,8 +12,6 @@
         [attr.inert]="isLoading() ? '' : null"
         [form]="draftForm"
         [mainLanguage]="mainLanguage()"
-        [reducedSeasonalPriceForm]="reducedSeasonalPriceForm"
-        [(isReducedSeasonalPriceOpen)]="isReducedSeasonalPriceOpen"
       />
     } @else if (selectedTab() === PanelTab.PriceList) {
       <app-price-list-tab
@@ -22,7 +20,14 @@
         [sectors]="sectors()"
         [periods]="periods()"
         [isLoaded]="isLoaded()"
-      />
+      >
+        <app-package-reduced-price
+          [reducedSeasonalPrices]="draftForm.reducedSeasonalPrices"
+          [draftForm]="reducedSeasonalPriceForm"
+          [(editedIndex)]="reducedSeasonalPriceIndex"
+          [sectors]="sectors()"
+        />
+      </app-price-list-tab>
     }
     @if (errorMessage(); as errorMessage) {
       <p class="package__edit__item__panel__error">{{ errorMessage }}</p>

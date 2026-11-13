@@ -42,11 +42,12 @@ import { PriceListService } from '../../../../../services/api/catalog/price-list
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { requiredText } from '../../../../shared/forms/validators';
+import { noOverlap, requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
+import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 
 interface PackageFormTexts {
@@ -64,7 +65,14 @@ enum PanelTab {
 
 @Component({
   selector: 'app-package-add-item-panel',
-  imports: [PackageGeneralInfoTab, PriceListTab, SidePanel, TabGroup, TranslatePipe],
+  imports: [
+    PackageGeneralInfoTab,
+    PackageReducedPrice,
+    PriceListTab,
+    SidePanel,
+    TabGroup,
+    TranslatePipe,
+  ],
   templateUrl: './package-add-item-panel.html',
   styleUrl: './package-add-item-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -112,8 +120,13 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     required(path.dateFrom);
     required(path.dateTo);
     requiredText(path.reducedSeasonalPriceName);
+    noOverlap(path, () =>
+      this.draft().reducedSeasonalPrices.filter(
+        (_, index) => index !== this.reducedSeasonalPriceIndex(),
+      ),
+    );
   });
-  protected readonly isReducedSeasonalPriceOpen = signal(false);
+  protected readonly reducedSeasonalPriceIndex = signal<number | null>(null);
   /** The form with nothing typed: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(JSON.stringify(newDraft()));
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
@@ -124,7 +137,8 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isSaving = signal(false);
   /** Also while the reduced seasonal price box is open: its values are not in the package yet. */
   protected readonly isSaveDisabled = computed(
-    () => this.isFetching() || this.draftForm().invalid() || this.isReducedSeasonalPriceOpen(),
+    () =>
+      this.isFetching() || this.draftForm().invalid() || this.reducedSeasonalPriceIndex() !== null,
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -158,15 +172,16 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
 
   /** The open box differs from what it showed when opened: empty, or the row being edited. */
   private isReducedSeasonalPriceTyped(): boolean {
-    const shown = this.draft().reducedSeasonalPrice ?? new PackageReducedSeasonalPrice();
-    return (
-      this.isReducedSeasonalPriceOpen() &&
-      JSON.stringify(this.reducedSeasonalPrice()) !== JSON.stringify(shown)
-    );
+    const index = this.reducedSeasonalPriceIndex();
+    if (index === null) {
+      return false;
+    }
+    const shown = this.draft().reducedSeasonalPrices[index] ?? new PackageReducedSeasonalPrice();
+    return JSON.stringify(this.reducedSeasonalPrice()) !== JSON.stringify(shown);
   }
 
   protected save(): void {
-    if (this.isSaving() || this.isReducedSeasonalPriceOpen()) {
+    if (this.isSaving() || this.reducedSeasonalPriceIndex() !== null) {
       return;
     }
 
@@ -203,7 +218,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.pristine.set(JSON.stringify(newDraft()));
     this.reducedSeasonalPrice.set(new PackageReducedSeasonalPrice());
     this.reducedSeasonalPriceForm().reset();
-    this.isReducedSeasonalPriceOpen.set(false);
+    this.reducedSeasonalPriceIndex.set(null);
     this.sectors.set([]);
     this.periods.set([]);
     this.isPriceListLoaded.set(false);

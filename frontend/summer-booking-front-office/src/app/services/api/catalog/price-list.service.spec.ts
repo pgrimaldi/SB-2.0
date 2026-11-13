@@ -262,6 +262,7 @@ describe('PriceListService', () => {
       dateFrom: '2026-06-01T00:00:00.000Z',
       dateTo: '2026-06-30T00:00:00.000Z',
       reducedSeasonalPriceName: 'Giugno',
+      sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 400, seasonalPrice: 700 }],
     };
     const request: PackageAddItemRequest = Object.assign(new PackageAddItemRequest(), {
       translations: [{ language: Language.It, packageName: 'Ombrellone e 2 lettini' }],
@@ -269,7 +270,13 @@ describe('PriceListService', () => {
       umbrellaQuantity: 1,
       idSectors: ['s1'],
       sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 500, seasonalPrice: 900 }],
-      reducedSeasonalPrice: { ...reducedSeasonalPrice, extra: 'not sent' },
+      reducedSeasonalPrices: [
+        {
+          ...reducedSeasonalPrice,
+          sectorPrices: [{ ...reducedSeasonalPrice.sectorPrices[0], extra: 'not sent' }],
+          extra: 'not sent',
+        },
+      ],
     });
 
     priceLists.createPackage(request).subscribe();
@@ -278,7 +285,10 @@ describe('PriceListService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages/create-package`,
     );
-    expect(call.request.body).toEqual({ ...request, reducedSeasonalPrice });
+    expect(call.request.body).toEqual({
+      ...request,
+      reducedSeasonalPrices: [reducedSeasonalPrice],
+    });
     expect(call.request.body).not.toHaveProperty('idProperty');
     controller.verify();
   });
@@ -308,14 +318,30 @@ describe('PriceListService', () => {
     });
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
+    const reducedSeasonalPrice = {
+      dateFrom: '2026-06-01T00:00:00.000Z',
+      dateTo: '2026-06-30T00:00:00.000Z',
+      reducedSeasonalPriceName: 'Giugno',
+      sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 400, seasonalPrice: 700 }],
+    };
     const request: PackageAddItemRequest = Object.assign(new PackageAddItemRequest(), {
       translations: [{ language: Language.It, packageName: 'Ombrellone e 3 lettini' }],
       sunbedQuantity: 3,
+      reducedSeasonalPrices: [reducedSeasonalPrice],
     });
 
-    priceLists
-      .updatePackage('k1', { ...request, extra: 'not sent' } as PackageAddItemRequest)
-      .subscribe();
+    const sent = Object.assign(new PackageAddItemRequest(), request, {
+      reducedSeasonalPrices: [
+        {
+          ...reducedSeasonalPrice,
+          sectorPrices: [{ ...reducedSeasonalPrice.sectorPrices[0], extra: 'not sent' }],
+          extra: 'not sent',
+        },
+      ],
+      extra: 'not sent',
+    });
+
+    priceLists.updatePackage('k1', sent).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>

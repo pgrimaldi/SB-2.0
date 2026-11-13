@@ -1635,7 +1635,15 @@
               "date_to": "Au",
               "name": "Nom",
               "add": "Ajouter",
-              "save": "Enregistrer"
+              "save": "Enregistrer",
+              "section_title": "Prix saisonniers réduits : {{name}} ({{dateFrom}} – {{dateTo}})",
+              "overlap": "Ces dates chevauchent un autre prix saisonnier réduit",
+              "delete": {
+                "title": "Supprimer le prix saisonnier réduit",
+                "text": "Voulez-vous vraiment supprimer cette section et toutes les données saisies ?",
+                "cancel": "Annuler",
+                "confirm": "Supprimer"
+              }
             }
           }
         },

@@ -3,7 +3,7 @@
   [appearance]="ButtonAppearance.Light"
   [size]="ButtonSize.Small"
   [pathIcon]="addIcon"
-  [disabled]="isOpen() || row() !== null || isLocked()"
+  [disabled]="isOpen() || isLocked()"
   (clicked)="add()"
 >
   {{ 'management.settings.catalog.packages.form.reduced_seasonal_price' | translate }}
@@ -25,6 +25,7 @@
         <app-filled-date-field
           class="package__reduced__price__field"
           [pathIcon]="calendarIcon"
+          [disabledPeriods]="otherPeriods()"
           [formField]="draft.dateFrom"
           [error]="validationText.text(draft.dateFrom)"
         />
@@ -37,6 +38,8 @@
           class="package__reduced__price__field"
           [pathIcon]="calendarIcon"
           [minDate]="draft.dateFrom().value()"
+          [maxDate]="dateToMax()"
+          [disabledPeriods]="otherPeriods()"
           [formField]="draft.dateTo"
           [error]="validationText.text(draft.dateTo)"
         />
@@ -59,60 +62,104 @@
         [disabled]="draft().invalid()"
         (clicked)="save()"
       >
-        @if (row() === null) {
+        @if (isAdding()) {
           {{ 'management.settings.catalog.packages.form.reduced_seasonal.add' | translate }}
         } @else {
           {{ 'management.settings.catalog.packages.form.reduced_seasonal.save' | translate }}
         }
       </app-button>
     </div>
+    @if (isOverlapping()) {
+      <p class="package__reduced__price__error">
+        {{ 'management.settings.catalog.packages.form.reduced_seasonal.overlap' | translate }}
+      </p>
+    }
   </div>
-} @else if (row(); as price) {
-  <div class="package__reduced__price__grid">
-    <table class="package__reduced__price__table">
-      <thead>
-        <tr>
-          <th>
-            {{ 'management.settings.catalog.packages.form.reduced_seasonal.name' | translate }}
-          </th>
-          <th>
-            {{ 'management.settings.catalog.packages.form.reduced_seasonal.date_from' | translate }}
-          </th>
-          <th>
-            {{ 'management.settings.catalog.packages.form.reduced_seasonal.date_to' | translate }}
-          </th>
-          <th class="package__reduced__price__actions">{{ 'table.actions.header' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="package__reduced__price__name">{{ price.reducedSeasonalPriceName }}</td>
-          <td>{{ day(price.dateFrom) }}</td>
-          <td>{{ day(price.dateTo) }}</td>
-          <td class="package__reduced__price__actions">
-            <span class="package__reduced__price__buttons">
-              <app-icon-button
-                class="package__reduced__price__action"
-                [label]="'table.actions.edit' | translate"
-                [pathIcon]="editIcon"
-                [disabled]="isLocked()"
-                (click)="edit(price)"
-              />
-              <app-icon-button
-                class="package__reduced__price__action"
-                [label]="'table.actions.delete' | translate"
-                [pathIcon]="deleteIcon"
-                [disabled]="isLocked()"
-                (click)="delete()"
-              />
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+}
+
+@for (reduced of reducedSeasonalPrices(); track reduced; let index = $index) {
+  @if (index !== editedIndex()) {
+    @let price = reduced().value();
+    <app-expansion-panel
+      class="package__reduced__price__section"
+      [title]="
+        'management.settings.catalog.packages.form.reduced_seasonal.section_title'
+          | translate
+            : {
+                name: price.reducedSeasonalPriceName,
+                dateFrom: day(price.dateFrom),
+                dateTo: day(price.dateTo),
+              }
+      "
+      [pathIcon]="sectionIcons"
+    >
+      <span appExpansionPanelAction class="package__reduced__price__buttons">
+        <app-icon-button
+          class="package__reduced__price__action"
+          [label]="'table.actions.edit' | translate"
+          [pathIcon]="editIcon"
+          [disabled]="isOpen() || isLocked()"
+          (click)="edit(index, price)"
+        />
+        <app-icon-button
+          class="package__reduced__price__action"
+          [label]="'table.actions.delete' | translate"
+          [pathIcon]="deleteIcon"
+          [disabled]="isOpen() || isLocked()"
+          (click)="deletingIndex.set(index)"
+        />
+      </span>
+      @if (sectors().length) {
+        <div class="package__reduced__price__grid">
+          <table class="package__reduced__price__table">
+            <thead>
+              <tr>
+                <th></th>
+                @for (column of seasonalColumns; track column.field) {
+                  <th scope="col">{{ column.label | translate }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of reduced.sectorPrices; track row) {
+                @if (isShownSector(row.idSector().value())) {
+                  <tr>
+                    <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+                    @for (column of seasonalColumns; track column.field) {
+                      <td>
+                        <app-filled-number-field
+                          [isDecimal]="true"
+                          [isCurrency]="true"
+                          [formField]="row[column.field]"
+                        />
+                      </td>
+                    }
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="package__reduced__price__empty">
+          {{ 'management.settings.catalog.price_list.no_sectors' | translate }}
+        </p>
+      }
+    </app-expansion-panel>
+  }
 }
 
 @if (error(); as error) {
   <p class="package__reduced__price__error">{{ error }}</p>
 }
+
+<app-confirm-popup
+  [pathIcon]="closeIcon"
+  [title]="'management.settings.catalog.packages.form.reduced_seasonal.delete.title' | translate"
+  [text]="'management.settings.catalog.packages.form.reduced_seasonal.delete.text' | translate"
+  [texts]="'management.settings.catalog.packages.form.reduced_seasonal.delete' | translate"
+  [danger]="true"
+  [open]="deletingIndex() !== null"
+  (openChange)="closeDelete($event)"
+  (confirmed)="confirmDelete()"
+/>

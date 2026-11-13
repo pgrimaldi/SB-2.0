@@ -1635,7 +1635,15 @@
               "date_to": "Al",
               "name": "Nombre",
               "add": "Añadir",
-              "save": "Guardar"
+              "save": "Guardar",
+              "section_title": "Precios de temporada reducidos: {{name}} ({{dateFrom}} – {{dateTo}})",
+              "overlap": "Estas fechas se solapan con otro precio de temporada reducido",
+              "delete": {
+                "title": "Eliminar precio de temporada reducido",
+                "text": "¿Seguro que quieres eliminar esta sección y todos los datos introducidos?",
+                "cancel": "Cancelar",
+                "confirm": "Eliminar"
+              }
             }
           }
         },

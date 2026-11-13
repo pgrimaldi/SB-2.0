@@ -27,7 +27,7 @@ export class PackageAddItemRequest {
   isDefaultOnline = false;
   isOnlineEnabled = false;
   isOnlineOnly = false;
-  reducedSeasonalPrice: PackageReducedSeasonalPrice | null = null;
+  reducedSeasonalPrices: PackageReducedSeasonalPrice[] = [];
   sectorPrices: PackageSectorPrice[] = [];
   periodPrices: PackagePeriodPrice[] = [];
   calculationMethod: PriceCalculationMethod | null = null;

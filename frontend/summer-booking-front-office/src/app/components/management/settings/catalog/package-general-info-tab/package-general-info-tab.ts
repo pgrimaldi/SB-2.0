@@ -5,7 +5,6 @@ import {
   computed,
   inject,
   input,
-  model,
   signal,
 } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
@@ -21,7 +20,6 @@ import {
   MAX_PACKAGE_PEOPLE_QUANTITY,
   PackageAddItemRequest,
 } from '../../../../../entities/settings/catalog/package-add-item-request';
-import { PackageReducedSeasonalPrice } from '../../../../../entities/settings/catalog/package-reduced-seasonal-price';
 import { Language } from '../../../../../entities/shared/language';
 import { MapService } from '../../../../../services/api/catalog/map.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
@@ -35,7 +33,6 @@ import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-se
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
-import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 
 /** The fields of the form that hold a quantity chosen in a dropdown. */
 type QuantityField = {
@@ -55,7 +52,6 @@ const ARTICLES_KEY = 'management.settings.catalog.packages.form.articles';
     FormField,
     FormRow,
     FormRowLabel,
-    PackageReducedPrice,
     SectionTitle,
     TranslatePipe,
   ],
@@ -67,9 +63,6 @@ export class PackageGeneralInfoTab implements OnDestroy {
   readonly form = input.required<FieldTree<PackageAddItemRequest>>();
   /** Language of the main name: the user's; the others are translations. */
   readonly mainLanguage = input.required<Language>();
-  /** The box of the reduced seasonal price: kept by the panel so that it outlives the tab. */
-  readonly reducedSeasonalPriceForm = input.required<FieldTree<PackageReducedSeasonalPrice>>();
-  readonly isReducedSeasonalPriceOpen = model.required<boolean>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly sectorService = inject(SectorService);

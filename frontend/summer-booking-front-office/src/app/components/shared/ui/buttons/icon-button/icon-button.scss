@@ -6,7 +6,7 @@
   @include mat.icon-button-overrides(
     (
       state-layer-size: var(--icon-button-size, 1.875rem),
-      icon-size: 1rem,
+      icon-size: var(--icon-button-icon-size, 1rem),
       icon-color: var(--color__main__theme__one),
       state-layer-color: var(--color__main__theme__one),
       touch-target-display: none,
