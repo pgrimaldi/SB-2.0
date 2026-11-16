@@ -11,6 +11,7 @@
           [center]="center()"
           [zoom]="zoom()"
           [markerPosition]="position()"
+          (positionClicked)="placePosition($event)"
         />
       } @else if (isMapFailed()) {
         <p class="bathhouse__media__settings__map__error">
@@ -18,6 +19,9 @@
         </p>
       }
     </div>
+    @if (fieldErrors.latitude() ?? fieldErrors.longitude(); as positionError) {
+      <p class="bathhouse__media__settings__error">{{ positionError }}</p>
+    }
   </section>
 
   <section class="bathhouse__media__settings__section">
@@ -28,30 +32,52 @@
     <h3 class="bathhouse__media__settings__label">
       {{ 'management.settings.bathhouse_configuration.media.images.main' | translate }}
     </h3>
-    <app-file-drop-zone
-      class="bathhouse__media__settings__main__image"
-      accept="image/*"
-      [text]="'management.settings.bathhouse_configuration.media.images.main_hint' | translate"
-      [pathIcon]="addImageIcon"
-      [previewUrl]="mainPhoto()?.url"
-      [disabled]="!isEditing()"
-    />
+    <div class="bathhouse__media__settings__photo">
+      <app-file-drop-zone
+        class="bathhouse__media__settings__main__image"
+        [accept]="imageTypes"
+        [text]="'management.settings.bathhouse_configuration.media.images.main_hint' | translate"
+        [pathIcon]="addImageIcon"
+        [previewUrl]="mainPhotoUrl()"
+        (filesSelected)="uploadMainPhoto($event)"
+      />
+      @if (mainPhotoUrl()) {
+        <app-icon-button
+          class="bathhouse__media__settings__remove"
+          [label]="'table.actions.delete' | translate"
+          [pathIcon]="removeIcon"
+          (click)="askMainPhotoDeletion()"
+        />
+      }
+    </div>
     <h3 class="bathhouse__media__settings__label">
       {{ 'management.settings.bathhouse_configuration.media.images.gallery' | translate }}
     </h3>
     <div class="bathhouse__media__settings__gallery">
       @for (photo of galleryPhotos(); track photo.idPhoto) {
-        <app-file-drop-zone accept="image/*" [previewUrl]="photo.url" [disabled]="!isEditing()" />
+        <div class="bathhouse__media__settings__photo">
+          <app-file-drop-zone [previewUrl]="photo.url" [disabled]="true" />
+          <app-icon-button
+            class="bathhouse__media__settings__remove"
+            [label]="'table.actions.delete' | translate"
+            [pathIcon]="removeIcon"
+            (click)="askPhotoDeletion(photo.idPhoto)"
+          />
+        </div>
       }
       @for (slot of emptyGallerySlots(); track slot) {
         <app-file-drop-zone
-          accept="image/*"
+          [accept]="imageTypes"
+          [isMultiple]="true"
           [text]="'management.settings.bathhouse_configuration.media.images.add' | translate"
           [pathIcon]="addImageIcon"
-          [disabled]="!isEditing()"
+          (filesSelected)="addPhotos($event)"
         />
       }
     </div>
+    @if (imagesErrorMessage(); as imagesErrorMessage) {
+      <p class="bathhouse__media__settings__error">{{ imagesErrorMessage }}</p>
+    }
   </section>
 
   <section class="bathhouse__media__settings__section">
@@ -65,8 +91,8 @@
         'management.settings.bathhouse_configuration.media.virtual_tour.placeholder' | translate
       "
       [pathIcon]="virtualTourFieldIcons"
-      [readonly]="!isEditing()"
-      [(value)]="virtualTourUrl"
+      [formField]="mediaForm.virtualTourUrl"
+      [error]="fieldErrors.virtualTourUrl()"
     />
   </section>
 
@@ -77,17 +103,33 @@
     />
     @for (document of documents(); track document.name) {
       <div class="bathhouse__media__settings__document">
-        <div>
+        <div class="bathhouse__media__settings__document__details">
           <p class="bathhouse__media__settings__document__name">{{ document.name | translate }}</p>
           @if (document.url; as url) {
-            <a
-              class="bathhouse__media__settings__document__file bathhouse__media__settings__document__link"
-              target="_blank"
-              rel="noopener noreferrer"
-              [href]="url"
-            >
-              {{ 'management.settings.bathhouse_configuration.media.documents.open' | translate }}
-            </a>
+            @if (document.fileName; as fileName) {
+              <p
+                class="bathhouse__media__settings__document__file bathhouse__media__settings__document__file__name"
+                [title]="fileName"
+              >
+                {{ fileName }}
+              </p>
+            }
+            <span class="bathhouse__media__settings__document__open">
+              <a
+                class="bathhouse__media__settings__document__file bathhouse__media__settings__document__link"
+                target="_blank"
+                rel="noopener noreferrer"
+                [href]="url"
+              >
+                {{ 'management.settings.bathhouse_configuration.media.documents.open' | translate }}
+              </a>
+              <app-icon-button
+                class="bathhouse__media__settings__document__remove"
+                [label]="'table.actions.delete' | translate"
+                [pathIcon]="removeIcon"
+                (click)="askDocumentDeletion(document.kind)"
+              />
+            </span>
           } @else {
             <p class="bathhouse__media__settings__document__file">
               {{
@@ -96,10 +138,24 @@
             </p>
           }
         </div>
-        <app-button [size]="ButtonSize.Small" [pathIcon]="uploadIcon" [disabled]="!isEditing()">
+        <input
+          #documentInput
+          type="file"
+          hidden
+          [accept]="pdfType"
+          (change)="uploadDocument(document.kind, documentInput)"
+        />
+        <app-button
+          [size]="ButtonSize.Small"
+          [pathIcon]="uploadIcon"
+          (clicked)="documentInput.click()"
+        >
           {{ 'management.settings.bathhouse_configuration.media.documents.upload' | translate }}
         </app-button>
       </div>
+    }
+    @if (documentsErrorMessage(); as documentsErrorMessage) {
+      <p class="bathhouse__media__settings__error">{{ documentsErrorMessage }}</p>
     }
   </section>
 
@@ -109,11 +165,18 @@
         [appearance]="ButtonAppearance.Light"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
+        [disabled]="isSaving()"
         (clicked)="requestCancel()"
       >
         {{ 'management.settings.bathhouse_configuration.media.cancel' | translate }}
       </app-button>
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [isLoading]="isSaving()"
+        [disabled]="mediaForm().invalid()"
+        (clicked)="save()"
+      >
         {{ 'management.settings.bathhouse_configuration.media.save' | translate }}
       </app-button>
     } @else {
@@ -126,3 +189,30 @@
     <p class="bathhouse__media__settings__error">{{ errorMessage }}</p>
   }
 </div>
+
+<app-confirm-popup
+  [pathIcon]="popupIcons"
+  [title]="
+    (isDocumentDeletion()
+      ? 'management.settings.bathhouse_configuration.media.documents.delete.title'
+      : 'management.settings.bathhouse_configuration.media.images.delete.title'
+    ) | translate
+  "
+  [text]="
+    (isDocumentDeletion()
+      ? 'management.settings.bathhouse_configuration.media.documents.delete.text'
+      : 'management.settings.bathhouse_configuration.media.images.delete.text'
+    ) | translate
+  "
+  [texts]="
+    (isDocumentDeletion()
+      ? 'management.settings.bathhouse_configuration.media.documents.delete'
+      : 'management.settings.bathhouse_configuration.media.images.delete'
+    ) | translate
+  "
+  [danger]="true"
+  [open]="deletion() !== null"
+  (openChange)="closeDeletion($event)"
+  (confirmed)="confirmDeletion()"
+/>
+<app-page-spinner [isLoading]="isActionRunning()" />

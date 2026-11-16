@@ -41,6 +41,10 @@ export interface OverlapError extends ValidationError {
   readonly kind: 'overlap';
 }
 
+export interface WebLinkError extends ValidationError {
+  readonly kind: 'web_link';
+}
+
 /** First and last day, at midnight UTC as ISO strings. */
 export interface DayRange {
   dateFrom: string | null;
@@ -91,6 +95,24 @@ export function requiredText<TPathKind extends PathKind = PathKind.Root>(
   validate(path, ({ value }): RequiredTextError | undefined =>
     value()?.trim() ? undefined : { kind: 'required' },
   );
+}
+
+/** A text that is not a full http or https address; an empty field is left to `requiredText`. */
+export function webLink<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(path, ({ value }): WebLinkError | undefined => {
+    const text = value()?.trim();
+    return !text || isWebLink(text) ? undefined : { kind: 'web_link' };
+  });
+}
+
+function isWebLink(text: string): boolean {
+  try {
+    return ['http:', 'https:'].includes(new URL(text).protocol);
+  } catch {
+    return false;
+  }
 }
 
 /** Unlike Angular's `min`, an empty field is an error too: "greater than 0" also means "required". */

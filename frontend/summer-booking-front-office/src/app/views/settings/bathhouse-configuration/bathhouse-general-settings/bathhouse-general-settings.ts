@@ -27,6 +27,7 @@ import {
   ButtonAppearance,
   ButtonSize,
 } from '../../../../components/shared/ui/buttons/button/button';
+import { requiredText } from '../../../../components/shared/forms/validators';
 import { FilledTextField } from '../../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTimeField } from '../../../../components/shared/ui/inputs/filled-time-field/filled-time-field';
 import { RichTextField } from '../../../../components/shared/ui/inputs/rich-text-field/rich-text-field';
@@ -42,9 +43,16 @@ import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 
 interface GeneralInformationTexts {
-  cancellation_policies: Record<'free_until_48_hours' | 'free_until_24_hours', string>;
-  pets_options: Record<'allowed' | 'not_allowed', string>;
+  cancellation_policies: Record<'free_until_48_hours' | 'free_until_24_hours' | 'none', string>;
+  pets_options: Record<'allowed' | 'not_allowed' | 'on_request', string>;
 }
+
+/** The hours of notice of each choice of Cancellazione: the API has them, not the choice. */
+const NOTICE_HOURS: Readonly<Record<CancellationPolicy, number | null>> = {
+  [CancellationPolicy.FreeUntil48Hours]: 48,
+  [CancellationPolicy.FreeUntil24Hours]: 24,
+  [CancellationPolicy.None]: null,
+};
 
 @Component({
   selector: 'app-bathhouse-general-settings',
@@ -78,6 +86,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   private readonly information = signal(new BathhouseGeneralInformation());
   private loaded = new BathhouseGeneralInformation();
   protected readonly informationForm = form(this.information, (path) => {
+    requiredText(path.bathhouseName);
     readonly(path, () => !this.isEditing() || this.isSaving());
   });
   protected readonly fieldErrors = Object.fromEntries(
@@ -106,11 +115,18 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
         value: CancellationPolicy.FreeUntil24Hours,
         label: this.texts()?.cancellation_policies.free_until_24_hours ?? '',
       },
+      {
+        value: CancellationPolicy.None,
+        label: this.texts()?.cancellation_policies.none ?? '',
+      },
     ],
   );
+  /** The choice of Cancellazione, from the free cancellation and its hours of notice. */
+  protected readonly cancellationPolicy = computed(() => policyOf(this.information()));
   protected readonly petOptions = computed<readonly SelectOption<PetPolicy>[]>(() => [
     { value: PetPolicy.Allowed, label: this.texts()?.pets_options.allowed ?? '' },
     { value: PetPolicy.NotAllowed, label: this.texts()?.pets_options.not_allowed ?? '' },
+    { value: PetPolicy.OnRequest, label: this.texts()?.pets_options.on_request ?? '' },
   ]);
   protected readonly isLoading = signal(false);
   /** [bold, italic, underline, bulleted list, numbered list, link]. */
@@ -133,15 +149,14 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   constructor() {
     this.unsaved.watch(this);
     effect((onCleanup) => {
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()) {
         return;
       }
       const subscription = untracked(() => {
         this.isLoading.set(true);
         this.error.set(null);
         return forkJoin({
-          information: this.cache.generalInformation(idProperty),
+          information: this.cache.generalInformation(),
           countries: this.cache.countries(),
         }).subscribe({
           next: ({ information, countries }) => {
@@ -168,6 +183,18 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     return this.informationForm().dirty();
   }
 
+  /** The choice becomes the free cancellation and its hours of notice, as the API has them. */
+  protected setCancellationPolicy(policy: CancellationPolicy | null): void {
+    if (policy === null) {
+      return;
+    }
+    const isFreeCancellation = this.informationForm.isFreeCancellation();
+    isFreeCancellation.value.set(policy !== CancellationPolicy.None);
+    this.informationForm.cancellationNoticeHours().value.set(NOTICE_HOURS[policy]);
+    isFreeCancellation.markAsDirty();
+    isFreeCancellation.markAsTouched();
+  }
+
   protected edit(): void {
     this.isEditing.set(true);
   }
@@ -186,8 +213,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving()) {
       return;
     }
     void submit(this.informationForm, async (): Promise<TreeValidationResult> => {
@@ -195,7 +221,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const sent = this.information();
-        await firstValueFrom(this.catalog.saveBathhouseConfigurationGeneral(idProperty, sent));
+        await firstValueFrom(this.catalog.saveBathhouseConfigurationGeneral(sent));
         this.loaded = sent;
         this.cache.keepGeneralInformation(sent);
         this.informationForm().reset();
@@ -213,4 +239,20 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+/** Hours of notice other than the choices, kept by the backend, show no choice. */
+function policyOf({
+  isFreeCancellation,
+  cancellationNoticeHours,
+}: BathhouseGeneralInformation): CancellationPolicy | null {
+  if (!isFreeCancellation) {
+    return CancellationPolicy.None;
+  }
+  return (
+    Object.values(CancellationPolicy).find(
+      (policy) =>
+        policy !== CancellationPolicy.None && NOTICE_HOURS[policy] === cancellationNoticeHours,
+    ) ?? null
+  );
 }

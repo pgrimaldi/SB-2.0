@@ -11,7 +11,18 @@ import { TableServiceDepositMode } from '../../../entities/enums/table-service-d
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
-import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
+import { BathhouseServiceGroup } from '../../../entities/enums/bathhouse-service-group';
+import {
+  BathhouseMedia,
+  MAX_BATHHOUSE_IMAGE_MEGABYTES,
+  MAX_BATHHOUSE_PDF_MEGABYTES,
+  MAX_BATHHOUSE_PHOTO_QUANTITY,
+  MAX_VIRTUAL_TOUR_URL_LENGTH,
+} from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+import { BathhouseMediaRequest } from '../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
+import { PropertyInfoDocument } from '../../../entities/settings/bathhouse-configuration/property-info-document';
+import { PropertyInfoMedia } from '../../../entities/settings/bathhouse-configuration/property-info-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
@@ -81,14 +92,19 @@ export const countriesComboboxMock = (
 
 const SERVICE_LANGUAGES = ['it', 'en', 'fr', 'es', 'de', 'zh', 'ar'] as const;
 
-/** The services of the catalogue: category, icon and the name in it, en, fr, es, de, zh, ar. */
+/**
+ * The services of the catalogue as the backend has them (`catalog.service_amenities`, in its order):
+ * id, category, icon and the name in it, en, fr, es, de, zh, ar.
+ */
 const SERVICES: readonly {
-  categoryCode: string;
+  idService: number;
+  categoryCode: BathhouseServiceGroup;
   icon: string;
   names: readonly [string, string, string, string, string, string, string];
 }[] = [
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 14,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'AccessibleForward',
     names: [
       'Accesso disabili',
@@ -101,7 +117,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 1,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Accessible',
     names: [
       'Doccia per disabili',
@@ -114,12 +131,14 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 31,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Shower',
     names: ['Doccia', 'Shower', 'Douche', 'Ducha', 'Dusche', '淋浴', 'دش'],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 36,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Shower',
     names: [
       'Doccia calda',
@@ -132,7 +151,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 34,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Shower',
     names: [
       'Tabacchi/edicola',
@@ -145,17 +165,20 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 38,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: ['Wifi', 'Wi-Fi', 'Wi-Fi', 'Wifi', 'WLAN', '无线网络', 'واي فاي'],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 35,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Wc',
     names: ['Toilette', 'Toilets', 'Toilettes', 'Aseos', 'Toiletten', '卫生间', 'دورات مياه'],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 23,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: [
       'Parcheggio',
@@ -168,7 +191,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 30,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: [
       'Parcheggio custodito',
@@ -181,7 +205,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 7,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Parking',
     names: [
       'Parcheggio bici',
@@ -194,7 +219,22 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 22,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
+    icon: 'Parking',
+    names: [
+      'Parcheggio incluso',
+      'Parking included',
+      'Parking inclus',
+      'Aparcamiento incluido',
+      'Parkplatz inklusive',
+      '含停车位',
+      'موقف سيارات مشمول',
+    ],
+  },
+  {
+    idService: 29,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Lock',
     names: [
       'Cassette di sicurezza',
@@ -207,7 +247,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 8,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Cabin',
     names: [
       'Cabine',
@@ -220,7 +261,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'accessibility_comfort',
+    idService: 21,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
     icon: 'Translate',
     names: [
       'Personale multilingua',
@@ -233,7 +275,22 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 18,
+    categoryCode: BathhouseServiceGroup.AccessibilityComfort,
+    icon: 'Infirmary',
+    names: [
+      'Infermeria',
+      'Infirmary',
+      'Infirmerie',
+      'Enfermería',
+      'Krankenstation',
+      '医务室',
+      'مستوصف',
+    ],
+  },
+  {
+    idService: 4,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Soccer',
     names: [
       'Beach soccer',
@@ -246,7 +303,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 5,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Volleyball',
     names: [
       'Beach volley',
@@ -259,7 +317,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 15,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Tennis',
     names: [
       'Beach tennis',
@@ -272,7 +331,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 17,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'TableFootball',
     names: [
       'Calcio balilla',
@@ -285,12 +345,14 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 10,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Luggage',
     names: ['Escursioni', 'Excursions', 'Excursions', 'Excursiones', 'Ausflüge', '远足', 'رحلات'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 2,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Celebration',
     names: [
       'Animazione',
@@ -303,7 +365,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 19,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Kitesurfing',
     names: [
       'Kitesurf',
@@ -316,17 +379,20 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 33,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Surfing',
     names: ['Surf', 'Surfing', 'Surf', 'Surf', 'Surfen', '冲浪', 'ركوب الأمواج'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 9,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Canoe',
     names: ['Canoa', 'Canoeing', 'Canoë', 'Canoa', 'Kanu', '皮划艇', 'قوارب الكانو'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 37,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'JetSki',
     names: [
       'Moto d’acqua',
@@ -339,7 +405,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 20,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Motorboat',
     names: [
       'Motoscafo',
@@ -352,7 +419,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 32,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Snorkel',
     names: [
       'Sub/snorkeling',
@@ -365,17 +433,20 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 24,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'PedalBoat',
     names: ['Pedalò', 'Pedal boat', 'Pédalo', 'Hidropedal', 'Tretboot', '脚踏船', 'قارب بدواسات'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 27,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Pool',
     names: ['Piscina', 'Swimming pool', 'Piscine', 'Piscina', 'Pool', '游泳池', 'مسبح'],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 13,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'HotTub',
     names: [
       'Idromassaggio',
@@ -388,7 +459,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 16,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Playground',
     names: [
       'Area giochi',
@@ -401,7 +473,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 6,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'Anchor',
     names: [
       'Posto barca',
@@ -414,7 +487,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'sport_activities',
+    idService: 11,
+    categoryCode: BathhouseServiceGroup.SportActivities,
     icon: 'FitnessCenter',
     names: [
       'Palestra',
@@ -427,22 +501,26 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 3,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Cafe',
     names: ['Bar', 'Bar', 'Bar', 'Bar', 'Bar', '酒吧', 'بار'],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 28,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Restaurant',
     names: ['Ristorante', 'Restaurant', 'Restaurant', 'Restaurante', 'Restaurant', '餐厅', 'مطعم'],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 26,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Pizza',
     names: ['Pizzeria', 'Pizzeria', 'Pizzeria', 'Pizzería', 'Pizzeria', '披萨店', 'مطعم بيتزا'],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 12,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Cocktail',
     names: [
       'Happy hour',
@@ -455,33 +533,22 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'food_extra',
+    idService: 57,
+    categoryCode: BathhouseServiceGroup.FoodExtra,
     icon: 'Leaf',
     names: [
-      'Cibo vegano',
-      'Vegan food',
-      'Cuisine végane',
-      'Comida vegana',
-      'Veganes Essen',
-      '纯素食品',
-      'طعام نباتي',
+      'Cibo vegano - Cibo senza glutine',
+      'Vegan food - Gluten free food',
+      'Cuisine végane - Cuisine sans gluten',
+      'Comida vegana - Comida sin gluten',
+      'Veganes Essen - Glutenfreies Essen',
+      '纯素食品 - 无麸质食品',
+      'طعام نباتي - طعام خالٍ من الغلوتين',
     ],
   },
   {
-    categoryCode: 'food_extra',
-    icon: 'GlutenFree',
-    names: [
-      'Cibo senza glutine',
-      'Gluten-free food',
-      'Cuisine sans gluten',
-      'Comida sin gluten',
-      'Glutenfreies Essen',
-      '无麸质食品',
-      'طعام خالٍ من الغلوتين',
-    ],
-  },
-  {
-    categoryCode: 'beach',
+    idService: 25,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Pets',
     names: [
       'Animali ammessi',
@@ -494,7 +561,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 40,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Person',
     names: [
       'Spiaggia per single',
@@ -507,7 +575,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 48,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'BeachUmbrella',
     names: [
       'Servizio spiaggia',
@@ -520,7 +589,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 53,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Rainbow',
     names: [
       'Spiaggia LGBT',
@@ -533,7 +603,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 44,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'VolumeOff',
     names: [
       'Spiaggia del silenzio',
@@ -546,7 +617,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 49,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Family',
     names: [
       'Spiaggia per famiglie',
@@ -559,7 +631,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 56,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'PalmTree',
     names: [
       'Spiaggia naturista',
@@ -572,7 +645,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 39,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Inventory',
     names: [
       'Pacchetti all inclusive',
@@ -585,7 +659,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 45,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Elderly',
     names: [
       'Spiaggia per anziani',
@@ -598,7 +673,8 @@ const SERVICES: readonly {
     ],
   },
   {
-    categoryCode: 'beach',
+    idService: 52,
+    categoryCode: BathhouseServiceGroup.Beach,
     icon: 'Fan',
     names: [
       'Ventilatore sotto l’ombrellone',
@@ -616,9 +692,9 @@ let generalInformation = new BathhouseGeneralInformation();
 let idOfferedServices = new Set<number>();
 
 /**
- * `GET /api/catalog/bathhouse-configuration-general?idProperty=…`: the general information of the
- * property, for the tab "Informazioni generali"; all empty until saved, a form to fill in. 401
- * without a valid access token; 403 for a missing or unknown property.
+ * `GET /api/catalog/bathhouse-configuration-general`: the general information of the property of
+ * the token, for the tab "Informazioni generali"; all empty until saved, a form to fill in. 401
+ * without a valid access token.
  */
 export const bathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -626,20 +702,16 @@ export const bathhouseConfigurationGeneralMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(request.params.get('idProperty'));
-  if (!property) {
-    return forbidden(request);
-  }
   return of(
     new HttpResponse({ status: 200, url: request.url, body: { ...generalInformation } }),
   ).pipe(delay(300));
 };
 
 /**
- * `GET /api/catalog/bathhouse-configuration-services?idProperty=…`: every service of the catalogue,
- * in the order of the categories and then of the services, with the name in the language of
- * `Accept-Language`; offered as last saved, none at the start. 401 without a valid access token;
- * 403 for a missing or unknown property.
+ * `GET /api/catalog/bathhouse-configuration-services`: every service of the catalogue, in the order
+ * of the categories and then of the services, with the name in the language of `Accept-Language`;
+ * offered by the property of the token as last saved, none at the start. 401 without a valid access
+ * token.
  */
 export const bathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -647,26 +719,25 @@ export const bathhouseConfigurationServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
-  }
   const language = SERVICE_LANGUAGES.indexOf(
     request.headers.get('Accept-Language') as (typeof SERVICE_LANGUAGES)[number],
   );
-  const services: BathhouseServiceItem[] = SERVICES.map(({ categoryCode, icon, names }, index) => ({
-    idService: index + 1,
-    name: names[Math.max(language, 0)],
-    categoryCode,
-    iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
-    isSelected: idOfferedServices.has(index + 1),
-  }));
+  const services: BathhouseServiceItem[] = SERVICES.map(
+    ({ idService, categoryCode, icon, names }) => ({
+      idService,
+      name: names[Math.max(language, 0)],
+      categoryCode,
+      iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
+      isSelected: idOfferedServices.has(idService),
+    }),
+  );
   return of(new HttpResponse({ status: 200, url: request.url, body: services })).pipe(delay(300));
 };
 
 /**
- * `POST /api/catalog/save-bathhouse-configuration-general` with every field of the tab and
- * `idProperty`: keeps them (until the page is reloaded). 204 without a body; 401 without a valid
- * access token; 403 for a missing or unknown property.
+ * `POST /api/catalog/save-bathhouse-configuration-general` with every field of the tab, for the
+ * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 without a
+ * name; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -674,11 +745,12 @@ export const saveBathhouseConfigurationGeneralMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<BathhouseGeneralInformation> & {
-    idProperty?: unknown;
-  };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
+  const body = (request.body ?? {}) as Partial<BathhouseGeneralInformation>;
+  if (typeof body.bathhouseName !== 'string' || !body.bathhouseName.trim()) {
+    return problem(request, 400, 'validation.failed', {
+      title: 'Invalid request',
+      errors: [{ field: 'bathhouseName', code: 'validation.required' }],
+    });
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
@@ -688,10 +760,9 @@ export const saveBathhouseConfigurationGeneralMock = (
 };
 
 /**
- * `POST /api/catalog/save-bathhouse-configuration-services` with `idProperty` and `services`, the
- * services the property offers: keeps them (until the page is reloaded). 204 without a body; 401
- * without a valid access token; 403 for a missing or unknown property; 404 for a service that does
- * not exist.
+ * `POST /api/catalog/save-bathhouse-configuration-services` with `services`, the services the
+ * property of the token offers: keeps them (until the page is reloaded). 204 without a body; 401
+ * without a valid access token; 404 for a service that does not exist.
  */
 export const saveBathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -699,10 +770,7 @@ export const saveBathhouseConfigurationServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idProperty?: unknown; services?: unknown };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { services?: unknown };
   const services = Array.isArray(body.services) ? (body.services as BathhouseServiceItem[]) : [];
   const idServices = services.map(({ idService }) => idService);
   if (!idServices.every(isServiceId)) {
@@ -713,16 +781,101 @@ export const saveBathhouseConfigurationServicesMock = (
 };
 
 function isServiceId(value: unknown): value is number {
-  return (
-    typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= SERVICES.length
-  );
+  return SERVICES.some(({ idService }) => idService === value);
 }
 
 /**
- * `GET /api/catalog/bathhouse-configuration-media?idProperty=…`: links of the photos (the main one
- * and the gallery, in order), of the virtual tour and of the two PDF documents. Example data until
- * the backend decides how files are kept. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `POST /api/catalog/save-bathhouse-configuration-media` with `virtualTourUrl` (null or empty removes
+ * it), `latitude` and `longitude` (both or neither) of the property of the token: keeps them (until
+ * the page is reloaded). 204 without a body; 400 with an error per field for a link that is not http
+ * or https or longer than 500 characters, a coordinate out of range or only one of the two; 401
+ * without a valid access token.
+ */
+export const saveBathhouseConfigurationMediaMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const body = (request.body ?? {}) as Partial<Record<keyof BathhouseMediaRequest, unknown>>;
+  const link =
+    typeof body.virtualTourUrl === 'string' && body.virtualTourUrl ? body.virtualTourUrl : null;
+  const latitude = typeof body.latitude === 'number' ? body.latitude : null;
+  const longitude = typeof body.longitude === 'number' ? body.longitude : null;
+  const errors: MockFieldError[] = [];
+  if (link && link.length > MAX_VIRTUAL_TOUR_URL_LENGTH) {
+    errors.push({
+      field: 'virtualTourUrl',
+      code: 'validation.max_length',
+      args: { max: MAX_VIRTUAL_TOUR_URL_LENGTH },
+    });
+  } else if (link && !isHttpLink(link)) {
+    errors.push({ field: 'virtualTourUrl', code: 'validation.invalid' });
+  }
+  errors.push(
+    ...coordinateErrors('latitude', latitude, longitude, MAX_LATITUDE),
+    ...coordinateErrors('longitude', longitude, latitude, MAX_LONGITUDE),
+  );
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  bathhouseMedia = { ...bathhouseMedia, virtualTourUrl: link, latitude, longitude };
+  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+const MAX_LATITUDE = 90;
+const MAX_LONGITUDE = 180;
+
+/** As the backend: within ±`max`, and given only together with the other coordinate. */
+function coordinateErrors(
+  field: keyof BathhouseMediaRequest,
+  value: number | null,
+  other: number | null,
+  max: number,
+): MockFieldError[] {
+  if (value === null) {
+    return other === null ? [] : [{ field, code: 'validation.required' }];
+  }
+  return Math.abs(value) > max ? [{ field, code: 'validation.out_of_range' }] : [];
+}
+
+function isHttpLink(link: string): boolean {
+  try {
+    return ['http:', 'https:'].includes(new URL(link).protocol);
+  } catch {
+    return false;
+  }
+}
+
+/** The media of the property of the token: the Media tab reads them and its uploads change them. */
+let bathhouseMedia: BathhouseMedia = {
+  mainPhotoUrl: '/assets/images/hub/hero-beach-desktop.webp',
+  photos: [
+    {
+      idPhoto: '0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01',
+      url: '/assets/images/hub/hero-beach-mobile-863.webp',
+    },
+    {
+      idPhoto: '0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02',
+      url: '/assets/images/hub/hero-beach-mobile-1290.webp',
+    },
+  ],
+  virtualTourUrl: 'https://tour.example.com/lido-demo',
+  latitude: 44.063812,
+  longitude: 12.580143,
+  priceListPdfUrl: 'https://files.example.com/lido-demo/listino-prezzi.pdf',
+  priceListPdfFileName: 'listino-prezzi.pdf',
+  menuPdfUrl: null,
+  menuPdfFileName: null,
+};
+const PHOTO_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const MAX_PHOTO_BYTES = MAX_BATHHOUSE_IMAGE_MEGABYTES * 1024 * 1024;
+const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * 1024 * 1024;
+
+/**
+ * `GET /api/catalog/bathhouse-configuration-media`: links of the main photo, of the gallery (in
+ * order), of the virtual tour and of the two PDF documents of the property of the token. 401 without
+ * a valid access token.
  */
 export const bathhouseConfigurationMediaMock = (
   request: HttpRequest<unknown>,
@@ -730,21 +883,185 @@ export const bathhouseConfigurationMediaMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
-  }
-  const media: BathhouseMedia = {
-    photos: [
-      { idPhoto: 1, url: '/assets/images/hub/hero-beach-desktop.webp', isMain: true },
-      { idPhoto: 2, url: '/assets/images/hub/hero-beach-mobile-863.webp', isMain: false },
-      { idPhoto: 3, url: '/assets/images/hub/hero-beach-mobile-1290.webp', isMain: false },
-    ],
-    virtualTourUrl: 'https://tour.example.com/lido-demo',
-    priceListPdfUrl: 'https://files.example.com/lido-demo/listino-prezzi.pdf',
-    menuPdfUrl: null,
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: media })).pipe(delay(300));
+  return of(
+    new HttpResponse({ status: 200, url: request.url, body: structuredClone(bathhouseMedia) }),
+  ).pipe(delay(300));
 };
+
+/**
+ * `POST /api/catalog/property-info/main-photo` with the image in the multipart field `file`: it
+ * becomes the main photo (an object URL stands for the address of the backend's storage). 422
+ * catalog.invalid_image for a type other than png, jpeg or webp or a file over 5 MB; 401 without a
+ * valid access token. Like every call of `property-info`, it answers with the public card, here
+ * only its media.
+ */
+export const uploadBathhouseMainPhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    bathhouseMedia = { ...bathhouseMedia, mainPhotoUrl: URL.createObjectURL(image) };
+    return propertyInfoAnswer(request);
+  });
+
+/** `DELETE /api/catalog/property-info/main-photo`: no main photo any more. 401 without a token. */
+export const deleteBathhouseMainPhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  bathhouseMedia = { ...bathhouseMedia, mainPhotoUrl: null };
+  return propertyInfoAnswer(request);
+};
+
+/**
+ * `POST /api/catalog/property-info/photos` with the image in the multipart field `file`: added at
+ * the end of the gallery. 422 catalog.invalid_image as for the main photo, catalog.gallery_full
+ * with 30 photos already; 401 without a valid access token.
+ */
+export const addBathhousePhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    if (bathhouseMedia.photos.length >= MAX_BATHHOUSE_PHOTO_QUANTITY) {
+      return problem(request, 422, 'catalog.gallery_full', {
+        title: 'Gallery full',
+        args: { max: MAX_BATHHOUSE_PHOTO_QUANTITY },
+      });
+    }
+    bathhouseMedia = {
+      ...bathhouseMedia,
+      photos: [
+        ...bathhouseMedia.photos,
+        { idPhoto: crypto.randomUUID(), url: URL.createObjectURL(image) },
+      ],
+    };
+    return propertyInfoAnswer(request);
+  });
+
+/**
+ * `DELETE /api/catalog/property-info/photos/{id}`: the photo leaves the gallery. 404
+ * catalog.photo_not_found for an id that is not in it; 401 without a valid access token.
+ */
+export const deleteBathhousePhotoMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const idPhoto = decodeURIComponent(request.url.split('/').pop() ?? '');
+  if (!bathhouseMedia.photos.some((photo) => photo.idPhoto === idPhoto)) {
+    return problem(request, 404, 'catalog.photo_not_found', { title: 'Photo not found' });
+  }
+  bathhouseMedia = {
+    ...bathhouseMedia,
+    photos: bathhouseMedia.photos.filter((photo) => photo.idPhoto !== idPhoto),
+  };
+  return propertyInfoAnswer(request);
+};
+
+/**
+ * `POST /api/catalog/property-info/documents/{price-list|menu}` with the PDF in the multipart field
+ * `file`: it replaces the one of that document. 422 catalog.invalid_pdf for another type or a file
+ * over 10 MB; 404 resource.not_found for another document; 401 without a valid access token.
+ */
+export const uploadBathhouseDocumentMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const document = documentOf(request);
+  if (!document) {
+    return resourceNotFound(request);
+  }
+  const pdf = request.body instanceof FormData ? request.body.get('file') : null;
+  if (!(pdf instanceof File) || pdf.type !== 'application/pdf' || pdf.size > MAX_PDF_BYTES) {
+    return problem(request, 422, 'catalog.invalid_pdf', {
+      title: 'Invalid PDF',
+      args: { maxBytes: MAX_PDF_BYTES, contentTypes: 'application/pdf' },
+    });
+  }
+  setDocument(document, URL.createObjectURL(pdf), pdf.name);
+  return propertyInfoAnswer(request);
+};
+
+/**
+ * `DELETE /api/catalog/property-info/documents/{price-list|menu}`: the document has no PDF any more.
+ * 404 resource.not_found for another document; 401 without a valid access token.
+ */
+export const deleteBathhouseDocumentMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const document = documentOf(request);
+  if (!document) {
+    return resourceNotFound(request);
+  }
+  setDocument(document, null, null);
+  return propertyInfoAnswer(request);
+};
+
+function withImage(
+  request: HttpRequest<unknown>,
+  keep: (image: File) => Observable<HttpEvent<unknown>>,
+): Observable<HttpEvent<unknown>> {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const image = request.body instanceof FormData ? request.body.get('file') : null;
+  if (
+    !(image instanceof File) ||
+    !PHOTO_TYPES.includes(image.type) ||
+    image.size > MAX_PHOTO_BYTES
+  ) {
+    return problem(request, 422, 'catalog.invalid_image', {
+      title: 'Invalid image',
+      args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: PHOTO_TYPES.join(', ') },
+    });
+  }
+  return keep(image);
+}
+
+/** The last part of `/property-info/documents/{document}`, if it is one of the two. */
+function documentOf(request: HttpRequest<unknown>): BathhouseDocument | undefined {
+  const code = request.url.split('/').pop();
+  return Object.values(BathhouseDocument).find((document) => document === code);
+}
+
+function setDocument(document: BathhouseDocument, url: string | null, name: string | null): void {
+  bathhouseMedia =
+    document === BathhouseDocument.PriceList
+      ? { ...bathhouseMedia, priceListPdfUrl: url, priceListPdfFileName: name }
+      : { ...bathhouseMedia, menuPdfUrl: url, menuPdfFileName: name };
+}
+
+/** The public card as `property-info` answers it: here only the media, the fields the tab reads. */
+function propertyInfoAnswer(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
+  const documentOfLink = (
+    url: string | null,
+    fileName: string | null,
+  ): PropertyInfoDocument | null => (url ? { fileName: fileName ?? 'documento.pdf', url } : null);
+  const body: PropertyInfoMedia = {
+    mainPhotoUrl: bathhouseMedia.mainPhotoUrl,
+    photos: bathhouseMedia.photos.map(({ idPhoto, url }, index) => ({
+      id: idPhoto,
+      url,
+      sortOrder: index,
+    })),
+    virtualTourUrl: bathhouseMedia.virtualTourUrl,
+    latitude: bathhouseMedia.latitude,
+    longitude: bathhouseMedia.longitude,
+    priceListPdf: documentOfLink(
+      bathhouseMedia.priceListPdfUrl,
+      bathhouseMedia.priceListPdfFileName,
+    ),
+    menuPdf: documentOfLink(bathhouseMedia.menuPdfUrl, bathhouseMedia.menuPdfFileName),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(600));
+}
 
 type BarServiceRow = BarServiceItem & { propertyId: number };
 

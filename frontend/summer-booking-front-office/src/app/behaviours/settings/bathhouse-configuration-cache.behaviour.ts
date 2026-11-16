@@ -20,9 +20,9 @@ export class BathhouseConfigurationCacheBehaviour {
   private mediaAnswer: Observable<BathhouseMedia> | null = null;
   private countriesAnswer: Observable<ComboboxItem[]> | null = null;
 
-  generalInformation(idProperty: string): Observable<BathhouseGeneralInformation> {
+  generalInformation(): Observable<BathhouseGeneralInformation> {
     this.generalInformationAnswer ??= this.catalog
-      .bathhouseConfigurationGeneral(idProperty)
+      .bathhouseConfigurationGeneral()
       .pipe(shareReplay(1));
     return this.generalInformationAnswer;
   }
@@ -32,10 +32,8 @@ export class BathhouseConfigurationCacheBehaviour {
     this.generalInformationAnswer = of(information);
   }
 
-  services(idProperty: string): Observable<BathhouseServiceItem[]> {
-    this.servicesAnswer ??= this.catalog
-      .bathhouseConfigurationServices(idProperty)
-      .pipe(shareReplay(1));
+  services(): Observable<BathhouseServiceItem[]> {
+    this.servicesAnswer ??= this.catalog.bathhouseConfigurationServices().pipe(shareReplay(1));
     return this.servicesAnswer;
   }
 
@@ -43,8 +41,12 @@ export class BathhouseConfigurationCacheBehaviour {
     this.servicesAnswer = of(services);
   }
 
-  media(idProperty: string): Observable<BathhouseMedia> {
-    this.mediaAnswer ??= this.catalog.bathhouseConfigurationMedia(idProperty).pipe(shareReplay(1));
+  keepMedia(media: BathhouseMedia): void {
+    this.mediaAnswer = of(media);
+  }
+
+  media(): Observable<BathhouseMedia> {
+    this.mediaAnswer ??= this.catalog.bathhouseConfigurationMedia().pipe(shareReplay(1));
     return this.mediaAnswer;
   }
 

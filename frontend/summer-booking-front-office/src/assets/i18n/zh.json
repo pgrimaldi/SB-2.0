@@ -118,7 +118,11 @@
     },
     "catalog": {
       "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}。",
-      "sector_name_taken": "已存在同名的区域/排。"
+      "sector_name_taken": "已存在同名的区域/排。",
+      "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。",
+      "invalid_pdf": "文件必须是 PDF，且不超过 10 MB。",
+      "gallery_full": "图库已满：最多可以上传 {{max}} 张图片。",
+      "photo_not_found": "图片已不存在：可能已被删除。"
     }
   },
   "alert": {
@@ -256,12 +260,14 @@
           "cancellation": "取消政策",
           "cancellation_policies": {
             "free_until_48_hours": "提前48小时免费取消",
-            "free_until_24_hours": "提前24小时免费取消"
+            "free_until_24_hours": "提前24小时免费取消",
+            "none": "无"
           },
           "pets": "宠物",
           "pets_options": {
             "allowed": "允许",
-            "not_allowed": "不允许"
+            "not_allowed": "不允许",
+            "on_request": "需申请"
           },
           "regulation": "规章制度",
           "edit": "编辑",
@@ -292,7 +298,13 @@
             "main": "主图",
             "main_hint": "将主图拖到此处或点击上传",
             "gallery": "图片库",
-            "add": "添加图片"
+            "add": "添加图片",
+            "delete": {
+              "title": "删除图片",
+              "text": "确定要删除这张图片吗？",
+              "cancel": "取消",
+              "confirm": "删除"
+            }
           },
           "virtual_tour": {
             "title": "虚拟游览链接",
@@ -304,7 +316,13 @@
             "menu": "菜单",
             "no_file": "未选择文件",
             "open": "打开文档",
-            "upload": "上传"
+            "upload": "上传",
+            "delete": {
+              "title": "删除文档",
+              "text": "确定要删除这个文档吗？",
+              "cancel": "取消",
+              "confirm": "删除"
+            }
           }
         }
       },
@@ -1885,7 +1903,8 @@
     "missing_lowercase": "至少 1 个小写字母",
     "overlap": "这些日期与本季节的另一个日期区间重叠",
     "max_file_size": "文件超过 {{max}} MB",
-    "unknown_icon": "图标不存在"
+    "unknown_icon": "图标不存在",
+    "web_link": "请输入以 http:// 或 https:// 开头的完整链接"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

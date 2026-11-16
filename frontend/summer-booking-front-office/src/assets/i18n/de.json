@@ -118,7 +118,11 @@
     },
     "catalog": {
       "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}.",
-      "sector_name_taken": "Ein Sektor/eine Reihe mit diesem Namen existiert bereits."
+      "sector_name_taken": "Ein Sektor/eine Reihe mit diesem Namen existiert bereits.",
+      "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein.",
+      "invalid_pdf": "Die Datei muss ein PDF sein und darf höchstens 10 MB groß sein.",
+      "gallery_full": "Die Galerie ist voll: Du kannst höchstens {{max}} Bilder hochladen.",
+      "photo_not_found": "Das Bild ist nicht mehr vorhanden: Es wurde vielleicht schon gelöscht."
     }
   },
   "alert": {
@@ -256,12 +260,14 @@
           "cancellation": "Stornierung",
           "cancellation_policies": {
             "free_until_48_hours": "Kostenlos bis 48 Std. vorher",
-            "free_until_24_hours": "Kostenlos bis 24 Std. vorher"
+            "free_until_24_hours": "Kostenlos bis 24 Std. vorher",
+            "none": "Keine"
           },
           "pets": "Haustiere",
           "pets_options": {
             "allowed": "Erlaubt",
-            "not_allowed": "Nicht erlaubt"
+            "not_allowed": "Nicht erlaubt",
+            "on_request": "Auf Anfrage"
           },
           "regulation": "Hausordnung",
           "edit": "Bearbeiten",
@@ -292,7 +298,13 @@
             "main": "Hauptbild",
             "main_hint": "Hauptbild hierher ziehen oder zum Hochladen klicken",
             "gallery": "Bildergalerie",
-            "add": "Bild hinzufügen"
+            "add": "Bild hinzufügen",
+            "delete": {
+              "title": "Bild löschen",
+              "text": "Möchtest du dieses Bild wirklich löschen?",
+              "cancel": "Abbrechen",
+              "confirm": "Löschen"
+            }
           },
           "virtual_tour": {
             "title": "Link zur virtuellen Tour",
@@ -304,7 +316,13 @@
             "menu": "Speisekarte",
             "no_file": "Keine Datei ausgewählt",
             "open": "Dokument öffnen",
-            "upload": "Hochladen"
+            "upload": "Hochladen",
+            "delete": {
+              "title": "Dokument löschen",
+              "text": "Möchtest du dieses Dokument wirklich löschen?",
+              "cancel": "Abbrechen",
+              "confirm": "Löschen"
+            }
           }
         }
       },
@@ -1885,7 +1903,8 @@
     "missing_lowercase": "Mindestens 1 Kleinbuchstabe",
     "overlap": "Diese Daten überschneiden sich mit einem anderen Datumsbereich der Saison",
     "max_file_size": "Die Datei ist größer als {{max}} MB",
-    "unknown_icon": "Symbol existiert nicht"
+    "unknown_icon": "Symbol existiert nicht",
+    "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

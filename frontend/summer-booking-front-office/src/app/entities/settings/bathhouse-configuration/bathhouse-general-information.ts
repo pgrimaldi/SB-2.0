@@ -1,4 +1,3 @@
-import { CancellationPolicy } from '../../enums/cancellation-policy';
 import { PetPolicy } from '../../enums/pet-policy';
 
 export class BathhouseGeneralInformation {
@@ -18,7 +17,8 @@ export class BathhouseGeneralInformation {
   description: string | null = null;
   openingTime: string | null = null;
   closingTime: string | null = null;
-  cancellationPolicy: CancellationPolicy | null = null;
+  isFreeCancellation = false;
+  cancellationNoticeHours: number | null = null;
   petPolicy: PetPolicy | null = null;
   regulation: string | null = null;
 }

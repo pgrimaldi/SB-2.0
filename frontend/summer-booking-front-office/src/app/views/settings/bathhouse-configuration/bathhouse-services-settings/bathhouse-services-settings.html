@@ -1,9 +1,9 @@
 <div class="bathhouse__services__settings" [attr.inert]="isLoading() ? '' : null">
-  @for (section of sections(); track section.categoryCode) {
+  @for (section of sections(); track section.group) {
     <section class="bathhouse__services__settings__section">
       <app-section-title
         [text]="
-          'management.settings.bathhouse_configuration.services.categories.' + section.categoryCode
+          'management.settings.bathhouse_configuration.services.categories.' + section.group
             | translate
         "
       />

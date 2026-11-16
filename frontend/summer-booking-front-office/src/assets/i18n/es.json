@@ -118,7 +118,11 @@
     },
     "catalog": {
       "sector_in_use": "El sector/fila {{sectorName}} está en uso y no se puede eliminar: puestos en el mapa {{mapSpots}}, tarifas {{priceLists}}, límites de estancia {{stayLimits}}, descuentos {{discounts}}.",
-      "sector_name_taken": "Ya existe un sector/fila con este nombre."
+      "sector_name_taken": "Ya existe un sector/fila con este nombre.",
+      "invalid_image": "La imagen debe ser PNG, JPEG o WebP y no superar los 5 MB.",
+      "invalid_pdf": "El archivo debe ser un PDF y no superar los 10 MB.",
+      "gallery_full": "La galería está llena: puedes subir como máximo {{max}} imágenes.",
+      "photo_not_found": "La imagen ya no existe: puede que ya se haya eliminado."
     }
   },
   "alert": {
@@ -256,12 +260,14 @@
           "cancellation": "Cancelación",
           "cancellation_policies": {
             "free_until_48_hours": "Gratuita hasta 48 h antes",
-            "free_until_24_hours": "Gratuita hasta 24 h antes"
+            "free_until_24_hours": "Gratuita hasta 24 h antes",
+            "none": "Ninguna"
           },
           "pets": "Animales",
           "pets_options": {
             "allowed": "Admitidos",
-            "not_allowed": "No admitidos"
+            "not_allowed": "No admitidos",
+            "on_request": "Bajo petición"
           },
           "regulation": "Reglamento",
           "edit": "Editar",
@@ -292,7 +298,13 @@
             "main": "Imagen principal",
             "main_hint": "Arrastra aquí la imagen principal o haz clic para subirla",
             "gallery": "Galería de imágenes",
-            "add": "Añadir imagen"
+            "add": "Añadir imagen",
+            "delete": {
+              "title": "Eliminar imagen",
+              "text": "¿Seguro que quieres eliminar esta imagen?",
+              "cancel": "Cancelar",
+              "confirm": "Eliminar"
+            }
           },
           "virtual_tour": {
             "title": "Enlace tour virtual",
@@ -304,7 +316,13 @@
             "menu": "Menú",
             "no_file": "Ningún archivo seleccionado",
             "open": "Abrir el documento",
-            "upload": "Subir"
+            "upload": "Subir",
+            "delete": {
+              "title": "Eliminar documento",
+              "text": "¿Seguro que quieres eliminar este documento?",
+              "cancel": "Cancelar",
+              "confirm": "Eliminar"
+            }
           }
         }
       },
@@ -1885,7 +1903,8 @@
     "missing_lowercase": "Al menos 1 minúscula",
     "overlap": "Estas fechas se solapan con otro intervalo de la temporada",
     "max_file_size": "El archivo supera los {{max}} MB",
-    "unknown_icon": "Icono inexistente"
+    "unknown_icon": "Icono inexistente",
+    "web_link": "Introduce un enlace completo que empiece por http:// o https://"
   },
   "unsaved_changes": {
     "title": "Cambios sin guardar",

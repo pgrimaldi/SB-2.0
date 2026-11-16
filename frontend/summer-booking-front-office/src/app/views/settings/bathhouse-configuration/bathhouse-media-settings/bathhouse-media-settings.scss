@@ -46,6 +46,21 @@
   height: 12rem;
 }
 
+// A photo with its small X in the top corner.
+.bathhouse__media__settings__photo {
+  position: relative;
+}
+
+.bathhouse__media__settings__remove {
+  --icon-button-size: 1.375rem;
+  --icon-button-icon-size: 0.5rem;
+  --icon-button-background: var(--color__layout__surface);
+
+  position: absolute;
+  top: 0.375rem;
+  inset-inline-end: 0.375rem;
+}
+
 .bathhouse__media__settings__gallery {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -89,8 +104,31 @@
   line-height: 0.875rem;
 }
 
+.bathhouse__media__settings__document__details {
+  min-width: 0;
+}
+
+.bathhouse__media__settings__document__file__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .bathhouse__media__settings__document__link {
   color: var(--color__main__theme__one);
+}
+
+// "Apri il documento" with the X that deletes the PDF.
+.bathhouse__media__settings__document__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bathhouse__media__settings__document__remove {
+  --icon-button-size: 1.125rem;
+  --icon-button-icon-size: 0.4375rem;
+  --icon-button-background: transparent;
 }
 
 .bathhouse__media__settings__actions {

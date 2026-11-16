@@ -28,6 +28,12 @@ import {
   updateStandardServicePricesMock,
   bathhouseConfigurationGeneralMock,
   bathhouseConfigurationMediaMock,
+  addBathhousePhotoMock,
+  deleteBathhouseDocumentMock,
+  deleteBathhouseMainPhotoMock,
+  deleteBathhousePhotoMock,
+  uploadBathhouseDocumentMock,
+  uploadBathhouseMainPhotoMock,
   bathhouseConfigurationServicesMock,
   countriesComboboxMock,
   deleteBarServiceItemsMock,
@@ -54,6 +60,7 @@ import {
   duplicateBarServiceItemsMock,
   hourlyServiceListMock,
   saveBathhouseConfigurationGeneralMock,
+  saveBathhouseConfigurationMediaMock,
   saveBathhouseConfigurationServicesMock,
   standardServiceListMock,
   tableServiceListMock,
@@ -563,6 +570,38 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return bathhouseConfigurationMediaMock(request);
   }
 
+  if (request.url === `${environment.apiBaseUrl}/catalog/property-info/main-photo`) {
+    if (request.method === 'POST') {
+      return uploadBathhouseMainPhotoMock(request);
+    }
+    if (request.method === 'DELETE') {
+      return deleteBathhouseMainPhotoMock(request);
+    }
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/property-info/photos`
+  ) {
+    return addBathhousePhotoMock(request);
+  }
+
+  if (
+    request.method === 'DELETE' &&
+    request.url.startsWith(`${environment.apiBaseUrl}/catalog/property-info/photos/`)
+  ) {
+    return deleteBathhousePhotoMock(request);
+  }
+
+  if (request.url.startsWith(`${environment.apiBaseUrl}/catalog/property-info/documents/`)) {
+    if (request.method === 'POST') {
+      return uploadBathhouseDocumentMock(request);
+    }
+    if (request.method === 'DELETE') {
+      return deleteBathhouseDocumentMock(request);
+    }
+  }
+
   if (
     request.method === 'POST' &&
     request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-general`
@@ -575,6 +614,12 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-services`
   ) {
     return saveBathhouseConfigurationServicesMock(request);
+  }
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-media`
+  ) {
+    return saveBathhouseConfigurationMediaMock(request);
   }
 
   if (

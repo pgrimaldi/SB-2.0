@@ -1,11 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+import { BathhouseMediaRequest } from '../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
+import { PropertyInfoMedia } from '../../../entities/settings/bathhouse-configuration/property-info-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceItem } from '../../../entities/settings/services/automatic-price-item';
@@ -75,50 +78,86 @@ export class CatalogService {
   readonly countriesCombobox = (): Observable<ComboboxItem[]> =>
     this.httpClient.get<ComboboxItem[]>(`${this.endpoint}/countries-combobox`);
 
-  readonly bathhouseConfigurationGeneral = (
-    idProperty: string,
-  ): Observable<BathhouseGeneralInformation> =>
+  /** The property comes from the access token, as in the other calls of the page. */
+  readonly bathhouseConfigurationGeneral = (): Observable<BathhouseGeneralInformation> =>
     this.httpClient.get<BathhouseGeneralInformation>(
       `${this.endpoint}/bathhouse-configuration-general`,
-      { params: { idProperty } },
     );
 
   /**
    * Every service of the catalogue, with the name in the language of the request (Accept-Language)
    * and whether the property offers it.
    */
-  readonly bathhouseConfigurationServices = (
-    idProperty: string,
-  ): Observable<BathhouseServiceItem[]> =>
+  readonly bathhouseConfigurationServices = (): Observable<BathhouseServiceItem[]> =>
     this.httpClient.get<BathhouseServiceItem[]>(
       `${this.endpoint}/bathhouse-configuration-services`,
-      { params: { idProperty } },
     );
 
-  readonly bathhouseConfigurationMedia = (idProperty: string): Observable<BathhouseMedia> =>
-    this.httpClient.get<BathhouseMedia>(`${this.endpoint}/bathhouse-configuration-media`, {
-      params: { idProperty },
-    });
+  readonly bathhouseConfigurationMedia = (): Observable<BathhouseMedia> =>
+    this.httpClient.get<BathhouseMedia>(`${this.endpoint}/bathhouse-configuration-media`);
+
+  /**
+   * The calls of the photos and of the PDFs of the Media tab are the backend's own: each answers with
+   * the whole public card of the property, of which the tab reads only the media.
+   */
+  readonly uploadBathhouseMainPhoto = (image: File): Observable<BathhouseMedia> =>
+    this.httpClient
+      .post<PropertyInfoMedia>(`${this.endpoint}/property-info/main-photo`, formOf(image))
+      .pipe(map(bathhouseMediaOf));
+
+  readonly deleteBathhouseMainPhoto = (): Observable<BathhouseMedia> =>
+    this.httpClient
+      .delete<PropertyInfoMedia>(`${this.endpoint}/property-info/main-photo`)
+      .pipe(map(bathhouseMediaOf));
+
+  readonly addBathhousePhoto = (image: File): Observable<BathhouseMedia> =>
+    this.httpClient
+      .post<PropertyInfoMedia>(`${this.endpoint}/property-info/photos`, formOf(image))
+      .pipe(map(bathhouseMediaOf));
+
+  readonly deleteBathhousePhoto = (idPhoto: string): Observable<BathhouseMedia> =>
+    this.httpClient
+      .delete<PropertyInfoMedia>(
+        `${this.endpoint}/property-info/photos/${encodeURIComponent(idPhoto)}`,
+      )
+      .pipe(map(bathhouseMediaOf));
+
+  readonly uploadBathhouseDocument = (
+    document: BathhouseDocument,
+    pdf: File,
+  ): Observable<BathhouseMedia> =>
+    this.httpClient
+      .post<PropertyInfoMedia>(`${this.endpoint}/property-info/documents/${document}`, formOf(pdf))
+      .pipe(map(bathhouseMediaOf));
+
+  readonly deleteBathhouseDocument = (document: BathhouseDocument): Observable<BathhouseMedia> =>
+    this.httpClient
+      .delete<PropertyInfoMedia>(`${this.endpoint}/property-info/documents/${document}`)
+      .pipe(map(bathhouseMediaOf));
 
   /** Every field of the tab, changed or not. Answers 204 with no body. */
   readonly saveBathhouseConfigurationGeneral = (
-    idProperty: string,
     information: BathhouseGeneralInformation,
   ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-general`, {
-      ...onlyFieldsOf(BathhouseGeneralInformation, information),
-      idProperty,
-    });
+    this.httpClient.post<void>(
+      `${this.endpoint}/save-bathhouse-configuration-general`,
+      onlyFieldsOf(BathhouseGeneralInformation, information),
+    );
 
   /** Only the services the property offers. Answers 204 with no body. */
   readonly saveBathhouseConfigurationServices = (
-    idProperty: string,
     services: readonly BathhouseServiceItem[],
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-services`, {
       services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
-      idProperty,
     });
+
+  /** The link of the virtual tour and the position on the map. Answers 204 with no body. */
+  readonly saveBathhouseConfigurationMedia = (request: BathhouseMediaRequest): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/save-bathhouse-configuration-media`,
+      onlyFieldsOf(BathhouseMediaRequest, request),
+    );
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
     this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
@@ -618,5 +657,29 @@ function tableAvailabilityFields(availability: TableServiceAvailability): TableS
   return {
     ...onlyFieldsOf(TableServiceAvailability, availability),
     days: availability.days.map((day) => onlyFieldsOf(TableServiceAvailabilityDay, day)),
+  };
+}
+
+/** The file goes as the `file` field of a multipart form. */
+function formOf(file: File): FormData {
+  const form = new FormData();
+  form.append('file', file);
+  return form;
+}
+
+/** The media of the public card as the tab has them: the gallery in its order, the PDFs as links. */
+function bathhouseMediaOf(info: PropertyInfoMedia): BathhouseMedia {
+  return {
+    mainPhotoUrl: info.mainPhotoUrl ?? null,
+    photos: [...(info.photos ?? [])]
+      .sort((first, second) => (first.sortOrder ?? 0) - (second.sortOrder ?? 0))
+      .map(({ id, url }) => ({ idPhoto: id, url })),
+    virtualTourUrl: info.virtualTourUrl ?? null,
+    latitude: info.latitude ?? null,
+    longitude: info.longitude ?? null,
+    priceListPdfUrl: info.priceListPdf?.url ?? null,
+    priceListPdfFileName: info.priceListPdf?.fileName ?? null,
+    menuPdfUrl: info.menuPdf?.url ?? null,
+    menuPdfFileName: info.menuPdf?.fileName ?? null,
   };
 }

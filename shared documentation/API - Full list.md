@@ -176,21 +176,17 @@ Nessun corpo (204).
 
 ## Informazioni stabilimento
 
-### GET `/api/catalog/bathhouse-configuration-general?idProperty={idProperty}`
+### GET `/api/catalog/bathhouse-configuration-general`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
 ```json
 {
-  "bathhouseName": "string | null",
+  "bathhouseName": "string",
   "address": "string | null",
   "postalCode": "string | null",
   "city": "string | null",
@@ -206,23 +202,22 @@ Nessun corpo (204).
   "description": "string (HTML) | null",
   "openingTime": "string (HH:mm) | null",
   "closingTime": "string (HH:mm) | null",
-  "cancellationPolicy": "string (enum CancellationPolicy) | null",
+  "isFreeCancellation": "boolean",
+  "cancellationNoticeHours": "number (intero) | null",
   "petPolicy": "string (enum PetPolicy) | null",
   "regulation": "string (HTML) | null"
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `bathhouseName` | string \| null |
+| `bathhouseName` | string |
 | `address` | string \| null |
 | `postalCode` | string \| null |
 | `city` | string \| null |
@@ -238,7 +233,8 @@ Nessun corpo (204).
 | `description` | string (HTML) \| null |
 | `openingTime` | string (HH:mm) \| null |
 | `closingTime` | string (HH:mm) \| null |
-| `cancellationPolicy` | string (enum CancellationPolicy) \| null |
+| `isFreeCancellation` | boolean |
+| `cancellationNoticeHours` | number (intero) \| null |
 | `petPolicy` | string (enum PetPolicy) \| null |
 | `regulation` | string (HTML) \| null |
 
@@ -276,7 +272,7 @@ Nessun payload.
 
 ```json
 {
-  "bathhouseName": "string | null",
+  "bathhouseName": "string",
   "address": "string | null",
   "postalCode": "string | null",
   "city": "string | null",
@@ -292,10 +288,10 @@ Nessun payload.
   "description": "string (HTML) | null",
   "openingTime": "string (HH:mm) | null",
   "closingTime": "string (HH:mm) | null",
-  "cancellationPolicy": "string (enum CancellationPolicy) | null",
+  "isFreeCancellation": "boolean",
+  "cancellationNoticeHours": "number (intero) | null",
   "petPolicy": "string (enum PetPolicy) | null",
-  "regulation": "string (HTML) | null",
-  "idProperty": "string (UUID)"
+  "regulation": "string (HTML) | null"
 }
 ```
 
@@ -307,7 +303,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `bathhouseName` | string \| null |
+| `bathhouseName` | string |
 | `address` | string \| null |
 | `postalCode` | string \| null |
 | `city` | string \| null |
@@ -323,24 +319,20 @@ Nessun corpo (204).
 | `description` | string (HTML) \| null |
 | `openingTime` | string (HH:mm) \| null |
 | `closingTime` | string (HH:mm) \| null |
-| `cancellationPolicy` | string (enum CancellationPolicy) \| null |
+| `isFreeCancellation` | boolean |
+| `cancellationNoticeHours` | number (intero) \| null |
 | `petPolicy` | string (enum PetPolicy) \| null |
 | `regulation` | string (HTML) \| null |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/catalog/bathhouse-configuration-services?idProperty={idProperty}`
+### GET `/api/catalog/bathhouse-configuration-services`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -349,18 +341,16 @@ Nessun corpo (204).
   {
     "idService": "number (intero)",
     "name": "string",
-    "categoryCode": "string",
+    "categoryCode": "string (enum BathhouseServiceGroup)",
     "iconUrl": "string | null",
     "isSelected": "boolean"
   }
 ]
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -368,7 +358,7 @@ Nessun corpo (204).
 |---|---|
 | `[].idService` | number (intero) |
 | `[].name` | string |
-| `[].categoryCode` | string |
+| `[].categoryCode` | string (enum BathhouseServiceGroup) |
 | `[].iconUrl` | string \| null |
 | `[].isSelected` | boolean |
 
@@ -382,12 +372,11 @@ Nessun corpo (204).
     {
       "idService": "number (intero)",
       "name": "string",
-      "categoryCode": "string",
+      "categoryCode": "string (enum BathhouseServiceGroup)",
       "iconUrl": "string | null",
       "isSelected": "boolean"
     }
-  ],
-  "idProperty": "string (UUID)"
+  ]
 }
 ```
 
@@ -402,22 +391,96 @@ Nessun corpo (204).
 | `services[]` | BathhouseServiceItem[] (array di oggetti) |
 | `services[].idService` | number (intero) |
 | `services[].name` | string |
-| `services[].categoryCode` | string |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) |
 | `services[].iconUrl` | string \| null |
 | `services[].isSelected` | boolean |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/catalog/bathhouse-configuration-media?idProperty={idProperty}`
+### GET `/api/catalog/bathhouse-configuration-media`
 
-**Payload JSON** (query string)
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)"
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "idPhoto": "string (UUID)",
+      "url": "string"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number (decimale, 6 cifre) | null",
+  "longitude": "number (decimale, 6 cifre) | null",
+  "priceListPdfUrl": "string | null",
+  "priceListPdfFileName": "string | null",
+  "menuPdfUrl": "string | null",
+  "menuPdfFileName": "string | null"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | BathhousePhoto[] (array di oggetti) |
+| `photos[].idPhoto` | string (UUID) |
+| `photos[].url` | string |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number (decimale, 6 cifre) \| null |
+| `longitude` | number (decimale, 6 cifre) \| null |
+| `priceListPdfUrl` | string \| null |
+| `priceListPdfFileName` | string \| null |
+| `menuPdfUrl` | string \| null |
+| `menuPdfFileName` | string \| null |
+
+### POST `/api/catalog/save-bathhouse-configuration-media`
+
+**Payload JSON**
+
+```json
+{
+  "virtualTourUrl": "string | null",
+  "latitude": "number (decimale, 6 cifre) | null",
+  "longitude": "number (decimale, 6 cifre) | null"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `virtualTourUrl` | string \| null |
+| `latitude` | number (decimale, 6 cifre) \| null |
+| `longitude` | number (decimale, 6 cifre) \| null |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/property-info/main-photo`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
 }
 ```
 
@@ -425,36 +488,339 @@ Nessun corpo (204).
 
 ```json
 {
+  "mainPhotoUrl": "string | null",
   "photos": [
     {
-      "idPhoto": "number (intero)",
+      "id": "string (UUID)",
       "url": "string",
-      "isMain": "boolean"
+      "sortOrder": "number (intero)"
     }
   ],
   "virtualTourUrl": "string | null",
-  "priceListPdfUrl": "string | null",
-  "menuPdfUrl": "string | null"
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
+| `file` | file (multipart/form-data) |
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `photos[]` | BathhousePhoto[] (array di oggetti) |
-| `photos[].idPhoto` | number (intero) |
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
 | `photos[].url` | string |
-| `photos[].isMain` | boolean |
+| `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
-| `priceListPdfUrl` | string \| null |
-| `menuPdfUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### DELETE `/api/catalog/property-info/main-photo`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### POST `/api/catalog/property-info/photos`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### DELETE `/api/catalog/property-info/photos/{id}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### POST `/api/catalog/property-info/documents/{document}`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
+
+### DELETE `/api/catalog/property-info/documents/{document}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "mainPhotoUrl": "string | null",
+  "photos": [
+    {
+      "id": "string (UUID)",
+      "url": "string",
+      "sortOrder": "number (intero)"
+    }
+  ],
+  "virtualTourUrl": "string | null",
+  "latitude": "number | null",
+  "longitude": "number | null",
+  "priceListPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  },
+  "menuPdf": {
+    "fileName": "string",
+    "url": "string | null"
+  }
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `mainPhotoUrl` | string \| null |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
+| `photos[].id` | string (UUID) |
+| `photos[].url` | string |
+| `photos[].sortOrder` | number (intero) |
+| `virtualTourUrl` | string \| null |
+| `latitude` | number \| null |
+| `longitude` | number \| null |
+| `priceListPdf` | PropertyInfoDocument \| null |
+| `priceListPdf.fileName` | string |
+| `priceListPdf.url` | string \| null |
+| `menuPdf` | PropertyInfoDocument \| null |
+| `menuPdf.fileName` | string |
+| `menuPdf.url` | string \| null |
 
 ## Gestione utenti
 

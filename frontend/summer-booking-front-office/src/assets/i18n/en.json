@@ -118,7 +118,11 @@
     },
     "catalog": {
       "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}.",
-      "sector_name_taken": "A sector/row with this name already exists."
+      "sector_name_taken": "A sector/row with this name already exists.",
+      "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB.",
+      "invalid_pdf": "The file must be a PDF and no larger than 10 MB.",
+      "gallery_full": "The gallery is full: you can upload up to {{max}} images.",
+      "photo_not_found": "The image is no longer there: it may already have been deleted."
     }
   },
   "alert": {
@@ -256,12 +260,14 @@
           "cancellation": "Cancellation",
           "cancellation_policies": {
             "free_until_48_hours": "Free up to 48 hours before",
-            "free_until_24_hours": "Free up to 24 hours before"
+            "free_until_24_hours": "Free up to 24 hours before",
+            "none": "None"
           },
           "pets": "Pets",
           "pets_options": {
             "allowed": "Allowed",
-            "not_allowed": "Not allowed"
+            "not_allowed": "Not allowed",
+            "on_request": "On request"
           },
           "regulation": "Rules",
           "edit": "Edit",
@@ -292,7 +298,13 @@
             "main": "Main image",
             "main_hint": "Drag the main image here or click to upload",
             "gallery": "Image gallery",
-            "add": "Add image"
+            "add": "Add image",
+            "delete": {
+              "title": "Delete image",
+              "text": "Do you really want to delete this image?",
+              "cancel": "Cancel",
+              "confirm": "Delete"
+            }
           },
           "virtual_tour": {
             "title": "Virtual tour link",
@@ -304,7 +316,13 @@
             "menu": "Menu",
             "no_file": "No file selected",
             "open": "Open document",
-            "upload": "Upload"
+            "upload": "Upload",
+            "delete": {
+              "title": "Delete document",
+              "text": "Do you really want to delete this document?",
+              "cancel": "Cancel",
+              "confirm": "Delete"
+            }
           }
         }
       },
@@ -1885,7 +1903,8 @@
     "missing_lowercase": "At least 1 lowercase letter",
     "overlap": "These dates overlap another date range of the season",
     "max_file_size": "The file is larger than {{max}} MB",
-    "unknown_icon": "Icon does not exist"
+    "unknown_icon": "Icon does not exist",
+    "web_link": "Enter a full link starting with http:// or https://"
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

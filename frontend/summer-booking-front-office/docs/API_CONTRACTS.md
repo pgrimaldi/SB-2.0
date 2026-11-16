@@ -2282,21 +2282,13 @@ Stato: 200 OK.
 | `id` | string (ISO 3166-1 alpha-2) | `IT` |
 | `value` | string | `Italia` |
 
-### GET `/api/catalog/bathhouse-configuration-general?idProperty={idProperty}`
+### GET `/api/catalog/bathhouse-configuration-general`
 
 Informazioni stabilimento: informazioni generali.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/catalog/bathhouse-configuration-general?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -2320,7 +2312,8 @@ Stato: 200 OK.
   "description": "<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>",
   "openingTime": "08:30",
   "closingTime": "19:00",
-  "cancellationPolicy": "FreeUntil48Hours",
+  "isFreeCancellation": true,
+  "cancellationNoticeHours": 48,
   "petPolicy": "Allowed",
   "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>"
 }
@@ -2328,7 +2321,7 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `bathhouseName` | string \| null | `Lido Demo` |
+| `bathhouseName` | string | `Lido Demo` |
 | `address` | string \| null | `Lungomare dei Pini 12` |
 | `postalCode` | string \| null | `00100` |
 | `city` | string \| null | `Roma` |
@@ -2344,7 +2337,8 @@ Stato: 200 OK.
 | `description` | string (HTML) \| null | `<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>` |
 | `openingTime` | string (HH:mm) \| null | `08:30` |
 | `closingTime` | string (HH:mm) \| null | `19:00` |
-| `cancellationPolicy` | string (enum CancellationPolicy) \| null | `FreeUntil48Hours` |
+| `isFreeCancellation` | boolean | `true` |
+| `cancellationNoticeHours` | number (intero) \| null | `48` |
 | `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
 
@@ -2372,16 +2366,16 @@ Informazioni stabilimento: salvataggio delle informazioni generali.
   "description": "<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>",
   "openingTime": "08:30",
   "closingTime": "19:00",
-  "cancellationPolicy": "FreeUntil48Hours",
+  "isFreeCancellation": true,
+  "cancellationNoticeHours": 48,
   "petPolicy": "Allowed",
-  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `bathhouseName` | string \| null | `Lido Demo` |
+| `bathhouseName` | string | `Lido Demo` |
 | `address` | string \| null | `Lungomare dei Pini 12` |
 | `postalCode` | string \| null | `00100` |
 | `city` | string \| null | `Roma` |
@@ -2397,10 +2391,10 @@ Informazioni stabilimento: salvataggio delle informazioni generali.
 | `description` | string (HTML) \| null | `<p>Il <strong>Lido Demo</strong> offre ombrelloni e lettini in prima fila.</p><ul><li><p>Bar sulla spiaggia</p></li><li><p>Parcheggio</p></li></ul>` |
 | `openingTime` | string (HH:mm) \| null | `08:30` |
 | `closingTime` | string (HH:mm) \| null | `19:00` |
-| `cancellationPolicy` | string (enum CancellationPolicy) \| null | `FreeUntil48Hours` |
+| `isFreeCancellation` | boolean | `true` |
+| `cancellationNoticeHours` | number (intero) \| null | `48` |
 | `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 
 #### Response
 
@@ -2408,21 +2402,13 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/catalog/bathhouse-configuration-services?idProperty={idProperty}`
+### GET `/api/catalog/bathhouse-configuration-services`
 
 Informazioni stabilimento: servizi.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/catalog/bathhouse-configuration-services?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -2431,21 +2417,21 @@ Stato: 200 OK.
 ```json
 [
   {
-    "idService": 1,
+    "idService": 14,
     "name": "Accesso disabili",
     "categoryCode": "accessibility_comfort",
     "iconUrl": "/media/icons/accesso-disabili.svg",
     "isSelected": true
   },
   {
-    "idService": 3,
+    "idService": 31,
     "name": "Doccia",
     "categoryCode": "accessibility_comfort",
     "iconUrl": "/media/icons/doccia.svg",
     "isSelected": true
   },
   {
-    "idService": 6,
+    "idService": 38,
     "name": "Wifi",
     "categoryCode": "accessibility_comfort",
     "iconUrl": null,
@@ -2456,9 +2442,9 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idService` | number (intero) | `1` |
+| `idService` | number (intero) | `14` |
 | `name` | string | `Accesso disabili` |
-| `categoryCode` | string | `accessibility_comfort` |
+| `categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
 | `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
 | `isSelected` | boolean | `true` |
 
@@ -2472,33 +2458,31 @@ Informazioni stabilimento: salvataggio dei servizi.
 {
   "services": [
     {
-      "idService": 1,
+      "idService": 14,
       "name": "Accesso disabili",
       "categoryCode": "accessibility_comfort",
       "iconUrl": "/media/icons/accesso-disabili.svg",
       "isSelected": true
     },
     {
-      "idService": 3,
+      "idService": 31,
       "name": "Doccia",
       "categoryCode": "accessibility_comfort",
       "iconUrl": "/media/icons/doccia.svg",
       "isSelected": true
     }
-  ],
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  ]
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 1, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 3, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/doccia.svg", "isSelected": true}]` |
-| `services[].idService` | number (intero) | `1` |
+| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/doccia.svg", "isSelected": true}]` |
+| `services[].idService` | number (intero) | `14` |
 | `services[].name` | string | `Accesso disabili` |
-| `services[].categoryCode` | string | `accessibility_comfort` |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
 | `services[].iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
 | `services[].isSelected` | boolean | `true` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 
 #### Response
 
@@ -2506,21 +2490,13 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/catalog/bathhouse-configuration-media?idProperty={idProperty}`
+### GET `/api/catalog/bathhouse-configuration-media`
 
 Informazioni stabilimento: media.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/catalog/bathhouse-configuration-media?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -2528,33 +2504,66 @@ Stato: 200 OK.
 
 ```json
 {
+  "mainPhotoUrl": "https://media.example.com/lido-demo/spiaggia.webp",
   "photos": [
     {
-      "idPhoto": 41,
-      "url": "https://media.example.com/lido-demo/spiaggia.webp",
-      "isMain": true
+      "idPhoto": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01",
+      "url": "https://media.example.com/lido-demo/bar.webp"
     },
     {
-      "idPhoto": 42,
-      "url": "https://media.example.com/lido-demo/bar.webp",
-      "isMain": false
+      "idPhoto": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp"
     }
   ],
   "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
   "priceListPdfUrl": "https://media.example.com/lido-demo/listino-prezzi.pdf",
-  "menuPdfUrl": "https://media.example.com/lido-demo/menu.pdf"
+  "priceListPdfFileName": "listino-prezzi.pdf",
+  "menuPdfUrl": "https://media.example.com/lido-demo/menu.pdf",
+  "menuPdfFileName": "menu.pdf"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `photos[]` | BathhousePhoto[] (array di oggetti) | `[{"idPhoto": 41, "url": "https://media.example.com/lido-demo/spiaggia.webp", "isMain": true}, {"idPhoto": 42, "url": "https://media.example.com/lido-demo/bar.webp", "isMain": false}]` |
-| `photos[].idPhoto` | number (intero) | `41` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/spiaggia.webp` |
-| `photos[].isMain` | boolean | `true` |
+| `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[]` | BathhousePhoto[] (array di oggetti) | `[{"idPhoto": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp"}, {"idPhoto": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp"}]` |
+| `photos[].idPhoto` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number (decimale, 6 cifre) \| null | `44.063812` |
+| `longitude` | number (decimale, 6 cifre) \| null | `12.580143` |
 | `priceListPdfUrl` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `priceListPdfFileName` | string \| null | `listino-prezzi.pdf` |
 | `menuPdfUrl` | string \| null | `https://media.example.com/lido-demo/menu.pdf` |
+| `menuPdfFileName` | string \| null | `menu.pdf` |
+
+### POST `/api/catalog/save-bathhouse-configuration-media`
+
+Informazioni stabilimento: salvataggio del link del tour virtuale e della posizione.
+
+#### Payload
+
+```json
+{
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number (decimale, 6 cifre) \| null | `44.063812` |
+| `longitude` | number (decimale, 6 cifre) \| null | `12.580143` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
 
 ### POST `/api/catalog/bar-service-list`
 
@@ -7758,6 +7767,338 @@ Listino: modifica articolo/servizio aggiuntivo.
 Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
+
+### POST `/api/catalog/property-info/main-photo`
+
+Informazioni stabilimento: caricamento dell'immagine principale.
+
+#### Payload
+
+```json
+{
+  "file": "spiaggia.webp (image/webp, 1,2 MB)"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `file` | file (multipart/form-data) | `spiaggia.webp (image/webp, 1,2 MB)` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "mainPhotoUrl": "https://media.example.com/lido-demo/spiaggia.webp",
+  "photos": [
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01",
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "sortOrder": 1
+    },
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp",
+      "sortOrder": 2
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
+  "priceListPdf": {
+    "fileName": "listino-prezzi.pdf",
+    "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"
+  },
+  "menuPdf": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
+| `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].sortOrder` | number (intero) | `1` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number \| null | `44.063812` |
+| `longitude` | number \| null | `12.580143` |
+| `priceListPdf` | PropertyInfoDocument \| null | `{"fileName": "listino-prezzi.pdf", "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"}` |
+| `priceListPdf.fileName` | string | `listino-prezzi.pdf` |
+| `priceListPdf.url` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdf` | PropertyInfoDocument \| null | `null` |
+
+### DELETE `/api/catalog/property-info/main-photo`
+
+Informazioni stabilimento: eliminazione dell'immagine principale.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "mainPhotoUrl": null,
+  "photos": [
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01",
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "sortOrder": 1
+    },
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp",
+      "sortOrder": 2
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
+  "priceListPdf": {
+    "fileName": "listino-prezzi.pdf",
+    "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"
+  },
+  "menuPdf": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `mainPhotoUrl` | string \| null | `null` |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
+| `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].sortOrder` | number (intero) | `1` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number \| null | `44.063812` |
+| `longitude` | number \| null | `12.580143` |
+| `priceListPdf` | PropertyInfoDocument \| null | `{"fileName": "listino-prezzi.pdf", "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"}` |
+| `priceListPdf.fileName` | string | `listino-prezzi.pdf` |
+| `priceListPdf.url` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdf` | PropertyInfoDocument \| null | `null` |
+
+### POST `/api/catalog/property-info/photos`
+
+Informazioni stabilimento: aggiunta di una foto alla galleria.
+
+#### Payload
+
+```json
+{
+  "file": "bar.webp (image/webp, 0,9 MB)"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `file` | file (multipart/form-data) | `bar.webp (image/webp, 0,9 MB)` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "mainPhotoUrl": "https://media.example.com/lido-demo/spiaggia.webp",
+  "photos": [
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01",
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "sortOrder": 1
+    },
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp",
+      "sortOrder": 2
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
+  "priceListPdf": {
+    "fileName": "listino-prezzi.pdf",
+    "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"
+  },
+  "menuPdf": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
+| `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].sortOrder` | number (intero) | `1` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number \| null | `44.063812` |
+| `longitude` | number \| null | `12.580143` |
+| `priceListPdf` | PropertyInfoDocument \| null | `{"fileName": "listino-prezzi.pdf", "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"}` |
+| `priceListPdf.fileName` | string | `listino-prezzi.pdf` |
+| `priceListPdf.url` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdf` | PropertyInfoDocument \| null | `null` |
+
+### DELETE `/api/catalog/property-info/photos/{id}`
+
+Informazioni stabilimento: eliminazione di una foto della galleria.
+
+#### Payload
+
+Nessun corpo: l'id della foto va nell'indirizzo e lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "mainPhotoUrl": "https://media.example.com/lido-demo/spiaggia.webp",
+  "photos": [
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp",
+      "sortOrder": 2
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
+  "priceListPdf": {
+    "fileName": "listino-prezzi.pdf",
+    "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"
+  },
+  "menuPdf": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
+| `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/ombrelloni.webp` |
+| `photos[].sortOrder` | number (intero) | `2` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number \| null | `44.063812` |
+| `longitude` | number \| null | `12.580143` |
+| `priceListPdf` | PropertyInfoDocument \| null | `{"fileName": "listino-prezzi.pdf", "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"}` |
+| `priceListPdf.fileName` | string | `listino-prezzi.pdf` |
+| `priceListPdf.url` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdf` | PropertyInfoDocument \| null | `null` |
+
+### POST `/api/catalog/property-info/documents/{document}`
+
+Informazioni stabilimento: caricamento del PDF del listino o del menù.
+
+#### Payload
+
+```json
+{
+  "file": "listino-prezzi.pdf (application/pdf, 0,4 MB)"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `file` | file (multipart/form-data) | `listino-prezzi.pdf (application/pdf, 0,4 MB)` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "mainPhotoUrl": "https://media.example.com/lido-demo/spiaggia.webp",
+  "photos": [
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01",
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "sortOrder": 1
+    },
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp",
+      "sortOrder": 2
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
+  "priceListPdf": {
+    "fileName": "listino-prezzi.pdf",
+    "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"
+  },
+  "menuPdf": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
+| `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].sortOrder` | number (intero) | `1` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number \| null | `44.063812` |
+| `longitude` | number \| null | `12.580143` |
+| `priceListPdf` | PropertyInfoDocument \| null | `{"fileName": "listino-prezzi.pdf", "url": "https://media.example.com/lido-demo/listino-prezzi.pdf"}` |
+| `priceListPdf.fileName` | string | `listino-prezzi.pdf` |
+| `priceListPdf.url` | string \| null | `https://media.example.com/lido-demo/listino-prezzi.pdf` |
+| `menuPdf` | PropertyInfoDocument \| null | `null` |
+
+### DELETE `/api/catalog/property-info/documents/{document}`
+
+Informazioni stabilimento: eliminazione del PDF del listino o del menù.
+
+#### Payload
+
+Nessun corpo: il documento va nell'indirizzo e lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "mainPhotoUrl": "https://media.example.com/lido-demo/spiaggia.webp",
+  "photos": [
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01",
+      "url": "https://media.example.com/lido-demo/bar.webp",
+      "sortOrder": 1
+    },
+    {
+      "id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02",
+      "url": "https://media.example.com/lido-demo/ombrelloni.webp",
+      "sortOrder": 2
+    }
+  ],
+  "virtualTourUrl": "https://tour.example.com/lido-demo",
+  "latitude": 44.063812,
+  "longitude": 12.580143,
+  "priceListPdf": null,
+  "menuPdf": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
+| `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
+| `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
+| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].sortOrder` | number (intero) | `1` |
+| `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
+| `latitude` | number \| null | `44.063812` |
+| `longitude` | number \| null | `12.580143` |
+| `priceListPdf` | PropertyInfoDocument \| null | `null` |
+| `menuPdf` | PropertyInfoDocument \| null | `null` |
 
 ## /booking
 

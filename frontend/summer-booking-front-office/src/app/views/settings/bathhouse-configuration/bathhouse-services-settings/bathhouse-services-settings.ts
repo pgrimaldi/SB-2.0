@@ -25,6 +25,7 @@ import {
 } from '../../../../components/shared/ui/buttons/button/button';
 import { Checkbox } from '../../../../components/shared/ui/checkboxes/checkbox/checkbox';
 import { SectionTitle } from '../../../../components/shared/ui/titles/section-title/section-title';
+import { BathhouseServiceGroup } from '../../../../entities/enums/bathhouse-service-group';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { BathhouseServiceItem } from '../../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
@@ -32,7 +33,7 @@ import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 
 interface ServiceSection {
-  readonly categoryCode: string;
+  readonly group: BathhouseServiceGroup;
   readonly services: readonly { readonly index: number; readonly service: BathhouseServiceItem }[];
 }
 
@@ -74,14 +75,13 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   constructor() {
     this.unsaved.watch(this);
     effect((onCleanup) => {
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()) {
         return;
       }
       const subscription = untracked(() => {
         this.isLoading.set(true);
         this.error.set(null);
-        return this.cache.services(idProperty).subscribe({
+        return this.cache.services().subscribe({
           next: (services) => {
             const loaded = services.map((service) => onlyFieldsOf(BathhouseServiceItem, service));
             this.loaded = loaded;
@@ -123,8 +123,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected async save(): Promise<void> {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving()) {
       return;
     }
     this.isSaving.set(true);
@@ -133,7 +132,6 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
       const sent = this.services();
       await firstValueFrom(
         this.catalog.saveBathhouseConfigurationServices(
-          idProperty,
           sent.filter(({ isSelected }) => isSelected),
         ),
       );
@@ -160,11 +158,14 @@ function selectionOf(services: readonly BathhouseServiceItem[]): string {
   );
 }
 
+/** The four sections in their order, each with its services in the order of the answer. */
 function sectionsOf(services: readonly BathhouseServiceItem[]): ServiceSection[] {
-  const sections = new Map<string, { index: number; service: BathhouseServiceItem }[]>();
-  services.forEach((service, index) => {
-    const categoryCode = service.categoryCode ?? '';
-    sections.set(categoryCode, [...(sections.get(categoryCode) ?? []), { index, service }]);
-  });
-  return [...sections].map(([categoryCode, items]) => ({ categoryCode, services: items }));
+  return Object.values(BathhouseServiceGroup)
+    .map((group) => ({
+      group,
+      services: services
+        .map((service, index) => ({ index, service }))
+        .filter(({ service }) => service.categoryCode === group),
+    }))
+    .filter(({ services }) => services.length);
 }

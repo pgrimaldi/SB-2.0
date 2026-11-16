@@ -35,6 +35,10 @@ export const API_ERROR_CODES = [
   'map.invalid_image',
   'catalog.sector_in_use',
   'catalog.sector_name_taken',
+  'catalog.invalid_image',
+  'catalog.invalid_pdf',
+  'catalog.gallery_full',
+  'catalog.photo_not_found',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

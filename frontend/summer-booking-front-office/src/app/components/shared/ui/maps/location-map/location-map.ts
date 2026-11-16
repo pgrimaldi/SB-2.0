@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { GoogleMap, MapAdvancedMarker } from '@angular/google-maps';
 
 export interface MapPosition {
@@ -20,6 +20,8 @@ export class LocationMap {
   /** Needed by the marker: Google draws it only on a map with an id. */
   readonly mapId = input<string | null>();
   readonly markerPosition = input<MapPosition | null>();
+  /** The point clicked on the map. */
+  readonly positionClicked = output<MapPosition>();
 
   protected readonly options: google.maps.MapOptions = {
     disableDefaultUI: true,
@@ -31,6 +33,12 @@ export class LocationMap {
     const position = this.markerPosition();
     return position ? toLatLng(position) : null;
   });
+
+  protected click({ latLng }: google.maps.MapMouseEvent | google.maps.IconMouseEvent): void {
+    if (latLng) {
+      this.positionClicked.emit({ latitude: latLng.lat(), longitude: latLng.lng() });
+    }
+  }
 }
 
 function toLatLng({ latitude, longitude }: MapPosition): google.maps.LatLngLiteral {

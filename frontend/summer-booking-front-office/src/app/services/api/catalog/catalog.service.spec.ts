@@ -11,7 +11,11 @@ import { TableServiceAvailabilityMode } from '../../../entities/enums/table-serv
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
+import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
+
+import { BathhouseMediaRequest } from '../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
 import { AutomaticPriceAddItemRequest } from '../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceUpdateGeneralRequest } from '../../../entities/settings/services/automatic-price-update-general-request';
@@ -60,52 +64,156 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
-  it('should ask for the general information of the property in the query string', () => {
+  it('should ask for the general information without the property, taken from the token', () => {
     const { catalog, controller } = setup();
 
-    catalog.bathhouseConfigurationGeneral('p1').subscribe();
+    catalog.bathhouseConfigurationGeneral().subscribe();
 
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-general` &&
-        params.get('idProperty') === 'p1',
+        params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
     controller.verify();
   });
 
-  it('should ask for the services of the property in the query string', () => {
+  it('should ask for the services without the property, taken from the token', () => {
     const { catalog, controller } = setup();
 
-    catalog.bathhouseConfigurationServices('p1').subscribe();
+    catalog.bathhouseConfigurationServices().subscribe();
 
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-services` &&
-        params.get('idProperty') === 'p1',
+        params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
     controller.verify();
   });
 
-  it('should ask for the media of the property in the query string', () => {
+  it('should ask for the media without the property, taken from the token', () => {
     const { catalog, controller } = setup();
 
-    catalog.bathhouseConfigurationMedia('p1').subscribe();
+    catalog.bathhouseConfigurationMedia().subscribe();
 
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-media` &&
-        params.get('idProperty') === 'p1',
+        params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
     controller.verify();
   });
 
-  it('should save every field of the general information with the property in the body', () => {
+  it('should upload the main photo as the file field and read the media of the public card', () => {
+    const { catalog, controller } = setup();
+    const image = new File(['image'], 'spiaggia.webp', { type: 'image/webp' });
+    let media: BathhouseMedia | undefined;
+
+    catalog.uploadBathhouseMainPhoto(image).subscribe((answer) => (media = answer));
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/property-info/main-photo`,
+    );
+    expect((request.request.body as FormData).get('file')).toBe(image);
+    request.flush({
+      name: 'Lido Demo',
+      mainPhotoUrl: 'https://cdn.example.com/main.webp',
+      photos: [
+        { id: 'p2', url: 'https://cdn.example.com/bar.webp', sortOrder: 2 },
+        { id: 'p1', url: 'https://cdn.example.com/beach.webp', sortOrder: 1 },
+      ],
+      virtualTourUrl: 'https://tour.example.com/lido',
+      latitude: 44.063812,
+      longitude: 12.580143,
+      priceListPdf: { fileName: 'listino.pdf', url: 'https://cdn.example.com/listino.pdf' },
+      menuPdf: null,
+      amenityCodes: [],
+    });
+    expect(media).toEqual({
+      mainPhotoUrl: 'https://cdn.example.com/main.webp',
+      photos: [
+        { idPhoto: 'p1', url: 'https://cdn.example.com/beach.webp' },
+        { idPhoto: 'p2', url: 'https://cdn.example.com/bar.webp' },
+      ],
+      virtualTourUrl: 'https://tour.example.com/lido',
+      latitude: 44.063812,
+      longitude: 12.580143,
+      priceListPdfUrl: 'https://cdn.example.com/listino.pdf',
+      priceListPdfFileName: 'listino.pdf',
+      menuPdfUrl: null,
+      menuPdfFileName: null,
+    });
+    controller.verify();
+  });
+
+  it('should delete the main photo without a body', () => {
+    const { catalog, controller } = setup();
+
+    catalog.deleteBathhouseMainPhoto().subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'DELETE' && url === `${environment.apiBaseUrl}/catalog/property-info/main-photo`,
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should add a photo to the gallery as the file field', () => {
+    const { catalog, controller } = setup();
+    const image = new File(['image'], 'bar.png', { type: 'image/png' });
+
+    catalog.addBathhousePhoto(image).subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/property-info/photos`,
+    ).request;
+    expect((request.body as FormData).get('file')).toBe(image);
+    controller.verify();
+  });
+
+  it('should delete a photo of the gallery by its id in the path', () => {
+    const { catalog, controller } = setup();
+
+    catalog.deleteBathhousePhoto('0193f2a4 7d2e').subscribe();
+
+    controller.expectOne(
+      ({ method, url }) =>
+        method === 'DELETE' &&
+        url === `${environment.apiBaseUrl}/catalog/property-info/photos/0193f2a4%207d2e`,
+    );
+    controller.verify();
+  });
+
+  it('should upload and delete the PDF of a document by its name in the path', () => {
+    const { catalog, controller } = setup();
+    const pdf = new File(['pdf'], 'listino.pdf', { type: 'application/pdf' });
+
+    catalog.uploadBathhouseDocument(BathhouseDocument.PriceList, pdf).subscribe();
+    catalog.deleteBathhouseDocument(BathhouseDocument.Menu).subscribe();
+
+    const upload = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/property-info/documents/price-list`,
+    ).request;
+    expect((upload.body as FormData).get('file')).toBe(pdf);
+    controller.expectOne(
+      ({ method, url }) =>
+        method === 'DELETE' &&
+        url === `${environment.apiBaseUrl}/catalog/property-info/documents/menu`,
+    );
+    controller.verify();
+  });
+
+  it('should save every field of the general information without the property', () => {
     const { catalog, controller } = setup();
     const information = Object.assign(new BathhouseGeneralInformation(), {
       bathhouseName: 'Lido Sole',
@@ -113,7 +221,7 @@ describe('CatalogService', () => {
       unexpectedFlag: 'extra-field',
     });
 
-    catalog.saveBathhouseConfigurationGeneral('p1', information).subscribe();
+    catalog.saveBathhouseConfigurationGeneral(information).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -123,12 +231,11 @@ describe('CatalogService', () => {
     expect(request.body).toEqual({
       ...new BathhouseGeneralInformation(),
       bathhouseName: 'Lido Sole',
-      idProperty: 'p1',
     });
     controller.verify();
   });
 
-  it('should save the offered services as entities with the property in the body', () => {
+  it('should save the offered services as entities without the property', () => {
     const { catalog, controller } = setup();
     const service = Object.assign(new BathhouseServiceItem(), {
       idService: 3,
@@ -137,7 +244,7 @@ describe('CatalogService', () => {
       unexpectedFlag: 'extra-field',
     });
 
-    catalog.saveBathhouseConfigurationServices('p1', [service]).subscribe();
+    catalog.saveBathhouseConfigurationServices([service]).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -146,7 +253,30 @@ describe('CatalogService', () => {
     ).request;
     expect(request.body).toEqual({
       services: [{ ...new BathhouseServiceItem(), idService: 3, name: 'Doccia', isSelected: true }],
-      idProperty: 'p1',
+    });
+    controller.verify();
+  });
+
+  it('should save the link of the virtual tour and the position, without other fields', () => {
+    const { catalog, controller } = setup();
+    const media = Object.assign(new BathhouseMediaRequest(), {
+      virtualTourUrl: 'https://tour.example.com/lido',
+      latitude: 44.063812,
+      longitude: 12.580143,
+      mainPhotoUrl: 'https://cdn.example.com/main.webp',
+    });
+
+    catalog.saveBathhouseConfigurationMedia(media).subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-media`,
+    ).request;
+    expect(request.body).toEqual({
+      virtualTourUrl: 'https://tour.example.com/lido',
+      latitude: 44.063812,
+      longitude: 12.580143,
     });
     controller.verify();
   });

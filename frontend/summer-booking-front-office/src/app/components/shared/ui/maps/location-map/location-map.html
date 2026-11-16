@@ -5,6 +5,7 @@
   [center]="googleCenter()"
   [zoom]="zoom()"
   [options]="options"
+  (mapClick)="click($event)"
 >
   @if (googleMarkerPosition(); as position) {
     <map-advanced-marker [position]="position" />

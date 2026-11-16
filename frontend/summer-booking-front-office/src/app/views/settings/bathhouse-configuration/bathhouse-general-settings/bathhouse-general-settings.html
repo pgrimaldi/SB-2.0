@@ -4,6 +4,7 @@
       [label]="
         'management.settings.bathhouse_configuration.general_information.bathhouse_name' | translate
       "
+      [isMandatory]="true"
       [error]="fieldErrors.bathhouseName()"
       [formField]="informationForm.bathhouseName"
     />
@@ -145,8 +146,10 @@
         'management.settings.bathhouse_configuration.general_information.choose' | translate
       "
       [options]="cancellationOptions()"
-      [error]="fieldErrors.cancellationPolicy()"
-      [formField]="informationForm.cancellationPolicy"
+      [error]="fieldErrors.isFreeCancellation() ?? fieldErrors.cancellationNoticeHours()"
+      [readonly]="informationForm.isFreeCancellation().readonly()"
+      [value]="cancellationPolicy()"
+      (valueChange)="setCancellationPolicy($event)"
     />
     <app-filled-select
       [label]="'management.settings.bathhouse_configuration.general_information.pets' | translate"
@@ -181,6 +184,7 @@
       <app-button
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
+        [disabled]="informationForm().invalid()"
         [isLoading]="isSaving()"
         (clicked)="save()"
       >
