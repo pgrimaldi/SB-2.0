@@ -1,6 +1,6 @@
 export class SeasonDates {
-  currentSeasonDateFrom: string | null = null;
-  currentSeasonDateTo: string | null = null;
-  nextSeasonDateFrom: string | null = null;
-  nextSeasonDateTo: string | null = null;
+  startsOn: string | null = null;
+  endsOn: string | null = null;
+  nextStartsOn: string | null = null;
+  nextEndsOn: string | null = null;
 }

@@ -582,43 +582,35 @@ Il corpo è il file (binario), non JSON.
 
 ## /seasons
 
-### GET `/api/seasons/season-dates?idProperty={idProperty}`
+### GET `/api/catalog/season`
 
 Stagioni e periodi: date di stagione.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/seasons/season-dates?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
-Stato: 200 OK.
+Stato: 200 OK (204 senza corpo se la stagione non è impostata).
 
 ```json
 {
-  "currentSeasonDateFrom": "2026-05-01T00:00:00.000Z",
-  "currentSeasonDateTo": "2026-09-30T00:00:00.000Z",
-  "nextSeasonDateFrom": "2027-05-01T00:00:00.000Z",
-  "nextSeasonDateTo": "2027-09-30T00:00:00.000Z"
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-30",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `currentSeasonDateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
-| `currentSeasonDateTo` | string (ISO 8601, UTC) | `2026-09-30T00:00:00.000Z` |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null | `2027-05-01T00:00:00.000Z` |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null | `2027-09-30T00:00:00.000Z` |
+| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
 
-### POST `/api/seasons/save-season-dates`
+### PUT `/api/catalog/season`
 
 Stagioni e periodi: salva date di stagione.
 
@@ -626,27 +618,39 @@ Stagioni e periodi: salva date di stagione.
 
 ```json
 {
-  "currentSeasonDateFrom": "2026-05-01T00:00:00.000Z",
-  "currentSeasonDateTo": "2026-09-25T00:00:00.000Z",
-  "nextSeasonDateFrom": "2027-05-01T00:00:00.000Z",
-  "nextSeasonDateTo": "2027-09-30T00:00:00.000Z",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-25",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-| `currentSeasonDateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
-| `currentSeasonDateTo` | string (ISO 8601, UTC) | `2026-09-25T00:00:00.000Z` |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) | `2027-05-01T00:00:00.000Z` |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) | `2027-09-30T00:00:00.000Z` |
+| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
+| `nextStartsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
+| `nextEndsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK (le date salvate).
 
-Nessun corpo.
+```json
+{
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-25",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
 
 ### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
 

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { DeleteIntervalsRequest } from '../../../entities/settings/seasons/delete-intervals-request';
 import { DeletePeriodRequest } from '../../../entities/settings/seasons/delete-period-request';
@@ -17,15 +17,17 @@ export class SeasonService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/seasons`;
 
-  readonly seasonDates = (idProperty: string): Observable<SeasonDates> =>
-    this.httpClient.get<SeasonDates>(`${this.endpoint}/season-dates`, { params: { idProperty } });
+  /** For the property of the token. Answers 204 with no body while the season is not set. */
+  readonly seasonDates = (): Observable<SeasonDates> =>
+    this.httpClient
+      .get<SeasonDates | null>(`${environment.apiBaseUrl}/catalog/season`)
+      .pipe(map((answer) => seasonDatesOf(answer)));
 
-  /** All four days, also the empty ones of the next season. Answers 204 with no body. */
-  readonly saveSeasonDates = (idProperty: string, dates: SeasonDates): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/save-season-dates`, {
-      ...onlyFieldsOf(SeasonDates, dates),
-      idProperty,
-    });
+  /** All four days, for the property of the token. Answers 200 with the days as saved. */
+  readonly saveSeasonDates = (dates: SeasonDates): Observable<SeasonDates> =>
+    this.httpClient
+      .put<SeasonDates>(`${environment.apiBaseUrl}/catalog/season`, daysOf(dates))
+      .pipe(map((answer) => seasonDatesOf(answer)));
 
   /** The periods of the current season, or of the next one with `isNextSeason`. */
   readonly periodList = (
@@ -88,4 +90,32 @@ export class SeasonService {
   /** One or more date intervals, of any period of the property: all or none. Answers 204 with no body. */
   readonly deleteIntervals = (request: DeleteIntervalsRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/delete-intervals`, request);
+}
+
+/** The backend sends and takes days (`2026-05-01`); the page keeps them at midnight UTC. */
+function seasonDatesOf(answer: SeasonDates | null): SeasonDates {
+  const days = onlyFieldsOf(SeasonDates, answer ?? new SeasonDates());
+  return {
+    startsOn: midnightOf(days.startsOn),
+    endsOn: midnightOf(days.endsOn),
+    nextStartsOn: midnightOf(days.nextStartsOn),
+    nextEndsOn: midnightOf(days.nextEndsOn),
+  };
+}
+
+function daysOf(dates: SeasonDates): SeasonDates {
+  return {
+    startsOn: dayOf(dates.startsOn),
+    endsOn: dayOf(dates.endsOn),
+    nextStartsOn: dayOf(dates.nextStartsOn),
+    nextEndsOn: dayOf(dates.nextEndsOn),
+  };
+}
+
+function midnightOf(day: string | null): string | null {
+  return day ? `${day.slice(0, 10)}T00:00:00.000Z` : null;
+}
+
+function dayOf(date: string | null): string | null {
+  return date ? date.slice(0, 10) : null;
 }

@@ -1240,73 +1240,77 @@ File (binario), non JSON.
 
 ## Stagioni e periodi
 
-### GET `/api/seasons/season-dates?idProperty={idProperty}`
+### GET `/api/catalog/season`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
 ```json
 {
-  "currentSeasonDateFrom": "string (ISO 8601, UTC)",
-  "currentSeasonDateTo": "string (ISO 8601, UTC)",
-  "nextSeasonDateFrom": "string (ISO 8601, UTC) | null",
-  "nextSeasonDateTo": "string (ISO 8601, UTC) | null"
+  "startsOn": "string (data, AAAA-MM-GG)",
+  "endsOn": "string (data, AAAA-MM-GG)",
+  "nextStartsOn": "string (data, AAAA-MM-GG) | null",
+  "nextEndsOn": "string (data, AAAA-MM-GG) | null"
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `currentSeasonDateFrom` | string (ISO 8601, UTC) |
-| `currentSeasonDateTo` | string (ISO 8601, UTC) |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) \| null |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) \| null |
+| `startsOn` | string (data, AAAA-MM-GG) |
+| `endsOn` | string (data, AAAA-MM-GG) |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null |
 
-### POST `/api/seasons/save-season-dates`
+### PUT `/api/catalog/season`
 
 **Payload JSON**
 
 ```json
 {
-  "idProperty": "string (UUID)",
-  "currentSeasonDateFrom": "string (ISO 8601, UTC)",
-  "currentSeasonDateTo": "string (ISO 8601, UTC)",
-  "nextSeasonDateFrom": "string (ISO 8601, UTC)",
-  "nextSeasonDateTo": "string (ISO 8601, UTC)"
+  "startsOn": "string (data, AAAA-MM-GG)",
+  "endsOn": "string (data, AAAA-MM-GG)",
+  "nextStartsOn": "string (data, AAAA-MM-GG)",
+  "nextEndsOn": "string (data, AAAA-MM-GG)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "startsOn": "string (data, AAAA-MM-GG)",
+  "endsOn": "string (data, AAAA-MM-GG)",
+  "nextStartsOn": "string (data, AAAA-MM-GG) | null",
+  "nextEndsOn": "string (data, AAAA-MM-GG) | null"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
-| `currentSeasonDateFrom` | string (ISO 8601, UTC) |
-| `currentSeasonDateTo` | string (ISO 8601, UTC) |
-| `nextSeasonDateFrom` | string (ISO 8601, UTC) |
-| `nextSeasonDateTo` | string (ISO 8601, UTC) |
+| `startsOn` | string (data, AAAA-MM-GG) |
+| `endsOn` | string (data, AAAA-MM-GG) |
+| `nextStartsOn` | string (data, AAAA-MM-GG) |
+| `nextEndsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `startsOn` | string (data, AAAA-MM-GG) |
+| `endsOn` | string (data, AAAA-MM-GG) |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null |
 
 ### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
 

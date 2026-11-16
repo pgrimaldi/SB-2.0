@@ -429,17 +429,11 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return deleteSelectedItemMock(request);
   }
 
-  if (
-    request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/seasons/season-dates`
-  ) {
+  if (request.method === 'GET' && request.url === `${environment.apiBaseUrl}/catalog/season`) {
     return seasonDatesMock(request);
   }
 
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/seasons/save-season-dates`
-  ) {
+  if (request.method === 'PUT' && request.url === `${environment.apiBaseUrl}/catalog/season`) {
     return saveSeasonDatesMock(request);
   }
 

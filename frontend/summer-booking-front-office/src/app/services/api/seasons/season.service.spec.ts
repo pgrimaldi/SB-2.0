@@ -2,23 +2,52 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
+import { SeasonDates } from '../../../entities/settings/seasons/season-dates';
 import { SeasonPeriodAddRequest } from '../../../entities/settings/seasons/season-period-add-request';
 import { SeasonService } from './season.service';
 
 describe('SeasonService', () => {
-  it('should ask the season dates of the property', () => {
+  it('should read the season days of the token as days at midnight UTC', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const seasons = TestBed.inject(SeasonService);
     const controller = TestBed.inject(HttpTestingController);
+    let dates: SeasonDates | undefined;
 
-    seasons.seasonDates('p1').subscribe();
+    seasons.seasonDates().subscribe((answer) => (dates = answer));
 
-    const request = controller.expectOne(
-      `${environment.apiBaseUrl}/seasons/season-dates?idProperty=p1`,
-    ).request;
-    expect(request.method).toBe('GET');
+    const call = controller.expectOne(`${environment.apiBaseUrl}/catalog/season`);
+    expect(call.request.method).toBe('GET');
+    call.flush({
+      startsOn: '2026-05-01',
+      endsOn: '2026-09-30',
+      nextStartsOn: null,
+      nextEndsOn: null,
+    });
+    expect(dates).toEqual({
+      startsOn: '2026-05-01T00:00:00.000Z',
+      endsOn: '2026-09-30T00:00:00.000Z',
+      nextStartsOn: null,
+      nextEndsOn: null,
+    });
+    controller.verify();
+  });
+
+  it('should read a season not set yet (204) as four empty days', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const seasons = TestBed.inject(SeasonService);
+    const controller = TestBed.inject(HttpTestingController);
+    let dates: SeasonDates | undefined;
+
+    seasons.seasonDates().subscribe((answer) => (dates = answer));
+
+    controller
+      .expectOne(`${environment.apiBaseUrl}/catalog/season`)
+      .flush(null, { status: 204, statusText: 'No Content' });
+    expect(dates).toEqual(new SeasonDates());
     controller.verify();
   });
 
@@ -143,32 +172,43 @@ describe('SeasonService', () => {
     controller.verify();
   });
 
-  it('should send all the season dates, also the empty ones, nothing else', () => {
+  it('should send all the season days, nothing else, and read the days as saved', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const seasons = TestBed.inject(SeasonService);
     const controller = TestBed.inject(HttpTestingController);
     const dates = {
-      currentSeasonDateFrom: '2026-05-01T00:00:00.000Z',
-      currentSeasonDateTo: '2026-09-30T00:00:00.000Z',
-      nextSeasonDateFrom: null,
-      nextSeasonDateTo: null,
+      startsOn: '2026-05-01T00:00:00.000Z',
+      endsOn: '2026-09-30T00:00:00.000Z',
+      nextStartsOn: null,
+      nextEndsOn: null,
       extra: true,
     };
 
-    seasons.saveSeasonDates('p1', dates).subscribe();
+    let saved: SeasonDates | undefined;
 
-    const request = controller.expectOne(
-      `${environment.apiBaseUrl}/seasons/save-season-dates`,
-    ).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({
-      currentSeasonDateFrom: '2026-05-01T00:00:00.000Z',
-      currentSeasonDateTo: '2026-09-30T00:00:00.000Z',
-      nextSeasonDateFrom: null,
-      nextSeasonDateTo: null,
-      idProperty: 'p1',
+    seasons.saveSeasonDates(dates).subscribe((answer) => (saved = answer));
+
+    const call = controller.expectOne(`${environment.apiBaseUrl}/catalog/season`);
+    expect(call.request.method).toBe('PUT');
+    expect(call.request.body).toEqual({
+      startsOn: '2026-05-01',
+      endsOn: '2026-09-30',
+      nextStartsOn: null,
+      nextEndsOn: null,
+    });
+    call.flush({
+      startsOn: '2026-05-01',
+      endsOn: '2026-09-30',
+      nextStartsOn: null,
+      nextEndsOn: null,
+    });
+    expect(saved).toEqual({
+      startsOn: '2026-05-01T00:00:00.000Z',
+      endsOn: '2026-09-30T00:00:00.000Z',
+      nextStartsOn: null,
+      nextEndsOn: null,
     });
     controller.verify();
   });

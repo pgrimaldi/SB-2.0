@@ -75,19 +75,20 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   private loaded = new SeasonDates();
   private readonly dates = signal(new SeasonDates());
   protected readonly datesForm = form(this.dates, (path) => {
-    required(path.currentSeasonDateFrom);
-    required(path.currentSeasonDateTo);
-    required(path.nextSeasonDateFrom);
-    required(path.nextSeasonDateTo);
+    required(path.startsOn);
+    required(path.endsOn);
+    required(path.nextStartsOn);
+    required(path.nextEndsOn);
     readonly(path, () => !this.isEditing() || this.isSaving() || this.isLoading());
   });
   protected readonly fieldErrors = {
-    currentSeasonDateFrom: this.validationText.message(this.datesForm.currentSeasonDateFrom),
-    currentSeasonDateTo: this.validationText.message(this.datesForm.currentSeasonDateTo),
-    nextSeasonDateFrom: this.validationText.message(this.datesForm.nextSeasonDateFrom),
-    nextSeasonDateTo: this.validationText.message(this.datesForm.nextSeasonDateTo),
+    startsOn: this.validationText.message(this.datesForm.startsOn),
+    endsOn: this.validationText.message(this.datesForm.endsOn),
+    nextStartsOn: this.validationText.message(this.datesForm.nextStartsOn),
+    nextEndsOn: this.validationText.message(this.datesForm.nextEndsOn),
   };
   protected readonly canSave = computed(() => this.datesForm().valid());
+  protected readonly nextSeasonMinDate = computed(() => dayAfter(this.datesForm.endsOn().value()));
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -107,7 +108,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       const subscription = untracked(() => {
         this.error.set(null);
         this.isLoading.set(true);
-        return this.seasons.seasonDates(idProperty).subscribe({
+        return this.seasons.seasonDates().subscribe({
           next: (dates) => {
             this.loaded = this.withDefaultStarts(onlyFieldsOf(SeasonDates, dates));
             this.dates.set(this.loaded);
@@ -162,9 +163,10 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
           this.isPeriodsOutsideShown.set(true);
           return;
         }
-        await firstValueFrom(this.seasons.saveSeasonDates(idProperty, sent));
-        this.loaded = sent;
-        this.seasonDates.dates.set(sent);
+        const saved = await firstValueFrom(this.seasons.saveSeasonDates(sent));
+        this.loaded = saved;
+        this.dates.set(saved);
+        this.seasonDates.dates.set(saved);
         this.datesForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
@@ -187,8 +189,8 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       new Date(Date.UTC(inYear, 0, 1)).toISOString();
     return {
       ...dates,
-      currentSeasonDateFrom: dates.currentSeasonDateFrom ?? firstOfJanuary(year),
-      nextSeasonDateFrom: dates.nextSeasonDateFrom ?? firstOfJanuary(year + 1),
+      startsOn: dates.startsOn ?? firstOfJanuary(year),
+      nextStartsOn: dates.nextStartsOn ?? firstOfJanuary(year + 1),
     };
   }
 
@@ -199,8 +201,8 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       firstValueFrom(this.seasons.periodList(idProperty, true)),
     ]);
     return (
-      isAnyOutside(current, dates.currentSeasonDateFrom, dates.currentSeasonDateTo) ||
-      isAnyOutside(next, dates.nextSeasonDateFrom, dates.nextSeasonDateTo)
+      isAnyOutside(current, dates.startsOn, dates.endsOn) ||
+      isAnyOutside(next, dates.nextStartsOn, dates.nextEndsOn)
     );
   }
 
@@ -227,4 +229,8 @@ function isAnyOutside(
         (interval.dateTo ?? '').slice(0, 10) > last,
     ),
   );
+}
+
+function dayAfter(day: string | null): string | null {
+  return day ? new Date(Date.parse(day) + 24 * 60 * 60 * 1000).toISOString() : null;
 }
