@@ -81,7 +81,7 @@ export class CatalogService {
   /** The property comes from the access token, as in the other calls of the page. */
   readonly bathhouseConfigurationGeneral = (): Observable<BathhouseGeneralInformation> =>
     this.httpClient.get<BathhouseGeneralInformation>(
-      `${this.endpoint}/bathhouse-configuration-general`,
+      `${this.endpoint}/property-info/bathhouse-configuration-general`,
     );
 
   /**
@@ -90,11 +90,13 @@ export class CatalogService {
    */
   readonly bathhouseConfigurationServices = (): Observable<BathhouseServiceItem[]> =>
     this.httpClient.get<BathhouseServiceItem[]>(
-      `${this.endpoint}/bathhouse-configuration-services`,
+      `${this.endpoint}/property-info/bathhouse-configuration-services`,
     );
 
   readonly bathhouseConfigurationMedia = (): Observable<BathhouseMedia> =>
-    this.httpClient.get<BathhouseMedia>(`${this.endpoint}/bathhouse-configuration-media`);
+    this.httpClient.get<BathhouseMedia>(
+      `${this.endpoint}/property-info/bathhouse-configuration-media`,
+    );
 
   /**
    * The calls of the photos and of the PDFs of the Media tab are the backend's own: each answers with
@@ -140,7 +142,7 @@ export class CatalogService {
     information: BathhouseGeneralInformation,
   ): Observable<void> =>
     this.httpClient.post<void>(
-      `${this.endpoint}/save-bathhouse-configuration-general`,
+      `${this.endpoint}/property-info/save-bathhouse-configuration-general`,
       onlyFieldsOf(BathhouseGeneralInformation, information),
     );
 
@@ -148,14 +150,17 @@ export class CatalogService {
   readonly saveBathhouseConfigurationServices = (
     services: readonly BathhouseServiceItem[],
   ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/save-bathhouse-configuration-services`, {
-      services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
-    });
+    this.httpClient.post<void>(
+      `${this.endpoint}/property-info/save-bathhouse-configuration-services`,
+      {
+        services: services.map((service) => onlyFieldsOf(BathhouseServiceItem, service)),
+      },
+    );
 
   /** The link of the virtual tour and the position on the map. Answers 204 with no body. */
   readonly saveBathhouseConfigurationMedia = (request: BathhouseMediaRequest): Observable<void> =>
     this.httpClient.post<void>(
-      `${this.endpoint}/save-bathhouse-configuration-media`,
+      `${this.endpoint}/property-info/save-bathhouse-configuration-media`,
       onlyFieldsOf(BathhouseMediaRequest, request),
     );
 

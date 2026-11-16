@@ -2282,7 +2282,7 @@ Stato: 200 OK.
 | `id` | string (ISO 3166-1 alpha-2) | `IT` |
 | `value` | string | `Italia` |
 
-### GET `/api/catalog/bathhouse-configuration-general`
+### GET `/api/catalog/property-info/bathhouse-configuration-general`
 
 Informazioni stabilimento: informazioni generali.
 
@@ -2342,7 +2342,7 @@ Stato: 200 OK.
 | `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
 
-### POST `/api/catalog/save-bathhouse-configuration-general`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-general`
 
 Informazioni stabilimento: salvataggio delle informazioni generali.
 
@@ -2402,7 +2402,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/catalog/bathhouse-configuration-services`
+### GET `/api/catalog/property-info/bathhouse-configuration-services`
 
 Informazioni stabilimento: servizi.
 
@@ -2448,7 +2448,7 @@ Stato: 200 OK.
 | `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
 | `isSelected` | boolean | `true` |
 
-### POST `/api/catalog/save-bathhouse-configuration-services`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-services`
 
 Informazioni stabilimento: salvataggio dei servizi.
 
@@ -2490,7 +2490,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/catalog/bathhouse-configuration-media`
+### GET `/api/catalog/property-info/bathhouse-configuration-media`
 
 Informazioni stabilimento: media.
 
@@ -2539,7 +2539,7 @@ Stato: 200 OK.
 | `menuPdfUrl` | string \| null | `https://media.example.com/lido-demo/menu.pdf` |
 | `menuPdfFileName` | string \| null | `menu.pdf` |
 
-### POST `/api/catalog/save-bathhouse-configuration-media`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-media`
 
 Informazioni stabilimento: salvataggio del link del tour virtuale e della posizione.
 

@@ -551,21 +551,23 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-general`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/property-info/bathhouse-configuration-general`
   ) {
     return bathhouseConfigurationGeneralMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-services`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/property-info/bathhouse-configuration-services`
   ) {
     return bathhouseConfigurationServicesMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-media`
+    request.url === `${environment.apiBaseUrl}/catalog/property-info/bathhouse-configuration-media`
   ) {
     return bathhouseConfigurationMediaMock(request);
   }
@@ -604,20 +606,23 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-general`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-general`
   ) {
     return saveBathhouseConfigurationGeneralMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-services`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-services`
   ) {
     return saveBathhouseConfigurationServicesMock(request);
   }
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-media`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-media`
   ) {
     return saveBathhouseConfigurationMediaMock(request);
   }

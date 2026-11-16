@@ -16,12 +16,12 @@ La pagina è `/settings/bathhouse-configuration` e ha tre tab, ognuna con le sue
 
 | # | Metodo | Rotta | Tab | Cosa fa |
 |---|---|---|---|---|
-| 1 | GET | `/api/catalog/bathhouse-configuration-general` | Informazioni Generali | Legge i campi della tab |
-| 2 | POST | `/api/catalog/save-bathhouse-configuration-general` | Informazioni Generali | Salva i campi della tab |
-| 3 | GET | `/api/catalog/bathhouse-configuration-services` | Servizi | Legge i servizi del catalogo con il loro stato |
-| 4 | POST | `/api/catalog/save-bathhouse-configuration-services` | Servizi | Salva i servizi offerti |
-| 5 | GET | `/api/catalog/bathhouse-configuration-media` | Media | Legge posizione, foto, tour virtuale e PDF |
-| 6 | POST | `/api/catalog/save-bathhouse-configuration-media` | Media | Salva tour virtuale e posizione |
+| 1 | GET | `/api/catalog/property-info/bathhouse-configuration-general` | Informazioni Generali | Legge i campi della tab |
+| 2 | POST | `/api/catalog/property-info/save-bathhouse-configuration-general` | Informazioni Generali | Salva i campi della tab |
+| 3 | GET | `/api/catalog/property-info/bathhouse-configuration-services` | Servizi | Legge i servizi del catalogo con il loro stato |
+| 4 | POST | `/api/catalog/property-info/save-bathhouse-configuration-services` | Servizi | Salva i servizi offerti |
+| 5 | GET | `/api/catalog/property-info/bathhouse-configuration-media` | Media | Legge posizione, foto, tour virtuale e PDF |
+| 6 | POST | `/api/catalog/property-info/save-bathhouse-configuration-media` | Media | Salva tour virtuale e posizione |
 
 Sono tutte **API nuove**. Foto e PDF invece usano le API che il backend ha già (sezione "API esistenti usate così come
 sono").
@@ -30,11 +30,12 @@ sono").
 
 Valgono per tutte e sei le API.
 
-- **Modulo**: Catalog (`Module.Catalog`), stesso gruppo di `/api/catalog/property-info`
-  (`Endpoints/PropertyInfoEndpoints.cs`, `PropertyInfoService`). I dati sono gli stessi della scheda dello stabilimento
-  (`PropertyInfoDto`): le nuove API leggono e scrivono le stesse tabelle.
-- **Le API esistenti non cambiano**: `/api/catalog/property-info` con tutte le sue sotto-rotte e `/api/catalog/lookups/*`
-  restano come sono.
+- **Modulo e rotte**: Catalog (`Module.Catalog`). Le sei API stanno nel gruppo `/api/catalog/property-info`
+  (`Endpoints/PropertyInfoEndpoints.cs`, `PropertyInfoService`), accanto a quelle che ci sono già. I dati sono gli
+  stessi della scheda dello stabilimento (`PropertyInfoDto`): le nuove API leggono e scrivono le stesse tabelle.
+- **Le API esistenti non cambiano**: le rotte di oggi di `/api/catalog/property-info` (`GET` e `PUT /`, `/amenities`,
+  `/main-photo`, `/photos`, `/photos/order`, `/photos/{id}`, `/documents/{document}`) e `/api/catalog/lookups/*`
+  restano come sono; le sei nuove si aggiungono.
 - **Stabilimento dal token**: nessuna richiesta ha `idProperty`; lo stabilimento è quello dell'utente autenticato, come
   per `property-info`.
 - **Permessi**: le GET come `GET /property-info` (`CatalogRead`), i salvataggi come `PUT /property-info`
@@ -47,7 +48,7 @@ Valgono per tutte e sei le API.
   (es. `bathhouseName`, non `name`), `code` il codice (es. `validation.required`), `args` i valori del messaggio. Il
   frontend mostra ogni errore sotto il suo campo. Senza token valido: 401 `auth.unauthenticated`.
 
-## 1. GET /api/catalog/bathhouse-configuration-general
+## 1. GET /api/catalog/property-info/bathhouse-configuration-general
 
 Tab Informazioni Generali: il frontend la chiama la prima volta che si apre la tab e con la risposta riempie i campi.
 Restituisce **solo i campi della tab**, con i nomi e i valori del frontend.
@@ -99,7 +100,7 @@ Non ci sono: `slug`, `latitude`, `longitude`, `virtualTourUrl`, `mainPhotoUrl`, 
 
 Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`.
 
-## 2. POST /api/catalog/save-bathhouse-configuration-general
+## 2. POST /api/catalog/property-info/save-bathhouse-configuration-general
 
 Bottone "Salva" della tab Informazioni Generali.
 
@@ -138,7 +139,7 @@ Bottone "Salva" della tab Informazioni Generali.
   `validation.required`, `email` non valida con `validation.email`); 401 `auth.unauthenticated`; 403
   `auth.forbidden`.
 
-## 3. GET /api/catalog/bathhouse-configuration-services
+## 3. GET /api/catalog/property-info/bathhouse-configuration-services
 
 Tab Servizi: il frontend la chiama la prima volta che si apre la tab e mostra una casella per servizio. Restituisce
 **una sola lista** con tutti i servizi attivi del catalogo, ognuno con il suo stato per lo stabilimento.
@@ -244,7 +245,7 @@ Valori iniziali, da caricare nel database (sono quelli che la pagina mostra oggi
 
 Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`.
 
-## 4. POST /api/catalog/save-bathhouse-configuration-services
+## 4. POST /api/catalog/property-info/save-bathhouse-configuration-services
 
 Bottone "Salva" della tab Servizi.
 
@@ -272,7 +273,7 @@ Bottone "Salva" della tab Servizi.
 - Errori: 404 `resource.not_found` se un `idService` non è un servizio attivo del catalogo (e non si salva nulla); 401
   `auth.unauthenticated`; 403 `auth.forbidden`.
 
-## 5. GET /api/catalog/bathhouse-configuration-media
+## 5. GET /api/catalog/property-info/bathhouse-configuration-media
 
 Tab Media: il frontend la chiama la prima volta che si apre la tab e mostra la posizione sulla mappa, le foto, il link
 del tour virtuale e i due PDF.
@@ -310,7 +311,7 @@ Non ci sono: i campi delle altre tab e `slug`.
 
 Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`.
 
-## 6. POST /api/catalog/save-bathhouse-configuration-media
+## 6. POST /api/catalog/property-info/save-bathhouse-configuration-media
 
 Bottone "Salva" della tab Media: salva il link del tour virtuale e la posizione sulla mappa (in modifica l'utente
 clicca sulla mappa per mettere il segnaposto). Foto e PDF non passano da qui.

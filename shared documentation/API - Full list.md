@@ -176,7 +176,7 @@ Nessun corpo (204).
 
 ## Informazioni stabilimento
 
-### GET `/api/catalog/bathhouse-configuration-general`
+### GET `/api/catalog/property-info/bathhouse-configuration-general`
 
 **Payload JSON**
 
@@ -266,7 +266,7 @@ Nessun payload.
 | `[].id` | string (ISO 3166-1 alpha-2) |
 | `[].value` | string |
 
-### POST `/api/catalog/save-bathhouse-configuration-general`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-general`
 
 **Payload JSON**
 
@@ -328,7 +328,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/bathhouse-configuration-services`
+### GET `/api/catalog/property-info/bathhouse-configuration-services`
 
 **Payload JSON**
 
@@ -362,7 +362,7 @@ Nessun payload.
 | `[].iconUrl` | string \| null |
 | `[].isSelected` | boolean |
 
-### POST `/api/catalog/save-bathhouse-configuration-services`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-services`
 
 **Payload JSON**
 
@@ -399,7 +399,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/bathhouse-configuration-media`
+### GET `/api/catalog/property-info/bathhouse-configuration-media`
 
 **Payload JSON**
 
@@ -446,7 +446,7 @@ Nessun payload.
 | `menuPdfUrl` | string \| null |
 | `menuPdfFileName` | string \| null |
 
-### POST `/api/catalog/save-bathhouse-configuration-media`
+### POST `/api/catalog/property-info/save-bathhouse-configuration-media`
 
 **Payload JSON**
 

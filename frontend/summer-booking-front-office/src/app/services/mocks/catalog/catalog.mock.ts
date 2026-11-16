@@ -692,7 +692,7 @@ let generalInformation = new BathhouseGeneralInformation();
 let idOfferedServices = new Set<number>();
 
 /**
- * `GET /api/catalog/bathhouse-configuration-general`: the general information of the property of
+ * `GET /api/catalog/property-info/bathhouse-configuration-general`: the general information of the property of
  * the token, for the tab "Informazioni generali"; all empty until saved, a form to fill in. 401
  * without a valid access token.
  */
@@ -708,7 +708,7 @@ export const bathhouseConfigurationGeneralMock = (
 };
 
 /**
- * `GET /api/catalog/bathhouse-configuration-services`: every service of the catalogue, in the order
+ * `GET /api/catalog/property-info/bathhouse-configuration-services`: every service of the catalogue, in the order
  * of the categories and then of the services, with the name in the language of `Accept-Language`;
  * offered by the property of the token as last saved, none at the start. 401 without a valid access
  * token.
@@ -735,7 +735,7 @@ export const bathhouseConfigurationServicesMock = (
 };
 
 /**
- * `POST /api/catalog/save-bathhouse-configuration-general` with every field of the tab, for the
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the tab, for the
  * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 without a
  * name; 401 without a valid access token.
  */
@@ -760,7 +760,7 @@ export const saveBathhouseConfigurationGeneralMock = (
 };
 
 /**
- * `POST /api/catalog/save-bathhouse-configuration-services` with `services`, the services the
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, the services the
  * property of the token offers: keeps them (until the page is reloaded). 204 without a body; 401
  * without a valid access token; 404 for a service that does not exist.
  */
@@ -785,7 +785,7 @@ function isServiceId(value: unknown): value is number {
 }
 
 /**
- * `POST /api/catalog/save-bathhouse-configuration-media` with `virtualTourUrl` (null or empty removes
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-media` with `virtualTourUrl` (null or empty removes
  * it), `latitude` and `longitude` (both or neither) of the property of the token: keeps them (until
  * the page is reloaded). 204 without a body; 400 with an error per field for a link that is not http
  * or https or longer than 500 characters, a coordinate out of range or only one of the two; 401
@@ -873,7 +873,7 @@ const MAX_PHOTO_BYTES = MAX_BATHHOUSE_IMAGE_MEGABYTES * 1024 * 1024;
 const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * 1024 * 1024;
 
 /**
- * `GET /api/catalog/bathhouse-configuration-media`: links of the main photo, of the gallery (in
+ * `GET /api/catalog/property-info/bathhouse-configuration-media`: links of the main photo, of the gallery (in
  * order), of the virtual tour and of the two PDF documents of the property of the token. 401 without
  * a valid access token.
  */

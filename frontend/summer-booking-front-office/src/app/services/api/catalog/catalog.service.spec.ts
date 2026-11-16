@@ -72,7 +72,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-general` &&
+        url === `${environment.apiBaseUrl}/catalog/property-info/bathhouse-configuration-general` &&
         params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
@@ -87,7 +87,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-services` &&
+        url ===
+          `${environment.apiBaseUrl}/catalog/property-info/bathhouse-configuration-services` &&
         params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
@@ -102,7 +103,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/bathhouse-configuration-media` &&
+        url === `${environment.apiBaseUrl}/catalog/property-info/bathhouse-configuration-media` &&
         params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
@@ -226,7 +227,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-general`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-general`,
     ).request;
     expect(request.body).toEqual({
       ...new BathhouseGeneralInformation(),
@@ -249,7 +251,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-services`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-services`,
     ).request;
     expect(request.body).toEqual({
       services: [{ ...new BathhouseServiceItem(), idService: 3, name: 'Doccia', isSelected: true }],
@@ -271,7 +274,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/save-bathhouse-configuration-media`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-media`,
     ).request;
     expect(request.body).toEqual({
       virtualTourUrl: 'https://tour.example.com/lido',
