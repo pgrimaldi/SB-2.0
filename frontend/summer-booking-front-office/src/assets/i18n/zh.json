@@ -109,6 +109,7 @@
     },
     "account": {
       "email_taken": "已存在使用此电子邮件的账户。",
+      "not_found": "该用户已不存在：可能已被删除。",
       "cannot_modify_self": "您不能在此删除或修改自己的账户。",
       "role_not_assignable": "无法在面板中管理此账户。"
     },
@@ -1030,6 +1031,7 @@
           "email": "电子邮件",
           "password": "密码",
           "phone": "手机",
+          "phone_prefix": "区号",
           "account_type": "账户类型",
           "choose": "请选择",
           "enable": "启用",
@@ -1904,7 +1906,9 @@
     "overlap": "这些日期与本季节的另一个日期区间重叠",
     "max_file_size": "文件超过 {{max}} MB",
     "unknown_icon": "图标不存在",
-    "web_link": "请输入以 http:// 或 https:// 开头的完整链接"
+    "web_link": "请输入以 http:// 或 https:// 开头的完整链接",
+    "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
+    "phone_max_length": "号码最多 {{max}} 个字符（含空格）"
   },
   "unsaved_changes": {
     "title": "未保存的更改",

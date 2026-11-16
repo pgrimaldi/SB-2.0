@@ -1,0 +1,60 @@
+@if (label()) {
+  <label class="filled__icon__select__label"
+    >{{ label() }}
+    @if (isMandatory()) {
+      <span class="filled__icon__select__mandatory">*</span>
+    }
+  </label>
+}
+<mat-form-field
+  class="filled__icon__select__control"
+  appearance="fill"
+  subscriptSizing="dynamic"
+  [class.filled__icon__select__invalid]="!!error()"
+  [class.filled__icon__select__locked]="readonly() || disabled()"
+>
+  <mat-select
+    panelClass="select__panel select__panel__fit"
+    panelWidth=""
+    hideSingleSelectionIndicator
+    [required]="isMandatory()"
+    [errorStateMatcher]="errorMatcher"
+    [placeholder]="placeholder() ?? ''"
+    [disabled]="disabled() || readonly()"
+    [value]="value()"
+    (valueChange)="value.set($event)"
+    (closed)="touch.emit()"
+  >
+    <mat-select-trigger>
+      @if (selected(); as option) {
+        <span class="filled__icon__select__trigger">
+          <img
+            class="filled__icon__select__icon"
+            [src]="option.icon"
+            width="20"
+            height="15"
+            alt=""
+          />
+          {{ option.shortLabel }}
+        </span>
+      }
+    </mat-select-trigger>
+    @for (option of options(); track option.value) {
+      <mat-option [value]="option.value">
+        <img
+          class="select__option__icon"
+          [src]="option.icon"
+          width="16"
+          height="16"
+          alt=""
+          loading="lazy"
+        />
+        <span class="select__option__label">{{ option.label }}</span>
+        <span class="select__option__short">{{ option.shortLabel }}</span>
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
+@if (error(); as error) {
+  <p class="filled__icon__select__error">{{ error }}</p>
+}

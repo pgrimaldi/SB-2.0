@@ -163,8 +163,8 @@ export class UserManagement {
     ...this.standardActions(),
   ]);
 
-  protected readonly deleteUser = (idProperty: string, [idUser]: string[]) =>
-    this.identity.deleteUser({ idProperty, idUser });
+  protected readonly deleteUser = (_idProperty: string, [idUser]: string[]) =>
+    this.identity.deleteUser(idUser);
 
   protected readonly load: TableLoad<{ idProperty: string }, UserRow> = (request) =>
     this.identity.usersList(request).pipe(
@@ -180,7 +180,9 @@ export class UserManagement {
               idUser: item.idUser,
               email: item.email,
               phone: item.phone
-                ? [item.phoneCountryCode, item.phone].filter(Boolean).join(' ')
+                ? [item.phoneCountryCode && `+${item.phoneCountryCode}`, item.phone]
+                    .filter(Boolean)
+                    .join(' ')
                 : null,
               role: item.role ? texts.role[USER_ROLE_KEYS[item.role]] : null,
               isOwner: item.role === UserRole.SuperAdmin,

@@ -24,7 +24,7 @@ import {
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../../entities/settings/user-management/audit-log-filters';
-import { AuditService } from '../../../../../services/api/audit/audit.service';
+import { IdentityService } from '../../../../../services/api/identity/identity.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
@@ -50,7 +50,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   readonly applied = output<AuditLogFilters>();
 
   private readonly translateService = inject(TranslateService);
-  private readonly audit = inject(AuditService);
+  private readonly identity = inject(IdentityService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly language = inject(LanguageBehaviour).current;
@@ -151,7 +151,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
     if (!idProperty) {
       return;
     }
-    this.usersSubscription = this.audit.userCombobox(idProperty).subscribe({
+    this.usersSubscription = this.identity.userCombobox(idProperty).subscribe({
       next: (users) => this.users.set(users),
       error: (error: unknown) => {
         const problem = toApiProblem(error);

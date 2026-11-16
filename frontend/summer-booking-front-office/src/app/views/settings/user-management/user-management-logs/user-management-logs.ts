@@ -51,6 +51,7 @@ import { AuditLogUserState } from '../../../../entities/settings/user-management
 import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
+import { IdentityService } from '../../../../services/api/identity/identity.service';
 
 interface UserManagementLogsTexts {
   date_filter: {
@@ -118,6 +119,7 @@ const PRINT_FALLBACK_NAME = 'log-print';
 export class UserManagementLogs {
   private readonly auth = inject(AuthBehaviour);
   private readonly audit = inject(AuditService);
+  private readonly identity = inject(IdentityService);
   private readonly translateService = inject(TranslateService);
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
@@ -336,7 +338,7 @@ export class UserManagementLogs {
     if (!this.logUser() || !idProperty) {
       return;
     }
-    this.audit.userCombobox(idProperty).subscribe({
+    this.identity.userCombobox(idProperty).subscribe({
       next: (users) => {
         const named = users.find(({ id }) => id === this.logUser()?.id);
         if (!named) {

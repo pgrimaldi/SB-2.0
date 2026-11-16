@@ -109,6 +109,7 @@
     },
     "account": {
       "email_taken": "Es gibt bereits ein Konto mit dieser E-Mail.",
+      "not_found": "Der Benutzer existiert nicht mehr: Er wurde vielleicht schon gelöscht.",
       "cannot_modify_self": "Du kannst dein eigenes Konto hier nicht löschen oder ändern.",
       "role_not_assignable": "Dieses Konto kann nicht über das Panel verwaltet werden."
     },
@@ -1030,6 +1031,7 @@
           "email": "E-Mail",
           "password": "Passwort",
           "phone": "Mobiltelefon",
+          "phone_prefix": "Vorwahl",
           "account_type": "Kontotyp",
           "choose": "Auswählen",
           "enable": "Aktivieren",
@@ -1904,7 +1906,9 @@
     "overlap": "Diese Daten überschneiden sich mit einem anderen Datumsbereich der Saison",
     "max_file_size": "Die Datei ist größer als {{max}} MB",
     "unknown_icon": "Symbol existiert nicht",
-    "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt"
+    "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt",
+    "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
+    "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen"
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

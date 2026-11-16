@@ -198,8 +198,8 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/identity/delete-user`
+    request.method === 'DELETE' &&
+    request.url.startsWith(`${environment.apiBaseUrl}/identity/property-users/`)
   ) {
     return deleteUserMock(request);
   }
@@ -224,7 +224,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/audit/user-combobox`
+    request.url === `${environment.apiBaseUrl}/identity/user-combobox`
   ) {
     return userComboboxMock(request);
   }

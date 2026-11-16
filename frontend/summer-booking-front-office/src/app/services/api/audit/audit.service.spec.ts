@@ -31,19 +31,4 @@ describe('AuditService', () => {
     }
     controller.verify();
   });
-
-  it('should ask the users of the log filter for the property', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const audit = TestBed.inject(AuditService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    audit.userCombobox('p1').subscribe();
-
-    const request = controller.expectOne(`${environment.apiBaseUrl}/audit/user-combobox`).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idProperty: 'p1' });
-    controller.verify();
-  });
 });

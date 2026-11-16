@@ -123,17 +123,9 @@ Gestione utenti: elenco.
   "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
-  "search": "rossi",
-  "filters": [
-    {
-      "field": "role",
-      "value": [
-        "Admin",
-        "Manager"
-      ]
-    }
-  ],
-  "sortField": "lastName",
+  "search": "example.com",
+  "filters": [],
+  "sortField": "email",
   "sortDirection": "Ascending"
 }
 ```
@@ -143,11 +135,9 @@ Gestione utenti: elenco.
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
-| `search` | string | `rossi` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "role", "value": ["Admin", "Manager"]}]` |
-| `filters[].field` | string | `role` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Admin", "Manager"]` |
-| `sortField` | string | `lastName` |
+| `search` | string | `example.com` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `email` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
 #### Response
@@ -161,16 +151,16 @@ Stato: 200 OK.
     {
       "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01",
       "email": "giulia.ferri@example.com",
-      "phoneCountryCode": "+39",
+      "phoneCountryCode": "39",
       "phone": "3401112201",
-      "role": "SuperAdmin"
+      "role": "superadmin"
     },
     {
       "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02",
       "email": "marco.bianchi@example.com",
-      "phoneCountryCode": "+39",
+      "phoneCountryCode": "39",
       "phone": "3401112202",
-      "role": "Admin"
+      "role": "admin"
     }
   ]
 }
@@ -179,12 +169,12 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | UserItem[] (array di oggetti) | `[{"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01", "email": "giulia.ferri@example.com", "phoneCountryCode": "+39", "phone": "3401112201", "role": "SuperAdmin"}, {"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02", "email": "marco.bianchi@example.com", "phoneCountryCode": "+39", "phone": "3401112202", "role": "Admin"}]` |
+| `rows[]` | UserItem[] (array di oggetti) | `[{"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01", "email": "giulia.ferri@example.com", "phoneCountryCode": "39", "phone": "3401112201", "role": "superadmin"}, {"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02", "email": "marco.bianchi@example.com", "phoneCountryCode": "39", "phone": "3401112202", "role": "admin"}]` |
 | `rows[].idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01` |
 | `rows[].email` | string \| null | `giulia.ferri@example.com` |
-| `rows[].phoneCountryCode` | string \| null | `+39` |
+| `rows[].phoneCountryCode` | string \| null | `39` |
 | `rows[].phone` | string \| null | `3401112201` |
-| `rows[].role` | string (enum UserRole) \| null | `SuperAdmin` |
+| `rows[].role` | string (enum UserRole) \| null | `superadmin` |
 
 ### POST `/api/identity/create-user`
 
@@ -195,30 +185,50 @@ Gestione utenti: nuovo utente.
 ```json
 {
   "email": "nuovo.utente@example.com",
-  "isEmailActive": true,
+  "emailIsContact": true,
   "password": "Sabbia-2026",
+  "phoneCountryCode": "39",
   "phone": "3401112299",
-  "isPhoneActive": false,
-  "role": "Waiter",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "phoneIsContact": false,
+  "role": "waiter"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
 | `email` | string | `nuovo.utente@example.com` |
-| `isEmailActive` | boolean | `true` |
+| `emailIsContact` | boolean | `true` |
 | `password` | string | `Sabbia-2026` |
+| `phoneCountryCode` | string \| null | `39` |
 | `phone` | string \| null | `3401112299` |
-| `isPhoneActive` | boolean | `false` |
-| `role` | string (enum UserRole) \| null | `Waiter` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `phoneIsContact` | boolean | `false` |
+| `role` | string (enum UserRole) | `waiter` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 201 Created (l'utente creato).
 
-Nessun corpo.
+```json
+{
+  "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d15",
+  "email": "nuovo.utente@example.com",
+  "emailIsContact": true,
+  "phoneCountryCode": "39",
+  "phone": "3401112299",
+  "phoneIsContact": false,
+  "role": "waiter"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d15` |
+| `email` | string | `nuovo.utente@example.com` |
+| `emailIsContact` | boolean | `true` |
+| `phoneCountryCode` | string \| null | `39` |
+| `phone` | string \| null | `3401112299` |
+| `phoneIsContact` | boolean | `false` |
+| `role` | string (enum UserRole) \| null | `waiter` |
 
 ### GET `/api/identity/get-selected-user?idUser={idUser}`
 
@@ -244,10 +254,11 @@ Stato: 200 OK.
 {
   "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03",
   "email": "sara.conti@example.com",
-  "isEmailActive": true,
+  "emailIsContact": true,
+  "phoneCountryCode": "39",
   "phone": "3401112203",
-  "isPhoneActive": true,
-  "role": "Manager"
+  "phoneIsContact": true,
+  "role": "manager"
 }
 ```
 
@@ -255,10 +266,11 @@ Stato: 200 OK.
 |---|---|---|
 | `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03` |
 | `email` | string | `sara.conti@example.com` |
-| `isEmailActive` | boolean | `true` |
+| `emailIsContact` | boolean | `true` |
+| `phoneCountryCode` | string \| null | `39` |
 | `phone` | string \| null | `3401112203` |
-| `isPhoneActive` | boolean | `true` |
-| `role` | string (enum UserRole) \| null | `Manager` |
+| `phoneIsContact` | boolean | `true` |
+| `role` | string (enum UserRole) \| null | `manager` |
 
 ### POST `/api/identity/update-user`
 
@@ -270,12 +282,12 @@ Gestione utenti: modifica utente.
 {
   "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03",
   "email": "sara.conti@example.com",
-  "isEmailActive": true,
+  "emailIsContact": true,
   "password": "Spiaggia-2027",
-  "phone": "3401112203",
-  "isPhoneActive": false,
-  "role": "Manager",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "phoneCountryCode": "41",
+  "phone": "79 123 45 67",
+  "phoneIsContact": false,
+  "role": "manager"
 }
 ```
 
@@ -283,12 +295,46 @@ Gestione utenti: modifica utente.
 |---|---|---|
 | `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03` |
 | `email` | string | `sara.conti@example.com` |
-| `isEmailActive` | boolean | `true` |
+| `emailIsContact` | boolean | `true` |
 | `password` | string \| null | `Spiaggia-2027` |
-| `phone` | string \| null | `3401112203` |
-| `isPhoneActive` | boolean | `false` |
-| `role` | string (enum UserRole) \| null | `Manager` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+| `phoneCountryCode` | string \| null | `41` |
+| `phone` | string \| null | `79 123 45 67` |
+| `phoneIsContact` | boolean | `false` |
+| `role` | string (enum UserRole) | `manager` |
+
+#### Response
+
+Stato: 200 OK (l'utente aggiornato).
+
+```json
+{
+  "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03",
+  "email": "sara.conti@example.com",
+  "emailIsContact": true,
+  "phoneCountryCode": "41",
+  "phone": "79 123 45 67",
+  "phoneIsContact": false,
+  "role": "manager"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03` |
+| `email` | string | `sara.conti@example.com` |
+| `emailIsContact` | boolean | `true` |
+| `phoneCountryCode` | string \| null | `41` |
+| `phone` | string \| null | `79 123 45 67` |
+| `phoneIsContact` | boolean | `false` |
+| `role` | string (enum UserRole) \| null | `manager` |
+
+### DELETE `/api/identity/property-users/{id}`
+
+Gestione utenti: elimina utente.
+
+#### Payload
+
+Nessun corpo: l'id dell'utente va nell'indirizzo e lo stabilimento viene dal token.
 
 #### Response
 
@@ -296,29 +342,43 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/identity/delete-user`
+### POST `/api/identity/user-combobox`
 
-Gestione utenti: elimina utente.
+Gestione utenti: utenti del filtro dei log.
 
 #### Payload
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
-  "idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02"
+  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-| `idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 200 OK.
 
-Nessun corpo.
+```json
+[
+  {
+    "id": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d09",
+    "value": "Anna Caruso"
+  },
+  {
+    "id": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01",
+    "value": "Giulia Ferri"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d09` |
+| `value` | string | `Anna Caruso` |
 
 ## /audit
 
@@ -412,51 +472,13 @@ Stato: 200 OK.
 |---|---|---|
 | `total` | number (intero) | `2` |
 | `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "booking.spot_added", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "booking.dates_changed", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
-| `rows[].idAuditEntry` | string (UUID) | `9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01` |
+| `rows[].idAuditEntry` | string | `9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01` |
 | `rows[].bookingNumber` | string \| null | `1234` |
 | `rows[].userNumber` | string \| null | `123` |
 | `rows[].actorName` | string \| null | `Giulia Ferri` |
 | `rows[].spotLabel` | string \| null | `A1` |
 | `rows[].actionCode` | string \| null | `booking.spot_added` |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null | `2026-10-23T11:11:00.000Z` |
-
-### POST `/api/audit/user-combobox`
-
-Gestione utenti: utenti del filtro dei log.
-
-#### Payload
-
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
-
-#### Response
-
-Stato: 200 OK.
-
-```json
-[
-  {
-    "id": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d09",
-    "value": "Anna Caruso"
-  },
-  {
-    "id": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01",
-    "value": "Giulia Ferri"
-  }
-]
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `id` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d09` |
-| `value` | string | `Anna Caruso` |
 
 ### POST `/api/audit/export-log`
 
@@ -505,8 +527,8 @@ Il corpo è il file (binario), non JSON.
 
 | Header | Esempio |
 |---|---|
-| `Content-Type` | `text/csv` |
-| `Content-Disposition` | `attachment; filename="log-2026-10-26.csv"` |
+| `Content-Type` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| `Content-Disposition` | `attachment; filename="log-2026-10-26.xlsx"` |
 
 ### POST `/api/audit/print-log`
 

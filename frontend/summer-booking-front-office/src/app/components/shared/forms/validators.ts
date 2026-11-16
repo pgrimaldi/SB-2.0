@@ -45,6 +45,15 @@ export interface WebLinkError extends ValidationError {
   readonly kind: 'web_link';
 }
 
+export interface PhoneDigitsError extends ValidationError {
+  readonly kind: 'phone_digits';
+}
+
+export interface PhoneMaxLengthError extends ValidationError {
+  readonly kind: 'phone_max_length';
+  readonly max: number;
+}
+
 /** First and last day, at midnight UTC as ISO strings. */
 export interface DayRange {
   dateFrom: string | null;
@@ -104,6 +113,23 @@ export function webLink<TPathKind extends PathKind = PathKind.Root>(
   validate(path, ({ value }): WebLinkError | undefined => {
     const text = value()?.trim();
     return !text || isWebLink(text) ? undefined : { kind: 'web_link' };
+  });
+}
+
+/**
+ * A phone number with something other than digits and spaces (the prefix has its own field), then
+ * one longer than `maxLength` characters, spaces included.
+ */
+export function phoneNumber<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  maxLength: number,
+): void {
+  validate(path, ({ value }): PhoneDigitsError | PhoneMaxLengthError | undefined => {
+    const number = value() ?? '';
+    if (!/^[0-9 ]*$/.test(number)) {
+      return { kind: 'phone_digits' };
+    }
+    return number.length > maxLength ? { kind: 'phone_max_length', max: maxLength } : undefined;
   });
 }
 

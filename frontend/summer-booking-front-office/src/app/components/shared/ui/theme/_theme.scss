@@ -55,6 +55,13 @@
     object-fit: contain;
   }
 
+  // The short text after the name of an option (`IconSelectOption.shortLabel`, e.g. `+39`).
+  .select__option__short {
+    flex: none;
+    margin-inline-start: auto;
+    color: var(--color__layout__text__soft);
+  }
+
   // A list as wide as its longest option (`isPanelSizedToOptions`): one line each; only on a screen
   // narrower than the option the end is cut.
   .select__panel__fit {

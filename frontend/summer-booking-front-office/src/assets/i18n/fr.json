@@ -109,6 +109,7 @@
     },
     "account": {
       "email_taken": "Un compte existe déjà avec cet e-mail.",
+      "not_found": "L'utilisateur n'existe plus : il a peut-être déjà été supprimé.",
       "cannot_modify_self": "Vous ne pouvez pas supprimer ou modifier votre propre compte ici.",
       "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau."
     },
@@ -1030,6 +1031,7 @@
           "email": "E-mail",
           "password": "Mot de passe",
           "phone": "Téléphone portable",
+          "phone_prefix": "Indicatif",
           "account_type": "Type de compte",
           "choose": "Sélectionner",
           "enable": "Activer",
@@ -1904,7 +1906,9 @@
     "overlap": "Ces dates chevauchent une autre plage de dates de la saison",
     "max_file_size": "Le fichier dépasse {{max}} Mo",
     "unknown_icon": "Icône inexistante",
-    "web_link": "Saisissez un lien complet commençant par http:// ou https://"
+    "web_link": "Saisissez un lien complet commençant par http:// ou https://",
+    "phone_digits": "Chiffres et espaces uniquement : l’indicatif va dans le champ à côté",
+    "phone_max_length": "Le numéro peut contenir au maximum {{max}} caractères, espaces compris"
   },
   "unsaved_changes": {
     "title": "Modifications non enregistrées",

@@ -895,34 +895,52 @@ Nessun payload.
 ```json
 {
   "email": "string",
-  "isEmailActive": "boolean",
+  "emailIsContact": "boolean",
   "password": "string",
+  "phoneCountryCode": "string | null",
   "phone": "string | null",
-  "isPhoneActive": "boolean",
-  "role": "string (enum UserRole) | null",
-  "idProperty": "string (UUID)"
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "idUser": "string (UUID)",
+  "email": "string",
+  "emailIsContact": "boolean",
+  "phoneCountryCode": "string | null",
+  "phone": "string | null",
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole) | null"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
 | `email` | string |
-| `isEmailActive` | boolean |
+| `emailIsContact` | boolean |
 | `password` | string |
+| `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
-| `isPhoneActive` | boolean |
-| `role` | string (enum UserRole) \| null |
-| `idProperty` | string (UUID) |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+| `email` | string |
+| `emailIsContact` | boolean |
+| `phoneCountryCode` | string \| null |
+| `phone` | string \| null |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) \| null |
 
 ### GET `/api/identity/get-selected-user?idUser={idUser}`
 
@@ -940,9 +958,10 @@ Nessun corpo (204).
 {
   "idUser": "string (UUID)",
   "email": "string",
-  "isEmailActive": "boolean",
+  "emailIsContact": "boolean",
+  "phoneCountryCode": "string | null",
   "phone": "string | null",
-  "isPhoneActive": "boolean",
+  "phoneIsContact": "boolean",
   "role": "string (enum UserRole) | null"
 }
 ```
@@ -959,9 +978,10 @@ Nessun corpo (204).
 |---|---|
 | `idUser` | string (UUID) |
 | `email` | string |
-| `isEmailActive` | boolean |
+| `emailIsContact` | boolean |
+| `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
-| `isPhoneActive` | boolean |
+| `phoneIsContact` | boolean |
 | `role` | string (enum UserRole) \| null |
 
 ### POST `/api/identity/update-user`
@@ -972,18 +992,28 @@ Nessun corpo (204).
 {
   "idUser": "string (UUID)",
   "email": "string",
-  "isEmailActive": "boolean",
+  "emailIsContact": "boolean",
   "password": "string | null",
+  "phoneCountryCode": "string | null",
   "phone": "string | null",
-  "isPhoneActive": "boolean",
-  "role": "string (enum UserRole) | null",
-  "idProperty": "string (UUID)"
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole)"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "idUser": "string (UUID)",
+  "email": "string",
+  "emailIsContact": "boolean",
+  "phoneCountryCode": "string | null",
+  "phone": "string | null",
+  "phoneIsContact": "boolean",
+  "role": "string (enum UserRole) | null"
+}
+```
 
 **Payload tabella**
 
@@ -991,27 +1021,30 @@ Nessun corpo (204).
 |---|---|
 | `idUser` | string (UUID) |
 | `email` | string |
-| `isEmailActive` | boolean |
+| `emailIsContact` | boolean |
 | `password` | string \| null |
+| `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
-| `isPhoneActive` | boolean |
-| `role` | string (enum UserRole) \| null |
-| `idProperty` | string (UUID) |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `idUser` | string (UUID) |
+| `email` | string |
+| `emailIsContact` | boolean |
+| `phoneCountryCode` | string \| null |
+| `phone` | string \| null |
+| `phoneIsContact` | boolean |
+| `role` | string (enum UserRole) \| null |
 
-### POST `/api/identity/delete-user`
+### DELETE `/api/identity/property-users/{id}`
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)",
-  "idUser": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -1019,10 +1052,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
-| `idUser` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -1056,7 +1086,7 @@ Nessun corpo (204).
   "total": "number (intero)",
   "rows": [
     {
-      "idAuditEntry": "string (UUID)",
+      "idAuditEntry": "string",
       "bookingNumber": "string | null",
       "userNumber": "string | null",
       "actorName": "string | null",
@@ -1088,7 +1118,7 @@ Nessun corpo (204).
 |---|---|
 | `total` | number (intero) |
 | `rows[]` | AuditEntryItem[] (array di oggetti) |
-| `rows[].idAuditEntry` | string (UUID) |
+| `rows[].idAuditEntry` | string |
 | `rows[].bookingNumber` | string \| null |
 | `rows[].userNumber` | string \| null |
 | `rows[].actorName` | string \| null |
@@ -1096,7 +1126,7 @@ Nessun corpo (204).
 | `rows[].actionCode` | string \| null |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null |
 
-### POST `/api/audit/user-combobox`
+### POST `/api/identity/user-combobox`
 
 **Payload JSON**
 

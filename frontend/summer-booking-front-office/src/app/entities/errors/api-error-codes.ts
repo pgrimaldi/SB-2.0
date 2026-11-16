@@ -29,6 +29,7 @@ export const API_ERROR_CODES = [
   'validation.password_too_long',
   'validation.password_too_common',
   'account.email_taken',
+  'account.not_found',
   'account.cannot_modify_self',
   'account.role_not_assignable',
   'map.spots_outside_grid',

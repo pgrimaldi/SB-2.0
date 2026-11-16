@@ -3,19 +3,17 @@ import { Observable, delay, of } from 'rxjs';
 import { UserRole } from '../../../entities/enums/user-role';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { CreateUserRequest } from '../../../entities/settings/user-management/create-user-request';
-import { DeleteUserRequest } from '../../../entities/settings/user-management/delete-user-request';
 import { UpdateUserRequest } from '../../../entities/settings/user-management/update-user-request';
 import { UserItem } from '../../../entities/settings/user-management/user-item';
 import { UserSelectedItem } from '../../../entities/settings/user-management/user-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { MockFieldError, forbidden, problem } from '../errors/problem.mock';
+import { DEMO_PROPERTY, propertyOf } from '../properties/properties.mock';
 
 type UserRow = UserItem & UserSelectedItem & { propertyId: number };
-type CreateUserBody = Partial<CreateUserRequest> & { idProperty?: unknown };
-type DeleteUserBody = Partial<DeleteUserRequest>;
-type UpdateUserBody = Partial<UpdateUserRequest> & { idProperty?: unknown };
+type CreateUserBody = Partial<CreateUserRequest>;
+type UpdateUserBody = Partial<UpdateUserRequest>;
 
 const USERS: UserRow[] = [
   user(1, '01', 'giulia.ferri', '3401112201', UserRole.SuperAdmin),
@@ -39,7 +37,8 @@ const SORT_FIELDS = ['email', 'phone', 'role'] as const;
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_MAX_LENGTH = 128;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE = /^\+?[0-9 ]{6,20}$/;
+const PHONE = /^[0-9 ]{1,32}$/;
+const PHONE_PREFIX = /^\+?[0-9]{1,6}$/;
 const ASSIGNABLE_ROLES: readonly unknown[] = Object.values(UserRole).filter(
   (role) => role !== UserRole.SuperAdmin && role !== UserRole.WebsiteAdmin,
 );
@@ -78,61 +77,65 @@ export const usersListMock = (request: HttpRequest<unknown>): Observable<HttpEve
 };
 
 /**
- * `POST /api/identity/create-user` with `CreateUserRequest` and `idProperty`: a new user of the
- * property, with the checks of the backend (email and password required, password of 8 to 128
+ * `POST /api/identity/create-user` with `CreateUserRequest`: a new user of the property of the token,
+ * with the checks of the backend (email, password and role required, password of 8 to 128
  * characters; the list of too common passwords is only in the backend). The password is not kept.
- * 204 without a body; 401 without a valid access token; 403 for an unknown property; 400 with one
- * error per wrong field; 409 `account.email_taken` for an email already used by any account.
+ * 201 with the new user (`UserSelectedItem`); 401 without a valid access token; 400 with one error
+ * per wrong field; 409 `account.email_taken` for an email already used by any account; 422
+ * `account.role_not_assignable` for a role not given from the panel.
  */
 export const createUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateUserBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
   const errors = userErrors(body, true);
+  if (body.role == null) {
+    errors.push({ field: 'role', code: 'validation.required' });
+  }
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  if (!ASSIGNABLE_ROLES.includes(body.role)) {
+    return problem(request, 422, 'account.role_not_assignable', {
+      title: 'Role cannot be assigned from the panel',
+    });
   }
   const email = (body.email ?? '').trim();
   if (USERS.some((row) => row.email?.toLowerCase() === email.toLowerCase())) {
     return problem(request, 409, 'account.email_taken', { title: 'Email already in use' });
   }
-  USERS.push({
-    propertyId: property.id,
+  const phone = body.phone?.trim() || null;
+  const user: UserRow = {
+    propertyId: DEMO_PROPERTY.id,
     idUser: crypto.randomUUID(),
     email,
-    phoneCountryCode: null,
-    phone: body.phone?.trim() || null,
+    emailIsContact: body.emailIsContact === true,
+    phoneCountryCode: phone ? body.phoneCountryCode?.trim() || null : null,
+    phone,
+    phoneIsContact: body.phoneIsContact === true,
     role: body.role ?? null,
-    isEmailActive: body.isEmailActive === true,
-    isPhoneActive: body.isPhoneActive === true,
-  });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  };
+  USERS.push(user);
+  const answer = onlyFieldsOf(UserSelectedItem, user);
+  return of(new HttpResponse({ status: 201, url: request.url, body: answer })).pipe(delay(600));
 };
 
 /**
- * `POST /api/identity/delete-user` with `DeleteUserRequest`: the user leaves the property. 204 without
- * a body; 401 without a valid access token; 403 for an unknown property; 404 `resource.not_found` for
- * an id that is not one of its users; 403 `account.role_not_assignable` for the owner (Titolare), who
- * cannot be deleted from the panel. The backend also refuses the signed-in user (422
- * `account.cannot_modify_self`), which the mock does not know.
+ * `DELETE /api/identity/property-users/{id}`: the user leaves the property of the token. 204 without
+ * a body; 401 without a valid access token; 404 `account.not_found` for an id that is not one of its
+ * users; 403 `account.role_not_assignable` for the owner (Titolare), who cannot be deleted from the
+ * panel. The backend also refuses the signed-in user (422 `account.cannot_modify_self`), which the mock
+ * does not know.
  */
 export const deleteUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as DeleteUserBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const user = USERS.find((row) => row.idUser === body.idUser && row.propertyId === property.id);
+  const idUser = decodeURIComponent(request.url.split('/').pop() ?? '');
+  const user = USERS.find((row) => row.idUser === idUser && row.propertyId === DEMO_PROPERTY.id);
   if (!user) {
-    return resourceNotFound(request);
+    return accountNotFound(request);
   }
   if (!isManageable(user)) {
     return roleNotAssignable(request);
@@ -142,19 +145,19 @@ export const deleteUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
 };
 
 /**
- * `GET /api/identity/get-selected-user?idUser=…`: the user with every field of the edit popup, never
- * the password. 200 with `UserSelectedItem`; 401 without a valid access token; 404
- * `resource.not_found` for an unknown id; 403 `account.role_not_assignable` for the owner (Titolare),
- * who cannot be managed from the panel.
+ * `GET /api/identity/get-selected-user?idUser=…`: the user of the property of the token with every
+ * field of the edit popup, never the password. 200 with `UserSelectedItem`; 401 without a valid access
+ * token; 404 `account.not_found` for an id that is not one of its users; 403
+ * `account.role_not_assignable` for the owner (Titolare), who cannot be managed from the panel.
  */
 export const selectedUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const idUser = request.params.get('idUser');
-  const user = USERS.find((row) => row.idUser === idUser);
+  const user = USERS.find((row) => row.idUser === idUser && row.propertyId === DEMO_PROPERTY.id);
   if (!user) {
-    return resourceNotFound(request);
+    return accountNotFound(request);
   }
   if (!isManageable(user)) {
     return roleNotAssignable(request);
@@ -164,32 +167,40 @@ export const selectedUserMock = (request: HttpRequest<unknown>): Observable<Http
 };
 
 /**
- * `POST /api/identity/update-user` with `UpdateUserRequest` and `idProperty`: the user `idUser` takes
- * the new values after the checks of the add (see `userErrors`), but the password is optional: null
- * keeps the saved one, and the mock never keeps it. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property; 404 `resource.not_found` for an id that is not one of its users;
- * 403 `account.role_not_assignable` for the owner; 400 with one error per wrong field; 409
- * `account.email_taken` for an email of another account.
+ * `POST /api/identity/update-user` with `UpdateUserRequest`: the user `idUser` of the property of the
+ * token takes the new values after the checks of the add (see `userErrors`), but the password is
+ * optional: null keeps the saved one, and the mock never keeps it. 200 with the user
+ * (`UserSelectedItem`); 401 without a valid access token; 404 `account.not_found` for an id that is
+ * not one of its users; 403 `account.role_not_assignable` for the owner; 400 with one error per wrong
+ * field; 422 `account.role_not_assignable` for a role not given from the panel; 409
+ * `account.email_taken` for an email of another account. The backend also refuses the signed-in
+ * user (422 `account.cannot_modify_self`), which the mock does not know.
  */
 export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateUserBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
-  const user = USERS.find((row) => row.idUser === body.idUser && row.propertyId === property.id);
+  const user = USERS.find(
+    (row) => row.idUser === body.idUser && row.propertyId === DEMO_PROPERTY.id,
+  );
   if (!user) {
-    return resourceNotFound(request);
+    return accountNotFound(request);
   }
   if (!isManageable(user)) {
     return roleNotAssignable(request);
   }
   const errors = userErrors(body, false);
+  if (body.role == null) {
+    errors.push({ field: 'role', code: 'validation.required' });
+  }
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+  }
+  if (!ASSIGNABLE_ROLES.includes(body.role)) {
+    return problem(request, 422, 'account.role_not_assignable', {
+      title: 'Role cannot be assigned from the panel',
+    });
   }
   const email = (body.email ?? '').trim();
   if (USERS.some((row) => row !== user && row.email?.toLowerCase() === email.toLowerCase())) {
@@ -199,17 +210,22 @@ export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
   Object.assign(user, {
     email,
     phone,
-    phoneCountryCode: phone ? user.phoneCountryCode : null,
+    phoneCountryCode: phone ? body.phoneCountryCode?.trim() || null : null,
     role: body.role ?? null,
-    isEmailActive: body.isEmailActive === true,
-    isPhoneActive: body.isPhoneActive === true,
+    emailIsContact: body.emailIsContact === true,
+    phoneIsContact: body.phoneIsContact === true,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  const answer = onlyFieldsOf(UserSelectedItem, user);
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(600));
 };
 
 /** Only the roles that can be given from the panel: not the owner (Titolare) nor the website admin. */
 function isManageable(user: UserRow): boolean {
   return user.role === null || ASSIGNABLE_ROLES.includes(user.role);
+}
+
+function accountNotFound(request: HttpRequest<unknown>): Observable<never> {
+  return problem(request, 404, 'account.not_found', { title: 'Account not found' });
 }
 
 function roleNotAssignable(request: HttpRequest<unknown>): Observable<never> {
@@ -251,8 +267,9 @@ function userErrors(body: CreateUserBody, isPasswordRequired: boolean): MockFiel
   if (phone && !PHONE.test(phone)) {
     errors.push({ field: 'phone', code: 'validation.phone' });
   }
-  if (body.role != null && !ASSIGNABLE_ROLES.includes(body.role)) {
-    errors.push({ field: 'role', code: 'validation.invalid' });
+  const prefix = typeof body.phoneCountryCode === 'string' ? body.phoneCountryCode.trim() : '';
+  if (prefix && !PHONE_PREFIX.test(prefix)) {
+    errors.push({ field: 'phoneCountryCode', code: 'validation.phone_prefix' });
   }
   return errors;
 }
@@ -268,11 +285,11 @@ function user(
     propertyId,
     idUser: `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d${number}`,
     email: `${emailName}@example.com`,
-    phoneCountryCode: phone ? '+39' : null,
+    phoneCountryCode: phone ? '39' : null,
     phone,
     role,
-    isEmailActive: true,
-    isPhoneActive: phone !== null,
+    emailIsContact: true,
+    phoneIsContact: phone !== null,
   };
 }
 

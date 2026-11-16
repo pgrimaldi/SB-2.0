@@ -12,11 +12,17 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  disabled,
+  form,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
-import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
@@ -24,14 +30,22 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import {
+  PhoneCountry,
+  PhonePrefixBehaviour,
+} from '../../../../../behaviours/i18n/phone-prefix.behaviour';
+import { PhonePrefix } from '../../../../../entities/enums/phone-prefix';
 import { UserRole } from '../../../../../entities/enums/user-role';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { PASSWORD_MIN_LENGTH } from '../../../../../entities/settings/user-management/create-user-request';
+import {
+  PASSWORD_MIN_LENGTH,
+  PHONE_MAX_LENGTH,
+} from '../../../../../entities/settings/user-management/create-user-request';
 import { UpdateUserRequest } from '../../../../../entities/settings/user-management/update-user-request';
 import { UserSelectedItem } from '../../../../../entities/settings/user-management/user-selected-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { IdentityService } from '../../../../../services/api/identity/identity.service';
-import { passwordRules, requiredText } from '../../../../shared/forms/validators';
+import { passwordRules, phoneNumber, requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -39,6 +53,7 @@ import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextFieldLabelAction } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field-label-action';
+import { FilledIconSelect } from '../../../../shared/ui/selects/filled-icon-select/filled-icon-select';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
@@ -74,6 +89,7 @@ const ASSIGNABLE_USER_ROLES: readonly { role: UserRole; key: keyof UserRoleTexts
   imports: [
     Button,
     Checkbox,
+    FilledIconSelect,
     FilledSelect,
     FilledTextField,
     FilledTextFieldLabelAction,
@@ -93,11 +109,11 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   readonly updated = output<void>();
 
   private readonly identity = inject(IdentityService);
-  private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly validationText = inject(ValidationTextBehaviour);
   private readonly translateService = inject(TranslateService);
+  private readonly phonePrefix = inject(PhonePrefixBehaviour);
 
   protected readonly ButtonSize = ButtonSize;
   /** [content shown, content hidden]. */
@@ -119,13 +135,22 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.email);
     passwordRules(path.password, PASSWORD_MIN_LENGTH);
+    phoneNumber(path.phone, PHONE_MAX_LENGTH);
+    required(path.role);
     disabled(path, () => this.isLoading() || this.isFetching());
   });
   protected readonly emailError = this.validationText.message(this.draftForm.email);
-  protected readonly isEmailActiveError = this.validationText.message(this.draftForm.isEmailActive);
+  protected readonly emailIsContactError = this.validationText.message(
+    this.draftForm.emailIsContact,
+  );
   protected readonly passwordError = this.validationText.message(this.draftForm.password);
+  protected readonly phoneCountryCodeError = this.validationText.message(
+    this.draftForm.phoneCountryCode,
+  );
   protected readonly phoneError = this.validationText.message(this.draftForm.phone);
-  protected readonly isPhoneActiveError = this.validationText.message(this.draftForm.isPhoneActive);
+  protected readonly phoneIsContactError = this.validationText.message(
+    this.draftForm.phoneIsContact,
+  );
   protected readonly roleError = this.validationText.message(this.draftForm.role);
   protected readonly canSave = computed(() => this.loaded() !== null && this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -139,6 +164,10 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
     this.translateService.stream(
       'management.settings.user_management.role',
     ) as Observable<UserRoleTexts>,
+  );
+  protected readonly prefixOptions = this.phonePrefix.options;
+  protected readonly phoneCountry = computed(() =>
+    this.phonePrefix.countryOf(this.draft().phoneCountryCode),
   );
   protected readonly roleOptions = computed<readonly SelectOption<UserRole>[]>(() => {
     const texts = this.roleTexts();
@@ -171,8 +200,7 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canSave()) {
+    if (this.isLoading() || !this.canSave()) {
       return;
     }
 
@@ -180,7 +208,7 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.identity.updateUser(idProperty, this.draft()));
+        await firstValueFrom(this.identity.updateUser(this.sent()));
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
@@ -192,6 +220,12 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
         this.isLoading.set(false);
       }
     });
+  }
+
+  protected setPhoneCountry(country: PhoneCountry): void {
+    const prefix = this.draftForm.phoneCountryCode();
+    prefix.value.set(PhonePrefix[country]);
+    prefix.markAsDirty();
   }
 
   protected async leave(): Promise<void> {
@@ -246,11 +280,21 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
     return {
       idUser: item.idUser,
       email: item.email,
-      isEmailActive: item.isEmailActive,
+      emailIsContact: item.emailIsContact,
       password: null,
+      phoneCountryCode: item.phoneCountryCode,
       phone: item.phone,
-      isPhoneActive: item.isPhoneActive,
+      phoneIsContact: item.phoneIsContact,
       role: item.role,
+    };
+  }
+
+  /** The prefix goes only with a number. */
+  private sent(): UpdateUserRequest {
+    const draft = this.draft();
+    return {
+      ...draft,
+      phoneCountryCode: this.phonePrefix.prefixFor(draft.phone, draft.phoneCountryCode),
     };
   }
 
