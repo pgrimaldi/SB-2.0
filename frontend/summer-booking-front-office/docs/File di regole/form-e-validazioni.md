@@ -1,0 +1,132 @@
+# Form e validazioni
+
+Signal Forms, validatori comuni, messaggi ed errori sotto i campi, aspetto dei campi, modifiche non salvate, spinner e
+campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
+
+## Signal Forms
+
+- I form usano i Signal Forms di Angular (`@angular/forms/signals`): il form è un signal con un oggetto
+  (`form(model, (path) => { … })`) e i campi dei wrapper si collegano con `[formField]`.
+- Le regole sono quelle di Angular (`required`, `min`, `max`, `minLength`, `maxLength`…) più le nostre generiche in
+  `components/shared/forms/validators.ts`.
+- Le regole dei Signal Forms non controllano i campi in sola lettura (`readonly`), disattivati o nascosti.
+
+## Validatori comuni
+
+- `requiredText(path)`: per ogni testo obbligatorio, al posto di `required`, perché conta come vuoto anche un testo
+  fatto solo di spazi. Dà lo stesso errore `required` ("Campo obbligatorio").
+- `greaterThan(path, limite)`: il valore deve superare il limite (`invalidate.greater_than`); anche un campo vuoto è
+  un errore, così "superiore a 0" vale anche come obbligatorio.
+- `passwordRules(path, lunghezza)`: almeno quella lunghezza, una maiuscola, una minuscola e un numero, in quest'ordine
+  (`invalidate.min_length`, `invalidate.missing_uppercase`, `invalidate.missing_lowercase`,
+  `invalidate.missing_digit`). Il campo vuoto lo lascia a `requiredText`.
+- `minItems(path, numero)`: una lista con meno elementi è un errore (`invalidate.min_items`, "Deve essere definito
+  almeno {{count}} {{field}}"), mostrato sotto la sua sezione.
+- `phoneNumber(path, lunghezza)`: un numero con qualcosa che non è una cifra o uno spazio (il prefisso ha il suo
+  campo) dà `invalidate.phone_digits`; più lungo di `lunghezza` caratteri, spazi compresi, dà
+  `invalidate.phone_max_length` (es. `PHONE_MAX_LENGTH`, 32, il limite del backend).
+- `webLink(path)`: un testo che non è un link completo http o https (`invalidate.web_link`). Il campo vuoto lo lascia
+  a `requiredText`.
+- `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
+  giorno in comune con un altro (`invalidate.overlap`).
+- Messaggi generici di Angular: `invalidate.min` "Il valore minimo è {{min}}", `invalidate.max` "Il valore massimo è
+  {{max}}".
+
+## Messaggi degli errori
+
+- Il testo lo dà `ValidationTextBehaviour` (`behaviours/validation/`): `message(field, chiaveNomeCampo)` restituisce il
+  testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
+  `management.settings.warehouse.form.field_names.total` = "totale").
+- Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua.
+- Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con
+  `text(field, chiaveNomeCampo)`.
+- Il wrapper riceve il testo con `[error]`: bordo rosso da 2px, sfondo rosato e messaggio rosso
+  (`--color__layout__error`) sotto il campo.
+- Codici di errore del backend e loro testi `error.<code>`: vedi `api-e-mock.md`.
+
+## Errori sotto i campi
+
+- Ogni errore sta sotto il campo che lo genera, mai solo in un messaggio generico. Le validazioni sono reattive: il
+  bottone che salva è spento finché il form non è valido.
+- Anche gli errori del backend su un campo (`errors[]` di Problem Details, con `field` uguale al nome nella richiesta)
+  vanno sotto quel campo: si invia con `submit()` dei Signal Forms e, se la chiamata fallisce, l'azione restituisce
+  `apiFieldErrorsOrGeneral(problem, form, …)` (`behaviours/validation/api-field-errors.ts`, errori `kind: 'api'`).
+- Lo fanno tutti i form con chiamate, e ogni campo, interruttore compreso, ha il suo `[error]`.
+- Di un errore del backend `ValidationTextBehaviour` mostra il testo `error.<code>` (`ErrorTextBehaviour.instant`);
+  Angular lo toglie appena il campo cambia.
+- `submit()` non invia nulla se un campo è sbagliato e segna tutti i campi come toccati, così ogni errore si vede.
+- Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
+  non riguarda un campo (es. rete assente).
+- Un errore su un id (un campo che comincia con `id`, come `idProperty`) non va mai sotto un campo ma nel messaggio
+  generale: l'id non si vede e il form resterebbe bloccato senza spiegazione.
+- Il backend non segnala mai un id in `errors[]`: un id non valido annulla l'operazione con un errore generale (codici:
+  vedi `api-e-mock.md`).
+
+## Campi obbligatori e aspetto dei campi
+
+- I campi obbligatori si segnano a vista con `[isMandatory]="true"` (asterisco rosso dopo l'etichetta) sui wrapper con
+  etichetta: `app-text-field`, `app-password-field`, `app-filled-text-field`, `app-filled-number-field`,
+  `app-filled-textarea`, `app-filled-select`, `app-filled-icon-select`, `app-filled-date-field`,
+  `app-filled-time-field`, `app-rich-text-field`.
+- I campi dei form (testo, numero, area di testo, tendina) sono bianchi con un bordo sottile blu tenue
+  (`--color__layout__text__soft`) quando si possono modificare, grigi con il testo grigio quando sono in sola lettura
+  o disattivati, perché l'utente lo capisca subito.
+- I campi riempiti dal riempimento automatico del browser (nomi, indirizzi, password salvate) tengono i colori
+  dell'app (regola globale in `styles.scss`, contro l'azzurro o il giallo di Chrome, Edge e Safari e il filtro di
+  Firefox). Il riempimento automatico resta attivo.
+
+## Modifiche non salvate
+
+- Quello che l'utente ha scritto e non ha salvato non si perde mai senza chiedere: vale per ogni form, di pagina o
+  popup, presente e futuro.
+- Ogni form implementa `UnsavedChanges` con `hasUnsavedChanges()` (per i Signal Forms `form().dirty()`, per un popup
+  i valori diversi da quelli di apertura, solo mentre è aperto).
+- Il form si registra con `UnsavedChangesBehaviour.watch(this)` nel costruttore e `unwatch(this)` in `ngOnDestroy`
+  (`behaviours/forms/`).
+- Poi, senza altro codice: uscire dalla pagina chiede prima (guard `unsavedChangesGuard` su tutte le pagine del
+  gestionale in `app.routes.ts`, con `canceledNavigationResolution: 'computed'` perché anche il tasto indietro del
+  browser resti coerente); anche il logout dal menu chiede prima.
+- Chiudere o ricaricare la scheda fa comparire la domanda del browser (`beforeunload`).
+- Un popup con form usa `disableClose: true` e chiude X, Esc e clic fuori con `leave()`: durante il salvataggio non fa
+  nulla, con modifiche chiede prima (`confirmDiscard`, `closeRequested()` di `BasePopup`).
+- Anche Annulla chiede prima: nei popup chiama `leave()`; nei pannelli laterali manda lo stesso `closeRequest` della X;
+  l'Annulla della modalità Modifica di pannelli e pagine chiama `requestCancel()`, che con modifiche chiede
+  (`confirmDiscard`) e solo dopo rimette i dati salvati.
+- La domanda è una sola, `app-unsaved-changes-popup` nel layout (`app-confirm-popup` rosso, testi `unsaved_changes.*`:
+  "Modifiche non salvate", "Hai modifiche non salvate: se esci andranno perse.", Resta, Esci senza salvare).
+- Anche i popup dei filtri contano come form (es. `app-existing-booking-filters-popup`, `app-audit-log-filters-popup`):
+  le scelte diverse da quelle di apertura fanno chiedere con X, Esc, clic fuori e Annulla.
+- Non si chiede nulla quando la sessione finisce senza una scelta dell'utente (scaduta, un altro utente in un'altra
+  scheda): i dati di quella sessione devono sparire. Il login non è un form da proteggere.
+
+## Spinner e campi bloccati durante le chiamate
+
+- Ogni bottone o voce che fa partire una chiamata API mostra lo spinner finché la risposta non arriva, anche se dura
+  mezzo secondo (`[isLoading]` di `app-button`; altrove `app-spinner`), e intanto non si può premere di nuovo.
+- Finché il server non risponde, tutti i campi del form sono in sola lettura o disattivati: inserimento, modifica,
+  cancellazione, duplicazione, invio, salvataggio, login, in qualsiasi form o tabella.
+- Con i Signal Forms si usa la regola `readonly(path, { when: () => <chiamata in corso> })`; nei popup e dove i wrapper
+  non hanno `readonly`, `inert` sul contenitore dei campi.
+- Checkbox, toggle e selezione multipla non hanno `readonly` (resterebbero cliccabili): nei form che li contengono si
+  usa `disabled(path, …)`, che per i Signal Forms ha lo stesso effetto (validazioni saltate, valori inviati) e lo
+  stesso aspetto grigio.
+- Lo stato "in corso" vive finché vive la chiamata, non finché è aperto il popup: se l'elemento sparisce e ricompare
+  durante la chiamata (es. il popup di login chiuso e riaperto) lo spinner si rivede.
+- Un errore arrivato per un tentativo il cui popup è stato chiuso non compare nel popup riaperto.
+- Azioni di tabella (interruttore, duplica, elimina): spinner a pagina intera, vedi `tabelle.md`.
+
+## Campi data e coppie Dal / Al
+
+- I campi data sono in sola lettura di default: la data si sceglie dal calendario. Un campo che accetta date scritte a
+  mano le legge con `DateLanguageBehaviour.parse`.
+- Coppie "Dal / Al", per tutti i date picker: il "Dal" non ha mai limiti, il "Al" non può venire prima del "Dal".
+  `app-period-calendar`, `app-date-range-select` e `app-datepicker` lo fanno già da soli.
+- Con due `app-filled-date-field` la pagina lega solo il "Al" con `[minDate]` al valore del "Dal" (es.
+  `[minDate]="period.validFrom().value()"`), che si aggiorna da sé a ogni nuovo "Dal": i giorni prima sono spenti nel
+  calendario.
+- Se il "Dal" passa oltre il "Al" già scelto, il wrapper svuota il "Al" (un giorno fuori da `minDate` / `maxDate` viene
+  sempre svuotato) e l'utente lo sceglie di nuovo.
+- Se c'è anche un altro limite (es. i giorni della stagione) vale il più stretto; i giorni già presi da altri periodi
+  si spengono con `disabledPeriods`. Ogni nuova coppia fa lo stesso.
+- Formato delle date mostrate e adattatore nativo: vedi `traduzioni-e-lingue.md`; date UTC nelle API: vedi
+  `api-e-mock.md`.

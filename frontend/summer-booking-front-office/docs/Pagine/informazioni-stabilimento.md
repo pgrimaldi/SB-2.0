@@ -1,0 +1,119 @@
+# Informazioni stabilimento
+
+Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bathhouse-configuration/`
+(`BathhouseConfiguration`).
+
+## Struttura
+
+- Pagina a tab fatta con il wrapper `app-tab-nav`: ogni tab è una rotta figlia con la sua pagina.
+- Le tab sono l'intestazione del riquadro bianco delle impostazioni (mixin `settings-panel`). La pagina della tab aperta
+  sta nello stesso riquadro, quindi le sue sezioni si separano con i titoli di sezione e non con altri riquadri.
+- La voce in `SETTINGS_PAGES` ha `loadChildren`, che carica con la pagina le sue rotte
+  (`bathhouse-configuration.routes.ts`): le tab non finiscono nel pacchetto iniziale, si scaricano con la pagina.
+- Rotte e nomi delle tab vengono da `BATHHOUSE_CONFIGURATION_TABS` (`bathhouse-configuration-tabs.ts`), che importa le
+  pagine delle tab per nome in testa al file (niente `import()` con il percorso per ogni tab).
+- La tab 1 è quella di partenza: senza numero, o con un numero che non c'è, si apre la tab 1. Il refresh riapre la tab
+  dell'URL.
+- La guardia delle modifiche non salvate sta su ogni tab e non sulla pagina, altrimenti uscendo chiederebbe due volte.
+- Ogni tab salva da sé, con il suo Modifica / Annulla / Salva e la sua API. Il bottone "Modifica" è piccolo e largo 8rem.
+
+## Tab
+
+- Tre tab: "Informazioni Generali", "Servizi", "Media"
+  (`management.settings.bathhouse_configuration.tabs.general_information`, `.services`, `.media`), larghe 34%, 33% e
+  33% della barra (`widthPercent`).
+- Una tab non diventa mai più stretta del suo nome: se i nomi non stanno, le tab si allargano e Material mostra le frecce.
+- Sui telefoni (`width < 48rem`) le tab diventano una tendina che occupa tutta l'intestazione del riquadro.
+
+## Tab 1 – Informazioni Generali
+
+- Componente `BathhouseGeneralSettings`, modello `BathhouseGeneralInformation` in
+  `entities/settings/bathhouse-configuration/` (una entity per tab).
+- Campi bianchi con l'etichetta sopra, su righe:
+  - Nome stabilimento 35% (obbligatorio, `requiredText`, con l'asterisco), Indirizzo 45%, Cap 20%;
+  - Città, Provincia, Regione e Nazione un quarto ciascuno;
+  - Telefono, Whatsapp ed Email un terzo ciascuno (i due numeri con `isPhoneField`);
+  - Sito web, Facebook e Instagram un terzo ciascuno;
+  - Descrizione su tutta la riga;
+  - Orario di apertura (due `app-filled-time-field` "Dalle" e "Alle", `HH:mm`), Cancellazione e Animali, un terzo
+    ciascuno;
+  - Regolamento su tutta la riga.
+- Descrizione e Regolamento usano `app-rich-text-field` (grassetto, corsivo, sottolineato, elenco puntato e numerato,
+  link), alte 6.25rem (`--rich-text-field-height`) con lo scorrimento interno. Icone provvisorie `GeneralIcon_Bold.svg` …
+  `GeneralIcon_TextLink.svg`, in attesa di quelle della grafica.
+- Cancellazione: tendina con le scelte dell'enum `CancellationPolicy` (Gratuita entro 48 ore, Gratuita entro 24 ore,
+  Nessuna). L'API usa invece `isFreeCancellation` e `cancellationNoticeHours`, come il backend, e la tab converte: la
+  tendina usa `[value]` / `(valueChange)` e non `[formField]`; ore diverse lette dal backend lasciano la tendina vuota.
+- Animali: tendina con l'enum `PetPolicy` (Ammessi, Non ammessi, Su richiesta); enum e non booleano perché le tendine
+  dell'app hanno valori stringa.
+- Nazione: tendina con le voci di `countries-combobox`; senza nazione parte dalla prima voce della lista.
+- Sotto, a destra, "Modifica" sblocca i campi e lascia il posto ad Annulla e Salva; senza Nome stabilimento Salva è
+  spento.
+- Sui telefoni i campi vanno uno per riga, tranne Cap (spostato sotto Città) con Provincia e Regione con Nazione, a metà
+  riga ciascuno (Città da sola, così anche i nomi lunghi delle nazioni non si tagliano). Le righe passano i loro campi a
+  un'unica griglia di sei colonne (`display: contents`), senza ripetere il markup.
+- I campi che il backend restituisce `null` restano vuoti, come un form da compilare; i mock partono con tutti i campi
+  `null`.
+
+## Tab 2 – Servizi
+
+- Componente `BathhouseServicesSettings`. Mostra i servizi del backend come caselle di spunta in quattro sezioni fisse,
+  sempre in quest'ordine: Accessibilità e Comfort, Sport e attività, Ristorazione e extra, Spiaggia (enum
+  `BathhouseServiceGroup`).
+- Ogni servizio va nella sezione del suo `categoryCode`, nell'ordine della risposta. Sezione e ordine li decide il
+  backend: il frontend non ha tabelle di id.
+- Modifica sblocca le caselle, Salva manda i servizi.
+
+## Tab 3 – Media
+
+- Componente `BathhouseMediaSettings`. Contiene la mappa della posizione, Immagini (immagine principale e galleria di al
+  massimo 30 foto), il link del tour virtuale e Documenti PDF (Listino Prezzi e Menù).
+- Mappa: `app-location-map`, segnaposto su `latitude` / `longitude` della GET con zoom 15; senza posizione l'Italia con
+  zoom 5.
+- Foto e PDF seguono lo standard dei caricamenti (vedi `api-e-mock.md`): le aree delle immagini e i bottoni "Carica"
+  sono sempre attivi e ogni file scelto parte subito. Le API rispondono con tutta la scheda: la tab ne tiene i media e
+  li passa alla cache (`keepMedia`).
+- Un PDF presente mostra il nome del file (`priceListPdfFileName`, `menuPdfFileName`; un nome lungo si accorcia con i
+  puntini) e "Apri il documento".
+- Ogni foto caricata e ogni PDF presente hanno la piccola X in alto a destra (`app-icon-button`), che chiede conferma
+  (`app-confirm-popup`, "Elimina immagine" / "Elimina documento") e poi chiama la cancellazione.
+- Prima di mandare un file la tab controlla tipo e peso (png, jpeg, webp fino a 5 MB; PDF fino a 10 MB) e il posto
+  libero nella galleria, con gli stessi codici di errore del backend (`catalog.invalid_image`, `catalog.invalid_pdf`,
+  `catalog.gallery_full`). Gli errori compaiono sotto Immagini o sotto Documenti PDF.
+- Modifica, Annulla e Salva valgono per il link del tour virtuale e per la posizione: form Signal Forms su
+  `BathhouseMediaRequest` (`webLink` sul link, Salva spento finché non è valido).
+- In Modifica un clic sulla mappa sposta il segnaposto (`positionClicked`, coordinate arrotondate a 6 decimali come le
+  tiene il backend); in sola lettura il clic non fa nulla.
+- Salva manda `virtualTourUrl` (vuoto = `null`), `latitude` e `longitude`. Gli errori del backend compaiono sotto il
+  campo (link) o sotto la mappa (coordinate), gli altri sotto la tab.
+
+## Cache della pagina
+
+- `BathhouseConfigurationCacheBehaviour` (`behaviours/settings/`) sta nei `providers` di `BathhouseConfiguration`: le tab
+  ne condividono una sola istanza, che muore con la pagina.
+- Ogni API si chiama la prima volta che una tab la chiede; tornando sulla tab si riusa la risposta. Uscendo dalla pagina
+  e rientrando si richiama. Una chiamata fallita non resta in cache.
+- La cache tiene i dati del server, non quelli scritti e non salvati: cambiando tab con modifiche in sospeso compare il
+  popup delle modifiche non salvate.
+
+## API
+
+Tutte in `CatalogService`, senza `idProperty`: lo stabilimento lo prende il backend dal token, e le tab aspettano solo
+l'utente autenticato.
+
+- `GET /api/catalog/property-info/bathhouse-configuration-general`: i campi della tab 1.
+- `GET /api/catalog/countries-combobox`: le voci di Nazione, `ComboboxItem` con il codice ISO come `id` e il nome già
+  tradotto dal backend (lingua di `Accept-Language`) come `value`.
+- `POST /api/catalog/property-info/save-bathhouse-configuration-general`: Salva della tab 1.
+- `GET /api/catalog/property-info/bathhouse-configuration-services`: i servizi della tab 2.
+- `POST /api/catalog/property-info/save-bathhouse-configuration-services`: Salva della tab 2.
+- `GET /api/catalog/property-info/bathhouse-configuration-media`: i media della tab 3.
+- `POST /api/catalog/property-info/save-bathhouse-configuration-media`: Salva della tab 3.
+- `POST` / `DELETE /api/catalog/property-info/main-photo`: immagine principale.
+- `POST /api/catalog/property-info/photos`, `DELETE /api/catalog/property-info/photos/{id}`: foto della galleria.
+- `POST` / `DELETE /api/catalog/property-info/documents/{price-list|menu}`: PDF del listino e del menù.
+
+## Comportamenti
+
+- Durante il caricamento i campi sono bloccati; un errore di lettura compare sotto i campi.
+- Ogni tab chiede prima di perdere i dati scritti (`UnsavedChangesBehaviour`).
