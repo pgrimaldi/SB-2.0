@@ -74,7 +74,7 @@ describe('ContactSupport', () => {
   it('should show the support contacts of the API', async () => {
     const { element, supportInfo } = await setup();
 
-    expect(supportInfo).toHaveBeenCalledWith('p1');
+    expect(supportInfo).toHaveBeenCalledWith();
     expect(element.querySelector('a[href="tel:0507916620"]')?.textContent?.trim()).toBe(
       '050 7916620',
     );
@@ -117,7 +117,6 @@ describe('ContactSupport', () => {
     send().click();
     await fixture.whenStable();
     expect(contactSupport).toHaveBeenCalledWith({
-      idProperty: 'p1',
       firstName: 'Anna',
       lastName: 'Bianchi',
       email: 'anna.bianchi@example.com',

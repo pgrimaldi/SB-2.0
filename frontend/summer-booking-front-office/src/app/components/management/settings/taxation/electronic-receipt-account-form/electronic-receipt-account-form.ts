@@ -197,8 +197,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.accountForm, async (): Promise<TreeValidationResult> => {
@@ -206,7 +205,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       const sent = this.account();
       try {
-        await firstValueFrom(this.taxation.saveElectronicReceiptAccount(idProperty, sent));
+        await firstValueFrom(this.taxation.saveElectronicReceiptAccount(sent));
         // Once saved, PIN and password leave the page: the fields are empty again.
         this.savedAccount = { ...sent, pin: null, password: null };
         this.account.set(this.savedAccount);

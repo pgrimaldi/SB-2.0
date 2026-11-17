@@ -58,8 +58,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - In tutte le tab, di riga e sui selezionati, come in Sconti e voucher: popup di conferma
   (`app-delete-items-popup` / `app-duplicate-items-popup`, testi `management.settings.services.<tab>.delete` /
   `duplicate`), spinner a pagina intera, poi la tabella si ricarica.
-- Corpo `idProperty` + la lista degli id, tutto o niente, 204. Le righe eliminate escono dalla selezione; dopo
-  "duplica selezionati" la selezione si svuota.
+- Corpo con la sola lista degli id (es. `{ idBarServices }`), tutto o niente, 204. Le righe eliminate escono dalla
+  selezione; dopo "duplica selezionati" la selezione si svuota.
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `delete-bar-service-item`, `duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `delete-standard-service-item`, `duplicate-standard-service-item` (`idStandardServices`);
@@ -144,8 +144,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Salva (`isSaveDisabled` di `app-side-panel`) è spento finché mancano Nome e Descrizione nella lingua
   dell'utente, gli unici campi obbligatori: asterisco, "Campo obbligatorio" sotto il campo dopo averlo toccato,
   `requiredText` solo sulla traduzione principale.
-- Salva manda tutto il form con `idProperty` all'API di creazione (risposta 204): spinner sul bottone e pannello
-  bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(created)`).
+- Salva manda tutto il form all'API di creazione (risposta 204): spinner sul bottone e pannello bloccato; se riesce
+  il pannello si chiude e la tabella si ricarica (`(created)`).
 - Se fallisce il pannello resta aperto con i dati: errori dei campi di primo livello sotto il campo, gli altri in
   fondo alla tab, sopra i bottoni.
 - Chiudere con dati scritti chiede conferma (modifiche non salvate); anche un riquadro di opzioni aggiunto conta
@@ -160,7 +160,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   messaggio va sopra i bottoni e la tab si rilegge alla prossima apertura.
 - I dati letti sono il confronto per le modifiche non salvate (`pristine`, aggiornato tab per tab).
 - **Modifica** rende modificabile la tab aperta e mostra **Annulla** (rimette i valori letti e torna in sola
-  lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id e `idProperty` (risposta 204).
+  lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
 - Spinner su Salva e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(updated)`); se
   fallisce resta aperto in modifica, errori dei campi di primo livello sotto il campo, gli altri sopra i bottoni.
 - I campi obbligatori (nome e descrizione nella lingua dell'utente) contano solo sulla tab Info Generali.
@@ -337,7 +337,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     "Abilita prezzo automatico per ogni singolo servizio" con la (i): attiva, il prezzo si applica e si inserisce
     per ogni singolo servizio aggiunto alla prenotazione; spenta, una sola volta per singolo ordine;
   - Limiti (`app-services-limits`).
-- I servizi arrivano all'apertura da `GET /api/catalog/get-automatic-price-services?idProperty=`
+- I servizi arrivano all'apertura da `GET /api/catalog/get-automatic-price-services`, senza parametri
   (`AutomaticPriceServices`, tre elenchi di `ComboboxItem`): durante la lettura le tab sono bloccate e Salva è
   spento; se fallisce compare l'errore e i pannelli restano vuoti.
 - Entità `AutomaticPriceValidityPeriod`, `AutomaticPriceTimeSlot`.
@@ -367,7 +367,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Disponibilità e Prenotazioni (`app-table-service-availability-bookings-tab`): le tre sezioni sotto.
 - Nessuna validazione oltre a nome e descrizione, come negli altri pannelli.
 - Salva si accende con nome e descrizione e chiama `POST /api/catalog/create-table-service`
-  (`CatalogService.createTableService`, `TableServiceAddItemRequest` con `idProperty`).
+  (`CatalogService.createTableService`, `TableServiceAddItemRequest`).
 
 #### Disponibilità (`app-table-service-availabilities`)
 

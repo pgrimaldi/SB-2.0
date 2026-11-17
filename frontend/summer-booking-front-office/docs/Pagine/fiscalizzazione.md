@@ -116,18 +116,17 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
 
 ## API
 
-In `TaxationService` (con GET lo stabilimento viaggia nell'indirizzo, con POST nel corpo):
+In `TaxationService` (lo stabilimento lo prende il backend dal token):
 
 - `POST /api/taxation/printer-list` (`printerList`): corpo di tutte le tabelle, risposta `Page<PrinterItemListResponse>`.
-- `GET /api/taxation/electronic-receipt?idProperty=…` (`electronicReceipt`): i termini e condizioni come HTML, risposta
-  `string | null` (il corpo è il testo da solo).
-- `POST /api/taxation/set-is-active` (`setPrinterIsActive`): corpo `{ idProperty, idPrinter, isEnabled }` con il nuovo
-  stato.
-- `POST /api/taxation/delete-printer` (`deletePrinter`): corpo `{ idProperty, idPrinter }`.
-- `POST /api/taxation/add-printer` (`addPrinter`): corpo `AddPrinterItemRequest` più `idProperty`.
+- `GET /api/taxation/electronic-receipt` (`electronicReceipt`), senza parametri: i termini e condizioni come HTML,
+  risposta `string | null` (il corpo è il testo da solo).
+- `POST /api/taxation/set-is-active` (`setPrinterIsActive`): corpo `{ idPrinter, isEnabled }` con il nuovo stato.
+- `POST /api/taxation/delete-printer` (`deletePrinter`): corpo `{ idPrinter }`.
+- `POST /api/taxation/add-printer` (`addPrinter`): corpo `AddPrinterItemRequest`.
 - `POST /api/taxation/electronic-receipt-activation` (`activateElectronicReceipt`): corpo
-  `{ idProperty, isElectronicReceiptAccepted }`.
-- `POST /api/taxation/save-electronic-receipt-account` (`saveElectronicReceiptAccount`): corpo `ElectronicReceiptAccount`
-  più `idProperty`.
-- `POST /api/taxation/download-guide-electronic-receipt` (`downloadGuideElectronicReceipt`): corpo `{ idProperty }`,
-  risposta un file (nome in `Content-Disposition`).
+  `{ isElectronicReceiptAccepted }`.
+- `POST /api/taxation/save-electronic-receipt-account` (`saveElectronicReceiptAccount`): corpo
+  `ElectronicReceiptAccount`.
+- `POST /api/taxation/download-guide-electronic-receipt` (`downloadGuideElectronicReceipt`): POST senza corpo, risposta
+  un file (nome in `Content-Disposition`).

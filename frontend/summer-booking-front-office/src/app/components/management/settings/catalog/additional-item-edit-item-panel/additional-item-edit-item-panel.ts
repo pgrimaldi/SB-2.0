@@ -172,9 +172,8 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idAdditionalItem = this.idAdditionalItem();
-    if (this.isSaving() || !idProperty || !idAdditionalItem) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !idAdditionalItem) {
       return;
     }
 
@@ -183,7 +182,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         await firstValueFrom(
-          this.priceLists.updateAdditionalItem(idProperty, idAdditionalItem, this.toRequest()),
+          this.priceLists.updateAdditionalItem(idAdditionalItem, this.toRequest()),
         );
         this.isSaving.set(false);
         this.open.set(false);
@@ -239,12 +238,11 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The item with the sectors and the periods of its price rows, and the choices of the dropdowns. */
   private load(): void {
     const idAdditionalItem = this.idAdditionalItem();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idAdditionalItem || !idProperty) {
+    if (!idAdditionalItem || !this.auth.user()?.propertyId) {
       return;
     }
     this.loadings.add(
-      this.warehouse.articleCombobox(idProperty).subscribe({
+      this.warehouse.articleCombobox().subscribe({
         next: (articles) => this.articles.set(articles),
         error: (error: unknown) => {
           const problem = toApiProblem(error);
@@ -254,7 +252,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
       }),
     );
     this.loadings.add(
-      this.priceLists.packageCombobox(idProperty).subscribe({
+      this.priceLists.packageCombobox().subscribe({
         next: (packages) => this.packages.set(packages),
         error: (error: unknown) => {
           const problem = toApiProblem(error);
@@ -267,8 +265,8 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     this.loadings.add(
       forkJoin({
         item: this.priceLists.selectedAdditionalItem(idAdditionalItem),
-        sectors: this.sectorService.sectorCombobox(idProperty),
-        periods: this.seasons.periodList(idProperty, false),
+        sectors: this.sectorService.sectorCombobox(),
+        periods: this.seasons.periodList(false),
       })
         .pipe(finalize(() => this.isLoading.set(false)))
         .subscribe({

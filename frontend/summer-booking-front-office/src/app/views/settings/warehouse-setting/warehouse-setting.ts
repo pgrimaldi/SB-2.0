@@ -47,10 +47,9 @@ export class WarehouseSetting {
   private readonly translateService = inject(TranslateService);
 
   protected readonly loadFailed = signal(false);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly adding = signal(false);
   protected readonly editing = signal(false);
   protected readonly editedItem = signal<WarehouseItem | null>(null);
@@ -106,10 +105,10 @@ export class WarehouseSetting {
     edit: (item) => this.editItem(item),
   });
 
-  protected readonly deleteItems = (idProperty: string, idItems: string[]) =>
-    this.warehouse.deleteWarehouseItems({ idProperty, idItems });
-  protected readonly duplicateItems = (idProperty: string, idItems: string[]) =>
-    this.warehouse.duplicateWarehouseItems({ idProperty, idItems });
+  protected readonly deleteItems = (idItems: string[]) =>
+    this.warehouse.deleteWarehouseItems(idItems);
+  protected readonly duplicateItems = (idItems: string[]) =>
+    this.warehouse.duplicateWarehouseItems(idItems);
 
   protected askDelete(idItems: readonly TableRowId[], itemName: string | null = null): void {
     this.idItemsToDelete.set(idItems.map(String));

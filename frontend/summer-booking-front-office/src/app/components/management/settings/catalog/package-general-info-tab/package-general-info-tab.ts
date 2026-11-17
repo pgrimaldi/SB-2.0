@@ -114,9 +114,8 @@ export class PackageGeneralInfoTab implements OnDestroy {
 
   /** The sectors and the areas are read every time the tab is shown. */
   constructor() {
-    const idProperty = this.auth.user()?.propertyId;
-    if (idProperty) {
-      this.sectorsSubscription = this.sectorService.sectorCombobox(idProperty).subscribe({
+    if (this.auth.user()?.propertyId) {
+      this.sectorsSubscription = this.sectorService.sectorCombobox().subscribe({
         next: (sectors) => this.sectors.set(sectors),
         error: (error: unknown) => {
           const problem = toApiProblem(error);
@@ -124,7 +123,7 @@ export class PackageGeneralInfoTab implements OnDestroy {
           this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
         },
       });
-      this.sectorAreasSubscription = this.mapService.sectorAreaCombobox(idProperty).subscribe({
+      this.sectorAreasSubscription = this.mapService.sectorAreaCombobox().subscribe({
         next: (sectorAreas) => this.sectorAreas.set(sectorAreas),
         error: (error: unknown) => {
           const problem = toApiProblem(error);

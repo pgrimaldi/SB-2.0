@@ -252,9 +252,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idAutomaticPrice = this.idAutomaticPrice();
-    if (this.isSaving() || !idProperty || !idAutomaticPrice) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !idAutomaticPrice) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -262,7 +261,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idAutomaticPrice));
+        await firstValueFrom(this.update(tab, idAutomaticPrice));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
@@ -285,8 +284,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The data of a tab, read from its API the first time the tab is opened. */
   private loadTab(tab: PanelTab): void {
     const idAutomaticPrice = this.idAutomaticPrice();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idAutomaticPrice || !idProperty || this.loadedTabs().has(tab)) {
+    if (!idAutomaticPrice || !this.auth.user()?.propertyId || this.loadedTabs().has(tab)) {
       return;
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
@@ -308,7 +306,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         tab,
         forkJoin({
           values: this.catalog.automaticPricePricesValidity(idAutomaticPrice),
-          services: this.catalog.automaticPriceServices(idProperty),
+          services: this.catalog.automaticPriceServices(),
         })
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
@@ -330,11 +328,10 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idAutomaticPrice: string): Observable<void> {
+  private update(tab: PanelTab, idAutomaticPrice: string): Observable<void> {
     const draft = this.draft();
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateAutomaticPriceGeneral(
-        idProperty,
         Object.assign(new AutomaticPriceUpdateGeneralRequest(), {
           idAutomaticPrice,
           ...pick(draft, tab),
@@ -342,7 +339,6 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
       );
     }
     return this.catalog.updateAutomaticPricePricesValidity(
-      idProperty,
       Object.assign(new AutomaticPriceUpdatePricesValidityRequest(), {
         idAutomaticPrice,
         ...pick(draft, tab),

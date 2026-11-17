@@ -245,9 +245,8 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idTableService = this.idTableService();
-    if (this.isSaving() || !idProperty || !idTableService) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !idTableService) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -255,7 +254,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idTableService));
+        await firstValueFrom(this.update(tab, idTableService));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
@@ -320,11 +319,10 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idTableService: string): Observable<void> {
+  private update(tab: PanelTab, idTableService: string): Observable<void> {
     const draft = this.draft();
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateTableServiceGeneral(
-        idProperty,
         Object.assign(new TableServiceUpdateGeneralRequest(), {
           idTableService,
           ...pick(draft, tab),
@@ -332,7 +330,6 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       );
     }
     return this.catalog.updateTableServiceAvailabilityBookings(
-      idProperty,
       Object.assign(new TableServiceUpdateAvailabilityBookingsRequest(), {
         idTableService,
         ...pick(draft, tab),

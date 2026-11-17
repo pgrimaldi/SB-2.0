@@ -13,8 +13,8 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
 
 ## app-table si carica da sola
 
-- La vista passa ad `app-table` solo `columns`, `params` (lo stabilimento, `{ idProperty }`), eventualmente `filters`
-  e `load`: l'API del proprio service, passata così com'è (`[load]="warehouse.list"`).
+- La vista passa ad `app-table` solo `columns`, `params` (`{}`, oppure `null` finché l'utente non è collegato: la
+  tabella aspetta), eventualmente `filters` e `load`: l'API del proprio service, passata così com'è (`[load]="warehouse.list"`).
 - Il metodo del service passato a `load` è una proprietà a freccia, così mantiene `this` (vedi il commento in
   `WarehouseService.list`).
 - Caricamento, pagina corrente, righe per pagina, ricerca, ordinamento, ritorno a pagina 1 ed errori li gestisce solo
@@ -28,7 +28,7 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
 
 - Ogni tabella chiama una `POST` con lo stesso corpo `PageRequest` (`entities/pagination/page.ts`), anche quando non ha
   ricerca, filtri od ordinamento; nessuna interfaccia per la singola API.
-- Campi: `idProperty`; `page` da 1; `pageSize` 10 (predefinito), 20, 50 o 100; `search` con il testo cercato o `''`
+- Campi: `page` da 1; `pageSize` 10 (predefinito), 20, 50 o 100; `search` con il testo cercato o `''`
   (il backend lo cerca in alcuni campi specifici); `sortField` con il campo da ordinare o `''`; `sortDirection`
   `Ascending` / `Descending`.
 - `filters`: array di `{ field, value }` composto dalla pagina, `[]` se non ce ne sono. Un oggetto per campo, con

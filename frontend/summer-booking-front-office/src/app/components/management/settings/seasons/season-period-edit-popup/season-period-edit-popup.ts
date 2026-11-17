@@ -85,8 +85,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canSave()) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave()) {
       return;
     }
 
@@ -94,7 +93,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.seasons.updatePeriod(idProperty, this.draft()));
+        await firstValueFrom(this.seasons.updatePeriod(this.draft()));
         this.isLoading.set(false);
         this.close();
         this.updated.emit();

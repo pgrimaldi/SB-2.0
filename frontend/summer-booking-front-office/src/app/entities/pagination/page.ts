@@ -8,7 +8,6 @@ export interface PageFilter {
 }
 
 export interface PageRequest {
-  idProperty: string;
   page: number;
   pageSize: number;
   search: string;

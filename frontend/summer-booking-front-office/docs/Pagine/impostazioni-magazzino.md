@@ -30,7 +30,7 @@ Rotta `/settings/warehouse-setting`, vista `views/settings/warehouse-setting/` (
     spegne da solo se la soglia torna vuota o 0.
 - Annulla e la X chiudono il popup. A ogni apertura il form è vuoto.
 - Aggiungi funziona solo con un articolo scelto e una quantità maggiore di 0. Il corpo è il `new WarehouseItem()` riempito
-  dall'utente più `idProperty`.
+  dall'utente.
 - Durante la chiamata il bottone mostra lo spinner (`[isLoading]` di `app-button`), i campi sono bloccati (`inert`), X e
   Annulla non fanno nulla ed Esc o il clic fuori non chiudono il popup.
 - Se riesce il popup si chiude ed emette `added`, con cui la pagina ricarica la tabella (`(added)="table.reload()"`).
@@ -44,8 +44,8 @@ Rotta `/settings/warehouse-setting`, vista `views/settings/warehouse-setting/` (
 - Si apre con i valori della riga (`[item]`: totale, soglia e `isThresholdWarningActive`, che `warehouse/list`
   restituisce per questo).
 - L'articolo è mostrato ma bloccato (`[disabled]` di `app-filled-select`), senza chiamare `article-combobox`.
-- Salva manda la riga `WarehouseItem` con i valori modificati più `idProperty`, con lo stesso spinner e la stessa
-  gestione degli errori; se riesce emette `saved` e la pagina ricarica la tabella.
+- Salva manda la riga `WarehouseItem` con i valori modificati, con lo stesso spinner e la stessa gestione degli errori;
+  se riesce emette `saved` e la pagina ricarica la tabella.
 - I due popup sono separati per scelta, anche se molto codice è uguale, per poterli far evolvere ciascuno per conto suo.
 
 ## Elimina
@@ -54,8 +54,8 @@ Rotta `/settings/warehouse-setting`, vista `views/settings/warehouse-setting/` (
   `app-delete-items-popup` (`components/management/delete-items-popup/`), condiviso con altre pagine (es. Sconti e
   voucher, Gestione utenti).
 - La pagina gli passa `translationKey` (il gruppo di testi con `cancel`, `confirm`, `one.title`, `one.text` con
-  `{{name}}`, `many.title`, `many.text` con `{{count}}`), `action` (la funzione `(idProperty, idItems) =>
-  Observable<void>` che chiama la sua API) e `pathIcon` (l'icona d'errore della pagina).
+  `{{name}}`, `many.title`, `many.text` con `{{count}}`), `action` (la funzione `(idItems) => Observable<void>`
+  che chiama la sua API) e `pathIcon` (l'icona d'errore della pagina).
 - Il popup usa `app-confirm-popup`: "Vuoi eliminare l'articolo Lettino?" per una riga, "Vuoi eliminare i 3 articoli
   selezionati?" per la selezione (testi `management.settings.warehouse.delete.*`).
 - Elimina manda un id per la riga, tutti quelli scelti per la selezione: tutto o niente.
@@ -73,11 +73,11 @@ Rotta `/settings/warehouse-setting`, vista `views/settings/warehouse-setting/` (
 
 ## API
 
-In `WarehouseService`:
+In `WarehouseService` (lo stabilimento lo prende il backend dal token):
 
 - `POST /api/warehouse/list` (`list`): corpo standard delle tabelle, risposta `Page<WarehouseItem>`.
-- `POST /api/warehouse/article-combobox` (`articleCombobox`): corpo `{ idProperty }`, gli articoli della tendina.
-- `POST /api/warehouse/add-warehouse-item` (`addWarehouseItem(idProperty, item)`): `WarehouseItem` più `idProperty`.
-- `POST /api/warehouse/edit-warehouse-item` (`editWarehouseItem(idProperty, item)`): `WarehouseItem` più `idProperty`.
-- `POST /api/warehouse/delete-warehouse-item` (`deleteWarehouseItems`): corpo `{ idProperty, idItems }`.
-- `POST /api/warehouse/duplicate-warehouse-item` (`duplicateWarehouseItems`): corpo `{ idProperty, idItems }`.
+- `POST /api/warehouse/article-combobox` (`articleCombobox`): POST senza corpo, gli articoli della tendina.
+- `POST /api/warehouse/add-warehouse-item` (`addWarehouseItem(item)`): corpo `WarehouseItem`.
+- `POST /api/warehouse/edit-warehouse-item` (`editWarehouseItem(item)`): corpo `WarehouseItem`.
+- `POST /api/warehouse/delete-warehouse-item` (`deleteWarehouseItems`): corpo `{ idItems }`.
+- `POST /api/warehouse/duplicate-warehouse-item` (`duplicateWarehouseItems`): corpo `{ idItems }`.

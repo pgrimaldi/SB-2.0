@@ -113,15 +113,14 @@ export class AddPrinterItemPopup extends BasePopup implements UnsavedChanges, On
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.taxation.addPrinter(idProperty, this.draft()));
+        await firstValueFrom(this.taxation.addPrinter(this.draft()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();

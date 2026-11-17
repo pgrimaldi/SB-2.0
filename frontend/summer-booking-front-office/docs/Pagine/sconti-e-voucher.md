@@ -63,15 +63,12 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 
 ## API
 
-In `VoucherService`:
+In `VoucherService` (lo stabilimento lo prende il backend dal token):
 
 - `POST /api/vouchers/voucher-list` (`voucherList`): corpo standard `PageRequest`, risposta `Page<VoucherItem>`.
-- `POST /api/vouchers/delete-voucher-item` (`deleteVoucherItems`): corpo `DeleteVoucherItemsRequest` =
-  `{ idProperty, idVouchers }`, risposta 204.
-- `POST /api/vouchers/duplicate-voucher-item` (`duplicateVoucherItems`): corpo `DuplicateVoucherItemsRequest` =
-  `{ idProperty, idVouchers }`, risposta 204.
-- `POST /api/vouchers/add-voucher-item` (`addVoucherItem`): corpo = form + `idProperty`, utilizzi vuoti mandati come 1,
-  risposta 204.
+- `POST /api/vouchers/delete-voucher-item` (`deleteVoucherItems`): corpo `{ idVouchers }`, risposta 204.
+- `POST /api/vouchers/duplicate-voucher-item` (`duplicateVoucherItems`): corpo `{ idVouchers }`, risposta 204.
+- `POST /api/vouchers/add-voucher-item` (`addVoucherItem`): corpo = form, utilizzi vuoti mandati come 1, risposta 204.
 - `GET /api/vouchers/get-selected-item?idVoucher=…` (`selectedItem`): risposta `VoucherSelectedItem`.
-- `POST /api/vouchers/update-voucher-item` (`updateVoucherItem`): corpo = form `VoucherUpdateItemRequest` + `idProperty`,
-  utilizzi vuoti mandati come 1, risposta 204.
+- `POST /api/vouchers/update-voucher-item` (`updateVoucherItem`): corpo = form `VoucherUpdateItemRequest`, utilizzi
+  vuoti mandati come 1, risposta 204.

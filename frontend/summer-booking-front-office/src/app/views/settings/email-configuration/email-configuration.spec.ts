@@ -20,7 +20,7 @@ describe('EmailConfiguration', () => {
   /** The server never sends the SMTP password: only that one is saved. */
   const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true };
   /** Without a new password typed, the saved one is kept (null). */
-  const SENT = { idProperty: 'p1', ...FIELDS, smtpPassword: null };
+  const SENT = { ...FIELDS, smtpPassword: null };
 
   const setup = async (
     emailConfiguration = vi.fn(() => of(CONFIGURATION)),
@@ -89,7 +89,7 @@ describe('EmailConfiguration', () => {
   it('should fill the fields with the configuration of the property, all hidden but the security', async () => {
     const { element, emailConfiguration } = await setup();
 
-    expect(emailConfiguration).toHaveBeenCalledWith('p1');
+    expect(emailConfiguration).toHaveBeenCalledWith();
     expect([...element.querySelectorAll('input')].map((input) => input.value)).toEqual([
       'prenotazioni@lido-demo.example',
       'Lido Demo',

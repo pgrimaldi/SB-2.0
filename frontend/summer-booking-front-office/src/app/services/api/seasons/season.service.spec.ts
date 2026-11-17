@@ -58,10 +58,10 @@ describe('SeasonService', () => {
     const seasons = TestBed.inject(SeasonService);
     const controller = TestBed.inject(HttpTestingController);
 
-    seasons.periodList('p1', true).subscribe();
+    seasons.periodList(true).subscribe();
 
     const request = controller.expectOne(
-      `${environment.apiBaseUrl}/seasons/period-list?idProperty=p1&isNextSeason=true`,
+      `${environment.apiBaseUrl}/seasons/period-list?isNextSeason=true`,
     ).request;
     expect(request.method).toBe('GET');
     controller.verify();
@@ -82,48 +82,47 @@ describe('SeasonService', () => {
       extra: true,
     };
 
-    seasons.addPeriod('p1', false, period).subscribe();
+    seasons.addPeriod(false, period).subscribe();
 
     const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/add-period`).request;
     expect(request.method).toBe('POST');
     expect(request.body).toEqual({
       periodName: 'Bassa stagione',
       intervals: [{ dateFrom: '2026-05-01T00:00:00.000Z', dateTo: '2026-06-15T00:00:00.000Z' }],
-      idProperty: 'p1',
       isNextSeason: false,
     });
     controller.verify();
   });
 
-  it('should send the property and the period to delete', () => {
+  it('should send the period to delete', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const seasons = TestBed.inject(SeasonService);
     const controller = TestBed.inject(HttpTestingController);
 
-    seasons.deletePeriod({ idProperty: 'p1', idPeriod: 'd1' }).subscribe();
+    seasons.deletePeriod('d1').subscribe();
 
     const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/delete-period`).request;
     expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idProperty: 'p1', idPeriod: 'd1' });
+    expect(request.body).toEqual({ idPeriod: 'd1' });
     controller.verify();
   });
 
-  it('should send the property and the date intervals to delete', () => {
+  it('should send the date intervals to delete', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const seasons = TestBed.inject(SeasonService);
     const controller = TestBed.inject(HttpTestingController);
 
-    seasons.deleteIntervals({ idProperty: 'p1', idIntervals: ['i1', 'i2'] }).subscribe();
+    seasons.deleteIntervals(['i1', 'i2']).subscribe();
 
     const request = controller.expectOne(
       `${environment.apiBaseUrl}/seasons/delete-intervals`,
     ).request;
     expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idProperty: 'p1', idIntervals: ['i1', 'i2'] });
+    expect(request.body).toEqual({ idIntervals: ['i1', 'i2'] });
     controller.verify();
   });
 
@@ -140,7 +139,7 @@ describe('SeasonService', () => {
       extra: true,
     };
 
-    seasons.updateInterval('p1', interval).subscribe();
+    seasons.updateInterval(interval).subscribe();
 
     const request = controller.expectOne(
       `${environment.apiBaseUrl}/seasons/update-interval`,
@@ -150,7 +149,6 @@ describe('SeasonService', () => {
       idInterval: 'i1',
       dateFrom: '2026-05-02T00:00:00.000Z',
       dateTo: '2026-06-14T00:00:00.000Z',
-      idProperty: 'p1',
     });
     controller.verify();
   });
@@ -164,11 +162,11 @@ describe('SeasonService', () => {
 
     const period = { idPeriod: 'd1', periodName: 'Pre stagione', extra: 1 };
 
-    seasons.updatePeriod('p1', period).subscribe();
+    seasons.updatePeriod(period).subscribe();
 
     const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/update-period`).request;
     expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idPeriod: 'd1', periodName: 'Pre stagione', idProperty: 'p1' });
+    expect(request.body).toEqual({ idPeriod: 'd1', periodName: 'Pre stagione' });
     controller.verify();
   });
 
@@ -225,7 +223,7 @@ describe('SeasonService', () => {
       extra: true,
     };
 
-    seasons.addInterval('p1', 'd1', interval).subscribe();
+    seasons.addInterval('d1', interval).subscribe();
 
     const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/add-interval`).request;
     expect(request.method).toBe('POST');
@@ -233,7 +231,6 @@ describe('SeasonService', () => {
       dateFrom: '2026-06-01T00:00:00.000Z',
       dateTo: '2026-06-10T00:00:00.000Z',
       idPeriod: 'd1',
-      idProperty: 'p1',
     });
     controller.verify();
   });

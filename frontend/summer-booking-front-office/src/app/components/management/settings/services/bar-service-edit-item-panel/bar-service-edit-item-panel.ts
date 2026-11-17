@@ -263,9 +263,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idBarService = this.idBarService();
-    if (this.isSaving() || !idProperty || !idBarService) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !idBarService) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -273,7 +272,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idBarService));
+        await firstValueFrom(this.update(tab, idBarService));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
@@ -296,8 +295,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The data of a tab, read from its API the first time the tab is opened. */
   private loadTab(tab: PanelTab): void {
     const idBarService = this.idBarService();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idBarService || !idProperty || this.loadedTabs().has(tab)) {
+    if (!idBarService || !this.auth.user()?.propertyId || this.loadedTabs().has(tab)) {
       return;
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
@@ -319,7 +317,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         tab,
         forkJoin({
           prices: this.catalog.barServicePrices(idBarService),
-          periods: this.seasons.periodList(idProperty, false),
+          periods: this.seasons.periodList(false),
         })
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
@@ -352,22 +350,19 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idBarService: string): Observable<void> {
+  private update(tab: PanelTab, idBarService: string): Observable<void> {
     const draft = this.draft();
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateBarServiceGeneral(
-        idProperty,
         Object.assign(new BarServiceUpdateGeneralRequest(), { idBarService, ...pick(draft, tab) }),
       );
     }
     if (tab === PanelTab.Prices) {
       return this.catalog.updateBarServicePrices(
-        idProperty,
         Object.assign(new BarServiceUpdatePricesRequest(), { idBarService, ...pick(draft, tab) }),
       );
     }
     return this.catalog.updateBarServiceBooking(
-      idProperty,
       Object.assign(new BarServiceUpdateBookingRequest(), { idBarService, ...pick(draft, tab) }),
     );
   }

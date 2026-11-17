@@ -218,7 +218,6 @@ describe('CatalogService', () => {
     const { catalog, controller } = setup();
     const information = Object.assign(new BathhouseGeneralInformation(), {
       bathhouseName: 'Lido Sole',
-      idProperty: 'p2',
       unexpectedFlag: 'extra-field',
     });
 
@@ -285,7 +284,7 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
-  it('should create the bar service with the data of the three tabs and the property', () => {
+  it('should create the bar service with the data of the three tabs, without the property', () => {
     const { catalog, controller } = setup();
     const translation = {
       language: Language.It,
@@ -322,7 +321,6 @@ describe('CatalogService', () => {
 
     catalog
       .createBarService(
-        'p1',
         Object.assign(new BarServiceAddItemRequest(), request, { unexpectedFlag: 'extra-field' }),
       )
       .subscribe();
@@ -331,11 +329,11 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-bar-service`,
     ).request.body;
-    expect(body).toEqual({ ...request, translations: [translation], idProperty: 'p1' });
+    expect(body).toEqual({ ...request, translations: [translation] });
     controller.verify();
   });
 
-  it('should save the Info Generali of the bar service with the property in the body', () => {
+  it('should save the Info Generali of the bar service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idBarService: 'b1',
@@ -347,7 +345,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateBarServiceGeneral(
-        'p1',
         Object.assign(new BarServiceUpdateGeneralRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -358,11 +355,11 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-general`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
-  it('should save the prices of the bar service with the property in the body', () => {
+  it('should save the prices of the bar service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idBarService: 'b1',
@@ -377,7 +374,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateBarServicePrices(
-        'p1',
         Object.assign(new BarServiceUpdatePricesRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -388,11 +384,11 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-prices`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
-  it('should save the booking options of the bar service with the property in the body', () => {
+  it('should save the booking options of the bar service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idBarService: 'b1',
@@ -415,7 +411,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateBarServiceBooking(
-        'p1',
         Object.assign(new BarServiceUpdateBookingRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -426,7 +421,7 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-booking`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -475,7 +470,7 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
-  it('should create the service with the data of the three tabs and the property', () => {
+  it('should create the service with the data of the three tabs, without the property', () => {
     const { catalog, controller } = setup();
     const translation = {
       language: Language.It,
@@ -511,7 +506,6 @@ describe('CatalogService', () => {
 
     catalog
       .createStandardService(
-        'p1',
         Object.assign(new StandardServiceAddItemRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -522,11 +516,11 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-standard-service`,
     ).request.body;
-    expect(body).toEqual({ ...request, translations: [translation], idProperty: 'p1' });
+    expect(body).toEqual({ ...request, translations: [translation] });
     controller.verify();
   });
 
-  it('should save the Info Generali of the service with the property in the body', () => {
+  it('should save the Info Generali of the service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idStandardService: 's1',
@@ -537,7 +531,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateStandardServiceGeneral(
-        'p1',
         Object.assign(new StandardServiceUpdateGeneralRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -549,11 +542,11 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-standard-service-general`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
-  it('should save the prices of the service with the property in the body', () => {
+  it('should save the prices of the service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idStandardService: 's1',
@@ -567,7 +560,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateStandardServicePrices(
-        'p1',
         Object.assign(new StandardServiceUpdatePricesRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -579,11 +571,11 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-standard-service-prices`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
-  it('should save the booking options of the service with the property in the body', () => {
+  it('should save the booking options of the service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idStandardService: 's1',
@@ -606,7 +598,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateStandardServiceBooking(
-        'p1',
         Object.assign(new StandardServiceUpdateBookingRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -618,7 +609,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-standard-service-booking`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -695,7 +686,7 @@ describe('CatalogService', () => {
     return { clean, sent };
   };
 
-  it('should create the hourly service with only the contract fields and the property', () => {
+  it('should create the hourly service with only the contract fields, without the property', () => {
     const { catalog, controller } = setup();
     const translation = { language: Language.It, serviceName: 'Sup', description: 'Tavola a ore' };
     const periodOption = availability();
@@ -719,7 +710,6 @@ describe('CatalogService', () => {
 
     catalog
       .createHourlyService(
-        'p1',
         Object.assign(new HourlyServiceAddItemRequest(), {
           ...request,
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
@@ -746,11 +736,11 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-hourly-service`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
-  it('should save the Info Generali of the hourly service with the property in the body', () => {
+  it('should save the Info Generali of the hourly service without the property', () => {
     const { catalog, controller } = setup();
     const request = {
       idHourlyService: 'h1',
@@ -761,7 +751,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateHourlyServiceGeneral(
-        'p1',
         Object.assign(new HourlyServiceUpdateGeneralRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
@@ -773,7 +762,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-hourly-service-general`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -790,7 +779,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateHourlyServicePrices(
-        'p1',
         Object.assign(new HourlyServiceUpdatePricesRequest(), {
           ...request,
           periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [option.sent] }],
@@ -804,7 +792,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-hourly-service-prices`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -820,7 +808,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateHourlyServiceBooking(
-        'p1',
         Object.assign(new HourlyServiceUpdateBookingRequest(), {
           ...request,
           bookingOptions: [{ ...bookingOption, availabilityOption: option.sent }],
@@ -834,7 +821,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-hourly-service-booking`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -883,22 +870,22 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
-  it('should ask for the services of the automatic prices with the property in the query string', () => {
+  it('should ask for the services of the automatic prices without the property, taken from the token', () => {
     const { catalog, controller } = setup();
 
-    catalog.automaticPriceServices('p1').subscribe();
+    catalog.automaticPriceServices().subscribe();
 
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/catalog/get-automatic-price-services` &&
-        params.get('idProperty') === 'p1',
+        params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
     controller.verify();
   });
 
-  it('should create the automatic price with only the contract fields and the property', () => {
+  it('should create the automatic price with only the contract fields, without the property', () => {
     const { catalog, controller } = setup();
     const translation = { language: Language.It, serviceName: 'Coperto', description: 'A persona' };
     const timeSlot = { startTime: '12:00', endTime: '15:00' };
@@ -924,7 +911,6 @@ describe('CatalogService', () => {
 
     catalog
       .createAutomaticPrice(
-        'p1',
         Object.assign(new AutomaticPriceAddItemRequest(), {
           ...request,
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
@@ -944,7 +930,7 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-automatic-price`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -978,7 +964,7 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
-  it('should save the Info Generali of the automatic price with the property in the body', () => {
+  it('should save the Info Generali of the automatic price without the property', () => {
     const { catalog, controller } = setup();
     const translation = { language: Language.It, serviceName: 'Coperto', description: 'A persona' };
     const request = {
@@ -989,7 +975,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateAutomaticPriceGeneral(
-        'p1',
         Object.assign(new AutomaticPriceUpdateGeneralRequest(), {
           ...request,
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
@@ -1003,7 +988,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-automatic-price-general`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -1031,7 +1016,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateAutomaticPricePricesValidity(
-        'p1',
         Object.assign(new AutomaticPriceUpdatePricesValidityRequest(), {
           ...request,
           validityPeriods: [
@@ -1051,11 +1035,11 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-automatic-price-prices-validity`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
-  it('should create the table service with only the contract fields and the property', () => {
+  it('should create the table service with only the contract fields, without the property', () => {
     const { catalog, controller } = setup();
     const translation = { language: Language.It, serviceName: 'Pranzo', description: 'Ai tavoli' };
     const day = { dayOfWeek: 1, isEnabled: true, startTime: '12:00', endTime: '15:00' };
@@ -1085,7 +1069,6 @@ describe('CatalogService', () => {
 
     catalog
       .createTableService(
-        'p1',
         Object.assign(new TableServiceAddItemRequest(), {
           ...request,
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
@@ -1106,7 +1089,7 @@ describe('CatalogService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-table-service`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -1140,14 +1123,13 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
-  it('should save the Info Generali of the table service with the property in the body', () => {
+  it('should save the Info Generali of the table service without the property', () => {
     const { catalog, controller } = setup();
     const translation = { language: Language.It, serviceName: 'Cena', description: 'Ai tavoli' };
     const request = { idTableService: 't1', translations: [translation], isHighlighted: true };
 
     catalog
       .updateTableServiceGeneral(
-        'p1',
         Object.assign(new TableServiceUpdateGeneralRequest(), {
           ...request,
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
@@ -1161,7 +1143,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-table-service-general`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -1192,7 +1174,6 @@ describe('CatalogService', () => {
 
     catalog
       .updateTableServiceAvailabilityBookings(
-        'p1',
         Object.assign(new TableServiceUpdateAvailabilityBookingsRequest(), {
           ...request,
           availabilities: [
@@ -1212,7 +1193,7 @@ describe('CatalogService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`,
     ).request.body;
-    expect(body).toEqual({ ...request, idProperty: 'p1' });
+    expect(body).toEqual({ ...request });
     controller.verify();
   });
 });

@@ -101,8 +101,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
     this.unsaved.watch(this);
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() => {
@@ -149,8 +148,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty || !this.canSave()) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !this.canSave()) {
       return;
     }
     void submit(this.datesForm, async (): Promise<TreeValidationResult> => {
@@ -158,7 +156,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const sent = this.dates();
-        if (await this.hasPeriodsOutside(idProperty, sent)) {
+        if (await this.hasPeriodsOutside(sent)) {
           this.cancel();
           this.isPeriodsOutsideShown.set(true);
           return;
@@ -195,10 +193,10 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** The periods of both seasons as saved now, against the new first and last days. */
-  private async hasPeriodsOutside(idProperty: string, dates: SeasonDates): Promise<boolean> {
+  private async hasPeriodsOutside(dates: SeasonDates): Promise<boolean> {
     const [current, next] = await Promise.all([
-      firstValueFrom(this.seasons.periodList(idProperty, false)),
-      firstValueFrom(this.seasons.periodList(idProperty, true)),
+      firstValueFrom(this.seasons.periodList(false)),
+      firstValueFrom(this.seasons.periodList(true)),
     ]);
     return (
       isAnyOutside(current, dates.startsOn, dates.endsOn) ||

@@ -192,22 +192,21 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() => {
         const savesAtStart = this.savesDone;
         this.isReloading.set(true);
         this.error.set(null);
-        return this.system.emailConfiguration(idProperty).subscribe({
+        return this.system.emailConfiguration().subscribe({
           next: (data) => {
             this.isReloading.set(false);
             if (savesAtStart !== this.savesDone) {
               return; // the values just saved are newer than this answer
             }
             const { hasSmtpPassword, ...fields } = data;
-            const configuration = { ...fields, idProperty, smtpPassword: null };
+            const configuration = { ...fields, smtpPassword: null };
             this.configuration.set(configuration);
             this.passwordSaved.set(hasSmtpPassword);
             this.savedConnection.set(configuration);
@@ -271,15 +270,14 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     call: (request: EmailConfigurationRequest) => Observable<void>,
     done: (sent: EmailConfigurationRequest) => void,
   ): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isBusy() || !idProperty) {
+    if (this.isBusy() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.configurationForm, async (): Promise<TreeValidationResult> => {
       isRunning.set(true);
       this.error.set(null);
       try {
-        const request = { ...this.configuration(), idProperty };
+        const request = { ...this.configuration() };
         await firstValueFrom(call(request));
         done(request);
       } catch (error: unknown) {

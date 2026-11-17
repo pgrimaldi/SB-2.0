@@ -100,11 +100,9 @@ export class Taxation {
   protected readonly printerToDelete = signal<PrinterItemListResponse | null>(null);
   private readonly printersTable = viewChild.required(Table);
   protected readonly printersPerPage = 5;
-  private readonly idProperty = computed(() => this.auth.user()?.propertyId ?? null);
-  protected readonly printerParams = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.idProperty();
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly printerParams = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   private readonly printerHeaders = toSignal(
     this.translateService.stream(
       'management.settings.taxation.printer.table',
@@ -159,12 +157,11 @@ export class Taxation {
     // Loaded again when the language changes: the server sends the terms translated.
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.idProperty();
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() =>
-        this.taxation.electronicReceipt(idProperty).subscribe({
+        this.taxation.electronicReceipt().subscribe({
           next: (termsAndConditions) => {
             this.termsAndConditions.set(termsAndConditions);
             this.receiptError.set(null);
@@ -179,9 +176,7 @@ export class Taxation {
     });
   }
 
-  protected readonly loadPrinters: TableLoad<{ idProperty: string }, PrinterItemListResponse> = (
-    request,
-  ) =>
+  protected readonly loadPrinters: TableLoad<object, PrinterItemListResponse> = (request) =>
     this.taxation.printerList(request).pipe(
       tap({
         next: (page) => this.hasPrinters.set(page.total > 0),
@@ -193,25 +188,24 @@ export class Taxation {
     { idPrinter },
     isEnabled,
   ) =>
-    void this.changePrinter(idPrinter, (idProperty, id) =>
-      this.taxation.setPrinterIsActive({ idProperty, idPrinter: id, isEnabled }),
+    void this.changePrinter(idPrinter, (id) =>
+      this.taxation.setPrinterIsActive({ idPrinter: id, isEnabled }),
     );
 
   protected deletePrinter(): void {
     this.isDeletePrinterAsked.set(false);
-    void this.changePrinter(this.printerToDelete()?.idPrinter ?? null, (idProperty, idPrinter) =>
-      this.taxation.deletePrinter({ idProperty, idPrinter }),
+    void this.changePrinter(this.printerToDelete()?.idPrinter ?? null, (idPrinter) =>
+      this.taxation.deletePrinter(idPrinter),
     );
   }
 
   protected async downloadGuide(): Promise<void> {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty || this.isGuideDownloading()) {
+    if (!this.auth.user()?.propertyId || this.isGuideDownloading()) {
       return;
     }
     this.isGuideDownloading.set(true);
     try {
-      const guide = await firstValueFrom(this.taxation.downloadGuideElectronicReceipt(idProperty));
+      const guide = await firstValueFrom(this.taxation.downloadGuideElectronicReceipt());
       this.fileDownload.save(guide, GUIDE_FALLBACK_NAME);
     } catch (error: unknown) {
       this.showActionError(error);
@@ -225,18 +219,12 @@ export class Taxation {
   }
 
   protected async sendReceiptChoice(): Promise<void> {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty || this.isSendingReceiptChoice() || !this.isAcceptChosen()) {
+    if (!this.auth.user()?.propertyId || this.isSendingReceiptChoice() || !this.isAcceptChosen()) {
       return;
     }
     this.isSendingReceiptChoice.set(true);
     try {
-      await firstValueFrom(
-        this.taxation.activateElectronicReceipt({
-          idProperty,
-          isElectronicReceiptAccepted: this.isAcceptChosen(),
-        }),
-      );
+      await firstValueFrom(this.taxation.activateElectronicReceipt(this.isAcceptChosen()));
       this.isReceiptActivated.set(true);
       this.isReceiptAccountShown.set(true);
     } catch (error: unknown) {
@@ -257,13 +245,12 @@ export class Taxation {
    */
   private async changePrinter(
     idPrinter: string | null,
-    call: (idProperty: string, idPrinter: string) => Observable<void>,
+    call: (idPrinter: string) => Observable<void>,
   ): Promise<void> {
-    const idProperty = this.auth.user()?.propertyId;
-    if (idProperty && idPrinter && !this.isPrinterActionRunning()) {
+    if (this.auth.user()?.propertyId && idPrinter && !this.isPrinterActionRunning()) {
       this.isPrinterActionRunning.set(true);
       try {
-        await firstValueFrom(call(idProperty, idPrinter));
+        await firstValueFrom(call(idPrinter));
       } catch (error: unknown) {
         this.showActionError(error);
       } finally {

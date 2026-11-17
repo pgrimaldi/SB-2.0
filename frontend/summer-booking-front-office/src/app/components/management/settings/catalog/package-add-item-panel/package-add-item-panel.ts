@@ -234,16 +234,12 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
 
   /** The sectors and the periods of the current season: one row of prices each. */
   private fetchPriceList(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty || this.isFetching()) {
+    if (!this.auth.user()?.propertyId || this.isFetching()) {
       return;
     }
     this.error.set(null);
     this.isFetching.set(true);
-    this.fetching = forkJoin([
-      this.sectorService.sectorCombobox(idProperty),
-      this.seasons.periodList(idProperty, false),
-    ])
+    this.fetching = forkJoin([this.sectorService.sectorCombobox(), this.seasons.periodList(false)])
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
         next: ([sectors, periods]) => {

@@ -124,8 +124,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -133,7 +132,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.priceLists.createAdditionalItem(idProperty, this.draft()));
+        await firstValueFrom(this.priceLists.createAdditionalItem(this.draft()));
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();
@@ -174,12 +173,11 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
 
   /** The articles and the packages of the dropdowns, the sectors and the periods of the price rows. */
   private load(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
     this.loadings.add(
-      this.warehouse.articleCombobox(idProperty).subscribe({
+      this.warehouse.articleCombobox().subscribe({
         next: (articles) => this.articles.set(articles),
         error: (error: unknown) => {
           const problem = toApiProblem(error);
@@ -189,7 +187,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
       }),
     );
     this.loadings.add(
-      this.priceLists.packageCombobox(idProperty).subscribe({
+      this.priceLists.packageCombobox().subscribe({
         next: (packages) => this.packages.set(packages),
         error: (error: unknown) => {
           const problem = toApiProblem(error);
@@ -200,10 +198,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     );
     this.isFetching.set(true);
     this.loadings.add(
-      forkJoin([
-        this.sectorService.sectorCombobox(idProperty),
-        this.seasons.periodList(idProperty, false),
-      ])
+      forkJoin([this.sectorService.sectorCombobox(), this.seasons.periodList(false)])
         .pipe(finalize(() => this.isFetching.set(false)))
         .subscribe({
           next: ([sectors, periods]) => {

@@ -19,8 +19,8 @@ export class IdentityService {
     this.httpClient.post<Page<UserItem>>(`${this.endpoint}/users-list`, request);
 
   /** The users to choose from, as the backend decides them (e.g. those of the log filter). */
-  readonly userCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/user-combobox`, { idProperty });
+  readonly userCombobox = (): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/user-combobox`, null);
 
   /** For the property of the token. Answers 201 with the new user. */
   readonly createUser = (request: CreateUserRequest): Observable<UserSelectedItem> =>

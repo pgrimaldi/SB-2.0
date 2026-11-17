@@ -9,7 +9,7 @@ import { VoucherUpdateItemRequest } from '../../../entities/settings/vouchers/vo
 import { VoucherService } from './voucher.service';
 
 describe('VoucherService', () => {
-  it('should send only the fields of the voucher, its periods and time slots, with the property of the session and at least 1 use', () => {
+  it('should send only the fields of the voucher, its periods and time slots, without the property and at least 1 use', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -19,7 +19,6 @@ describe('VoucherService', () => {
       voucherName: 'Estate',
       discountValue: 15,
       maxUseQuantity: null,
-      idProperty: 'p2',
       validityPeriods: [
         {
           validFrom: '2026-08-01T00:00:00.000Z',
@@ -31,7 +30,7 @@ describe('VoucherService', () => {
       ],
     });
 
-    vouchers.addVoucherItem('p1', request).subscribe();
+    vouchers.addVoucherItem(request).subscribe();
 
     const body = controller.expectOne(`${environment.apiBaseUrl}/vouchers/add-voucher-item`).request
       .body;
@@ -50,7 +49,6 @@ describe('VoucherService', () => {
       discountScope: DiscountScope.All,
       maxUseQuantity: 1,
       isEnabled: true,
-      idProperty: 'p1',
     });
     controller.verify();
   });
@@ -77,7 +75,7 @@ describe('VoucherService', () => {
       ],
     });
 
-    vouchers.updateVoucherItem('p1', request).subscribe();
+    vouchers.updateVoucherItem(request).subscribe();
 
     const body = controller.expectOne(`${environment.apiBaseUrl}/vouchers/update-voucher-item`)
       .request.body;
@@ -97,7 +95,6 @@ describe('VoucherService', () => {
       discountScope: DiscountScope.All,
       maxUseQuantity: 1,
       isEnabled: true,
-      idProperty: 'p1',
     });
     controller.verify();
   });

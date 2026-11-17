@@ -30,9 +30,9 @@ Rotta `/settings/contact-support`, vista `views/settings/contact-support/` (`Con
 
 ## API
 
-In `SystemService`:
+In `SystemService` (lo stabilimento lo prende il backend dal token):
 
-- `POST /api/system/info-support` (`supportInfo`): corpo `{ idProperty }`, risposta `SupportInfo` con `phoneNumber`,
+- `POST /api/system/info-support` (`supportInfo`): POST senza corpo, risposta `SupportInfo` con `phoneNumber`,
   `mailAddress` e `supportHour` (una riga per periodo, già nella lingua dell'utente).
-- `POST /api/system/contact-support` (`contactSupport`): corpo `ContactSupportRequest` con `idProperty`, `firstName`,
-  `lastName`, `email`, `mobilePhone` (`null` se vuoto) e `message`, testi senza spazi ai lati.
+- `POST /api/system/contact-support` (`contactSupport`): corpo `ContactSupportRequest` con `firstName`, `lastName`,
+  `email`, `mobilePhone` (`null` se vuoto) e `message`, testi senza spazi ai lati.

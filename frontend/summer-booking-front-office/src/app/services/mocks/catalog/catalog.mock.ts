@@ -33,16 +33,6 @@ import { BarServiceAddItemRequest } from '../../../entities/settings/services/ba
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
 import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
-import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
-import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
-import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
-import { DuplicateStandardServiceItemsRequest } from '../../../entities/settings/services/duplicate-standard-service-items-request';
-import { DeleteHourlyServiceItemsRequest } from '../../../entities/settings/services/delete-hourly-service-items-request';
-import { DuplicateHourlyServiceItemsRequest } from '../../../entities/settings/services/duplicate-hourly-service-items-request';
-import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/services/delete-automatic-price-items-request';
-import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
-import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
-import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
@@ -63,8 +53,8 @@ import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/serv
 import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
 const COUNTRY_CODES = ['IT', 'FR', 'DE', 'CN'] as const;
@@ -1240,8 +1230,8 @@ const MAX_PAGE_SIZE = 100;
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
 /**
- * `POST /api/catalog/bar-service-list`: one page of the bar services of the requested property,
- * searched in the name. 401 without a valid access token; 403 for a missing or unknown property.
+ * `POST /api/catalog/bar-service-list`: one page of the bar services of the property of the token,
+ * searched in the name. 401 without a valid access token.
  */
 export const barServiceListMock = (
   request: HttpRequest<unknown>,
@@ -1250,10 +1240,7 @@ export const barServiceListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -1274,13 +1261,12 @@ export const barServiceListMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
-type CreateBarServiceBody = Partial<BarServiceAddItemRequest> & { idProperty?: unknown };
+type CreateBarServiceBody = Partial<BarServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-bar-service` with `BarServiceAddItemRequest` and `idProperty`: the new
- * bar service goes into the list, with the name in the language of `Accept-Language`. 204 without a
- * body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
- * field (see `barServiceErrors`).
+ * `POST /api/catalog/create-bar-service` with `BarServiceAddItemRequest`: the new bar service goes
+ * into the list, with the name in the language of `Accept-Language`. 204 without a body; 401
+ * without a valid access token; 400 with one error per wrong field (see `barServiceErrors`).
  */
 export const createBarServiceMock = (
   request: HttpRequest<unknown>,
@@ -1289,10 +1275,7 @@ export const createBarServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateBarServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = barServiceErrors(body, language);
   if (errors.length) {
@@ -1353,10 +1336,10 @@ function priceErrors(body: { price?: number | null }): MockFieldError[] {
 type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
- * an unknown property; 404 `resource.not_found` for an `idBarService` that is not one of its bar
- * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and
- * the answer is 204 without a body.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 404
+ * `resource.not_found` for an `idBarService` that is not one of its bar services; 400 with one
+ * error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body.
  */
 function updateBarService(
   request: HttpRequest<unknown>,
@@ -1371,10 +1354,7 @@ function updateBarService(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateBarServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const row = BAR_SERVICES.find(
     (item) => item.idBarService === body.idBarService && item.propertyId === property.id,
   );
@@ -1392,9 +1372,9 @@ function updateBarService(
 }
 
 /**
- * `POST /api/catalog/update-bar-service-general` with `BarServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions, category, icon and Metti in evidenza; the list shows the new name
- * (language of `Accept-Language`) and category. Errors as the creation (see `generalErrors`).
+ * `POST /api/catalog/update-bar-service-general` with `BarServiceUpdateGeneralRequest`: names,
+ * descriptions, category, icon and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`) and category. Errors as the creation (see `generalErrors`).
  */
 export const updateBarServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -1416,8 +1396,8 @@ export const updateBarServiceGeneralMock = (
 };
 
 /**
- * `POST /api/catalog/update-bar-service-prices` with `BarServiceUpdatePricesRequest` and `idProperty`:
- * the Prezzi tab; the list shows the new price. 400 for a price below 0.
+ * `POST /api/catalog/update-bar-service-prices` with `BarServiceUpdatePricesRequest`: the Prezzi
+ * tab; the list shows the new price. 400 for a price below 0.
  */
 export const updateBarServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1434,8 +1414,8 @@ export const updateBarServicePricesMock = (
   });
 
 /**
- * `POST /api/catalog/update-bar-service-booking` with `BarServiceUpdateBookingRequest` and
- * `idProperty`: the booking options of the Prenotazioni tab, all of them.
+ * `POST /api/catalog/update-bar-service-booking` with `BarServiceUpdateBookingRequest`: the booking
+ * options of the Prenotazioni tab, all of them.
  */
 export const updateBarServiceBookingMock = (
   request: HttpRequest<unknown>,
@@ -1449,9 +1429,9 @@ export const updateBarServiceBookingMock = (
   );
 
 /**
- * `POST /api/catalog/delete-bar-service-item` with `DeleteBarServiceItemsRequest`: all or nothing. If
- * one id is not a bar service of the property nothing is deleted (404 `resource.not_found`). Repeated
- * ids count once. 204 without a body; 401 without a valid access token; 403 for an unknown property.
+ * `POST /api/catalog/delete-bar-service-item` with `{ idBarServices }`: all or nothing. If one id
+ * is not a bar service of the property nothing is deleted (404 `resource.not_found`). Repeated ids
+ * count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteBarServiceItemsMock = (
   request: HttpRequest<unknown>,
@@ -1459,11 +1439,8 @@ export const deleteBarServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteBarServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idBarServices?: string[] };
+  const property = DEMO_PROPERTY;
   const barServices = barServicesOf(property.id, body.idBarServices);
   if (!barServices) {
     return resourceNotFound(request);
@@ -1475,7 +1452,7 @@ export const deleteBarServiceItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-bar-service-item` with `DuplicateBarServiceItemsRequest`: all or
+ * `POST /api/catalog/duplicate-bar-service-item` with `{ idBarServices }`: all or
  * nothing, like the delete. Each copy keeps the price; the name is chosen by the backend: the mock
  * invents "Caffè (copia)", then "Caffè (copia 2)" and so on.
  */
@@ -1485,11 +1462,8 @@ export const duplicateBarServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateBarServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idBarServices?: string[] };
+  const property = DEMO_PROPERTY;
   const barServices = barServicesOf(property.id, body.idBarServices);
   if (!barServices) {
     return resourceNotFound(request);
@@ -1550,8 +1524,7 @@ const STANDARD_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
 /**
  * `POST /api/catalog/standard-service-list`: one page of the services (neither bar nor hourly) of
- * the requested property, searched in the name. 401 without a valid access token; 403 for a missing
- * or unknown property.
+ * the property of the token, searched in the name. 401 without a valid access token.
  */
 export const standardServiceListMock = (
   request: HttpRequest<unknown>,
@@ -1560,10 +1533,7 @@ export const standardServiceListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -1735,13 +1705,13 @@ export const standardServiceBookingOptionsMock = (
   ).pipe(delay(300));
 };
 
-type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest> & { idProperty?: unknown };
+type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-standard-service` with `StandardServiceAddItemRequest` and `idProperty`:
- * the new service goes into the list, with the name in the language of `Accept-Language`. 204 without
- * a body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
- * field (see `standardGeneralErrors` and `priceErrors`).
+ * `POST /api/catalog/create-standard-service` with `StandardServiceAddItemRequest`: the new service
+ * goes into the list, with the name in the language of `Accept-Language`. 204 without a body; 401
+ * without a valid access token; 400 with one error per wrong field (see `standardGeneralErrors` and
+ * `priceErrors`).
  */
 export const createStandardServiceMock = (
   request: HttpRequest<unknown>,
@@ -1750,10 +1720,7 @@ export const createStandardServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateStandardServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [...standardGeneralErrors(body, language), ...priceErrors(body)];
   if (errors.length) {
@@ -1805,10 +1772,10 @@ function standardGeneralErrors(
 type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
- * an unknown property; 404 `resource.not_found` for an `idStandardService` that is not one of its
- * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and the
- * answer is 204 without a body.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 404
+ * `resource.not_found` for an `idStandardService` that is not one of its services; 400 with one
+ * error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body.
  */
 function updateStandardService(
   request: HttpRequest<unknown>,
@@ -1823,10 +1790,7 @@ function updateStandardService(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateStandardServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const row = STANDARD_SERVICES.find(
     (item) => item.idStandardService === body.idStandardService && item.propertyId === property.id,
   );
@@ -1844,9 +1808,9 @@ function updateStandardService(
 }
 
 /**
- * `POST /api/catalog/update-standard-service-general` with `StandardServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions, icon and Metti in evidenza; the list shows the new name (language
- * of `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
+ * `POST /api/catalog/update-standard-service-general` with `StandardServiceUpdateGeneralRequest`:
+ * names, descriptions, icon and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
  */
 export const updateStandardServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -1866,8 +1830,8 @@ export const updateStandardServiceGeneralMock = (
 };
 
 /**
- * `POST /api/catalog/update-standard-service-prices` with `StandardServiceUpdatePricesRequest` and
- * `idProperty`: the Prezzi tab; the list shows the new price. 400 for a price below 0.
+ * `POST /api/catalog/update-standard-service-prices` with `StandardServiceUpdatePricesRequest`: the
+ * Prezzi tab; the list shows the new price. 400 for a price below 0.
  */
 export const updateStandardServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1883,8 +1847,8 @@ export const updateStandardServicePricesMock = (
   });
 
 /**
- * `POST /api/catalog/update-standard-service-booking` with `StandardServiceUpdateBookingRequest` and
- * `idProperty`: the booking options of the Prenotazioni tab, all of them.
+ * `POST /api/catalog/update-standard-service-booking` with `StandardServiceUpdateBookingRequest`:
+ * the booking options of the Prenotazioni tab, all of them.
  */
 export const updateStandardServiceBookingMock = (
   request: HttpRequest<unknown>,
@@ -1915,9 +1879,8 @@ const HOURLY_SERVICES: HourlyServiceRow[] = (
 const HOURLY_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
 /**
- * `POST /api/catalog/hourly-service-list`: one page of the hourly services of the requested
- * property, searched in the name. 401 without a valid access token; 403 for a missing or unknown
- * property.
+ * `POST /api/catalog/hourly-service-list`: one page of the hourly services of the property of the
+ * token, searched in the name. 401 without a valid access token.
  */
 export const hourlyServiceListMock = (
   request: HttpRequest<unknown>,
@@ -1926,10 +1889,7 @@ export const hourlyServiceListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -2119,13 +2079,13 @@ export const hourlyServiceBookingOptionsMock = (
   ).pipe(delay(300));
 };
 
-type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest> & { idProperty?: unknown };
+type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-hourly-service` with `HourlyServiceAddItemRequest` and `idProperty`: the
- * new hourly service goes into the list, with the name in the language of `Accept-Language`. 204
- * without a body; 401 without a valid access token; 403 for an unknown property; 400 with one error
- * per wrong field (see `standardGeneralErrors` and `hourlyPriceErrors`).
+ * `POST /api/catalog/create-hourly-service` with `HourlyServiceAddItemRequest`: the new hourly
+ * service goes into the list, with the name in the language of `Accept-Language`. 204 without a
+ * body; 401 without a valid access token; 400 with one error per wrong field (see
+ * `standardGeneralErrors` and `hourlyPriceErrors`).
  */
 export const createHourlyServiceMock = (
   request: HttpRequest<unknown>,
@@ -2134,10 +2094,7 @@ export const createHourlyServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateHourlyServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [...standardGeneralErrors(body, language), ...hourlyPriceErrors(body)];
   if (errors.length) {
@@ -2192,10 +2149,10 @@ function hourlyPriceErrors(body: {
 type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 403 for
- * an unknown property; 404 `resource.not_found` for an `idHourlyService` that is not one of its
- * hourly services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab
- * and the answer is 204 without a body.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 404
+ * `resource.not_found` for an `idHourlyService` that is not one of its hourly services; 400 with
+ * one error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body.
  */
 function updateHourlyService(
   request: HttpRequest<unknown>,
@@ -2210,10 +2167,7 @@ function updateHourlyService(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateHourlyServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const row = HOURLY_SERVICES.find(
     (item) => item.idHourlyService === body.idHourlyService && item.propertyId === property.id,
   );
@@ -2231,9 +2185,9 @@ function updateHourlyService(
 }
 
 /**
- * `POST /api/catalog/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions, icon and Metti in evidenza; the list shows the new name
- * (language of `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
+ * `POST /api/catalog/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest`:
+ * names, descriptions, icon and Metti in evidenza; the list shows the new name (language of
+ * `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
  */
 export const updateHourlyServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -2253,8 +2207,8 @@ export const updateHourlyServiceGeneralMock = (
 };
 
 /**
- * `POST /api/catalog/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest` and
- * `idProperty`: the Prezzi tab. 400 for a price below 0.
+ * `POST /api/catalog/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest`: the
+ * Prezzi tab. 400 for a price below 0.
  */
 export const updateHourlyServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -2271,8 +2225,8 @@ export const updateHourlyServicePricesMock = (
   );
 
 /**
- * `POST /api/catalog/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest` and
- * `idProperty`: the booking options of the Prenotazioni tab, all of them. 400 for a price below 0.
+ * `POST /api/catalog/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest`: the
+ * booking options of the Prenotazioni tab, all of them. 400 for a price below 0.
  */
 export const updateHourlyServiceBookingMock = (
   request: HttpRequest<unknown>,
@@ -2370,9 +2324,9 @@ function areServicesOf<Row extends { propertyId: number }>(
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-services?idProperty=…`: the bar, standard and hourly services
- * of the property, as `{ id, value }` with the name, for "Validità sui servizi". 401 without a valid
- * access token; 403 for a missing or unknown property.
+ * `GET /api/catalog/get-automatic-price-services`: the bar, standard and hourly services of the
+ * property, as `{ id, value }` with the name, for "Validità sui servizi". 401 without a valid
+ * access token.
  */
 export const automaticPriceServicesMock = (
   request: HttpRequest<unknown>,
@@ -2380,10 +2334,7 @@ export const automaticPriceServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(request.params.get('idProperty'));
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const answer: AutomaticPriceServices = {
     barServices: serviceItemsOf(BAR_SERVICES, property.id, (row) => row.idBarService),
     standardServices: serviceItemsOf(
@@ -2396,15 +2347,14 @@ export const automaticPriceServicesMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
 
-type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest> & { idProperty?: unknown };
+type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-automatic-price` with `AutomaticPriceAddItemRequest` and `idProperty`: the
- * new automatic price goes into the list, with the name in the language of `Accept-Language`. 204
- * without a body; 401 without a valid access token; 403 for an unknown property; 404
- * `resource.not_found` for a service that is not one of the property; 400 with one error per wrong
- * field (name and description in the language of the request, icon of one of the two lists, price
- * not below 0).
+ * `POST /api/catalog/create-automatic-price` with `AutomaticPriceAddItemRequest`: the new automatic
+ * price goes into the list, with the name in the language of `Accept-Language`. 204 without a body;
+ * 401 without a valid access token; 404 `resource.not_found` for a service that is not one of the
+ * property; 400 with one error per wrong field (name and description in the language of the
+ * request, icon of one of the two lists, price not below 0).
  */
 export const createAutomaticPriceMock = (
   request: HttpRequest<unknown>,
@@ -2413,10 +2363,7 @@ export const createAutomaticPriceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateAutomaticPriceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   if (!areAutomaticServicesOf(body, property.id)) {
     return resourceNotFound(request);
   }
@@ -2533,10 +2480,10 @@ export const automaticPricePricesValidityMock = (
 type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: unknown };
 
 /**
- * The common part of the two updates of the edit panel: 401 without a valid access token; 403 for an
- * unknown property; 404 `resource.not_found` for an `idAutomaticPrice` that is not one of its
- * automatic prices (or for a service that is not one of the property); 400 with one error per wrong
- * field; otherwise `apply` changes the data of its tab and the answer is 204 without a body.
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 404
+ * `resource.not_found` for an `idAutomaticPrice` that is not one of its automatic prices (or for a
+ * service that is not one of the property); 400 with one error per wrong field; otherwise `apply`
+ * changes the data of its tab and the answer is 204 without a body.
  */
 function updateAutomaticPrice(
   request: HttpRequest<unknown>,
@@ -2551,10 +2498,7 @@ function updateAutomaticPrice(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateAutomaticPriceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const row = AUTOMATIC_PRICES.find(
     (item) => item.idAutomaticPrice === body.idAutomaticPrice && item.propertyId === property.id,
   );
@@ -2572,9 +2516,9 @@ function updateAutomaticPrice(
 }
 
 /**
- * `POST /api/catalog/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions and icon; the list shows the new name (language of
- * `Accept-Language`). Errors as the creation.
+ * `POST /api/catalog/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest`:
+ * names, descriptions and icon; the list shows the new name (language of `Accept-Language`). Errors
+ * as the creation.
  */
 export const updateAutomaticPriceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -2597,8 +2541,8 @@ export const updateAutomaticPriceGeneralMock = (
 
 /**
  * `POST /api/catalog/update-automatic-price-prices-validity` with
- * `AutomaticPriceUpdatePricesValidityRequest` and `idProperty`: the Prezzi e Validità tab; the list
- * shows the new price. 400 for a price below 0; 404 for a service that is not one of the property.
+ * `AutomaticPriceUpdatePricesValidityRequest`: the Prezzi e Validità tab; the list shows the new
+ * price. 400 for a price below 0; 404 for a service that is not one of the property.
  */
 export const updateAutomaticPricePricesValidityMock = (
   request: HttpRequest<unknown>,
@@ -2644,9 +2588,8 @@ function automaticIconErrors(icon: string | null): MockFieldError[] {
 }
 
 /**
- * `POST /api/catalog/automatic-price-list`: one page of the automatic prices of the requested
- * property, searched in the name. 401 without a valid access token; 403 for a missing or unknown
- * property.
+ * `POST /api/catalog/automatic-price-list`: one page of the automatic prices of the property of the
+ * token, searched in the name. 401 without a valid access token.
  */
 export const automaticPriceListMock = (
   request: HttpRequest<unknown>,
@@ -2655,10 +2598,7 @@ export const automaticPriceListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -2748,9 +2688,8 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
 ]);
 
 /**
- * `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) of the
- * requested property, searched in the name. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) of
+ * the property of the token, searched in the name. 401 without a valid access token.
  */
 export const tableServiceListMock = (
   request: HttpRequest<unknown>,
@@ -2759,10 +2698,7 @@ export const tableServiceListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -2784,10 +2720,9 @@ export const tableServiceListMock = (
 };
 
 /**
- * `POST /api/catalog/delete-standard-service-item` with `DeleteStandardServiceItemsRequest`: all or
- * nothing. If one id is not a service of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
+ * `POST /api/catalog/delete-standard-service-item` with `{ idStandardServices }`: all or nothing.
+ * If one id is not a service of the property nothing is deleted (404 `resource.not_found`).
+ * Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
@@ -2795,11 +2730,8 @@ export const deleteStandardServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteStandardServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idStandardServices?: string[] };
+  const property = DEMO_PROPERTY;
   const standardServices = standardServicesOf(property.id, body.idStandardServices);
   if (!standardServices) {
     return resourceNotFound(request);
@@ -2811,7 +2743,7 @@ export const deleteStandardServiceItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-standard-service-item` with `DuplicateStandardServiceItemsRequest`:
+ * `POST /api/catalog/duplicate-standard-service-item` with `{ idStandardServices }`:
  * all or nothing, like the delete. Each copy keeps the price; the name is chosen by the backend:
  * the mock invents "Doccia calda (copia)", then "Doccia calda (copia 2)" and so on.
  */
@@ -2821,11 +2753,8 @@ export const duplicateStandardServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateStandardServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idStandardServices?: string[] };
+  const property = DEMO_PROPERTY;
   const standardServices = standardServicesOf(property.id, body.idStandardServices);
   if (!standardServices) {
     return resourceNotFound(request);
@@ -2875,10 +2804,9 @@ function standardServiceCopyName(standardService: StandardServiceRow): string {
 }
 
 /**
- * `POST /api/catalog/delete-hourly-service-item` with `DeleteHourlyServiceItemsRequest`: all or
- * nothing. If one id is not an hourly service of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
+ * `POST /api/catalog/delete-hourly-service-item` with `{ idHourlyServices }`: all or nothing. If
+ * one id is not an hourly service of the property nothing is deleted (404 `resource.not_found`).
+ * Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
@@ -2886,11 +2814,8 @@ export const deleteHourlyServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteHourlyServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idHourlyServices?: string[] };
+  const property = DEMO_PROPERTY;
   const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
   if (!hourlyServices) {
     return resourceNotFound(request);
@@ -2902,7 +2827,7 @@ export const deleteHourlyServiceItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-hourly-service-item` with `DuplicateHourlyServiceItemsRequest`: all
+ * `POST /api/catalog/duplicate-hourly-service-item` with `{ idHourlyServices }`: all
  * or nothing, like the delete. The name of each copy is chosen by the backend: the mock invents
  * "Sup (copia)", then "Sup (copia 2)" and so on.
  */
@@ -2912,11 +2837,8 @@ export const duplicateHourlyServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateHourlyServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idHourlyServices?: string[] };
+  const property = DEMO_PROPERTY;
   const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
   if (!hourlyServices) {
     return resourceNotFound(request);
@@ -2962,10 +2884,9 @@ function hourlyServiceCopyName(hourlyService: HourlyServiceRow): string {
 }
 
 /**
- * `POST /api/catalog/delete-automatic-price-item` with `DeleteAutomaticPriceItemsRequest`: all or
- * nothing. If one id is not an automatic price of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
+ * `POST /api/catalog/delete-automatic-price-item` with `{ idAutomaticPrices }`: all or nothing. If
+ * one id is not an automatic price of the property nothing is deleted (404 `resource.not_found`).
+ * Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
@@ -2973,11 +2894,8 @@ export const deleteAutomaticPriceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteAutomaticPriceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idAutomaticPrices?: string[] };
+  const property = DEMO_PROPERTY;
   const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
   if (!automaticPrices) {
     return resourceNotFound(request);
@@ -2989,7 +2907,7 @@ export const deleteAutomaticPriceItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-automatic-price-item` with `DuplicateAutomaticPriceItemsRequest`:
+ * `POST /api/catalog/duplicate-automatic-price-item` with `{ idAutomaticPrices }`:
  * all or nothing, like the delete. Each copy keeps the price; the name is chosen by the backend:
  * the mock invents "Coperto (copia)", then "Coperto (copia 2)" and so on.
  */
@@ -2999,11 +2917,8 @@ export const duplicateAutomaticPriceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateAutomaticPriceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idAutomaticPrices?: string[] };
+  const property = DEMO_PROPERTY;
   const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
   if (!automaticPrices) {
     return resourceNotFound(request);
@@ -3049,10 +2964,9 @@ function automaticPriceCopyName(automaticPrice: AutomaticPriceRow): string {
 }
 
 /**
- * `POST /api/catalog/delete-table-service-item` with `DeleteTableServiceItemsRequest`: all or
- * nothing. If one id is not a table service of the property nothing is deleted (404
- * `resource.not_found`). Repeated ids count once. 204 without a body; 401 without a valid access
- * token; 403 for an unknown property.
+ * `POST /api/catalog/delete-table-service-item` with `{ idTableServices }`: all or nothing. If one
+ * id is not a table service of the property nothing is deleted (404 `resource.not_found`). Repeated
+ * ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteTableServiceItemsMock = (
   request: HttpRequest<unknown>,
@@ -3060,11 +2974,8 @@ export const deleteTableServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteTableServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idTableServices?: string[] };
+  const property = DEMO_PROPERTY;
   const tableServices = tableServicesOf(property.id, body.idTableServices);
   if (!tableServices) {
     return resourceNotFound(request);
@@ -3076,7 +2987,7 @@ export const deleteTableServiceItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-table-service-item` with `DuplicateTableServiceItemsRequest`: all or
+ * `POST /api/catalog/duplicate-table-service-item` with `{ idTableServices }`: all or
  * nothing, like the delete. The name of each copy is chosen by the backend: the mock invents
  * "Pranzo (copia)", then "Pranzo (copia 2)" and so on.
  */
@@ -3086,11 +2997,8 @@ export const duplicateTableServiceItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateTableServiceItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idTableServices?: string[] };
+  const property = DEMO_PROPERTY;
   const tableServices = tableServicesOf(property.id, body.idTableServices);
   if (!tableServices) {
     return resourceNotFound(request);
@@ -3105,14 +3013,14 @@ export const duplicateTableServiceItemsMock = (
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
-type CreateTableServiceBody = Partial<TableServiceAddItemRequest> & { idProperty?: unknown };
+type CreateTableServiceBody = Partial<TableServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-table-service` with `TableServiceAddItemRequest` and `idProperty`: the new
- * table service goes into the list, with the name in the language of `Accept-Language`. 204 without a
- * body; 401 without a valid access token; 403 for an unknown property; 400 with one error per wrong
- * field (name and description in the language of the request, choices among the values of their
- * enums, quantities whole and above 0, deposit from 0 to 100).
+ * `POST /api/catalog/create-table-service` with `TableServiceAddItemRequest`: the new table service
+ * goes into the list, with the name in the language of `Accept-Language`. 204 without a body; 401
+ * without a valid access token; 400 with one error per wrong field (name and description in the
+ * language of the request, choices among the values of their enums, quantities whole and above 0,
+ * deposit from 0 to 100).
  */
 export const createTableServiceMock = (
   request: HttpRequest<unknown>,
@@ -3121,10 +3029,7 @@ export const createTableServiceMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateTableServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [
     ...standardGeneralErrors({ translations: body.translations }, language),
@@ -3233,10 +3138,10 @@ export const tableServiceAvailabilityBookingsMock = (
 type UpdateTableServiceBody = CreateTableServiceBody & { idTableService?: unknown };
 
 /**
- * The common part of the two updates of the edit panel: 401 without a valid access token; 403 for an
- * unknown property; 404 `resource.not_found` for an `idTableService` that is not one of its table
- * services; 400 with one error per wrong field; otherwise `apply` changes the data of its tab and
- * the answer is 204 without a body.
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 404
+ * `resource.not_found` for an `idTableService` that is not one of its table services; 400 with one
+ * error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body.
  */
 function updateTableService(
   request: HttpRequest<unknown>,
@@ -3251,10 +3156,7 @@ function updateTableService(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateTableServiceBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const row = TABLE_SERVICES.find(
     (item) => item.idTableService === body.idTableService && item.propertyId === property.id,
   );
@@ -3272,9 +3174,9 @@ function updateTableService(
 }
 
 /**
- * `POST /api/catalog/update-table-service-general` with `TableServiceUpdateGeneralRequest` and
- * `idProperty`: names, descriptions and Metti in evidenza; the list shows the new name (language of
- * `Accept-Language`). Errors as the creation.
+ * `POST /api/catalog/update-table-service-general` with `TableServiceUpdateGeneralRequest`: names,
+ * descriptions and Metti in evidenza; the list shows the new name (language of `Accept-Language`).
+ * Errors as the creation.
  */
 export const updateTableServiceGeneralMock = (
   request: HttpRequest<unknown>,
@@ -3294,8 +3196,8 @@ export const updateTableServiceGeneralMock = (
 
 /**
  * `POST /api/catalog/update-table-service-availability-bookings` with
- * `TableServiceUpdateAvailabilityBookingsRequest` and `idProperty`: the Disponibilità e Prenotazioni
- * tab. Errors as the creation (see `tableServiceErrors`).
+ * `TableServiceUpdateAvailabilityBookingsRequest`: the Disponibilità e Prenotazioni tab. Errors as
+ * the creation (see `tableServiceErrors`).
  */
 export const updateTableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,

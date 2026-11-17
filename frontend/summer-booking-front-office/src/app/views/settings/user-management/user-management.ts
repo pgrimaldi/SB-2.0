@@ -96,10 +96,9 @@ export class UserManagement {
   protected readonly deleting = signal(false);
   protected readonly idUsersToDelete = signal<readonly string[]>([]);
   protected readonly userNameToDelete = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   private readonly logIcon = '/assets/images/UserManagement_Log.svg';
   protected readonly viewLogsIcon = ['/assets/images/UserManagement_LogWhite.svg'] as const;
@@ -163,10 +162,9 @@ export class UserManagement {
     ...this.standardActions(),
   ]);
 
-  protected readonly deleteUser = (_idProperty: string, [idUser]: string[]) =>
-    this.identity.deleteUser(idUser);
+  protected readonly deleteUser = ([idUser]: string[]) => this.identity.deleteUser(idUser);
 
-  protected readonly load: TableLoad<{ idProperty: string }, UserRow> = (request) =>
+  protected readonly load: TableLoad<object, UserRow> = (request) =>
     this.identity.usersList(request).pipe(
       switchMap((page) =>
         (

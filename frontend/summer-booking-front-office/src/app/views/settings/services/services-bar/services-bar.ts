@@ -84,10 +84,9 @@ export class ServicesBar {
   protected readonly duplicating = signal(false);
   protected readonly idBarServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly barServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_BarTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -122,7 +121,7 @@ export class ServicesBar {
     edit: ({ idBarService }) => idBarService && this.openEdit(idBarService),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, BarServiceRow> = (request) =>
+  protected readonly load: TableLoad<object, BarServiceRow> = (request) =>
     this.catalog.barServiceList(request).pipe(
       switchMap((page) =>
         (
@@ -150,10 +149,10 @@ export class ServicesBar {
       ),
     );
 
-  protected readonly deleteBarServices = (idProperty: string, idBarServices: string[]) =>
-    this.catalog.deleteBarServiceItems({ idProperty, idBarServices });
-  protected readonly duplicateBarServices = (idProperty: string, idBarServices: string[]) =>
-    this.catalog.duplicateBarServiceItems({ idProperty, idBarServices });
+  protected readonly deleteBarServices = (idBarServices: string[]) =>
+    this.catalog.deleteBarServiceItems(idBarServices);
+  protected readonly duplicateBarServices = (idBarServices: string[]) =>
+    this.catalog.duplicateBarServiceItems(idBarServices);
 
   protected askDelete(
     idBarServices: readonly TableRowId[],

@@ -10,20 +10,17 @@ export class BookingService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/booking`;
 
-  /** GET: the property travels in the query string (`?idProperty=…`). */
-  readonly onlineServicesOptions = (idProperty: string): Observable<OnlineBookingServicesOptions> =>
+  readonly onlineServicesOptions = (): Observable<OnlineBookingServicesOptions> =>
     this.httpClient.get<OnlineBookingServicesOptions>(
       `${this.endpoint}/get-online-services-options`,
-      { params: { idProperty } },
     );
 
   /** Every option, changed or not. Answers 204 with no body. */
   readonly updateOnlineServicesOptions = (
-    idProperty: string,
     options: OnlineBookingServicesOptions,
   ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-online-services-options`, {
-      ...onlyFieldsOf(OnlineBookingServicesOptions, options),
-      idProperty,
-    });
+    this.httpClient.post<void>(
+      `${this.endpoint}/update-online-services-options`,
+      onlyFieldsOf(OnlineBookingServicesOptions, options),
+    );
 }

@@ -13,7 +13,6 @@ describe('AuditService', () => {
     const audit = TestBed.inject(AuditService);
     const controller = TestBed.inject(HttpTestingController);
     const filters: AuditLogFiltersRequest = {
-      idProperty: 'p1',
       search: 'ferri',
       filters: [{ field: 'datetimeFrom', value: ['2026-10-20T00:00:00.000Z'] }],
       sortField: 'occurredAt',

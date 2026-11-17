@@ -31,9 +31,8 @@ registro, `/settings/user-management/logs`.
   `/api/audit/entries/export` e `/api/audit/actors` restano come sono.
 - **Le liste sono le tabelle del frontend**: ogni elenco mostrato in una tabella usa la richiesta e la risposta standard
   delle tabelle del frontend (sotto), con pagine, ricerca e ordinamento fatti dal backend.
-- **Stabilimento**: le richieste con la ricerca e i filtri di una tabella (l'elenco degli utenti, il registro, la sua
-  stampa e la sua esportazione) e quelle delle tendine (`*-combobox`) hanno `idProperty`, che deve essere quello del
-  token; tutte le altre API lo prendono dal token e non lo ricevono.
+- **Stabilimento**: tutte le API lo prendono dal token, comprese le tabelle (l'elenco degli utenti, il registro, la sua
+  stampa e la sua esportazione) e le tendine (`*-combobox`), che sono POST senza corpo: nessuna richiesta lo contiene.
 - **Permessi**: le API degli utenti come `/api/identity/property-users` (`StaffManage`), quelle del registro come
   `GET /api/audit/entries` (`AuditRead`). Senza permesso: 403 `auth.forbidden`.
 - **JSON** in camelCase, con i nomi esatti di questo documento. I ruoli viaggiano con i codici di `RoleCodes`
@@ -52,7 +51,6 @@ Il corpo è la richiesta standard delle tabelle:
 
 ```json
 {
-  "idProperty": "7ddc54a7-233b-4f4b-a365-68be583e661f",
   "page": 1,
   "pageSize": 10,
   "search": "ferri",
@@ -64,7 +62,6 @@ Il corpo è la richiesta standard delle tabelle:
 
 | Campo | Tipo | Regola |
 |---|---|---|
-| `idProperty` | string (UUID) | Lo stabilimento della tabella: deve essere quello dell'utente del token, altrimenti 403 `auth.forbidden`. |
 | `page` | number | Pagina richiesta, da 1. |
 | `pageSize` | number | Righe per pagina: 10, 20, 50 o 100. |
 | `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Si cerca in email e cellulare (il numero, senza prefisso), senza distinguere maiuscole e minuscole. |
@@ -118,7 +115,7 @@ e non lo fa modificare né eliminare.
 
 | Status | `code` | Quando |
 |---|---|---|
-| 403 | `auth.forbidden` | `idProperty` assente, sconosciuto o non dell'utente, oppure utente senza il permesso `StaffManage`. |
+| 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 2. POST /api/identity/create-user
@@ -131,7 +128,7 @@ restrizione.
 
 ### Richiesta
 
-Lo stabilimento lo prende dal token: il corpo non ha `idProperty`.
+Lo stabilimento lo prende dal token.
 
 ```json
 {
@@ -239,8 +236,7 @@ Bottone "Salva" del popup "Modifica utente". È un'**API nuova** con solo i camp
 
 ### Richiesta
 
-Tutti i campi del popup, cambiati o no; l'utente da modificare è `idUser`. Lo stabilimento lo prende dal token: il
-corpo non ha `idProperty`.
+Tutti i campi del popup, cambiati o no; l'utente da modificare è `idUser`. Lo stabilimento lo prende dal token.
 
 ```json
 {
@@ -313,7 +309,6 @@ Il corpo è la richiesta standard delle tabelle:
 
 ```json
 {
-  "idProperty": "7ddc54a7-233b-4f4b-a365-68be583e661f",
   "page": 1,
   "pageSize": 10,
   "search": "ferri",
@@ -330,7 +325,6 @@ Il corpo è la richiesta standard delle tabelle:
 
 | Campo | Tipo | Regola |
 |---|---|---|
-| `idProperty` | string (UUID) | Lo stabilimento della tabella: deve essere quello dell'utente del token, altrimenti 403. |
 | `page` | number | Pagina richiesta, da 1. |
 | `pageSize` | number | Righe per pagina: 10, 20, 50 o 100. |
 | `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Si cerca in nome dell'operatore, numero della prenotazione e postazione, senza distinguere maiuscole e minuscole. |
@@ -395,7 +389,7 @@ Le voci sono le stesse di `GET /api/audit/entries`, con solo questi sette campi 
 | Status | `code` | Quando |
 |---|---|---|
 | 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
-| 403 | `auth.forbidden` | `idProperty` non dell'utente, oppure utente senza il permesso `AuditRead`. |
+| 403 | `auth.forbidden` | Utente senza il permesso `AuditRead`. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 6. POST /api/identity/user-combobox
@@ -410,17 +404,7 @@ rimanda nel filtro `idUser` di `entries-list` e `print-log`.
 
 ### Richiesta
 
-Come tutte le tendine del frontend, il solo stabilimento:
-
-```json
-{
-  "idProperty": "7ddc54a7-233b-4f4b-a365-68be583e661f"
-}
-```
-
-| Campo | Tipo | Regola |
-|---|---|---|
-| `idProperty` | string (UUID) | Deve essere quello dell'utente del token, altrimenti 403. |
+Come tutte le tendine del frontend, POST senza corpo: lo stabilimento lo prende il backend dal token.
 
 ### Risposta
 
@@ -442,7 +426,7 @@ Come tutte le tendine del frontend, il solo stabilimento:
 
 | Status | `code` | Quando |
 |---|---|---|
-| 403 | `auth.forbidden` | `idProperty` non dell'utente, oppure utente senza il permesso di vedere gli utenti. |
+| 403 | `auth.forbidden` | Utente senza il permesso di vedere gli utenti. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 7. POST /api/audit/print-log
@@ -457,7 +441,6 @@ Gli stessi filtri che la tabella del registro sta mostrando, senza pagina e righ
 
 ```json
 {
-  "idProperty": "7ddc54a7-233b-4f4b-a365-68be583e661f",
   "search": "ferri",
   "filters": [
     { "field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"] },
@@ -472,7 +455,6 @@ Gli stessi filtri che la tabella del registro sta mostrando, senza pagina e righ
 
 | Campo | Tipo | Regola |
 |---|---|---|
-| `idProperty` | string (UUID) | Lo stabilimento della tabella: deve essere quello dell'utente del token, altrimenti 403. |
 | `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Si cerca in nome dell'operatore, numero della prenotazione e postazione. |
 | `filters` | array | Un elemento per campo, `value` sempre un array di stringhe, `[]` se non ci sono filtri. `datetimeFrom` / `datetimeTo`: il periodo (date e ore ISO 8601 UTC, un valore ciascuno). `actionCode`: i codici delle azioni scelte (una qualsiasi). `idUser`: gli utenti scelti (uno qualsiasi). |
 | `sortField` | string | `bookingNumber`, `userNumber`, `actorName`, `spotLabel`, `actionCode` o `occurredAt`; `""` = le più recenti prima. |
@@ -497,7 +479,7 @@ Errori in JSON (Problem Details), anche se la risposta giusta è un file:
 | Status | `code` | Quando |
 |---|---|---|
 | 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
-| 403 | `auth.forbidden` | `idProperty` non dell'utente, oppure utente senza il permesso di leggere il registro (`AuditRead`, come `GET /api/audit/entries`). |
+| 403 | `auth.forbidden` | Utente senza il permesso di leggere il registro (`AuditRead`, come `GET /api/audit/entries`). |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 8. POST /api/audit/export-log
@@ -513,7 +495,6 @@ mostrando, senza pagina e righe per pagina, quindi **tutte** le voci che li risp
 
 ```json
 {
-  "idProperty": "7ddc54a7-233b-4f4b-a365-68be583e661f",
   "search": "ferri",
   "filters": [
     { "field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"] },
@@ -546,7 +527,7 @@ Errori in JSON (Problem Details), come per `print-log`:
 | Status | `code` | Quando |
 |---|---|---|
 | 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
-| 403 | `auth.forbidden` | `idProperty` non dell'utente, oppure utente senza il permesso `AuditRead`. |
+| 403 | `auth.forbidden` | Utente senza il permesso `AuditRead`. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## API esistenti usate così come sono
@@ -587,4 +568,4 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
   `Content-Disposition`.
 - `export-log` accetta lo stesso corpo di `print-log` e restituisce un file `xlsx` con tutte le voci filtrate,
   nell'ordine chiesto, e il nome in `Content-Disposition`.
-- Ovunque: un `idProperty` diverso da quello del token dà 403; nessuna API senza `idProperty` lo accetta.
+- Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.

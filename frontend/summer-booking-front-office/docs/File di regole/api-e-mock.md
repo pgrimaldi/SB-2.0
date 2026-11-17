@@ -53,9 +53,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - Un codice di errore nuovo va aggiunto in `API_ERROR_CODES`, nel catalogo di `API_CONTRACTS.docx`, nei mock e nelle
   traduzioni `error.` di ogni lingua.
 - Richiesta standard delle tabelle (`PageRequest`, risposta `Page<T>`): vedi `tabelle.md`.
-- Stabilimento: le richieste con la ricerca e i filtri di una tabella (elenchi, stampe, esportazioni) e quelle delle
-  tendine hanno `idProperty`, che il backend controlla col token; tutte le altre API lo prendono dal token e non lo
-  mandano.
+- Stabilimento: nessuna API manda `idProperty`, nemmeno tabelle e tendine: il backend prende lo stabilimento dal
+  token. Una chiamata che deve aspettare l'utente collegato controlla `this.auth.user()?.propertyId`, senza mandarlo.
+- I mock usano lo stabilimento dell'utente di prova (`DEMO_PROPERTY`).
 
 ## Collegamento con il backend
 
@@ -138,7 +138,7 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 
 ## Combobox
 
-- Le API delle tendine sono `POST /api/<area>/<cosa>-combobox` con il solo `{ idProperty }`, senza paginazione.
+- Le API delle tendine sono `POST /api/<area>/<cosa>-combobox` senza corpo e senza paginazione.
   Unica eccezione `GET /api/catalog/countries-combobox`, che non dipende dallo stabilimento.
 - Una sola tendina degli utenti per tutta l'app: `POST /api/identity/user-combobox`. Quali utenti restituire lo
   decide il backend.

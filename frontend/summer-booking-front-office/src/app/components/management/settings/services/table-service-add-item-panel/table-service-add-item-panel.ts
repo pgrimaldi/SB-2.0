@@ -144,8 +144,7 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -153,7 +152,7 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.catalog.createTableService(idProperty, this.draft()));
+        await firstValueFrom(this.catalog.createTableService(this.draft()));
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();

@@ -112,7 +112,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -149,7 +148,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -830,7 +828,6 @@ Nessun payload.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -866,7 +863,6 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -1064,7 +1060,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -1102,7 +1097,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -1130,11 +1124,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -1149,9 +1139,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -1166,7 +1154,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "search": "string",
   "filters": [
     {
@@ -1187,7 +1174,6 @@ File (binario), non JSON.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `search` | string |
 | `filters[]` | PageFilter[] (array di oggetti) |
 | `filters[].field` | string |
@@ -1205,7 +1191,6 @@ File (binario), non JSON.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "search": "string",
   "filters": [
     {
@@ -1226,7 +1211,6 @@ File (binario), non JSON.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `search` | string |
 | `filters[]` | PageFilter[] (array di oggetti) |
 | `filters[].field` | string |
@@ -1312,13 +1296,12 @@ Nessun payload.
 | `nextStartsOn` | string (data, AAAA-MM-GG) \| null |
 | `nextEndsOn` | string (data, AAAA-MM-GG) \| null |
 
-### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+### GET `/api/seasons/period-list?isNextSeason={isNextSeason}`
 
 **Payload JSON** (query string)
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "isNextSeason": "boolean"
 }
 ```
@@ -1345,7 +1328,6 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `isNextSeason` | boolean |
 
 **Response tabella**
@@ -1365,7 +1347,6 @@ Nessun payload.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "isNextSeason": "boolean",
   "periodName": "string",
   "intervals": [
@@ -1385,7 +1366,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `isNextSeason` | boolean |
 | `periodName` | string |
 | `intervals[]` | SeasonPeriodInterval[] (array di oggetti) |
@@ -1402,7 +1382,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPeriod": "string (UUID)"
 }
 ```
@@ -1415,7 +1394,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPeriod` | string (UUID) |
 
 **Response tabella**
@@ -1428,7 +1406,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPeriod": "string (UUID)",
   "periodName": "string"
 }
@@ -1442,7 +1419,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPeriod` | string (UUID) |
 | `periodName` | string |
 
@@ -1456,7 +1432,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPeriod": "string (UUID)",
   "dateFrom": "string (ISO 8601, UTC)",
   "dateTo": "string (ISO 8601, UTC)"
@@ -1471,7 +1446,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPeriod` | string (UUID) |
 | `dateFrom` | string (ISO 8601, UTC) |
 | `dateTo` | string (ISO 8601, UTC) |
@@ -1486,7 +1460,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idInterval": "string (UUID)",
   "dateFrom": "string (ISO 8601, UTC)",
   "dateTo": "string (ISO 8601, UTC)"
@@ -1501,7 +1474,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idInterval` | string (UUID) |
 | `dateFrom` | string (ISO 8601, UTC) |
 | `dateTo` | string (ISO 8601, UTC) |
@@ -1516,7 +1488,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idIntervals": "string[] (UUID)"
 }
 ```
@@ -1529,7 +1500,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idIntervals` | string[] (UUID) |
 
 **Response tabella**
@@ -1544,7 +1514,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -1577,7 +1546,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -1602,7 +1570,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "sectorName": "string"
 }
 ```
@@ -1615,7 +1582,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `sectorName` | string |
 
 **Response tabella**
@@ -1628,7 +1594,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idSector": "string (UUID)",
   "sectorName": "string"
 }
@@ -1642,7 +1607,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idSector` | string (UUID) |
 | `sectorName` | string |
 
@@ -1656,7 +1620,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idSectors": "string[] (UUID, almeno uno)"
 }
 ```
@@ -1669,7 +1632,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idSectors` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -1682,7 +1644,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idSectors": "string[] (UUID, almeno uno)"
 }
 ```
@@ -1695,7 +1656,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idSectors` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2209,7 +2169,6 @@ Nessun payload.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -2246,7 +2205,6 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -2273,11 +2231,7 @@ Nessun payload.
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -2292,9 +2246,7 @@ Nessun payload.
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -2309,7 +2261,6 @@ Nessun payload.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idArticle": "string (UUID)",
   "name": "string | null",
   "totalQuantity": "number (intero > 0)",
@@ -2327,7 +2278,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idArticle` | string (UUID) |
 | `name` | string \| null |
 | `totalQuantity` | number (intero > 0) |
@@ -2345,7 +2295,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idArticle": "string (UUID)",
   "name": "string | null",
   "totalQuantity": "number (intero > 0)",
@@ -2363,7 +2312,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idArticle` | string (UUID) |
 | `name` | string \| null |
 | `totalQuantity` | number (intero > 0) |
@@ -2381,7 +2329,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idItems": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2394,7 +2341,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idItems` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2407,7 +2353,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idItems": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2420,7 +2365,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idItems` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2435,7 +2379,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -2468,7 +2411,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -2493,7 +2435,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPackages": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2506,7 +2447,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPackages` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2519,7 +2459,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPackages": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2532,7 +2471,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPackages` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2545,7 +2483,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -2578,7 +2515,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -2603,7 +2539,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAdditionalItems": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2616,7 +2551,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAdditionalItems` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2629,7 +2563,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAdditionalItems": "string[] (UUID, almeno uno)"
 }
 ```
@@ -2642,7 +2575,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAdditionalItems` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -2655,7 +2587,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idArticle": "string (UUID)",
   "idPackages": "string[] (UUID)",
   "isOnlineEnabled": "boolean",
@@ -2710,7 +2641,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idArticle` | string (UUID) |
 | `idPackages` | string[] (UUID) |
 | `isOnlineEnabled` | boolean |
@@ -2864,7 +2794,6 @@ Nessun corpo (204).
 ```json
 {
   "idAdditionalItem": "string (UUID)",
-  "idProperty": "string (UUID)",
   "idArticle": "string (UUID)",
   "idPackages": "string[] (UUID)",
   "isOnlineEnabled": "boolean",
@@ -2920,7 +2849,6 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idAdditionalItem` | string (UUID) |
-| `idProperty` | string (UUID) |
 | `idArticle` | string (UUID) |
 | `idPackages` | string[] (UUID) |
 | `isOnlineEnabled` | boolean |
@@ -2964,11 +2892,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -2983,9 +2907,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -2998,11 +2920,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -3017,9 +2935,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -3486,11 +3402,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -3505,9 +3417,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -3520,11 +3430,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -3539,9 +3445,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -3550,13 +3454,12 @@ Nessun corpo (204).
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+### GET `/api/seasons/period-list?isNextSeason={isNextSeason}`
 
 **Payload JSON** (query string)
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "isNextSeason": "boolean"
 }
 ```
@@ -3583,7 +3486,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `isNextSeason` | boolean |
 
 **Response tabella**
@@ -3605,7 +3507,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -3642,7 +3543,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -3671,7 +3571,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "voucherName": "string",
   "validityPeriods": [
     {
@@ -3702,7 +3601,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `voucherName` | string |
 | `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
@@ -3789,7 +3687,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idVoucher": "string (UUID)",
   "voucherName": "string",
   "validityPeriods": [
@@ -3821,7 +3718,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idVoucher` | string (UUID) |
 | `voucherName` | string |
 | `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) |
@@ -3847,7 +3743,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idVouchers": "string[] (UUID, almeno uno)"
 }
 ```
@@ -3860,7 +3755,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idVouchers` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -3873,7 +3767,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idVouchers": "string[] (UUID, almeno uno)"
 }
 ```
@@ -3886,7 +3779,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idVouchers` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -3901,7 +3793,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -3936,7 +3827,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -3961,11 +3851,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -3980,9 +3866,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -3997,7 +3881,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -4051,7 +3934,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
@@ -4248,7 +4130,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarService": "string (UUID)",
   "translations": [
     {
@@ -4271,7 +4152,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
@@ -4291,7 +4171,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarService": "string (UUID)",
   "price": "number (decimale, €) | null",
   "vatRate": "number (decimale, %) | null",
@@ -4321,7 +4200,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarService` | string (UUID) |
 | `price` | number (decimale, €) \| null |
 | `vatRate` | number (decimale, %) \| null |
@@ -4345,7 +4223,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarService": "string (UUID)",
   "bookingOptions": [
     {
@@ -4373,7 +4250,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarService` | string (UUID) |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
@@ -4398,7 +4274,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -4411,7 +4286,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -4424,7 +4298,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBarServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -4437,7 +4310,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBarServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -4450,7 +4322,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -4484,7 +4355,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -4510,7 +4380,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -4557,7 +4426,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
@@ -4739,7 +4607,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardService": "string (UUID)",
   "translations": [
     {
@@ -4761,7 +4628,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
@@ -4780,7 +4646,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardService": "string (UUID)",
   "price": "number (decimale, €) | null",
   "vatRate": "number (decimale, %) | null",
@@ -4804,7 +4669,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardService` | string (UUID) |
 | `price` | number (decimale, €) \| null |
 | `vatRate` | number (decimale, %) \| null |
@@ -4825,7 +4689,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardService": "string (UUID)",
   "bookingOptions": [
     {
@@ -4853,7 +4716,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardService` | string (UUID) |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
@@ -4878,7 +4740,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -4891,7 +4752,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -4904,7 +4764,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idStandardServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -4917,7 +4776,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idStandardServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -4930,7 +4788,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -4963,7 +4820,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -4988,7 +4844,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -5001,7 +4856,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -5014,7 +4868,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -5027,7 +4880,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -5040,7 +4892,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -5113,7 +4964,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
@@ -5353,7 +5203,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyService": "string (UUID)",
   "translations": [
     {
@@ -5375,7 +5224,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
@@ -5394,7 +5242,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyService": "string (UUID)",
   "isPeriodPricingEnabled": "boolean",
   "periodAvailabilities": [
@@ -5435,7 +5282,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyService` | string (UUID) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
@@ -5467,7 +5313,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idHourlyService": "string (UUID)",
   "bookingOptions": [
     {
@@ -5504,7 +5349,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idHourlyService` | string (UUID) |
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
@@ -5534,7 +5378,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -5568,7 +5411,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -5588,15 +5430,11 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### GET `/api/catalog/get-automatic-price-services?idProperty={idProperty}`
+### GET `/api/catalog/get-automatic-price-services`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -5623,11 +5461,9 @@ Nessun corpo (204).
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -5649,7 +5485,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -5690,7 +5525,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
@@ -5829,7 +5663,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrice": "string (UUID)",
   "translations": [
     {
@@ -5850,7 +5683,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrice` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
@@ -5868,7 +5700,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrice": "string (UUID)",
   "price": "number (decimale, €) | null",
   "vatRate": "number (decimale, %) | null",
@@ -5902,7 +5733,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrice` | string (UUID) |
 | `price` | number (decimale, €) \| null |
 | `vatRate` | number (decimale, %) \| null |
@@ -5930,7 +5760,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -5943,7 +5772,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -5956,7 +5784,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idAutomaticPrices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -5969,7 +5796,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idAutomaticPrices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -5982,7 +5808,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -6015,7 +5840,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -6040,7 +5864,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -6053,7 +5876,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -6066,7 +5888,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableServices": "string[] (UUID, almeno uno)"
 }
 ```
@@ -6079,7 +5900,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableServices` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -6092,7 +5912,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "translations": [
     {
       "language": "string",
@@ -6143,7 +5962,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
@@ -6306,7 +6124,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableService": "string (UUID)",
   "translations": [
     {
@@ -6327,7 +6144,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableService` | string (UUID) |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) |
 | `translations[].language` | string |
@@ -6345,7 +6161,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idTableService": "string (UUID)",
   "availabilities": [
     {
@@ -6389,7 +6204,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idTableService` | string (UUID) |
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
 | `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
@@ -6420,15 +6234,11 @@ Nessun corpo (204).
 
 ## Sharing
 
-### GET `/api/sharing/general-information?idProperty={idProperty}`
+### GET `/api/sharing/general-information`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -6450,11 +6260,9 @@ Nessun corpo (204).
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -6492,8 +6300,7 @@ Nessun corpo (204).
   "isAutomaticVoucherEnabled": "boolean",
   "voucherCreditValue": "number (decimale, €) | null",
   "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €) | null",
-  "idProperty": "string (UUID)"
+  "prepaidCardCreditValue": "number (decimale, €) | null"
 }
 ```
 
@@ -6518,7 +6325,6 @@ Nessun corpo (204).
 | `voucherCreditValue` | number (decimale, €) \| null |
 | `isPrepaidCardTopUpEnabled` | boolean |
 | `prepaidCardCreditValue` | number (decimale, €) \| null |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
@@ -6526,15 +6332,11 @@ Nessun corpo (204).
 
 ## Prenotazioni online
 
-### GET `/api/system/get-stripe-information?idProperty={idProperty}`
+### GET `/api/system/get-stripe-information`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -6542,11 +6344,9 @@ Nessun corpo (204).
 "string | null"
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -6554,15 +6354,11 @@ Nessun corpo (204).
 |---|---|
 | `(corpo)` | string \| null |
 
-### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
+### GET `/api/booking/get-online-services-options`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -6582,11 +6378,9 @@ Nessun corpo (204).
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -6620,8 +6414,7 @@ Nessun corpo (204).
   "isDepositAccepted": "boolean",
   "isPrepaidCardAccepted": "boolean",
   "bookingPanelTitle": "string (HTML) | null",
-  "usefulInformation": "string (HTML) | null",
-  "idProperty": "string (UUID)"
+  "usefulInformation": "string (HTML) | null"
 }
 ```
 
@@ -6644,7 +6437,6 @@ Nessun corpo (204).
 | `isPrepaidCardAccepted` | boolean |
 | `bookingPanelTitle` | string (HTML) \| null |
 | `usefulInformation` | string (HTML) \| null |
-| `idProperty` | string (UUID) |
 
 **Response tabella**
 
@@ -6654,11 +6446,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -6673,9 +6461,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -6692,7 +6478,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -6727,7 +6512,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -6754,7 +6538,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPrinter": "string (UUID)",
   "isEnabled": "boolean"
 }
@@ -6768,7 +6551,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPrinter` | string (UUID) |
 | `isEnabled` | boolean |
 
@@ -6782,7 +6564,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "printerName": "string",
   "printerIP": "string | null",
   "printerPort": "number (intero) | null",
@@ -6807,7 +6588,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `printerName` | string |
 | `printerIP` | string \| null |
 | `printerPort` | number (intero) \| null |
@@ -6832,7 +6612,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idPrinter": "string (UUID)"
 }
 ```
@@ -6845,22 +6624,17 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idPrinter` | string (UUID) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/taxation/electronic-receipt?idProperty={idProperty}`
+### GET `/api/taxation/electronic-receipt`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -6868,11 +6642,9 @@ Nessun corpo (204).
 "string (HTML)"
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -6886,7 +6658,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "isElectronicReceiptAccepted": "boolean"
 }
 ```
@@ -6899,7 +6670,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `isElectronicReceiptAccepted` | boolean |
 
 **Response tabella**
@@ -6910,11 +6680,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -6922,9 +6688,7 @@ File (binario), non JSON.
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -6936,7 +6700,6 @@ File (binario), non JSON.
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "companyName": "string | null",
   "companyAddress": "string | null",
   "streetNumber": "string | null",
@@ -6959,7 +6722,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `companyName` | string \| null |
 | `companyAddress` | string \| null |
 | `streetNumber` | string \| null |
@@ -6978,15 +6740,11 @@ Nessun corpo (204).
 
 ## Configurazione email
 
-### GET `/api/system/email-configuration?idProperty={idProperty}`
+### GET `/api/system/email-configuration`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -7002,11 +6760,9 @@ Nessun corpo (204).
 }
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -7026,7 +6782,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "senderMailAddress": "string",
   "senderName": "string",
   "smtpServerAddress": "string",
@@ -7045,7 +6800,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `senderMailAddress` | string |
 | `senderName` | string |
 | `smtpServerAddress` | string |
@@ -7064,7 +6818,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "senderMailAddress": "string",
   "senderName": "string",
   "smtpServerAddress": "string",
@@ -7083,7 +6836,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `senderMailAddress` | string |
 | `senderName` | string |
 | `smtpServerAddress` | string |
@@ -7104,7 +6856,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -7143,7 +6894,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -7172,11 +6922,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -7191,9 +6937,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -7208,7 +6952,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBookings": "string[] (UUID, almeno uno)",
   "password": "string"
 }
@@ -7222,7 +6965,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBookings` | string[] (UUID, almeno uno) |
 | `password` | string |
 
@@ -7236,7 +6978,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "page": "number (intero, da 1)",
   "pageSize": "number (intero)",
   "search": "string",
@@ -7275,7 +7016,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `page` | number (intero, da 1) |
 | `pageSize` | number (intero) |
 | `search` | string |
@@ -7304,11 +7044,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -7316,9 +7052,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -7330,7 +7064,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBookings": "string[] (UUID, almeno uno)"
 }
 ```
@@ -7343,7 +7076,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBookings` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -7356,7 +7088,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "idBookings": "string[] (UUID, almeno uno)"
 }
 ```
@@ -7369,7 +7100,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `idBookings` | string[] (UUID, almeno uno) |
 
 **Response tabella**
@@ -7382,11 +7112,7 @@ Nessun corpo (204).
 
 **Payload JSON**
 
-```json
-{
-  "idProperty": "string (UUID)"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
@@ -7400,9 +7126,7 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `idProperty` | string (UUID) |
+Nessun payload.
 
 **Response tabella**
 
@@ -7418,7 +7142,6 @@ Nessun corpo (204).
 
 ```json
 {
-  "idProperty": "string (UUID)",
   "firstName": "string",
   "lastName": "string",
   "email": "string",
@@ -7435,7 +7158,6 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idProperty` | string (UUID) |
 | `firstName` | string |
 | `lastName` | string |
 | `email` | string |

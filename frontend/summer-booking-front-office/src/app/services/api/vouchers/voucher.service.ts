@@ -3,8 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
-import { DeleteVoucherItemsRequest } from '../../../entities/settings/vouchers/delete-voucher-items-request';
-import { DuplicateVoucherItemsRequest } from '../../../entities/settings/vouchers/duplicate-voucher-items-request';
 import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
 import { VoucherSelectedItem } from '../../../entities/settings/vouchers/voucher-selected-item';
@@ -22,18 +20,15 @@ export class VoucherService {
     this.httpClient.post<Page<VoucherItem>>(`${this.endpoint}/voucher-list`, request);
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteVoucherItems = (request: DeleteVoucherItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-voucher-item`, request);
+  readonly deleteVoucherItems = (idVouchers: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-voucher-item`, { idVouchers });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateVoucherItems = (request: DuplicateVoucherItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-voucher-item`, request);
+  readonly duplicateVoucherItems = (idVouchers: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-voucher-item`, { idVouchers });
 
   /** Answers 204 with no body. */
-  readonly addVoucherItem = (
-    idProperty: string,
-    request: VoucherAddItemRequest,
-  ): Observable<void> =>
+  readonly addVoucherItem = (request: VoucherAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/add-voucher-item`, {
       ...onlyFieldsOf(VoucherAddItemRequest, request),
       maxUseQuantity: request.maxUseQuantity ?? 1,
@@ -41,14 +36,10 @@ export class VoucherService {
         ...onlyFieldsOf(VoucherValidityPeriod, period),
         timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
       })),
-      idProperty,
     });
 
   /** Answers 204 with no body. */
-  readonly updateVoucherItem = (
-    idProperty: string,
-    request: VoucherUpdateItemRequest,
-  ): Observable<void> =>
+  readonly updateVoucherItem = (request: VoucherUpdateItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-voucher-item`, {
       ...onlyFieldsOf(VoucherUpdateItemRequest, request),
       maxUseQuantity: request.maxUseQuantity ?? 1,
@@ -56,7 +47,6 @@ export class VoucherService {
         ...onlyFieldsOf(VoucherValidityPeriod, period),
         timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
       })),
-      idProperty,
     });
 
   readonly selectedItem = (idVoucher: string): Observable<VoucherSelectedItem> =>

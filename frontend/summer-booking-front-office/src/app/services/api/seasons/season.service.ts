@@ -2,8 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { DeleteIntervalsRequest } from '../../../entities/settings/seasons/delete-intervals-request';
-import { DeletePeriodRequest } from '../../../entities/settings/seasons/delete-period-request';
 import { SeasonDates } from '../../../entities/settings/seasons/season-dates';
 import { SeasonPeriodAddRequest } from '../../../entities/settings/seasons/season-period-add-request';
 import { SeasonPeriodInterval } from '../../../entities/settings/seasons/season-period-interval';
@@ -29,67 +27,51 @@ export class SeasonService {
       .put<SeasonDates>(`${environment.apiBaseUrl}/catalog/season`, daysOf(dates))
       .pipe(map((answer) => seasonDatesOf(answer)));
 
-  /** The periods of the current season, or of the next one with `isNextSeason`. */
-  readonly periodList = (
-    idProperty: string,
-    isNextSeason: boolean,
-  ): Observable<SeasonPeriodItem[]> =>
+  /**
+   * The periods of the current season, or of the next one with `isNextSeason`, for the property of
+   * the token.
+   */
+  readonly periodList = (isNextSeason: boolean): Observable<SeasonPeriodItem[]> =>
     this.httpClient.get<SeasonPeriodItem[]>(`${this.endpoint}/period-list`, {
-      params: { idProperty, isNextSeason },
+      params: { isNextSeason },
     });
 
   /** A period of the current season, or of the next one with `isNextSeason`. Answers 204 with no body. */
-  readonly addPeriod = (
-    idProperty: string,
-    isNextSeason: boolean,
-    request: SeasonPeriodAddRequest,
-  ): Observable<void> =>
+  readonly addPeriod = (isNextSeason: boolean, request: SeasonPeriodAddRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/add-period`, {
       ...onlyFieldsOf(SeasonPeriodAddRequest, request),
       intervals: request.intervals.map((interval) => onlyFieldsOf(SeasonPeriodInterval, interval)),
-      idProperty,
       isNextSeason,
     });
 
   /** The period with all its date intervals. Answers 204 with no body. */
-  readonly deletePeriod = (request: DeletePeriodRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-period`, request);
+  readonly deletePeriod = (idPeriod: string): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-period`, { idPeriod });
 
   /** New name of a period. Answers 204 with no body. */
-  readonly updatePeriod = (
-    idProperty: string,
-    request: SeasonPeriodUpdateRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-period`, {
-      ...onlyFieldsOf(SeasonPeriodUpdateRequest, request),
-      idProperty,
-    });
+  readonly updatePeriod = (request: SeasonPeriodUpdateRequest): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/update-period`,
+      onlyFieldsOf(SeasonPeriodUpdateRequest, request),
+    );
 
   /** A new date interval of a period. Answers 204 with no body. */
-  readonly addInterval = (
-    idProperty: string,
-    idPeriod: string,
-    interval: SeasonPeriodInterval,
-  ): Observable<void> =>
+  readonly addInterval = (idPeriod: string, interval: SeasonPeriodInterval): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/add-interval`, {
       ...onlyFieldsOf(SeasonPeriodInterval, interval),
       idPeriod,
-      idProperty,
     });
 
   /** New days of a date interval. Answers 204 with no body. */
-  readonly updateInterval = (
-    idProperty: string,
-    interval: SeasonPeriodIntervalItem,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-interval`, {
-      ...onlyFieldsOf(SeasonPeriodIntervalItem, interval),
-      idProperty,
-    });
+  readonly updateInterval = (interval: SeasonPeriodIntervalItem): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/update-interval`,
+      onlyFieldsOf(SeasonPeriodIntervalItem, interval),
+    );
 
   /** One or more date intervals, of any period of the property: all or none. Answers 204 with no body. */
-  readonly deleteIntervals = (request: DeleteIntervalsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-intervals`, request);
+  readonly deleteIntervals = (idIntervals: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-intervals`, { idIntervals });
 }
 
 /** The backend sends and takes days (`2026-05-01`); the page keeps them at midnight UTC. */

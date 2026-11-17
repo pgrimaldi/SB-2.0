@@ -121,8 +121,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canSave()) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave()) {
       return;
     }
 
@@ -130,7 +129,7 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.warehouse.editWarehouseItem(idProperty, this.draft()));
+        await firstValueFrom(this.warehouse.editWarehouseItem(this.draft()));
         this.isLoading.set(false);
         this.close();
         this.saved.emit();

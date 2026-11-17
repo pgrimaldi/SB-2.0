@@ -148,8 +148,7 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -157,7 +156,7 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.catalog.createAutomaticPrice(idProperty, this.draft()));
+        await firstValueFrom(this.catalog.createAutomaticPrice(this.draft()));
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();
@@ -190,13 +189,12 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   private fetchServices(): void {
     this.fetching?.unsubscribe();
     this.error.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
     this.isFetching.set(true);
     this.fetching = this.catalog
-      .automaticPriceServices(idProperty)
+      .automaticPriceServices()
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
         next: (services) => this.services.set(services),

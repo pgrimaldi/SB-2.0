@@ -112,9 +112,8 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const period = this.period();
-    if (this.isLoading() || !idProperty || !period?.idPeriod || !this.canSave()) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !period?.idPeriod || !this.canSave()) {
       return;
     }
     const idPeriod = period.idPeriod;
@@ -123,7 +122,7 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.seasons.addInterval(idProperty, idPeriod, this.draft()));
+        await firstValueFrom(this.seasons.addInterval(idPeriod, this.draft()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();

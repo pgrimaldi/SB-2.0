@@ -2,16 +2,14 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
-import { DeleteSectorItemsRequest } from '../../../entities/settings/rows-and-sectors/delete-sector-items-request';
-import { DuplicateSectorItemsRequest } from '../../../entities/settings/rows-and-sectors/duplicate-sector-items-request';
 import {
   MAX_SECTOR_NAME_LENGTH,
   SectorItem,
 } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { problem, resourceNotFound } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 interface SectorUsage {
   mapSpots: number;
@@ -48,19 +46,15 @@ const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['sectorName'] as const;
 
 /**
- * `POST /api/catalog/sectors-list`: one page of the sectors (rows) of the requested property, in
- * their own order unless sorted. 401 without a valid access token; 403 for a missing or unknown
- * property.
+ * `POST /api/catalog/sectors-list`: one page of the sectors (rows) of the property of the token, in
+ * their own order unless sorted. 401 without a valid access token.
  */
 export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -81,8 +75,8 @@ export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEv
 };
 
 /**
- * `POST /api/catalog/sector-combobox` with `{ idProperty }`: every sector of the property, in its
- * order, as `{ id, value }`. 401 without a valid access token; 403 for a missing or unknown property.
+ * `POST /api/catalog/sector-combobox` without a body: every sector of the property, in its order,
+ * as `{ id, value }`. 401 without a valid access token.
  */
 export const sectorComboboxMock = (
   request: HttpRequest<unknown>,
@@ -90,10 +84,7 @@ export const sectorComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf((request.body as { idProperty?: unknown } | null)?.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const items: ComboboxItem[] = SECTORS.filter((row) => row.propertyId === property.id).map(
     (row) => ({ id: row.idSector ?? '', value: row.sectorName ?? '' }),
   );
@@ -101,10 +92,10 @@ export const sectorComboboxMock = (
 };
 
 /**
- * `POST /api/catalog/add-sector-item` with `idProperty` and `sectorName`: the new sector goes at the
- * end of the order. 400 with validation.required / validation.max_length on sectorName; 409
+ * `POST /api/catalog/add-sector-item` with `sectorName`: the new sector goes at the end of the
+ * order. 400 with validation.required / validation.max_length on sectorName; 409
  * `catalog.sector_name_taken` for a name the property has already (case-insensitive). 204 without a
- * body; 401 without a valid access token; 403 for an unknown property.
+ * body; 401 without a valid access token.
  */
 export const addSectorItemMock = (
   request: HttpRequest<unknown>,
@@ -112,11 +103,8 @@ export const addSectorItemMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idProperty?: unknown; sectorName?: unknown };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { sectorName?: unknown };
+  const property = DEMO_PROPERTY;
   const sectorName = typeof body.sectorName === 'string' ? body.sectorName.trim() : '';
   const nameError = sectorNameError(request, sectorName);
   if (nameError) {
@@ -130,10 +118,10 @@ export const addSectorItemMock = (
 };
 
 /**
- * `POST /api/catalog/update-sector-item` with `idProperty`, `idSector` and `sectorName`: the sector is
- * renamed. 404 `resource.not_found` for an id that is not a sector of the property; the same name
- * errors as the add (the sector's own name does not count as taken). 204 without a body; 401 without
- * a valid access token; 403 for an unknown property.
+ * `POST /api/catalog/update-sector-item` with `idSector` and `sectorName`: the sector is renamed.
+ * 404 `resource.not_found` for an id that is not a sector of the property; the same name errors as
+ * the add (the sector's own name does not count as taken). 204 without a body; 401 without a valid
+ * access token.
  */
 export const updateSectorItemMock = (
   request: HttpRequest<unknown>,
@@ -142,14 +130,10 @@ export const updateSectorItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as {
-    idProperty?: unknown;
     idSector?: unknown;
     sectorName?: unknown;
   };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const sector = SECTORS.find(
     (row) => row.idSector === body.idSector && row.propertyId === property.id,
   );
@@ -169,11 +153,10 @@ export const updateSectorItemMock = (
 };
 
 /**
- * `POST /api/catalog/delete-sector-item` with `DeleteSectorItemsRequest`: all or nothing. If one id
- * is not a sector of the property nothing is deleted (404 `resource.not_found`); a sector still used
- * by the map, a price list, a stay limit or a discount stops it too (409 `catalog.sector_in_use`, the
- * mock uses "Fila 1"). Repeated ids count once. 204 without a body; 401 without a valid access token;
- * 403 for an unknown property.
+ * `POST /api/catalog/delete-sector-item` with `{ idSectors }`: all or nothing. If one id is not a
+ * sector of the property nothing is deleted (404 `resource.not_found`); a sector still used by the
+ * map, a price list, a stay limit or a discount stops it too (409 `catalog.sector_in_use`, the mock
+ * uses "Fila 1"). Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteSectorItemsMock = (
   request: HttpRequest<unknown>,
@@ -181,11 +164,8 @@ export const deleteSectorItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteSectorItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idSectors?: string[] };
+  const property = DEMO_PROPERTY;
   const sectors = sectorsOf(property.id, body.idSectors);
   if (!sectors) {
     return resourceNotFound(request);
@@ -204,7 +184,7 @@ export const deleteSectorItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-sector-item` with `DuplicateSectorItemsRequest`: all or nothing, like
+ * `POST /api/catalog/duplicate-sector-item` with `{ idSectors }`: all or nothing, like
  * the delete. The copies go at the end of the order; the name is chosen by the backend and is unique
  * in the property: the mock invents "Fila 2 (copia)", then "Fila 2 (copia 2)" and so on. A copy is
  * not used anywhere yet.
@@ -215,11 +195,8 @@ export const duplicateSectorItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateSectorItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idSectors?: string[] };
+  const property = DEMO_PROPERTY;
   const sectors = sectorsOf(property.id, body.idSectors);
   if (!sectors) {
     return resourceNotFound(request);

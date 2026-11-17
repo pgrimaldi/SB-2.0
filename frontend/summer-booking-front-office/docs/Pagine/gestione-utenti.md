@@ -116,8 +116,8 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 ### Esporta e Stampa
 
 - Chiamano le API di export e stampa con gli stessi filtri che la tabella sta mostrando (`AuditLogFiltersRequest`:
-  `idProperty`, `search`, `filters`, `sortField`, `sortDirection`, presi da `table.currentRequest()`, senza pagina), con
-  lo spinner sul bottone e l'altro spento.
+  `search`, `filters`, `sortField`, `sortDirection`, presi da `table.currentRequest()`, senza pagina), con lo spinner
+  sul bottone e l'altro spento.
 - Il file ricevuto si salva con `FileDownloadBehaviour` (nome da `Content-Disposition`, di riserva `log` / `log-print`).
   Aprire la stampa del browser richiederebbe `blob:` in `frame-src` della CSP.
 - Qualunque errore mostra in "Operazione non riuscita" il testo fisso "Il servizio non è ancora implementato"
@@ -126,17 +126,17 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 
 ## API
 
-`IdentityService` (lo stabilimento viene dal token dove non c'è `idProperty`):
+`IdentityService` (lo stabilimento lo prende il backend dal token):
 
 - `POST /api/identity/users-list` (`usersList`): corpo standard delle tabelle, risposta `Page<UserItem>`.
-- `POST /api/identity/create-user` (`createUser`): corpo `CreateUserRequest`, senza `idProperty`; risposta 201 con
-  l'utente creato (`UserSelectedItem`), che il popup non usa.
+- `POST /api/identity/create-user` (`createUser`): corpo `CreateUserRequest`; risposta 201 con l'utente creato
+  (`UserSelectedItem`), che il popup non usa.
 - `GET /api/identity/get-selected-user?idUser=…` (`selectedUser`): risposta `UserSelectedItem`, mai la password.
-- `POST /api/identity/update-user` (`updateUser`): corpo `UpdateUserRequest`, senza `idProperty`; risposta 200 con
-  l'utente aggiornato (`UserSelectedItem`), che il popup non usa.
+- `POST /api/identity/update-user` (`updateUser`): corpo `UpdateUserRequest`; risposta 200 con l'utente aggiornato
+  (`UserSelectedItem`), che il popup non usa.
 - `DELETE /api/identity/property-users/{id}` (`deleteUser(idUser)`): API del backend così com'è, id nell'indirizzo,
   risposta 204.
-- `POST /api/identity/user-combobox` (`userCombobox`): corpo `{ idProperty }`, gli utenti del filtro Utente.
+- `POST /api/identity/user-combobox` (`userCombobox`): POST senza corpo, gli utenti del filtro Utente.
 
 `AuditService`:
 

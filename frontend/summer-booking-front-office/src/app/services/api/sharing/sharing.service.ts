@@ -10,18 +10,13 @@ export class SharingService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/sharing`;
 
-  readonly generalInformation = (idProperty: string): Observable<SharingGeneralInformation> =>
-    this.httpClient.get<SharingGeneralInformation>(`${this.endpoint}/general-information`, {
-      params: { idProperty },
-    });
+  readonly generalInformation = (): Observable<SharingGeneralInformation> =>
+    this.httpClient.get<SharingGeneralInformation>(`${this.endpoint}/general-information`);
 
   /** Every setting of the page, changed or not. Answers 204 with no body. */
-  readonly saveInformation = (
-    idProperty: string,
-    information: SharingGeneralInformation,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/save-information`, {
-      ...onlyFieldsOf(SharingGeneralInformation, information),
-      idProperty,
-    });
+  readonly saveInformation = (information: SharingGeneralInformation): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/save-information`,
+      onlyFieldsOf(SharingGeneralInformation, information),
+    );
 }

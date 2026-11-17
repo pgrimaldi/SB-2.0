@@ -6,10 +6,6 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
 import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
 import { AdditionalItemSelectedItem } from '../../../entities/settings/catalog/additional-item-selected-item';
-import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
-import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
-import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
-import { DuplicatePackageItemsRequest } from '../../../entities/settings/catalog/duplicate-package-items-request';
 import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
 import { PackageIntermediatePrice } from '../../../entities/settings/catalog/package-intermediate-price';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
@@ -30,16 +26,16 @@ export class PriceListService {
     this.httpClient.post<Page<PackageItem>>(`${this.endpoint}/packages-list`, request);
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deletePackageItems = (request: DeletePackageItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-package-item`, request);
+  readonly deletePackageItems = (idPackages: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-package-item`, { idPackages });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicatePackageItems = (request: DuplicatePackageItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-package-item`, request);
+  readonly duplicatePackageItems = (idPackages: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-package-item`, { idPackages });
 
   /** Every package of the property, in its order: `id` is the idPackage, `value` the name. */
-  readonly packageCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/package-combobox`, { idProperty });
+  readonly packageCombobox = (): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/package-combobox`, null);
 
   readonly additionalItemList = (request: PageRequest): Observable<Page<AdditionalItem>> =>
     this.httpClient.post<Page<AdditionalItem>>(
@@ -48,17 +44,16 @@ export class PriceListService {
     );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteAdditionalItems = (request: DeleteAdditionalItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-additional-services-article-item`, request);
+  readonly deleteAdditionalItems = (idAdditionalItems: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-additional-services-article-item`, {
+      idAdditionalItems,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateAdditionalItems = (
-    request: DuplicateAdditionalItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(
-      `${this.endpoint}/duplicate-additional-services-article-item`,
-      request,
-    );
+  readonly duplicateAdditionalItems = (idAdditionalItems: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-additional-services-article-item`, {
+      idAdditionalItems,
+    });
 
   /**
    * The whole package of the add panel; the property comes from the access token. Answers 204
@@ -68,13 +63,9 @@ export class PriceListService {
     this.httpClient.post<void>(`${this.endpoint}/packages/create-package`, packageBody(request));
 
   /** The whole form of the add panel of the additional items. Answers 204 with no body. */
-  readonly createAdditionalItem = (
-    idProperty: string,
-    request: AdditionalItemAddItemRequest,
-  ): Observable<void> =>
+  readonly createAdditionalItem = (request: AdditionalItemAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-additional-services-article-item`, {
       ...additionalItemBody(request),
-      idProperty,
     });
 
   /** Everything the edit panel of an additional item shows. */
@@ -88,14 +79,12 @@ export class PriceListService {
 
   /** The whole form, as in `createAdditionalItem`, with its id. Answers 204 with no body. */
   readonly updateAdditionalItem = (
-    idProperty: string,
     idAdditionalItem: string,
     request: AdditionalItemAddItemRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-additional-services-article-item`, {
       ...additionalItemBody(request),
       idAdditionalItem,
-      idProperty,
     });
 
   /** Everything the edit panel shows; the property comes from the access token. */

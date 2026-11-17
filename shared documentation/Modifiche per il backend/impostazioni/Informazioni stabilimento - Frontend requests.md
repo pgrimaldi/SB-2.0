@@ -36,8 +36,8 @@ Valgono per tutte e sei le API.
 - **Le API esistenti non cambiano**: le rotte di oggi di `/api/catalog/property-info` (`GET` e `PUT /`, `/amenities`,
   `/main-photo`, `/photos`, `/photos/order`, `/photos/{id}`, `/documents/{document}`) e `/api/catalog/lookups/*`
   restano come sono; le sei nuove si aggiungono.
-- **Stabilimento dal token**: nessuna richiesta ha `idProperty`; lo stabilimento è quello dell'utente autenticato, come
-  per `property-info`.
+- **Stabilimento dal token**: lo stabilimento è quello dell'utente autenticato, come per `property-info`; nessuna
+  richiesta lo contiene.
 - **Permessi**: le GET come `GET /property-info` (`CatalogRead`), i salvataggi come `PUT /property-info`
   (`CatalogSettings`). Senza permesso: 403 `auth.forbidden`.
 - **JSON** in camelCase, con i nomi esatti di questo documento. Gli enum viaggiano con il nome .NET (es. `OnRequest`).
@@ -375,4 +375,4 @@ mandare il file:
   (es. salvare la tab Media non tocca nome, servizi o foto).
 - Uno stabilimento senza dati risponde alle GET con `null` (o `[]` per le liste), mai con 404.
 - Errori di validazione con `field` uguale al nome del campo del corpo.
-- Senza token 401, senza permesso 403; nessuna API accetta o usa un `idProperty`.
+- Senza token 401, senza permesso 403; lo stabilimento viene solo dal token.

@@ -174,8 +174,7 @@ export class OnlineBookingServicesOptionsPopup
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || this.isSaving() || !idProperty) {
+    if (this.isLoading() || this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
@@ -183,7 +182,7 @@ export class OnlineBookingServicesOptionsPopup
       this.error.set(null);
       try {
         const sent = this.draft();
-        await firstValueFrom(this.booking.updateOnlineServicesOptions(idProperty, sent));
+        await firstValueFrom(this.booking.updateOnlineServicesOptions(sent));
         this.loaded = sent;
         this.isSaving.set(false);
         this.close();
@@ -228,13 +227,12 @@ export class OnlineBookingServicesOptionsPopup
       this.fill(this.loaded);
       return;
     }
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
     this.fill(new OnlineBookingServicesOptions());
     this.isLoading.set(true);
-    return this.booking.onlineServicesOptions(idProperty).subscribe({
+    return this.booking.onlineServicesOptions().subscribe({
       next: (options) => {
         const loaded = onlyFieldsOf(OnlineBookingServicesOptions, options);
         if (loaded.supplementType === SupplementType.None) {

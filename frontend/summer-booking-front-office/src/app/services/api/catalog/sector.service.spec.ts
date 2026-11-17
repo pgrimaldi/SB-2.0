@@ -14,7 +14,6 @@ describe('SectorService', () => {
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
     const request: PageRequest = {
-      idProperty: 'p1',
       page: 2,
       pageSize: 10,
       search: 'fila',
@@ -40,7 +39,7 @@ describe('SectorService', () => {
     controller.verify();
   });
 
-  it('should ask the sectors of the dropdowns with the property only', () => {
+  it('should ask the sectors of the dropdowns without a body', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -48,19 +47,19 @@ describe('SectorService', () => {
     const controller = TestBed.inject(HttpTestingController);
     let answer: unknown;
 
-    sectors.sectorCombobox('p1').subscribe((read) => (answer = read));
+    sectors.sectorCombobox().subscribe((read) => (answer = read));
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sector-combobox`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1' });
+    expect(call.request.body).toBeNull();
     call.flush([{ id: 's1', value: 'Fila 1' }]);
     expect(answer).toEqual([{ id: 's1', value: 'Fila 1' }]);
     controller.verify();
   });
 
-  it('should add a sector sending only the property and the name', () => {
+  it('should add a sector sending only the name', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -68,7 +67,7 @@ describe('SectorService', () => {
     const controller = TestBed.inject(HttpTestingController);
 
     sectors
-      .addSectorItem('p1', {
+      .addSectorItem({
         idSector: null,
         sectorName: 'Fila 9',
         extra: 'not sent',
@@ -79,7 +78,7 @@ describe('SectorService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/add-sector-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', sectorName: 'Fila 9' });
+    expect(call.request.body).toEqual({ sectorName: 'Fila 9' });
     controller.verify();
   });
 
@@ -91,7 +90,7 @@ describe('SectorService', () => {
     const controller = TestBed.inject(HttpTestingController);
 
     sectors
-      .updateSectorItem('p1', {
+      .updateSectorItem({
         idSector: 's1',
         sectorName: 'Fila A',
         extra: 'not sent',
@@ -102,7 +101,7 @@ describe('SectorService', () => {
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-sector-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idSector: 's1', sectorName: 'Fila A' });
+    expect(call.request.body).toEqual({ idSector: 's1', sectorName: 'Fila A' });
     controller.verify();
   });
 
@@ -113,13 +112,13 @@ describe('SectorService', () => {
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
 
-    sectors.deleteSectorItems({ idProperty: 'p1', idSectors: ['s1', 's2'] }).subscribe();
+    sectors.deleteSectorItems(['s1', 's2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/delete-sector-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idSectors: ['s1', 's2'] });
+    expect(call.request.body).toEqual({ idSectors: ['s1', 's2'] });
     controller.verify();
   });
 
@@ -130,13 +129,13 @@ describe('SectorService', () => {
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
 
-    sectors.duplicateSectorItems({ idProperty: 'p1', idSectors: ['s1', 's2'] }).subscribe();
+    sectors.duplicateSectorItems(['s1', 's2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-sector-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idSectors: ['s1', 's2'] });
+    expect(call.request.body).toEqual({ idSectors: ['s1', 's2'] });
     controller.verify();
   });
 });

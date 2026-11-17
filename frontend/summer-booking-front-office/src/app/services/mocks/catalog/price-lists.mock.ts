@@ -5,13 +5,9 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
 import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
 import { AdditionalItemSelectedItem } from '../../../entities/settings/catalog/additional-item-selected-item';
-import { DeleteAdditionalItemsRequest } from '../../../entities/settings/catalog/delete-additional-items-request';
-import { DeletePackageItemsRequest } from '../../../entities/settings/catalog/delete-package-items-request';
 import { PriceCalculationMethod } from '../../../entities/enums/price-calculation-method';
 import { PriceMonthlySetting } from '../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../entities/enums/price-weekend-setting';
-import { DuplicateAdditionalItemsRequest } from '../../../entities/settings/catalog/duplicate-additional-items-request';
-import { DuplicatePackageItemsRequest } from '../../../entities/settings/catalog/duplicate-package-items-request';
 import {
   MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
   MAX_PACKAGE_ARTICLE_QUANTITY,
@@ -26,8 +22,8 @@ import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { DEMO_PROPERTY, propertyOf } from '../properties/properties.mock';
+import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { activeArticleIdNamed, activeArticleName } from '../warehouse/warehouse.mock';
 
 type PackageRow = PackageItem & { propertyId: number };
@@ -124,18 +120,15 @@ const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['packageName'] as const;
 
 /**
- * `POST /api/catalog/packages-list`: one page of the packages of the requested property, in their
- * own order unless sorted. 401 without a valid access token; 403 for a missing or unknown property.
+ * `POST /api/catalog/packages-list`: one page of the packages of the property of the token, in
+ * their own order unless sorted. 401 without a valid access token.
  */
 export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -158,7 +151,7 @@ export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpE
 
 /**
  * `POST /api/catalog/delete-package-item`: deletes the given packages, all or nothing. 204 with no
- * body; 404 when an id is not a package of the property; 401 / 403 as the list.
+ * body; 404 when an id is not a package of the property; 401 as the list.
  */
 export const deletePackageItemsMock = (
   request: HttpRequest<unknown>,
@@ -166,11 +159,8 @@ export const deletePackageItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeletePackageItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idPackages?: string[] };
+  const property = DEMO_PROPERTY;
   const packages = packagesOf(property.id, body.idPackages);
   if (!packages) {
     return resourceNotFound(request);
@@ -183,9 +173,9 @@ export const deletePackageItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-package-item`: one copy of each given package at the end of the list,
- * all or nothing, named by the backend ("X (copia)", then "X (copia 2)"…). 204 with no body;
- * 404 when an id is not a package of the property; 401 / 403 as the list.
+ * `POST /api/catalog/duplicate-package-item`: one copy of each given package at the end of the
+ * list, all or nothing, named by the backend ("X (copia)", then "X (copia 2)"…). 204 with no body;
+ * 404 when an id is not a package of the property; 401 as the list.
  */
 export const duplicatePackageItemsMock = (
   request: HttpRequest<unknown>,
@@ -193,11 +183,8 @@ export const duplicatePackageItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicatePackageItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idPackages?: string[] };
+  const property = DEMO_PROPERTY;
   const packages = packagesOf(property.id, body.idPackages);
   if (!packages) {
     return resourceNotFound(request);
@@ -450,9 +437,8 @@ const ADDITIONAL_ITEM_DETAILS = new Map<string, AdditionalItemAddItemRequest>();
 const ADDITIONAL_ITEM_SORT_FIELDS = ['additionalItemName'] as const;
 
 /**
- * `POST /api/catalog/additional-services-articles-list`: one page of the additional items/services of
- * the requested property, in their own order unless sorted. 401 without a valid access token; 403
- * for a missing or unknown property.
+ * `POST /api/catalog/additional-services-articles-list`: one page of the additional items/services
+ * of the property of the token, in their own order unless sorted. 401 without a valid access token.
  */
 export const additionalItemListMock = (
   request: HttpRequest<unknown>,
@@ -461,10 +447,7 @@ export const additionalItemListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -488,7 +471,7 @@ export const additionalItemListMock = (
 /**
  * `POST /api/catalog/delete-additional-services-article-item`: deletes the given additional
  * items/services, all or nothing. 204 with no body; 404 when an id is not an additional item of the
- * property; 401 / 403 as the list.
+ * property; 401 as the list.
  */
 export const deleteAdditionalItemsMock = (
   request: HttpRequest<unknown>,
@@ -496,11 +479,8 @@ export const deleteAdditionalItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteAdditionalItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idAdditionalItems?: string[] };
+  const property = DEMO_PROPERTY;
   const items = additionalItemsOf(property.id, body.idAdditionalItems);
   if (!items) {
     return resourceNotFound(request);
@@ -514,9 +494,9 @@ export const deleteAdditionalItemsMock = (
 
 /**
  * `POST /api/catalog/duplicate-additional-services-article-item`: one copy of each given additional
- * item/service at the end of the list, all or nothing, named by the backend ("X (copia)", then
- * "X (copia 2)"…). 204 with no body; 404 when an id is not an additional item of the property;
- * 401 / 403 as the list.
+ * item/service at the end of the list, all or nothing, named by the backend ("X (copia)", then "X
+ * (copia 2)"…). 204 with no body; 404 when an id is not an additional item of the property; 401 as
+ * the list.
  */
 export const duplicateAdditionalItemsMock = (
   request: HttpRequest<unknown>,
@@ -524,11 +504,8 @@ export const duplicateAdditionalItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateAdditionalItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idAdditionalItems?: string[] };
+  const property = DEMO_PROPERTY;
   const items = additionalItemsOf(property.id, body.idAdditionalItems);
   if (!items) {
     return resourceNotFound(request);
@@ -639,8 +616,8 @@ function isIntermediatePrice(value: unknown): boolean {
 }
 
 /**
- * `POST /api/catalog/package-combobox` with `{ idProperty }`: every package of the property, in its
- * order, as `{ id, value }`. 401 without a valid access token; 403 for a missing or unknown property.
+ * `POST /api/catalog/package-combobox` without a body: every package of the property, in its order,
+ * as `{ id, value }`. 401 without a valid access token.
  */
 export const packageComboboxMock = (
   request: HttpRequest<unknown>,
@@ -648,24 +625,21 @@ export const packageComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf((request.body as { idProperty?: unknown } | null)?.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const items: ComboboxItem[] = PACKAGES.filter((row) => row.propertyId === property.id).map(
     (row) => ({ id: row.idPackage ?? '', value: row.packageName ?? '' }),
   );
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };
 
-type CreateAdditionalItemBody = Partial<AdditionalItemAddItemRequest> & { idProperty?: unknown };
+type CreateAdditionalItemBody = Partial<AdditionalItemAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-additional-services-article-item` with `AdditionalItemAddItemRequest` and
- * `idProperty`: the new additional item goes into the list with the name of its article. 204 without
- * a body; 401 without a valid access token; 403 for an unknown property; 404 `resource.not_found`
- * for an article that is not an active one of the property or a package that is not one of its; 400
- * with one error per wrong choice (see `choiceErrors`).
+ * `POST /api/catalog/create-additional-services-article-item` with `AdditionalItemAddItemRequest`:
+ * the new additional item goes into the list with the name of its article. 204 without a body; 401
+ * without a valid access token; 404 `resource.not_found` for an article that is not an active one
+ * of the property or a package that is not one of its; 400 with one error per wrong choice (see
+ * `choiceErrors`).
  */
 export const createAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -674,10 +648,7 @@ export const createAdditionalItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateAdditionalItemBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const name = additionalItemName(property.id, body);
   if (name === null) {
     return resourceNotFound(request);
@@ -746,9 +717,9 @@ export const selectedAdditionalItemMock = (
 
 /**
  * `POST /api/catalog/update-additional-services-article-item` with `AdditionalItemAddItemRequest`,
- * `idAdditionalItem` and `idProperty`: the item takes all the values sent and the name of its
- * article. 204 without a body; 401 / 403 / 404 / 400 as `createAdditionalItemMock`, 404 also for an
- * item that is not one of the property.
+ * `idAdditionalItem`: the item takes all the values sent and the name of its article. 204 without a
+ * body; 401 / 404 / 400 as `createAdditionalItemMock`, 404 also for an item that is not one of the
+ * property.
  */
 export const updateAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -757,10 +728,7 @@ export const updateAdditionalItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateAdditionalItemBody & { idAdditionalItem?: unknown };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const row = ADDITIONAL_ITEMS.find(
     (item) => item.idAdditionalItem === body.idAdditionalItem && item.propertyId === property.id,
   );

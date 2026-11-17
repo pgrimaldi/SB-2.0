@@ -125,7 +125,7 @@ export class UserManagementLogs {
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly location = inject(Location);
   private readonly fileDownload = inject(FileDownloadBehaviour);
-  private readonly table = viewChild.required<Table<AuditEntryRow, { idProperty: string }>>(Table);
+  private readonly table = viewChild.required<Table<AuditEntryRow, object>>(Table);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -133,10 +133,9 @@ export class UserManagementLogs {
   protected readonly isExporting = signal(false);
   protected readonly isPrinting = signal(false);
   protected readonly isNotImplementedShown = signal(false);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly dateRange = signal<DateRange | null>(null);
   protected readonly isFiltersOpen = signal(false);
   /** From the Log button of a user row: the only user of the Utente filter while it is chosen. */
@@ -270,7 +269,7 @@ export class UserManagementLogs {
     this.nameLogUser();
   }
 
-  protected readonly load: TableLoad<{ idProperty: string }, AuditEntryRow> = (request) =>
+  protected readonly load: TableLoad<object, AuditEntryRow> = (request) =>
     this.audit.entriesList(request).pipe(
       switchMap((page) =>
         (
@@ -334,11 +333,10 @@ export class UserManagementLogs {
 
   /** The row brings the email: the name comes from the users of the log, matched by id. */
   private nameLogUser(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!this.logUser() || !idProperty) {
+    if (!this.logUser() || !this.auth.user()?.propertyId) {
       return;
     }
-    this.identity.userCombobox(idProperty).subscribe({
+    this.identity.userCombobox().subscribe({
       next: (users) => {
         const named = users.find(({ id }) => id === this.logUser()?.id);
         if (!named) {
@@ -364,12 +362,10 @@ export class UserManagementLogs {
     if (!request || this.isExporting() || this.isPrinting()) {
       return;
     }
-    const { idProperty, search, filters, sortField, sortDirection } = request;
+    const { search, filters, sortField, sortDirection } = request;
     isRunning.set(true);
     try {
-      const file = await firstValueFrom(
-        call({ idProperty, search, filters, sortField, sortDirection }),
-      );
+      const file = await firstValueFrom(call({ search, filters, sortField, sortDirection }));
       this.fileDownload.save(file, fallbackName);
     } catch {
       this.isNotImplementedShown.set(true);

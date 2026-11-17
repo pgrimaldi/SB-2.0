@@ -19,8 +19,8 @@ import {
   MapSettings,
 } from '../../../entities/settings/map-configuration/map-settings';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const MAX_BYTES = MAX_MAP_BACKGROUND_MEGABYTES * 1024 * 1024;
@@ -239,9 +239,8 @@ export const updateMapConfigurationMock = (
 };
 
 /**
- * `POST /api/catalog/map/sector-area-combobox` with `{ idProperty }`: every area of the property's
- * map, in its order, as `{ id, value }`. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `POST /api/catalog/map/sector-area-combobox` without a body: every area of the property's map, in
+ * its order, as `{ id, value }`. 401 without a valid access token.
  */
 export const sectorAreaComboboxMock = (
   request: HttpRequest<unknown>,
@@ -249,10 +248,7 @@ export const sectorAreaComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf((request.body as { idProperty?: unknown } | null)?.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const items: ComboboxItem[] = SECTOR_AREAS.filter((area) => area.propertyId === property.id).map(
     ({ id, value }) => ({ id, value }),
   );

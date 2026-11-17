@@ -3,20 +3,18 @@ import { Observable, delay, of } from 'rxjs';
 import { DiscountScope } from '../../../entities/enums/discount-scope';
 import { DiscountType } from '../../../entities/enums/discount-type';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
-import { DeleteVoucherItemsRequest } from '../../../entities/settings/vouchers/delete-voucher-items-request';
-import { DuplicateVoucherItemsRequest } from '../../../entities/settings/vouchers/duplicate-voucher-items-request';
 import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
 import { VoucherSelectedItem } from '../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherUpdateItemRequest } from '../../../entities/settings/vouchers/voucher-update-item-request';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 type VoucherRow = VoucherItem & VoucherSelectedItem & { propertyId: number };
-type AddVoucherBody = Partial<VoucherAddItemRequest> & { idProperty?: unknown };
-type UpdateVoucherBody = Partial<VoucherUpdateItemRequest> & { idProperty?: unknown };
+type AddVoucherBody = Partial<VoucherAddItemRequest>;
+type UpdateVoucherBody = Partial<VoucherUpdateItemRequest>;
 
 const VOUCHERS: VoucherRow[] = [
   {
@@ -75,18 +73,15 @@ const SORT_FIELDS = [
 ] as const;
 
 /**
- * `POST /api/vouchers/voucher-list`: one page of the discounts and vouchers of the requested
- * property. 401 without a valid access token; 403 for a missing or unknown property.
+ * `POST /api/vouchers/voucher-list`: one page of the discounts and vouchers of the property of the
+ * token. 401 without a valid access token.
  */
 export const voucherListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -108,9 +103,9 @@ export const voucherListMock = (request: HttpRequest<unknown>): Observable<HttpE
 };
 
 /**
- * `POST /api/vouchers/delete-voucher-item` with `DeleteVoucherItemsRequest`: all or nothing. If one id
- * is not a voucher of the property nothing is deleted (404 `resource.not_found`). Repeated ids count
- * once. 204 without a body; 401 without a valid access token; 403 for an unknown property.
+ * `POST /api/vouchers/delete-voucher-item` with `{ idVouchers }`: all or nothing. If one id is not
+ * a voucher of the property nothing is deleted (404 `resource.not_found`). Repeated ids count once.
+ * 204 without a body; 401 without a valid access token.
  */
 export const deleteVoucherItemsMock = (
   request: HttpRequest<unknown>,
@@ -118,11 +113,8 @@ export const deleteVoucherItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeleteVoucherItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idVouchers?: string[] };
+  const property = DEMO_PROPERTY;
   const vouchers = vouchersOf(property.id, body.idVouchers);
   if (!vouchers) {
     return resourceNotFound(request);
@@ -134,7 +126,7 @@ export const deleteVoucherItemsMock = (
 };
 
 /**
- * `POST /api/vouchers/duplicate-voucher-item` with `DuplicateVoucherItemsRequest`: all or nothing,
+ * `POST /api/vouchers/duplicate-voucher-item` with `{ idVouchers }`: all or nothing,
  * like the delete. Each copy keeps dates, type and value; the name is chosen by the backend: the mock
  * invents "Giugno (copia)", then "Giugno (copia 2)" and so on.
  */
@@ -144,11 +136,8 @@ export const duplicateVoucherItemsMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DuplicateVoucherItemsRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idVouchers?: string[] };
+  const property = DEMO_PROPERTY;
   const vouchers = vouchersOf(property.id, body.idVouchers);
   if (!vouchers) {
     return resourceNotFound(request);
@@ -164,10 +153,10 @@ export const duplicateVoucherItemsMock = (
 };
 
 /**
- * `POST /api/vouchers/add-voucher-item` with `VoucherAddItemRequest` and `idProperty`: a new voucher
- * with the name, the validity periods and the options; in the list it shows from the first day to
- * the last one. 204 without a body; 401 without a valid access token; 403 for an
- * unknown property; 400 with one error per wrong field (see `voucherErrors`).
+ * `POST /api/vouchers/add-voucher-item` with `VoucherAddItemRequest`: a new voucher with the name,
+ * the validity periods and the options; in the list it shows from the first day to the last one.
+ * 204 without a body; 401 without a valid access token; 400 with one error per wrong field (see
+ * `voucherErrors`).
  */
 export const addVoucherItemMock = (
   request: HttpRequest<unknown>,
@@ -176,10 +165,7 @@ export const addVoucherItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as AddVoucherBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const errors = voucherErrors(body);
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
@@ -189,10 +175,10 @@ export const addVoucherItemMock = (
 };
 
 /**
- * `POST /api/vouchers/update-voucher-item` with `VoucherUpdateItemRequest` and `idProperty`: the
- * voucher `idVoucher` takes the new values, after the same checks as the add (see `voucherErrors`).
- * 204 without a body; 401 without a valid access token; 403 for an unknown property; 404
- * `resource.not_found` for an id that is not one of its vouchers; 400 with one error per wrong field.
+ * `POST /api/vouchers/update-voucher-item` with `VoucherUpdateItemRequest`: the voucher `idVoucher`
+ * takes the new values, after the same checks as the add (see `voucherErrors`). 204 without a body;
+ * 401 without a valid access token; 404 `resource.not_found` for an id that is not one of its
+ * vouchers; 400 with one error per wrong field.
  */
 export const updateVoucherItemMock = (
   request: HttpRequest<unknown>,
@@ -201,10 +187,7 @@ export const updateVoucherItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateVoucherBody;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const voucher = VOUCHERS.find(
     (row) => row.idVoucher === body.idVoucher && row.propertyId === property.id,
   );

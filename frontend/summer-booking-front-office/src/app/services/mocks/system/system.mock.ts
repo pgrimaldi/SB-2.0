@@ -11,8 +11,7 @@ import {
 } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'message'] as const;
 const SMTP_SECURITIES: readonly SmtpSecurity[] = ['None', 'Ssl', 'Tls'];
@@ -31,17 +30,14 @@ const EMAIL_CONFIGURATION: Omit<EmailConfigurationData, 'hasSmtpPassword'> = {
 let smtpPassword: string | null = 'password-di-esempio';
 
 /**
- * `GET /api/system/email-configuration?idProperty=…`: the mail settings of the property. 401
- * without a valid access token; 403 `auth.forbidden` for a missing or unknown property.
+ * `GET /api/system/email-configuration`: the mail settings of the property. 401 without a valid
+ * access token.
  */
 export const emailConfigurationMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
   }
   return of(
     new HttpResponse({
@@ -53,18 +49,14 @@ export const emailConfigurationMock = (
 };
 
 /**
- * `GET /api/system/get-stripe-information?idProperty=…`: the id of the Stripe account connected to
- * the property, the body is the string alone. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `GET /api/system/get-stripe-information`: the id of the Stripe account connected to the property,
+ * the body is the string alone. 401 without a valid access token.
  */
 export const stripeInformationMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
   }
   return of(
     new HttpResponse({ status: 200, url: request.url, body: 'acct_1QmDemo4Fz8Lw2Xc' }),
@@ -85,17 +77,13 @@ const SUPPORT_HOURS: Record<'it' | 'en', string[]> = {
 /**
  * `POST /api/system/send-test-email` with `EmailConfigurationRequest`: the real backend tries the
  * settings by sending an email, the mock only checks them (see `emailConfigurationErrors`). 204
- * without a body; 401 without a valid access token; 403 for an unknown property; 400 with one error
- * per wrong field.
+ * without a body; 401 without a valid access token; 400 with one error per wrong field.
  */
 export const sendTestEmailMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  if (!propertyOf((request.body as Partial<EmailConfigurationRequest> | null)?.idProperty)) {
-    return forbidden(request);
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
@@ -110,17 +98,13 @@ export const sendTestEmailMock = (
 /**
  * `POST /api/system/save-email-configuration` with `EmailConfigurationRequest`: same checks as the
  * test email; the mock keeps the values until the page is reloaded, so the GET (and Reset) answers
- * them. 204 without a body; 401 without a valid access token; 403 for an unknown property; 400 with
- * one error per wrong field.
+ * them. 204 without a body; 401 without a valid access token; 400 with one error per wrong field.
  */
 export const saveEmailConfigurationMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  if (!propertyOf((request.body as Partial<EmailConfigurationRequest> | null)?.idProperty)) {
-    return forbidden(request);
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
@@ -177,17 +161,12 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
 }
 
 /**
- * `POST /api/system/info-support` with `{ idProperty }`: the support contacts and hours, the hours in
- * the language of `Accept-Language` (Italian when it is not English). 401 without a valid access
- * token; 403 for an unknown property.
+ * `POST /api/system/info-support` without a body: the support contacts and hours, the hours in the
+ * language of `Accept-Language` (Italian when it is not English). 401 without a valid access token.
  */
 export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idProperty?: unknown };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
   }
   const language = request.headers.get('Accept-Language')?.startsWith('en') ? 'en' : 'it';
   const info: SupportInfo = {
@@ -201,8 +180,8 @@ export const supportInfoMock = (request: HttpRequest<unknown>): Observable<HttpE
 /**
  * `POST /api/system/contact-support` with `ContactSupportRequest`: the real backend sends the
  * message to the support team, the mock only checks it. 204 without a body; 401 without a valid
- * access token; 403 for an unknown property; 400 with one error per missing field (blank counts as
- * missing; the mobile phone may be `null`).
+ * access token; 400 with one error per missing field (blank counts as missing; the mobile phone may
+ * be `null`).
  */
 export const contactSupportMock = (
   request: HttpRequest<unknown>,
@@ -211,9 +190,6 @@ export const contactSupportMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<Record<keyof ContactSupportRequest, unknown>>;
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
   const errors: MockFieldError[] = [];
   for (const field of REQUIRED_FIELDS) {
     const value = body[field];

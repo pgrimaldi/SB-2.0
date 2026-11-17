@@ -67,7 +67,7 @@ classi e commenti.
 - Una sola classe Angular per file (es. `carousel-slide.ts` separato da `carousel.ts`).
 - La cartella di un componente ha lo stesso nome del suo file (`dialogs/alert-popup/alert-popup.ts`).
 - Il nome di un wrapper descrive il componente, non la zona dell'app dove si usa (`app-card`, non `app-card-hub`).
-- Un campo o una variabile che contiene un id comincia con `id` (`idArticle`, `idProperty`, `idItems`); una quantità
+- Un campo o una variabile che contiene un id comincia con `id` (`idArticle`, `idPeriod`, `idItems`); una quantità
   (totale, disponibili, soglia…) finisce con `Quantity` (`totalQuantity`, `availableQuantity`, `thresholdQuantity`).
   Vale anche per i campi delle API.
 - Fanno eccezione i nomi delle colonne del database copiati nei mock (`publicId`, `propertyId`, `lowStockThreshold`) e
@@ -140,11 +140,11 @@ classi e commenti.
 - Ogni API con un corpo vero ha la sua request con un nome: niente tipi scritti direttamente nei service.
 - **Niente oggetti con un solo valore**: una request o una response fatta di un solo valore semplice (un id, una
   stringa, un numero) non ha un'entità. Il service riceve o restituisce il valore stesso e costruisce da sé il corpo
-  `{ idProperty }` o la query string (es. `supportInfo(idProperty)`, `articleCombobox(idProperty)`).
+  o la query string (es. `deletePeriod(idPeriod)` manda `{ idPeriod }`, `deleteVoucherItems(idVouchers)` manda
+  `{ idVouchers }`).
 - La pagina tiene quel valore in una sua variabile con il nome del valore (es. `GET api/system/get-stripe-information`
   restituisce la stringa e la pagina la tiene in `stripeAccountId`).
-- Le tabelle usano tutte `PageRequest`, che contiene già `idProperty`, senza un'interfaccia propria per ogni API: vedi
-  `tabelle.md`.
+- Le tabelle usano tutte `PageRequest`, senza un'interfaccia propria per ogni API: vedi `tabelle.md`.
 - Le entità di servizio (forme di dati usate da behaviours e service) stanno in `entities`: quelle generali in
   `entities/shared/` (es. `DateRange`, `DatePart`, `Language`), quelle di un argomento nella sua cartella (es.
   `entities/auth/session.ts`, `tab-message.ts`, `logout-outcome.ts`).
@@ -172,13 +172,12 @@ classi e commenti.
   magazzino è un `WarehouseItem`).
 - Esempio: a ogni apertura il popup di accesso parte da `new LoginRequest()` e alla chiusura lo svuota, così la password
   scritta non resta in memoria.
-- Gli id (`idProperty`, `idArticle`…) stanno nelle entità ma non si mostrano mai nei form, salvo richiesta.
-- Quando l'entità non ha `idProperty` (la riga della lista), il service lo riceve a parte e lo mette nel corpo
-  (`addWarehouseItem(idProperty, item)`, `editWarehouseItem(idProperty, item)`).
+- Gli id (`idArticle`, `idPeriod`…) stanno nelle entità ma non si mostrano mai nei form, salvo richiesta.
 - Il service manda solo i campi dichiarati dalla classe, con `onlyFieldsOf(Classe, valore)`
   (`services/api/only-fields-of.ts`): i tipi non tolgono a runtime i campi in più di un JSON del server, e lo spread li
   rimanderebbe tutti. Vale per ogni API che manda un'entità-classe.
-- `idProperty` va messo dopo, così non si può sovrascrivere: `{ ...onlyFieldsOf(WarehouseItem, item), idProperty }`.
+- I campi che il service aggiunge al corpo vanno dopo, così non si possono sovrascrivere:
+  `{ ...onlyFieldsOf(SeasonPeriodAddRequest, request), isNextSeason }`.
   Funziona perché ogni classe dà un valore di partenza a tutti i suoi campi.
 - Non si fanno ipotesi su cosa fa il backend con i dati (es. se l'aggiunta crea un articolo nuovo o somma la quantità a
   uno esistente): se serve saperlo si chiede all'utente.

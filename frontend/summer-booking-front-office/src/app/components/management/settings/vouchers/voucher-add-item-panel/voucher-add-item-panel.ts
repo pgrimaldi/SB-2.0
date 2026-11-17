@@ -242,8 +242,7 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -251,7 +250,7 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.vouchers.addVoucherItem(idProperty, this.draft()));
+        await firstValueFrom(this.vouchers.addVoucherItem(this.draft()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();

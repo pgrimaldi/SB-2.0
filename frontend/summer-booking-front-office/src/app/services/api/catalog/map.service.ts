@@ -9,10 +9,6 @@ import { MapLayout } from '../../../entities/settings/map-configuration/map-layo
 import { MapSettings } from '../../../entities/settings/map-configuration/map-settings';
 import { onlyFieldsOf } from '../only-fields-of';
 
-/**
- * The property comes from the access token: only the combobox carries idProperty, like every
- * other combobox.
- */
 @Injectable({ providedIn: 'root' })
 export class MapService {
   private readonly httpClient = inject(HttpClient);
@@ -44,6 +40,6 @@ export class MapService {
     this.httpClient.post<MapLayout>(`${this.endpoint}/reset`, null);
 
   /** Every area of the property's map: `id` is the idSectorArea, `value` the name. */
-  readonly sectorAreaCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sector-area-combobox`, { idProperty });
+  readonly sectorAreaCombobox = (): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sector-area-combobox`, null);
 }

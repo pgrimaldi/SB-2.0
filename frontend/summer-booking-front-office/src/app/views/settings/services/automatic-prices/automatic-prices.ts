@@ -63,10 +63,9 @@ export class AutomaticPrices {
   protected readonly duplicating = signal(false);
   protected readonly idAutomaticPricesToDuplicate = signal<readonly string[]>([]);
   protected readonly automaticPriceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_AutomaticPricesTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -100,7 +99,7 @@ export class AutomaticPrices {
     edit: ({ idAutomaticPrice }) => idAutomaticPrice && this.openEdit(idAutomaticPrice),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, AutomaticPriceRow> = (request) =>
+  protected readonly load: TableLoad<object, AutomaticPriceRow> = (request) =>
     this.catalog.automaticPriceList(request).pipe(
       map((page) => {
         const amount = new Intl.NumberFormat(this.dateLanguage.locale(), {
@@ -117,10 +116,10 @@ export class AutomaticPrices {
       }),
     );
 
-  protected readonly deleteAutomaticPrices = (idProperty: string, idAutomaticPrices: string[]) =>
-    this.catalog.deleteAutomaticPriceItems({ idProperty, idAutomaticPrices });
-  protected readonly duplicateAutomaticPrices = (idProperty: string, idAutomaticPrices: string[]) =>
-    this.catalog.duplicateAutomaticPriceItems({ idProperty, idAutomaticPrices });
+  protected readonly deleteAutomaticPrices = (idAutomaticPrices: string[]) =>
+    this.catalog.deleteAutomaticPriceItems(idAutomaticPrices);
+  protected readonly duplicateAutomaticPrices = (idAutomaticPrices: string[]) =>
+    this.catalog.duplicateAutomaticPriceItems(idAutomaticPrices);
 
   protected openEdit(idAutomaticPrice: string): void {
     this.idAutomaticPriceToEdit.set(idAutomaticPrice);

@@ -13,14 +13,11 @@ export class SystemService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/system`;
 
-  readonly supportInfo = (idProperty: string): Observable<SupportInfo> =>
-    this.httpClient.post<SupportInfo>(`${this.endpoint}/info-support`, { idProperty });
+  readonly supportInfo = (): Observable<SupportInfo> =>
+    this.httpClient.post<SupportInfo>(`${this.endpoint}/info-support`, null);
 
-  /** GET: the property travels in the query string (`?idProperty=…`). */
-  readonly emailConfiguration = (idProperty: string): Observable<EmailConfigurationData> =>
-    this.httpClient.get<EmailConfigurationData>(`${this.endpoint}/email-configuration`, {
-      params: { idProperty },
-    });
+  readonly emailConfiguration = (): Observable<EmailConfigurationData> =>
+    this.httpClient.get<EmailConfigurationData>(`${this.endpoint}/email-configuration`);
 
   /** The backend sends a test email with these settings. Answers 204 with no body. */
   readonly sendTestEmail = (request: EmailConfigurationRequest): Observable<void> =>
@@ -37,10 +34,8 @@ export class SystemService {
     );
 
   /** The id of the Stripe account connected to the property; null while none is connected. */
-  readonly stripeInformation = (idProperty: string): Observable<string | null> =>
-    this.httpClient.get<string | null>(`${this.endpoint}/get-stripe-information`, {
-      params: { idProperty },
-    });
+  readonly stripeInformation = (): Observable<string | null> =>
+    this.httpClient.get<string | null>(`${this.endpoint}/get-stripe-information`);
 
   /** The backend sends the message to the support team. Answers 204 with no body. */
   readonly contactSupport = (request: ContactSupportRequest): Observable<void> =>

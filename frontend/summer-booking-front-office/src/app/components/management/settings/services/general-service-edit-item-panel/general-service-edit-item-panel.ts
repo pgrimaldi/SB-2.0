@@ -261,9 +261,8 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idStandardService = this.idStandardService();
-    if (this.isSaving() || !idProperty || !idStandardService) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !idStandardService) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -271,7 +270,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idStandardService));
+        await firstValueFrom(this.update(tab, idStandardService));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
@@ -294,8 +293,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The data of a tab, read from its API the first time the tab is opened. */
   private loadTab(tab: PanelTab): void {
     const idStandardService = this.idStandardService();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idStandardService || !idProperty || this.loadedTabs().has(tab)) {
+    if (!idStandardService || !this.auth.user()?.propertyId || this.loadedTabs().has(tab)) {
       return;
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
@@ -317,7 +315,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         tab,
         forkJoin({
           prices: this.catalog.standardServicePrices(idStandardService),
-          periods: this.seasons.periodList(idProperty, false),
+          periods: this.seasons.periodList(false),
         })
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
@@ -350,11 +348,10 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idStandardService: string): Observable<void> {
+  private update(tab: PanelTab, idStandardService: string): Observable<void> {
     const draft = this.draft();
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateStandardServiceGeneral(
-        idProperty,
         Object.assign(new StandardServiceUpdateGeneralRequest(), {
           idStandardService,
           ...pick(draft, tab),
@@ -363,7 +360,6 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     if (tab === PanelTab.Prices) {
       return this.catalog.updateStandardServicePrices(
-        idProperty,
         Object.assign(new StandardServiceUpdatePricesRequest(), {
           idStandardService,
           ...pick(draft, tab),
@@ -371,7 +367,6 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       );
     }
     return this.catalog.updateStandardServiceBooking(
-      idProperty,
       Object.assign(new StandardServiceUpdateBookingRequest(), {
         idStandardService,
         ...pick(draft, tab),

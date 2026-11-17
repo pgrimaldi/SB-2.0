@@ -104,12 +104,11 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     // Loaded again when the language changes: the support hours come translated by the server.
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() =>
-        this.system.supportInfo(idProperty).subscribe({
+        this.system.supportInfo().subscribe({
           next: (supportInfo) => {
             this.supportInfo.set(supportInfo);
             this.supportInfoError.set(null);
@@ -130,8 +129,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
 
   protected send(event: Event): void {
     event.preventDefault();
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty) {
+    if (this.isLoading() || !this.auth.user()?.propertyId) {
       return;
     }
     // Every field becomes touched and nothing is sent while one is wrong; an error of the backend on
@@ -144,7 +142,6 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
         await firstValueFrom(
           this.system.contactSupport({
             ...contact,
-            idProperty,
             firstName: trimmed(contact.firstName),
             lastName: trimmed(contact.lastName),
             email: trimmed(contact.email),

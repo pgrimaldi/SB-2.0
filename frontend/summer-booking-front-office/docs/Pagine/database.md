@@ -120,15 +120,14 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 
 ## API
 
-In `DatabaseService`:
+In `DatabaseService` (lo stabilimento lo prende il backend dal token):
 
 - `POST /api/database/existing-booking-list` (`existingBookingList`): corpo `PageRequest` come tutte le tabelle,
   risposta `Page<ExistingBookingItem>`.
 - `POST /api/database/trash-item-list` (`trashItemList`): stesso corpo e stessa risposta.
-- `POST /api/database/affiliated-hotel-combobox` (`affiliatedHotelCombobox(idProperty)`): `ComboboxItem[]`.
-- `POST /api/database/move-to-trash` (`moveToTrash`): corpo `{ idProperty, idBookings, password }`.
-- `POST /api/database/empty-trash` (`emptyTrash(idProperty)`): corpo con il solo `idProperty`.
-- `POST /api/database/restore-booking-item` (`restoreBookingItem`): corpo `RestoreBookingItemRequest` (`idProperty` e
-  l'array `idBookings` delle righe scelte, `entities/database/`).
-- `POST /api/database/delete-selected-item` (`deleteSelectedItem`): corpo `DeleteSelectedItemRequest`, stessi campi di
-  Ripristina.
+- `POST /api/database/affiliated-hotel-combobox` (`affiliatedHotelCombobox`): POST senza corpo, `ComboboxItem[]`.
+- `POST /api/database/move-to-trash` (`moveToTrash`): corpo `{ idBookings, password }`.
+- `POST /api/database/empty-trash` (`emptyTrash`): POST senza corpo.
+- `POST /api/database/restore-booking-item` (`restoreBookingItem`): corpo `{ idBookings }`, l'array degli id delle
+  righe scelte.
+- `POST /api/database/delete-selected-item` (`deleteSelectedItem`): stesso corpo `{ idBookings }` di Ripristina.

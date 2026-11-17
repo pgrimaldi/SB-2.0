@@ -9,20 +9,20 @@ import { UserSelectedItem } from '../../../entities/settings/user-management/use
 import { IdentityService } from './identity.service';
 
 describe('IdentityService', () => {
-  it('should ask the users of the combobox for the property', () => {
+  it('should ask the users of the combobox without a body', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const identity = TestBed.inject(IdentityService);
     const controller = TestBed.inject(HttpTestingController);
 
-    identity.userCombobox('p1').subscribe();
+    identity.userCombobox().subscribe();
 
     const request = controller.expectOne(
       `${environment.apiBaseUrl}/identity/user-combobox`,
     ).request;
     expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idProperty: 'p1' });
+    expect(request.body).toBeNull();
     controller.verify();
   });
 
@@ -39,7 +39,6 @@ describe('IdentityService', () => {
       phoneCountryCode: '39',
       phone: '3401112299',
       role: UserRole.Waiter,
-      idProperty: 'p2',
       firstName: 'extra-field',
     });
 
@@ -80,7 +79,6 @@ describe('IdentityService', () => {
       phoneCountryCode: '41',
       phone: '3401112277',
       role: UserRole.Manager,
-      idProperty: 'p2',
     });
 
     let updated: UserSelectedItem | undefined;

@@ -105,13 +105,12 @@ export class Sharing implements UnsavedChanges, OnDestroy {
     });
     effect((onCleanup) => {
       this.dataReload?.();
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() => {
         this.error.set(null);
-        return this.sharing.generalInformation(idProperty).subscribe({
+        return this.sharing.generalInformation().subscribe({
           next: (information) => {
             this.information.set(information);
             this.informationForm().reset();
@@ -132,8 +131,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (!this.canSave() || !idProperty) {
+    if (!this.canSave() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.informationForm, async (): Promise<TreeValidationResult> => {
@@ -141,7 +139,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const sent = this.information();
-        await firstValueFrom(this.sharing.saveInformation(idProperty, sent));
+        await firstValueFrom(this.sharing.saveInformation(sent));
         this.informationForm().reset();
         this.saved.set(true);
       } catch (error: unknown) {

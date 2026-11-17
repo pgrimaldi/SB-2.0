@@ -33,7 +33,7 @@ export class DeleteItemsPopup {
   readonly idItems = input<readonly string[]>([]);
   readonly itemName = input<string | null>(null);
   readonly translationKey = input.required<string>();
-  readonly action = input.required<(idProperty: string, idItems: string[]) => Observable<void>>();
+  readonly action = input.required<(idItems: string[]) => Observable<void>>();
   /** [X of both popups, warning of the error popup]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly deleted = output<readonly string[]>();
@@ -52,14 +52,13 @@ export class DeleteItemsPopup {
   );
 
   protected deleteItems(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idItems = [...this.idItems()];
-    if (this.isLoading() || !idProperty || !idItems.length) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !idItems.length) {
       return;
     }
     this.open.set(false);
     this.isLoading.set(true);
-    this.action()(idProperty, idItems).subscribe({
+    this.action()(idItems).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.deleted.emit(idItems);

@@ -71,7 +71,7 @@ describe('ElectronicReceiptAccountForm', () => {
     expect(element.querySelector('.electronic__receipt__account__form__saved')).toBeNull();
     save().click();
     await settle();
-    expect(saveElectronicReceiptAccount).toHaveBeenCalledWith('p1', filled);
+    expect(saveElectronicReceiptAccount).toHaveBeenCalledWith(filled);
     expect(save().querySelector('mat-progress-spinner')).not.toBeNull();
     expect(
       element.querySelector('.electronic__receipt__account__form__fields')!.hasAttribute('inert'),
@@ -151,7 +151,6 @@ describe('ElectronicReceiptAccountForm', () => {
     button('save')!.click();
     await settle();
     expect(saveElectronicReceiptAccount).toHaveBeenCalledWith(
-      'p1',
       expect.objectContaining({ password: 'segreta-1' }),
     );
     expect(inputs()[10].value).toBe('');

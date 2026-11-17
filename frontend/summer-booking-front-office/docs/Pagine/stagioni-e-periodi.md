@@ -66,7 +66,7 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 - Su un telefono (titolo sotto i 27rem) "Periodi" resta solo e i due bottoni scendono sotto e si dividono la riga,
   tutti e due nell'azzurro dei bottoni di aggiunta delle tabelle.
 - Una sottosezione apribile (`app-expansion-panel`) per ogni periodo di
-  `GET /api/seasons/period-list?idProperty=&isNextSeason=` (i periodi della stagione della tab).
+  `GET /api/seasons/period-list?isNextSeason=` (i periodi della stagione della tab; stabilimento dal token).
 
 ### Righe degli intervalli
 
@@ -89,14 +89,14 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   - Su telefono i bottoni vanno due per riga sotto "Periodi".
 - Il cestino di una riga e "Cancella selezionati" aprono `app-delete-items-popup` come le tabelle ("Vuoi eliminare
   l'intervallo 01 maggio 2026 – 15 giugno 2026?" / "Vuoi eliminare i 2 intervalli selezionati?").
-- Poi `POST /api/seasons/delete-intervals` (`DeleteIntervalsRequest`, `idInterval` delle righe di `period-list`),
+- Poi `POST /api/seasons/delete-intervals` (corpo `{ idIntervals }`, `idInterval` delle righe di `period-list`),
   con lo spinner a pagina intera e ricarica dei periodi. Un periodo senza più intervalli resta.
 
 ### Azioni sul periodo
 
 - A sinistra del nome di ogni periodo un cestino (`app-icon-button` nello slot `appExpansionPanelStart`, tooltip
   "Elimina"): apre `app-delete-items-popup` ("Vuoi eliminare il periodo …? Verranno eliminati anche tutti i suoi
-  intervalli di date se presenti."), poi `POST /api/seasons/delete-period` (`DeletePeriodRequest`) con lo spinner a
+  intervalli di date se presenti."), poi `POST /api/seasons/delete-period` (corpo `{ idPeriod }`) con lo spinner a
   pagina intera e ricarica dei periodi della tab; errore in "Operazione non riuscita".
 - Subito a destra del nome (`appExpansionPanelTitleAside`) una matita (tooltip "Modifica") e un "+"
   (`Seasons_AddInterval.svg`, il + sottile di Aggiungi nuova regola nell'azzurro di matita e cestino, tooltip
@@ -106,17 +106,17 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 
 - "Imposta periodo" (`app-season-period-add-popup`, da "Aggiungi periodo"): nome del periodo (obbligatorio) e
   `app-period-calendar` così com'è, solo a clic, con almeno un intervallo. Salva manda `SeasonPeriodAddRequest`,
-  con `idProperty` e l'`isNextSeason` della tab, a `POST /api/seasons/add-period` e ricarica i periodi della tab.
+  con l'`isNextSeason` della tab, a `POST /api/seasons/add-period` e ricarica i periodi della tab.
 - "Modifica Periodo" (`app-season-period-edit-popup`, dalla matita del periodo): il solo campo "Nome del periodo",
   obbligatorio e già riempito, Annulla e Salva; poi `POST /api/seasons/update-period`
-  (`SeasonPeriodUpdateRequest` e `idProperty`).
+  (`SeasonPeriodUpdateRequest`).
 - "Aggiungi intervallo" (`app-season-interval-add-popup`, dal "+"): copia di Modifica Intervallo con le date vuote e
-  le stesse regole (giorni della stagione, Al da Dal in poi); poi `POST /api/seasons/add-interval` (le due date,
-  `idPeriod` e `idProperty`).
+  le stesse regole (giorni della stagione, Al da Dal in poi); poi `POST /api/seasons/add-interval` (le due date e
+  `idPeriod`).
 - "Modifica Intervallo" (`app-season-interval-edit-popup`, dalla matita della riga): Data inizio e Data fine,
   `app-filled-date-field` obbligatori già riempiti con la riga, Annulla e Salva; poi
-  `POST /api/seasons/update-interval` con la riga `SeasonPeriodIntervalItem` e `idProperty`; spinner, errori sotto
-  i campi, avviso di modifiche non salvate.
+  `POST /api/seasons/update-interval` con la riga `SeasonPeriodIntervalItem`; spinner, errori sotto i campi,
+  avviso di modifiche non salvate.
 
 ## Intervalli senza sovrapposizioni
 

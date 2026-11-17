@@ -55,10 +55,9 @@ export class Packages {
   protected readonly duplicating = signal(false);
   protected readonly idPackagesToDuplicate = signal<readonly string[]>([]);
   protected readonly packageNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
@@ -89,13 +88,13 @@ export class Packages {
     edit: ({ idPackage }) => idPackage && this.askEdit(idPackage),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, PackageItem> = (request) =>
+  protected readonly load: TableLoad<object, PackageItem> = (request) =>
     this.priceLists.packageList(request);
 
-  protected readonly deletePackages = (idProperty: string, idPackages: string[]) =>
-    this.priceLists.deletePackageItems({ idProperty, idPackages });
-  protected readonly duplicatePackages = (idProperty: string, idPackages: string[]) =>
-    this.priceLists.duplicatePackageItems({ idProperty, idPackages });
+  protected readonly deletePackages = (idPackages: string[]) =>
+    this.priceLists.deletePackageItems(idPackages);
+  protected readonly duplicatePackages = (idPackages: string[]) =>
+    this.priceLists.duplicatePackageItems(idPackages);
 
   protected askDelete(idPackages: readonly TableRowId[], packageName: string | null = null): void {
     this.idPackagesToDelete.set(idPackages.map(String));

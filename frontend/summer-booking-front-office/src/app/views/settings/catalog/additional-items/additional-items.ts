@@ -55,10 +55,9 @@ export class AdditionalItems {
   protected readonly duplicating = signal(false);
   protected readonly idAdditionalItemsToDuplicate = signal<readonly string[]>([]);
   protected readonly additionalItemNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
   protected readonly alertIcons = [
@@ -90,13 +89,13 @@ export class AdditionalItems {
     edit: ({ idAdditionalItem }) => idAdditionalItem && this.askEdit(idAdditionalItem),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, AdditionalItem> = (request) =>
+  protected readonly load: TableLoad<object, AdditionalItem> = (request) =>
     this.priceLists.additionalItemList(request);
 
-  protected readonly deleteAdditionalItems = (idProperty: string, idAdditionalItems: string[]) =>
-    this.priceLists.deleteAdditionalItems({ idProperty, idAdditionalItems });
-  protected readonly duplicateAdditionalItems = (idProperty: string, idAdditionalItems: string[]) =>
-    this.priceLists.duplicateAdditionalItems({ idProperty, idAdditionalItems });
+  protected readonly deleteAdditionalItems = (idAdditionalItems: string[]) =>
+    this.priceLists.deleteAdditionalItems(idAdditionalItems);
+  protected readonly duplicateAdditionalItems = (idAdditionalItems: string[]) =>
+    this.priceLists.duplicateAdditionalItems(idAdditionalItems);
 
   protected askEdit(idAdditionalItem: string): void {
     this.idAdditionalItemToEdit.set(idAdditionalItem);

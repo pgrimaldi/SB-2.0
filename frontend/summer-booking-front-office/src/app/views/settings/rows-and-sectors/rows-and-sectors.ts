@@ -55,10 +55,9 @@ export class RowsAndSectors {
   protected readonly duplicating = signal(false);
   protected readonly idSectorsToDuplicate = signal<readonly string[]>([]);
   protected readonly sectorNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/GeneralIcon_CalendarFilled.svg'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -89,13 +88,13 @@ export class RowsAndSectors {
     edit: (sector) => this.openEdit(sector),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, SectorItem> = (request) =>
+  protected readonly load: TableLoad<object, SectorItem> = (request) =>
     this.sectors.sectorList(request);
 
-  protected readonly deleteSectors = (idProperty: string, idSectors: string[]) =>
-    this.sectors.deleteSectorItems({ idProperty, idSectors });
-  protected readonly duplicateSectors = (idProperty: string, idSectors: string[]) =>
-    this.sectors.duplicateSectorItems({ idProperty, idSectors });
+  protected readonly deleteSectors = (idSectors: string[]) =>
+    this.sectors.deleteSectorItems(idSectors);
+  protected readonly duplicateSectors = (idSectors: string[]) =>
+    this.sectors.duplicateSectorItems(idSectors);
 
   protected askDelete(idSectors: readonly TableRowId[], sectorName: string | null = null): void {
     this.idSectorsToDelete.set(idSectors.map(String));

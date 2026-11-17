@@ -18,7 +18,6 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
     const request: PageRequest = {
-      idProperty: 'p1',
       page: 2,
       pageSize: 10,
       search: 'ombrellone',
@@ -51,13 +50,13 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
 
-    priceLists.deletePackageItems({ idProperty: 'p1', idPackages: ['k1', 'k2'] }).subscribe();
+    priceLists.deletePackageItems(['k1', 'k2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/delete-package-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    expect(call.request.body).toEqual({ idPackages: ['k1', 'k2'] });
     controller.verify();
   });
 
@@ -68,17 +67,17 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
 
-    priceLists.duplicatePackageItems({ idProperty: 'p1', idPackages: ['k1', 'k2'] }).subscribe();
+    priceLists.duplicatePackageItems(['k1', 'k2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idPackages: ['k1', 'k2'] });
+    expect(call.request.body).toEqual({ idPackages: ['k1', 'k2'] });
     controller.verify();
   });
 
-  it('should ask the packages of the dropdowns with the property only', () => {
+  it('should ask the packages of the dropdowns without a body', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -86,19 +85,19 @@ describe('PriceListService', () => {
     const controller = TestBed.inject(HttpTestingController);
     let answer: unknown;
 
-    priceLists.packageCombobox('p1').subscribe((read) => (answer = read));
+    priceLists.packageCombobox().subscribe((read) => (answer = read));
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/package-combobox`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1' });
+    expect(call.request.body).toBeNull();
     call.flush([{ id: 'k1', value: 'Ombrellone e 2 lettini' }]);
     expect(answer).toEqual([{ id: 'k1', value: 'Ombrellone e 2 lettini' }]);
     controller.verify();
   });
 
-  it('should create the additional item sending the whole form and the property', () => {
+  it('should create the additional item sending the whole form, without the property', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -124,14 +123,14 @@ describe('PriceListService', () => {
       extra: 'not sent',
     });
 
-    priceLists.createAdditionalItem('p1', sent).subscribe();
+    priceLists.createAdditionalItem(sent).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/create-additional-services-article-item`,
     );
-    expect(call.request.body).toEqual({ ...request, idProperty: 'p1' });
+    expect(call.request.body).toEqual({ ...request });
     controller.verify();
   });
 
@@ -156,7 +155,7 @@ describe('PriceListService', () => {
     controller.verify();
   });
 
-  it('should update the additional item sending the whole form, its id and the property', () => {
+  it('should update the additional item sending the whole form, its id, without the property', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -172,7 +171,7 @@ describe('PriceListService', () => {
     );
 
     priceLists
-      .updateAdditionalItem('p1', 'a1', {
+      .updateAdditionalItem('a1', {
         ...request,
         extra: 'not sent',
       } as AdditionalItemAddItemRequest)
@@ -183,7 +182,7 @@ describe('PriceListService', () => {
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/update-additional-services-article-item`,
     );
-    expect(call.request.body).toEqual({ ...request, idAdditionalItem: 'a1', idProperty: 'p1' });
+    expect(call.request.body).toEqual({ ...request, idAdditionalItem: 'a1' });
     controller.verify();
   });
 
@@ -194,7 +193,6 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
     const request: PageRequest = {
-      idProperty: 'p1',
       page: 1,
       pageSize: 10,
       search: 'lettino',
@@ -228,16 +226,14 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
 
-    priceLists
-      .deleteAdditionalItems({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] })
-      .subscribe();
+    priceLists.deleteAdditionalItems(['a1', 'a2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/delete-additional-services-article-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] });
+    expect(call.request.body).toEqual({ idAdditionalItems: ['a1', 'a2'] });
     controller.verify();
   });
 
@@ -248,16 +244,14 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
 
-    priceLists
-      .duplicateAdditionalItems({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] })
-      .subscribe();
+    priceLists.duplicateAdditionalItems(['a1', 'a2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/catalog/duplicate-additional-services-article-item`,
     );
-    expect(call.request.body).toEqual({ idProperty: 'p1', idAdditionalItems: ['a1', 'a2'] });
+    expect(call.request.body).toEqual({ idAdditionalItems: ['a1', 'a2'] });
     controller.verify();
   });
 

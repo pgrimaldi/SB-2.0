@@ -17,7 +17,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   bottone "Aggiungi pacchetto", una colonna Nome (`packageName`), azioni di riga cancella, duplica e modifica.
 - Righe da `POST /api/catalog/packages-list` (`PriceListService.packageList`).
 - Cestino di riga ed "elimina selezionati": `app-delete-items-popup`, poi `POST /api/catalog/delete-package-item`
-  (`{ idProperty, idPackages }`, tutto o niente, 204).
+  (`{ idPackages }`, tutto o niente, 204).
 - Duplica di riga e "duplica selezionati": `app-duplicate-items-popup`, poi
   `POST /api/catalog/duplicate-package-item` (stesso corpo, tutto o niente, 204; i nomi delle copie li sceglie
   il backend).
@@ -27,7 +27,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - Tutti e due in `components/management/settings/catalog/`: `app-side-panel` + `app-tab-group` come i pannelli di
   Servizi, modulo `PackageAddItemRequest`, conferma "Modifiche non salvate".
-- Le loro API prendono lo stabilimento dal token e non mandano `idProperty`.
+- Le loro API prendono lo stabilimento dal token.
 - Le due tab, "Info Generali" e "Listino", sono le stesse nei due pannelli.
 
 ### Aggiungi
@@ -193,7 +193,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   `AdditionalItem`).
 - Cestino ed "elimina selezionati": `POST /api/catalog/delete-additional-services-article-item`.
 - Duplica e "duplica selezionati": `POST /api/catalog/duplicate-additional-services-article-item`.
-- Corpo `{ idProperty, idAdditionalItems }`, tutto o niente, 204.
+- Corpo `{ idAdditionalItems }`, tutto o niente, 204.
 
 ### Pannello Aggiungi (`app-additional-item-add-item-panel`)
 
@@ -206,7 +206,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   (`isMapAssignable`).
 - Poi il titolo "Listino" e `app-price-list-tab`, senza prezzi stagionali ridotti.
 - Le due tendine e le righe dei prezzi (`sector-combobox` e `period-list`) si leggono a ogni apertura del pannello.
-- "Crea articolo/servizio" è spento finché manca l'articolo; manda tutto il modulo e `idProperty` a
+- "Crea articolo/servizio" è spento finché manca l'articolo; manda tutto il modulo a
   `POST /api/catalog/create-additional-services-article-item` (`PriceListService.createAdditionalItem`, 204).
 - Spinner e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica, se fallisce gli errori
   vanno sotto i campi o sopra i bottoni.
@@ -219,7 +219,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   `GET /api/catalog/get-additional-services-article-item?idAdditionalItem=` (`PriceListService.selectedAdditionalItem`,
   risposta `AdditionalItemSelectedItem`), le due tendine, i settori e i periodi; si apre in sola lettura.
 - "Modifica" sblocca i campi; "Annulla" riporta i valori letti, chiedendo prima se ci sono modifiche.
-- "Salva" manda tutto il modulo con `idAdditionalItem` e `idProperty` a
+- "Salva" manda tutto il modulo con `idAdditionalItem` a
   `POST /api/catalog/update-additional-services-article-item` (`PriceListService.updateAdditionalItem`, 204),
   compresi i prezzi letti di settori o periodi che il pannello non mostra; se riesce il pannello si chiude e la
   tabella si ricarica.

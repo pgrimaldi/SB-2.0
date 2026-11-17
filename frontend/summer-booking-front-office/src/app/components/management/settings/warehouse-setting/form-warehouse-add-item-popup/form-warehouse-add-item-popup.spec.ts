@@ -104,7 +104,7 @@ describe('FormWarehouseAddItemPopup', () => {
   it('should offer the articles of the property in the select', async () => {
     const { openSelect, articleCombobox } = await setup();
 
-    expect(articleCombobox).toHaveBeenCalledWith('p1');
+    expect(articleCombobox).toHaveBeenCalledWith();
     expect((await openSelect()).map((option) => option.textContent?.trim())).toEqual([
       'Lettino',
       'Ombrellone',
@@ -210,7 +210,7 @@ describe('FormWarehouseAddItemPopup', () => {
 
     add().click();
     await fixture.whenStable();
-    expect(addWarehouseItem).toHaveBeenCalledWith('p1', {
+    expect(addWarehouseItem).toHaveBeenCalledWith({
       ...new WarehouseItem(),
       idArticle: 'a2',
       totalQuantity: 7,

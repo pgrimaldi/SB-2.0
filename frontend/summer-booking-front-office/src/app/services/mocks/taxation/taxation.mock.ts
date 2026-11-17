@@ -2,13 +2,10 @@ import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/comm
 import { Observable, delay, of } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { AddPrinterItemRequest } from '../../../entities/settings/taxation/add-printer-item-request';
-import { DeletePrinterRequest } from '../../../entities/settings/taxation/delete-printer-request';
-import { ElectronicReceiptActivationRequest } from '../../../entities/settings/taxation/electronic-receipt-activation-request';
 import { PrinterItemListResponse } from '../../../entities/settings/taxation/printer-item-list-response';
 import { SetPrinterIsActiveRequest } from '../../../entities/settings/taxation/set-printer-is-active-request';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { resourceNotFound } from '../errors/problem.mock';
 
 /** Invented printers, with documentation IP addresses (RFC 5737); changed by the mock calls. */
 let printers: PrinterItemListResponse[] = [
@@ -51,18 +48,14 @@ const TERMS: Record<'it' | 'en', string> = {
 };
 
 /**
- * `POST /api/taxation/printer-list` with `PageRequest`: one page of the printers of the
- * property; search, filters and sorting are not read. 401 without a valid access token; 403
- * `auth.forbidden` for a missing or unknown property.
+ * `POST /api/taxation/printer-list` with `PageRequest`: one page of the printers of the property;
+ * search, filters and sorting are not read. 401 without a valid access token.
  */
 export const printerListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
   const page = positiveInteger(body.page, 1);
   const pageSize = positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE);
   // Copies, as from a real server: the page never holds the mock's own objects.
@@ -78,9 +71,8 @@ function positiveInteger(value: unknown, fallback: number): number {
 }
 
 /**
- * `POST /api/taxation/set-is-active` with `SetPrinterIsActiveRequest`: switches the
- * printer on or off. 204 without a body; 401 without a valid access token; 403 for an unknown
- * property; 404 for an unknown printer.
+ * `POST /api/taxation/set-is-active` with `SetPrinterIsActiveRequest`: switches the printer on or
+ * off. 204 without a body; 401 without a valid access token; 404 for an unknown printer.
  */
 export const setPrinterIsActiveMock = (
   request: HttpRequest<unknown>,
@@ -89,9 +81,6 @@ export const setPrinterIsActiveMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<SetPrinterIsActiveRequest>;
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
   const printer = printers.find(({ idPrinter }) => idPrinter === body.idPrinter);
   if (!printer) {
     return resourceNotFound(request);
@@ -101,8 +90,8 @@ export const setPrinterIsActiveMock = (
 };
 
 /**
- * `POST /api/taxation/delete-printer` with `DeletePrinterRequest`. 204 without a body; 401 without a
- * valid access token; 403 for an unknown property; 404 for an unknown printer.
+ * `POST /api/taxation/delete-printer` with `{ idPrinter }`. 204 without a body; 401 without a valid
+ * access token; 404 for an unknown printer.
  */
 export const deletePrinterMock = (
   request: HttpRequest<unknown>,
@@ -110,10 +99,7 @@ export const deletePrinterMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<DeletePrinterRequest>;
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idPrinter?: string };
   if (!printers.some(({ idPrinter }) => idPrinter === body.idPrinter)) {
     return resourceNotFound(request);
   }
@@ -122,18 +108,14 @@ export const deletePrinterMock = (
 };
 
 /**
- * `GET /api/taxation/electronic-receipt?idProperty=…`: the terms of the electronic receipt as HTML,
- * in the language of `Accept-Language` (Italian when it is not English). 401 without a valid access
- * token; 403 `auth.forbidden` for a missing or unknown property.
+ * `GET /api/taxation/electronic-receipt`: the terms of the electronic receipt as HTML, in the
+ * language of `Accept-Language` (Italian when it is not English). 401 without a valid access token.
  */
 export const electronicReceiptMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  if (!propertyOf(request.params.get('idProperty'))) {
-    return forbidden(request);
   }
   const language = request.headers.get('Accept-Language')?.startsWith('en') ? 'en' : 'it';
   return of(new HttpResponse({ status: 200, url: request.url, body: TERMS[language] })).pipe(
@@ -142,20 +124,15 @@ export const electronicReceiptMock = (
 };
 
 /**
- * `POST /api/taxation/download-guide-electronic-receipt` with
- * `{ idProperty }`: the guide as a file. The real document and its type are
- * not known yet: the mock sends an invented text file. 401 without a valid access token; 403 for an
- * unknown property.
+ * `POST /api/taxation/download-guide-electronic-receipt` without a body: the guide as a file. The
+ * real document and its type are not known yet: the mock sends an invented text file. 401 without a
+ * valid access token.
  */
 export const downloadGuideElectronicReceiptMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idProperty?: unknown };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
   }
   const guide = new Blob(['Guida di prova dello scontrino elettronico.'], {
     type: 'text/plain',
@@ -170,18 +147,14 @@ export const downloadGuideElectronicReceiptMock = (
 };
 
 /**
- * `POST /api/taxation/add-printer` with `AddPrinterItemRequest` and `idProperty`: the new printer is
- * added switched off. 204 without a body; 401 without a valid access token; 403 for an unknown
- * property.
+ * `POST /api/taxation/add-printer` with `AddPrinterItemRequest`: the new printer is added switched
+ * off. 204 without a body; 401 without a valid access token.
  */
 export const addPrinterMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<AddPrinterItemRequest> & { idProperty?: string };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as Partial<AddPrinterItemRequest>;
   printers = [
     ...printers,
     {
@@ -195,8 +168,8 @@ export const addPrinterMock = (request: HttpRequest<unknown>): Observable<HttpEv
 };
 
 /**
- * `POST /api/taxation/electronic-receipt-activation` with `ElectronicReceiptActivationRequest`. 204
- * without a body; 401 without a valid access token; 403 for an unknown property.
+ * `POST /api/taxation/electronic-receipt-activation` with `{ isElectronicReceiptAccepted }`. 204
+ * without a body; 401 without a valid access token.
  */
 export const electronicReceiptActivationMock = (
   request: HttpRequest<unknown>,
@@ -204,26 +177,18 @@ export const electronicReceiptActivationMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as Partial<ElectronicReceiptActivationRequest>;
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
-  }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `POST /api/taxation/save-electronic-receipt-account` with `ElectronicReceiptAccount` and
- * `idProperty`. 204 without a body; 401 without a valid access token; 403 for an unknown property.
+ * `POST /api/taxation/save-electronic-receipt-account` with `ElectronicReceiptAccount`. 204 without
+ * a body; 401 without a valid access token.
  */
 export const saveElectronicReceiptAccountMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idProperty?: string };
-  if (!propertyOf(body.idProperty)) {
-    return forbidden(request);
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };

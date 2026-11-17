@@ -22,7 +22,7 @@ class DeleteItemsPopupHost {
   readonly idItems = signal<readonly string[]>(['a1']);
   readonly itemName = signal<string | null>('Lettino');
   readonly open = signal(false);
-  action: (idProperty: string, idItems: string[]) => Observable<void> = vi.fn();
+  action: (idItems: string[]) => Observable<void> = vi.fn();
   deleted: readonly string[] = [];
 }
 
@@ -60,7 +60,7 @@ describe('DeleteItemsPopup', () => {
     });
 
     await confirm();
-    expect(action).toHaveBeenCalledWith('p1', ['a1', 'a2']);
+    expect(action).toHaveBeenCalledWith(['a1', 'a2']);
     expect(host.open()).toBe(false);
     expect(document.querySelector('.page__spinner')).not.toBeNull();
 

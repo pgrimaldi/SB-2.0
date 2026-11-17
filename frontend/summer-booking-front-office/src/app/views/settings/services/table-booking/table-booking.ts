@@ -54,10 +54,9 @@ export class TableBooking {
   protected readonly duplicating = signal(false);
   protected readonly idTableServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly tableServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_TableBookingTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -90,10 +89,10 @@ export class TableBooking {
     edit: ({ idTableService }) => idTableService && this.openEdit(idTableService),
   });
 
-  protected readonly deleteTableServices = (idProperty: string, idTableServices: string[]) =>
-    this.catalog.deleteTableServiceItems({ idProperty, idTableServices });
-  protected readonly duplicateTableServices = (idProperty: string, idTableServices: string[]) =>
-    this.catalog.duplicateTableServiceItems({ idProperty, idTableServices });
+  protected readonly deleteTableServices = (idTableServices: string[]) =>
+    this.catalog.deleteTableServiceItems(idTableServices);
+  protected readonly duplicateTableServices = (idTableServices: string[]) =>
+    this.catalog.duplicateTableServiceItems(idTableServices);
 
   protected openEdit(idTableService: string): void {
     this.idTableServiceToEdit.set(idTableService);

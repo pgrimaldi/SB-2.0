@@ -66,12 +66,12 @@ Rotta `/settings/email-configuration`, vista `views/settings/email-configuration
 
 ## API
 
-In `SystemService`:
+In `SystemService` (lo stabilimento lo prende il backend dal token):
 
-- `GET /api/system/email-configuration?idProperty=…` (`emailConfiguration`): all'apertura, a Reset e quando cambia la
-  lingua (le modifiche non salvate si perdono). Con GET lo stabilimento viaggia nell'indirizzo, non nel corpo.
+- `GET /api/system/email-configuration` (`emailConfiguration`), senza parametri: all'apertura, a Reset e quando cambia
+  la lingua (le modifiche non salvate si perdono).
   Risposta `EmailConfigurationData`: `senderMailAddress`, `senderName`, `smtpServerAddress`, `smtpPort` (numero),
   `smtpUsername`, `hasSmtpPassword`, `smtpSecurity` (`None`, `Ssl`, `Tls`).
-- `POST /api/system/send-test-email` (`sendTestEmail`): corpo `EmailConfigurationRequest`, cioè `idProperty` e gli
-  stessi campi della GET, ma con `smtpPassword` invece di `hasSmtpPassword`, e la porta come numero.
+- `POST /api/system/send-test-email` (`sendTestEmail`): corpo `EmailConfigurationRequest`, cioè gli stessi campi della
+  GET, ma con `smtpPassword` invece di `hasSmtpPassword`, e la porta come numero.
 - `POST /api/system/save-email-configuration` (`saveEmailConfiguration`): stesso corpo.

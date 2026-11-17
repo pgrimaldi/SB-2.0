@@ -307,11 +307,10 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private loadSectors(): void {
     this.sectorsSubscription?.unsubscribe();
     this.sectorsLoadError.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
-    this.sectorsSubscription = this.sectorService.sectorCombobox(idProperty).subscribe({
+    this.sectorsSubscription = this.sectorService.sectorCombobox().subscribe({
       next: (sectors) => this.sectors.set(sectors),
       error: (error: unknown) => {
         const problem = toApiProblem(error);

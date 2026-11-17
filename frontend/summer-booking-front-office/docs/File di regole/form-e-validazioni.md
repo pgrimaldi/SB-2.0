@@ -57,7 +57,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - `submit()` non invia nulla se un campo è sbagliato e segna tutti i campi come toccati, così ogni errore si vede.
 - Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
   non riguarda un campo (es. rete assente).
-- Un errore su un id (un campo che comincia con `id`, come `idProperty`) non va mai sotto un campo ma nel messaggio
+- Un errore su un id (un campo che comincia con `id`, come `idPeriod`) non va mai sotto un campo ma nel messaggio
   generale: l'id non si vede e il form resterebbe bloccato senza spiegazione.
 - Il backend non segnala mai un id in `errors[]`: un id non valido annulla l'operazione con un errore generale (codici:
   vedi `api-e-mock.md`).

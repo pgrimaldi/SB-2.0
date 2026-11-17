@@ -10,8 +10,7 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AuditEntryItem } from '../../../entities/settings/user-management/audit-entry-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { forbidden } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 type AuditEntryRow = AuditEntryItem & { propertyId: number; idUser: string };
 
@@ -62,20 +61,17 @@ const SORT_FIELDS = [
 ] as const;
 
 /**
- * `POST /api/audit/entries-list`: one page of the log of the requested property, the newest first
- * when no other order is asked. The search looks in the operator name, the booking number and the
- * spot; the period arrives in `filters` as `datetimeFrom` and `datetimeTo`. 401 without a valid access
- * token; 403 for a missing or unknown property.
+ * `POST /api/audit/entries-list`: one page of the log of the property of the token, the newest
+ * first when no other order is asked. The search looks in the operator name, the booking number and
+ * the spot; the period arrives in `filters` as `datetimeFrom` and `datetimeTo`. 401 without a valid
+ * access token.
  */
 export const entriesListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
@@ -106,18 +102,15 @@ export const entriesListMock = (request: HttpRequest<unknown>): Observable<HttpE
 };
 
 /**
- * `POST /api/identity/user-combobox` with `{ idProperty }`: the users of the property, id and name,
- * sorted by name; here those that appear in its log, the only list the mocks use. 401 without a valid access token; 403 for a missing or
- * unknown property.
+ * `POST /api/identity/user-combobox` without a body: the users of the property, id and name, sorted
+ * by name; here those that appear in its log, the only list the mocks use. 401 without a valid
+ * access token.
  */
 export const userComboboxMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const users = new Map<string, ComboboxItem>();
   for (const row of AUDIT_ENTRIES) {
     if (row.propertyId === property.id) {

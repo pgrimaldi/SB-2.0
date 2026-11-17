@@ -63,7 +63,7 @@ describe('ConfirmDeleteBookingPopup', () => {
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should send the property, the chosen bookings and the password, then close and tell the page', async () => {
+  it('should send the chosen bookings and the password, then close and tell the page', async () => {
     const { host, popup, input, confirm, settle, type, moveToTrash } = await setup();
     const answer = new Subject<void>();
     moveToTrash.mockReturnValue(answer);
@@ -75,7 +75,7 @@ describe('ConfirmDeleteBookingPopup', () => {
     await type('segreta');
     confirm().click();
     await settle();
-    expect(moveToTrash).toHaveBeenCalledWith('p1', {
+    expect(moveToTrash).toHaveBeenCalledWith({
       idBookings: ['b1', 'b2'],
       password: 'segreta',
     });

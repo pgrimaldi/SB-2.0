@@ -52,7 +52,7 @@ describe('AddPrinterItemPopup', () => {
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should send the form with the property, with a spinner, then close and tell the page', async () => {
+  it('should send the form, with a spinner, then close and tell the page', async () => {
     const { host, popup, save, typeName, settle, addPrinter } = await setup();
     const answer = new Subject<void>();
     addPrinter.mockReturnValue(answer);
@@ -60,7 +60,7 @@ describe('AddPrinterItemPopup', () => {
 
     save().click();
     await settle();
-    expect(addPrinter).toHaveBeenCalledWith('p1', {
+    expect(addPrinter).toHaveBeenCalledWith({
       ...new AddPrinterItemRequest(),
       printerName: 'EPSON - 3',
     });

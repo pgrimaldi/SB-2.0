@@ -120,7 +120,6 @@ Gestione utenti: elenco.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "example.com",
@@ -132,7 +131,6 @@ Gestione utenti: elenco.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `example.com` |
@@ -348,15 +346,7 @@ Gestione utenti: utenti del filtro dei log.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -390,7 +380,6 @@ Gestione utenti: log.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "ferri",
@@ -428,7 +417,6 @@ Gestione utenti: log.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `ferri` |
@@ -488,7 +476,6 @@ Gestione utenti: esporta log.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "search": "ferri",
   "filters": [
     {
@@ -511,7 +498,6 @@ Gestione utenti: esporta log.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `search` | string | `ferri` |
 | `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-26T23:59:59.999Z"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
@@ -538,7 +524,6 @@ Gestione utenti: stampa log.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "search": "ferri",
   "filters": [
     {
@@ -561,7 +546,6 @@ Gestione utenti: stampa log.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `search` | string | `ferri` |
 | `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-26T23:59:59.999Z"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
@@ -652,21 +636,20 @@ Stato: 200 OK (le date salvate).
 | `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
 | `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
 
-### GET `/api/seasons/period-list?idProperty={idProperty}&isNextSeason={isNextSeason}`
+### GET `/api/seasons/period-list?isNextSeason={isNextSeason}`
 
 Stagioni e periodi: periodi.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
+Nessun corpo: è una GET, i parametri vanno nella query string e lo stabilimento viene dal token.
 
 ```text
-/api/seasons/period-list?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d&isNextSeason=false
+/api/seasons/period-list?isNextSeason=false
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `isNextSeason` | boolean | `false` |
 
 #### Response
@@ -729,14 +712,12 @@ Stagioni e periodi: nuovo periodo.
       "dateTo": "2027-04-30T00:00:00.000Z"
     }
   ],
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "isNextSeason": true
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `isNextSeason` | boolean | `true` |
 | `periodName` | string | `Pre stagione` |
 | `intervals[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"dateFrom": "2027-04-20T00:00:00.000Z", "dateTo": "2027-04-30T00:00:00.000Z"}]` |
@@ -757,14 +738,12 @@ Stagioni e periodi: elimina periodo.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 
 #### Response
@@ -782,14 +761,12 @@ Stagioni e periodi: modifica periodo.
 ```json
 {
   "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
-  "periodName": "Bassissima stagione",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "periodName": "Bassissima stagione"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
 | `periodName` | string | `Bassissima stagione` |
 
@@ -809,14 +786,12 @@ Stagioni e periodi: nuovo intervallo.
 {
   "dateFrom": "2026-09-01T00:00:00.000Z",
   "dateTo": "2026-09-05T00:00:00.000Z",
-  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02` |
 | `dateFrom` | string (ISO 8601, UTC) | `2026-09-01T00:00:00.000Z` |
 | `dateTo` | string (ISO 8601, UTC) | `2026-09-05T00:00:00.000Z` |
@@ -837,14 +812,12 @@ Stagioni e periodi: modifica intervallo.
 {
   "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01",
   "dateFrom": "2026-05-01T00:00:00.000Z",
-  "dateTo": "2026-06-20T00:00:00.000Z",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "dateTo": "2026-06-20T00:00:00.000Z"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idInterval` | string (UUID) | `7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01` |
 | `dateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
 | `dateTo` | string (ISO 8601, UTC) | `2026-06-20T00:00:00.000Z` |
@@ -863,7 +836,6 @@ Stagioni e periodi: elimina intervalli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idIntervals": [
     "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02",
     "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03"
@@ -873,7 +845,6 @@ Stagioni e periodi: elimina intervalli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idIntervals` | string[] (UUID) | `["7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02", "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03"]` |
 
 #### Response
@@ -892,7 +863,6 @@ Magazzino: elenco articoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "lettino",
@@ -923,7 +893,6 @@ Magazzino: elenco articoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lettino` |
@@ -978,15 +947,7 @@ Magazzino: articoli per la tendina.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -1026,7 +987,6 @@ Magazzino: aggiunta di un articolo.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
   "name": "Lettino",
   "totalQuantity": 10,
@@ -1038,7 +998,6 @@ Magazzino: aggiunta di un articolo.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `name` | string \| null | `Lettino` |
 | `totalQuantity` | number (intero > 0) | `10` |
@@ -1060,7 +1019,6 @@ Magazzino: modifica di un articolo.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
   "name": "Lettino",
   "totalQuantity": 110,
@@ -1072,7 +1030,6 @@ Magazzino: modifica di un articolo.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `name` | string \| null | `Lettino` |
 | `totalQuantity` | number (intero > 0) | `110` |
@@ -1094,7 +1051,6 @@ Magazzino: eliminazione di articoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idItems": [
     "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
     "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"
@@ -1104,7 +1060,6 @@ Magazzino: eliminazione di articoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"]` |
 
 #### Response
@@ -1121,7 +1076,6 @@ Magazzino: duplicazione di articoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idItems": [
     "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c"
   ]
@@ -1130,7 +1084,6 @@ Magazzino: duplicazione di articoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c"]` |
 
 #### Response
@@ -1149,7 +1102,6 @@ Database: elenco prenotazioni.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "rossi",
@@ -1202,7 +1154,6 @@ Database: elenco prenotazioni.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `rossi` |
@@ -1263,15 +1214,7 @@ Database: hotel convenzionati per la tendina.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -1311,7 +1254,6 @@ Database: conferma della cancellazione con la password.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBookings": [
     "3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70",
     "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"
@@ -1322,7 +1264,6 @@ Database: conferma della cancellazione con la password.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBookings` | string[] (UUID, almeno uno) | `["3d1e5f7a-9b2c-4d6e-8f1a-2b3c4d5e6f70", "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c01"]` |
 | `password` | string | `password-digitata` |
 
@@ -1340,7 +1281,6 @@ Database: elenco del cestino.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "lilla",
@@ -1389,7 +1329,6 @@ Database: elenco del cestino.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lilla` |
@@ -1440,15 +1379,7 @@ Database: svuota il cestino.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -1464,7 +1395,6 @@ Database: ripristina dal cestino.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBookings": [
     "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"
   ]
@@ -1473,7 +1403,6 @@ Database: ripristina dal cestino.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBookings` | string[] (UUID, almeno uno) | `["9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"]` |
 
 #### Response
@@ -1490,7 +1419,6 @@ Database: elimina definitivamente dal cestino.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBookings": [
     "9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"
   ]
@@ -1499,7 +1427,6 @@ Database: elimina definitivamente dal cestino.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBookings` | string[] (UUID, almeno uno) | `["9c8b7a6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d"]` |
 
 #### Response
@@ -1518,7 +1445,6 @@ Fiscalizzazione: stampanti.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 5,
   "search": "epson",
@@ -1538,7 +1464,6 @@ Fiscalizzazione: stampanti.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `5` |
 | `search` | string | `epson` |
@@ -1589,7 +1514,6 @@ Fiscalizzazione: attivazione di una stampante.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60",
   "isEnabled": true
 }
@@ -1597,7 +1521,6 @@ Fiscalizzazione: attivazione di una stampante.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPrinter` | string (UUID) | `5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60` |
 | `isEnabled` | boolean | `true` |
 
@@ -1615,7 +1538,6 @@ Fiscalizzazione: aggiunta di una stampante.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "printerName": "EPSON - 3",
   "printerIP": "192.0.2.12",
   "printerPort": 9100,
@@ -1640,7 +1562,6 @@ Fiscalizzazione: aggiunta di una stampante.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `printerName` | string | `EPSON - 3` |
 | `printerIP` | string \| null | `192.0.2.12` |
 | `printerPort` | number (intero) \| null | `9100` |
@@ -1669,14 +1590,12 @@ Fiscalizzazione: eliminazione di una stampante.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idPrinter": "5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPrinter` | string (UUID) | `5f0c2a1e-8b3d-4c6f-9a2e-1d7b3c4e5f60` |
 
 #### Response
@@ -1691,15 +1610,7 @@ Fiscalizzazione: guida dello scontrino elettronico.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -1720,14 +1631,12 @@ Fiscalizzazione: attivazione dello scontrino elettronico.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "isElectronicReceiptAccepted": true
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `isElectronicReceiptAccepted` | boolean | `true` |
 
 #### Response
@@ -1744,7 +1653,6 @@ Fiscalizzazione: account dello scontrino elettronico.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "companyName": "Bagno Esempio Srl",
   "companyAddress": "Via del Mare",
   "streetNumber": "1",
@@ -1761,7 +1669,6 @@ Fiscalizzazione: account dello scontrino elettronico.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `companyName` | string \| null | `Bagno Esempio Srl` |
 | `companyAddress` | string \| null | `Via del Mare` |
 | `streetNumber` | string \| null | `1` |
@@ -1780,21 +1687,13 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/taxation/electronic-receipt?idProperty={idProperty}`
+### GET `/api/taxation/electronic-receipt`
 
 Fiscalizzazione: scontrino elettronico.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/taxation/electronic-receipt?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -1808,21 +1707,13 @@ Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (t
 
 ## /sharing
 
-### GET `/api/sharing/general-information?idProperty={idProperty}`
+### GET `/api/sharing/general-information`
 
 Sharing: impostazioni generali.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/sharing/general-information?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -1882,8 +1773,7 @@ Sharing: salvataggio delle impostazioni.
   "isAutomaticVoucherEnabled": true,
   "voucherCreditValue": 5.5,
   "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": 10,
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "prepaidCardCreditValue": 10
 }
 ```
 
@@ -1902,7 +1792,6 @@ Sharing: salvataggio delle impostazioni.
 | `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
 | `isPrepaidCardTopUpEnabled` | boolean | `false` |
 | `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 
 #### Response
 
@@ -1920,7 +1809,6 @@ Sconti e voucher: elenco.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "g",
@@ -1940,7 +1828,6 @@ Sconti e voucher: elenco.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `g` |
@@ -1997,7 +1884,6 @@ Sconti e voucher: eliminazione.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idVouchers": [
     "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01",
     "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02"
@@ -2007,7 +1893,6 @@ Sconti e voucher: eliminazione.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idVouchers` | string[] (UUID, almeno uno) | `["6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01", "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02"]` |
 
 #### Response
@@ -2024,7 +1909,6 @@ Sconti e voucher: duplicazione.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idVouchers": [
     "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01"
   ]
@@ -2033,7 +1917,6 @@ Sconti e voucher: duplicazione.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idVouchers` | string[] (UUID, almeno uno) | `["6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01"]` |
 
 #### Response
@@ -2050,7 +1933,6 @@ Sconti e voucher: aggiunta.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "voucherName": "Estate",
   "validityPeriods": [
     {
@@ -2097,7 +1979,6 @@ Sconti e voucher: aggiunta.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `voucherName` | string | `Estate` |
 | `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-01T00:00:00.000Z` |
@@ -2126,7 +2007,6 @@ Sconti e voucher: modifica.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
   "voucherName": "Estate 2026",
   "validityPeriods": [
@@ -2174,7 +2054,6 @@ Sconti e voucher: modifica.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02` |
 | `voucherName` | string | `Estate 2026` |
 | `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
@@ -2599,7 +2478,6 @@ Servizi: servizi bar.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "acqua",
@@ -2619,7 +2497,6 @@ Servizi: servizi bar.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `acqua` |
@@ -2670,7 +2547,6 @@ Servizi: creazione servizio bar.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "translations": [
     {
       "language": "it",
@@ -2754,7 +2630,6 @@ Servizi: creazione servizio bar.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Caffè ginseng", "description": "Caffè al ginseng in tazza piccola"}, {"language": "en", "serviceName": "Ginseng coffee", "description": "Ginseng coffee in a small cup"}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Caffè ginseng` |
@@ -2962,7 +2837,6 @@ Servizi: servizio bar, salvataggio Info Generali.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
   "translations": [
     {
@@ -3009,7 +2883,6 @@ Servizi: servizio bar, salvataggio Info Generali.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Caffè espresso", "description": "Espresso in tazzina."}, {"language": "en", "serviceName": "Coffee", "description": "Espresso in a small cup."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
@@ -3033,7 +2906,6 @@ Servizi: servizio bar, salvataggio Prezzi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
   "price": 1.3,
   "vatRate": 10,
@@ -3063,7 +2935,6 @@ Servizi: servizio bar, salvataggio Prezzi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
 | `price` | number (decimale, €) \| null | `1.3` |
 | `vatRate` | number (decimale, %) \| null | `10` |
@@ -3091,7 +2962,6 @@ Servizi: servizio bar, salvataggio Prenotazioni.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBarService": "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
   "bookingOptions": [
     {
@@ -3113,7 +2983,6 @@ Servizi: servizio bar, salvataggio Prenotazioni.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "08:00", "managementEndTime": "12:00", "onlineStartTime": "08:30", "onlineEndTime": "11:30", "maxBookingPerHourQuantity": 20, "maxBookingPerDayQuantity": 80, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 4}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
@@ -3142,7 +3011,6 @@ Servizi: eliminazione servizi bar.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09"
@@ -3152,7 +3020,6 @@ Servizi: eliminazione servizi bar.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBarServices` | string[] (UUID, almeno uno) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c08", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c09"]` |
 
 #### Response
@@ -3169,7 +3036,6 @@ Servizi: duplicazione servizi bar.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01"
   ]
@@ -3178,7 +3044,6 @@ Servizi: duplicazione servizi bar.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idBarServices` | string[] (UUID, almeno uno) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01"]` |
 
 #### Response
@@ -3195,7 +3060,6 @@ Servizi: servizi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "doccia",
@@ -3214,7 +3078,6 @@ Servizi: servizi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `doccia` |
@@ -3257,7 +3120,6 @@ Servizi: creazione servizio.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "translations": [
     {
       "language": "it",
@@ -3334,7 +3196,6 @@ Servizi: creazione servizio.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Doccia calda", "description": "Acqua calda nelle docce dello stabilimento."}, {"language": "en", "serviceName": "Hot shower", "description": "Hot water in the showers of the beach club."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Doccia calda` |
@@ -3527,7 +3388,6 @@ Servizi: servizio, salvataggio Info Generali.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
   "translations": [
     {
@@ -3573,7 +3433,6 @@ Servizi: servizio, salvataggio Info Generali.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Doccia calda", "description": "Acqua calda nelle docce dello stabilimento."}, {"language": "en", "serviceName": "Hot shower", "description": "Hot water in the showers of the beach club."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
@@ -3596,7 +3455,6 @@ Servizi: servizio, salvataggio Prezzi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
   "price": 4,
   "vatRate": 22,
@@ -3620,7 +3478,6 @@ Servizi: servizio, salvataggio Prezzi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
 | `price` | number (decimale, €) \| null | `4` |
 | `vatRate` | number (decimale, %) \| null | `22` |
@@ -3645,7 +3502,6 @@ Servizi: servizio, salvataggio Prenotazioni.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idStandardService": "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
   "bookingOptions": [
     {
@@ -3667,7 +3523,6 @@ Servizi: servizio, salvataggio Prenotazioni.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
@@ -3696,7 +3551,6 @@ Servizi: eliminazione servizi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idStandardServices": [
     "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01",
     "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d02"
@@ -3706,7 +3560,6 @@ Servizi: eliminazione servizi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idStandardServices` | string[] (UUID, almeno uno) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01", "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d02"]` |
 
 #### Response
@@ -3723,7 +3576,6 @@ Servizi: duplicazione servizi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idStandardServices": [
     "9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"
   ]
@@ -3732,7 +3584,6 @@ Servizi: duplicazione servizi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idStandardServices` | string[] (UUID, almeno uno) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 
 #### Response
@@ -3749,7 +3600,6 @@ Servizi: servizi orari.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "pisc",
@@ -3768,7 +3618,6 @@ Servizi: servizi orari.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `pisc` |
@@ -3809,7 +3658,6 @@ Servizi: eliminazione servizi orari.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idHourlyServices": [
     "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
     "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a02"
@@ -3819,7 +3667,6 @@ Servizi: eliminazione servizi orari.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idHourlyServices` | string[] (UUID, almeno uno) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01", "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a02"]` |
 
 #### Response
@@ -3836,7 +3683,6 @@ Servizi: duplicazione servizi orari.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idHourlyServices": [
     "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"
   ]
@@ -3845,7 +3691,6 @@ Servizi: duplicazione servizi orari.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idHourlyServices` | string[] (UUID, almeno uno) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
 
 #### Response
@@ -3862,7 +3707,6 @@ Servizi Orari: creazione servizio orario.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "translations": [
     {
       "language": "it",
@@ -4047,7 +3891,6 @@ Servizi Orari: creazione servizio orario.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Sup", "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."}, {"language": "en", "serviceName": "Sup", "description": "Stand up paddle board with paddle, rented by the hour."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Sup` |
@@ -4384,7 +4227,6 @@ Servizi Orari: servizio orario, salvataggio Info Generali.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
   "translations": [
     {
@@ -4430,7 +4272,6 @@ Servizi Orari: servizio orario, salvataggio Info Generali.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Sup", "description": "Tavola da stand up paddle con pagaia, a noleggio a ore."}, {"language": "en", "serviceName": "Sup", "description": "Stand up paddle board with paddle, rented by the hour."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
@@ -4453,7 +4294,6 @@ Servizi Orari: servizio orario, salvataggio Prezzi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
   "isPeriodPricingEnabled": true,
   "periodAvailabilities": [
@@ -4533,7 +4373,6 @@ Servizi Orari: servizio orario, salvataggio Prezzi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
@@ -4569,7 +4408,6 @@ Servizi Orari: servizio orario, salvataggio Prenotazioni.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idHourlyService": "4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01",
   "bookingOptions": [
     {
@@ -4643,7 +4481,6 @@ Servizi Orari: servizio orario, salvataggio Prenotazioni.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
@@ -4677,7 +4514,6 @@ Servizi: prezzi automatici.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "cop",
@@ -4696,7 +4532,6 @@ Servizi: prezzi automatici.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `cop` |
@@ -4731,21 +4566,13 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Coperto` |
 | `rows[].price` | number (decimale, €) \| null | `2` |
 
-### GET `/api/catalog/get-automatic-price-services?idProperty={idProperty}`
+### GET `/api/catalog/get-automatic-price-services`
 
 Prezzi Automatici: servizi a cui si applicano.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/catalog/get-automatic-price-services?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -4798,7 +4625,6 @@ Prezzi Automatici: creazione prezzo automatico.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "translations": [
     {
       "language": "it",
@@ -4880,7 +4706,6 @@ Prezzi Automatici: creazione prezzo automatico.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Menu pranzo", "description": "Prezzo fisso per il pranzo al bar."}, {"language": "en", "serviceName": "Lunch menu", "description": "Fixed price for lunch at the bar."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Menu pranzo` |
@@ -5049,7 +4874,6 @@ Prezzi Automatici: prezzo automatico, salvataggio Info Generali.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAutomaticPrice": "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01",
   "translations": [
     {
@@ -5094,7 +4918,6 @@ Prezzi Automatici: prezzo automatico, salvataggio Info Generali.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idAutomaticPrice` | string (UUID) | `7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Coperto", "description": "Coperto a persona per i servizi del bar."}, {"language": "en", "serviceName": "Cover charge", "description": "Cover charge per person for the bar services."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
@@ -5116,7 +4939,6 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAutomaticPrice": "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01",
   "price": 2.5,
   "vatRate": 10,
@@ -5165,7 +4987,6 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idAutomaticPrice` | string (UUID) | `7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01` |
 | `price` | number (decimale, €) \| null | `2.5` |
 | `vatRate` | number (decimale, %) \| null | `10` |
@@ -5197,7 +5018,6 @@ Servizi: eliminazione prezzi automatici.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAutomaticPrices": [
     "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01",
     "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02"
@@ -5207,7 +5027,6 @@ Servizi: eliminazione prezzi automatici.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idAutomaticPrices` | string[] (UUID, almeno uno) | `["7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01", "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02"]` |
 
 #### Response
@@ -5224,7 +5043,6 @@ Servizi: duplicazione prezzi automatici.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAutomaticPrices": [
     "7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01"
   ]
@@ -5233,7 +5051,6 @@ Servizi: duplicazione prezzi automatici.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idAutomaticPrices` | string[] (UUID, almeno uno) | `["7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01"]` |
 
 #### Response
@@ -5250,7 +5067,6 @@ Servizi: prenotazione servizio tavoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "cen",
@@ -5269,7 +5085,6 @@ Servizi: prenotazione servizio tavoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `cen` |
@@ -5310,7 +5125,6 @@ Servizi: eliminazione servizi tavoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idTableServices": [
     "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
     "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702"
@@ -5320,7 +5134,6 @@ Servizi: eliminazione servizi tavoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idTableServices` | string[] (UUID, almeno uno) | `["2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701", "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a702"]` |
 
 #### Response
@@ -5337,7 +5150,6 @@ Servizi: duplicazione servizi tavoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idTableServices": [
     "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701"
   ]
@@ -5346,7 +5158,6 @@ Servizi: duplicazione servizi tavoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idTableServices` | string[] (UUID, almeno uno) | `["2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701"]` |
 
 #### Response
@@ -5363,7 +5174,6 @@ Prenotazione tavoli: creazione servizio tavoli.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "translations": [
     {
       "language": "it",
@@ -5478,7 +5288,6 @@ Prenotazione tavoli: creazione servizio tavoli.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Aperitivo", "description": "Tavoli per l'aperitivo al tramonto."}, {"language": "en", "serviceName": "Aperitif", "description": "Tables for the sunset aperitif."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Aperitivo` |
@@ -5694,7 +5503,6 @@ Prenotazione tavoli: servizio tavoli, salvataggio Info Generali.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
   "translations": [
     {
@@ -5739,7 +5547,6 @@ Prenotazione tavoli: servizio tavoli, salvataggio Info Generali.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
 | `translations[]` | ServiceTranslation[] (array di oggetti, una per lingua) | `[{"language": "it", "serviceName": "Pranzo", "description": "Tavoli del ristorante per il pranzo."}, {"language": "en", "serviceName": "Lunch", "description": "Restaurant tables for lunch."}, {"language": "fr", "serviceName": null, "description": null}, {"language": "de", "serviceName": null, "description": null}, {"language": "es", "serviceName": null, "description": null}, {"language": "ar", "serviceName": null, "description": null}, {"language": "zh", "serviceName": null, "description": null}]` |
 | `translations[].language` | string | `it` |
@@ -5761,7 +5568,6 @@ Prenotazione tavoli: servizio tavoli, salvataggio Disponibilità e Prenotazioni.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idTableService": "2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701",
   "availabilities": [
     {
@@ -5843,7 +5649,6 @@ Prenotazione tavoli: servizio tavoli, salvataggio Disponibilità e Prenotazioni.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idTableService` | string (UUID) | `2a4c6e8f-0b1d-4e3f-a5b7-c9d1e3f5a701` |
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z", "isSameTimeForAllDays": true, "startTime": "12:00", "endTime": "15:00", "days": [{"dayOfWeek": 1, "isEnabled": false, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 2, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 3, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 4, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 5, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 6, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}, {"dayOfWeek": 7, "isEnabled": true, "startTime": "12:00", "endTime": "15:00"}]}]` |
 | `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
@@ -6439,7 +6244,6 @@ Settori e file: elenco.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "fila",
@@ -6451,7 +6255,6 @@ Settori e file: elenco.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `fila` |
@@ -6498,7 +6301,6 @@ Settori e file: eliminazione.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idSectors": [
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"
@@ -6508,7 +6310,6 @@ Settori e file: eliminazione.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"]` |
 
 #### Response
@@ -6525,7 +6326,6 @@ Settori e file: duplicazione.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idSectors": [
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02"
   ]
@@ -6534,7 +6334,6 @@ Settori e file: duplicazione.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02"]` |
 
 #### Response
@@ -6551,14 +6350,12 @@ Settori e file: aggiunta.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "sectorName": "Fila 9"
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `sectorName` | string | `Fila 9` |
 
 #### Response
@@ -6575,7 +6372,6 @@ Settori e file: modifica.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
   "sectorName": "Fila 2 lato mare"
 }
@@ -6583,7 +6379,6 @@ Settori e file: modifica.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02` |
 | `sectorName` | string | `Fila 2 lato mare` |
 
@@ -6599,15 +6394,7 @@ Settori e file: settori per la tendina.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -6643,7 +6430,6 @@ Listino: elenco dei pacchetti.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "ombrellone",
@@ -6655,7 +6441,6 @@ Listino: elenco dei pacchetti.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `ombrellone` |
@@ -6698,7 +6483,6 @@ Listino: eliminazione dei pacchetti.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idPackages": [
     "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01",
     "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a02"
@@ -6708,7 +6492,6 @@ Listino: eliminazione dei pacchetti.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPackages` | string[] (UUID, almeno uno) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01", "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a02"]` |
 
 #### Response
@@ -6725,7 +6508,6 @@ Listino: duplicazione dei pacchetti.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idPackages": [
     "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"
   ]
@@ -6734,7 +6516,6 @@ Listino: duplicazione dei pacchetti.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idPackages` | string[] (UUID, almeno uno) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"]` |
 
 #### Response
@@ -6749,15 +6530,7 @@ Listino: aree della mappa per la tendina.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -7336,7 +7109,6 @@ Listino: elenco degli articoli/servizi aggiuntivi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "page": 1,
   "pageSize": 10,
   "search": "lettino",
@@ -7348,7 +7120,6 @@ Listino: elenco degli articoli/servizi aggiuntivi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `lettino` |
@@ -7391,7 +7162,6 @@ Listino: eliminazione degli articoli/servizi aggiuntivi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAdditionalItems": [
     "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01",
     "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a02"
@@ -7401,7 +7171,6 @@ Listino: eliminazione degli articoli/servizi aggiuntivi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idAdditionalItems` | string[] (UUID, almeno uno) | `["4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01", "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a02"]` |
 
 #### Response
@@ -7418,7 +7187,6 @@ Listino: duplicazione degli articoli/servizi aggiuntivi.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAdditionalItems": [
     "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01"
   ]
@@ -7427,7 +7195,6 @@ Listino: duplicazione degli articoli/servizi aggiuntivi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idAdditionalItems` | string[] (UUID, almeno uno) | `["4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01"]` |
 
 #### Response
@@ -7442,15 +7209,7 @@ Listino: pacchetti per la tendina.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -7482,7 +7241,6 @@ Listino: creazione articolo/servizio aggiuntivo.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idArticle": "afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62",
   "idPackages": [
     "8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"
@@ -7535,7 +7293,6 @@ Listino: creazione articolo/servizio aggiuntivo.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62` |
 | `idPackages` | string[] (UUID) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"]` |
 | `isOnlineEnabled` | boolean | `true` |
@@ -7696,7 +7453,6 @@ Listino: modifica articolo/servizio aggiuntivo.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "idAdditionalItem": "2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02",
   "idArticle": "afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62",
   "idPackages": [
@@ -7752,7 +7508,6 @@ Listino: modifica articolo/servizio aggiuntivo.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idAdditionalItem` | string (UUID) | `2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `idArticle` | string (UUID) | `afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62` |
 | `idPackages` | string[] (UUID) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01", "4e2a9c71-3b5d-4f6e-8a1b-2c3d4e5f6a02"]` |
 | `isOnlineEnabled` | boolean | `true` |
@@ -8128,21 +7883,13 @@ Stato: 200 OK.
 
 ## /booking
 
-### GET `/api/booking/get-online-services-options?idProperty={idProperty}`
+### GET `/api/booking/get-online-services-options`
 
 Prenotazioni online: opzioni dei servizi.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/booking/get-online-services-options?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -8196,8 +7943,7 @@ Prenotazioni online: salvataggio delle opzioni dei servizi.
   "isDepositAccepted": false,
   "isPrepaidCardAccepted": true,
   "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
-  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
+  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>"
 }
 ```
 
@@ -8214,7 +7960,6 @@ Prenotazioni online: salvataggio delle opzioni dei servizi.
 | `isPrepaidCardAccepted` | boolean | `true` |
 | `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
 | `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 
 #### Response
 
@@ -8224,21 +7969,13 @@ Nessun corpo.
 
 ## /system
 
-### GET `/api/system/email-configuration?idProperty={idProperty}`
+### GET `/api/system/email-configuration`
 
 Configurazione email: lettura.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/system/email-configuration?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -8274,7 +8011,6 @@ Configurazione email: invio di prova.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "senderMailAddress": "prenotazioni@lido-demo.example",
   "senderName": "Lido Demo",
   "smtpServerAddress": "smtp.lido-demo.example",
@@ -8287,7 +8023,6 @@ Configurazione email: invio di prova.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
 | `senderName` | string | `Lido Demo` |
 | `smtpServerAddress` | string | `smtp.lido-demo.example` |
@@ -8310,7 +8045,6 @@ Configurazione email: salvataggio.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "senderMailAddress": "prenotazioni@lido-demo.example",
   "senderName": "Lido Demo",
   "smtpServerAddress": "smtp.lido-demo.example",
@@ -8323,7 +8057,6 @@ Configurazione email: salvataggio.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `senderMailAddress` | string | `prenotazioni@lido-demo.example` |
 | `senderName` | string | `Lido Demo` |
 | `smtpServerAddress` | string | `smtp.lido-demo.example` |
@@ -8344,15 +8077,7 @@ Assistenza: contatti e orari.
 
 #### Payload
 
-```json
-{
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -8383,7 +8108,6 @@ Assistenza: messaggio al supporto.
 
 ```json
 {
-  "idProperty": "5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d",
   "firstName": "Mario",
   "lastName": "Rossi",
   "email": "mario.rossi@example.com",
@@ -8394,7 +8118,6 @@ Assistenza: messaggio al supporto.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
 | `firstName` | string | `Mario` |
 | `lastName` | string | `Rossi` |
 | `email` | string | `mario.rossi@example.com` |
@@ -8407,21 +8130,13 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/system/get-stripe-information?idProperty={idProperty}`
+### GET `/api/system/get-stripe-information`
 
 Prenotazioni online: conto Stripe collegato.
 
 #### Payload
 
-Nessun corpo: è una GET, lo stabilimento va nella query string.
-
-```text
-/api/system/get-stripe-information?idProperty=5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idProperty` | string (UUID) | `5b1f3c7e-2d4a-4e8b-9c1d-7a6e5f4b3c2d` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 

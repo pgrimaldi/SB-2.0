@@ -63,10 +63,9 @@ export class ServicesGeneral {
   protected readonly duplicating = signal(false);
   protected readonly idStandardServicesToDuplicate = signal<readonly string[]>([]);
   protected readonly standardServiceNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Services_StandardTitle.png'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -100,7 +99,7 @@ export class ServicesGeneral {
     edit: ({ idStandardService }) => idStandardService && this.openEdit(idStandardService),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, StandardServiceRow> = (request) =>
+  protected readonly load: TableLoad<object, StandardServiceRow> = (request) =>
     this.catalog.standardServiceList(request).pipe(
       map((page) => {
         const amount = new Intl.NumberFormat(this.dateLanguage.locale(), {
@@ -117,12 +116,10 @@ export class ServicesGeneral {
       }),
     );
 
-  protected readonly deleteStandardServices = (idProperty: string, idStandardServices: string[]) =>
-    this.catalog.deleteStandardServiceItems({ idProperty, idStandardServices });
-  protected readonly duplicateStandardServices = (
-    idProperty: string,
-    idStandardServices: string[],
-  ) => this.catalog.duplicateStandardServiceItems({ idProperty, idStandardServices });
+  protected readonly deleteStandardServices = (idStandardServices: string[]) =>
+    this.catalog.deleteStandardServiceItems(idStandardServices);
+  protected readonly duplicateStandardServices = (idStandardServices: string[]) =>
+    this.catalog.duplicateStandardServiceItems(idStandardServices);
 
   protected openEdit(idStandardService: string): void {
     this.idStandardServiceToEdit.set(idStandardService);

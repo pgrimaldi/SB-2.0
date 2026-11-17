@@ -36,8 +36,9 @@ header di sicurezza e CSP.
 - Errori di login generici ("Credenziali non valide"): non rivelano se l'utente esiste.
 - Login: `POST /api/identity/auth/login` con `LoginRequest` (`username`, `password`, `remember`) più `app`, fisso a
   `"hub"` in `environment.authApp` (in futuro verrà da un file di configurazione).
-- Risposta: `AuthSession` = `{ accessToken, expiresIn, user: { id, email, role, propertyId } }`. Le pagine leggono lo
-  stabilimento da `user.propertyId` e lo mandano come `idProperty` nelle altre API.
+- Risposta: `AuthSession` = `{ accessToken, expiresIn, user: { id, email, role, propertyId } }`. Le pagine leggono
+  `user.propertyId` solo per sapere che l'utente è pronto: lo stabilimento non si manda mai alle API, il backend lo
+  prende dal token.
 - La verifica in due passaggi del backend (`twoFactorRequired`, `mfaToken`, `login/verify-otp`) non è ancora gestita:
   vedi `docs/TODO.md`.
 

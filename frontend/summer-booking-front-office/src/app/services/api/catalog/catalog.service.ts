@@ -26,16 +26,6 @@ import { BarServiceSelectedPrices } from '../../../entities/settings/services/ba
 import { BarServiceUpdateBookingRequest } from '../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../entities/settings/services/bar-service-update-general-request';
 import { BarServiceUpdatePricesRequest } from '../../../entities/settings/services/bar-service-update-prices-request';
-import { DeleteBarServiceItemsRequest } from '../../../entities/settings/services/delete-bar-service-items-request';
-import { DuplicateBarServiceItemsRequest } from '../../../entities/settings/services/duplicate-bar-service-items-request';
-import { DeleteStandardServiceItemsRequest } from '../../../entities/settings/services/delete-standard-service-items-request';
-import { DuplicateStandardServiceItemsRequest } from '../../../entities/settings/services/duplicate-standard-service-items-request';
-import { DeleteHourlyServiceItemsRequest } from '../../../entities/settings/services/delete-hourly-service-items-request';
-import { DuplicateHourlyServiceItemsRequest } from '../../../entities/settings/services/duplicate-hourly-service-items-request';
-import { DeleteAutomaticPriceItemsRequest } from '../../../entities/settings/services/delete-automatic-price-items-request';
-import { DuplicateAutomaticPriceItemsRequest } from '../../../entities/settings/services/duplicate-automatic-price-items-request';
-import { DeleteTableServiceItemsRequest } from '../../../entities/settings/services/delete-table-service-items-request';
-import { DuplicateTableServiceItemsRequest } from '../../../entities/settings/services/duplicate-table-service-items-request';
 import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
@@ -190,50 +180,35 @@ export class CatalogService {
     );
 
   /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
-  readonly updateBarServiceGeneral = (
-    idProperty: string,
-    request: BarServiceUpdateGeneralRequest,
-  ): Observable<void> =>
+  readonly updateBarServiceGeneral = (request: BarServiceUpdateGeneralRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-bar-service-general`, {
       ...onlyFieldsOf(BarServiceUpdateGeneralRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
-      idProperty,
     });
 
   /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
-  readonly updateBarServicePrices = (
-    idProperty: string,
-    request: BarServiceUpdatePricesRequest,
-  ): Observable<void> =>
+  readonly updateBarServicePrices = (request: BarServiceUpdatePricesRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-bar-service-prices`, {
       ...onlyFieldsOf(BarServiceUpdatePricesRequest, request),
       variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
       periodPrices: request.periodPrices.map((periodPrice) =>
         onlyFieldsOf(ServicePeriodPrice, periodPrice),
       ),
-      idProperty,
     });
 
   /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
-  readonly updateBarServiceBooking = (
-    idProperty: string,
-    request: BarServiceUpdateBookingRequest,
-  ): Observable<void> =>
+  readonly updateBarServiceBooking = (request: BarServiceUpdateBookingRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-bar-service-booking`, {
       ...onlyFieldsOf(BarServiceUpdateBookingRequest, request),
       bookingOptions: request.bookingOptions.map((bookingOption) =>
         onlyFieldsOf(ServiceBookingOption, bookingOption),
       ),
-      idProperty,
     });
 
   /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createBarService = (
-    idProperty: string,
-    request: BarServiceAddItemRequest,
-  ): Observable<void> =>
+  readonly createBarService = (request: BarServiceAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-bar-service`, {
       ...onlyFieldsOf(BarServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
@@ -246,18 +221,15 @@ export class CatalogService {
       bookingOptions: request.bookingOptions.map((bookingOption) =>
         onlyFieldsOf(ServiceBookingOption, bookingOption),
       ),
-      idProperty,
     });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteBarServiceItems = (request: DeleteBarServiceItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-bar-service-item`, request);
+  readonly deleteBarServiceItems = (idBarServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-bar-service-item`, { idBarServices });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateBarServiceItems = (
-    request: DuplicateBarServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-bar-service-item`, request);
+  readonly duplicateBarServiceItems = (idBarServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-bar-service-item`, { idBarServices });
 
   readonly standardServiceList = (request: PageRequest): Observable<Page<StandardServiceItem>> =>
     this.httpClient.post<Page<StandardServiceItem>>(
@@ -294,7 +266,6 @@ export class CatalogService {
 
   /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
   readonly updateStandardServiceGeneral = (
-    idProperty: string,
     request: StandardServiceUpdateGeneralRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-standard-service-general`, {
@@ -302,12 +273,10 @@ export class CatalogService {
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
-      idProperty,
     });
 
   /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
   readonly updateStandardServicePrices = (
-    idProperty: string,
     request: StandardServiceUpdatePricesRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-standard-service-prices`, {
@@ -315,12 +284,10 @@ export class CatalogService {
       periodPrices: request.periodPrices.map((periodPrice) =>
         onlyFieldsOf(ServicePeriodPrice, periodPrice),
       ),
-      idProperty,
     });
 
   /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
   readonly updateStandardServiceBooking = (
-    idProperty: string,
     request: StandardServiceUpdateBookingRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-standard-service-booking`, {
@@ -328,14 +295,10 @@ export class CatalogService {
       bookingOptions: request.bookingOptions.map((bookingOption) =>
         onlyFieldsOf(ServiceBookingOption, bookingOption),
       ),
-      idProperty,
     });
 
   /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createStandardService = (
-    idProperty: string,
-    request: StandardServiceAddItemRequest,
-  ): Observable<void> =>
+  readonly createStandardService = (request: StandardServiceAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-standard-service`, {
       ...onlyFieldsOf(StandardServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
@@ -347,20 +310,19 @@ export class CatalogService {
       bookingOptions: request.bookingOptions.map((bookingOption) =>
         onlyFieldsOf(ServiceBookingOption, bookingOption),
       ),
-      idProperty,
     });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteStandardServiceItems = (
-    request: DeleteStandardServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-standard-service-item`, request);
+  readonly deleteStandardServiceItems = (idStandardServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-standard-service-item`, {
+      idStandardServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateStandardServiceItems = (
-    request: DuplicateStandardServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-standard-service-item`, request);
+  readonly duplicateStandardServiceItems = (idStandardServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-standard-service-item`, {
+      idStandardServices,
+    });
 
   /**
    * An arrow property on purpose: the page hands it to `app-table` as its loader
@@ -371,16 +333,14 @@ export class CatalogService {
     this.httpClient.post<Page<HourlyServiceItem>>(`${this.endpoint}/hourly-service-list`, request);
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteHourlyServiceItems = (
-    request: DeleteHourlyServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-hourly-service-item`, request);
+  readonly deleteHourlyServiceItems = (idHourlyServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-hourly-service-item`, { idHourlyServices });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateHourlyServiceItems = (
-    request: DuplicateHourlyServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-hourly-service-item`, request);
+  readonly duplicateHourlyServiceItems = (idHourlyServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-hourly-service-item`, {
+      idHourlyServices,
+    });
 
   /** The Info Generali tab of an hourly service, for the edit panel. */
   readonly hourlyServiceGeneralInfo = (
@@ -410,7 +370,6 @@ export class CatalogService {
 
   /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
   readonly updateHourlyServiceGeneral = (
-    idProperty: string,
     request: HourlyServiceUpdateGeneralRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-general`, {
@@ -418,36 +377,28 @@ export class CatalogService {
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
-      idProperty,
     });
 
   /** Salva of the Prezzi tab of the edit panel. Answers 204 with no body. */
   readonly updateHourlyServicePrices = (
-    idProperty: string,
     request: HourlyServiceUpdatePricesRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-prices`, {
       ...onlyFieldsOf(HourlyServiceUpdatePricesRequest, request),
       periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
-      idProperty,
     });
 
   /** Salva of the Prenotazioni tab of the edit panel. Answers 204 with no body. */
   readonly updateHourlyServiceBooking = (
-    idProperty: string,
     request: HourlyServiceUpdateBookingRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-hourly-service-booking`, {
       ...onlyFieldsOf(HourlyServiceUpdateBookingRequest, request),
       bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
-      idProperty,
     });
 
   /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createHourlyService = (
-    idProperty: string,
-    request: HourlyServiceAddItemRequest,
-  ): Observable<void> =>
+  readonly createHourlyService = (request: HourlyServiceAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-hourly-service`, {
       ...onlyFieldsOf(HourlyServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
@@ -455,7 +406,6 @@ export class CatalogService {
       ),
       periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
       bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
-      idProperty,
     });
 
   readonly automaticPriceList = (request: PageRequest): Observable<Page<AutomaticPriceItem>> =>
@@ -465,23 +415,17 @@ export class CatalogService {
     );
 
   /** The bar, standard and hourly services of the property, for "Validità sui servizi". */
-  readonly automaticPriceServices = (idProperty: string): Observable<AutomaticPriceServices> =>
-    this.httpClient.get<AutomaticPriceServices>(`${this.endpoint}/get-automatic-price-services`, {
-      params: { idProperty },
-    });
+  readonly automaticPriceServices = (): Observable<AutomaticPriceServices> =>
+    this.httpClient.get<AutomaticPriceServices>(`${this.endpoint}/get-automatic-price-services`);
 
   /** The data of the two tabs of the add panel. Answers 204 with no body. */
-  readonly createAutomaticPrice = (
-    idProperty: string,
-    request: AutomaticPriceAddItemRequest,
-  ): Observable<void> =>
+  readonly createAutomaticPrice = (request: AutomaticPriceAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-automatic-price`, {
       ...onlyFieldsOf(AutomaticPriceAddItemRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
       validityPeriods: request.validityPeriods.map(validityPeriodFields),
-      idProperty,
     });
 
   /** The Info Generali tab of an automatic price, for the edit panel. */
@@ -504,7 +448,6 @@ export class CatalogService {
 
   /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
   readonly updateAutomaticPriceGeneral = (
-    idProperty: string,
     request: AutomaticPriceUpdateGeneralRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-automatic-price-general`, {
@@ -512,31 +455,28 @@ export class CatalogService {
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
-      idProperty,
     });
 
   /** Salva of the Prezzi e Validità tab of the edit panel. Answers 204 with no body. */
   readonly updateAutomaticPricePricesValidity = (
-    idProperty: string,
     request: AutomaticPriceUpdatePricesValidityRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-automatic-price-prices-validity`, {
       ...onlyFieldsOf(AutomaticPriceUpdatePricesValidityRequest, request),
       validityPeriods: request.validityPeriods.map(validityPeriodFields),
-      idProperty,
     });
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteAutomaticPriceItems = (
-    request: DeleteAutomaticPriceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-automatic-price-item`, request);
+  readonly deleteAutomaticPriceItems = (idAutomaticPrices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-automatic-price-item`, {
+      idAutomaticPrices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateAutomaticPriceItems = (
-    request: DuplicateAutomaticPriceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-automatic-price-item`, request);
+  readonly duplicateAutomaticPriceItems = (idAutomaticPrices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-automatic-price-item`, {
+      idAutomaticPrices,
+    });
 
   /**
    * An arrow property on purpose: the page hands it to `app-table` as its loader
@@ -547,20 +487,17 @@ export class CatalogService {
     this.httpClient.post<Page<TableServiceItem>>(`${this.endpoint}/table-service-list`, request);
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteTableServiceItems = (request: DeleteTableServiceItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-table-service-item`, request);
+  readonly deleteTableServiceItems = (idTableServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-table-service-item`, { idTableServices });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
-  readonly duplicateTableServiceItems = (
-    request: DuplicateTableServiceItemsRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, request);
+  readonly duplicateTableServiceItems = (idTableServices: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, {
+      idTableServices,
+    });
 
   /** The data of the two tabs of the add panel. Answers 204 with no body. */
-  readonly createTableService = (
-    idProperty: string,
-    request: TableServiceAddItemRequest,
-  ): Observable<void> =>
+  readonly createTableService = (request: TableServiceAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/create-table-service`, {
       ...onlyFieldsOf(TableServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
@@ -570,7 +507,6 @@ export class CatalogService {
       tableGroups: request.tableGroups.map((tableGroup) =>
         onlyFieldsOf(TableServiceTableGroup, tableGroup),
       ),
-      idProperty,
     });
 
   /** The Info Generali tab of a table service, for the edit panel. */
@@ -593,7 +529,6 @@ export class CatalogService {
 
   /** Salva of the Info Generali tab of the edit panel. Answers 204 with no body. */
   readonly updateTableServiceGeneral = (
-    idProperty: string,
     request: TableServiceUpdateGeneralRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-table-service-general`, {
@@ -601,12 +536,10 @@ export class CatalogService {
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
-      idProperty,
     });
 
   /** Salva of the Disponibilità e Prenotazioni tab of the edit panel. Answers 204 with no body. */
   readonly updateTableServiceAvailabilityBookings = (
-    idProperty: string,
     request: TableServiceUpdateAvailabilityBookingsRequest,
   ): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/update-table-service-availability-bookings`, {
@@ -615,7 +548,6 @@ export class CatalogService {
       tableGroups: request.tableGroups.map((tableGroup) =>
         onlyFieldsOf(TableServiceTableGroup, tableGroup),
       ),
-      idProperty,
     });
 }
 

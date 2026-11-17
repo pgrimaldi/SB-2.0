@@ -8,8 +8,8 @@ import { UserItem } from '../../../entities/settings/user-management/user-item';
 import { UserSelectedItem } from '../../../entities/settings/user-management/user-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, forbidden, problem } from '../errors/problem.mock';
-import { DEMO_PROPERTY, propertyOf } from '../properties/properties.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 type UserRow = UserItem & UserSelectedItem & { propertyId: number };
 type CreateUserBody = Partial<CreateUserRequest>;
@@ -44,18 +44,15 @@ const ASSIGNABLE_ROLES: readonly unknown[] = Object.values(UserRole).filter(
 );
 
 /**
- * `POST /api/identity/users-list`: one page of the users of the requested property. 401 without a
- * valid access token; 403 for a missing or unknown property.
+ * `POST /api/identity/users-list`: one page of the users of the property of the token. 401 without
+ * a valid access token.
  */
 export const usersListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';

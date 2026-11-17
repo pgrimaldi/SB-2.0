@@ -3,9 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
-import { DeleteSelectedItemRequest } from '../../../entities/database/delete-selected-item-request';
 import { MoveToTrashRequest } from '../../../entities/database/move-to-trash-request';
-import { RestoreBookingItemRequest } from '../../../entities/database/restore-booking-item-request';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { onlyFieldsOf } from '../only-fields-of';
@@ -24,23 +22,21 @@ export class DatabaseService {
   readonly trashItemList = (request: PageRequest): Observable<Page<ExistingBookingItem>> =>
     this.httpClient.post<Page<ExistingBookingItem>>(`${this.endpoint}/trash-item-list`, request);
 
-  readonly affiliatedHotelCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/affiliated-hotel-combobox`, {
-      idProperty,
-    });
+  readonly affiliatedHotelCombobox = (): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/affiliated-hotel-combobox`, null);
 
-  readonly moveToTrash = (idProperty: string, request: MoveToTrashRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/move-to-trash`, {
-      ...onlyFieldsOf(MoveToTrashRequest, request),
-      idProperty,
-    });
+  readonly moveToTrash = (request: MoveToTrashRequest): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/move-to-trash`,
+      onlyFieldsOf(MoveToTrashRequest, request),
+    );
 
-  readonly emptyTrash = (idProperty: string): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/empty-trash`, { idProperty });
+  readonly emptyTrash = (): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/empty-trash`, null);
 
-  readonly restoreBookingItem = (request: RestoreBookingItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/restore-booking-item`, request);
+  readonly restoreBookingItem = (idBookings: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/restore-booking-item`, { idBookings });
 
-  readonly deleteSelectedItem = (request: DeleteSelectedItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-selected-item`, request);
+  readonly deleteSelectedItem = (idBookings: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-selected-item`, { idBookings });
 }

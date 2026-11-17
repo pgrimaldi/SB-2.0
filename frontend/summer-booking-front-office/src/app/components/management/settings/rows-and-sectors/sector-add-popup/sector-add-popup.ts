@@ -93,15 +93,14 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canSave()) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave()) {
       return;
     }
     void submit(this.sectorForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.sectors.addSectorItem(idProperty, this.sector()));
+        await firstValueFrom(this.sectors.addSectorItem(this.sector()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();

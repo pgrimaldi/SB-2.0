@@ -2,8 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { DeleteWarehouseItemsRequest } from '../../../entities/warehouse/delete-warehouse-items-request';
-import { DuplicateWarehouseItemsRequest } from '../../../entities/warehouse/duplicate-warehouse-items-request';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
@@ -23,30 +21,30 @@ export class WarehouseService {
     this.httpClient.post<Page<WarehouseItem>>(`${this.endpoint}/list`, request);
 
   /** All the articles of the property, not paged, sorted by name. */
-  readonly articleCombobox = (idProperty: string): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/article-combobox`, { idProperty });
+  readonly articleCombobox = (): Observable<ComboboxItem[]> =>
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/article-combobox`, null);
 
   /** Answers 204 with no body. */
-  readonly addWarehouseItem = (idProperty: string, item: WarehouseItem): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/add-warehouse-item`, {
-      ...onlyFieldsOf(WarehouseItem, item),
-      idProperty,
-    });
+  readonly addWarehouseItem = (item: WarehouseItem): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/add-warehouse-item`,
+      onlyFieldsOf(WarehouseItem, item),
+    );
 
   /** Answers 204 with no body. */
-  readonly editWarehouseItem = (idProperty: string, item: WarehouseItem): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/edit-warehouse-item`, {
-      ...onlyFieldsOf(WarehouseItem, item),
-      idProperty,
-    });
+  readonly editWarehouseItem = (item: WarehouseItem): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/edit-warehouse-item`,
+      onlyFieldsOf(WarehouseItem, item),
+    );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
-  readonly deleteWarehouseItems = (request: DeleteWarehouseItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-warehouse-item`, request);
+  readonly deleteWarehouseItems = (idItems: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-warehouse-item`, { idItems });
 
   /**
    * All or nothing, like the delete. The backend names the copies. Answers 204 with no body.
    */
-  readonly duplicateWarehouseItems = (request: DuplicateWarehouseItemsRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-warehouse-item`, request);
+  readonly duplicateWarehouseItems = (idItems: string[]): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/duplicate-warehouse-item`, { idItems });
 }

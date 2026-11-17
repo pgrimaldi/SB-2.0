@@ -45,9 +45,8 @@ export class ServicesLimits implements OnDestroy {
 
   /** Read every time the section is shown, i.e. at every opening of the Prices tab. */
   constructor() {
-    const idProperty = this.auth.user()?.propertyId;
-    if (idProperty) {
-      this.sectorsSubscription = this.sectorService.sectorCombobox(idProperty).subscribe({
+    if (this.auth.user()?.propertyId) {
+      this.sectorsSubscription = this.sectorService.sectorCombobox().subscribe({
         next: (sectors) => this.sectors.set(sectors),
         error: (error: unknown) => {
           const problem = toApiProblem(error);

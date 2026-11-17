@@ -166,8 +166,7 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isSaving() || !idProperty) {
+    if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -175,7 +174,7 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.catalog.createStandardService(idProperty, this.draft()));
+        await firstValueFrom(this.catalog.createStandardService(this.draft()));
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();
@@ -209,13 +208,12 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private fetchPeriods(): void {
     this.fetching?.unsubscribe();
     this.error.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
     this.isFetching.set(true);
     this.fetching = this.seasons
-      .periodList(idProperty, false)
+      .periodList(false)
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
         next: (periods) => {

@@ -184,10 +184,9 @@ export class Database {
     ),
     { initialValue: null },
   );
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly dateRange = signal<DateRange | null>(null);
   protected readonly isFiltersOpen = signal(false);
   protected readonly bookingFilters = signal(new ExistingBookingFilters());
@@ -320,7 +319,7 @@ export class Database {
   ]);
 
   /** The texts are asked with each page: after a language change they are those of the new one. */
-  protected readonly load: TableLoad<{ idProperty: string }, ExistingBookingRow> = (request) =>
+  protected readonly load: TableLoad<object, ExistingBookingRow> = (request) =>
     (this.isTrash ? this.database.trashItemList : this.database.existingBookingList)(request).pipe(
       tap((page) => {
         if (this.isTrash && !request.search && !request.filters.length) {
@@ -374,13 +373,12 @@ export class Database {
   }
 
   /** The page waits under a spinner; then the table is read again, whatever the answer. */
-  protected emptyTrash(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isEmptyingTrash() || !idProperty) {
+  protected emptyTrash(table: Table<ExistingBookingRow, object>): void {
+    if (this.isEmptyingTrash() || !this.auth.user()?.propertyId) {
       return;
     }
     this.isEmptyingTrash.set(true);
-    this.database.emptyTrash(idProperty).subscribe({
+    this.database.emptyTrash().subscribe({
       next: () => {
         this.isEmptyingTrash.set(false);
         this.idSelectedBookings.set([]);
@@ -396,17 +394,16 @@ export class Database {
     });
   }
 
-  protected restore(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isRestoring() || !idProperty) {
+  protected restore(table: Table<ExistingBookingRow, object>): void {
+    if (this.isRestoring() || !this.auth.user()?.propertyId) {
       return;
     }
     this.isRestoring.set(true);
-    this.database.restoreBookingItem({ idProperty, idBookings: this.idBookings() }).subscribe({
+    this.database.restoreBookingItem(this.idBookings()).subscribe({
       next: () => {
         this.isRestoring.set(false);
         this.idSelectedBookings.set([]);
-        this.readIsTrashEmpty(idProperty);
+        this.readIsTrashEmpty();
         table.reload();
       },
       error: (error: unknown) => {
@@ -418,17 +415,16 @@ export class Database {
     });
   }
 
-  protected deleteForever(table: Table<ExistingBookingRow, { idProperty: string }>): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isDeletingForever() || !idProperty) {
+  protected deleteForever(table: Table<ExistingBookingRow, object>): void {
+    if (this.isDeletingForever() || !this.auth.user()?.propertyId) {
       return;
     }
     this.isDeletingForever.set(true);
-    this.database.deleteSelectedItem({ idProperty, idBookings: this.idBookings() }).subscribe({
+    this.database.deleteSelectedItem(this.idBookings()).subscribe({
       next: () => {
         this.isDeletingForever.set(false);
         this.idSelectedBookings.set([]);
-        this.readIsTrashEmpty(idProperty);
+        this.readIsTrashEmpty();
         table.reload();
       },
       error: (error: unknown) => {
@@ -441,10 +437,9 @@ export class Database {
   }
 
   // The table may be showing a search or filters: its total is not the whole trash.
-  private readIsTrashEmpty(idProperty: string): void {
+  private readIsTrashEmpty(): void {
     this.database
       .trashItemList({
-        idProperty,
         page: 1,
         pageSize: 1,
         search: '',

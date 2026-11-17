@@ -17,31 +17,30 @@ describe('BookingService', () => {
     };
   };
 
-  it('should ask for the online services options of the property in the query string', () => {
+  it('should ask for the online services options without the property, taken from the token', () => {
     const { booking, controller } = setup();
 
-    booking.onlineServicesOptions('p1').subscribe();
+    booking.onlineServicesOptions().subscribe();
 
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/booking/get-online-services-options` &&
-        params.get('idProperty') === 'p1',
+        params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
     controller.verify();
   });
 
-  it('should save every option with the property in the body', () => {
+  it('should save every option without the property', () => {
     const { booking, controller } = setup();
     const options = Object.assign(new OnlineBookingServicesOptions(), {
       supplementType: SupplementType.Fixed,
       supplementValue: 2.5,
-      idProperty: 'p2',
       unexpectedFlag: 'extra-field',
     });
 
-    booking.updateOnlineServicesOptions('p1', options).subscribe();
+    booking.updateOnlineServicesOptions(options).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -52,7 +51,6 @@ describe('BookingService', () => {
       ...new OnlineBookingServicesOptions(),
       supplementType: SupplementType.Fixed,
       supplementValue: 2.5,
-      idProperty: 'p1',
     });
     controller.verify();
   });

@@ -84,10 +84,9 @@ export class Vouchers {
   protected readonly duplicating = signal(false);
   protected readonly idVouchersToDuplicate = signal<readonly string[]>([]);
   protected readonly voucherNameToDuplicate = signal<string | null>(null);
-  protected readonly params = computed<{ idProperty: string } | null>(() => {
-    const idProperty = this.auth.user()?.propertyId;
-    return idProperty ? { idProperty } : null;
-  });
+  protected readonly params = computed<object | null>(() =>
+    this.auth.user()?.propertyId ? {} : null,
+  );
   protected readonly titleIcon = ['/assets/images/Vouchers_Title.svg'] as const;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X, warning]. */
@@ -131,7 +130,7 @@ export class Vouchers {
     edit: ({ idVoucher }) => idVoucher && this.openEdit(idVoucher),
   });
 
-  protected readonly load: TableLoad<{ idProperty: string }, VoucherRow> = (request) =>
+  protected readonly load: TableLoad<object, VoucherRow> = (request) =>
     this.vouchers.voucherList(request).pipe(
       switchMap((page) =>
         (
@@ -175,10 +174,10 @@ export class Vouchers {
       ),
     );
 
-  protected readonly deleteVouchers = (idProperty: string, idVouchers: string[]) =>
-    this.vouchers.deleteVoucherItems({ idProperty, idVouchers });
-  protected readonly duplicateVouchers = (idProperty: string, idVouchers: string[]) =>
-    this.vouchers.duplicateVoucherItems({ idProperty, idVouchers });
+  protected readonly deleteVouchers = (idVouchers: string[]) =>
+    this.vouchers.deleteVoucherItems(idVouchers);
+  protected readonly duplicateVouchers = (idVouchers: string[]) =>
+    this.vouchers.duplicateVoucherItems(idVouchers);
 
   protected askDelete(idVouchers: readonly TableRowId[], voucherName: string | null = null): void {
     this.idVouchersToDelete.set(idVouchers.map(String));

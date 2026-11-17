@@ -32,9 +32,9 @@ Rotta `/settings/sharing`, vista `views/settings/sharing/` (`Sharing`).
 
 ## API
 
-In `SharingService`:
+In `SharingService` (lo stabilimento lo prende il backend dal token):
 
-- `GET /api/sharing/general-information?idProperty=…` (`generalInformation`): all'apertura e al cambio lingua; risposta
-  `SharingGeneralInformation`.
-- `POST /api/sharing/save-information` (`saveInformation`): corpo `idProperty` più tutti i valori della pagina, risposta
-  204.
+- `GET /api/sharing/general-information` (`generalInformation`), senza parametri: all'apertura e al cambio lingua;
+  risposta `SharingGeneralInformation`.
+- `POST /api/sharing/save-information` (`saveInformation`): corpo con tutti i valori della pagina
+  (`SharingGeneralInformation`), risposta 204.

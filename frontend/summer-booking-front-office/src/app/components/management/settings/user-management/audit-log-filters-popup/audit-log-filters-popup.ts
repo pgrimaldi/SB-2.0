@@ -147,11 +147,10 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
     // A slower answer of an earlier opening must not replace the list of this one.
     this.usersSubscription?.unsubscribe();
     this.usersLoadError.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
-    this.usersSubscription = this.identity.userCombobox(idProperty).subscribe({
+    this.usersSubscription = this.identity.userCombobox().subscribe({
       next: (users) => this.users.set(users),
       error: (error: unknown) => {
         const problem = toApiProblem(error);

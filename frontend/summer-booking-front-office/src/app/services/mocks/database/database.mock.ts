@@ -11,8 +11,8 @@ import {
   PageRequest,
 } from '../../../entities/pagination/page';
 import { isAuthorized, isMockPassword, unauthorized } from '../auth/auth.mock';
-import { forbidden, problem, resourceNotFound } from '../errors/problem.mock';
-import { propertyOf } from '../properties/properties.mock';
+import { problem, resourceNotFound } from '../errors/problem.mock';
+import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 type ReservationRow = Omit<ExistingBookingItem, 'isTrashed'> & { propertyId: number };
 
@@ -241,9 +241,8 @@ const SORT_FIELDS = [
 ] as const;
 
 /**
- * `POST /api/database/existing-booking-list`: one page of the bookings of the requested property
- * (never of other properties) that are not in the trash. 401 without a valid access token; 403 for a
- * missing or unknown property.
+ * `POST /api/database/existing-booking-list`: one page of the bookings of the property of the token
+ * (never of other properties) that are not in the trash. 401 without a valid access token.
  */
 export const existingBookingListMock = (
   request: HttpRequest<unknown>,
@@ -261,10 +260,7 @@ function bookingPageMock(
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
 
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
@@ -305,8 +301,8 @@ function bookingPageMock(
 }
 
 /**
- * `POST /api/database/affiliated-hotel-combobox` with `{ idProperty }`: the hotels of the property,
- * id and name. 401 without a valid access token; 403 for a missing or unknown property.
+ * `POST /api/database/affiliated-hotel-combobox` without a body: the hotels of the property, id and
+ * name. 401 without a valid access token.
  */
 export const affiliatedHotelComboboxMock = (
   request: HttpRequest<unknown>,
@@ -314,10 +310,7 @@ export const affiliatedHotelComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const hotels: ComboboxItem[] = AFFILIATED_HOTELS.filter(
     (hotel) => hotel.propertyId === property.id,
   ).map(({ id, value }) => ({ id, value }));
@@ -325,24 +318,20 @@ export const affiliatedHotelComboboxMock = (
 };
 
 /**
- * `POST /api/database/move-to-trash` with `{ idProperty, idBookings, password }`: checks the
- * password of the user (the one of the test account), then moves the bookings to the trash: they
- * leave the list. 204 without a body; 401 without a valid access token; 403 for an unknown property;
- * 404 when a booking is not one of the property; 400 with an error on `password` when it is wrong.
+ * `POST /api/database/move-to-trash` with `{ idBookings, password }`: checks the password of the
+ * user (the one of the test account), then moves the bookings to the trash: they leave the list.
+ * 204 without a body; 401 without a valid access token; 404 when a booking is not one of the
+ * property; 400 with an error on `password` when it is wrong.
  */
 export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as {
-    idProperty?: unknown;
     idBookings?: unknown;
     password?: unknown;
   };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
   const known = RESERVATIONS.filter(
     (row) => row.propertyId === property.id && !trashedBookings.has(row.idBooking ?? ''),
@@ -366,18 +355,14 @@ export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpE
 };
 
 /**
- * `POST /api/database/empty-trash` with `{ idProperty }`: deletes for good every booking of the
- * property in the trash (until the page is reloaded). 204 without a body; 401 without a valid access
- * token; 403 for a missing or unknown property.
+ * `POST /api/database/empty-trash` without a body: deletes for good every booking of the property
+ * in the trash (until the page is reloaded). 204 without a body; 401 without a valid access token.
  */
 export const emptyTrashMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = propertyOf(((request.body ?? {}) as { idProperty?: unknown }).idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const property = DEMO_PROPERTY;
   for (let index = RESERVATIONS.length - 1; index >= 0; index--) {
     const row = RESERVATIONS[index];
     if (row.propertyId === property.id && trashedBookings.delete(row.idBooking ?? '')) {
@@ -388,9 +373,9 @@ export const emptyTrashMock = (request: HttpRequest<unknown>): Observable<HttpEv
 };
 
 /**
- * `POST /api/database/restore-booking-item` with `{ idProperty, idBookings }`: takes the bookings
- * out of the trash, back to the bookings list. 204 without a body; 401 without a valid access token;
- * 403 for a missing or unknown property; 404 when a booking is not in the trash of the property.
+ * `POST /api/database/restore-booking-item` with `{ idBookings }`: takes the bookings out of the
+ * trash, back to the bookings list. 204 without a body; 401 without a valid access token; 404 when
+ * a booking is not in the trash of the property.
  */
 export const restoreBookingItemMock = (
   request: HttpRequest<unknown>,
@@ -398,11 +383,8 @@ export const restoreBookingItemMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idProperty?: unknown; idBookings?: unknown };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idBookings?: unknown };
+  const property = DEMO_PROPERTY;
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
   const known = RESERVATIONS.filter(
     (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? ''),
@@ -417,9 +399,9 @@ export const restoreBookingItemMock = (
 };
 
 /**
- * `POST /api/database/delete-selected-item` with `{ idProperty, idBookings }`: deletes for good the
- * bookings in the trash (until the page is reloaded). 204 without a body; 401 without a valid access
- * token; 403 for a missing or unknown property; 404 when a booking is not in the trash of the property.
+ * `POST /api/database/delete-selected-item` with `{ idBookings }`: deletes for good the bookings in
+ * the trash (until the page is reloaded). 204 without a body; 401 without a valid access token; 404
+ * when a booking is not in the trash of the property.
  */
 export const deleteSelectedItemMock = (
   request: HttpRequest<unknown>,
@@ -427,11 +409,8 @@ export const deleteSelectedItemMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idProperty?: unknown; idBookings?: unknown };
-  const property = propertyOf(body.idProperty);
-  if (!property) {
-    return forbidden(request);
-  }
+  const body = (request.body ?? {}) as { idBookings?: unknown };
+  const property = DEMO_PROPERTY;
   const idBookings = Array.isArray(body.idBookings) ? body.idBookings : [];
   const known = RESERVATIONS.filter(
     (row) => row.propertyId === property.id && trashedBookings.has(row.idBooking ?? ''),

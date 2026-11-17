@@ -130,8 +130,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   }
 
   protected add(): void {
-    const idProperty = this.auth.user()?.propertyId;
-    if (this.isLoading() || !idProperty || !this.canAdd()) {
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canAdd()) {
       return;
     }
 
@@ -139,7 +138,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.warehouse.addWarehouseItem(idProperty, this.draft()));
+        await firstValueFrom(this.warehouse.addWarehouseItem(this.draft()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();
@@ -187,11 +186,10 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     // A slower answer of an earlier opening must not replace the list of this one.
     this.articlesSubscription?.unsubscribe();
     this.articlesLoadError.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
-    this.articlesSubscription = this.warehouse.articleCombobox(idProperty).subscribe({
+    this.articlesSubscription = this.warehouse.articleCombobox().subscribe({
       next: (articles) => this.articles.set(articles),
       error: (error: unknown) => {
         const problem = toApiProblem(error);

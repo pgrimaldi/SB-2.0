@@ -98,8 +98,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 
 ## API
 
-Tutte in `CatalogService`, senza `idProperty`: lo stabilimento lo prende il backend dal token, e le tab aspettano solo
-l'utente autenticato.
+Tutte in `CatalogService`: lo stabilimento lo prende il backend dal token, e le tab aspettano solo l'utente
+autenticato.
 
 - `GET /api/catalog/property-info/bathhouse-configuration-general`: i campi della tab 1.
 - `GET /api/catalog/countries-combobox`: le voci di Nazione, `ComboboxItem` con il codice ISO come `id` e il nome già

@@ -169,13 +169,12 @@ export class SeasonPeriods {
     effect((onCleanup) => {
       this.dataReload?.();
       this.reloads();
-      const idProperty = this.auth.user()?.propertyId;
-      if (!idProperty) {
+      if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() => {
         this.error.set(null);
-        return this.seasons.periodList(idProperty, this.isNextSeason).subscribe({
+        return this.seasons.periodList(this.isNextSeason).subscribe({
           next: (items) => {
             this.selectedIntervals.set(new Set());
             this.periodItems.set(items);
@@ -187,11 +186,10 @@ export class SeasonPeriods {
     });
   }
 
-  protected readonly deletePeriod = (idProperty: string, [idPeriod]: string[]) =>
-    this.seasons.deletePeriod({ idProperty, idPeriod });
+  protected readonly deletePeriod = ([idPeriod]: string[]) => this.seasons.deletePeriod(idPeriod);
 
-  protected readonly deleteIntervals = (idProperty: string, idIntervals: string[]) =>
-    this.seasons.deleteIntervals({ idProperty, idIntervals });
+  protected readonly deleteIntervals = (idIntervals: string[]) =>
+    this.seasons.deleteIntervals(idIntervals);
 
   protected askDelete(period: SeasonPeriodRow): void {
     this.periodToDelete.set(period);

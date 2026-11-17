@@ -257,9 +257,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
-    const idProperty = this.auth.user()?.propertyId;
     const idHourlyService = this.idHourlyService();
-    if (this.isSaving() || !idProperty || !idHourlyService) {
+    if (this.isSaving() || !this.auth.user()?.propertyId || !idHourlyService) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;
@@ -267,7 +266,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.update(tab, idProperty, idHourlyService));
+        await firstValueFrom(this.update(tab, idHourlyService));
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
@@ -290,8 +289,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The data of a tab, read from its API the first time the tab is opened. */
   private loadTab(tab: PanelTab): void {
     const idHourlyService = this.idHourlyService();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idHourlyService || !idProperty || this.loadedTabs().has(tab)) {
+    if (!idHourlyService || !this.auth.user()?.propertyId || this.loadedTabs().has(tab)) {
       return;
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
@@ -313,7 +311,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         tab,
         forkJoin({
           prices: this.catalog.hourlyServicePrices(idHourlyService),
-          periods: this.seasons.periodList(idProperty, false),
+          periods: this.seasons.periodList(false),
         })
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
@@ -346,11 +344,10 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idProperty: string, idHourlyService: string): Observable<void> {
+  private update(tab: PanelTab, idHourlyService: string): Observable<void> {
     const draft = this.draft();
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateHourlyServiceGeneral(
-        idProperty,
         Object.assign(new HourlyServiceUpdateGeneralRequest(), {
           idHourlyService,
           ...pick(draft, tab),
@@ -359,7 +356,6 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     if (tab === PanelTab.Prices) {
       return this.catalog.updateHourlyServicePrices(
-        idProperty,
         Object.assign(new HourlyServiceUpdatePricesRequest(), {
           idHourlyService,
           ...pick(draft, tab),
@@ -367,7 +363,6 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       );
     }
     return this.catalog.updateHourlyServiceBooking(
-      idProperty,
       Object.assign(new HourlyServiceUpdateBookingRequest(), {
         idHourlyService,
         ...pick(draft, tab),

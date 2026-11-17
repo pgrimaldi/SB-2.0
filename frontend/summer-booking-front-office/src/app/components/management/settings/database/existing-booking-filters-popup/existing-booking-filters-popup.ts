@@ -167,20 +167,17 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
     // A slower answer of an earlier opening must not replace the list of this one.
     this.affiliatedHotelsSubscription?.unsubscribe();
     this.affiliatedHotelsLoadError.set(null);
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idProperty) {
+    if (!this.auth.user()?.propertyId) {
       return;
     }
-    this.affiliatedHotelsSubscription = this.database
-      .affiliatedHotelCombobox(idProperty)
-      .subscribe({
-        next: (hotels) => this.affiliatedHotels.set(hotels),
-        error: (error: unknown) => {
-          const problem = toApiProblem(error);
-          this.affiliatedHotels.set([]);
-          this.affiliatedHotelsLoadError.set(this.errorText.instant(problem.code, problem.args));
-        },
-      });
+    this.affiliatedHotelsSubscription = this.database.affiliatedHotelCombobox().subscribe({
+      next: (hotels) => this.affiliatedHotels.set(hotels),
+      error: (error: unknown) => {
+        const problem = toApiProblem(error);
+        this.affiliatedHotels.set([]);
+        this.affiliatedHotelsLoadError.set(this.errorText.instant(problem.code, problem.args));
+      },
+    });
   }
 
   override ngOnDestroy(): void {

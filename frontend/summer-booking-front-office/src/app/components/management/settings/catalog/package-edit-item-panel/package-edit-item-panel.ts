@@ -295,15 +295,14 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The package, with the sectors and the periods of the current season for its price rows. */
   private load(): void {
     const idPackage = this.idPackage();
-    const idProperty = this.auth.user()?.propertyId;
-    if (!idPackage || !idProperty) {
+    if (!idPackage || !this.auth.user()?.propertyId) {
       return;
     }
     this.isLoading.set(true);
     this.loading = forkJoin({
       item: this.priceLists.selectedPackage(idPackage),
-      sectors: this.sectorService.sectorCombobox(idProperty),
-      periods: this.seasons.periodList(idProperty, false),
+      sectors: this.sectorService.sectorCombobox(),
+      periods: this.seasons.periodList(false),
     })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
