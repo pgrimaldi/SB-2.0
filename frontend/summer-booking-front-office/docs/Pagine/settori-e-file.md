@@ -40,8 +40,8 @@ Rotta `/settings/rows-and-sectors` · vista `views/settings/rows-and-sectors/` (
 - Annulla e Salva a metà riga.
 - Salva chiama `SectorService.addSectorItem` (`POST /api/catalog/add-sector-item` con `{ sectorName }`, 204), con
   spinner e campo bloccato.
-- Se riesce il popup si chiude e la tabella si ricarica. Un errore su `sectorName` va sotto il campo, gli altri
-  (es. 409 `catalog.sector_name_taken`) sopra i bottoni.
+- Se riesce il popup si chiude e la tabella si ricarica. Un errore su `sectorName` va sotto il campo, anche il 409
+  `catalog.sector_name_taken` (nome già usato), che arriva senza `errors[]`; gli altri sopra i bottoni.
 - Annulla e la X chiedono conferma se c'è un nome scritto.
 
 ## Popup Modifica (`app-sector-edit-popup`)
