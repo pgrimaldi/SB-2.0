@@ -10,6 +10,7 @@ import { PackageTranslation } from './package-translation';
 export const MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY = 15;
 export const MAX_PACKAGE_PEOPLE_QUANTITY = 15;
 export const MAX_PACKAGE_ARTICLE_QUANTITY = 10;
+export const MAX_PRICE_LIST_PRICE = 1_000_000;
 
 export class PackageAddItemRequest {
   translations: PackageTranslation[] = [];

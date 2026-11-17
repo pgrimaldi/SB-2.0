@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  metadata,
   readonly,
   required,
   submit,
@@ -36,10 +38,16 @@ import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
-import { PackageReducedSeasonalPrice } from '../../../../../entities/settings/catalog/package-reduced-seasonal-price';
+import {
+  MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH,
+  PackageReducedSeasonalPrice,
+} from '../../../../../entities/settings/catalog/package-reduced-seasonal-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
 import { PackageSelectedItem } from '../../../../../entities/settings/catalog/package-selected-item';
-import { PackageTranslation } from '../../../../../entities/settings/catalog/package-translation';
+import {
+  MAX_PACKAGE_NAME_LENGTH,
+  PackageTranslation,
+} from '../../../../../entities/settings/catalog/package-translation';
 import { PackageIntermediatePrice } from '../../../../../entities/settings/catalog/package-intermediate-price';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { PriceListService } from '../../../../../services/api/catalog/price-list.service';
@@ -54,6 +62,13 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
 import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
+import {
+  intermediatePricesOf,
+  maxPrices,
+  periodPricesOf,
+  reducedPricesOf,
+  sectorPricesOf,
+} from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
 
@@ -134,18 +149,28 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.isPublicHolidaysIncluded, () => this.isLocked());
     disabled(path.isIntermediatePricesIncluded, () => this.isLocked());
     applyEach(path.translations, (translation) => {
+      metadata(translation.packageName, MAX_LENGTH, () => MAX_PACKAGE_NAME_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) => valueOf(translation.language) === this.mainLanguage(),
         (main) => requiredText(main.packageName),
       );
     });
+    maxPrices(path.sectorPrices, sectorPricesOf);
+    maxPrices(path.periodPrices, periodPricesOf);
+    maxPrices(path.intermediatePrices, intermediatePricesOf);
+    maxPrices(path.reducedSeasonalPrices, reducedPricesOf);
   });
   private readonly reducedSeasonalPrice = signal(new PackageReducedSeasonalPrice());
   protected readonly reducedSeasonalPriceForm = form(this.reducedSeasonalPrice, (path) => {
     required(path.startsOn);
     required(path.endsOn);
     requiredText(path.reducedSeasonalPriceName);
+    metadata(
+      path.reducedSeasonalPriceName,
+      MAX_LENGTH,
+      () => MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH,
+    );
     noOverlap(path, () =>
       this.draft().reducedSeasonalPrices.filter(
         (_, index) => index !== this.reducedSeasonalPriceIndex(),

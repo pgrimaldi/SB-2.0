@@ -151,6 +151,13 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
     maxRowItemQuantity: this.validationText.message(this.gridForm.maxRowItemQuantity),
     tiltDegrees: this.validationText.message(this.gridForm.tiltDegrees),
   };
+  /** An error of the backend on the icons of the umbrella, or of the custom articles: under their rows. */
+  protected readonly hasUmbrellaIconsError = computed(
+    () => this.gridForm.umbrellaIcons().errorSummary().length > 0,
+  );
+  protected readonly hasCustomArticleIconsError = computed(
+    () => this.gridForm.customArticleIcons().errorSummary().length > 0,
+  );
   private readonly hasUnknownIcon = computed(() =>
     [null, ...CUSTOM_ARTICLE_NUMBERS].some((article) =>
       this.iconColumns.some((isOccupied) => this.isUnknownIcon(article, isOccupied)),

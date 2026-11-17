@@ -40,6 +40,7 @@ import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-se
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 
 @Component({
@@ -76,6 +77,9 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly draft = signal(new AdditionalItemAddItemRequest());
   protected readonly draftForm = form(this.draft, (path) => {
     required(path.idArticle);
+    maxPrices(path.sectorPrices, sectorPricesOf);
+    maxPrices(path.periodPrices, periodPricesOf);
+    maxPrices(path.intermediatePrices, intermediatePricesOf);
   });
   /** The form with nothing chosen: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(JSON.stringify(new AdditionalItemAddItemRequest()));

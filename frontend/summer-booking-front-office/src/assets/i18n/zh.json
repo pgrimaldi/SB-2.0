@@ -1616,7 +1616,11 @@
             "occupied": "已占用",
             "umbrella": "遮阳伞",
             "custom_article": "自定义物品 {{number}}",
-            "select": "选择图标"
+            "select": "选择图标",
+            "invalid": {
+              "umbrella": "遮阳伞图标无效：请选择其他图标后重新保存。",
+              "custom_articles": "自定义物品图标无效：请选择其他图标后重新保存。"
+            }
           }
         },
         "edit": "编辑",
@@ -2012,6 +2016,11 @@
       },
       "season_required": "请先设置并保存当前季节的开始和结束日期。",
       "next_season_required": "请先设置并保存下一季节的开始和结束日期。"
+    },
+    "catalog": {
+      "price": {
+        "max": "有价格超过了允许的最高值 {max, number, currency}。"
+      }
     }
   },
   "unsaved_changes": {

@@ -52,6 +52,7 @@ import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-se
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
 
@@ -106,6 +107,9 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.isPublicHolidaysIncluded, () => this.isLocked());
     disabled(path.isIntermediatePricesIncluded, () => this.isLocked());
     required(path.idArticle);
+    maxPrices(path.sectorPrices, sectorPricesOf);
+    maxPrices(path.periodPrices, periodPricesOf);
+    maxPrices(path.intermediatePrices, intermediatePricesOf);
   });
   /** The values as the API gave them: the form is compared with them. */
   private readonly pristine = signal(new AdditionalItemAddItemRequest());

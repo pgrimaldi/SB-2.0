@@ -12,6 +12,7 @@ import {
   MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
   MAX_PACKAGE_ARTICLE_QUANTITY,
   MAX_PACKAGE_PEOPLE_QUANTITY,
+  MAX_PRICE_LIST_PRICE,
   PackageAddItemRequest,
 } from '../../../entities/settings/catalog/package-add-item-request';
 import {
@@ -20,6 +21,12 @@ import {
 } from '../../../entities/settings/catalog/package-intermediate-price';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
 import { PackagePeriodPrice } from '../../../entities/settings/catalog/package-period-price';
+import { MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH } from '../../../entities/settings/catalog/package-reduced-seasonal-price';
+import { PackageSectorPrice } from '../../../entities/settings/catalog/package-sector-price';
+import {
+  MAX_PACKAGE_NAME_LENGTH,
+  PackageTranslation,
+} from '../../../entities/settings/catalog/package-translation';
 import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -149,7 +156,8 @@ const SORT_FIELDS = ['packageName'] as const;
 
 /**
  * `POST /api/catalog/packages-list`: one page of the packages of the property of the token, in
- * their own order unless sorted. 401 without a valid access token.
+ * their own order unless sorted, each with its name in the language of `Accept-Language` (see
+ * `packageNameIn`), which the search and the sorting use too. 401 without a valid access token.
  */
 export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -160,11 +168,13 @@ export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpE
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = PACKAGES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.packageName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(PackageItem, row));
+  const language = request.headers.get('Accept-Language') ?? 'it';
+  const found = PACKAGES.filter((row) => row.propertyId === property.id)
+    .map((row) => ({
+      ...onlyFieldsOf(PackageItem, row),
+      packageName: packageNameIn(row, language),
+    }))
+    .filter(({ packageName }) => !search || packageName?.toLowerCase().includes(search));
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -228,7 +238,7 @@ export const duplicatePackageItemsMock = (
       PACKAGE_DETAILS.set(copy.idPackage ?? '', {
         ...structuredClone(detail),
         translations: detail.translations.map((translation) =>
-          translation.language === 'it'
+          translation.packageName?.trim() === item.packageName
             ? { ...translation, packageName: copy.packageName }
             : { ...translation },
         ),
@@ -262,6 +272,24 @@ function packagesOf(propertyId: number, idPackages: unknown): PackageRow[] | nul
   return ids.length && packages.length === ids.length ? packages : null;
 }
 
+/** The name shown for a package: the one in `language`, otherwise its `name` (`row.packageName`). */
+function packageNameIn(row: PackageRow, language: string): string | null {
+  const translated = PACKAGE_DETAILS.get(row.idPackage ?? '')
+    ?.translations.find((translation) => translation.language === language)
+    ?.packageName?.trim();
+  return translated || row.packageName;
+}
+
+/** The `name` of a saved package: the Italian name when written, otherwise the one in `language`. */
+function savedPackageName(
+  translations: readonly Partial<PackageTranslation>[] | undefined,
+  language: string,
+): string | null {
+  const nameIn = (code: string): string | undefined =>
+    translations?.find((translation) => translation.language === code)?.packageName?.trim();
+  return nameIn('it') || nameIn(language) || null;
+}
+
 function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? -1 : 1;
@@ -277,9 +305,9 @@ type CreatePackageBody = Partial<PackageAddItemRequest>;
 
 /**
  * `POST /api/catalog/packages/create-package` with `PackageAddItemRequest`, the property from the
- * access token: the new package goes into the list, with the name in the language of
- * `Accept-Language`. 204 without a body; 401 without a valid access token; 400 with one error per
- * wrong field (see `packageErrors`).
+ * access token: the new package goes into the list, its `name` the Italian name or, when missing,
+ * the one in the language of `Accept-Language` (`savedPackageName`). 204 without a body; 401 without
+ * a valid access token; 400 with one error per wrong field (see `packageErrors`).
  */
 export const createPackageMock = (
   request: HttpRequest<unknown>,
@@ -293,11 +321,10 @@ export const createPackageMock = (
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
   const row: PackageRow = {
     propertyId: DEMO_PROPERTY.id,
     idPackage: crypto.randomUUID(),
-    packageName: main?.packageName?.trim() ?? null,
+    packageName: savedPackageName(body.translations, language),
   };
   PACKAGES.push(row);
   PACKAGE_DETAILS.set(
@@ -308,10 +335,12 @@ export const createPackageMock = (
 };
 
 /**
- * The name in the language of the request (the user's), as the panel requires; the quantities, when
- * given, within the choices of their dropdowns; calculation method, monthly and weekend settings,
- * when given, among the values of their enums; every reduced seasonal price with its name and its
- * days in order, without days in common with another one.
+ * The name in the language of the request (the user's), as the panel requires, and every name at most
+ * `MAX_PACKAGE_NAME_LENGTH` characters; the quantities, when given, within the choices of their
+ * dropdowns; calculation method, monthly and weekend settings, when given, among the values of their
+ * enums; prices between 0 and `MAX_PRICE_LIST_PRICE`; every reduced seasonal price with its name (at
+ * most `MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH` characters) and its days in order, without days in
+ * common with another one.
  */
 function packageErrors(body: CreatePackageBody, language: string): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -324,6 +353,15 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
       code: 'validation.required',
     });
   }
+  translations.forEach(({ packageName }, translationIndex) => {
+    if (typeof packageName === 'string' && packageName.trim().length > MAX_PACKAGE_NAME_LENGTH) {
+      errors.push({
+        field: `translations[${translationIndex}].packageName`,
+        code: 'validation.max_length',
+        args: { max: MAX_PACKAGE_NAME_LENGTH },
+      });
+    }
+  });
   const limits = [
     ['maxAdditionalItemQuantity', MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY],
     ['maxPeopleQuantity', MAX_PACKAGE_PEOPLE_QUANTITY],
@@ -344,8 +382,15 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
   const reducedPrices = Array.isArray(body.reducedSeasonalPrices) ? body.reducedSeasonalPrices : [];
   reducedPrices.forEach((reduced, reducedIndex) => {
     const field = `reducedSeasonalPrices[${reducedIndex}]`;
-    if (!reduced.reducedSeasonalPriceName?.trim()) {
+    const name = reduced.reducedSeasonalPriceName?.trim();
+    if (!name) {
       errors.push({ field: `${field}.reducedSeasonalPriceName`, code: 'validation.required' });
+    } else if (name.length > MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH) {
+      errors.push({
+        field: `${field}.reducedSeasonalPriceName`,
+        code: 'validation.max_length',
+        args: { max: MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH },
+      });
     }
     if (!reduced.startsOn || !reduced.endsOn) {
       errors.push({ field: `${field}.startsOn`, code: 'validation.required' });
@@ -364,6 +409,17 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
       errors.push({ field: `${field}.startsOn`, code: 'validation.invalid' });
     }
   });
+  if (
+    !reducedPrices.every(
+      ({ sectorPrices }) =>
+        Array.isArray(sectorPrices) &&
+        sectorPrices.every(({ seasonalHalfDayPrice, seasonalPrice }) =>
+          [seasonalHalfDayPrice, seasonalPrice].every(isPrice),
+        ),
+    )
+  ) {
+    errors.push({ field: 'reducedSeasonalPrices', code: 'validation.invalid' });
+  }
   return errors;
 }
 
@@ -406,8 +462,8 @@ export const selectedPackageMock = (
 
 /**
  * `POST /api/catalog/packages/update-package` with `PackageAddItemRequest` and `idPackage`, the
- * property from the access token: the package takes all the values sent, its name in the list the
- * one in the language of `Accept-Language`. 204 without a body; 401 without a valid access token;
+ * property from the access token: the package takes all the values sent, its `name` as in
+ * `createPackageMock`. 204 without a body; 401 without a valid access token;
  * 404 `resource.not_found` for a package that is not one of its; 400 as `createPackageMock`.
  */
 export const updatePackageMock = (
@@ -426,8 +482,7 @@ export const updatePackageMock = (
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
-  row.packageName = main?.packageName?.trim() ?? row.packageName;
+  row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
   PACKAGE_DETAILS.set(
     row.idPackage ?? '',
     structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
@@ -589,6 +644,8 @@ function choiceErrors(body: {
   monthlySetting?: unknown;
   weekendSetting?: unknown;
   publicHolidayDates?: unknown;
+  sectorPrices?: unknown;
+  periodPrices?: unknown;
   intermediatePrices?: unknown;
 }): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -610,6 +667,38 @@ function choiceErrors(body: {
     new Set(dates.map((date: string) => date.slice(0, 10))).size !== dates.length
   ) {
     errors.push({ field: 'publicHolidayDates', code: 'validation.invalid' });
+  }
+  const sectorPrices = body.sectorPrices ?? [];
+  if (
+    !Array.isArray(sectorPrices) ||
+    !sectorPrices.every(
+      (row: Partial<PackageSectorPrice> | null) =>
+        !!row && [row.seasonalHalfDayPrice, row.seasonalPrice].every(isPrice),
+    )
+  ) {
+    errors.push({ field: 'sectorPrices', code: 'validation.invalid' });
+  }
+  const periodPrices = body.periodPrices ?? [];
+  if (
+    !Array.isArray(periodPrices) ||
+    !periodPrices.every(
+      (row: Partial<PackagePeriodPrice> | null) =>
+        !!row &&
+        [
+          row.halfDayPrice,
+          row.dailyPrice,
+          row.weekendPrice,
+          row.halfDayWeekendPrice,
+          row.halfDaySevenDaysPrice,
+          row.sevenDaysPrice,
+          row.halfDayFourteenDaysPrice,
+          row.fourteenDaysPrice,
+          row.halfDayMonthlyPrice,
+          row.monthlyPrice,
+        ].every(isPrice),
+    )
+  ) {
+    errors.push({ field: 'periodPrices', code: 'validation.invalid' });
   }
   const prices = body.intermediatePrices ?? [];
   if (
@@ -638,13 +727,24 @@ function isIntermediatePrice(value: unknown): boolean {
     dayQuantity >= 1 &&
     dayQuantity <= MAX_INTERMEDIATE_PRICE_DAY_QUANTITY &&
     typeof price === 'number' &&
-    price >= 0
+    isPrice(price)
+  );
+}
+
+/** A price of the price list: none, or between 0 and `MAX_PRICE_LIST_PRICE`. */
+function isPrice(value: unknown): boolean {
+  return (
+    value == null ||
+    (typeof value === 'number' &&
+      Number.isFinite(value) &&
+      value >= 0 &&
+      value <= MAX_PRICE_LIST_PRICE)
   );
 }
 
 /**
  * `POST /api/catalog/package-combobox` without a body: every package of the property, in its order,
- * as `{ id, value }`. 401 without a valid access token.
+ * as `{ id, value }`, the name as in `packageListMock`. 401 without a valid access token.
  */
 export const packageComboboxMock = (
   request: HttpRequest<unknown>,
@@ -653,8 +753,9 @@ export const packageComboboxMock = (
     return unauthorized(request);
   }
   const property = DEMO_PROPERTY;
+  const language = request.headers.get('Accept-Language') ?? 'it';
   const items: ComboboxItem[] = PACKAGES.filter((row) => row.propertyId === property.id).map(
-    (row) => ({ id: row.idPackage ?? '', value: row.packageName ?? '' }),
+    (row) => ({ id: row.idPackage ?? '', value: packageNameIn(row, language) ?? '' }),
   );
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };

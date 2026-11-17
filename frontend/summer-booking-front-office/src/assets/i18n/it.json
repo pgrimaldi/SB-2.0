@@ -1616,7 +1616,11 @@
             "occupied": "Occupato",
             "umbrella": "Ombrellone",
             "custom_article": "Articolo personalizzato {{number}}",
-            "select": "Seleziona icona"
+            "select": "Seleziona icona",
+            "invalid": {
+              "umbrella": "Le icone dell'ombrellone non sono valide: scegline altre e salva di nuovo.",
+              "custom_articles": "Le icone degli articoli personalizzati non sono valide: scegline altre e salva di nuovo."
+            }
           }
         },
         "edit": "Modifica",
@@ -2012,6 +2016,11 @@
       },
       "season_required": "Imposta e salva prima le date di inizio e fine della stagione corrente.",
       "next_season_required": "Imposta e salva prima le date di inizio e fine della prossima stagione."
+    },
+    "catalog": {
+      "price": {
+        "max": "Un prezzo supera il massimo consentito di {max, number, currency}."
+      }
     }
   },
   "unsaved_changes": {

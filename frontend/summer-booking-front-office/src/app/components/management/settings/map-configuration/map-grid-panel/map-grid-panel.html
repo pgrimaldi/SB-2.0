@@ -68,6 +68,11 @@
       [ngTemplateOutletContext]="{ $implicit: null }"
     />
   </div>
+  @if (hasUmbrellaIconsError()) {
+    <p class="map__grid__panel__icons__error">
+      {{ 'management.settings.map_configuration.grid.icons.invalid.umbrella' | translate }}
+    </p>
+  }
   @for (article of customArticles; track article) {
     <div class="map__grid__panel__icons__row">
       <span>
@@ -81,6 +86,11 @@
         [ngTemplateOutletContext]="{ $implicit: article }"
       />
     </div>
+  }
+  @if (hasCustomArticleIconsError()) {
+    <p class="map__grid__panel__icons__error">
+      {{ 'management.settings.map_configuration.grid.icons.invalid.custom_articles' | translate }}
+    </p>
   }
 </div>
 

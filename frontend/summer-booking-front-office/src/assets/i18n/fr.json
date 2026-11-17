@@ -1616,7 +1616,11 @@
             "occupied": "Occupé",
             "umbrella": "Parasol",
             "custom_article": "Article personnalisé {{number}}",
-            "select": "Choisir une icône"
+            "select": "Choisir une icône",
+            "invalid": {
+              "umbrella": "Les icônes du parasol ne sont pas valides : choisissez-en d'autres et enregistrez à nouveau.",
+              "custom_articles": "Les icônes des articles personnalisés ne sont pas valides : choisissez-en d'autres et enregistrez à nouveau."
+            }
           }
         },
         "edit": "Modifier",
@@ -2012,6 +2016,11 @@
       },
       "season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison en cours.",
       "next_season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison prochaine."
+    },
+    "catalog": {
+      "price": {
+        "max": "Un prix dépasse le maximum autorisé de {max, number, currency}."
+      }
     }
   },
   "unsaved_changes": {

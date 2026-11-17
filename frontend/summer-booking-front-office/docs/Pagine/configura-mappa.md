@@ -84,6 +84,9 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
   sul telefono da sola sopra Libero e Occupato) e le intestazioni Libero e Occupato.
 - Poi le righe bordate Ombrellone e Articolo personalizzato 1-8, con i bottoni "Seleziona icona" per Libero e
   Occupato (sul telefono il nome sopra e i due bottoni sotto), spenti in sola lettura.
+- Un errore del backend su `umbrellaIcons` compare sotto la riga Ombrellone, uno su `customArticleIcons` sotto le
+  righe degli articoli personalizzati (`management.settings.map_configuration.grid.icons.invalid.*`); Salva resta
+  spento finché non si sceglie un'altra icona della riga.
 
 ### Scelta delle icone
 

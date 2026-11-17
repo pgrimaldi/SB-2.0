@@ -1616,7 +1616,11 @@
             "occupied": "Belegt",
             "umbrella": "Sonnenschirm",
             "custom_article": "Eigener Artikel {{number}}",
-            "select": "Symbol wählen"
+            "select": "Symbol wählen",
+            "invalid": {
+              "umbrella": "Die Symbole des Sonnenschirms sind ungültig: Wähle andere und speichere erneut.",
+              "custom_articles": "Die Symbole der eigenen Artikel sind ungültig: Wähle andere und speichere erneut."
+            }
           }
         },
         "edit": "Bearbeiten",
@@ -2012,6 +2016,11 @@
       },
       "season_required": "Lege zuerst Beginn und Ende der aktuellen Saison fest und speichere sie.",
       "next_season_required": "Lege zuerst Beginn und Ende der nächsten Saison fest und speichere sie."
+    },
+    "catalog": {
+      "price": {
+        "max": "Ein Preis überschreitet den zulässigen Höchstwert von {max, number, currency}."
+      }
     }
   },
   "unsaved_changes": {

@@ -1616,7 +1616,11 @@
             "occupied": "Occupied",
             "umbrella": "Umbrella",
             "custom_article": "Custom item {{number}}",
-            "select": "Select icon"
+            "select": "Select icon",
+            "invalid": {
+              "umbrella": "The umbrella icons are not valid: choose others and save again.",
+              "custom_articles": "The custom item icons are not valid: choose others and save again."
+            }
           }
         },
         "edit": "Edit",
@@ -2012,6 +2016,11 @@
       },
       "season_required": "First set and save the start and end dates of the current season.",
       "next_season_required": "First set and save the start and end dates of the next season."
+    },
+    "catalog": {
+      "price": {
+        "max": "A price exceeds the allowed maximum of {max, number, currency}."
+      }
     }
   },
   "unsaved_changes": {

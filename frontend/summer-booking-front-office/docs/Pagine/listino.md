@@ -67,7 +67,8 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 ## Tab "Info Generali" (`app-package-general-info-tab`)
 
-- Nome con "Altre lingue" come Servizi.
+- Nome con "Altre lingue" come Servizi. Ogni nome al massimo 255 caratteri (`MAX_PACKAGE_NAME_LENGTH` di
+  `PackageTranslation`, come il backend): il campo non lascia scrivere oltre.
 - Tendine "Numero max di articoli aggiuntivi" e "Numero max di persone" da 1 a 15; Ombrellone, Lettino, Sdraio,
   Sedia regista, Cabina e Tenda da 1 a 10 (costanti `MAX_PACKAGE_*_QUANTITY` di `PackageAddItemRequest`).
   Le tendine lavorano con testi, il modulo tiene il numero nei campi `*Quantity`.
@@ -93,12 +94,17 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Le griglie sono larghe quanto la loro sezione, nei colori delle tabelle dell'app: testi blu, righe alternate
   bianche e azzurre (`--color__layout__highlight`) separate da linee sottili (anche quelle dei prezzi ridotti).
 - Scorrono da sole con intestazione e prima colonna fisse.
+- Limite dei prezzi: 1.000.000 (`MAX_PRICE_LIST_PRICE` di `PackageAddItemRequest`, come il backend). Le regole sono
+  in `price-limits.ts` (`maxPrices` sulla lista con le funzioni che leggono i prezzi di una riga), usate dai quattro
+  pannelli per `sectorPrices`, `periodPrices`, `intermediatePrices` e, nei pacchetti, `reducedSeasonalPrices`: un
+  prezzo oltre il massimo mostra `invalidate.catalog.price.max` sotto la sua tabella e spegne il salvataggio.
 
 ### Prezzi stagionali ridotti (solo pacchetti)
 
 - I pannelli dei pacchetti mettono nello `<ng-content />` `app-package-reduced-price`: quanti prezzi ridotti si
   vogliono (`reducedSeasonalPrices`, tipo `PackageReducedSeasonalPrice[]`).
-- Il bottone "Prezzo stagionale ridotto" apre un riquadro con Dal, Al (`startsOn`, `endsOn`) e Nome obbligatori.
+- Il bottone "Prezzo stagionale ridotto" apre un riquadro con Dal, Al (`startsOn`, `endsOn`) e Nome obbligatori
+  (Nome al massimo 120 caratteri, `MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH`, come il backend).
 - I periodi non si sovrappongono: nei due calendari i giorni degli altri prezzi ridotti sono spenti
   (`disabledPeriods`), Al si ferma al giorno prima del prezzo ridotto successivo e il modulo del riquadro ha
   `noOverlap` (messaggio `packages.form.reduced_seasonal.overlap` sotto i campi, Aggiungi/Salva spento).

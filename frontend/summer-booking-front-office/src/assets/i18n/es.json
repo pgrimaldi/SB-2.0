@@ -1616,7 +1616,11 @@
             "occupied": "Ocupado",
             "umbrella": "Sombrilla",
             "custom_article": "Artículo personalizado {{number}}",
-            "select": "Elegir icono"
+            "select": "Elegir icono",
+            "invalid": {
+              "umbrella": "Los iconos de la sombrilla no son válidos: elige otros y vuelve a guardar.",
+              "custom_articles": "Los iconos de los artículos personalizados no son válidos: elige otros y vuelve a guardar."
+            }
           }
         },
         "edit": "Editar",
@@ -2012,6 +2016,11 @@
       },
       "season_required": "Configura y guarda primero las fechas de inicio y fin de la temporada actual.",
       "next_season_required": "Configura y guarda primero las fechas de inicio y fin de la próxima temporada."
+    },
+    "catalog": {
+      "price": {
+        "max": "Un precio supera el máximo permitido de {max, number, currency}."
+      }
     }
   },
   "unsaved_changes": {
