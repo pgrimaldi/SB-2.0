@@ -29,40 +29,44 @@ import {
 import { IconButton } from '../../../../components/shared/ui/buttons/icon-button/icon-button';
 import { SelectionCheckbox } from '../../../../components/shared/ui/checkboxes/selection-checkbox/selection-checkbox';
 import { DATA_RELOAD } from '../../../../components/shared/ui/data/data-reload';
+import { AlertPopup } from '../../../../components/shared/ui/dialogs/alert-popup/alert-popup';
 import { ExpansionPanel } from '../../../../components/shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { SectionTitle } from '../../../../components/shared/ui/titles/section-title/section-title';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
+import { SeasonPeriodInterval } from '../../../../entities/settings/seasons/season-period-interval';
 import { SeasonPeriodIntervalItem } from '../../../../entities/settings/seasons/season-period-interval-item';
-import { SeasonPeriodItem } from '../../../../entities/settings/seasons/season-period-item';
-import { SeasonPeriodUpdateRequest } from '../../../../entities/settings/seasons/season-period-update-request';
+import {
+  MAX_SEASON_PERIOD_RANGES,
+  SeasonPeriodItem,
+} from '../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../services/api/seasons/season.service';
 
 interface SeasonIntervalRow {
-  idInterval: string | null;
-  dateFrom: string;
-  dateTo: string;
-  /** As the list gave it, for the edit popup. */
-  item: SeasonPeriodIntervalItem;
+  startsOn: string;
+  endsOn: string;
+  /** As the list gave it: the selection, the edit popup and the deletion know it by this. */
+  item: SeasonPeriodInterval;
 }
 
 interface SeasonPeriodRow {
-  idPeriod: string | null;
-  periodName: string;
+  key: number | null;
+  name: string;
   intervals: SeasonIntervalRow[];
-  /** As the list gave it, for the popup that adds an interval. */
+  /** As the list gave it, for the popups that change it. */
   item: SeasonPeriodItem;
 }
 
 /** No name when there are several: the popup then tells how many. */
 interface IntervalsToDelete {
-  idIntervals: string[];
+  intervals: SeasonPeriodIntervalItem[];
   name: string | null;
 }
 
 @Component({
   selector: 'app-season-periods',
   imports: [
+    AlertPopup,
     Button,
     DeleteItemsPopup,
     ExpansionPanel,
@@ -107,23 +111,27 @@ export class SeasonPeriods {
   protected readonly isAddOpen = signal(false);
   protected readonly isDeleteAsked = signal(false);
   protected readonly periodToDelete = signal<SeasonPeriodRow | null>(null);
-  protected readonly idPeriodsToDelete = computed(() => {
-    const idPeriod = this.periodToDelete()?.idPeriod;
-    return idPeriod ? [idPeriod] : [];
+  protected readonly keysToDelete = computed(() => {
+    const key = this.periodToDelete()?.key;
+    return key === null || key === undefined ? [] : [key];
   });
   protected readonly isEditPeriodOpen = signal(false);
-  protected readonly periodToEdit = signal<SeasonPeriodUpdateRequest | null>(null);
+  protected readonly periodToEdit = signal<SeasonPeriodItem | null>(null);
   protected readonly isAddIntervalOpen = signal(false);
   protected readonly periodToExtend = signal<SeasonPeriodItem | null>(null);
   protected readonly isEditIntervalOpen = signal(false);
-  protected readonly intervalToEdit = signal<SeasonPeriodIntervalItem | null>(null);
+  protected readonly periodOfInterval = signal<SeasonPeriodItem | null>(null);
+  protected readonly intervalToEdit = signal<SeasonPeriodInterval | null>(null);
   protected readonly isDeleteIntervalsAsked = signal(false);
-  protected readonly intervalsToDelete = signal<IntervalsToDelete>({ idIntervals: [], name: null });
+  protected readonly intervalsToDelete = signal<IntervalsToDelete>({ intervals: [], name: null });
+  protected readonly isPeriodLeftEmpty = signal(false);
+  protected readonly isPeriodFull = signal(false);
+  protected readonly maxRanges = MAX_SEASON_PERIOD_RANGES;
   private readonly reloads = signal(0);
-  /** Chosen date intervals of all the periods of the tab. */
-  private readonly selectedIntervals = signal<ReadonlySet<string>>(new Set());
+  /** Chosen date intervals of all the periods of the tab, as the list gave them. */
+  private readonly selectedIntervals = signal<ReadonlySet<SeasonPeriodInterval>>(new Set());
   protected readonly selectedTotal = computed(() => this.selectedIntervals().size);
-  private readonly periodItems = signal<SeasonPeriodItem[] | null>(null);
+  protected readonly periodItems = signal<SeasonPeriodItem[] | null>(null);
   protected readonly periods = computed<SeasonPeriodRow[] | null>(() => {
     const items = this.periodItems();
     if (!items) {
@@ -137,20 +145,19 @@ export class SeasonPeriods {
     });
     const format = (date: string | null): string => (date ? day.format(new Date(date)) : '');
     return items.map((item) => ({
-      idPeriod: item.idPeriod,
-      periodName: item.periodName ?? '',
-      intervals: item.intervals.map((interval) => ({
-        idInterval: interval.idInterval,
-        dateFrom: format(interval.dateFrom),
-        dateTo: format(interval.dateTo),
-        item: interval,
+      key: item.key,
+      name: item.name ?? '',
+      intervals: item.ranges.map((range) => ({
+        startsOn: format(range.startsOn),
+        endsOn: format(range.endsOn),
+        item: range,
       })),
       item,
     }));
   });
   /** All the date intervals of the season of the tab: a new or changed one cannot overlap them. */
   protected readonly seasonIntervals = computed(() =>
-    (this.periodItems() ?? []).flatMap(({ intervals }) => intervals),
+    (this.periodItems() ?? []).flatMap(({ ranges }) => ranges),
   );
   private readonly panels = viewChildren(ExpansionPanel);
   protected readonly isAllShown = computed(() => {
@@ -186,10 +193,11 @@ export class SeasonPeriods {
     });
   }
 
-  protected readonly deletePeriod = ([idPeriod]: string[]) => this.seasons.deletePeriod(idPeriod);
+  protected readonly deletePeriod = ([key]: number[]) =>
+    this.seasons.deletePeriod(this.isNextSeason, key);
 
-  protected readonly deleteIntervals = (idIntervals: string[]) =>
-    this.seasons.deleteIntervals(idIntervals);
+  protected readonly deleteIntervals = (intervals: SeasonPeriodIntervalItem[]) =>
+    this.seasons.deleteRanges(this.isNextSeason, intervals);
 
   protected askDelete(period: SeasonPeriodRow): void {
     this.periodToDelete.set(period);
@@ -197,49 +205,44 @@ export class SeasonPeriods {
   }
 
   protected askDeleteInterval(interval: SeasonIntervalRow): void {
-    if (interval.idInterval) {
-      this.intervalsToDelete.set({
-        idIntervals: [interval.idInterval],
-        name: `${interval.dateFrom} – ${interval.dateTo}`,
-      });
-      this.isDeleteIntervalsAsked.set(true);
-    }
+    this.askDeleteIntervals(new Set([interval.item]), `${interval.startsOn} – ${interval.endsOn}`);
   }
 
   protected editPeriod(period: SeasonPeriodRow): void {
-    this.periodToEdit.set({ idPeriod: period.idPeriod, periodName: period.periodName });
+    this.periodToEdit.set(period.item);
     this.isEditPeriodOpen.set(true);
   }
 
   protected addInterval(period: SeasonPeriodRow): void {
+    if (period.item.ranges.length >= MAX_SEASON_PERIOD_RANGES) {
+      this.isPeriodFull.set(true);
+      return;
+    }
     this.periodToExtend.set(period.item);
     this.isAddIntervalOpen.set(true);
   }
 
-  protected editInterval(interval: SeasonIntervalRow): void {
+  protected editInterval(period: SeasonPeriodRow, interval: SeasonIntervalRow): void {
+    this.periodOfInterval.set(period.item);
     this.intervalToEdit.set(interval.item);
     this.isEditIntervalOpen.set(true);
   }
 
   protected askDeleteSelected(): void {
-    this.intervalsToDelete.set({ idIntervals: [...this.selectedIntervals()], name: null });
-    this.isDeleteIntervalsAsked.set(true);
+    this.askDeleteIntervals(this.selectedIntervals(), null);
   }
 
-  protected isIntervalSelected(idInterval: string | null): boolean {
-    return !!idInterval && this.selectedIntervals().has(idInterval);
+  protected isIntervalSelected(interval: SeasonIntervalRow): boolean {
+    return this.selectedIntervals().has(interval.item);
   }
 
-  protected selectInterval(idInterval: string | null, isSelected: boolean): void {
-    if (!idInterval) {
-      return;
-    }
+  protected selectInterval(interval: SeasonIntervalRow, isSelected: boolean): void {
     this.selectedIntervals.update((selected) => {
       const next = new Set(selected);
       if (isSelected) {
-        next.add(idInterval);
+        next.add(interval.item);
       } else {
-        next.delete(idInterval);
+        next.delete(interval.item);
       }
       return next;
     });
@@ -256,5 +259,23 @@ export class SeasonPeriods {
 
   protected reload(): void {
     this.reloads.update((count) => count + 1);
+  }
+
+  /** A period keeps at least one interval: when all of its would go, nothing is asked nor deleted. */
+  private askDeleteIntervals(chosen: ReadonlySet<SeasonPeriodInterval>, name: string | null): void {
+    const periods = this.periodItems() ?? [];
+    if (periods.some(({ ranges }) => ranges.length && ranges.every((range) => chosen.has(range)))) {
+      this.isPeriodLeftEmpty.set(true);
+      return;
+    }
+    const intervals = periods.flatMap(({ key, ranges }) =>
+      ranges
+        .filter((range) => chosen.has(range))
+        .map(({ startsOn, endsOn }) => ({ key, startsOn, endsOn })),
+    );
+    if (intervals.length) {
+      this.intervalsToDelete.set({ intervals, name });
+      this.isDeleteIntervalsAsked.set(true);
+    }
   }
 }

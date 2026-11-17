@@ -12,7 +12,15 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  form,
+  readonly,
+  submit,
+  validate,
+  ValidationError,
+} from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, of, switchMap } from 'rxjs';
@@ -22,14 +30,26 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  ApiValidationError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodAddRequest } from '../../../../../entities/settings/seasons/season-period-add-request';
 import { SeasonPeriodInterval } from '../../../../../entities/settings/seasons/season-period-interval';
+import {
+  MAX_SEASON_PERIOD_RANGES,
+  SeasonPeriodItem,
+} from '../../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { minItems, noOverlaps, requiredText } from '../../../../shared/forms/validators';
+import {
+  isTextTaken,
+  minItems,
+  noOverlaps,
+  requiredText,
+} from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
@@ -51,6 +71,8 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
   readonly season = input<SeasonPeriodInterval | null>(null);
   /** The date intervals the season has already: the new ones cannot overlap them. */
   readonly seasonIntervals = input<readonly SeasonPeriodInterval[]>([]);
+  /** The periods the season has already: the new one cannot have the name of one of them. */
+  readonly periods = input<readonly SeasonPeriodItem[]>([]);
   readonly added = output<void>();
 
   private readonly seasons = inject(SeasonService);
@@ -70,20 +92,33 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
   protected readonly isLoading = signal(false);
   private readonly draft = signal(new SeasonPeriodAddRequest());
   protected readonly draftForm = form(this.draft, (path) => {
-    requiredText(path.periodName);
-    minItems(path.intervals, 1);
-    noOverlaps(path.intervals, () => this.seasonIntervals());
+    requiredText(path.name);
+    validate(path.name, ({ value }) =>
+      isTextTaken(
+        value(),
+        this.periods().map(({ name }) => name),
+      )
+        ? { kind: 'seasons.period_name.taken' }
+        : undefined,
+    );
+    minItems(path.ranges, 1);
+    validate(path.ranges, ({ value }) =>
+      value().length > MAX_SEASON_PERIOD_RANGES
+        ? { kind: 'seasons.ranges.max', max: MAX_SEASON_PERIOD_RANGES }
+        : undefined,
+    );
+    noOverlaps(path.ranges, () => this.seasonIntervals());
     readonly(path, () => this.isLoading());
   });
-  protected readonly periodNameError = this.validationText.message(this.draftForm.periodName);
+  protected readonly nameError = this.validationText.message(this.draftForm.name);
   protected readonly intervalsError = this.validationText.message(
-    this.draftForm.intervals,
+    this.draftForm.ranges,
     'management.settings.seasons.add_popup.field_names.interval',
   );
   /** The days of the other periods of the season and of the intervals chosen already. */
   protected readonly takenIntervals = computed(() => [
     ...this.seasonIntervals(),
-    ...this.draft().intervals,
+    ...this.draft().ranges,
   ]);
   protected readonly canSave = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -123,8 +158,36 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
         this.close();
         this.added.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        if (problem.code === 'pricing.period_name_taken') {
+          const nameTaken: ApiValidationError = {
+            kind: 'api',
+            fieldTree: this.draftForm.name,
+            code: problem.code,
+          };
+          return nameTaken;
+        }
+        const errors = problem.errors ?? [];
+        if (errors.some(({ field, code }) => field === 'ranges' && code === 'validation.invalid')) {
+          const rangesInvalid: ValidationError.WithFieldTree & { readonly max: number } = {
+            kind: 'seasons.ranges.invalid',
+            max: MAX_SEASON_PERIOD_RANGES,
+            fieldTree: this.draftForm.ranges,
+          };
+          const others = errors.filter(({ field }) => field !== 'ranges');
+          return others.length
+            ? [
+                rangesInvalid,
+                ...apiFieldErrorsOrGeneral(
+                  { ...problem, errors: others },
+                  this.draftForm,
+                  (general) => this.error.set(general),
+                ),
+              ]
+            : rangesInvalid;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);

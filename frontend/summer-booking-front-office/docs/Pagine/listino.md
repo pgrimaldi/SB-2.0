@@ -40,7 +40,8 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - Si apre in sola lettura, come i pannelli dei Servizi, con il pacchetto letto da
   `GET /api/catalog/packages/{idPackage}` (`PriceListService.selectedPackage`, `PackageSelectedItem` = `idPackage`
-  e i campi del modulo), insieme a `POST /api/catalog/sector-combobox` e `GET /api/seasons/period-list`.
+  e i campi del modulo), insieme a `POST /api/catalog/sector-combobox` e `GET /api/catalog/tariff-periods` (i periodi
+  della stagione corrente; il loro `key` numerico è l'`idPeriod` delle righe dei prezzi).
 - Le lingue senza nome restano vuote; le righe dei prezzi sono una per settore e una per settore e periodo, con i
   prezzi salvati o vuote.
 - I prezzi salvati di settori o periodi che il pannello non mostra (es. di un'altra stagione) restano da parte e
@@ -61,7 +62,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Se fallisce, il pannello resta aperto con i dati scritti. Ogni campo del modulo ha il suo `[error]`: un errore
   del backend su un campo va sotto quel campo (`translations` sotto il nome, `reducedSeasonalPrices` sotto i
   prezzi ridotti, `sectorPrices` e `periodPrices` sotto la loro sezione).
-- Errori dentro una lista o un oggetto (es. `translations[0].packageName`, `reducedSeasonalPrices[0].dateTo`),
+- Errori dentro una lista o un oggetto (es. `translations[0].packageName`, `reducedSeasonalPrices[0].endsOn`),
   di rete o del server: sopra i bottoni.
 
 ## Tab "Info Generali" (`app-package-general-info-tab`)
@@ -97,7 +98,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - I pannelli dei pacchetti mettono nello `<ng-content />` `app-package-reduced-price`: quanti prezzi ridotti si
   vogliono (`reducedSeasonalPrices`, tipo `PackageReducedSeasonalPrice[]`).
-- Il bottone "Prezzo stagionale ridotto" apre un riquadro con Dal, Al e Nome obbligatori.
+- Il bottone "Prezzo stagionale ridotto" apre un riquadro con Dal, Al (`startsOn`, `endsOn`) e Nome obbligatori.
 - I periodi non si sovrappongono: nei due calendari i giorni degli altri prezzi ridotti sono spenti
   (`disabledPeriods`), Al si ferma al giorno prima del prezzo ridotto successivo e il modulo del riquadro ha
   `noOverlap` (messaggio `packages.form.reduced_seasonal.overlap` sotto i campi, Aggiungi/Salva spento).
@@ -205,7 +206,8 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Caselle "Prenotazioni online", "Solo online" e, in una cornice, "Imposta come articolo assegnabile su mappa"
   (`isMapAssignable`).
 - Poi il titolo "Listino" e `app-price-list-tab`, senza prezzi stagionali ridotti.
-- Le due tendine e le righe dei prezzi (`sector-combobox` e `period-list`) si leggono a ogni apertura del pannello.
+- Le due tendine e le righe dei prezzi (`sector-combobox` e `catalog/tariff-periods`) si leggono a ogni apertura del
+  pannello.
 - "Crea articolo/servizio" è spento finché manca l'articolo; manda tutto il modulo a
   `POST /api/catalog/create-additional-services-article-item` (`PriceListService.createAdditionalItem`, 204).
 - Spinner e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica, se fallisce gli errori

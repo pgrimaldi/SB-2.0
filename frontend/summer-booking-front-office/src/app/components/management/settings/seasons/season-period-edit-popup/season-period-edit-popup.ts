@@ -12,7 +12,14 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  form,
+  readonly,
+  submit,
+  validate,
+} from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, of, switchMap } from 'rxjs';
@@ -22,13 +29,16 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  ApiValidationError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { SeasonPeriodUpdateRequest } from '../../../../../entities/settings/seasons/season-period-update-request';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { requiredText } from '../../../../shared/forms/validators';
+import { isTextTaken, requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
@@ -43,8 +53,12 @@ import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/
   encapsulation: ViewEncapsulation.None,
 })
 export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, OnDestroy {
-  /** The period of a sub-section, with the name it has now. */
-  readonly period = input<SeasonPeriodUpdateRequest | null>(null);
+  /** The period is one of the next season instead of the current one. */
+  readonly isNextSeason = input.required<boolean>();
+  /** The period of a sub-section, with the name and the date intervals it has now. */
+  readonly period = input<SeasonPeriodItem | null>(null);
+  /** The periods of the season, this one too: two periods of a season cannot have the same name. */
+  readonly periods = input<readonly SeasonPeriodItem[]>([]);
   readonly updated = output<void>();
 
   private readonly seasons = inject(SeasonService);
@@ -56,12 +70,15 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly isLoading = signal(false);
-  private readonly draft = signal(new SeasonPeriodUpdateRequest());
+  private readonly draft = signal(new SeasonPeriodItem());
   protected readonly draftForm = form(this.draft, (path) => {
-    requiredText(path.periodName);
+    requiredText(path.name);
+    validate(path.name, ({ value }) =>
+      isTextTaken(value(), this.otherNames()) ? { kind: 'seasons.period_name.taken' } : undefined,
+    );
     readonly(path, () => this.isLoading());
   });
-  protected readonly periodNameError = this.validationText.message(this.draftForm.periodName);
+  protected readonly nameError = this.validationText.message(this.draftForm.name);
   protected readonly canSave = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -85,7 +102,8 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   }
 
   protected save(): void {
-    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave()) {
+    const key = this.draft().key;
+    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave() || key === null) {
       return;
     }
 
@@ -93,13 +111,26 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.seasons.updatePeriod(this.draft()));
+        await firstValueFrom(this.seasons.updatePeriod(this.isNextSeason(), key, this.draft()));
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        if (problem.code === 'pricing.period_name_taken') {
+          const nameTaken: ApiValidationError = {
+            kind: 'api',
+            fieldTree: this.draftForm.name,
+            code: problem.code,
+          };
+          return nameTaken;
+        }
+        if ((problem.errors ?? []).some(({ field }) => field !== 'name')) {
+          this.error.set(problem);
+          return [];
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);
@@ -132,8 +163,16 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
     };
   }
 
-  private original(): SeasonPeriodUpdateRequest {
-    return { ...new SeasonPeriodUpdateRequest(), ...this.period() };
+  /** The names of the other periods of the season. */
+  private otherNames(): (string | null)[] {
+    const key = this.period()?.key;
+    return this.periods()
+      .filter((period) => period.key !== key)
+      .map(({ name }) => name);
+  }
+
+  private original(): SeasonPeriodItem {
+    return { ...new SeasonPeriodItem(), ...this.period() };
   }
 
   private reset(): void {

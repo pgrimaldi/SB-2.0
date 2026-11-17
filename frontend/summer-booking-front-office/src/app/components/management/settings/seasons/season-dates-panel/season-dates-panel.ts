@@ -209,22 +209,21 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   }
 }
 
-/** A date interval of the periods before `dateFrom` or after `dateTo`; no limit while one is missing. */
+/** A date range of the periods before `startsOn` or after `endsOn`; no limit while one is missing. */
 function isAnyOutside(
   periods: readonly SeasonPeriodItem[],
-  dateFrom: string | null,
-  dateTo: string | null,
+  startsOn: string | null,
+  endsOn: string | null,
 ): boolean {
-  if (!dateFrom || !dateTo) {
+  if (!startsOn || !endsOn) {
     return false;
   }
-  const first = dateFrom.slice(0, 10);
-  const last = dateTo.slice(0, 10);
-  return periods.some(({ intervals }) =>
-    intervals.some(
-      (interval) =>
-        (interval.dateFrom ?? '').slice(0, 10) < first ||
-        (interval.dateTo ?? '').slice(0, 10) > last,
+  const first = startsOn.slice(0, 10);
+  const last = endsOn.slice(0, 10);
+  return periods.some(({ ranges }) =>
+    ranges.some(
+      (range) =>
+        (range.startsOn ?? '').slice(0, 10) < first || (range.endsOn ?? '').slice(0, 10) > last,
     ),
   );
 }

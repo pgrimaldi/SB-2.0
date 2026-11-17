@@ -418,7 +418,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       price: prices.price,
       vatRate: prices.vatRate,
       isPeriodPricingEnabled: prices.isPeriodPricingEnabled ?? false,
-      periodPrices: periods.map(({ idPeriod }) =>
+      periodPrices: periods.map(({ key: idPeriod }) =>
         Object.assign(new ServicePeriodPrice(), {
           idPeriod,
           price: prices.periodPrices.find((item) => item.idPeriod === idPeriod)?.price ?? null,

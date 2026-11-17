@@ -19,6 +19,7 @@ import {
   readonly,
   required,
   submit,
+  ValidationError,
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -33,7 +34,10 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodInterval } from '../../../../../entities/settings/seasons/season-period-interval';
-import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
+import {
+  MAX_SEASON_PERIOD_RANGES,
+  SeasonPeriodItem,
+} from '../../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { noOverlap } from '../../../../shared/forms/validators';
@@ -50,7 +54,9 @@ import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/
   encapsulation: ViewEncapsulation.None,
 })
 export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges, OnDestroy {
-  /** The period the interval goes to. */
+  /** The period is one of the next season instead of the current one. */
+  readonly isNextSeason = input.required<boolean>();
+  /** The period the interval goes to, as the list gave it: it is saved with all its intervals. */
   readonly period = input<SeasonPeriodItem | null>(null);
   /** The date intervals the season has already: the new one cannot overlap them. */
   readonly seasonIntervals = input<readonly SeasonPeriodInterval[]>([]);
@@ -71,21 +77,21 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
   protected readonly isLoading = signal(false);
   private readonly draft = signal(new SeasonPeriodInterval());
   protected readonly draftForm = form(this.draft, (path) => {
-    required(path.dateFrom);
-    required(path.dateTo);
+    required(path.startsOn);
+    required(path.endsOn);
     noOverlap(path, () => this.seasonIntervals());
     readonly(path, () => this.isLoading());
   });
-  protected readonly dateFromError = this.validationText.message(this.draftForm.dateFrom);
-  protected readonly dateToError = this.validationText.message(this.draftForm.dateTo);
+  protected readonly startsOnError = this.validationText.message(this.draftForm.startsOn);
+  protected readonly endsOnError = this.validationText.message(this.draftForm.endsOn);
   protected readonly overlapError = this.validationText.message(this.draftForm);
   /** Data fine from Data inizio on, inside the season. */
-  protected readonly dateToMin = computed(() =>
-    laterDay(this.season()?.dateFrom ?? null, this.draft().dateFrom),
+  protected readonly endsOnMin = computed(() =>
+    laterDay(this.season()?.startsOn ?? null, this.draft().startsOn),
   );
   /** Data fine stops the day before the next interval of the season. */
-  protected readonly dateToMax = computed(() =>
-    lastFreeDay(this.draft().dateFrom, this.seasonIntervals(), this.season()?.dateTo ?? null),
+  protected readonly endsOnMax = computed(() =>
+    lastFreeDay(this.draft().startsOn, this.seasonIntervals(), this.season()?.endsOn ?? null),
   );
   protected readonly canSave = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -113,22 +119,44 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
 
   protected save(): void {
     const period = this.period();
-    if (this.isLoading() || !this.auth.user()?.propertyId || !period?.idPeriod || !this.canSave()) {
+    const key = period?.key;
+    if (
+      this.isLoading() ||
+      !this.auth.user()?.propertyId ||
+      !period ||
+      key === null ||
+      key === undefined ||
+      !this.canSave()
+    ) {
       return;
     }
-    const idPeriod = period.idPeriod;
+    const ranges = [...period.ranges, this.draft()];
 
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.seasons.addInterval(idPeriod, this.draft()));
+        await firstValueFrom(
+          this.seasons.updatePeriod(this.isNextSeason(), key, { ...period, ranges }),
+        );
         this.isLoading.set(false);
         this.close();
         this.added.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        const isRangesInvalid = (problem.errors ?? []).some(
+          ({ field, code }) => field === 'ranges' && code === 'validation.invalid',
+        );
+        if (isRangesInvalid) {
+          const rangesInvalid: ValidationError.WithFieldTree & { readonly max: number } = {
+            kind: 'seasons.ranges.invalid',
+            max: MAX_SEASON_PERIOD_RANGES,
+            fieldTree: this.draftForm,
+          };
+          return rangesInvalid;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);
@@ -194,11 +222,11 @@ function lastFreeDay(
     return limit;
   }
   const next = periods.reduce<string | null>(
-    (first, { dateFrom }) =>
-      dateFrom &&
-      dateFrom.slice(0, 10) > day.slice(0, 10) &&
-      (!first || dateFrom.slice(0, 10) < first.slice(0, 10))
-        ? dateFrom
+    (first, { startsOn }) =>
+      startsOn &&
+      startsOn.slice(0, 10) > day.slice(0, 10) &&
+      (!first || startsOn.slice(0, 10) < first.slice(0, 10))
+        ? startsOn
         : first,
     null,
   );

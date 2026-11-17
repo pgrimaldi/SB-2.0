@@ -1,6 +1,6 @@
 export class PackagePeriodPrice {
   idSector: string | null = null;
-  idPeriod: string | null = null;
+  idPeriod: number | null = null;
   halfDayPrice: number | null = null;
   dailyPrice: number | null = null;
   weekendPrice: number | null = null;

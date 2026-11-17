@@ -103,7 +103,7 @@ describe('PriceListService', () => {
     });
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
-    const intermediatePrice = { idPeriod: 'pe1', isFirstRow: false, dayQuantity: 3, price: 40 };
+    const intermediatePrice = { idPeriod: 1, isFirstRow: false, dayQuantity: 3, price: 40 };
     const request: AdditionalItemAddItemRequest = Object.assign(
       new AdditionalItemAddItemRequest(),
       {
@@ -261,10 +261,10 @@ describe('PriceListService', () => {
     });
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
-    const intermediatePrice = { idPeriod: 'pe1', isFirstRow: true, dayQuantity: 2, price: 35 };
+    const intermediatePrice = { idPeriod: 1, isFirstRow: true, dayQuantity: 2, price: 35 };
     const reducedSeasonalPrice = {
-      dateFrom: '2026-06-01T00:00:00.000Z',
-      dateTo: '2026-06-30T00:00:00.000Z',
+      startsOn: '2026-06-01T00:00:00.000Z',
+      endsOn: '2026-06-30T00:00:00.000Z',
       reducedSeasonalPriceName: 'Giugno',
       sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 400, seasonalPrice: 700 }],
     };
@@ -328,8 +328,8 @@ describe('PriceListService', () => {
     const priceLists = TestBed.inject(PriceListService);
     const controller = TestBed.inject(HttpTestingController);
     const reducedSeasonalPrice = {
-      dateFrom: '2026-06-01T00:00:00.000Z',
-      dateTo: '2026-06-30T00:00:00.000Z',
+      startsOn: '2026-06-01T00:00:00.000Z',
+      endsOn: '2026-06-30T00:00:00.000Z',
       reducedSeasonalPriceName: 'Giugno',
       sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 400, seasonalPrice: 700 }],
     };

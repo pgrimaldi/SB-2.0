@@ -143,8 +143,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   });
   private readonly reducedSeasonalPrice = signal(new PackageReducedSeasonalPrice());
   protected readonly reducedSeasonalPriceForm = form(this.reducedSeasonalPrice, (path) => {
-    required(path.dateFrom);
-    required(path.dateTo);
+    required(path.startsOn);
+    required(path.endsOn);
     requiredText(path.reducedSeasonalPriceName);
     noOverlap(path, () =>
       this.draft().reducedSeasonalPrices.filter(
@@ -365,7 +365,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
             ],
           }),
         )
-        .sort((first, second) => (first.dateFrom ?? '').localeCompare(second.dateFrom ?? '')),
+        .sort((first, second) => (first.startsOn ?? '').localeCompare(second.startsOn ?? '')),
       sectorPrices: sectors.map(({ id }) =>
         Object.assign(
           new PackageSectorPrice(),
@@ -374,7 +374,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         ),
       ),
       periodPrices: sectors.flatMap(({ id }) =>
-        periods.map(({ idPeriod }) =>
+        periods.map(({ key: idPeriod }) =>
           Object.assign(
             new PackagePeriodPrice(),
             item.periodPrices.find((price) => price.idSector === id && price.idPeriod === idPeriod),
@@ -394,14 +394,14 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         .sort(byIntermediatePrice),
     });
     const idSectors = new Set(sectors.map(({ id }) => id));
-    const idPeriods = new Set(periods.map(({ idPeriod }) => idPeriod));
+    const idPeriods = new Set(periods.map(({ key }) => key));
     this.hiddenSectorPrices.set(
       item.sectorPrices.filter(({ idSector }) => !idSector || !idSectors.has(idSector)),
     );
     this.hiddenPeriodPrices.set(
       item.periodPrices.filter(
         ({ idSector, idPeriod }) =>
-          !idSector || !idSectors.has(idSector) || !idPeriod || !idPeriods.has(idPeriod),
+          !idSector || !idSectors.has(idSector) || idPeriod === null || !idPeriods.has(idPeriod),
       ),
     );
     this.sectors.set(sectors);

@@ -26,8 +26,8 @@
           class="package__reduced__price__field"
           [pathIcon]="calendarIcon"
           [disabledPeriods]="otherPeriods()"
-          [formField]="draft.dateFrom"
-          [error]="validationText.text(draft.dateFrom)"
+          [formField]="draft.startsOn"
+          [error]="validationText.text(draft.startsOn)"
         />
       </div>
       <div class="package__reduced__price__pair">
@@ -37,11 +37,11 @@
         <app-filled-date-field
           class="package__reduced__price__field"
           [pathIcon]="calendarIcon"
-          [minDate]="draft.dateFrom().value()"
-          [maxDate]="dateToMax()"
+          [minDate]="draft.startsOn().value()"
+          [maxDate]="endsOnMax()"
           [disabledPeriods]="otherPeriods()"
-          [formField]="draft.dateTo"
-          [error]="validationText.text(draft.dateTo)"
+          [formField]="draft.endsOn"
+          [error]="validationText.text(draft.endsOn)"
         />
       </div>
     </div>
@@ -87,8 +87,8 @@
           | translate
             : {
                 name: price.reducedSeasonalPriceName,
-                dateFrom: day(price.dateFrom),
-                dateTo: day(price.dateTo),
+                dateFrom: day(price.startsOn),
+                dateTo: day(price.endsOn),
               }
       "
       [pathIcon]="sectionIcons"

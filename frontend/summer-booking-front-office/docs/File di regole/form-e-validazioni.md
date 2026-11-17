@@ -57,6 +57,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - `submit()` non invia nulla se un campo è sbagliato e segna tutti i campi come toccati, così ogni errore si vede.
 - Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
   non riguarda un campo (es. rete assente).
+- Un codice del backend che arriva senza `errors[]` ma riguarda un solo campo (es. `pricing.period_name_taken`, nome
+  già usato) il form lo mette sotto quel campo, restituendolo da `submit()` come errore `api` di quel campo.
 - Un errore su un id (un campo che comincia con `id`, come `idPeriod`) non va mai sotto un campo ma nel messaggio
   generale: l'id non si vede e il form resterebbe bloccato senza spiegazione.
 - Il backend non segnala mai un id in `errors[]`: un id non valido annulla l'operazione con un errore generale (codici:
@@ -128,5 +130,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   sempre svuotato) e l'utente lo sceglie di nuovo.
 - Se c'è anche un altro limite (es. i giorni della stagione) vale il più stretto; i giorni già presi da altri periodi
   si spengono con `disabledPeriods`. Ogni nuova coppia fa lo stesso.
+- Un periodo di giorni si chiama come nel backend, `startsOn` / `endsOn`: i periodi di `app-period-calendar`, i
+  `disabledPeriods` di `app-period-calendar` e `app-filled-date-field`, `DayRange` di `noOverlap` / `noOverlaps`
+  (`components/shared/forms/validators.ts`) e le entità che li usano (es. `SeasonPeriodInterval`,
+  `PackageReducedSeasonalPrice`, `OnlineBookingPeriod`).
 - Formato delle date mostrate e adattatore nativo: vedi `traduzioni-e-lingue.md`; date UTC nelle API: vedi
   `api-e-mock.md`.

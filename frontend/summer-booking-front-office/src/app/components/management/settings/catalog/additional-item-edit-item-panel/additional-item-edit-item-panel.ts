@@ -303,7 +303,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
         ),
       ),
       periodPrices: sectors.flatMap(({ id }) =>
-        periods.map(({ idPeriod }) =>
+        periods.map(({ key: idPeriod }) =>
           Object.assign(
             new PackagePeriodPrice(),
             item.periodPrices.find((price) => price.idSector === id && price.idPeriod === idPeriod),
@@ -323,14 +323,14 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
         .sort(byIntermediatePrice),
     });
     const idSectors = new Set(sectors.map(({ id }) => id));
-    const idPeriods = new Set(periods.map(({ idPeriod }) => idPeriod));
+    const idPeriods = new Set(periods.map(({ key }) => key));
     this.hiddenSectorPrices.set(
       item.sectorPrices.filter(({ idSector }) => !idSector || !idSectors.has(idSector)),
     );
     this.hiddenPeriodPrices.set(
       item.periodPrices.filter(
         ({ idSector, idPeriod }) =>
-          !idSector || !idSectors.has(idSector) || !idPeriod || !idPeriods.has(idPeriod),
+          !idSector || !idSectors.has(idSector) || idPeriod === null || !idPeriods.has(idPeriod),
       ),
     );
     this.sectors.set(sectors);

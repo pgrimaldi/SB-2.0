@@ -124,6 +124,15 @@
       "invalid_pdf": "Il file deve essere un PDF e non superare i 10 MB.",
       "gallery_full": "La galleria è piena: puoi caricare al massimo {{max}} immagini.",
       "photo_not_found": "L'immagine non c'è più: forse è già stata eliminata."
+    },
+    "pricing": {
+      "season_required": "Imposta prima le date della stagione.",
+      "next_season_required": "Imposta prima le date della prossima stagione.",
+      "period_not_found": "Il periodo non c'è più: forse è già stato eliminato.",
+      "period_name_taken": "Esiste già un periodo con questo nome.",
+      "period_outside_season": "Le date del periodo devono essere dentro la stagione.",
+      "period_range_not_found": "L'intervallo non c'è più: forse è già stato eliminato.",
+      "period_ranges_required": "Un periodo deve avere almeno un intervallo. Per eliminarlo del tutto usa il cestino accanto al suo nome."
     }
   },
   "alert": {
@@ -1080,7 +1089,8 @@
           "date_to": "Data fine",
           "empty": "Nessun periodo inserito",
           "clear_selection": "Annulla selezione",
-          "delete_selected": "Cancella selezionati"
+          "delete_selected": "Cancella selezionati",
+          "period_full": "Un periodo può avere al massimo {{max}} intervalli di date. Per aggiungerne un altro, eliminane prima uno."
         },
         "add_popup": {
           "title": "Imposta periodo",
@@ -1137,7 +1147,8 @@
           "many": {
             "title": "Elimina intervalli",
             "text": "Vuoi eliminare i {{count}} intervalli selezionati?"
-          }
+          },
+          "period_left_empty": "Un periodo deve avere almeno un intervallo. Per eliminarlo del tutto usa il cestino accanto al suo nome."
         }
       },
       "services": {
@@ -1908,7 +1919,16 @@
     "unknown_icon": "Icona non esistente",
     "web_link": "Inserisci un link completo, che inizi con http:// o https://",
     "phone_digits": "Solo numeri e spazi: il prefisso va nel campo accanto",
-    "phone_max_length": "Il numero può avere al massimo {{max}} caratteri, spazi compresi"
+    "phone_max_length": "Il numero può avere al massimo {{max}} caratteri, spazi compresi",
+    "seasons": {
+      "period_name": {
+        "taken": "Esiste già un periodo con questo nome in questa stagione."
+      },
+      "ranges": {
+        "max": "Un periodo può avere al massimo {{max}} intervalli di date.",
+        "invalid": "Intervalli non validi: un periodo può averne al massimo {{max}} e non possono avere giorni in comune."
+      }
+    }
   },
   "unsaved_changes": {
     "title": "Modifiche non salvate",

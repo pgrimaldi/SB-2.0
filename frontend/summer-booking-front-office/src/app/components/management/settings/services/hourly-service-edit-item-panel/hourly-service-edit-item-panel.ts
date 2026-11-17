@@ -415,7 +415,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.periods.set(periods);
     this.applyLoaded({
       isPeriodPricingEnabled: prices.isPeriodPricingEnabled ?? false,
-      periodAvailabilities: periods.map(({ idPeriod }) => {
+      periodAvailabilities: periods.map(({ key: idPeriod }) => {
         const saved = prices.periodAvailabilities.find((item) => item.idPeriod === idPeriod);
         return Object.assign(new ServicePeriodAvailability(), {
           idPeriod,

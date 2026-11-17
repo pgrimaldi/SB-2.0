@@ -412,7 +412,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         Object.assign(new ServiceVariant(), { variantName, price }),
       ),
       isPeriodPricingEnabled: prices.isPeriodPricingEnabled ?? false,
-      periodPrices: periods.map(({ idPeriod }) =>
+      periodPrices: periods.map(({ key: idPeriod }) =>
         Object.assign(new ServicePeriodPrice(), {
           idPeriod,
           price: prices.periodPrices.find((item) => item.idPeriod === idPeriod)?.price ?? null,

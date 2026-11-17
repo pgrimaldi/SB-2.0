@@ -71,6 +71,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - Date verso e dal server sempre in ISO 8601 UTC.
 - Un giorno senza ora (es. `validFrom` di un periodo, scelto con `app-filled-date-field`) viaggia come quel giorno a
   mezzanotte UTC (`2026-08-01T00:00:00.000Z`), senza conversione di fuso.
+- Le API del backend che usano giorni senza ora (es. le date della stagione e i periodi tariffari) li mandano e li
+  ricevono come `2026-08-01`: il service li converte da e verso la mezzanotte UTC, così le pagine lavorano sempre con
+  lo stesso formato.
 - Un orario senza data (es. le fasce orarie dei voucher, con `app-filled-time-field`) è il testo `HH:mm` sulle 24 ore
   (`09:00`, ore 00–23, minuti 00–59), mostrato sulle 24 ore in ogni lingua (`timeInput` / `timeOptionLabel` di
   `DATE_FORMATS`).

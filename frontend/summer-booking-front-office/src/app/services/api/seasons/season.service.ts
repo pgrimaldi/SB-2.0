@@ -27,51 +27,48 @@ export class SeasonService {
       .put<SeasonDates>(`${environment.apiBaseUrl}/catalog/season`, daysOf(dates))
       .pipe(map((answer) => seasonDatesOf(answer)));
 
-  /**
-   * The periods of the current season, or of the next one with `isNextSeason`, for the property of
-   * the token.
-   */
+  /** The tariff periods of the current season, or of the next one, of the property of the token. */
   readonly periodList = (isNextSeason: boolean): Observable<SeasonPeriodItem[]> =>
-    this.httpClient.get<SeasonPeriodItem[]>(`${this.endpoint}/period-list`, {
-      params: { isNextSeason },
-    });
+    this.httpClient
+      .get<SeasonPeriodItem[] | null>(periodsEndpoint(isNextSeason))
+      .pipe(map((answer) => (Array.isArray(answer) ? answer.map(periodOf) : [])));
 
   /** A period of the current season, or of the next one with `isNextSeason`. Answers 204 with no body. */
   readonly addPeriod = (isNextSeason: boolean, request: SeasonPeriodAddRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/add-period`, {
       ...onlyFieldsOf(SeasonPeriodAddRequest, request),
-      intervals: request.intervals.map((interval) => onlyFieldsOf(SeasonPeriodInterval, interval)),
+      ranges: request.ranges.map((range) => onlyFieldsOf(SeasonPeriodInterval, range)),
       isNextSeason,
     });
 
   /** The period with all its date intervals. Answers 204 with no body. */
-  readonly deletePeriod = (idPeriod: string): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-period`, { idPeriod });
+  readonly deletePeriod = (isNextSeason: boolean, key: number): Observable<void> =>
+    this.httpClient.post<void>(`${this.endpoint}/delete-period`, { key, isNextSeason });
 
-  /** New name of a period. Answers 204 with no body. */
-  readonly updatePeriod = (request: SeasonPeriodUpdateRequest): Observable<void> =>
-    this.httpClient.post<void>(
-      `${this.endpoint}/update-period`,
-      onlyFieldsOf(SeasonPeriodUpdateRequest, request),
-    );
+  /** Name and all the date intervals of the period, the ones it keeps too. Answers 200 with the period saved. */
+  readonly updatePeriod = (
+    isNextSeason: boolean,
+    key: number,
+    request: SeasonPeriodUpdateRequest,
+  ): Observable<SeasonPeriodItem> =>
+    this.httpClient
+      .put<SeasonPeriodItem>(`${periodsEndpoint(isNextSeason)}/${key}`, {
+        ...onlyFieldsOf(SeasonPeriodUpdateRequest, request),
+        ranges: request.ranges.map(rangeDaysOf),
+      })
+      .pipe(map(periodOf));
 
-  /** A new date interval of a period. Answers 204 with no body. */
-  readonly addInterval = (idPeriod: string, interval: SeasonPeriodInterval): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/add-interval`, {
-      ...onlyFieldsOf(SeasonPeriodInterval, interval),
-      idPeriod,
+  /** Date intervals of one or more periods of the season, all or none. Answers 204 with no body. */
+  readonly deleteRanges = (
+    isNextSeason: boolean,
+    ranges: readonly SeasonPeriodIntervalItem[],
+  ): Observable<void> =>
+    this.httpClient.post<void>(`${periodsEndpoint(isNextSeason)}/bulk-delete-ranges`, {
+      ranges: ranges.map((range) => ({
+        ...onlyFieldsOf(SeasonPeriodIntervalItem, range),
+        ...rangeDaysOf(range),
+      })),
     });
-
-  /** New days of a date interval. Answers 204 with no body. */
-  readonly updateInterval = (interval: SeasonPeriodIntervalItem): Observable<void> =>
-    this.httpClient.post<void>(
-      `${this.endpoint}/update-interval`,
-      onlyFieldsOf(SeasonPeriodIntervalItem, interval),
-    );
-
-  /** One or more date intervals, of any period of the property: all or none. Answers 204 with no body. */
-  readonly deleteIntervals = (idIntervals: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-intervals`, { idIntervals });
 }
 
 /** The backend sends and takes days (`2026-05-01`); the page keeps them at midnight UTC. */
@@ -83,6 +80,26 @@ function seasonDatesOf(answer: SeasonDates | null): SeasonDates {
     nextStartsOn: midnightOf(days.nextStartsOn),
     nextEndsOn: midnightOf(days.nextEndsOn),
   };
+}
+
+function periodsEndpoint(isNextSeason: boolean): string {
+  return `${environment.apiBaseUrl}/catalog/${isNextSeason ? 'next-season/' : ''}tariff-periods`;
+}
+
+function periodOf(answer: SeasonPeriodItem): SeasonPeriodItem {
+  const period = onlyFieldsOf(SeasonPeriodItem, answer);
+  const ranges = Array.isArray(period.ranges) ? period.ranges : [];
+  return {
+    ...period,
+    ranges: ranges.map((range) => {
+      const days = onlyFieldsOf(SeasonPeriodInterval, range);
+      return { startsOn: midnightOf(days.startsOn), endsOn: midnightOf(days.endsOn) };
+    }),
+  };
+}
+
+function rangeDaysOf(range: SeasonPeriodInterval): SeasonPeriodInterval {
+  return { startsOn: dayOf(range.startsOn), endsOn: dayOf(range.endsOn) };
 }
 
 function daysOf(dates: SeasonDates): SeasonDates {

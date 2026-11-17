@@ -72,6 +72,9 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
 - Elimina e duplica chiedono conferma con `app-delete-items-popup` / `app-duplicate-items-popup`
   (`components/management/`): la pagina passa `translationKey` (il gruppo di testi), `action` (la funzione che chiama
   la sua API) e `pathIcon`. Appena confermato, il popup si chiude e parte lo spinner.
+- `idItems` sono gli elementi da eliminare, di solito gli id delle righe; `app-delete-items-popup` accetta qualunque
+  tipo e lo passa uguale ad `action` (es. Stagioni e periodi passa la `key` del periodo o gli intervalli con la `key`
+  del loro periodo).
 - Dopo la risposta la tabella si ricarica (`reload()`): le righe eliminate escono dalla selezione e dopo "duplica
   selezionati" la selezione si svuota. Dopo l'interruttore, riuscito o no, la tabella rilegge le righe e mostra lo
   stato del server.

@@ -28,15 +28,15 @@ import { PageSpinner } from '../../shared/ui/spinners/page-spinner/page-spinner'
   templateUrl: './delete-items-popup.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeleteItemsPopup {
+export class DeleteItemsPopup<T = string> {
   readonly open = model(false);
-  readonly idItems = input<readonly string[]>([]);
+  readonly idItems = input<readonly T[]>([]);
   readonly itemName = input<string | null>(null);
   readonly translationKey = input.required<string>();
-  readonly action = input.required<(idItems: string[]) => Observable<void>>();
+  readonly action = input.required<(idItems: T[]) => Observable<void>>();
   /** [X of both popups, warning of the error popup]. */
   readonly pathIcon = input<readonly string[] | null>();
-  readonly deleted = output<readonly string[]>();
+  readonly deleted = output<readonly T[]>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);

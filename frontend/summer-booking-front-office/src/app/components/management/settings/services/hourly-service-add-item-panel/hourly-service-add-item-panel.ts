@@ -229,7 +229,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private setPeriods(periods: readonly SeasonPeriodItem[]): void {
     this.periods.set(periods);
     this.draftForm.periodAvailabilities().value.set(
-      periods.map(({ idPeriod }) =>
+      periods.map(({ key: idPeriod }) =>
         Object.assign(new ServicePeriodAvailability(), {
           idPeriod,
           availabilityOptions: [new ServiceAvailabilityOption()],

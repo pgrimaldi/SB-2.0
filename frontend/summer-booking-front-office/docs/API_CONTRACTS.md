@@ -636,21 +636,13 @@ Stato: 200 OK (le date salvate).
 | `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
 | `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
 
-### GET `/api/seasons/period-list?isNextSeason={isNextSeason}`
+### GET `/api/catalog/tariff-periods`
 
-Stagioni e periodi: periodi.
+Stagioni e periodi: periodi della stagione corrente.
 
 #### Payload
 
-Nessun corpo: è una GET, i parametri vanno nella query string e lo stabilimento viene dal token.
-
-```text
-/api/seasons/period-list?isNextSeason=false
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `isNextSeason` | boolean | `false` |
+Nessun corpo né parametri: lo stabilimento viene dal token.
 
 #### Response
 
@@ -659,29 +651,40 @@ Stato: 200 OK.
 ```json
 [
   {
-    "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
-    "periodName": "Bassa stagione",
-    "intervals": [
+    "key": 0,
+    "name": "Bassa stagione",
+    "ranges": [
       {
-        "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01",
-        "dateFrom": "2026-05-01T00:00:00.000Z",
-        "dateTo": "2026-06-15T00:00:00.000Z"
+        "startsOn": "2026-05-01",
+        "endsOn": "2026-06-15"
       },
       {
-        "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02",
-        "dateFrom": "2026-09-01T00:00:00.000Z",
-        "dateTo": "2026-09-30T00:00:00.000Z"
+        "startsOn": "2026-09-01",
+        "endsOn": "2026-09-30"
       }
     ]
   },
   {
-    "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
-    "periodName": "Media stagione",
-    "intervals": [
+    "key": 1,
+    "name": "Media stagione",
+    "ranges": [
       {
-        "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03",
-        "dateFrom": "2026-06-16T00:00:00.000Z",
-        "dateTo": "2026-07-31T00:00:00.000Z"
+        "startsOn": "2026-06-16",
+        "endsOn": "2026-07-15"
+      },
+      {
+        "startsOn": "2026-08-21",
+        "endsOn": "2026-08-31"
+      }
+    ]
+  },
+  {
+    "key": 2,
+    "name": "Alta stagione",
+    "ranges": [
+      {
+        "startsOn": "2026-07-16",
+        "endsOn": "2026-08-20"
       }
     ]
   }
@@ -690,12 +693,60 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
-| `periodName` | string | `Bassa stagione` |
-| `intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) | `[{"idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01", "dateFrom": "2026-05-01T00:00:00.000Z", "dateTo": "2026-06-15T00:00:00.000Z"}, {"idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02", "dateFrom": "2026-09-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z"}]` |
-| `intervals[].idInterval` | string (UUID) | `7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01` |
-| `intervals[].dateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
-| `intervals[].dateTo` | string (ISO 8601, UTC) | `2026-06-15T00:00:00.000Z` |
+| `key` | number (intero) | `0` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-15"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-15` |
+
+### GET `/api/catalog/next-season/tariff-periods`
+
+Stagioni e periodi: periodi della prossima stagione.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "key": 0,
+    "name": "Bassa stagione",
+    "ranges": [
+      {
+        "startsOn": "2027-05-01",
+        "endsOn": "2027-06-15"
+      },
+      {
+        "startsOn": "2027-09-01",
+        "endsOn": "2027-09-30"
+      }
+    ]
+  },
+  {
+    "key": 1,
+    "name": "Alta stagione",
+    "ranges": [
+      {
+        "startsOn": "2027-07-01",
+        "endsOn": "2027-08-31"
+      }
+    ]
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `0` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-05-01", "endsOn": "2027-06-15"}, {"startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-15` |
 
 ### POST `/api/seasons/add-period`
 
@@ -705,11 +756,11 @@ Stagioni e periodi: nuovo periodo.
 
 ```json
 {
-  "periodName": "Pre stagione",
-  "intervals": [
+  "name": "Media stagione",
+  "ranges": [
     {
-      "dateFrom": "2027-04-20T00:00:00.000Z",
-      "dateTo": "2027-04-30T00:00:00.000Z"
+      "startsOn": "2027-06-16T00:00:00.000Z",
+      "endsOn": "2027-06-30T00:00:00.000Z"
     }
   ],
   "isNextSeason": true
@@ -718,11 +769,11 @@ Stagioni e periodi: nuovo periodo.
 
 | Property | Tipo | Esempio |
 |---|---|---|
+| `name` | string | `Media stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16T00:00:00.000Z", "endsOn": "2027-06-30T00:00:00.000Z"}]` |
+| `ranges[].startsOn` | string (ISO 8601, UTC) | `2027-06-16T00:00:00.000Z` |
+| `ranges[].endsOn` | string (ISO 8601, UTC) | `2027-06-30T00:00:00.000Z` |
 | `isNextSeason` | boolean | `true` |
-| `periodName` | string | `Pre stagione` |
-| `intervals[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"dateFrom": "2027-04-20T00:00:00.000Z", "dateTo": "2027-04-30T00:00:00.000Z"}]` |
-| `intervals[].dateFrom` | string (ISO 8601, UTC) | `2027-04-20T00:00:00.000Z` |
-| `intervals[].dateTo` | string (ISO 8601, UTC) | `2027-04-30T00:00:00.000Z` |
 
 #### Response
 
@@ -738,13 +789,15 @@ Stagioni e periodi: elimina periodo.
 
 ```json
 {
-  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01"
+  "key": 1,
+  "isNextSeason": false
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `key` | number (intero) | `1` |
+| `isNextSeason` | boolean | `false` |
 
 #### Response
 
@@ -752,100 +805,174 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/seasons/update-period`
+### PUT `/api/catalog/tariff-periods/{key}`
 
-Stagioni e periodi: modifica periodo.
-
-#### Payload
-
-```json
-{
-  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
-  "periodName": "Bassissima stagione"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
-| `periodName` | string | `Bassissima stagione` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/seasons/add-interval`
-
-Stagioni e periodi: nuovo intervallo.
+Stagioni e periodi: modifica periodo della stagione corrente.
 
 #### Payload
 
 ```json
 {
-  "dateFrom": "2026-09-01T00:00:00.000Z",
-  "dateTo": "2026-09-05T00:00:00.000Z",
-  "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02` |
-| `dateFrom` | string (ISO 8601, UTC) | `2026-09-01T00:00:00.000Z` |
-| `dateTo` | string (ISO 8601, UTC) | `2026-09-05T00:00:00.000Z` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/seasons/update-interval`
-
-Stagioni e periodi: modifica intervallo.
-
-#### Payload
-
-```json
-{
-  "idInterval": "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01",
-  "dateFrom": "2026-05-01T00:00:00.000Z",
-  "dateTo": "2026-06-20T00:00:00.000Z"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idInterval` | string (UUID) | `7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e01` |
-| `dateFrom` | string (ISO 8601, UTC) | `2026-05-01T00:00:00.000Z` |
-| `dateTo` | string (ISO 8601, UTC) | `2026-06-20T00:00:00.000Z` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/seasons/delete-intervals`
-
-Stagioni e periodi: elimina intervalli.
-
-#### Payload
-
-```json
-{
-  "idIntervals": [
-    "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02",
-    "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03"
+  "name": "Bassa stagione",
+  "ranges": [
+    {
+      "startsOn": "2026-05-01",
+      "endsOn": "2026-06-10"
+    },
+    {
+      "startsOn": "2026-09-01",
+      "endsOn": "2026-09-30"
+    }
   ]
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idIntervals` | string[] (UUID) | `["7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e02", "7c2e9a41-5b3d-4e8f-a1c6-2d4b6f8a0e03"]` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
+
+#### Response
+
+Stato: 200 OK (il periodo salvato).
+
+```json
+{
+  "key": 0,
+  "name": "Bassa stagione",
+  "ranges": [
+    {
+      "startsOn": "2026-05-01",
+      "endsOn": "2026-06-10"
+    },
+    {
+      "startsOn": "2026-09-01",
+      "endsOn": "2026-09-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `0` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
+
+### PUT `/api/catalog/next-season/tariff-periods/{key}`
+
+Stagioni e periodi: modifica periodo della prossima stagione.
+
+#### Payload
+
+```json
+{
+  "name": "Altissima stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-07-01",
+      "endsOn": "2027-08-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Altissima stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
+
+#### Response
+
+Stato: 200 OK (il periodo salvato).
+
+```json
+{
+  "key": 1,
+  "name": "Altissima stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-07-01",
+      "endsOn": "2027-08-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `1` |
+| `name` | string | `Altissima stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
+
+### POST `/api/catalog/tariff-periods/bulk-delete-ranges`
+
+Stagioni e periodi: elimina intervalli della stagione corrente.
+
+#### Payload
+
+```json
+{
+  "ranges": [
+    {
+      "key": 0,
+      "startsOn": "2026-09-01",
+      "endsOn": "2026-09-30"
+    },
+    {
+      "key": 1,
+      "startsOn": "2026-08-21",
+      "endsOn": "2026-08-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) | `[{"key": 0, "startsOn": "2026-09-01", "endsOn": "2026-09-30"}, {"key": 1, "startsOn": "2026-08-21", "endsOn": "2026-08-31"}]` |
+| `ranges[].key` | number (intero) | `0` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-09-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/next-season/tariff-periods/bulk-delete-ranges`
+
+Stagioni e periodi: elimina intervalli della prossima stagione.
+
+#### Payload
+
+```json
+{
+  "ranges": [
+    {
+      "key": 0,
+      "startsOn": "2027-09-01",
+      "endsOn": "2027-09-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) | `[{"key": 0, "startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
+| `ranges[].key` | number (intero) | `0` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-09-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
 
 #### Response
 
@@ -2598,11 +2725,11 @@ Servizi: creazione servizio bar.
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "price": 1.5
     },
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "idPeriod": 1,
       "price": 1.8
     }
   ],
@@ -2643,8 +2770,8 @@ Servizi: creazione servizio bar.
 | `variants[].variantName` | string \| null | `Grande` |
 | `variants[].price` | number (decimale, €) \| null | `2` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 1.8}]` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.5}, {"idPeriod": 1, "price": 1.8}]` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
@@ -2752,7 +2879,7 @@ Stato: 200 OK.
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "price": 1.2
     }
   ],
@@ -2771,8 +2898,8 @@ Stato: 200 OK.
 | `variants[].variantName` | string \| null | `Doppio` |
 | `variants[].price` | number (decimale, €) \| null | `1.8` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.2}]` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.2}]` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.2` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
@@ -2918,11 +3045,11 @@ Servizi: servizio bar, salvataggio Prezzi.
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "price": 1.2
     },
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "idPeriod": 1,
       "price": 1.5
     }
   ],
@@ -2942,8 +3069,8 @@ Servizi: servizio bar, salvataggio Prezzi.
 | `variants[].variantName` | string \| null | `Doppio` |
 | `variants[].price` | number (decimale, €) \| null | `1.8` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 1.2}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 1.5}]` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.2}, {"idPeriod": 1, "price": 1.5}]` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.2` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
@@ -3164,11 +3291,11 @@ Servizi: creazione servizio.
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "price": 2.5
     },
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "idPeriod": 1,
       "price": 3.5
     }
   ],
@@ -3205,8 +3332,8 @@ Servizi: creazione servizio.
 | `price` | number (decimale, €) \| null | `3` |
 | `vatRate` | number (decimale, %) \| null | `22` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 3.5}]` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 2.5}, {"idPeriod": 1, "price": 3.5}]` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
@@ -3306,7 +3433,7 @@ Stato: 200 OK.
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "price": 2.5
     }
   ],
@@ -3322,8 +3449,8 @@ Stato: 200 OK.
 | `price` | number (decimale, €) \| null | `3` |
 | `vatRate` | number (decimale, %) \| null | `22` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}]` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 2.5}]` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
@@ -3461,11 +3588,11 @@ Servizi: servizio, salvataggio Prezzi.
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "price": 2.5
     },
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02",
+      "idPeriod": 1,
       "price": 3.5
     }
   ],
@@ -3482,8 +3609,8 @@ Servizi: servizio, salvataggio Prezzi.
 | `price` | number (decimale, €) \| null | `4` |
 | `vatRate` | number (decimale, %) \| null | `22` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "price": 2.5}, {"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e02", "price": 3.5}]` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 2.5}, {"idPeriod": 1, "price": 3.5}]` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
@@ -3749,7 +3876,7 @@ Servizi Orari: creazione servizio orario.
   "isPeriodPricingEnabled": true,
   "periodAvailabilities": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "availabilityOptions": [
         {
           "startTime": "09:00",
@@ -3898,8 +4025,8 @@ Servizi Orari: creazione servizio orario.
 | `icon` | string (enum StandardServiceIcon) \| null | `Surfing` |
 | `isHighlighted` | boolean | `false` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
-| `periodAvailabilities[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": 0, "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
+| `periodAvailabilities[].idPeriod` | number (intero) | `0` |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]` |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null | `09:00` |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null | `19:00` |
@@ -4015,7 +4142,7 @@ Stato: 200 OK.
   "isPeriodPricingEnabled": true,
   "periodAvailabilities": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "availabilityOptions": [
         {
           "startTime": "09:00",
@@ -4091,8 +4218,8 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
-| `periodAvailabilities[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": 0, "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
+| `periodAvailabilities[].idPeriod` | number (intero) | `0` |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]` |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null | `09:00` |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null | `19:00` |
@@ -4298,7 +4425,7 @@ Servizi Orari: servizio orario, salvataggio Prezzi.
   "isPeriodPricingEnabled": true,
   "periodAvailabilities": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "availabilityOptions": [
         {
           "startTime": "09:00",
@@ -4375,8 +4502,8 @@ Servizi Orari: servizio orario, salvataggio Prezzi.
 |---|---|---|
 | `idHourlyService` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
 | `isPeriodPricingEnabled` | boolean | `true` |
-| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
-| `periodAvailabilities[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) | `[{"idPeriod": 0, "availabilityOptions": [{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]}]` |
+| `periodAvailabilities[].idPeriod` | number (intero) | `0` |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}]` |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null | `09:00` |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null | `19:00` |
@@ -6617,8 +6744,8 @@ Listino: creazione pacchetto.
   "isOnlineOnly": false,
   "reducedSeasonalPrices": [
     {
-      "dateFrom": "2026-06-01T00:00:00.000Z",
-      "dateTo": "2026-06-30T00:00:00.000Z",
+      "startsOn": "2026-06-01T00:00:00.000Z",
+      "endsOn": "2026-06-30T00:00:00.000Z",
       "reducedSeasonalPriceName": "Giugno",
       "sectorPrices": [
         {
@@ -6629,8 +6756,8 @@ Listino: creazione pacchetto.
       ]
     },
     {
-      "dateFrom": "2026-09-01T00:00:00.000Z",
-      "dateTo": "2026-09-15T00:00:00.000Z",
+      "startsOn": "2026-09-01T00:00:00.000Z",
+      "endsOn": "2026-09-15T00:00:00.000Z",
       "reducedSeasonalPriceName": "Inizio settembre",
       "sectorPrices": [
         {
@@ -6651,7 +6778,7 @@ Listino: creazione pacchetto.
   "periodPrices": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "halfDayPrice": 15,
       "dailyPrice": 25,
       "weekendPrice": 30,
@@ -6676,7 +6803,7 @@ Listino: creazione pacchetto.
   "isIntermediatePricesIncluded": false,
   "intermediatePrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "isFirstRow": true,
       "dayQuantity": 2,
       "price": 35
@@ -6705,9 +6832,9 @@ Listino: creazione pacchetto.
 | `isDefaultOnline` | boolean | `false` |
 | `isOnlineEnabled` | boolean | `true` |
 | `isOnlineOnly` | boolean | `false` |
-| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]}, {"dateFrom": "2026-09-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "reducedSeasonalPriceName": "Inizio settembre", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 500, "seasonalPrice": 900}]}]` |
-| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
-| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) | `[{"startsOn": "2026-06-01T00:00:00.000Z", "endsOn": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]}, {"startsOn": "2026-09-01T00:00:00.000Z", "endsOn": "2026-09-15T00:00:00.000Z", "reducedSeasonalPriceName": "Inizio settembre", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 500, "seasonalPrice": 900}]}]` |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
 | `reducedSeasonalPrices[].reducedSeasonalPriceName` | string | `Giugno` |
 | `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]` |
 | `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
@@ -6717,9 +6844,9 @@ Listino: creazione pacchetto.
 | `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1100` |
-| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
 | `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
@@ -6737,8 +6864,8 @@ Listino: creazione pacchetto.
 | `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-06-02T00:00:00.000Z", "2026-08-15T00:00:00.000Z"]` |
 | `isIntermediatePricesIncluded` | boolean | `false` |
-| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
-| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
@@ -6795,8 +6922,8 @@ Stato: 200 OK.
   "isOnlineOnly": false,
   "reducedSeasonalPrices": [
     {
-      "dateFrom": "2026-06-01T00:00:00.000Z",
-      "dateTo": "2026-06-30T00:00:00.000Z",
+      "startsOn": "2026-06-01T00:00:00.000Z",
+      "endsOn": "2026-06-30T00:00:00.000Z",
       "reducedSeasonalPriceName": "Giugno",
       "sectorPrices": [
         {
@@ -6807,8 +6934,8 @@ Stato: 200 OK.
       ]
     },
     {
-      "dateFrom": "2026-09-01T00:00:00.000Z",
-      "dateTo": "2026-09-15T00:00:00.000Z",
+      "startsOn": "2026-09-01T00:00:00.000Z",
+      "endsOn": "2026-09-15T00:00:00.000Z",
       "reducedSeasonalPriceName": "Inizio settembre",
       "sectorPrices": [
         {
@@ -6829,7 +6956,7 @@ Stato: 200 OK.
   "periodPrices": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "halfDayPrice": 15,
       "dailyPrice": 25,
       "weekendPrice": 30,
@@ -6853,7 +6980,7 @@ Stato: 200 OK.
   "isIntermediatePricesIncluded": false,
   "intermediatePrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "isFirstRow": true,
       "dayQuantity": 2,
       "price": 35
@@ -6883,9 +7010,9 @@ Stato: 200 OK.
 | `isDefaultOnline` | boolean | `false` |
 | `isOnlineEnabled` | boolean | `true` |
 | `isOnlineOnly` | boolean | `false` |
-| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]}, {"dateFrom": "2026-09-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "reducedSeasonalPriceName": "Inizio settembre", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 500, "seasonalPrice": 900}]}]` |
-| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
-| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) | `[{"startsOn": "2026-06-01T00:00:00.000Z", "endsOn": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]}, {"startsOn": "2026-09-01T00:00:00.000Z", "endsOn": "2026-09-15T00:00:00.000Z", "reducedSeasonalPriceName": "Inizio settembre", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 500, "seasonalPrice": 900}]}]` |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
 | `reducedSeasonalPrices[].reducedSeasonalPriceName` | string | `Giugno` |
 | `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]` |
 | `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
@@ -6895,9 +7022,9 @@ Stato: 200 OK.
 | `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1100` |
-| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
 | `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
@@ -6915,8 +7042,8 @@ Stato: 200 OK.
 | `isPublicHolidaysIncluded` | boolean | `false` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
 | `isIntermediatePricesIncluded` | boolean | `false` |
-| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
-| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
@@ -6981,8 +7108,8 @@ Listino: modifica pacchetto.
   "isOnlineOnly": false,
   "reducedSeasonalPrices": [
     {
-      "dateFrom": "2026-06-01T00:00:00.000Z",
-      "dateTo": "2026-06-30T00:00:00.000Z",
+      "startsOn": "2026-06-01T00:00:00.000Z",
+      "endsOn": "2026-06-30T00:00:00.000Z",
       "reducedSeasonalPriceName": "Giugno",
       "sectorPrices": [
         {
@@ -7003,7 +7130,7 @@ Listino: modifica pacchetto.
   "periodPrices": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "halfDayPrice": 15,
       "dailyPrice": 25,
       "weekendPrice": 30,
@@ -7027,7 +7154,7 @@ Listino: modifica pacchetto.
   "isIntermediatePricesIncluded": false,
   "intermediatePrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "isFirstRow": true,
       "dayQuantity": 2,
       "price": 35
@@ -7057,9 +7184,9 @@ Listino: modifica pacchetto.
 | `isDefaultOnline` | boolean | `false` |
 | `isOnlineEnabled` | boolean | `true` |
 | `isOnlineOnly` | boolean | `false` |
-| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]}]` |
-| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
-| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
+| `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) | `[{"startsOn": "2026-06-01T00:00:00.000Z", "endsOn": "2026-06-30T00:00:00.000Z", "reducedSeasonalPriceName": "Giugno", "sectorPrices": [{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]}]` |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) | `2026-06-01T00:00:00.000Z` |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) | `2026-06-30T00:00:00.000Z` |
 | `reducedSeasonalPrices[].reducedSeasonalPriceName` | string | `Giugno` |
 | `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 450, "seasonalPrice": 800}]` |
 | `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
@@ -7069,9 +7196,9 @@ Listino: modifica pacchetto.
 | `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1200` |
-| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
 | `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
@@ -7089,8 +7216,8 @@ Listino: modifica pacchetto.
 | `isPublicHolidaysIncluded` | boolean | `false` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
 | `isIntermediatePricesIncluded` | boolean | `false` |
-| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
-| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
@@ -7258,7 +7385,7 @@ Listino: creazione articolo/servizio aggiuntivo.
   "periodPrices": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "halfDayPrice": 4,
       "dailyPrice": 7,
       "weekendPrice": 9,
@@ -7282,7 +7409,7 @@ Listino: creazione articolo/servizio aggiuntivo.
   "isIntermediatePricesIncluded": false,
   "intermediatePrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "isFirstRow": true,
       "dayQuantity": 2,
       "price": 35
@@ -7302,9 +7429,9 @@ Listino: creazione articolo/servizio aggiuntivo.
 | `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `120` |
-| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
 | `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
@@ -7322,8 +7449,8 @@ Listino: creazione articolo/servizio aggiuntivo.
 | `isPublicHolidaysIncluded` | boolean | `false` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
 | `isIntermediatePricesIncluded` | boolean | `false` |
-| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
-| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
@@ -7374,7 +7501,7 @@ Stato: 200 OK.
   "periodPrices": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "halfDayPrice": 4,
       "dailyPrice": 7,
       "weekendPrice": 9,
@@ -7398,7 +7525,7 @@ Stato: 200 OK.
   "isIntermediatePricesIncluded": false,
   "intermediatePrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "isFirstRow": true,
       "dayQuantity": 2,
       "price": 35
@@ -7419,9 +7546,9 @@ Stato: 200 OK.
 | `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `120` |
-| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
 | `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
@@ -7439,8 +7566,8 @@ Stato: 200 OK.
 | `isPublicHolidaysIncluded` | boolean | `false` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
 | `isIntermediatePricesIncluded` | boolean | `false` |
-| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
-| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
@@ -7472,7 +7599,7 @@ Listino: modifica articolo/servizio aggiuntivo.
   "periodPrices": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "halfDayPrice": 4,
       "dailyPrice": 7,
       "weekendPrice": 9,
@@ -7496,7 +7623,7 @@ Listino: modifica articolo/servizio aggiuntivo.
   "isIntermediatePricesIncluded": false,
   "intermediatePrices": [
     {
-      "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01",
+      "idPeriod": 0,
       "isFirstRow": true,
       "dayQuantity": 2,
       "price": 35
@@ -7517,9 +7644,9 @@ Listino: modifica articolo/servizio aggiuntivo.
 | `sectorPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `130` |
-| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
+| `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
 | `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
@@ -7537,8 +7664,8 @@ Listino: modifica articolo/servizio aggiuntivo.
 | `isPublicHolidaysIncluded` | boolean | `false` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
 | `isIntermediatePricesIncluded` | boolean | `false` |
-| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": "3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01", "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
-| `intermediatePrices[].idPeriod` | string (UUID) | `3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01` |
+| `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
+| `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |

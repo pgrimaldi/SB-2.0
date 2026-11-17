@@ -230,7 +230,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draftForm
       .periodPrices()
       .value.set(
-        periods.map(({ idPeriod }) => Object.assign(new ServicePeriodPrice(), { idPeriod })),
+        periods.map(({ key }) => Object.assign(new ServicePeriodPrice(), { idPeriod: key })),
       );
     this.pristine.set(JSON.stringify(this.draft()));
   }

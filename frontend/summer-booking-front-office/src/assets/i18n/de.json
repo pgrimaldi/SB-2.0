@@ -124,6 +124,15 @@
       "invalid_pdf": "Die Datei muss ein PDF sein und darf höchstens 10 MB groß sein.",
       "gallery_full": "Die Galerie ist voll: Du kannst höchstens {{max}} Bilder hochladen.",
       "photo_not_found": "Das Bild ist nicht mehr vorhanden: Es wurde vielleicht schon gelöscht."
+    },
+    "pricing": {
+      "season_required": "Lege zuerst die Daten der Saison fest.",
+      "next_season_required": "Lege zuerst die Daten der nächsten Saison fest.",
+      "period_not_found": "Der Zeitraum ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "period_name_taken": "Ein Zeitraum mit diesem Namen existiert bereits.",
+      "period_outside_season": "Die Daten des Zeitraums müssen innerhalb der Saison liegen.",
+      "period_range_not_found": "Der Datumsbereich ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "period_ranges_required": "Ein Zeitraum braucht mindestens einen Datumsbereich. Um ihn ganz zu löschen, verwende den Papierkorb neben seinem Namen."
     }
   },
   "alert": {
@@ -1080,7 +1089,8 @@
           "date_to": "Enddatum",
           "empty": "Keine Zeiträume vorhanden",
           "clear_selection": "Abwählen",
-          "delete_selected": "Ausgewählte löschen"
+          "delete_selected": "Ausgewählte löschen",
+          "period_full": "Ein Zeitraum kann höchstens {{max}} Datumsbereiche haben. Um einen weiteren hinzuzufügen, lösche zuerst einen."
         },
         "add_popup": {
           "title": "Zeitraum festlegen",
@@ -1137,7 +1147,8 @@
           "many": {
             "title": "Datumsbereiche löschen",
             "text": "Möchtest du die {{count}} ausgewählten Datumsbereiche löschen?"
-          }
+          },
+          "period_left_empty": "Ein Zeitraum braucht mindestens einen Datumsbereich. Um ihn ganz zu löschen, verwende den Papierkorb neben seinem Namen."
         }
       },
       "services": {
@@ -1908,7 +1919,16 @@
     "unknown_icon": "Symbol existiert nicht",
     "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt",
     "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
-    "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen"
+    "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen",
+    "seasons": {
+      "period_name": {
+        "taken": "In dieser Saison gibt es bereits einen Zeitraum mit diesem Namen."
+      },
+      "ranges": {
+        "max": "Ein Zeitraum kann höchstens {{max}} Datumsbereiche haben.",
+        "invalid": "Ungültige Datumsbereiche: Ein Zeitraum kann höchstens {{max}} haben und sie dürfen keine gemeinsamen Tage haben."
+      }
+    }
   },
   "unsaved_changes": {
     "title": "Nicht gespeicherte Änderungen",

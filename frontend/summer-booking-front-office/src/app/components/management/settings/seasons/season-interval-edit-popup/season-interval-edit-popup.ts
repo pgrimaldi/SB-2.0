@@ -33,7 +33,7 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodInterval } from '../../../../../entities/settings/seasons/season-period-interval';
-import { SeasonPeriodIntervalItem } from '../../../../../entities/settings/seasons/season-period-interval-item';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { noOverlap } from '../../../../shared/forms/validators';
@@ -50,12 +50,16 @@ import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/
   encapsulation: ViewEncapsulation.None,
 })
 export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges, OnDestroy {
+  /** The period is one of the next season instead of the current one. */
+  readonly isNextSeason = input.required<boolean>();
+  /** The period of the interval, as the list gave it: it is saved with all its intervals. */
+  readonly period = input<SeasonPeriodItem | null>(null);
   /** The date interval of a row of the periods, as the list gave it. */
-  readonly interval = input<SeasonPeriodIntervalItem | null>(null);
+  readonly interval = input<SeasonPeriodInterval | null>(null);
   /** First and last day of the season of the tab: the days outside cannot be chosen. */
   readonly season = input<SeasonPeriodInterval | null>(null);
   /** The date intervals the season has already, this one too: it cannot overlap the others. */
-  readonly seasonIntervals = input<readonly SeasonPeriodIntervalItem[]>([]);
+  readonly seasonIntervals = input<readonly SeasonPeriodInterval[]>([]);
   readonly updated = output<void>();
 
   private readonly seasons = inject(SeasonService);
@@ -69,27 +73,27 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
   /** [calendar, before the date]. */
   protected readonly dateIcon = ['/assets/images/GeneralIcon_CalendarFilled.svg'] as const;
   protected readonly isLoading = signal(false);
-  private readonly draft = signal(new SeasonPeriodIntervalItem());
+  private readonly draft = signal(new SeasonPeriodInterval());
   /** The intervals of the season but this one. */
   protected readonly otherIntervals = computed(() =>
-    this.seasonIntervals().filter(({ idInterval }) => idInterval !== this.interval()?.idInterval),
+    this.seasonIntervals().filter((range) => range !== this.interval()),
   );
   protected readonly draftForm = form(this.draft, (path) => {
-    required(path.dateFrom);
-    required(path.dateTo);
+    required(path.startsOn);
+    required(path.endsOn);
     noOverlap(path, () => this.otherIntervals());
     readonly(path, () => this.isLoading());
   });
-  protected readonly dateFromError = this.validationText.message(this.draftForm.dateFrom);
-  protected readonly dateToError = this.validationText.message(this.draftForm.dateTo);
+  protected readonly startsOnError = this.validationText.message(this.draftForm.startsOn);
+  protected readonly endsOnError = this.validationText.message(this.draftForm.endsOn);
   protected readonly overlapError = this.validationText.message(this.draftForm);
   /** Data fine from Data inizio on, inside the season. */
-  protected readonly dateToMin = computed(() =>
-    laterDay(this.season()?.dateFrom ?? null, this.draft().dateFrom),
+  protected readonly endsOnMin = computed(() =>
+    laterDay(this.season()?.startsOn ?? null, this.draft().startsOn),
   );
   /** Data fine stops the day before the next interval of the season. */
-  protected readonly dateToMax = computed(() =>
-    lastFreeDay(this.draft().dateFrom, this.otherIntervals(), this.season()?.dateTo ?? null),
+  protected readonly endsOnMax = computed(() =>
+    lastFreeDay(this.draft().startsOn, this.otherIntervals(), this.season()?.endsOn ?? null),
   );
   protected readonly canSave = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -114,15 +118,30 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
   }
 
   protected save(): void {
-    if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave()) {
+    const period = this.period();
+    const interval = this.interval();
+    const key = period?.key;
+    if (
+      this.isLoading() ||
+      !this.auth.user()?.propertyId ||
+      !period ||
+      key === null ||
+      key === undefined ||
+      !interval ||
+      !period.ranges.includes(interval) ||
+      !this.canSave()
+    ) {
       return;
     }
+    const ranges = period.ranges.map((range) => (range === interval ? this.draft() : range));
 
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.seasons.updateInterval(this.draft()));
+        await firstValueFrom(
+          this.seasons.updatePeriod(this.isNextSeason(), key, { ...period, ranges }),
+        );
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
@@ -161,8 +180,8 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
     };
   }
 
-  private original(): SeasonPeriodIntervalItem {
-    return { ...new SeasonPeriodIntervalItem(), ...this.interval() };
+  private original(): SeasonPeriodInterval {
+    return { ...new SeasonPeriodInterval(), ...this.interval() };
   }
 
   private reset(): void {
@@ -198,11 +217,11 @@ function lastFreeDay(
     return limit;
   }
   const next = periods.reduce<string | null>(
-    (first, { dateFrom }) =>
-      dateFrom &&
-      dateFrom.slice(0, 10) > day.slice(0, 10) &&
-      (!first || dateFrom.slice(0, 10) < first.slice(0, 10))
-        ? dateFrom
+    (first, { startsOn }) =>
+      startsOn &&
+      startsOn.slice(0, 10) > day.slice(0, 10) &&
+      (!first || startsOn.slice(0, 10) < first.slice(0, 10))
+        ? startsOn
         : first,
     null,
   );

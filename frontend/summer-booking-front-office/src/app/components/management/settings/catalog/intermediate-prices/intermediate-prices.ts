@@ -40,7 +40,7 @@ const PERIOD_PRICE_FIELDS = new Map<number, PeriodPriceField>([
 
 /** A choice of the dropdown: Fila 1 or Altre file, in a period. */
 interface IntermediatePriceChoice {
-  idPeriod: string | null;
+  idPeriod: number | null;
   isFirstRow: boolean;
   label: string;
 }
@@ -104,11 +104,11 @@ export class IntermediatePrices {
   private readonly choices = computed<readonly IntermediatePriceChoice[]>(() => {
     this.texts();
     return [true, false].flatMap((isFirstRow) =>
-      this.periods().map(({ idPeriod, periodName }) => ({
-        idPeriod,
+      this.periods().map(({ key, name }) => ({
+        idPeriod: key,
         isFirstRow,
         label: this.translateService.instant(`${KEY}.${isFirstRow ? 'first_row' : 'other_rows'}`, {
-          period: periodName ?? '',
+          period: name ?? '',
         }) as string,
       })),
     );
@@ -217,7 +217,7 @@ export function byIntermediatePrice(
 ): number {
   return (
     Number(second.isFirstRow) - Number(first.isFirstRow) ||
-    (first.idPeriod ?? '').localeCompare(second.idPeriod ?? '') ||
+    (first.idPeriod ?? -1) - (second.idPeriod ?? -1) ||
     (first.dayQuantity ?? 0) - (second.dayQuantity ?? 0)
   );
 }

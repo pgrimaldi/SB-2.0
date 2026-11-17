@@ -70,8 +70,10 @@ classi e commenti.
 - Un campo o una variabile che contiene un id comincia con `id` (`idArticle`, `idPeriod`, `idItems`); una quantità
   (totale, disponibili, soglia…) finisce con `Quantity` (`totalQuantity`, `availableQuantity`, `thresholdQuantity`).
   Vale anche per i campi delle API.
-- Fanno eccezione i nomi delle colonne del database copiati nei mock (`publicId`, `propertyId`, `lowStockThreshold`) e
-  `total` di `Page`, che conta le righe.
+- Fanno eccezione i nomi delle colonne del database copiati nei mock (`publicId`, `propertyId`, `lowStockThreshold`),
+  `total` di `Page`, che conta le righe, e `key` dei periodi tariffari (`SeasonPeriodItem`, `SeasonPeriodIntervalItem`),
+  un numero che parte da 0, come nel backend; le entità che lo riferiscono (prezzi e disponibilità per periodo) lo
+  chiamano `idPeriod`.
 - La landing dell'hub sta in `src/app/views/hub/home/` con `home.ts`, `home.html` e `home.scss`: questo naming resta.
 
 ## Commenti
@@ -140,8 +142,7 @@ classi e commenti.
 - Ogni API con un corpo vero ha la sua request con un nome: niente tipi scritti direttamente nei service.
 - **Niente oggetti con un solo valore**: una request o una response fatta di un solo valore semplice (un id, una
   stringa, un numero) non ha un'entità. Il service riceve o restituisce il valore stesso e costruisce da sé il corpo
-  o la query string (es. `deletePeriod(idPeriod)` manda `{ idPeriod }`, `deleteVoucherItems(idVouchers)` manda
-  `{ idVouchers }`).
+  o la query string (es. `deleteVoucherItems(idVouchers)` manda `{ idVouchers }`).
 - La pagina tiene quel valore in una sua variabile con il nome del valore (es. `GET api/system/get-stripe-information`
   restituisce la stringa e la pagina la tiene in `stripeAccountId`).
 - Le tabelle usano tutte `PageRequest`, senza un'interfaccia propria per ogni API: vedi `tabelle.md`.

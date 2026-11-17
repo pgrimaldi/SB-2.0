@@ -27,6 +27,9 @@ Regole per i testi tradotti, le 7 lingue, l'arabo da destra a sinistra, le chiav
   lingua in `language.names` di ogni file, il preload in `src/index.html` e la CloudFront Function di
   `README_DEPLOY.md` (`LANGUAGES` e `PUBLIC_ROUTES`).
 - Un testo che non si riesce a tradurre si scrive `PLACEHOLDER`.
+- Nessun errore resta senza testo: ogni messaggio d'errore che l'app può mostrare (codici del backend sotto `error.`,
+  controlli del frontend sotto `invalidate.`, avvisi delle pagine) ha la sua traduzione in tutte e 7 le lingue. Se il
+  testo definitivo non c'è ancora, se ne scrive uno provvisorio, preciso e adatto al contesto.
 - La lingua si cambia solo nell'hub (header pubblico): nell'area riservata non si cambia e resta quella scelta
   nell'hub.
 

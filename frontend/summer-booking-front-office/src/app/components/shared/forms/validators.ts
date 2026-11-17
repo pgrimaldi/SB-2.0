@@ -56,19 +56,25 @@ export interface PhoneMaxLengthError extends ValidationError {
 
 /** First and last day, at midnight UTC as ISO strings. */
 export interface DayRange {
-  dateFrom: string | null;
-  dateTo: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
 }
 
 /** At least one day in common; a range without both of its days has none. */
 export function rangesOverlap(first: DayRange, second: DayRange): boolean {
-  if (!first.dateFrom || !first.dateTo || !second.dateFrom || !second.dateTo) {
+  if (!first.startsOn || !first.endsOn || !second.startsOn || !second.endsOn) {
     return false;
   }
   return (
-    first.dateFrom.slice(0, 10) <= second.dateTo.slice(0, 10) &&
-    second.dateFrom.slice(0, 10) <= first.dateTo.slice(0, 10)
+    first.startsOn.slice(0, 10) <= second.endsOn.slice(0, 10) &&
+    second.startsOn.slice(0, 10) <= first.endsOn.slice(0, 10)
   );
+}
+
+/** The same text as one of `others`, not minding capitals and the spaces at the ends (e.g. a name already used). */
+export function isTextTaken(text: string | null, others: readonly (string | null)[]): boolean {
+  const wanted = text?.trim().toLowerCase();
+  return !!wanted && others.some((other) => other?.trim().toLowerCase() === wanted);
 }
 
 /** A range of days (the form itself, e.g. Dal / Al) that shares a day with one of `others`. */

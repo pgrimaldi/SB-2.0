@@ -67,8 +67,8 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
       isOnlineEnabled: true,
       reducedSeasonalPrices: [
         {
-          dateFrom: '2026-06-01T00:00:00.000Z',
-          dateTo: '2026-06-30T00:00:00.000Z',
+          startsOn: '2026-06-01T00:00:00.000Z',
+          endsOn: '2026-06-30T00:00:00.000Z',
           reducedSeasonalPriceName: 'Giugno',
           sectorPrices: [
             {
@@ -79,8 +79,8 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
           ],
         },
         {
-          dateFrom: '2026-09-01T00:00:00.000Z',
-          dateTo: '2026-09-15T00:00:00.000Z',
+          startsOn: '2026-09-01T00:00:00.000Z',
+          endsOn: '2026-09-15T00:00:00.000Z',
           reducedSeasonalPriceName: 'Inizio settembre',
           sectorPrices: [],
         },
@@ -100,13 +100,13 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
       isIntermediatePricesIncluded: true,
       intermediatePrices: [
         {
-          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          idPeriod: 0,
           isFirstRow: true,
           dayQuantity: 2,
           price: 35,
         },
         {
-          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          idPeriod: 0,
           isFirstRow: true,
           dayQuantity: 3,
           price: 50,
@@ -319,21 +319,21 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
     if (!reduced.reducedSeasonalPriceName?.trim()) {
       errors.push({ field: `${field}.reducedSeasonalPriceName`, code: 'validation.required' });
     }
-    if (!reduced.dateFrom || !reduced.dateTo) {
-      errors.push({ field: `${field}.dateFrom`, code: 'validation.required' });
-    } else if (reduced.dateTo < reduced.dateFrom) {
-      errors.push({ field: `${field}.dateTo`, code: 'validation.end_before_start' });
+    if (!reduced.startsOn || !reduced.endsOn) {
+      errors.push({ field: `${field}.startsOn`, code: 'validation.required' });
+    } else if (reduced.endsOn < reduced.startsOn) {
+      errors.push({ field: `${field}.endsOn`, code: 'validation.end_before_start' });
     } else if (
       reducedPrices.some(
         (other, otherIndex) =>
           otherIndex !== reducedIndex &&
-          !!other.dateFrom &&
-          !!other.dateTo &&
-          (reduced.dateFrom as string).slice(0, 10) <= other.dateTo.slice(0, 10) &&
-          other.dateFrom.slice(0, 10) <= (reduced.dateTo as string).slice(0, 10),
+          !!other.startsOn &&
+          !!other.endsOn &&
+          (reduced.startsOn as string).slice(0, 10) <= other.endsOn.slice(0, 10) &&
+          other.startsOn.slice(0, 10) <= (reduced.endsOn as string).slice(0, 10),
       )
     ) {
-      errors.push({ field: `${field}.dateFrom`, code: 'validation.invalid' });
+      errors.push({ field: `${field}.startsOn`, code: 'validation.invalid' });
     }
   });
   return errors;
@@ -603,8 +603,7 @@ function isIntermediatePrice(value: unknown): boolean {
   const { idPeriod, isFirstRow, dayQuantity, price } = (value ??
     {}) as Partial<PackageIntermediatePrice>;
   return (
-    typeof idPeriod === 'string' &&
-    !!idPeriod &&
+    Number.isInteger(idPeriod) &&
     typeof isFirstRow === 'boolean' &&
     typeof dayQuantity === 'number' &&
     Number.isInteger(dayQuantity) &&

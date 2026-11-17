@@ -117,8 +117,8 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   });
   private readonly reducedSeasonalPrice = signal(new PackageReducedSeasonalPrice());
   protected readonly reducedSeasonalPriceForm = form(this.reducedSeasonalPrice, (path) => {
-    required(path.dateFrom);
-    required(path.dateTo);
+    required(path.startsOn);
+    required(path.endsOn);
     requiredText(path.reducedSeasonalPriceName);
     noOverlap(path, () =>
       this.draft().reducedSeasonalPrices.filter(
@@ -259,8 +259,8 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
       Object.assign(new PackageSectorPrice(), { idSector: id }),
     );
     const periodPrices = sectors.flatMap(({ id }) =>
-      periods.map(({ idPeriod }) =>
-        Object.assign(new PackagePeriodPrice(), { idSector: id, idPeriod }),
+      periods.map(({ key }) =>
+        Object.assign(new PackagePeriodPrice(), { idSector: id, idPeriod: key }),
       ),
     );
     this.sectors.set(sectors);

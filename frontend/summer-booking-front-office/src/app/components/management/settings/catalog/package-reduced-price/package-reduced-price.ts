@@ -96,8 +96,8 @@ export class PackageReducedPrice {
     this.rows().filter((_, index) => index !== this.editedIndex()),
   );
   /** Al stops the day before the next reduced price. */
-  protected readonly dateToMax = computed(() =>
-    lastFreeDay(this.draftForm().dateFrom().value(), this.otherPeriods()),
+  protected readonly endsOnMax = computed(() =>
+    lastFreeDay(this.draftForm().startsOn().value(), this.otherPeriods()),
   );
   protected readonly isOverlapping = computed(() =>
     this.draftForm()()
@@ -193,11 +193,11 @@ function lastFreeDay(
     return null;
   }
   const next = periods.reduce<string | null>(
-    (first, { dateFrom }) =>
-      dateFrom &&
-      dateFrom.slice(0, 10) > day.slice(0, 10) &&
-      (!first || dateFrom.slice(0, 10) < first.slice(0, 10))
-        ? dateFrom
+    (first, { startsOn }) =>
+      startsOn &&
+      startsOn.slice(0, 10) > day.slice(0, 10) &&
+      (!first || startsOn.slice(0, 10) < first.slice(0, 10))
+        ? startsOn
         : first,
     null,
   );
@@ -209,5 +209,5 @@ function byDateFrom(
   first: PackageReducedSeasonalPrice,
   second: PackageReducedSeasonalPrice,
 ): number {
-  return (first.dateFrom ?? '').localeCompare(second.dateFrom ?? '');
+  return (first.startsOn ?? '').localeCompare(second.startsOn ?? '');
 }

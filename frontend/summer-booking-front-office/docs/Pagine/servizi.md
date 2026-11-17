@@ -136,9 +136,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 
 - `app-side-panel` con le tab interne `app-tab-group`. Un solo oggetto per tutto il pannello e un solo form
   (`draftForm`) passato alle tab: cambiare tab non perde i dati scritti.
-- Bar, servizi generici e orari: a ogni apertura parte solo `GET /api/seasons/period-list` (stagione corrente,
-  `isNextSeason=false`) per la tab Prezzi: un prezzo vuoto per periodo, che non conta come dato scritto. Nel
-  frattempo i campi non si usano e Salva è spento; un errore compare sotto.
+- Bar, servizi generici e orari: a ogni apertura parte solo `GET /api/catalog/tariff-periods` (stagione corrente; il
+  `key` numerico di ogni periodo è l'`idPeriod` dei prezzi) per la tab Prezzi: un prezzo vuoto per periodo, che non
+  conta come dato scritto. Nel frattempo i campi non si usano e Salva è spento; un errore compare sotto.
 - Se la lettura dei periodi fallisce l'interruttore dei prezzi per periodo resta spento e bloccato (`disabled`
   finché i periodi non arrivano); il resto del servizio si salva lo stesso e riaprendo il pannello si riprova.
 - Salva (`isSaveDisabled` di `app-side-panel`) è spento finché mancano Nome e Descrizione nella lingua
@@ -225,7 +225,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - GET (`idBarService` nella query string):
   - Info Generali, all'apertura: `GET /api/catalog/get-bar-service-general-info` (`BarServiceSelectedGeneralInfo`,
     le lingue mancanti restano vuote);
-  - Prezzi: `GET /api/catalog/get-bar-service-prices` insieme a `seasons/period-list` (`BarServiceSelectedPrices`,
+  - Prezzi: `GET /api/catalog/get-bar-service-prices` insieme a `catalog/tariff-periods` (`BarServiceSelectedPrices`,
     i prezzi sui periodi della stagione corrente);
   - Prenotazioni: `GET /api/catalog/get-bar-service-booking-options` (array `ServiceBookingOption[]`).
 - Salvataggi (`POST /api/catalog/…`): `update-bar-service-general` (`BarServiceUpdateGeneralRequest`),
@@ -260,7 +260,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - `general-service-edit-item-panel/` (`GeneralServiceEditItemPanel`): copia del pannello di modifica del bar senza
   Categoria e Varianti, input `idStandardService`, form `StandardServiceAddItemRequest`, titolo
   `standard_services.edit_title`.
-- GET: `get-standard-service-general-info`, `get-standard-service-prices` insieme a `seasons/period-list`,
+- GET: `get-standard-service-general-info`, `get-standard-service-prices` insieme a `catalog/tariff-periods`,
   `get-standard-service-booking-options` (`GET /api/catalog/…`; risposte `StandardServiceSelectedGeneralInfo`,
   `StandardServiceSelectedPrices` e l'array delle opzioni).
 - Salvataggi: `update-standard-service-general`, `update-standard-service-prices`, `update-standard-service-booking`
@@ -306,7 +306,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 
 - `app-hourly-service-edit-item-panel`, come quello del servizio generale, input `idHourlyService`.
 - GET (`idHourlyService` nella query string): `get-hourly-service-general-info`, `get-hourly-service-prices`
-  insieme a `seasons/period-list`, `get-hourly-service-booking-options`.
+  insieme a `catalog/tariff-periods`, `get-hourly-service-booking-options`.
 - Salvataggi: `update-hourly-service-general`, `update-hourly-service-prices`, `update-hourly-service-booking`;
   entità `HourlyServiceSelectedGeneralInfo`, `HourlyServiceSelectedPrices`, `HourlyServiceUpdate*Request`.
 - Il form si blocca con `disabled(path, …)` (caselle e interruttori non hanno `readonly`); le tab Prezzi e

@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { SeasonDates } from '../../../entities/settings/seasons/season-dates';
 import { SeasonPeriodAddRequest } from '../../../entities/settings/seasons/season-period-add-request';
+import { SeasonPeriodItem } from '../../../entities/settings/seasons/season-period-item';
 import { SeasonService } from './season.service';
 
 describe('SeasonService', () => {
@@ -51,125 +52,6 @@ describe('SeasonService', () => {
     controller.verify();
   });
 
-  it('should ask the periods of the chosen season of the property', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const seasons = TestBed.inject(SeasonService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    seasons.periodList(true).subscribe();
-
-    const request = controller.expectOne(
-      `${environment.apiBaseUrl}/seasons/period-list?isNextSeason=true`,
-    ).request;
-    expect(request.method).toBe('GET');
-    controller.verify();
-  });
-
-  it('should send the name, the date intervals and the season of the new period, nothing else', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const seasons = TestBed.inject(SeasonService);
-    const controller = TestBed.inject(HttpTestingController);
-    const period = {
-      ...new SeasonPeriodAddRequest(),
-      periodName: 'Bassa stagione',
-      intervals: [
-        { dateFrom: '2026-05-01T00:00:00.000Z', dateTo: '2026-06-15T00:00:00.000Z', extra: 1 },
-      ],
-      extra: true,
-    };
-
-    seasons.addPeriod(false, period).subscribe();
-
-    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/add-period`).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({
-      periodName: 'Bassa stagione',
-      intervals: [{ dateFrom: '2026-05-01T00:00:00.000Z', dateTo: '2026-06-15T00:00:00.000Z' }],
-      isNextSeason: false,
-    });
-    controller.verify();
-  });
-
-  it('should send the period to delete', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const seasons = TestBed.inject(SeasonService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    seasons.deletePeriod('d1').subscribe();
-
-    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/delete-period`).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idPeriod: 'd1' });
-    controller.verify();
-  });
-
-  it('should send the date intervals to delete', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const seasons = TestBed.inject(SeasonService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    seasons.deleteIntervals(['i1', 'i2']).subscribe();
-
-    const request = controller.expectOne(
-      `${environment.apiBaseUrl}/seasons/delete-intervals`,
-    ).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idIntervals: ['i1', 'i2'] });
-    controller.verify();
-  });
-
-  it('should send the new days of the date interval, nothing else', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const seasons = TestBed.inject(SeasonService);
-    const controller = TestBed.inject(HttpTestingController);
-    const interval = {
-      idInterval: 'i1',
-      dateFrom: '2026-05-02T00:00:00.000Z',
-      dateTo: '2026-06-14T00:00:00.000Z',
-      extra: true,
-    };
-
-    seasons.updateInterval(interval).subscribe();
-
-    const request = controller.expectOne(
-      `${environment.apiBaseUrl}/seasons/update-interval`,
-    ).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({
-      idInterval: 'i1',
-      dateFrom: '2026-05-02T00:00:00.000Z',
-      dateTo: '2026-06-14T00:00:00.000Z',
-    });
-    controller.verify();
-  });
-
-  it('should send the new name of the period, nothing else', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const seasons = TestBed.inject(SeasonService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    const period = { idPeriod: 'd1', periodName: 'Pre stagione', extra: 1 };
-
-    seasons.updatePeriod(period).subscribe();
-
-    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/update-period`).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ idPeriod: 'd1', periodName: 'Pre stagione' });
-    controller.verify();
-  });
-
   it('should send all the season days, nothing else, and read the days as saved', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -211,26 +93,168 @@ describe('SeasonService', () => {
     controller.verify();
   });
 
-  it('should send the new date interval and its period, nothing else', () => {
+  it('should read the periods of the current season as days at midnight UTC, nothing else', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const seasons = TestBed.inject(SeasonService);
     const controller = TestBed.inject(HttpTestingController);
-    const interval = {
-      dateFrom: '2026-06-01T00:00:00.000Z',
-      dateTo: '2026-06-10T00:00:00.000Z',
+    let periods: SeasonPeriodItem[] | undefined;
+
+    seasons.periodList(false).subscribe((answer) => (periods = answer));
+
+    const call = controller.expectOne(`${environment.apiBaseUrl}/catalog/tariff-periods`);
+    expect(call.request.method).toBe('GET');
+    call.flush([
+      {
+        key: 0,
+        name: 'Bassa stagione',
+        ranges: [{ startsOn: '2026-05-01', endsOn: '2026-06-15', extra: 1 }],
+        extra: true,
+      },
+    ]);
+    expect(periods).toEqual([
+      {
+        key: 0,
+        name: 'Bassa stagione',
+        ranges: [{ startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z' }],
+      },
+    ]);
+    controller.verify();
+  });
+
+  it('should ask the periods of the next season on its own route', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const seasons = TestBed.inject(SeasonService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    seasons.periodList(true).subscribe();
+
+    const request = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/next-season/tariff-periods`,
+    ).request;
+    expect(request.method).toBe('GET');
+    controller.verify();
+  });
+
+  it('should send the name, the date ranges and the season of the new period, nothing else', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const seasons = TestBed.inject(SeasonService);
+    const controller = TestBed.inject(HttpTestingController);
+    const period = {
+      ...new SeasonPeriodAddRequest(),
+      name: 'Bassa stagione',
+      ranges: [
+        { startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z', extra: 1 },
+      ],
       extra: true,
     };
 
-    seasons.addInterval('d1', interval).subscribe();
+    seasons.addPeriod(false, period).subscribe();
 
-    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/add-interval`).request;
+    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/add-period`).request;
     expect(request.method).toBe('POST');
     expect(request.body).toEqual({
-      dateFrom: '2026-06-01T00:00:00.000Z',
-      dateTo: '2026-06-10T00:00:00.000Z',
-      idPeriod: 'd1',
+      name: 'Bassa stagione',
+      ranges: [{ startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z' }],
+      isNextSeason: false,
+    });
+    controller.verify();
+  });
+
+  it('should send the key and the season of the period to delete', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const seasons = TestBed.inject(SeasonService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    seasons.deletePeriod(true, 0).subscribe();
+
+    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/delete-period`).request;
+    expect(request.method).toBe('POST');
+    expect(request.body).toEqual({ key: 0, isNextSeason: true });
+    controller.verify();
+  });
+
+  it('should save the name and all the date ranges of the period as days, nothing else', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const seasons = TestBed.inject(SeasonService);
+    const controller = TestBed.inject(HttpTestingController);
+    const period = {
+      key: 0,
+      name: 'Pre stagione',
+      ranges: [
+        { startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z', extra: 1 },
+        { startsOn: '2026-09-01T00:00:00.000Z', endsOn: '2026-09-30T00:00:00.000Z' },
+      ],
+      extra: true,
+    };
+    let saved: SeasonPeriodItem | undefined;
+
+    seasons.updatePeriod(false, 0, period).subscribe((answer) => (saved = answer));
+
+    const call = controller.expectOne(`${environment.apiBaseUrl}/catalog/tariff-periods/0`);
+    expect(call.request.method).toBe('PUT');
+    expect(call.request.body).toEqual({
+      name: 'Pre stagione',
+      ranges: [
+        { startsOn: '2026-05-01', endsOn: '2026-06-15' },
+        { startsOn: '2026-09-01', endsOn: '2026-09-30' },
+      ],
+    });
+    call.flush({
+      key: 0,
+      name: 'Pre stagione',
+      ranges: [
+        { startsOn: '2026-05-01', endsOn: '2026-06-15' },
+        { startsOn: '2026-09-01', endsOn: '2026-09-30' },
+      ],
+    });
+    expect(saved).toEqual({
+      key: 0,
+      name: 'Pre stagione',
+      ranges: [
+        { startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z' },
+        { startsOn: '2026-09-01T00:00:00.000Z', endsOn: '2026-09-30T00:00:00.000Z' },
+      ],
+    });
+    controller.verify();
+  });
+
+  it('should send the date ranges to delete with the key of their period, as days, nothing else', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const seasons = TestBed.inject(SeasonService);
+    const controller = TestBed.inject(HttpTestingController);
+    const ranges = [
+      {
+        key: 0,
+        startsOn: '2027-05-01T00:00:00.000Z',
+        endsOn: '2027-06-30T00:00:00.000Z',
+        extra: 1,
+      },
+      { key: 1, startsOn: '2027-07-01T00:00:00.000Z', endsOn: '2027-07-15T00:00:00.000Z' },
+    ];
+
+    seasons.deleteRanges(true, ranges).subscribe();
+
+    const request = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/next-season/tariff-periods/bulk-delete-ranges`,
+    ).request;
+    expect(request.method).toBe('POST');
+    expect(request.body).toEqual({
+      ranges: [
+        { key: 0, startsOn: '2027-05-01', endsOn: '2027-06-30' },
+        { key: 1, startsOn: '2027-07-01', endsOn: '2027-07-15' },
+      ],
     });
     controller.verify();
   });

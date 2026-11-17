@@ -1296,50 +1296,79 @@ Nessun payload.
 | `nextStartsOn` | string (data, AAAA-MM-GG) \| null |
 | `nextEndsOn` | string (data, AAAA-MM-GG) \| null |
 
-### GET `/api/seasons/period-list?isNextSeason={isNextSeason}`
+### GET `/api/catalog/tariff-periods`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "isNextSeason": "boolean"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
 ```json
 [
   {
-    "idPeriod": "string (UUID)",
-    "periodName": "string",
-    "intervals": [
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
       {
-        "idInterval": "string (UUID)",
-        "dateFrom": "string (ISO 8601, UTC)",
-        "dateTo": "string (ISO 8601, UTC)"
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
       }
     ]
   }
 ]
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `isNextSeason` | boolean |
+Nessun payload.
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `[].idPeriod` | string (UUID) |
-| `[].periodName` | string |
-| `[].intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) |
-| `[].intervals[].idInterval` | string (UUID) |
-| `[].intervals[].dateFrom` | string (ISO 8601, UTC) |
-| `[].intervals[].dateTo` | string (ISO 8601, UTC) |
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+### GET `/api/catalog/next-season/tariff-periods`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
+      {
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
+      }
+    ]
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 ### POST `/api/seasons/add-period`
 
@@ -1347,12 +1376,172 @@ Nessun payload.
 
 ```json
 {
-  "isNextSeason": "boolean",
-  "periodName": "string",
-  "intervals": [
+  "name": "string",
+  "ranges": [
     {
-      "dateFrom": "string (ISO 8601, UTC)",
-      "dateTo": "string (ISO 8601, UTC)"
+      "startsOn": "string (ISO 8601, UTC)",
+      "endsOn": "string (ISO 8601, UTC)"
+    }
+  ],
+  "isNextSeason": "boolean"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (ISO 8601, UTC) |
+| `ranges[].endsOn` | string (ISO 8601, UTC) |
+| `isNextSeason` | boolean |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/seasons/delete-period`
+
+**Payload JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "isNextSeason": "boolean"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `isNextSeason` | boolean |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### PUT `/api/catalog/tariff-periods/{key}`
+
+**Payload JSON**
+
+```json
+{
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+### PUT `/api/catalog/next-season/tariff-periods/{key}`
+
+**Payload JSON**
+
+```json
+{
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+### POST `/api/catalog/tariff-periods/bulk-delete-ranges`
+
+**Payload JSON**
+
+```json
+{
+  "ranges": [
+    {
+      "key": "number (intero)",
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
     }
   ]
 }
@@ -1366,23 +1555,28 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `isNextSeason` | boolean |
-| `periodName` | string |
-| `intervals[]` | SeasonPeriodInterval[] (array di oggetti) |
-| `intervals[].dateFrom` | string (ISO 8601, UTC) |
-| `intervals[].dateTo` | string (ISO 8601, UTC) |
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) |
+| `ranges[].key` | number (intero) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/seasons/delete-period`
+### POST `/api/catalog/next-season/tariff-periods/bulk-delete-ranges`
 
 **Payload JSON**
 
 ```json
 {
-  "idPeriod": "string (UUID)"
+  "ranges": [
+    {
+      "key": "number (intero)",
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
 }
 ```
 
@@ -1394,113 +1588,10 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idPeriod` | string (UUID) |
-
-**Response tabella**
-
-Nessun corpo (204).
-
-### POST `/api/seasons/update-period`
-
-**Payload JSON**
-
-```json
-{
-  "idPeriod": "string (UUID)",
-  "periodName": "string"
-}
-```
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idPeriod` | string (UUID) |
-| `periodName` | string |
-
-**Response tabella**
-
-Nessun corpo (204).
-
-### POST `/api/seasons/add-interval`
-
-**Payload JSON**
-
-```json
-{
-  "idPeriod": "string (UUID)",
-  "dateFrom": "string (ISO 8601, UTC)",
-  "dateTo": "string (ISO 8601, UTC)"
-}
-```
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idPeriod` | string (UUID) |
-| `dateFrom` | string (ISO 8601, UTC) |
-| `dateTo` | string (ISO 8601, UTC) |
-
-**Response tabella**
-
-Nessun corpo (204).
-
-### POST `/api/seasons/update-interval`
-
-**Payload JSON**
-
-```json
-{
-  "idInterval": "string (UUID)",
-  "dateFrom": "string (ISO 8601, UTC)",
-  "dateTo": "string (ISO 8601, UTC)"
-}
-```
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idInterval` | string (UUID) |
-| `dateFrom` | string (ISO 8601, UTC) |
-| `dateTo` | string (ISO 8601, UTC) |
-
-**Response tabella**
-
-Nessun corpo (204).
-
-### POST `/api/seasons/delete-intervals`
-
-**Payload JSON**
-
-```json
-{
-  "idIntervals": "string[] (UUID)"
-}
-```
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idIntervals` | string[] (UUID) |
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) |
+| `ranges[].key` | number (intero) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
@@ -2602,7 +2693,7 @@ Nessun corpo (204).
   "periodPrices": [
     {
       "idSector": "string (UUID)",
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -2624,7 +2715,7 @@ Nessun corpo (204).
   "isIntermediatePricesIncluded": "boolean",
   "intermediatePrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "isFirstRow": "boolean",
       "dayQuantity": "number (intero)",
       "price": "number"
@@ -2652,7 +2743,7 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -2671,7 +2762,7 @@ Nessun corpo (204).
 | `publicHolidayDates` | string[] (date UTC ISO 8601) |
 | `isIntermediatePricesIncluded` | boolean |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
-| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].idPeriod` | number (intero) |
 | `intermediatePrices[].isFirstRow` | boolean |
 | `intermediatePrices[].dayQuantity` | number (intero) |
 | `intermediatePrices[].price` | number |
@@ -2710,7 +2801,7 @@ Nessun corpo (204).
   "periodPrices": [
     {
       "idSector": "string (UUID)",
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -2732,7 +2823,7 @@ Nessun corpo (204).
   "isIntermediatePricesIncluded": "boolean",
   "intermediatePrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "isFirstRow": "boolean",
       "dayQuantity": "number (intero)",
       "price": "number"
@@ -2763,7 +2854,7 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -2782,7 +2873,7 @@ Nessun corpo (204).
 | `publicHolidayDates` | string[] (date UTC ISO 8601) |
 | `isIntermediatePricesIncluded` | boolean |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
-| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].idPeriod` | number (intero) |
 | `intermediatePrices[].isFirstRow` | boolean |
 | `intermediatePrices[].dayQuantity` | number (intero) |
 | `intermediatePrices[].price` | number |
@@ -2809,7 +2900,7 @@ Nessun corpo (204).
   "periodPrices": [
     {
       "idSector": "string (UUID)",
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -2831,7 +2922,7 @@ Nessun corpo (204).
   "isIntermediatePricesIncluded": "boolean",
   "intermediatePrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "isFirstRow": "boolean",
       "dayQuantity": "number (intero)",
       "price": "number"
@@ -2860,7 +2951,7 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -2879,7 +2970,7 @@ Nessun corpo (204).
 | `publicHolidayDates` | string[] (date UTC ISO 8601) |
 | `isIntermediatePricesIncluded` | boolean |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
-| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].idPeriod` | number (intero) |
 | `intermediatePrices[].isFirstRow` | boolean |
 | `intermediatePrices[].dayQuantity` | number (intero) |
 | `intermediatePrices[].price` | number |
@@ -2973,8 +3064,8 @@ Nessun payload.
   "isOnlineOnly": "boolean",
   "reducedSeasonalPrices": [
     {
-      "dateFrom": "string (ISO 8601, mezzanotte UTC)",
-      "dateTo": "string (ISO 8601, mezzanotte UTC)",
+      "startsOn": "string (ISO 8601, mezzanotte UTC)",
+      "endsOn": "string (ISO 8601, mezzanotte UTC)",
       "reducedSeasonalPriceName": "string",
       "sectorPrices": [
         {
@@ -2995,7 +3086,7 @@ Nessun payload.
   "periodPrices": [
     {
       "idSector": "string (UUID)",
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3017,7 +3108,7 @@ Nessun payload.
   "isIntermediatePricesIncluded": "boolean",
   "intermediatePrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "isFirstRow": "boolean",
       "dayQuantity": "number (intero)",
       "price": "number"
@@ -3053,8 +3144,8 @@ Nessun corpo (204).
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
 | `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
-| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) |
 | `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
 | `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
 | `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
@@ -3066,7 +3157,7 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3085,7 +3176,7 @@ Nessun corpo (204).
 | `publicHolidayDates` | string[] (date UTC ISO 8601) |
 | `isIntermediatePricesIncluded` | boolean |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
-| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].idPeriod` | number (intero) |
 | `intermediatePrices[].isFirstRow` | boolean |
 | `intermediatePrices[].dayQuantity` | number (intero) |
 | `intermediatePrices[].price` | number |
@@ -3128,8 +3219,8 @@ Nessun payload.
   "isOnlineOnly": "boolean",
   "reducedSeasonalPrices": [
     {
-      "dateFrom": "string (ISO 8601, mezzanotte UTC)",
-      "dateTo": "string (ISO 8601, mezzanotte UTC)",
+      "startsOn": "string (ISO 8601, mezzanotte UTC)",
+      "endsOn": "string (ISO 8601, mezzanotte UTC)",
       "reducedSeasonalPriceName": "string",
       "sectorPrices": [
         {
@@ -3150,7 +3241,7 @@ Nessun payload.
   "periodPrices": [
     {
       "idSector": "string (UUID)",
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3172,7 +3263,7 @@ Nessun payload.
   "isIntermediatePricesIncluded": "boolean",
   "intermediatePrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "isFirstRow": "boolean",
       "dayQuantity": "number (intero)",
       "price": "number"
@@ -3209,8 +3300,8 @@ Nessun payload.
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
 | `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
-| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) |
 | `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
 | `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
 | `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
@@ -3222,7 +3313,7 @@ Nessun payload.
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3241,7 +3332,7 @@ Nessun payload.
 | `publicHolidayDates` | string[] (date UTC ISO 8601) |
 | `isIntermediatePricesIncluded` | boolean |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
-| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].idPeriod` | number (intero) |
 | `intermediatePrices[].isFirstRow` | boolean |
 | `intermediatePrices[].dayQuantity` | number (intero) |
 | `intermediatePrices[].price` | number |
@@ -3276,8 +3367,8 @@ Nessun payload.
   "isOnlineOnly": "boolean",
   "reducedSeasonalPrices": [
     {
-      "dateFrom": "string (ISO 8601, mezzanotte UTC)",
-      "dateTo": "string (ISO 8601, mezzanotte UTC)",
+      "startsOn": "string (ISO 8601, mezzanotte UTC)",
+      "endsOn": "string (ISO 8601, mezzanotte UTC)",
       "reducedSeasonalPriceName": "string",
       "sectorPrices": [
         {
@@ -3298,7 +3389,7 @@ Nessun payload.
   "periodPrices": [
     {
       "idSector": "string (UUID)",
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3320,7 +3411,7 @@ Nessun payload.
   "isIntermediatePricesIncluded": "boolean",
   "intermediatePrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "isFirstRow": "boolean",
       "dayQuantity": "number (intero)",
       "price": "number"
@@ -3357,8 +3448,8 @@ Nessun corpo (204).
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
 | `reducedSeasonalPrices[]` | PackageReducedSeasonalPrice[] (array di oggetti) |
-| `reducedSeasonalPrices[].dateFrom` | string (ISO 8601, mezzanotte UTC) |
-| `reducedSeasonalPrices[].dateTo` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].startsOn` | string (ISO 8601, mezzanotte UTC) |
+| `reducedSeasonalPrices[].endsOn` | string (ISO 8601, mezzanotte UTC) |
 | `reducedSeasonalPrices[].reducedSeasonalPriceName` | string |
 | `reducedSeasonalPrices[].sectorPrices[]` | PackageSectorPrice[] (array di oggetti) |
 | `reducedSeasonalPrices[].sectorPrices[].idSector` | string (UUID) |
@@ -3370,7 +3461,7 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3389,7 +3480,7 @@ Nessun corpo (204).
 | `publicHolidayDates` | string[] (date UTC ISO 8601) |
 | `isIntermediatePricesIncluded` | boolean |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) |
-| `intermediatePrices[].idPeriod` | string (UUID) |
+| `intermediatePrices[].idPeriod` | number (intero) |
 | `intermediatePrices[].isFirstRow` | boolean |
 | `intermediatePrices[].dayQuantity` | number (intero) |
 | `intermediatePrices[].price` | number |
@@ -3454,50 +3545,42 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### GET `/api/seasons/period-list?isNextSeason={isNextSeason}`
+### GET `/api/catalog/tariff-periods`
 
-**Payload JSON** (query string)
+**Payload JSON**
 
-```json
-{
-  "isNextSeason": "boolean"
-}
-```
+Nessun payload.
 
 **Response JSON**
 
 ```json
 [
   {
-    "idPeriod": "string (UUID)",
-    "periodName": "string",
-    "intervals": [
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
       {
-        "idInterval": "string (UUID)",
-        "dateFrom": "string (ISO 8601, UTC)",
-        "dateTo": "string (ISO 8601, UTC)"
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
       }
     ]
   }
 ]
 ```
 
-**Payload tabella** (query string)
+**Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `isNextSeason` | boolean |
+Nessun payload.
 
 **Response tabella**
 
 | Campo | Tipo |
 |---|---|
-| `[].idPeriod` | string (UUID) |
-| `[].periodName` | string |
-| `[].intervals[]` | SeasonPeriodIntervalItem[] (array di oggetti) |
-| `[].intervals[].idInterval` | string (UUID) |
-| `[].intervals[].dateFrom` | string (ISO 8601, UTC) |
-| `[].intervals[].dateTo` | string (ISO 8601, UTC) |
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 ## Sconti e voucher
 
@@ -3875,6 +3958,43 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
+### GET `/api/catalog/tariff-periods`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "key": "number (intero)",
+    "name": "string",
+    "ranges": [
+      {
+        "startsOn": "string (data, AAAA-MM-GG)",
+        "endsOn": "string (data, AAAA-MM-GG)"
+      }
+    ]
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].key` | number (intero) |
+| `[].name` | string |
+| `[].ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
 ### POST `/api/catalog/create-bar-service`
 
 **Payload JSON**
@@ -3902,7 +4022,7 @@ Nessun payload.
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -3948,7 +4068,7 @@ Nessun corpo (204).
 | `variants[].price` | number (decimale, €) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -4041,7 +4161,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -4067,7 +4187,7 @@ Nessun corpo (204).
 | `variants[].price` | number (decimale, €) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -4183,7 +4303,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -4208,7 +4328,7 @@ Nessun corpo (204).
 | `variants[].price` | number (decimale, €) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -4394,7 +4514,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -4436,7 +4556,7 @@ Nessun corpo (204).
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -4521,7 +4641,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -4544,7 +4664,7 @@ Nessun corpo (204).
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -4652,7 +4772,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "price": "number (decimale, €) | null"
     }
   ],
@@ -4674,7 +4794,7 @@ Nessun corpo (204).
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idPeriod` | string (UUID) |
+| `periodPrices[].idPeriod` | number (intero) |
 | `periodPrices[].price` | number (decimale, €) \| null |
 | `idSectors` | string[] (UUID) |
 | `isOnlinePurchaseEnabled` | boolean |
@@ -4904,7 +5024,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodAvailabilities": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "availabilityOptions": [
         {
           "startTime": "string (HH:mm) | null",
@@ -4972,7 +5092,7 @@ Nessun corpo (204).
 | `isHighlighted` | boolean |
 | `isPeriodPricingEnabled` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
-| `periodAvailabilities[].idPeriod` | string (UUID) |
+| `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |
@@ -5073,7 +5193,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodAvailabilities": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "availabilityOptions": [
         {
           "startTime": "string (HH:mm) | null",
@@ -5113,7 +5233,7 @@ Nessun corpo (204).
 |---|---|
 | `isPeriodPricingEnabled` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
-| `periodAvailabilities[].idPeriod` | string (UUID) |
+| `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |
@@ -5246,7 +5366,7 @@ Nessun corpo (204).
   "isPeriodPricingEnabled": "boolean",
   "periodAvailabilities": [
     {
-      "idPeriod": "string (UUID)",
+      "idPeriod": "number (intero)",
       "availabilityOptions": [
         {
           "startTime": "string (HH:mm) | null",
@@ -5285,7 +5405,7 @@ Nessun corpo (204).
 | `idHourlyService` | string (UUID) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
-| `periodAvailabilities[].idPeriod` | string (UUID) |
+| `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
 | `periodAvailabilities[].availabilityOptions[].startTime` | string (HH:mm) \| null |
 | `periodAvailabilities[].availabilityOptions[].endTime` | string (HH:mm) \| null |

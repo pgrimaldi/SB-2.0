@@ -124,6 +124,15 @@
       "invalid_pdf": "The file must be a PDF and no larger than 10 MB.",
       "gallery_full": "The gallery is full: you can upload up to {{max}} images.",
       "photo_not_found": "The image is no longer there: it may already have been deleted."
+    },
+    "pricing": {
+      "season_required": "Set the season dates first.",
+      "next_season_required": "Set the dates of the next season first.",
+      "period_not_found": "The period is no longer there: it may already have been deleted.",
+      "period_name_taken": "A period with this name already exists.",
+      "period_outside_season": "The period dates must be within the season.",
+      "period_range_not_found": "The date range is no longer there: it may already have been deleted.",
+      "period_ranges_required": "A period needs at least one date range. To delete it completely, use the bin next to its name."
     }
   },
   "alert": {
@@ -1080,7 +1089,8 @@
           "date_to": "End date",
           "empty": "No periods added",
           "clear_selection": "Clear selection",
-          "delete_selected": "Delete selected"
+          "delete_selected": "Delete selected",
+          "period_full": "A period can have at most {{max}} date ranges. To add another one, delete one first."
         },
         "add_popup": {
           "title": "Set period",
@@ -1137,7 +1147,8 @@
           "many": {
             "title": "Delete date ranges",
             "text": "Do you want to delete the {{count}} selected date ranges?"
-          }
+          },
+          "period_left_empty": "A period needs at least one date range. To delete it completely, use the bin next to its name."
         }
       },
       "services": {
@@ -1908,7 +1919,16 @@
     "unknown_icon": "Icon does not exist",
     "web_link": "Enter a full link starting with http:// or https://",
     "phone_digits": "Only digits and spaces: the prefix goes in the field beside",
-    "phone_max_length": "The number can have at most {{max}} characters, spaces included"
+    "phone_max_length": "The number can have at most {{max}} characters, spaces included",
+    "seasons": {
+      "period_name": {
+        "taken": "A period with this name already exists in this season."
+      },
+      "ranges": {
+        "max": "A period can have at most {{max}} date ranges.",
+        "invalid": "Invalid date ranges: a period can have at most {{max}} and they cannot share any day."
+      }
+    }
   },
   "unsaved_changes": {
     "title": "Unsaved changes",

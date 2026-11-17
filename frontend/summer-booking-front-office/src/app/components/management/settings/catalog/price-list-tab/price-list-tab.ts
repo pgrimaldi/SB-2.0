@@ -180,14 +180,14 @@ export class PriceListTab {
     () => new Map(this.sectors().map(({ id, value }) => [id, value])),
   );
   private readonly periodNames = computed(
-    () => new Map(this.periods().map(({ idPeriod, periodName }) => [idPeriod, periodName])),
+    () => new Map(this.periods().map(({ key, name }) => [key, name])),
   );
 
   protected sectorName(idSector: string | null): string {
     return (idSector && this.sectorNames().get(idSector)) ?? '';
   }
 
-  protected periodName(idPeriod: string | null): string {
-    return (idPeriod && this.periodNames().get(idPeriod)) ?? '';
+  protected periodName(idPeriod: number | null): string {
+    return (idPeriod === null ? null : this.periodNames().get(idPeriod)) ?? '';
   }
 }

@@ -124,6 +124,15 @@
       "invalid_pdf": "文件必须是 PDF，且不超过 10 MB。",
       "gallery_full": "图库已满：最多可以上传 {{max}} 张图片。",
       "photo_not_found": "图片已不存在：可能已被删除。"
+    },
+    "pricing": {
+      "season_required": "请先设置季节日期。",
+      "next_season_required": "请先设置下一季节的日期。",
+      "period_not_found": "时段已不存在：可能已被删除。",
+      "period_name_taken": "已存在同名的时段。",
+      "period_outside_season": "时段日期必须在季节范围内。",
+      "period_range_not_found": "日期区间已不存在：可能已被删除。",
+      "period_ranges_required": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。"
     }
   },
   "alert": {
@@ -1080,7 +1089,8 @@
           "date_to": "结束日期",
           "empty": "尚未添加时段",
           "clear_selection": "取消选择",
-          "delete_selected": "删除所选"
+          "delete_selected": "删除所选",
+          "period_full": "一个时段最多可以有 {{max}} 个日期区间。如要再添加，请先删除一个。"
         },
         "add_popup": {
           "title": "设置时段",
@@ -1137,7 +1147,8 @@
           "many": {
             "title": "删除日期区间",
             "text": "要删除选中的 {{count}} 个日期区间吗？"
-          }
+          },
+          "period_left_empty": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。"
         }
       },
       "services": {
@@ -1908,7 +1919,16 @@
     "unknown_icon": "图标不存在",
     "web_link": "请输入以 http:// 或 https:// 开头的完整链接",
     "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
-    "phone_max_length": "号码最多 {{max}} 个字符（含空格）"
+    "phone_max_length": "号码最多 {{max}} 个字符（含空格）",
+    "seasons": {
+      "period_name": {
+        "taken": "本季节已存在同名的时段。"
+      },
+      "ranges": {
+        "max": "一个时段最多可以有 {{max}} 个日期区间。",
+        "invalid": "日期区间无效：一个时段最多可以有 {{max}} 个，且区间之间不能有相同的日期。"
+      }
+    }
   },
   "unsaved_changes": {
     "title": "未保存的更改",

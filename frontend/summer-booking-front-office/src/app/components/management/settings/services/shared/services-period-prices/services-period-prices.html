@@ -9,21 +9,21 @@
   />
 </div>
 @if (isPeriodPricingEnabled()().value()) {
-  @for (period of periods(); track period.idPeriod) {
-    <app-expansion-panel [title]="period.periodName ?? ''" [pathIcon]="periodIcons">
+  @for (period of periods(); track period.key) {
+    <app-expansion-panel [title]="period.name ?? ''" [pathIcon]="periodIcons">
       <div class="services__period__prices__body">
         <div class="services__period__prices__period">
           <div class="services__period__prices__dates">
             <div class="services__period__prices__intervals">
-              @for (interval of period.intervals; track interval.idInterval) {
+              @for (range of period.ranges; track $index) {
                 <div class="services__period__prices__interval">
-                  <span>{{ day(interval.dateFrom) }}</span>
-                  <span class="services__period__prices__to">{{ day(interval.dateTo) }}</span>
+                  <span>{{ day(range.startsOn) }}</span>
+                  <span class="services__period__prices__to">{{ day(range.endsOn) }}</span>
                 </div>
               }
             </div>
           </div>
-          @if (priceByPeriod().get(period.idPeriod); as periodPrice) {
+          @if (priceByPeriod().get(period.key); as periodPrice) {
             <div class="services__period__prices__amount services__period__prices__price">
               <app-filled-number-field
                 class="services__period__prices__field"

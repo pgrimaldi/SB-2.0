@@ -40,6 +40,13 @@ export const API_ERROR_CODES = [
   'catalog.invalid_pdf',
   'catalog.gallery_full',
   'catalog.photo_not_found',
+  'pricing.season_required',
+  'pricing.next_season_required',
+  'pricing.period_not_found',
+  'pricing.period_name_taken',
+  'pricing.period_outside_season',
+  'pricing.period_range_not_found',
+  'pricing.period_ranges_required',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

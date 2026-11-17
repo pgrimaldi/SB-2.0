@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
-import { greaterThan, passwordRules, requiredText } from './validators';
+import { greaterThan, isTextTaken, passwordRules, requiredText } from './validators';
 
 describe('greaterThan', () => {
   it('should accept only numbers above the limit, an empty field included in the errors', () => {
@@ -54,5 +54,16 @@ describe('passwordRules', () => {
     }
     model.set({ password: null });
     expect(passwordForm.password().valid()).toBe(true);
+  });
+});
+
+describe('isTextTaken', () => {
+  it('should find a name already used, not minding capitals and the spaces at the ends', () => {
+    const names = ['Bassa stagione', null, 'Alta stagione'];
+
+    expect(isTextTaken(' bassa STAGIONE ', names)).toBe(true);
+    expect(isTextTaken('Media stagione', names)).toBe(false);
+    expect(isTextTaken('   ', names)).toBe(false);
+    expect(isTextTaken(null, names)).toBe(false);
   });
 });

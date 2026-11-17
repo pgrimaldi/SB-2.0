@@ -114,14 +114,12 @@ import {
   usersListMock,
 } from './identity/identity.mock';
 import {
-  addSeasonIntervalMock,
   addSeasonPeriodMock,
-  deleteSeasonIntervalsMock,
   deleteSeasonPeriodMock,
+  deleteSeasonRangesMock,
   saveSeasonDatesMock,
   seasonDatesMock,
   seasonPeriodListMock,
-  updateSeasonIntervalMock,
   updateSeasonPeriodMock,
 } from './seasons/seasons.mock';
 import { saveSharingInformationMock, sharingGeneralInformationMock } from './sharing/sharing.mock';
@@ -159,6 +157,10 @@ import {
   warehouseEditMock,
   warehouseMock,
 } from './warehouse/warehouse.mock';
+
+/** The tariff periods of the current or of the next season, with a period key or the bulk delete of ranges. */
+const TARIFF_PERIODS_URL =
+  /^\/catalog\/(next-season\/)?tariff-periods(?:\/(\d+)|\/(bulk-delete-ranges))?$/;
 
 /** Answers the mocked endpoints; included only in builds with mocks (see `mock-interceptors.ts`). */
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
@@ -437,8 +439,21 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return saveSeasonDatesMock(request);
   }
 
-  if (request.method === 'GET' && request.url === `${environment.apiBaseUrl}/seasons/period-list`) {
-    return seasonPeriodListMock(request);
+  const tariffPeriods = request.url.startsWith(environment.apiBaseUrl)
+    ? TARIFF_PERIODS_URL.exec(request.url.slice(environment.apiBaseUrl.length))
+    : null;
+  if (tariffPeriods) {
+    const [, nextSeason, key, bulkDeleteRanges] = tariffPeriods;
+    const isNextSeason = nextSeason !== undefined;
+    if (request.method === 'GET' && key === undefined && bulkDeleteRanges === undefined) {
+      return seasonPeriodListMock(request, isNextSeason);
+    }
+    if (request.method === 'PUT' && key !== undefined) {
+      return updateSeasonPeriodMock(request, isNextSeason, Number(key));
+    }
+    if (request.method === 'POST' && bulkDeleteRanges !== undefined) {
+      return deleteSeasonRangesMock(request, isNextSeason);
+    }
   }
 
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/seasons/add-period`) {
@@ -450,34 +465,6 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     request.url === `${environment.apiBaseUrl}/seasons/delete-period`
   ) {
     return deleteSeasonPeriodMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/seasons/delete-intervals`
-  ) {
-    return deleteSeasonIntervalsMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/seasons/update-interval`
-  ) {
-    return updateSeasonIntervalMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/seasons/add-interval`
-  ) {
-    return addSeasonIntervalMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/seasons/update-period`
-  ) {
-    return updateSeasonPeriodMock(request);
   }
 
   if (

@@ -13,8 +13,8 @@ export class SeasonDatesBehaviour {
   /** First and last day of the current season, or of the next one; null while one of them is missing. */
   rangeOf(isNextSeason: boolean): SeasonPeriodInterval | null {
     const dates = this.dates();
-    const dateFrom = (isNextSeason ? dates?.nextStartsOn : dates?.startsOn) ?? null;
-    const dateTo = (isNextSeason ? dates?.nextEndsOn : dates?.endsOn) ?? null;
-    return dateFrom && dateTo ? { dateFrom, dateTo } : null;
+    const startsOn = (isNextSeason ? dates?.nextStartsOn : dates?.startsOn) ?? null;
+    const endsOn = (isNextSeason ? dates?.nextEndsOn : dates?.endsOn) ?? null;
+    return startsOn && endsOn ? { startsOn, endsOn } : null;
   }
 }

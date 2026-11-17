@@ -3,7 +3,7 @@
   [periods]="periods()"
 >
   <ng-template appServicesPeriodContent let-period>
-    @if (availabilityByPeriod().get(period.idPeriod); as periodAvailability) {
+    @if (availabilityByPeriod().get(period.key); as periodAvailability) {
       <app-services-availability-options
         [form]="periodAvailability.availabilityOptions"
         [isReadonly]="isReadonly()"

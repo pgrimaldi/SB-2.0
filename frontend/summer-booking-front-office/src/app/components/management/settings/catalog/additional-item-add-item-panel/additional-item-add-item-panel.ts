@@ -219,8 +219,8 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
       Object.assign(new PackageSectorPrice(), { idSector: id }),
     );
     const periodPrices = sectors.flatMap(({ id }) =>
-      periods.map(({ idPeriod }) =>
-        Object.assign(new PackagePeriodPrice(), { idSector: id, idPeriod }),
+      periods.map(({ key }) =>
+        Object.assign(new PackagePeriodPrice(), { idSector: id, idPeriod: key }),
       ),
     );
     this.sectors.set(sectors);

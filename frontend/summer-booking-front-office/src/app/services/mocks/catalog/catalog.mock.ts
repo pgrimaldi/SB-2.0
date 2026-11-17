@@ -1097,7 +1097,7 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
       vatRate: 10,
       variants: [{ variantName: 'Doppio', price: 1.8 }],
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01', price: 1.2 }],
+      periodPrices: [{ idPeriod: 0, price: 1.2 }],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
         {
@@ -1579,7 +1579,7 @@ const STANDARD_SERVICE_DETAILS = new Map<string, StandardServiceAddItemRequest>(
       price: 3,
       vatRate: 22,
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01', price: 2.5 }],
+      periodPrices: [{ idPeriod: 0, price: 2.5 }],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
         {
@@ -1959,7 +1959,7 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
       isPeriodPricingEnabled: true,
       periodAvailabilities: [
         {
-          idPeriod: '3a7c1e52-8d4b-4f60-9e21-5b6a7c8d9e01',
+          idPeriod: 0,
           availabilityOptions: [exampleAvailability()],
         },
       ],

@@ -313,7 +313,7 @@ describe('CatalogService', () => {
       vatRate: 10,
       variants: [{ variantName: 'Grande', price: 2 }],
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: 'a1', price: 1.8 }],
+      periodPrices: [{ idPeriod: 1, price: 1.8 }],
       idSectors: ['s1'],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [bookingOption],
@@ -367,7 +367,7 @@ describe('CatalogService', () => {
       vatRate: 10,
       variants: [{ variantName: 'Doppio', price: 1.8 }],
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: 'a1', price: 1.2 }],
+      periodPrices: [{ idPeriod: 1, price: 1.2 }],
       idSectors: ['s1'],
       isOnlinePurchaseEnabled: false,
     };
@@ -484,7 +484,7 @@ describe('CatalogService', () => {
       price: 3,
       vatRate: 22,
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: 'a1', price: 3.5 }],
+      periodPrices: [{ idPeriod: 1, price: 3.5 }],
       idSectors: ['s1'],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
@@ -553,7 +553,7 @@ describe('CatalogService', () => {
       price: 3,
       vatRate: 22,
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: 'a1', price: 4 }],
+      periodPrices: [{ idPeriod: 1, price: 4 }],
       idSectors: ['s1'],
       isOnlinePurchaseEnabled: false,
     };
@@ -696,7 +696,7 @@ describe('CatalogService', () => {
       icon: StandardServiceIcon.Surfing,
       isHighlighted: true,
       isPeriodPricingEnabled: true,
-      periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [periodOption.clean] }],
+      periodAvailabilities: [{ idPeriod: 1, availabilityOptions: [periodOption.clean] }],
       idSectors: ['s1'],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
@@ -715,7 +715,7 @@ describe('CatalogService', () => {
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
           periodAvailabilities: [
             {
-              idPeriod: 'a1',
+              idPeriod: 1,
               availabilityOptions: [periodOption.sent],
               unexpectedFlag: 'extra-field',
             },
@@ -772,7 +772,7 @@ describe('CatalogService', () => {
     const request = {
       idHourlyService: 'h1',
       isPeriodPricingEnabled: true,
-      periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [option.clean] }],
+      periodAvailabilities: [{ idPeriod: 1, availabilityOptions: [option.clean] }],
       idSectors: ['s1'],
       isOnlinePurchaseEnabled: false,
     };
@@ -781,7 +781,7 @@ describe('CatalogService', () => {
       .updateHourlyServicePrices(
         Object.assign(new HourlyServiceUpdatePricesRequest(), {
           ...request,
-          periodAvailabilities: [{ idPeriod: 'a1', availabilityOptions: [option.sent] }],
+          periodAvailabilities: [{ idPeriod: 1, availabilityOptions: [option.sent] }],
           unexpectedFlag: 'extra-field',
         }),
       )
