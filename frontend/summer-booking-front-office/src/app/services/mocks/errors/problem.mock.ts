@@ -21,7 +21,7 @@ export interface MockFieldError extends ApiFieldError {
 export interface MockProblemDetails {
   /** For developers and logs, never shown to the user. */
   title: string;
-  args?: ApiProblemArgs;
+  args?: Readonly<Record<string, ApiProblemArgs[string] | readonly string[]>>;
   errors?: readonly MockFieldError[];
 }
 

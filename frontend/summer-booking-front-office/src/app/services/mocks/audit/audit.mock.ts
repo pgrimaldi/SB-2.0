@@ -14,10 +14,10 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 type AuditEntryRow = AuditEntryItem & { propertyId: number; idUser: string };
 
-const SPOT_ADDED = 'booking.spot_added';
-const REPEATED = 'booking.repeated';
-const MOVED = 'booking.moved';
-const DATES_CHANGED = 'booking.dates_changed';
+const SPOTS_CREATED = 'catalog.map_spots_created';
+const PERIOD_UPDATED = 'catalog.tariff_period_updated';
+const SPOT_UPDATED = 'catalog.map_spot_updated';
+const SEASON_UPDATED = 'catalog.season_updated';
 
 /** The same ids as the users of identity.mock.ts. */
 const USER_NUMBERS: Record<string, string> = {
@@ -35,19 +35,19 @@ const USER_NUMBERS: Record<string, string> = {
 };
 
 const AUDIT_ENTRIES: AuditEntryRow[] = [
-  entry(1, '01', '1234', '123', 'Giulia Ferri', 'A1', SPOT_ADDED, 1),
-  entry(1, '02', '5678', '321', 'Marco Bianchi', 'A2', REPEATED, 3),
-  entry(1, '03', '9123', '456', 'Sara Conti', 'A6', MOVED, 20),
-  entry(1, '04', '4567', '654', 'Luca Moretti', 'A12', SPOT_ADDED, 30),
-  entry(1, '05', '7890', '678', 'Elena Gallo', 'B13', REPEATED, 52),
-  entry(1, '06', '1254', '876', 'Paolo Costa', 'C4', MOVED, 75),
-  entry(1, '07', '5236', '789', 'Chiara Fontana', 'D7', SPOT_ADDED, 100),
-  entry(1, '08', '8536', '987', 'Davide Rinaldi', 'A7', REPEATED, 140),
-  entry(1, '09', '0586', '890', 'Anna Caruso', 'B11', REPEATED, 200),
-  entry(1, '10', '1839', '098', 'Matteo Lombardi', 'C9', DATES_CHANGED, 400),
-  entry(1, '11', '2741', '123', 'Giulia Ferri', 'D2', DATES_CHANGED, 900),
-  entry(1, '12', '3365', '321', 'Marco Bianchi', 'B5', MOVED, 2000),
-  entry(2, '13', '7012', '555', 'Laura Testa', 'A3', SPOT_ADDED, 10),
+  entry(1, '01', '1234', '123', 'Giulia Ferri', 'A1', SPOTS_CREATED, 1),
+  entry(1, '02', '5678', '321', 'Marco Bianchi', 'A2', PERIOD_UPDATED, 3),
+  entry(1, '03', '9123', '456', 'Sara Conti', 'A6', SPOT_UPDATED, 20),
+  entry(1, '04', '4567', '654', 'Luca Moretti', 'A12', SPOTS_CREATED, 30),
+  entry(1, '05', '7890', '678', 'Elena Gallo', 'B13', PERIOD_UPDATED, 52),
+  entry(1, '06', '1254', '876', 'Paolo Costa', 'C4', SPOT_UPDATED, 75),
+  entry(1, '07', '5236', '789', 'Chiara Fontana', 'D7', SPOTS_CREATED, 100),
+  entry(1, '08', '8536', '987', 'Davide Rinaldi', 'A7', PERIOD_UPDATED, 140),
+  entry(1, '09', '0586', '890', 'Anna Caruso', 'B11', PERIOD_UPDATED, 200),
+  entry(1, '10', '1839', '098', 'Matteo Lombardi', 'C9', SEASON_UPDATED, 400),
+  entry(1, '11', '2741', '123', 'Giulia Ferri', 'D2', SEASON_UPDATED, 900),
+  entry(1, '12', '3365', '321', 'Marco Bianchi', 'B5', SPOT_UPDATED, 2000),
+  entry(2, '13', '7012', '555', 'Laura Testa', 'A3', SPOTS_CREATED, 10),
 ];
 
 const MAX_PAGE_SIZE = 100;

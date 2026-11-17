@@ -13,9 +13,12 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  FieldTree,
   FormField,
+  MAX_LENGTH,
   TreeValidationResult,
   form,
+  metadata,
   readonly,
   submit,
   validate,
@@ -35,10 +38,11 @@ import {
   apiFieldErrorsOrGeneral,
 } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import { ApiProblem, ApiProblemArgs } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodAddRequest } from '../../../../../entities/settings/seasons/season-period-add-request';
 import { SeasonPeriodInterval } from '../../../../../entities/settings/seasons/season-period-interval';
 import {
+  MAX_SEASON_PERIOD_NAME_LENGTH,
   MAX_SEASON_PERIOD_RANGES,
   SeasonPeriodItem,
 } from '../../../../../entities/settings/seasons/season-period-item';
@@ -93,6 +97,7 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
   private readonly draft = signal(new SeasonPeriodAddRequest());
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.name);
+    metadata(path.name, MAX_LENGTH, () => MAX_SEASON_PERIOD_NAME_LENGTH);
     validate(path.name, ({ value }) =>
       isTextTaken(
         value(),
@@ -120,7 +125,9 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
     ...this.seasonIntervals(),
     ...this.draft().ranges,
   ]);
-  protected readonly canSave = computed(() => this.draftForm().valid());
+  /** The backend creates a period only in a season with both its days. */
+  protected readonly isSeasonMissing = computed(() => !this.season());
+  protected readonly canSave = computed(() => this.draftForm().valid() && !this.isSeasonMissing());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -167,28 +174,40 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
           };
           return nameTaken;
         }
-        const errors = problem.errors ?? [];
-        if (errors.some(({ field, code }) => field === 'ranges' && code === 'validation.invalid')) {
-          const rangesInvalid: ValidationError.WithFieldTree & { readonly max: number } = {
-            kind: 'seasons.ranges.invalid',
-            max: MAX_SEASON_PERIOD_RANGES,
+        if (problem.code === 'pricing.period_outside_season') {
+          const outsideSeason: ApiValidationError = {
+            kind: 'api',
             fieldTree: this.draftForm.ranges,
+            code: problem.code,
           };
-          const others = errors.filter(({ field }) => field !== 'ranges');
-          return others.length
-            ? [
-                rangesInvalid,
-                ...apiFieldErrorsOrGeneral(
-                  { ...problem, errors: others },
-                  this.draftForm,
-                  (general) => this.error.set(general),
-                ),
-              ]
-            : rangesInvalid;
+          return outsideSeason;
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
-        );
+        const errors = problem.errors ?? [];
+        const isOfRanges = (field: string): boolean =>
+          field === 'ranges' || field.startsWith('ranges[');
+        const rangeErrors = errors
+          .filter(({ field }) => isOfRanges(field))
+          .map(({ field, code, args }): ValidationError.WithFieldTree =>
+            field === 'ranges' && code === 'validation.invalid'
+              ? rangesInvalidOf(this.draftForm.ranges)
+              : apiErrorOf(this.draftForm.ranges, code, args),
+          );
+        if (!rangeErrors.length) {
+          return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+            this.error.set(general),
+          );
+        }
+        const others = errors.filter(({ field }) => !isOfRanges(field));
+        return others.length
+          ? [
+              ...rangeErrors,
+              ...apiFieldErrorsOrGeneral(
+                { ...problem, errors: others },
+                this.draftForm,
+                (general) => this.error.set(general),
+              ),
+            ]
+          : rangeErrors;
       } finally {
         this.isLoading.set(false);
       }
@@ -230,4 +249,23 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
     this.unsaved.unwatch(this);
     super.ngOnDestroy();
   }
+}
+
+/** Too many date ranges, or some with days in common: one clear text for both, as the backend says. */
+function rangesInvalidOf(fieldTree: FieldTree<unknown>): ValidationError.WithFieldTree {
+  const rangesInvalid: ValidationError.WithFieldTree & { readonly max: number } = {
+    kind: 'seasons.ranges.invalid',
+    max: MAX_SEASON_PERIOD_RANGES,
+    fieldTree,
+  };
+  return rangesInvalid;
+}
+
+function apiErrorOf(
+  fieldTree: FieldTree<unknown>,
+  code: string,
+  args: ApiProblemArgs | undefined,
+): ValidationError.WithFieldTree {
+  const apiError: ApiValidationError = { kind: 'api', fieldTree, code, args };
+  return apiError;
 }

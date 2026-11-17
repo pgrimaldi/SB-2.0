@@ -111,7 +111,12 @@
       "email_taken": "Un compte existe déjà avec cet e-mail.",
       "not_found": "L'utilisateur n'existe plus : il a peut-être déjà été supprimé.",
       "cannot_modify_self": "Vous ne pouvez pas supprimer ou modifier votre propre compte ici.",
-      "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau."
+      "role_not_assignable": "Ce compte ne peut pas être géré depuis le panneau.",
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."
+    },
+    "audit": {
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
     },
     "map": {
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
@@ -123,7 +128,11 @@
       "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo.",
       "invalid_pdf": "Le fichier doit être un PDF et ne pas dépasser 10 Mo.",
       "gallery_full": "La galerie est pleine : vous pouvez charger jusqu'à {{max}} images.",
-      "photo_not_found": "L'image n'existe plus : elle a peut-être déjà été supprimée."
+      "photo_not_found": "L'image n'existe plus : elle a peut-être déjà été supprimée.",
+      "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement.",
+      "property_not_found": "L'établissement de votre compte est introuvable. Déconnectez-vous et reconnectez-vous ; si cela se reproduit, contactez l'assistance.",
+      "country_not_found": "Le pays choisi n'est plus disponible : choisissez-en un autre.",
+      "sector_not_found": "Le secteur/la rangée n'existe plus : il a peut-être déjà été supprimé."
     },
     "pricing": {
       "season_required": "Définissez d'abord les dates de la saison.",
@@ -132,7 +141,8 @@
       "period_name_taken": "Une période porte déjà ce nom.",
       "period_outside_season": "Les dates de la période doivent être comprises dans la saison.",
       "period_range_not_found": "La plage de dates n'existe plus : elle a peut-être déjà été supprimée.",
-      "period_ranges_required": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom."
+      "period_ranges_required": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom.",
+      "period_in_use": "La période a des prix dans les tarifs {{priceLists}} : retirez d'abord ses prix de ces tarifs, puis supprimez-la."
     }
   },
   "alert": {
@@ -940,6 +950,114 @@
             "occurred_at": "Date et heure"
           },
           "actions": {
+            "identity": {
+              "login_succeeded": "Connexion réussie",
+              "login_failed": "Échec de la connexion",
+              "login_locked": "Connexion bloquée après trop de tentatives",
+              "login_app_denied": "Connexion à cette application refusée",
+              "second_factor_requested": "Code de vérification demandé",
+              "second_factor_failed": "Code de vérification erroné",
+              "refresh_reuse_detected": "Session fermée après un accès suspect",
+              "logout": "Déconnexion effectuée",
+              "password_reset_requested": "Réinitialisation du mot de passe demandée",
+              "password_reset_completed": "Mot de passe réinitialisé",
+              "password_changed": "Mot de passe modifié",
+              "account_registered": "Compte créé",
+              "account_deleted": "Compte supprimé",
+              "session_revoked": "Session fermée",
+              "user_created": "Utilisateur ajouté",
+              "user_updated": "Utilisateur modifié",
+              "user_deleted": "Utilisateur supprimé",
+              "security_settings_changed": "Paramètres de sécurité modifiés",
+              "external_token_issued": "Accès externe autorisé",
+              "external_token_denied": "Accès externe refusé",
+              "customer_created": "Client ajouté",
+              "customer_updated": "Données client modifiées",
+              "customer_deleted": "Client supprimé",
+              "customers_exported": "Clients exportés",
+              "contract_acceptance_changed": "Acceptation du contrat modifiée"
+            },
+            "catalog": {
+              "inventory_item_created": "Article du stock ajouté",
+              "inventory_item_updated": "Article du stock modifié",
+              "inventory_item_deleted": "Article du stock supprimé",
+              "season_updated": "Dates de la saison modifiées",
+              "tariff_period_created": "Période ajoutée",
+              "tariff_period_updated": "Période modifiée",
+              "tariff_period_deleted": "Période supprimée",
+              "sector_created": "Secteur/rangée ajouté",
+              "sector_updated": "Secteur/rangée modifié",
+              "sector_deleted": "Secteur/rangée supprimé",
+              "map_settings_updated": "Paramètres de la carte modifiés",
+              "map_background_updated": "Fond de la carte modifié",
+              "map_icons_updated": "Icônes de la carte modifiées",
+              "map_spots_created": "Emplacements ajoutés à la carte",
+              "map_spot_updated": "Emplacement de la carte modifié",
+              "map_spots_deleted": "Emplacements supprimés de la carte",
+              "map_grid_changed": "Grille de la carte modifiée",
+              "map_reset": "Carte réinitialisée",
+              "property_info_updated": "Informations de l'établissement modifiées",
+              "property_amenities_updated": "Services de l'établissement modifiés",
+              "property_photos_updated": "Photos de l'établissement modifiées",
+              "property_documents_updated": "Documents de l'établissement modifiés",
+              "online_settings_updated": "Paramètres des réservations en ligne modifiés",
+              "service_online_settings_updated": "Options en ligne des services modifiées",
+              "stay_limits_updated": "Limites de séjour modifiées",
+              "online_legend_updated": "Légende des réservations en ligne modifiée",
+              "service_created": "Service ajouté",
+              "service_updated": "Service modifié",
+              "service_deleted": "Service supprimé",
+              "automatic_price_created": "Prix automatique ajouté",
+              "automatic_price_updated": "Prix automatique modifié",
+              "automatic_price_deleted": "Prix automatique supprimé",
+              "table_service_created": "Service de tables ajouté",
+              "table_service_updated": "Service de tables modifié",
+              "table_service_deleted": "Service de tables supprimé",
+              "price_list_created": "Forfait ou article supplémentaire ajouté",
+              "price_list_updated": "Forfait ou article supplémentaire modifié",
+              "price_list_deleted": "Forfait ou article supplémentaire supprimé",
+              "price_list_duplicated": "Forfait ou article supplémentaire dupliqué",
+              "price_lists_imported": "Forfaits et articles supplémentaires importés",
+              "reduced_season_created": "Prix saisonnier réduit ajouté",
+              "reduced_season_updated": "Prix saisonnier réduit modifié",
+              "reduced_season_deleted": "Prix saisonnier réduit supprimé",
+              "discount_created": "Remise/bon ajouté",
+              "discount_updated": "Remise/bon modifié",
+              "discount_deleted": "Remise/bon supprimé",
+              "agreement_partner_created": "Convention ajoutée",
+              "agreement_partner_updated": "Convention modifiée",
+              "agreement_partner_deleted": "Convention supprimée",
+              "agreement_partner_duplicated": "Convention dupliquée",
+              "agreement_price_list_created": "Liste de prix de la convention ajoutée",
+              "agreement_price_list_updated": "Liste de prix de la convention modifiée",
+              "agreement_price_list_deleted": "Liste de prix de la convention supprimée",
+              "agreement_report_cancelled": "Rapport de la convention annulé",
+              "revenue_settings_updated": "Paramètres du revenue modifiés",
+              "suggested_prices_computed": "Prix suggérés calculés",
+              "suggested_prices_applied": "Prix suggérés appliqués",
+              "revenue_weights_updated": "Pondérations du revenue modifiées",
+              "revenue_standard_periods_updated": "Périodes standard du revenue modifiées",
+              "platform_property_status_changed": "Statut de l'établissement modifié par la plateforme",
+              "platform_property_trashed": "Établissement placé dans la corbeille par la plateforme",
+              "platform_property_restored": "Établissement restauré par la plateforme",
+              "platform_property_purged": "Établissement supprimé définitivement par la plateforme",
+              "platform_property_showcase_updated": "Vitrine de l'établissement modifiée par la plateforme",
+              "platform_map_icon_saved": "Icône de la carte enregistrée par la plateforme",
+              "platform_map_icon_deleted": "Icône de la carte supprimée par la plateforme",
+              "platform_beach_element_saved": "Élément de plage enregistré par la plateforme",
+              "platform_beach_element_deleted": "Élément de plage supprimé par la plateforme",
+              "platform_badge_saved": "Badge enregistré par la plateforme",
+              "platform_badge_deleted": "Badge supprimé par la plateforme",
+              "platform_region_saved": "Région enregistrée par la plateforme",
+              "platform_region_deleted": "Région supprimée par la plateforme",
+              "platform_showcase_updated": "Vitrine modifiée par la plateforme",
+              "service_duplicated": "Service dupliqué",
+              "automatic_price_duplicated": "Prix automatique dupliqué",
+              "table_service_duplicated": "Service de tables dupliqué"
+            },
+            "audit": {
+              "entries_exported": "Journal exporté"
+            },
             "booking": {
               "checked_in": "Check-in",
               "checked_out": "Check-out",
@@ -956,9 +1074,6 @@
               "renewed": "Réservation renouvelée",
               "cancelled": "Réservation annulée"
             },
-            "customer": {
-              "updated": "Données client modifiées"
-            },
             "payment": {
               "deposit_added": "Acompte ajouté",
               "balance_added": "Solde ajouté",
@@ -966,13 +1081,6 @@
               "discount_code_applied": "Code de réduction appliqué",
               "discount_applied": "Réduction appliquée",
               "increase_added": "Supplément ajouté"
-            },
-            "property": {
-              "info_updated": "Informations de l'établissement modifiées"
-            },
-            "identity": {
-              "user_created": "Utilisateur ajouté",
-              "user_deleted": "Utilisateur supprimé"
             },
             "cash": {
               "pre_bill_printed": "Pré-addition imprimée",
@@ -991,32 +1099,6 @@
             "order": {
               "marked_done": "Commande marquée comme servie",
               "marked_not_done": "Commande marquée comme non servie"
-            },
-            "price_list": {
-              "package_updated": "Forfait de la liste de prix modifié",
-              "extra_item_updated": "Article supplémentaire de la liste de prix modifié",
-              "package_created": "Forfait de la liste de prix ajouté",
-              "extra_item_created": "Article supplémentaire de la liste de prix ajouté",
-              "package_deleted": "Forfait de la liste de prix supprimé",
-              "extra_item_deleted": "Article supplémentaire de la liste de prix supprimé",
-              "package_duplicated": "Forfait de la liste de prix dupliqué",
-              "extra_item_duplicated": "Article supplémentaire de la liste de prix dupliqué"
-            },
-            "warehouse": {
-              "item_updated": "Article du stock modifié",
-              "item_created": "Article du stock ajouté",
-              "item_deleted": "Article du stock supprimé"
-            },
-            "season": {
-              "dates_updated": "Dates de la saison modifiées",
-              "period_updated": "Période modifiée",
-              "period_created": "Période ajoutée",
-              "period_deleted": "Période supprimée"
-            },
-            "map": {
-              "sector_updated": "Secteur/rangée modifié",
-              "sector_created": "Secteur/rangée ajouté",
-              "sector_deleted": "Secteur/rangée supprimé"
             }
           },
           "not_implemented": "Le service n'est pas encore implémenté",
@@ -1927,7 +2009,9 @@
       "ranges": {
         "max": "Une période peut avoir au maximum {{max}} plages de dates.",
         "invalid": "Plages de dates non valides : une période peut en avoir au maximum {{max}} et elles ne peuvent pas avoir de jours en commun."
-      }
+      },
+      "season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison en cours.",
+      "next_season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison prochaine."
     }
   },
   "unsaved_changes": {

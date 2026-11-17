@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of, shareReplay } from 'rxjs';
-import { ComboboxItem } from '../../entities/combobox/combobox-item';
 import { BathhouseGeneralInformation } from '../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseServiceItem } from '../../entities/settings/bathhouse-configuration/bathhouse-service-item';
+import { Country } from '../../entities/shared/country';
 import { CatalogService } from '../../services/api/catalog/catalog.service';
 
 /**
@@ -18,7 +18,7 @@ export class BathhouseConfigurationCacheBehaviour {
   private generalInformationAnswer: Observable<BathhouseGeneralInformation> | null = null;
   private servicesAnswer: Observable<BathhouseServiceItem[]> | null = null;
   private mediaAnswer: Observable<BathhouseMedia> | null = null;
-  private countriesAnswer: Observable<ComboboxItem[]> | null = null;
+  private countriesAnswer: Observable<Country[]> | null = null;
 
   generalInformation(): Observable<BathhouseGeneralInformation> {
     this.generalInformationAnswer ??= this.catalog
@@ -50,8 +50,8 @@ export class BathhouseConfigurationCacheBehaviour {
     return this.mediaAnswer;
   }
 
-  countries(): Observable<ComboboxItem[]> {
-    this.countriesAnswer ??= this.catalog.countriesCombobox().pipe(shareReplay(1));
+  countries(): Observable<Country[]> {
+    this.countriesAnswer ??= this.catalog.countries().pipe(shareReplay(1));
     return this.countriesAnswer;
   }
 }

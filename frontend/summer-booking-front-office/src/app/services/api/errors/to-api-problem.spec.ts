@@ -114,6 +114,26 @@ describe('toApiProblem', () => {
     );
   });
 
+  it('should turn a list of texts in the args into one text, cut when too long', () => {
+    const problem = toApiProblem(
+      answer(409, {
+        code: 'pricing.period_in_use',
+        args: {
+          priceLists: ['Listino 2026', 'Hotel Mare – Listino base'],
+          long: ['x'.repeat(150), 'y'.repeat(150)],
+          mixed: ['Listino', 3],
+          many: Array.from({ length: 21 }, (_, index) => `L${index + 1}`),
+        },
+      }),
+    );
+
+    expect(problem.args).toEqual({
+      priceLists: 'Listino 2026, Hotel Mare – Listino base',
+      long: `${'x'.repeat(150)}, ${'y'.repeat(47)}…`,
+      many: `${Array.from({ length: 20 }, (_, index) => `L${index + 1}`).join(', ')}, …`,
+    });
+  });
+
   it('should keep at most 50 field errors', () => {
     const errors = Array.from({ length: 60 }, (_, index) => ({
       field: `field${index}`,

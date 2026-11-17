@@ -36,6 +36,7 @@ import { TableServiceAddItemRequest } from '../../../entities/settings/services/
 import { TableServiceUpdateAvailabilityBookingsRequest } from '../../../entities/settings/services/table-service-update-availability-bookings-request';
 import { TableServiceUpdateGeneralRequest } from '../../../entities/settings/services/table-service-update-general-request';
 import { Language } from '../../../entities/shared/language';
+import { Country } from '../../../entities/shared/country';
 import { CatalogService } from './catalog.service';
 
 describe('CatalogService', () => {
@@ -49,18 +50,21 @@ describe('CatalogService', () => {
     };
   };
 
-  it('should ask for the countries with a GET and no parameters', () => {
+  it("should read the backend's countries with a GET and no parameters, code and name only", () => {
     const { catalog, controller } = setup();
+    let countries: Country[] | undefined;
 
-    catalog.countriesCombobox().subscribe();
+    catalog.countries().subscribe((answer) => (countries = answer));
 
-    const request = controller.expectOne(
+    const call = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/countries-combobox` &&
+        url === `${environment.apiBaseUrl}/catalog/lookups/countries` &&
         params.keys().length === 0,
-    ).request;
-    expect(request.body).toBeNull();
+    );
+    expect(call.request.body).toBeNull();
+    call.flush([{ code: 'DE', name: 'Germania', extra: true }]);
+    expect(countries).toEqual([{ code: 'DE', name: 'Germania' }]);
     controller.verify();
   });
 

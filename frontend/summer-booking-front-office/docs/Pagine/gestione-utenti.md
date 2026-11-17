@@ -99,10 +99,14 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 
 - `app-audit-log-filters-popup` (`components/management/settings/user-management/audit-log-filters-popup/`), copia di
   quello del Database: Azione e Utente a scelta multipla, Annulla / Applica. Largo 48rem, Azione più larga di Utente.
-- Le azioni sono le 52 del catalogo `AUDIT_ACTIONS` (`components/management/settings/user-management/audit-actions.ts`):
-  codice del backend `<modulo>.<azione>` e icona `UserManagement_Action<Nome>.svg` (15 disegni) o
-  `GeneralIcon_CalendarFilled.svg`, nome tradotto in `logs.actions.<modulo>.<azione>` con l'icona prima
-  (`SelectOption.icon`).
+- Le azioni sono le 102 del catalogo `AUDIT_ACTIONS` (`components/management/settings/user-management/audit-actions.ts`):
+  i codici che il backend scrive nel registro dello stabilimento (`AuditActionCodes`, categorie operatore e sicurezza:
+  `identity.*`, `catalog.*`, `audit.*`), con un'icona `UserManagement_Action<Nome>.svg` o
+  `GeneralIcon_CalendarFilled.svg` scelta per tipo di azione (aggiunta, modifica, eliminazione, duplicazione,
+  ripristino, accesso…), nome tradotto in `logs.actions.<modulo>.<azione>` con l'icona prima (`SelectOption.icon`).
+- Le azioni dei moduli che il backend non ha ancora (prenotazioni, pagamenti, cassa, ordini, database, prenotazioni dei
+  tavoli: `booking.*`, `payment.*`, `cash.*`, `order.*`, `database.*`, `table_booking.*`) hanno già i loro testi nelle 7
+  lingue ma non sono nel filtro: i codici sono chiesti al backend (sezione 9 del documento di richieste della pagina).
 - L'elenco scorre, è largo quanto il nome più lungo e mai meno del campo, con ogni nome su una riga sola in ogni lingua
   (`isPanelSizedToOptions` di `app-filled-multi-select`).
 - Gli utenti arrivano da `user-combobox` a ogni apertura. Azioni e utenti sono in ordine alfabetico nella lingua

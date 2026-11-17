@@ -32,6 +32,9 @@ export const API_ERROR_CODES = [
   'account.not_found',
   'account.cannot_modify_self',
   'account.role_not_assignable',
+  'account.property_required',
+  'audit.property_required',
+  'audit.export_too_large',
   'map.spots_outside_grid',
   'map.invalid_image',
   'catalog.sector_in_use',
@@ -40,6 +43,10 @@ export const API_ERROR_CODES = [
   'catalog.invalid_pdf',
   'catalog.gallery_full',
   'catalog.photo_not_found',
+  'catalog.property_required',
+  'catalog.property_not_found',
+  'catalog.country_not_found',
+  'catalog.sector_not_found',
   'pricing.season_required',
   'pricing.next_season_required',
   'pricing.period_not_found',
@@ -47,6 +54,7 @@ export const API_ERROR_CODES = [
   'pricing.period_outside_season',
   'pricing.period_range_not_found',
   'pricing.period_ranges_required',
+  'pricing.period_in_use',
 ] as const;
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[number];

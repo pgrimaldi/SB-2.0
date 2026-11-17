@@ -139,7 +139,7 @@ describe('SeasonService', () => {
     controller.verify();
   });
 
-  it('should send the name, the date ranges and the season of the new period, nothing else', () => {
+  it('should create the period of the next season with its name and date ranges as days, nothing else', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -149,24 +149,39 @@ describe('SeasonService', () => {
       ...new SeasonPeriodAddRequest(),
       name: 'Bassa stagione',
       ranges: [
-        { startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z', extra: 1 },
+        { startsOn: '2027-05-01T00:00:00.000Z', endsOn: '2027-06-15T00:00:00.000Z', extra: 1 },
       ],
       extra: true,
     };
+    let created: SeasonPeriodItem | undefined;
 
-    seasons.addPeriod(false, period).subscribe();
+    seasons.addPeriod(true, period).subscribe((answer) => (created = answer));
 
-    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/add-period`).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({
+    const call = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/next-season/tariff-periods`,
+    );
+    expect(call.request.method).toBe('POST');
+    expect(call.request.body).toEqual({
       name: 'Bassa stagione',
-      ranges: [{ startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z' }],
-      isNextSeason: false,
+      ranges: [{ startsOn: '2027-05-01', endsOn: '2027-06-15' }],
+    });
+    call.flush(
+      {
+        key: 2,
+        name: 'Bassa stagione',
+        ranges: [{ startsOn: '2027-05-01', endsOn: '2027-06-15' }],
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    expect(created).toEqual({
+      key: 2,
+      name: 'Bassa stagione',
+      ranges: [{ startsOn: '2027-05-01T00:00:00.000Z', endsOn: '2027-06-15T00:00:00.000Z' }],
     });
     controller.verify();
   });
 
-  it('should send the key and the season of the period to delete', () => {
+  it('should delete the period of the next season by its key in the route, without a body', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -175,9 +190,11 @@ describe('SeasonService', () => {
 
     seasons.deletePeriod(true, 0).subscribe();
 
-    const request = controller.expectOne(`${environment.apiBaseUrl}/seasons/delete-period`).request;
-    expect(request.method).toBe('POST');
-    expect(request.body).toEqual({ key: 0, isNextSeason: true });
+    const request = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/next-season/tariff-periods/0`,
+    ).request;
+    expect(request.method).toBe('DELETE');
+    expect(request.body).toBeNull();
     controller.verify();
   });
 

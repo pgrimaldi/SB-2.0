@@ -14,8 +14,10 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
+  MAX_LENGTH,
   TreeValidationResult,
   form,
+  metadata,
   readonly,
   submit,
   validate,
@@ -35,7 +37,10 @@ import {
 } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
+import {
+  MAX_SEASON_PERIOD_NAME_LENGTH,
+  SeasonPeriodItem,
+} from '../../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { isTextTaken, requiredText } from '../../../../shared/forms/validators';
@@ -73,6 +78,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   private readonly draft = signal(new SeasonPeriodItem());
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.name);
+    metadata(path.name, MAX_LENGTH, () => MAX_SEASON_PERIOD_NAME_LENGTH);
     validate(path.name, ({ value }) =>
       isTextTaken(value(), this.otherNames()) ? { kind: 'seasons.period_name.taken' } : undefined,
     );

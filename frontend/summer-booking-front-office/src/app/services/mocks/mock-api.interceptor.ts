@@ -35,7 +35,7 @@ import {
   uploadBathhouseDocumentMock,
   uploadBathhouseMainPhotoMock,
   bathhouseConfigurationServicesMock,
-  countriesComboboxMock,
+  lookupCountriesMock,
   deleteBarServiceItemsMock,
   deleteStandardServiceItemsMock,
   duplicateStandardServiceItemsMock,
@@ -114,7 +114,7 @@ import {
   usersListMock,
 } from './identity/identity.mock';
 import {
-  addSeasonPeriodMock,
+  createSeasonPeriodMock,
   deleteSeasonPeriodMock,
   deleteSeasonRangesMock,
   saveSeasonDatesMock,
@@ -451,20 +451,15 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     if (request.method === 'PUT' && key !== undefined) {
       return updateSeasonPeriodMock(request, isNextSeason, Number(key));
     }
+    if (request.method === 'DELETE' && key !== undefined) {
+      return deleteSeasonPeriodMock(request, isNextSeason, Number(key));
+    }
+    if (request.method === 'POST' && key === undefined && bulkDeleteRanges === undefined) {
+      return createSeasonPeriodMock(request, isNextSeason);
+    }
     if (request.method === 'POST' && bulkDeleteRanges !== undefined) {
       return deleteSeasonRangesMock(request, isNextSeason);
     }
-  }
-
-  if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/seasons/add-period`) {
-    return addSeasonPeriodMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/seasons/delete-period`
-  ) {
-    return deleteSeasonPeriodMock(request);
   }
 
   if (
@@ -525,9 +520,9 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/countries-combobox`
+    request.url === `${environment.apiBaseUrl}/catalog/lookups/countries`
   ) {
-    return countriesComboboxMock(request);
+    return lookupCountriesMock(request);
   }
 
   if (

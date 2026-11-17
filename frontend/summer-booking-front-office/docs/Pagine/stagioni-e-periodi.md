@@ -56,8 +56,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 - Ogni tab ne prende primo e ultimo giorno della sua stagione e li passa come `minDate` / `maxDate` ai popup
   Imposta periodo (`app-period-calendar`) e Modifica Intervallo (`app-filled-date-field`): i giorni fuori stagione
   non si scelgono.
-- Il backend rifiuta comunque: `validation.out_of_range` per `add-period`, `pricing.period_outside_season` per il
-  `PUT` del periodo. Se la stagione non ha ancora le due date, nessun limite.
+- Il backend rifiuta comunque, con `pricing.period_outside_season` (creazione e `PUT` del periodo). Se la stagione
+  non ha ancora le due date, nessun limite nei calendari, ma "Imposta periodo" non salva (vedi sotto).
 
 ## Tab Stagione Corrente / Prossima Stagione (`SeasonPeriods`)
 
@@ -69,6 +69,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 - Una sottosezione apribile (`app-expansion-panel`) per ogni periodo della stagione della tab, nell'ordine del
   backend: `GET /api/catalog/tariff-periods` (Stagione Corrente) o `GET /api/catalog/next-season/tariff-periods`
   (Prossima Stagione), API del backend usate così come sono, stabilimento dal token.
+- Ogni sottosezione si apre e si chiude per conto suo: se ne possono tenere aperte più insieme ("Mostra tutti" le
+  apre tutte).
 - `SeasonPeriodItem` ha i nomi del backend: `key` (numero, da 0, distinto per stagione), `name` e `ranges`
   (`SeasonPeriodInterval`: `startsOn`, `endsOn`). Il backend manda i giorni senza ora (`2026-05-01`), che
   `SeasonService` converte a mezzanotte UTC per la pagina e riconverte quando li manda. Gli intervalli non hanno un id.
@@ -109,8 +111,13 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 
 - A sinistra del nome di ogni periodo un cestino (`app-icon-button` nello slot `appExpansionPanelStart`, tooltip
   "Elimina"): apre `app-delete-items-popup` ("Vuoi eliminare il periodo …? Verranno eliminati anche tutti i suoi
-  intervalli di date se presenti."), poi `POST /api/seasons/delete-period` (corpo `{ key, isNextSeason }`) con lo
-  spinner a pagina intera e ricarica dei periodi della tab; errore in "Operazione non riuscita".
+  intervalli di date se presenti."), poi l'API del backend `DELETE /api/catalog/tariff-periods/{key}` (o
+  `/api/catalog/next-season/tariff-periods/{key}`), senza corpo, con lo spinner a pagina intera e ricarica dei periodi
+  della tab; errore in "Operazione non riuscita".
+- Un periodo della stagione corrente con prezzi in qualche listino non si elimina: il backend risponde
+  `pricing.period_in_use` con i nomi dei listini e il popup dice "Il periodo ha dei prezzi nei listini …: togli prima
+  i suoi prezzi da questi listini, poi eliminalo.". Il controllo sui servizi è chiesto al backend (sezione 3 del
+  documento di richieste della pagina).
 - Subito a destra del nome (`appExpansionPanelTitleAside`) una matita (tooltip "Modifica") e un "+"
   (`Seasons_AddInterval.svg`, il + sottile di Aggiungi nuova regola nell'azzurro di matita e cestino, tooltip
   "Aggiungi intervallo").
@@ -121,16 +128,27 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 
 ## Popup
 
-- "Imposta periodo" (`app-season-period-add-popup`, da "Aggiungi periodo"): nome del periodo (obbligatorio) e
-  `app-period-calendar` così com'è, solo a clic, con almeno un intervallo e al massimo 20 (oltre, sotto il
-  calendario: `invalidate.seasons.ranges.max`, "Un periodo può avere al massimo 20 intervalli di date."). Salva manda `SeasonPeriodAddRequest`
-  (`name`, `ranges`), con l'`isNextSeason` della tab, a `POST /api/seasons/add-period` e ricarica i periodi della tab.
+- "Imposta periodo" (`app-season-period-add-popup`, da "Aggiungi periodo"): nome del periodo (obbligatorio, al
+  massimo 80 caratteri come la colonna `name` del database: `MAX_SEASON_PERIOD_NAME_LENGTH` con `metadata(…,
+  MAX_LENGTH, …)`, oltre non si scrive) e `app-period-calendar` così com'è, solo a clic, con almeno un intervallo e al
+  massimo 20 (oltre, sotto il calendario: `invalidate.seasons.ranges.max`, "Un periodo può avere al massimo 20
+  intervalli di date.").
+  - Se la stagione della tab non ha le due date salvate (`season` vuoto), sopra i bottoni compare
+    `invalidate.seasons.season_required` / `next_season_required` ("Imposta e salva prima le date di inizio e fine
+    della stagione corrente." / "… della prossima stagione.") e Salva resta spento, come chiederebbe il backend.
+  - Salva manda `SeasonPeriodAddRequest` (`name`, `ranges` come giorni) all'API del backend
+    `POST /api/catalog/tariff-periods` (o `/api/catalog/next-season/tariff-periods`), usata così com'è: risponde 201
+    con il periodo creato (con la sua `key`), che la tab non usa: ricarica i periodi.
+  - Errori del backend: `name`, `pricing.period_name_taken` e `validation.max_length` sotto il nome; `ranges`,
+    `ranges[0]` e `pricing.period_outside_season` sotto il calendario; gli altri (es. `pricing.season_required`,
+    `catalog.property_required`) sopra i bottoni.
 - Gli altri tre popup salvano tutti il periodo intero con l'API del backend
   `PUT /api/catalog/tariff-periods/{key}` (o `/api/catalog/next-season/tariff-periods/{key}`), corpo
   `SeasonPeriodUpdateRequest` (`name` e tutti i `ranges`, anche quelli che non cambiano, come giorni); risponde 200
   con il periodo salvato e la tab ricarica i periodi:
   - "Modifica Periodo" (`app-season-period-edit-popup`, dalla matita del periodo): il solo campo "Nome del periodo",
-    obbligatorio e già riempito, Annulla e Salva; manda il nuovo nome con gli intervalli che il periodo ha.
+    obbligatorio (al massimo 80 caratteri, come in Imposta periodo) e già riempito, Annulla e Salva; manda il nuovo
+    nome con gli intervalli che il periodo ha.
   - "Aggiungi intervallo" (`app-season-interval-add-popup`, dal "+"): copia di Modifica Intervallo con le date vuote e
     le stesse regole (giorni della stagione, Al da Dal in poi); manda gli intervalli del periodo più il nuovo.
   - "Modifica Intervallo" (`app-season-interval-edit-popup`, dalla matita della riga): Data inizio e Data fine,
@@ -156,8 +174,10 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   - Imposta periodo: `noOverlaps` sulla lista, anche tra i suoi intervalli;
   - Aggiungi intervallo e Modifica Intervallo: `noOverlap` sul form (la modifica esclude il proprio intervallo).
 - Validatori in `components/shared/forms/validators.ts`. Il messaggio `invalidate.overlap` sta sopra i bottoni e
-  Salva resta spento; `add-period` risponde `validation.invalid`, mentre il `PUT` del backend controlla le
-  sovrapposizioni solo dentro lo stesso periodo.
+  Salva resta spento. Il backend controlla le sovrapposizioni solo dentro lo stesso periodo (vincolo
+  `ex_catalog_pricing_tariff_periods_no_overlap` della tabella `catalog.pricing_tariff_periods`): quelle tra periodi
+  diversi le impedisce solo il frontend; il controllo è chiesto al backend (sezione 4 del documento di richieste della
+  pagina, codice `pricing.period_overlap`).
 - Di solito il messaggio non compare, perché i giorni presi sono grigi (`disabledPeriods`):
   - in Imposta periodo `app-period-calendar` riceve gli intervalli della stagione e quelli già scelti nel popup e,
     dopo il primo clic, mette in grigio anche i giorni dal prossimo intervallo preso in poi;

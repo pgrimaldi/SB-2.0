@@ -13,7 +13,6 @@ import { onlyFieldsOf } from '../only-fields-of';
 @Injectable({ providedIn: 'root' })
 export class SeasonService {
   private readonly httpClient = inject(HttpClient);
-  private readonly endpoint = `${environment.apiBaseUrl}/seasons`;
 
   /** For the property of the token. Answers 204 with no body while the season is not set. */
   readonly seasonDates = (): Observable<SeasonDates> =>
@@ -33,17 +32,21 @@ export class SeasonService {
       .get<SeasonPeriodItem[] | null>(periodsEndpoint(isNextSeason))
       .pipe(map((answer) => (Array.isArray(answer) ? answer.map(periodOf) : [])));
 
-  /** A period of the current season, or of the next one with `isNextSeason`. Answers 204 with no body. */
-  readonly addPeriod = (isNextSeason: boolean, request: SeasonPeriodAddRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/add-period`, {
-      ...onlyFieldsOf(SeasonPeriodAddRequest, request),
-      ranges: request.ranges.map((range) => onlyFieldsOf(SeasonPeriodInterval, range)),
-      isNextSeason,
-    });
+  /** A period of the current season, or of the next one. Answers 201 with the period created. */
+  readonly addPeriod = (
+    isNextSeason: boolean,
+    request: SeasonPeriodAddRequest,
+  ): Observable<SeasonPeriodItem> =>
+    this.httpClient
+      .post<SeasonPeriodItem>(periodsEndpoint(isNextSeason), {
+        ...onlyFieldsOf(SeasonPeriodAddRequest, request),
+        ranges: request.ranges.map(rangeDaysOf),
+      })
+      .pipe(map(periodOf));
 
   /** The period with all its date intervals. Answers 204 with no body. */
   readonly deletePeriod = (isNextSeason: boolean, key: number): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-period`, { key, isNextSeason });
+    this.httpClient.delete<void>(`${periodsEndpoint(isNextSeason)}/${key}`);
 
   /** Name and all the date intervals of the period, the ones it keeps too. Answers 200 with the period saved. */
   readonly updatePeriod = (

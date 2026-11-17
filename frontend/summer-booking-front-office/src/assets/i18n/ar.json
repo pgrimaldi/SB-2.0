@@ -111,7 +111,12 @@
       "email_taken": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
       "not_found": "المستخدم لم يعد موجودًا: ربما تم حذفه بالفعل.",
       "cannot_modify_self": "لا يمكنك حذف حسابك أو تعديله من هنا.",
-      "role_not_assignable": "لا يمكن إدارة هذا الحساب من اللوحة."
+      "role_not_assignable": "لا يمكن إدارة هذا الحساب من اللوحة.",
+      "property_required": "حسابك غير مرتبط بأي منشأة: سجّل الدخول بحساب المنشأة."
+    },
+    "audit": {
+      "property_required": "حسابك غير مرتبط بأي منشأة: سجّل الدخول بحساب المنشأة.",
+      "export_too_large": "عدد الإدخالات المراد تصديرها {total, number, integer}، لكن يمكن تصدير {max, number, integer} كحد أقصى: ضيّق الفترة أو عوامل التصفية ثم أعد المحاولة."
     },
     "map": {
       "spots_outside_grid": "توجد مواقع خارج هذه الأبعاد: يلزم {{rows}} صفوف على الأقل و{{columns}} عناصر في كل صف.",
@@ -123,7 +128,11 @@
       "invalid_image": "يجب أن تكون الصورة بصيغة PNG أو JPEG أو WebP وألا يتجاوز حجمها 5 ميغابايت.",
       "invalid_pdf": "يجب أن يكون الملف بصيغة PDF وألا يتجاوز حجمه 10 ميغابايت.",
       "gallery_full": "المعرض ممتلئ: يمكنك تحميل {{max}} صورة كحد أقصى.",
-      "photo_not_found": "الصورة لم تعد موجودة: ربما تم حذفها بالفعل."
+      "photo_not_found": "الصورة لم تعد موجودة: ربما تم حذفها بالفعل.",
+      "property_required": "حسابك غير مرتبط بأي منشأة: سجّل الدخول بحساب المنشأة.",
+      "property_not_found": "لم يتم العثور على منشأة حسابك. سجّل الخروج ثم سجّل الدخول مجددًا؛ وإذا تكرر ذلك، فاتصل بالدعم.",
+      "country_not_found": "الدولة المختارة لم تعد متاحة: اختر دولة أخرى.",
+      "sector_not_found": "القطاع/الصف لم يعد موجودًا: ربما تم حذفه بالفعل."
     },
     "pricing": {
       "season_required": "حدد تواريخ الموسم أولاً.",
@@ -132,7 +141,8 @@
       "period_name_taken": "توجد بالفعل فترة بهذا الاسم.",
       "period_outside_season": "يجب أن تكون تواريخ الفترة ضمن الموسم.",
       "period_range_not_found": "نطاق التواريخ لم يعد موجودًا: ربما تم حذفه بالفعل.",
-      "period_ranges_required": "يجب أن تحتوي الفترة على نطاق تواريخ واحد على الأقل. لحذفها بالكامل، استخدم سلة المهملات بجوار اسمها."
+      "period_ranges_required": "يجب أن تحتوي الفترة على نطاق تواريخ واحد على الأقل. لحذفها بالكامل، استخدم سلة المهملات بجوار اسمها.",
+      "period_in_use": "للفترة أسعار في قوائم الأسعار {{priceLists}}: احذف أسعارها من هذه القوائم أولاً، ثم احذفها."
     }
   },
   "alert": {
@@ -940,6 +950,114 @@
             "occurred_at": "التاريخ والوقت"
           },
           "actions": {
+            "identity": {
+              "login_succeeded": "تم تسجيل الدخول",
+              "login_failed": "فشل تسجيل الدخول",
+              "login_locked": "تم قفل تسجيل الدخول بسبب كثرة المحاولات",
+              "login_app_denied": "تم رفض تسجيل الدخول إلى هذا التطبيق",
+              "second_factor_requested": "تم طلب رمز التحقق",
+              "second_factor_failed": "رمز تحقق خاطئ",
+              "refresh_reuse_detected": "تم إغلاق الجلسة بسبب وصول مشبوه",
+              "logout": "تم تسجيل الخروج",
+              "password_reset_requested": "تم طلب إعادة تعيين كلمة المرور",
+              "password_reset_completed": "تمت إعادة تعيين كلمة المرور",
+              "password_changed": "تم تعديل كلمة المرور",
+              "account_registered": "تم تسجيل حساب",
+              "account_deleted": "تم حذف حساب",
+              "session_revoked": "تم إغلاق الجلسة",
+              "user_created": "تمت إضافة مستخدم",
+              "user_updated": "تم تعديل مستخدم",
+              "user_deleted": "تم حذف مستخدم",
+              "security_settings_changed": "تم تعديل إعدادات الأمان",
+              "external_token_issued": "تم السماح بالوصول الخارجي",
+              "external_token_denied": "تم رفض الوصول الخارجي",
+              "customer_created": "تمت إضافة عميل",
+              "customer_updated": "تم تعديل بيانات العميل",
+              "customer_deleted": "تم حذف عميل",
+              "customers_exported": "تم تصدير العملاء",
+              "contract_acceptance_changed": "تم تعديل قبول العقد"
+            },
+            "catalog": {
+              "inventory_item_created": "تمت إضافة صنف إلى المخزن",
+              "inventory_item_updated": "تم تعديل صنف في المخزن",
+              "inventory_item_deleted": "تم حذف صنف من المخزن",
+              "season_updated": "تم تعديل تواريخ الموسم",
+              "tariff_period_created": "تمت إضافة فترة",
+              "tariff_period_updated": "تم تعديل الفترة",
+              "tariff_period_deleted": "تم حذف فترة",
+              "sector_created": "تمت إضافة قطاع/صف",
+              "sector_updated": "تم تعديل القطاع/الصف",
+              "sector_deleted": "تم حذف قطاع/صف",
+              "map_settings_updated": "تم تعديل إعدادات الخريطة",
+              "map_background_updated": "تم تعديل خلفية الخريطة",
+              "map_icons_updated": "تم تعديل أيقونات الخريطة",
+              "map_spots_created": "تمت إضافة مواقع إلى الخريطة",
+              "map_spot_updated": "تم تعديل موقع على الخريطة",
+              "map_spots_deleted": "تم حذف مواقع من الخريطة",
+              "map_grid_changed": "تم تعديل شبكة الخريطة",
+              "map_reset": "تمت إعادة تعيين الخريطة",
+              "property_info_updated": "تم تعديل معلومات المنشأة",
+              "property_amenities_updated": "تم تعديل خدمات المنشأة",
+              "property_photos_updated": "تم تعديل صور المنشأة",
+              "property_documents_updated": "تم تعديل مستندات المنشأة",
+              "online_settings_updated": "تم تعديل إعدادات الحجوزات عبر الإنترنت",
+              "service_online_settings_updated": "تم تعديل خيارات الخدمات عبر الإنترنت",
+              "stay_limits_updated": "تم تعديل حدود الإقامة",
+              "online_legend_updated": "تم تعديل وسيلة إيضاح الحجوزات عبر الإنترنت",
+              "service_created": "تمت إضافة خدمة",
+              "service_updated": "تم تعديل خدمة",
+              "service_deleted": "تم حذف خدمة",
+              "automatic_price_created": "تمت إضافة سعر تلقائي",
+              "automatic_price_updated": "تم تعديل سعر تلقائي",
+              "automatic_price_deleted": "تم حذف سعر تلقائي",
+              "table_service_created": "تمت إضافة خدمة الطاولات",
+              "table_service_updated": "تم تعديل خدمة الطاولات",
+              "table_service_deleted": "تم حذف خدمة الطاولات",
+              "price_list_created": "تمت إضافة باقة أو عنصر إضافي",
+              "price_list_updated": "تم تعديل باقة أو عنصر إضافي",
+              "price_list_deleted": "تم حذف باقة أو عنصر إضافي",
+              "price_list_duplicated": "تم نسخ باقة أو عنصر إضافي",
+              "price_lists_imported": "تم استيراد الباقات والعناصر الإضافية",
+              "reduced_season_created": "تمت إضافة سعر موسمي مخفّض",
+              "reduced_season_updated": "تم تعديل سعر موسمي مخفّض",
+              "reduced_season_deleted": "تم حذف سعر موسمي مخفّض",
+              "discount_created": "تمت إضافة خصم/قسيمة",
+              "discount_updated": "تم تعديل خصم/قسيمة",
+              "discount_deleted": "تم حذف خصم/قسيمة",
+              "agreement_partner_created": "تمت إضافة اتفاقية",
+              "agreement_partner_updated": "تم تعديل اتفاقية",
+              "agreement_partner_deleted": "تم حذف اتفاقية",
+              "agreement_partner_duplicated": "تم نسخ اتفاقية",
+              "agreement_price_list_created": "تمت إضافة قائمة أسعار الاتفاقية",
+              "agreement_price_list_updated": "تم تعديل قائمة أسعار الاتفاقية",
+              "agreement_price_list_deleted": "تم حذف قائمة أسعار الاتفاقية",
+              "agreement_report_cancelled": "تم إلغاء تقرير الاتفاقية",
+              "revenue_settings_updated": "تم تعديل إعدادات الإيرادات",
+              "suggested_prices_computed": "تم حساب الأسعار المقترحة",
+              "suggested_prices_applied": "تم تطبيق الأسعار المقترحة",
+              "revenue_weights_updated": "تم تعديل أوزان الإيرادات",
+              "revenue_standard_periods_updated": "تم تعديل الفترات القياسية للإيرادات",
+              "platform_property_status_changed": "قامت المنصة بتعديل حالة المنشأة",
+              "platform_property_trashed": "قامت المنصة بنقل المنشأة إلى سلة المهملات",
+              "platform_property_restored": "قامت المنصة باستعادة المنشأة",
+              "platform_property_purged": "قامت المنصة بحذف المنشأة نهائيًا",
+              "platform_property_showcase_updated": "قامت المنصة بتعديل واجهة عرض المنشأة",
+              "platform_map_icon_saved": "قامت المنصة بحفظ أيقونة الخريطة",
+              "platform_map_icon_deleted": "قامت المنصة بحذف أيقونة الخريطة",
+              "platform_beach_element_saved": "قامت المنصة بحفظ عنصر الشاطئ",
+              "platform_beach_element_deleted": "قامت المنصة بحذف عنصر الشاطئ",
+              "platform_badge_saved": "قامت المنصة بحفظ الشارة",
+              "platform_badge_deleted": "قامت المنصة بحذف الشارة",
+              "platform_region_saved": "قامت المنصة بحفظ المنطقة",
+              "platform_region_deleted": "قامت المنصة بحذف المنطقة",
+              "platform_showcase_updated": "قامت المنصة بتعديل واجهة العرض",
+              "service_duplicated": "تم نسخ خدمة",
+              "automatic_price_duplicated": "تم نسخ سعر تلقائي",
+              "table_service_duplicated": "تم نسخ خدمة الطاولات"
+            },
+            "audit": {
+              "entries_exported": "تم تصدير السجل"
+            },
             "booking": {
               "checked_in": "تسجيل الوصول",
               "checked_out": "تسجيل المغادرة",
@@ -956,9 +1074,6 @@
               "renewed": "تم تجديد الحجز",
               "cancelled": "تم إلغاء الحجز"
             },
-            "customer": {
-              "updated": "تم تعديل بيانات العميل"
-            },
             "payment": {
               "deposit_added": "تمت إضافة عربون",
               "balance_added": "تمت إضافة الرصيد",
@@ -966,13 +1081,6 @@
               "discount_code_applied": "تم تطبيق رمز الخصم",
               "discount_applied": "تم تطبيق الخصم",
               "increase_added": "تمت إضافة زيادة"
-            },
-            "property": {
-              "info_updated": "تم تعديل معلومات المنشأة"
-            },
-            "identity": {
-              "user_created": "تمت إضافة مستخدم",
-              "user_deleted": "تم حذف مستخدم"
             },
             "cash": {
               "pre_bill_printed": "تمت طباعة الفاتورة المبدئية",
@@ -991,32 +1099,6 @@
             "order": {
               "marked_done": "تم تعليم الطلب كمنجز",
               "marked_not_done": "تم تعليم الطلب كغير منجز"
-            },
-            "price_list": {
-              "package_updated": "تم تعديل باقة قائمة الأسعار",
-              "extra_item_updated": "تم تعديل عنصر إضافي في قائمة الأسعار",
-              "package_created": "تمت إضافة باقة إلى قائمة الأسعار",
-              "extra_item_created": "تمت إضافة عنصر إضافي إلى قائمة الأسعار",
-              "package_deleted": "تم حذف باقة من قائمة الأسعار",
-              "extra_item_deleted": "تم حذف عنصر إضافي من قائمة الأسعار",
-              "package_duplicated": "تم تكرار باقة قائمة الأسعار",
-              "extra_item_duplicated": "تم تكرار عنصر إضافي في قائمة الأسعار"
-            },
-            "warehouse": {
-              "item_updated": "تم تعديل صنف في المخزن",
-              "item_created": "تمت إضافة صنف إلى المخزن",
-              "item_deleted": "تم حذف صنف من المخزن"
-            },
-            "season": {
-              "dates_updated": "تم تعديل تواريخ الموسم",
-              "period_updated": "تم تعديل الفترة",
-              "period_created": "تمت إضافة فترة",
-              "period_deleted": "تم حذف فترة"
-            },
-            "map": {
-              "sector_updated": "تم تعديل القطاع/الصف",
-              "sector_created": "تمت إضافة قطاع/صف",
-              "sector_deleted": "تم حذف قطاع/صف"
             }
           },
           "not_implemented": "لم يتم تنفيذ الخدمة بعد",
@@ -1927,7 +2009,9 @@
       "ranges": {
         "max": "يمكن أن تحتوي الفترة على {{max}} نطاقات تواريخ كحد أقصى.",
         "invalid": "نطاقات تواريخ غير صالحة: يمكن أن تحتوي الفترة على {{max}} نطاقات كحد أقصى ولا يجوز أن تشترك في أي يوم."
-      }
+      },
+      "season_required": "حدد أولاً تاريخي بداية الموسم الحالي ونهايته واحفظهما.",
+      "next_season_required": "حدد أولاً تاريخي بداية الموسم القادم ونهايته واحفظهما."
     }
   },
   "unsaved_changes": {

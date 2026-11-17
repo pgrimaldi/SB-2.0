@@ -33,11 +33,11 @@ import { FilledTimeField } from '../../../../components/shared/ui/inputs/filled-
 import { RichTextField } from '../../../../components/shared/ui/inputs/rich-text-field/rich-text-field';
 import { FilledSelect } from '../../../../components/shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../components/shared/ui/selects/select/select';
-import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { CancellationPolicy } from '../../../../entities/enums/cancellation-policy';
 import { PetPolicy } from '../../../../entities/enums/pet-policy';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { BathhouseGeneralInformation } from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { Country } from '../../../../entities/shared/country';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
@@ -95,9 +95,11 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       this.validationText.message(this.informationForm[name]),
     ]),
   ) as Readonly<Record<keyof BathhouseGeneralInformation, Signal<string | null>>>;
-  private readonly countries = signal<readonly ComboboxItem[]>([]);
+  private readonly countries = signal<readonly Country[]>([]);
   protected readonly countryOptions = computed<readonly SelectOption[]>(() =>
-    this.countries().map(({ id, value }) => ({ value: id, label: value })),
+    this.countries().flatMap(({ code, name }) =>
+      code ? [{ value: code, label: name ?? code }] : [],
+    ),
   );
   private readonly texts = toSignal(
     this.translateService.stream(
@@ -162,7 +164,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
           next: ({ information, countries }) => {
             this.loaded = {
               ...onlyFieldsOf(BathhouseGeneralInformation, information),
-              country: information.country ?? countries.at(0)?.id ?? null,
+              country: information.country ?? countries.at(0)?.code ?? null,
             };
             this.information.set(this.loaded);
             this.informationForm().reset();

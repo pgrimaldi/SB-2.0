@@ -399,8 +399,8 @@ Gestione utenti: log.
     {
       "field": "actionCode",
       "value": [
-        "booking.spot_added",
-        "booking.dates_changed"
+        "catalog.map_spots_created",
+        "catalog.season_updated"
       ]
     },
     {
@@ -420,7 +420,7 @@ Gestione utenti: log.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `ferri` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-17T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-23T23:59:59.999Z"]}, {"field": "actionCode", "value": ["booking.spot_added", "booking.dates_changed"]}, {"field": "idUser", "value": ["3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01"]}]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "datetimeFrom", "value": ["2026-10-17T00:00:00.000Z"]}, {"field": "datetimeTo", "value": ["2026-10-23T23:59:59.999Z"]}, {"field": "actionCode", "value": ["catalog.map_spots_created", "catalog.season_updated"]}, {"field": "idUser", "value": ["3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01"]}]` |
 | `filters[].field` | string | `datetimeFrom` |
 | `filters[].value` | string[] (array di stringhe, almeno una) | `["2026-10-17T00:00:00.000Z"]` |
 | `sortField` | string | `occurredAt` |
@@ -440,7 +440,7 @@ Stato: 200 OK.
       "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "A1",
-      "actionCode": "booking.spot_added",
+      "actionCode": "catalog.map_spots_created",
       "occurredAt": "2026-10-23T11:11:00.000Z"
     },
     {
@@ -449,7 +449,7 @@ Stato: 200 OK.
       "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "D2",
-      "actionCode": "booking.dates_changed",
+      "actionCode": "catalog.season_updated",
       "occurredAt": "2026-10-17T14:05:00.000Z"
     }
   ]
@@ -459,13 +459,13 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "booking.spot_added", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "booking.dates_changed", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
+| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "catalog.map_spots_created", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "catalog.season_updated", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
 | `rows[].idAuditEntry` | string | `9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01` |
 | `rows[].bookingNumber` | string \| null | `1234` |
 | `rows[].userNumber` | string \| null | `123` |
 | `rows[].actorName` | string \| null | `Giulia Ferri` |
 | `rows[].spotLabel` | string \| null | `A1` |
-| `rows[].actionCode` | string \| null | `booking.spot_added` |
+| `rows[].actionCode` | string \| null | `catalog.map_spots_created` |
 | `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null | `2026-10-23T11:11:00.000Z` |
 
 ### POST `/api/audit/export-log`
@@ -748,9 +748,9 @@ Stato: 200 OK.
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-15` |
 
-### POST `/api/seasons/add-period`
+### POST `/api/catalog/tariff-periods`
 
-Stagioni e periodi: nuovo periodo.
+Stagioni e periodi: nuovo periodo della stagione corrente.
 
 #### Payload
 
@@ -759,21 +759,102 @@ Stagioni e periodi: nuovo periodo.
   "name": "Media stagione",
   "ranges": [
     {
-      "startsOn": "2027-06-16T00:00:00.000Z",
-      "endsOn": "2027-06-30T00:00:00.000Z"
+      "startsOn": "2026-06-16",
+      "endsOn": "2026-07-31"
     }
-  ],
-  "isNextSeason": true
+  ]
 }
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
 | `name` | string | `Media stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16T00:00:00.000Z", "endsOn": "2027-06-30T00:00:00.000Z"}]` |
-| `ranges[].startsOn` | string (ISO 8601, UTC) | `2027-06-16T00:00:00.000Z` |
-| `ranges[].endsOn` | string (ISO 8601, UTC) | `2027-06-30T00:00:00.000Z` |
-| `isNextSeason` | boolean | `true` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-06-16", "endsOn": "2026-07-31"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-06-16` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-07-31` |
+
+#### Response
+
+Stato: 201 Created (il periodo creato).
+
+```json
+{
+  "key": 3,
+  "name": "Media stagione",
+  "ranges": [
+    {
+      "startsOn": "2026-06-16",
+      "endsOn": "2026-07-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `3` |
+| `name` | string | `Media stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-06-16", "endsOn": "2026-07-31"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-06-16` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-07-31` |
+
+### POST `/api/catalog/next-season/tariff-periods`
+
+Stagioni e periodi: nuovo periodo della prossima stagione.
+
+#### Payload
+
+```json
+{
+  "name": "Media stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-06-16",
+      "endsOn": "2027-06-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Media stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
+
+#### Response
+
+Stato: 201 Created (il periodo creato).
+
+```json
+{
+  "key": 2,
+  "name": "Media stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-06-16",
+      "endsOn": "2027-06-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `2` |
+| `name` | string | `Media stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
+
+### DELETE `/api/catalog/tariff-periods/{key}`
+
+Stagioni e periodi: elimina periodo della stagione corrente.
+
+#### Payload
+
+Nessun corpo: la key del periodo va nell'indirizzo e lo stabilimento viene dal token.
 
 #### Response
 
@@ -781,23 +862,13 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/seasons/delete-period`
+### DELETE `/api/catalog/next-season/tariff-periods/{key}`
 
-Stagioni e periodi: elimina periodo.
+Stagioni e periodi: elimina periodo della prossima stagione.
 
 #### Payload
 
-```json
-{
-  "key": 1,
-  "isNextSeason": false
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `1` |
-| `isNextSeason` | boolean | `false` |
+Nessun corpo: la key del periodo va nell'indirizzo e lo stabilimento viene dal token.
 
 #### Response
 
@@ -2276,9 +2347,9 @@ Stato: 200 OK.
 
 ## /catalog
 
-### GET `/api/catalog/countries-combobox`
+### GET `/api/catalog/lookups/countries`
 
-Catalogo: nazioni per le tendine.
+Catalogo: nazioni.
 
 #### Payload
 
@@ -2291,28 +2362,28 @@ Stato: 200 OK.
 ```json
 [
   {
-    "id": "IT",
-    "value": "Italia"
+    "code": "IT",
+    "name": "Italia"
   },
   {
-    "id": "FR",
-    "value": "Francia"
+    "code": "FR",
+    "name": "Francia"
   },
   {
-    "id": "DE",
-    "value": "Germania"
+    "code": "DE",
+    "name": "Germania"
   },
   {
-    "id": "CN",
-    "value": "Cina"
+    "code": "CN",
+    "name": "Cina"
   }
 ]
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `id` | string (ISO 3166-1 alpha-2) | `IT` |
-| `value` | string | `Italia` |
+| `code` | string (ISO 3166-1 alpha-2) | `IT` |
+| `name` | string | `Italia` |
 
 ### GET `/api/catalog/property-info/bathhouse-configuration-general`
 

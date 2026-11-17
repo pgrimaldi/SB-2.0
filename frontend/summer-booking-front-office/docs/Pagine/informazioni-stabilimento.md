@@ -46,7 +46,9 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   tendina usa `[value]` / `(valueChange)` e non `[formField]`; ore diverse lette dal backend lasciano la tendina vuota.
 - Animali: tendina con l'enum `PetPolicy` (Ammessi, Non ammessi, Su richiesta); enum e non booleano perché le tendine
   dell'app hanno valori stringa.
-- Nazione: tendina con le voci di `countries-combobox`; senza nazione parte dalla prima voce della lista.
+- Nazione: tendina con le nazioni del backend (`lookups/countries`), nel suo ordine; senza nazione parte dalla prima
+  voce della lista. Il valore è il codice ISO (`code`), così ogni voce resta legata alla sua nazione (es. per una
+  bandiera, `assets/flags/<code in minuscolo>.svg`).
 - Sotto, a destra, "Modifica" sblocca i campi e lascia il posto ad Annulla e Salva; senza Nome stabilimento Salva è
   spento.
 - Sui telefoni i campi vanno uno per riga, tranne Cap (spostato sotto Città) con Provincia e Regione con Nazione, a metà
@@ -102,8 +104,10 @@ Tutte in `CatalogService`: lo stabilimento lo prende il backend dal token, e le 
 autenticato.
 
 - `GET /api/catalog/property-info/bathhouse-configuration-general`: i campi della tab 1.
-- `GET /api/catalog/countries-combobox`: le voci di Nazione, `ComboboxItem` con il codice ISO come `id` e il nome già
-  tradotto dal backend (lingua di `Accept-Language`) come `value`.
+- `GET /api/catalog/lookups/countries`: le voci di Nazione, API del backend usata così com'è (aperta anche senza
+  accesso). Risponde `Country` (`entities/shared/country.ts`): `code`, codice ISO 3166-1 alpha-2 (es. `DE`), e `name`,
+  già tradotto dal backend nella lingua di `Accept-Language`; le voci arrivano nell'ordine del backend
+  (`catalog.countries.sort_order`).
 - `POST /api/catalog/property-info/save-bathhouse-configuration-general`: Salva della tab 1.
 - `GET /api/catalog/property-info/bathhouse-configuration-services`: i servizi della tab 2.
 - `POST /api/catalog/property-info/save-bathhouse-configuration-services`: Salva della tab 2.

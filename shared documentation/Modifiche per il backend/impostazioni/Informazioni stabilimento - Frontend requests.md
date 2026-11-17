@@ -343,6 +343,9 @@ clicca sulla mappa per mettere il segnaposto). Foto e PDF non passano da qui.
 
 ## API esistenti usate così come sono
 
+La tab Informazioni Generali legge le voci della tendina Nazione da `GET /api/catalog/lookups/countries`, così com'è
+(`code` e `name`, nell'ordine del backend): il valore salvato in `country` è il `code`. **Non va cambiata.**
+
 La tab Media carica e toglie foto e PDF **subito**, un file per chiamata, con le API che il backend ha già. **Non vanno
 cambiate**: sono qui solo perché chi lavora sulla pagina sappia cosa il frontend si aspetta.
 

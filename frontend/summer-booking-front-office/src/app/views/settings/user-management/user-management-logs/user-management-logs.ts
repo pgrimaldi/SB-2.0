@@ -375,7 +375,7 @@ export class UserManagementLogs {
   }
 }
 
-/** The translation of a backend action code (`booking.spot_added`); the code itself when unknown. */
+/** The translation of a backend action code (`catalog.sector_created`); the code itself when unknown. */
 function actionLabelOf(actions: UserManagementLogsTexts['actions'], actionCode: string): string {
   const [module, action] = actionCode.split('.');
   return (action && actions[module]?.[action]) || actionCode;

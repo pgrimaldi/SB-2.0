@@ -178,7 +178,7 @@ classi e commenti.
   (`services/api/only-fields-of.ts`): i tipi non tolgono a runtime i campi in più di un JSON del server, e lo spread li
   rimanderebbe tutti. Vale per ogni API che manda un'entità-classe.
 - I campi che il service aggiunge al corpo vanno dopo, così non si possono sovrascrivere:
-  `{ ...onlyFieldsOf(SeasonPeriodAddRequest, request), isNextSeason }`.
+  `{ ...onlyFieldsOf(LoginRequest, request), app: environment.authApp }`.
   Funziona perché ogni classe dà un valore di partenza a tutti i suoi campi.
 - Non si fanno ipotesi su cosa fa il backend con i dati (es. se l'aggiunta crea un articolo nuovo o somma la quantità a
   uno esistente): se serve saperlo si chiede all'utente.

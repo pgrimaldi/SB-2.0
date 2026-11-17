@@ -21,6 +21,9 @@ registro, `/settings/user-management/logs`.
 | 7 | POST | `/api/audit/print-log` | Documento da stampare con le voci del registro filtrate |
 | 8 | POST | `/api/audit/export-log` | File Excel con le voci del registro filtrate |
 
+Oltre alle API, la sezione 9 chiede i codici di azione del registro per i moduli che oggi non hanno API (prenotazioni,
+pagamenti, cassa, ordini, database, prenotazioni dei tavoli).
+
 ## Regole comuni
 
 - **Moduli**: le API `/api/identity/*` stanno in Identity (`Module.Identity`), accanto a `/api/identity/property-users`
@@ -315,7 +318,7 @@ Il corpo è la richiesta standard delle tabelle:
   "filters": [
     { "field": "datetimeFrom", "value": ["2026-10-17T00:00:00.000Z"] },
     { "field": "datetimeTo", "value": ["2026-10-23T23:59:59.999Z"] },
-    { "field": "actionCode", "value": ["booking.spot_added", "booking.dates_changed"] },
+    { "field": "actionCode", "value": ["catalog.map_spots_created", "catalog.season_updated"] },
     { "field": "idUser", "value": ["3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01", "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02"] }
   ],
   "sortField": "occurredAt",
@@ -338,7 +341,7 @@ I filtri (un campo può mancare; più valori dello stesso campo = uno qualsiasi,
 |---|---|---|
 | `datetimeFrom` | un valore, data e ora ISO 8601 UTC | Solo le voci da quel momento (il periodo scelto nella tendina delle date). |
 | `datetimeTo` | un valore, data e ora ISO 8601 UTC | Solo le voci fino a quel momento. |
-| `actionCode` | uno o più codici di azione (es. `booking.moved`) | Le azioni scelte nel popup Filtri. |
+| `actionCode` | uno o più codici di azione di `AuditActionCodes` (es. `catalog.map_spot_updated`) | Le azioni scelte nel popup Filtri. |
 | `idUser` | uno o più id di utenti (UUID) | Gli utenti scelti nel popup Filtri, o l'utente del bottone "Log" di una riga di Gestione utenti. Sono gli `actorUserId` delle voci. |
 
 ### Risposta
@@ -356,7 +359,7 @@ richiesta (al massimo `pageSize` righe).
       "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "A1",
-      "actionCode": "booking.spot_added",
+      "actionCode": "catalog.map_spots_created",
       "occurredAt": "2026-10-23T11:11:00.000Z"
     },
     {
@@ -365,7 +368,7 @@ richiesta (al massimo `pageSize` righe).
       "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "D2",
-      "actionCode": "booking.dates_changed",
+      "actionCode": "catalog.season_updated",
       "occurredAt": "2026-10-17T14:05:00.000Z"
     }
   ]
@@ -445,7 +448,7 @@ Gli stessi filtri che la tabella del registro sta mostrando, senza pagina e righ
   "filters": [
     { "field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"] },
     { "field": "datetimeTo", "value": ["2026-10-26T23:59:59.999Z"] },
-    { "field": "actionCode", "value": ["booking.checked_in", "booking.moved"] },
+    { "field": "actionCode", "value": ["catalog.sector_updated", "catalog.map_spot_updated"] },
     { "field": "idUser", "value": ["3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02"] }
   ],
   "sortField": "occurredAt",
@@ -499,7 +502,7 @@ mostrando, senza pagina e righe per pagina, quindi **tutte** le voci che li risp
   "filters": [
     { "field": "datetimeFrom", "value": ["2026-10-20T00:00:00.000Z"] },
     { "field": "datetimeTo", "value": ["2026-10-26T23:59:59.999Z"] },
-    { "field": "actionCode", "value": ["booking.checked_in"] },
+    { "field": "actionCode", "value": ["catalog.sector_updated"] },
     { "field": "idUser", "value": ["3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01", "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02"] }
   ],
   "sortField": "actorName",
@@ -529,6 +532,53 @@ Errori in JSON (Problem Details), come per `print-log`:
 | 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
 | 403 | `auth.forbidden` | Utente senza il permesso `AuditRead`. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+
+## 9. Codici di azione del registro per i moduli futuri
+
+La schermata del registro (`/settings/user-management/logs`) traduce e filtra le azioni con i codici di
+`AuditActionCodes` (`Shared/Contracts/Audit/AuditActionCodes.cs`), che il frontend conosce tutti. Il mockup della
+pagina ha anche azioni dei moduli che oggi non hanno API, quindi non scrivono niente nel registro: il frontend le ha già
+tradotte nelle 7 lingue, ma le ha tolte dal filtro "Azione" finché il backend non le registra.
+
+Quando quei moduli registreranno le loro azioni, devono usare **esattamente questi codici** (categoria `Operator`, come
+le azioni degli operatori di oggi), così il frontend li mostra senza altre modifiche. Se un'azione non serve o il
+backend ne vuole un'altra, va deciso insieme: il frontend allinea il suo elenco.
+
+| Codice | Testo del frontend (italiano) | Modulo |
+|---|---|---|
+| `booking.checked_in` | Check-in | Prenotazioni (`Module.Booking`) |
+| `booking.checked_out` | Check-out | Prenotazioni (`Module.Booking`) |
+| `booking.arrival_reported` | Ingresso segnalato | Prenotazioni (`Module.Booking`) |
+| `booking.guest_added` | Ospite aggiunto | Prenotazioni (`Module.Booking`) |
+| `booking.dates_changed` | Date prenotazione modificate | Prenotazioni (`Module.Booking`) |
+| `booking.agreement_added` | Convenzione aggiunta | Prenotazioni (`Module.Booking`) |
+| `booking.repeated` | Prenotazione ripetuta | Prenotazioni (`Module.Booking`) |
+| `booking.spot_added` | Postazione aggiunta | Prenotazioni (`Module.Booking`) |
+| `booking.absences_added` | Assenze programmate aggiunte | Prenotazioni (`Module.Booking`) |
+| `booking.moved` | Prenotazione spostata | Prenotazioni (`Module.Booking`) |
+| `booking.file_attached` | File allegato | Prenotazioni (`Module.Booking`) |
+| `booking.extra_added` | Extra aggiunto | Prenotazioni (`Module.Booking`) |
+| `booking.renewed` | Prenotazione rinnovata | Prenotazioni (`Module.Booking`) |
+| `booking.cancelled` | Prenotazione cancellata | Prenotazioni (`Module.Booking`) |
+| `payment.deposit_added` | Acconto aggiunto | Pagamenti (`Module.Payment`) |
+| `payment.balance_added` | Saldo aggiunto | Pagamenti (`Module.Payment`) |
+| `payment.bill_split` | Conto diviso | Pagamenti (`Module.Payment`) |
+| `payment.discount_code_applied` | Codice sconto applicato | Pagamenti (`Module.Payment`) |
+| `payment.discount_applied` | Sconto applicato | Pagamenti (`Module.Payment`) |
+| `payment.increase_added` | Incremento aggiunto | Pagamenti (`Module.Payment`) |
+| `cash.pre_bill_printed` | Preconto stampato | Cassa e stampa fiscale (`Module.FiscalPrint` / `Module.Fiskaly`) |
+| `cash.receipt_printed` | Scontrino stampato | Cassa e stampa fiscale (`Module.FiscalPrint` / `Module.Fiskaly`) |
+| `order.marked_done` | Ordine segnalato come evaso | Ordini |
+| `order.marked_not_done` | Ordine segnalato come non evaso | Ordini |
+| `database.bookings_trashed` | Dati database eliminati | Pagina Database (prenotazioni nel cestino) |
+| `database.bookings_restored` | Dati database ripristinati | Pagina Database (prenotazioni nel cestino) |
+| `database.trash_emptied` | Cestino database svuotato | Pagina Database (prenotazioni nel cestino) |
+| `table_booking.created` | Prenotazione servizio tavoli aggiunta | Prenotazioni del servizio tavoli |
+| `table_booking.deleted` | Prenotazione servizio tavoli eliminata | Prenotazioni del servizio tavoli |
+| `table_booking.updated` | Prenotazione servizio tavoli modificata | Prenotazioni del servizio tavoli |
+
+Per ognuna, `bookingNumber` e `spotLabel` della voce sono valorizzati quando l'azione riguarda una prenotazione o una
+postazione, come per le altre voci (sezione 5).
 
 ## API esistenti usate così come sono
 
@@ -568,4 +618,6 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
   `Content-Disposition`.
 - `export-log` accetta lo stesso corpo di `print-log` e restituisce un file `xlsx` con tutte le voci filtrate,
   nell'ordine chiesto, e il nome in `Content-Disposition`.
+- I codici della sezione 9, quando i loro moduli registrano le azioni, sono quelli della tabella, con la categoria
+  `Operator`, e `GET /api/audit/action-codes` li restituisce.
 - Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.

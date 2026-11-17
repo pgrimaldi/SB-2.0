@@ -100,6 +100,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   per un `computed`. I codici non ancora tradotti mostrano `error.unknown`.
 - `args` riempie i segnaposto: `{{name}}` nei testi semplici; `{date, date, long}`, `{amount, number, currency}`,
   `{count, plural, …}` per date, importi e plurali (vedi `traduzioni-e-lingue.md`).
+- `toApiProblem` tiene solo `args` semplici (testi fino a 200 caratteri e numeri). Un elenco di testi (es. i nomi dei
+  listini di `pricing.period_in_use`) diventa un testo solo, separato da virgole: i primi 20, poi "…", tagliato con
+  "…" oltre i 200 caratteri.
 - I codici del backend sono in `entities/errors/api-error-codes.ts` (`API_ERROR_CODES`, lo stesso catalogo di
   `API_CONTRACTS.docx`) e ognuno ha la sua traduzione in `error.`.
 - Anche i mock rispondono in Problem Details (`problem()` in `services/mocks/errors/problem.mock.ts`), con `code`,
@@ -142,7 +145,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 ## Combobox
 
 - Le API delle tendine sono `POST /api/<area>/<cosa>-combobox` senza corpo e senza paginazione.
-  Unica eccezione `GET /api/catalog/countries-combobox`, che non dipende dallo stabilimento.
+- Fanno eccezione gli elenchi che il backend ha già (`GET /api/catalog/lookups/...`), usati così come sono con la loro
+  entità: es. le nazioni, `GET /api/catalog/lookups/countries` → `Country` (`code`, `name`); la pagina fa le opzioni
+  della tendina dai loro campi.
 - Una sola tendina degli utenti per tutta l'app: `POST /api/identity/user-combobox`. Quali utenti restituire lo
   decide il backend.
 - La risposta è un array di `ComboboxItem` (`entities/combobox/combobox-item.ts`, `{ id, value }`: `id` è quello che

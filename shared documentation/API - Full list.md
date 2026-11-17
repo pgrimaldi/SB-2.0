@@ -236,7 +236,7 @@ Nessun payload.
 | `petPolicy` | string (enum PetPolicy) \| null |
 | `regulation` | string (HTML) \| null |
 
-### GET `/api/catalog/countries-combobox`
+### GET `/api/catalog/lookups/countries`
 
 **Payload JSON**
 
@@ -247,8 +247,8 @@ Nessun payload.
 ```json
 [
   {
-    "id": "string (ISO 3166-1 alpha-2)",
-    "value": "string"
+    "code": "string (ISO 3166-1 alpha-2)",
+    "name": "string"
   }
 ]
 ```
@@ -261,8 +261,8 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `[].id` | string (ISO 3166-1 alpha-2) |
-| `[].value` | string |
+| `[].code` | string (ISO 3166-1 alpha-2) |
+| `[].name` | string |
 
 ### POST `/api/catalog/property-info/save-bathhouse-configuration-general`
 
@@ -1370,7 +1370,7 @@ Nessun payload.
 | `[].ranges[].startsOn` | string (data, AAAA-MM-GG) |
 | `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
-### POST `/api/seasons/add-period`
+### POST `/api/catalog/tariff-periods`
 
 **Payload JSON**
 
@@ -1379,17 +1379,27 @@ Nessun payload.
   "name": "string",
   "ranges": [
     {
-      "startsOn": "string (ISO 8601, UTC)",
-      "endsOn": "string (ISO 8601, UTC)"
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
     }
-  ],
-  "isNextSeason": "boolean"
+  ]
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
 
 **Payload tabella**
 
@@ -1397,24 +1407,74 @@ Nessun corpo (204).
 |---|---|
 | `name` | string |
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
-| `ranges[].startsOn` | string (ISO 8601, UTC) |
-| `ranges[].endsOn` | string (ISO 8601, UTC) |
-| `isNextSeason` | boolean |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
 
-### POST `/api/seasons/delete-period`
+### POST `/api/catalog/next-season/tariff-periods`
 
 **Payload JSON**
 
 ```json
 {
-  "key": "number (intero)",
-  "isNextSeason": "boolean"
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
 }
 ```
+
+**Response JSON**
+
+```json
+{
+  "key": "number (intero)",
+  "name": "string",
+  "ranges": [
+    {
+      "startsOn": "string (data, AAAA-MM-GG)",
+      "endsOn": "string (data, AAAA-MM-GG)"
+    }
+  ]
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `key` | number (intero) |
+| `name` | string |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) |
+
+### DELETE `/api/catalog/tariff-periods/{key}`
+
+**Payload JSON**
+
+Nessun payload.
 
 **Response JSON**
 
@@ -1422,10 +1482,25 @@ Nessun corpo (204).
 
 **Payload tabella**
 
-| Campo | Tipo |
-|---|---|
-| `key` | number (intero) |
-| `isNextSeason` | boolean |
+Nessun payload.
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### DELETE `/api/catalog/next-season/tariff-periods/{key}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+Nessun payload.
 
 **Response tabella**
 

@@ -111,7 +111,12 @@
       "email_taken": "An account with this email already exists.",
       "not_found": "The user no longer exists: it may already have been deleted.",
       "cannot_modify_self": "You cannot delete or change your own account here.",
-      "role_not_assignable": "This account cannot be managed from the panel."
+      "role_not_assignable": "This account cannot be managed from the panel.",
+      "property_required": "Your account is not linked to a property: sign in with an account of the property."
+    },
+    "audit": {
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "export_too_large": "There are {total, number, integer} entries to export, but at most {max, number, integer} can be exported: narrow the period or the filters and try again."
     },
     "map": {
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
@@ -123,7 +128,11 @@
       "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB.",
       "invalid_pdf": "The file must be a PDF and no larger than 10 MB.",
       "gallery_full": "The gallery is full: you can upload up to {{max}} images.",
-      "photo_not_found": "The image is no longer there: it may already have been deleted."
+      "photo_not_found": "The image is no longer there: it may already have been deleted.",
+      "property_required": "Your account is not linked to a property: sign in with an account of the property.",
+      "property_not_found": "The property of your account was not found. Sign out and sign in again; if it happens again, contact support.",
+      "country_not_found": "The selected country is no longer available: choose another one.",
+      "sector_not_found": "The sector/row is no longer there: it may already have been deleted."
     },
     "pricing": {
       "season_required": "Set the season dates first.",
@@ -132,7 +141,8 @@
       "period_name_taken": "A period with this name already exists.",
       "period_outside_season": "The period dates must be within the season.",
       "period_range_not_found": "The date range is no longer there: it may already have been deleted.",
-      "period_ranges_required": "A period needs at least one date range. To delete it completely, use the bin next to its name."
+      "period_ranges_required": "A period needs at least one date range. To delete it completely, use the bin next to its name.",
+      "period_in_use": "The period has prices in the price lists {{priceLists}}: first remove its prices from these price lists, then delete it."
     }
   },
   "alert": {
@@ -940,6 +950,114 @@
             "occurred_at": "Date and time"
           },
           "actions": {
+            "identity": {
+              "login_succeeded": "Signed in",
+              "login_failed": "Sign-in failed",
+              "login_locked": "Sign-in locked after too many attempts",
+              "login_app_denied": "Sign-in to this app denied",
+              "second_factor_requested": "Verification code requested",
+              "second_factor_failed": "Wrong verification code",
+              "refresh_reuse_detected": "Session closed after a suspicious access",
+              "logout": "Signed out",
+              "password_reset_requested": "Password reset requested",
+              "password_reset_completed": "Password reset",
+              "password_changed": "Password changed",
+              "account_registered": "Account registered",
+              "account_deleted": "Account deleted",
+              "session_revoked": "Session closed",
+              "user_created": "User added",
+              "user_updated": "User changed",
+              "user_deleted": "User deleted",
+              "security_settings_changed": "Security settings changed",
+              "external_token_issued": "External access granted",
+              "external_token_denied": "External access denied",
+              "customer_created": "Customer added",
+              "customer_updated": "Customer details changed",
+              "customer_deleted": "Customer deleted",
+              "customers_exported": "Customers exported",
+              "contract_acceptance_changed": "Contract acceptance changed"
+            },
+            "catalog": {
+              "inventory_item_created": "Warehouse item added",
+              "inventory_item_updated": "Warehouse item changed",
+              "inventory_item_deleted": "Warehouse item deleted",
+              "season_updated": "Season dates changed",
+              "tariff_period_created": "Period added",
+              "tariff_period_updated": "Period changed",
+              "tariff_period_deleted": "Period deleted",
+              "sector_created": "Sector/row added",
+              "sector_updated": "Sector/row changed",
+              "sector_deleted": "Sector/row deleted",
+              "map_settings_updated": "Map settings changed",
+              "map_background_updated": "Map background changed",
+              "map_icons_updated": "Map icons changed",
+              "map_spots_created": "Spots added to the map",
+              "map_spot_updated": "Map spot changed",
+              "map_spots_deleted": "Spots deleted from the map",
+              "map_grid_changed": "Map grid changed",
+              "map_reset": "Map reset",
+              "property_info_updated": "Property information changed",
+              "property_amenities_updated": "Property services changed",
+              "property_photos_updated": "Property photos changed",
+              "property_documents_updated": "Property documents changed",
+              "online_settings_updated": "Online booking settings changed",
+              "service_online_settings_updated": "Online options of the services changed",
+              "stay_limits_updated": "Stay limits changed",
+              "online_legend_updated": "Online booking legend changed",
+              "service_created": "Service added",
+              "service_updated": "Service changed",
+              "service_deleted": "Service deleted",
+              "automatic_price_created": "Automatic price added",
+              "automatic_price_updated": "Automatic price changed",
+              "automatic_price_deleted": "Automatic price deleted",
+              "table_service_created": "Table service added",
+              "table_service_updated": "Table service changed",
+              "table_service_deleted": "Table service deleted",
+              "price_list_created": "Package or extra item added",
+              "price_list_updated": "Package or extra item changed",
+              "price_list_deleted": "Package or extra item deleted",
+              "price_list_duplicated": "Package or extra item duplicated",
+              "price_lists_imported": "Packages and extra items imported",
+              "reduced_season_created": "Reduced seasonal price added",
+              "reduced_season_updated": "Reduced seasonal price changed",
+              "reduced_season_deleted": "Reduced seasonal price deleted",
+              "discount_created": "Discount/voucher added",
+              "discount_updated": "Discount/voucher changed",
+              "discount_deleted": "Discount/voucher deleted",
+              "agreement_partner_created": "Agreement added",
+              "agreement_partner_updated": "Agreement changed",
+              "agreement_partner_deleted": "Agreement deleted",
+              "agreement_partner_duplicated": "Agreement duplicated",
+              "agreement_price_list_created": "Agreement price list added",
+              "agreement_price_list_updated": "Agreement price list changed",
+              "agreement_price_list_deleted": "Agreement price list deleted",
+              "agreement_report_cancelled": "Agreement report cancelled",
+              "revenue_settings_updated": "Revenue settings changed",
+              "suggested_prices_computed": "Suggested prices calculated",
+              "suggested_prices_applied": "Suggested prices applied",
+              "revenue_weights_updated": "Revenue weights changed",
+              "revenue_standard_periods_updated": "Revenue standard periods changed",
+              "platform_property_status_changed": "Property status changed by the platform",
+              "platform_property_trashed": "Property moved to the bin by the platform",
+              "platform_property_restored": "Property restored by the platform",
+              "platform_property_purged": "Property permanently deleted by the platform",
+              "platform_property_showcase_updated": "Property showcase changed by the platform",
+              "platform_map_icon_saved": "Map icon saved by the platform",
+              "platform_map_icon_deleted": "Map icon deleted by the platform",
+              "platform_beach_element_saved": "Beach element saved by the platform",
+              "platform_beach_element_deleted": "Beach element deleted by the platform",
+              "platform_badge_saved": "Badge saved by the platform",
+              "platform_badge_deleted": "Badge deleted by the platform",
+              "platform_region_saved": "Region saved by the platform",
+              "platform_region_deleted": "Region deleted by the platform",
+              "platform_showcase_updated": "Showcase changed by the platform",
+              "service_duplicated": "Service duplicated",
+              "automatic_price_duplicated": "Automatic price duplicated",
+              "table_service_duplicated": "Table service duplicated"
+            },
+            "audit": {
+              "entries_exported": "Log exported"
+            },
             "booking": {
               "checked_in": "Check-in",
               "checked_out": "Check-out",
@@ -956,9 +1074,6 @@
               "renewed": "Booking renewed",
               "cancelled": "Booking cancelled"
             },
-            "customer": {
-              "updated": "Customer details changed"
-            },
             "payment": {
               "deposit_added": "Deposit added",
               "balance_added": "Balance added",
@@ -966,13 +1081,6 @@
               "discount_code_applied": "Discount code applied",
               "discount_applied": "Discount applied",
               "increase_added": "Surcharge added"
-            },
-            "property": {
-              "info_updated": "Property information changed"
-            },
-            "identity": {
-              "user_created": "User added",
-              "user_deleted": "User deleted"
             },
             "cash": {
               "pre_bill_printed": "Pre-bill printed",
@@ -991,32 +1099,6 @@
             "order": {
               "marked_done": "Order marked as fulfilled",
               "marked_not_done": "Order marked as not fulfilled"
-            },
-            "price_list": {
-              "package_updated": "Price list package changed",
-              "extra_item_updated": "Price list extra item changed",
-              "package_created": "Price list package added",
-              "extra_item_created": "Price list extra item added",
-              "package_deleted": "Price list package deleted",
-              "extra_item_deleted": "Price list extra item deleted",
-              "package_duplicated": "Price list package duplicated",
-              "extra_item_duplicated": "Price list extra item duplicated"
-            },
-            "warehouse": {
-              "item_updated": "Warehouse item changed",
-              "item_created": "Warehouse item added",
-              "item_deleted": "Warehouse item deleted"
-            },
-            "season": {
-              "dates_updated": "Season dates changed",
-              "period_updated": "Period changed",
-              "period_created": "Period added",
-              "period_deleted": "Period deleted"
-            },
-            "map": {
-              "sector_updated": "Sector/row changed",
-              "sector_created": "Sector/row added",
-              "sector_deleted": "Sector/row deleted"
             }
           },
           "not_implemented": "The service is not implemented yet",
@@ -1927,7 +2009,9 @@
       "ranges": {
         "max": "A period can have at most {{max}} date ranges.",
         "invalid": "Invalid date ranges: a period can have at most {{max}} and they cannot share any day."
-      }
+      },
+      "season_required": "First set and save the start and end dates of the current season.",
+      "next_season_required": "First set and save the start and end dates of the next season."
     }
   },
   "unsaved_changes": {

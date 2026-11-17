@@ -51,6 +51,7 @@ import { TableServiceItem } from '../../../entities/settings/services/table-serv
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
 import { Language } from '../../../entities/shared/language';
+import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
@@ -60,22 +61,19 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 const COUNTRY_CODES = ['IT', 'FR', 'DE', 'CN'] as const;
 
 /**
- * `GET /api/catalog/countries-combobox`: the selectable countries, `id` = ISO code and `value` = name
- * in the language of `Accept-Language` (the backend has a translation per country and language).
- * 401 without a valid access token.
+ * `GET /api/catalog/lookups/countries`: the active countries, `code` = ISO code and `name` in the language
+ * of `Accept-Language` (the backend has a translation per country and language), in the order of
+ * `sort_order`. Open also without an access token, as in the backend.
  */
-export const countriesComboboxMock = (
+export const lookupCountriesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
   const names = new Intl.DisplayNames([request.headers.get('Accept-Language') ?? 'it'], {
     type: 'region',
   });
-  const countries: ComboboxItem[] = COUNTRY_CODES.map((code) => ({
-    id: code,
-    value: names.of(code) ?? code,
+  const countries: Country[] = COUNTRY_CODES.map((code) => ({
+    code,
+    name: names.of(code) ?? code,
   }));
   return of(new HttpResponse({ status: 200, url: request.url, body: countries })).pipe(delay(150));
 };

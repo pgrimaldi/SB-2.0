@@ -19,6 +19,7 @@ import {
   PackageIntermediatePrice,
 } from '../../../entities/settings/catalog/package-intermediate-price';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
+import { PackagePeriodPrice } from '../../../entities/settings/catalog/package-period-price';
 import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -115,6 +116,33 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
     }),
   ],
 ]);
+
+/**
+ * Names of the packages and additional items with a price for the tariff period `key` of the current
+ * season, as the backend lists the price lists that use a period.
+ */
+export function priceListsUsingPeriod(key: number): string[] {
+  const hasPrice = (price: PackagePeriodPrice): boolean =>
+    price.idPeriod === key &&
+    Object.entries(price).some(
+      ([field, value]) => field !== 'idSector' && field !== 'idPeriod' && typeof value === 'number',
+    );
+  const uses = (
+    details: PackageAddItemRequest | AdditionalItemAddItemRequest | undefined,
+  ): boolean =>
+    !!details &&
+    (details.periodPrices.some(hasPrice) ||
+      ('intermediatePrices' in details &&
+        details.intermediatePrices.some(({ idPeriod }) => idPeriod === key)));
+  return [
+    ...PACKAGES.filter(({ idPackage }) => uses(PACKAGE_DETAILS.get(idPackage ?? ''))).map(
+      ({ packageName }) => packageName ?? '',
+    ),
+    ...ADDITIONAL_ITEMS.filter(({ idAdditionalItem }) =>
+      uses(ADDITIONAL_ITEM_DETAILS.get(idAdditionalItem ?? '')),
+    ).map(({ additionalItemName }) => additionalItemName ?? ''),
+  ];
+}
 
 const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['packageName'] as const;

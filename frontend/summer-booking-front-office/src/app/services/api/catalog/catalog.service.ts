@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { Country } from '../../../entities/shared/country';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
@@ -64,9 +64,15 @@ export class CatalogService {
   private readonly httpClient = inject(HttpClient);
   private readonly endpoint = `${environment.apiBaseUrl}/catalog`;
 
-  /** Names in the language of the request (Accept-Language); `id` is the ISO 3166-1 alpha-2 code. */
-  readonly countriesCombobox = (): Observable<ComboboxItem[]> =>
-    this.httpClient.get<ComboboxItem[]>(`${this.endpoint}/countries-combobox`);
+  /** The backend's list as it is, in its order: ISO 3166-1 alpha-2 code and name in the language of the request. */
+  readonly countries = (): Observable<Country[]> =>
+    this.httpClient
+      .get<Country[] | null>(`${this.endpoint}/lookups/countries`)
+      .pipe(
+        map((answer) =>
+          Array.isArray(answer) ? answer.map((country) => onlyFieldsOf(Country, country)) : [],
+        ),
+      );
 
   /** The property comes from the access token, as in the other calls of the page. */
   readonly bathhouseConfigurationGeneral = (): Observable<BathhouseGeneralInformation> =>

@@ -26,6 +26,17 @@
       <p class="season__period__add__popup__error">{{ intervalsError }}</p>
     }
 
+    @if (isSeasonMissing()) {
+      <p class="season__period__add__popup__error">
+        {{
+          (isNextSeason()
+            ? 'invalidate.seasons.next_season_required'
+            : 'invalidate.seasons.season_required'
+          ) | translate
+        }}
+      </p>
+    }
+
     @if (errorMessage(); as errorMessage) {
       <p class="season__period__add__popup__error">{{ errorMessage }}</p>
     }
