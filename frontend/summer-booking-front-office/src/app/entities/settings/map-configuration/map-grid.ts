@@ -20,7 +20,8 @@ export class MapGrid {
 
 export const MAX_MAP_ROW_QUANTITY = 50;
 export const MAX_MAP_ROW_ITEM_QUANTITY = 80;
-export const MAX_MAP_TILT_DEGREES = 359;
+export const MIN_MAP_TILT_DEGREES = -45;
+export const MAX_MAP_TILT_DEGREES = 45;
 export const MAP_CUSTOM_ARTICLE_QUANTITY = 8;
 
 export const DEFAULT_MAP_GRID: Readonly<MapGrid> = {

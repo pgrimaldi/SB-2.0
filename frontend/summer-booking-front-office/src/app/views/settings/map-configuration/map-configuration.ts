@@ -1,15 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  OnDestroy,
   effect,
   inject,
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { Subscription, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
 import { MapBackgroundPanel } from '../../../components/management/settings/map-configuration/map-background-panel/map-background-panel';
@@ -33,12 +33,11 @@ import { toApiProblem } from '../../../services/api/errors/to-api-problem';
   styleUrl: './map-configuration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MapConfiguration {
+export class MapConfiguration implements OnDestroy {
   private readonly auth = inject(AuthBehaviour);
   private readonly mapService = inject(MapService);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly errorText = inject(ErrorTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -60,6 +59,7 @@ export class MapConfiguration {
     ),
     { initialValue: null },
   );
+  private resetting?: Subscription;
 
   constructor() {
     effect((onCleanup) => {
@@ -91,19 +91,20 @@ export class MapConfiguration {
     }
     this.isResetting.set(true);
     this.resetError.set(null);
-    this.mapService
-      .reset()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ settings }) => {
-          this.settings.set(settings);
-          this.isResetting.set(false);
-          this.isResetAsked.set(false);
-        },
-        error: (error: unknown) => {
-          this.isResetting.set(false);
-          this.resetError.set(toApiProblem(error));
-        },
-      });
+    this.resetting = this.mapService.reset().subscribe({
+      next: ({ settings }) => {
+        this.settings.set(settings);
+        this.isResetting.set(false);
+        this.isResetAsked.set(false);
+      },
+      error: (error: unknown) => {
+        this.isResetting.set(false);
+        this.resetError.set(toApiProblem(error));
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.resetting?.unsubscribe();
   }
 }

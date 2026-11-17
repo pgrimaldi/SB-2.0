@@ -21,8 +21,8 @@ let nextId = 0;
 const CURRENCY_DECIMALS = 2;
 
 /**
- * Only digits 0-9 can be typed (no signs, no exponent); with `isDecimal` also one separator, comma or
- * dot.
+ * Only digits 0-9 can be typed (no exponent); with `isDecimal` also one separator, comma or dot, and
+ * with `isSigned` a minus at the start.
  */
 @Component({
   selector: 'app-filled-number-field',
@@ -44,6 +44,8 @@ export class FilledNumberField {
   readonly autocomplete = input<string>();
   readonly isDecimal = input(false);
   readonly isCurrency = input(false);
+  /** Negative numbers too: a minus at the start, kept on the left also in Arabic. */
+  readonly isSigned = input(false);
   /** The digits are dots, as in a password field, with the eye after them to show them. */
   readonly isMasked = input(false);
   /**
@@ -72,6 +74,10 @@ export class FilledNumberField {
   protected readonly inputType = computed(() =>
     this.isMasked() && !this.visible() ? 'password' : 'text',
   );
+  /** Number pads have no minus: a signed field opens the full keyboard. */
+  protected readonly inputMode = computed(() =>
+    this.isSigned() ? null : this.isDecimal() ? 'decimal' : 'numeric',
+  );
   protected readonly decimals = computed(() =>
     !this.isDecimal() ? 0 : this.isCurrency() ? CURRENCY_DECIMALS : Infinity,
   );
@@ -95,12 +101,15 @@ export class FilledNumberField {
 
   protected changeValue(field: HTMLInputElement): void {
     const decimals = this.decimals();
-    const kept = keepNumber(field.value, decimals);
-    const zeros = leadingZeros(kept);
-    const text = kept.slice(zeros);
+    const isSigned = this.isSigned();
+    const kept = keepNumber(field.value, decimals, isSigned);
+    const sign = kept.startsWith('-') ? 1 : 0;
+    const zeros = leadingZeros(kept.slice(sign));
+    const text = kept.slice(0, sign) + kept.slice(sign + zeros);
     if (text !== field.value) {
-      const cursor = keepNumber(field.value.slice(0, field.selectionStart ?? 0), decimals).length;
-      const position = Math.max(0, cursor - zeros);
+      const before = field.value.slice(0, field.selectionStart ?? 0);
+      const cursor = keepNumber(before, decimals, isSigned).length;
+      const position = Math.max(Math.min(cursor, sign), cursor - zeros);
       field.value = text;
       field.setSelectionRange(position, position);
     }
@@ -113,7 +122,7 @@ export class FilledNumberField {
   }
 }
 
-function keepNumber(text: string, decimals: number): string {
+function keepNumber(text: string, decimals: number, isSigned: boolean): string {
   let kept = '';
   let separator = false;
   let fraction = 0;
@@ -125,6 +134,8 @@ function keepNumber(text: string, decimals: number): string {
       kept += char;
     } else if ((char === ',' || char === '.') && decimals > 0 && !separator) {
       separator = true;
+      kept += char;
+    } else if (char === '-' && isSigned && kept === '') {
       kept += char;
     }
   }
@@ -140,7 +151,7 @@ function leadingZeros(text: string): number {
   return zeros;
 }
 
-/** Empty text or a lone separator is `null`. */
+/** Empty text, a lone separator or a lone minus is `null`. */
 function toNumber(text: string): number | null {
   const number = text === '' ? NaN : Number(text.replace(',', '.'));
   return Number.isFinite(number) ? number : null;

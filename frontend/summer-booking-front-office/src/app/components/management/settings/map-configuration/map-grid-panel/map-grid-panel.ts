@@ -38,6 +38,7 @@ import {
   MAX_MAP_ROW_ITEM_QUANTITY,
   MAX_MAP_ROW_QUANTITY,
   MAX_MAP_TILT_DEGREES,
+  MIN_MAP_TILT_DEGREES,
   MapArticleIcons,
   MapElementIcons,
   MapGrid,
@@ -141,6 +142,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
     min(path.maxRowItemQuantity, 1);
     max(path.maxRowItemQuantity, MAX_MAP_ROW_ITEM_QUANTITY);
     required(path.tiltDegrees);
+    min(path.tiltDegrees, MIN_MAP_TILT_DEGREES);
     max(path.tiltDegrees, MAX_MAP_TILT_DEGREES);
     readonly(path, () => !this.isEditing() || this.isSaving());
   });

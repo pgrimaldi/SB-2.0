@@ -81,6 +81,8 @@ e i wrapper delle librerie ammesse.
 - Ogni popup ha la X in alto a destra, disegnata da `BasePopup`: è la prima icona di `matIcon` / `pathIcon` e le icone
   del popup vengono dopo. Chi usa il popup passa sempre la X della sua pagina; il popup non disegna una X sua.
 - La X fa come Esc (chiede prima, se il popup chiede prima di chiudere) e si spegne con `isCloseDisabled()`.
+- Eccezione: il popup di login dell'hub (`components/hub/login/login-dialog`) non estende `BasePopup` e disegna la sua
+  X.
 - Ogni form in popup o pannello è un componente dedicato, che la pagina usa come `<app-… [(open)]="…" />`: vedi
   `architettura.md`. Chiusura con modifiche non salvate: vedi `form-e-validazioni.md`.
 

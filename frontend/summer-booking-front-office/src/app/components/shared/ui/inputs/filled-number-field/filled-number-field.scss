@@ -37,3 +37,8 @@
     font-size: 1rem;
   }
 }
+
+// A signed number reads left to right, on the same side as the other fields also in Arabic.
+:host-context([dir='rtl']) .filled__number__field__control input[dir='ltr'] {
+  text-align: right;
+}

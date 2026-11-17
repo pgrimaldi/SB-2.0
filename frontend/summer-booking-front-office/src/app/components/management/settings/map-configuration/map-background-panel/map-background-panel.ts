@@ -2,7 +2,6 @@ import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angul
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   OnDestroy,
   computed,
   effect,
@@ -11,9 +10,9 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { Subscription, of, switchMap } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   UnsavedChanges,
@@ -68,7 +67,6 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly mapService = inject(MapService);
   private readonly errorText = inject(ErrorTextBehaviour);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly settings = input<MapSettings | null>(null);
   readonly loadError = input<ApiProblem | null>(null);
@@ -109,6 +107,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   private savedPreviewUrl: string | null = null;
   /** Address made in the browser for the last uploaded image: freed when it is replaced. */
   private localUrl: string | null = null;
+  private request?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
@@ -159,22 +158,19 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.chosenSlot.set(null);
     this.imagePreviewUrl.set(url);
     this.isBusy.set(true);
-    this.mapService
-      .uploadBackground(image)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.keepLocalUrl(url);
-          this.saved(null, url);
-        },
-        error: (error: unknown) => {
-          URL.revokeObjectURL(url);
-          this.chosenSlot.set(shownSlot);
-          this.imagePreviewUrl.set(shownUrl);
-          this.isBusy.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    this.request = this.mapService.uploadBackground(image).subscribe({
+      next: () => {
+        this.keepLocalUrl(url);
+        this.saved(null, url);
+      },
+      error: (error: unknown) => {
+        URL.revokeObjectURL(url);
+        this.chosenSlot.set(shownSlot);
+        this.imagePreviewUrl.set(shownUrl);
+        this.isBusy.set(false);
+        this.error.set(toApiProblem(error));
+      },
+    });
   }
 
   /** Deleted at once, without Salva nor confirmation. */
@@ -184,19 +180,16 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     }
     this.clearErrors();
     this.isBusy.set(true);
-    this.mapService
-      .removeBackground()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.keepLocalUrl(null);
-          this.saved(null, null);
-        },
-        error: (error: unknown) => {
-          this.isBusy.set(false);
-          this.error.set(toApiProblem(error));
-        },
-      });
+    this.request = this.mapService.removeBackground().subscribe({
+      next: () => {
+        this.keepLocalUrl(null);
+        this.saved(null, null);
+      },
+      error: (error: unknown) => {
+        this.isBusy.set(false);
+        this.error.set(toApiProblem(error));
+      },
+    });
   }
 
   protected async requestCancel(): Promise<void> {
@@ -226,20 +219,17 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     }
     this.isBusy.set(true);
     this.isSaving.set(true);
-    this.mapService
-      .updateBackground(name)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.keepLocalUrl(null);
-          this.saved(slot, null);
-        },
-        error: (error: unknown) => {
-          this.isBusy.set(false);
-          this.isSaving.set(false);
-          this.saveError.set(toApiProblem(error));
-        },
-      });
+    this.request = this.mapService.updateBackground(name).subscribe({
+      next: () => {
+        this.keepLocalUrl(null);
+        this.saved(slot, null);
+      },
+      error: (error: unknown) => {
+        this.isBusy.set(false);
+        this.isSaving.set(false);
+        this.saveError.set(toApiProblem(error));
+      },
+    });
   }
 
   /** A name this page does not know chooses no slot. */
@@ -275,6 +265,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
+    this.request?.unsubscribe();
     this.keepLocalUrl(null);
   }
 }

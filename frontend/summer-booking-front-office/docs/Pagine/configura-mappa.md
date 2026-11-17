@@ -76,9 +76,8 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
   impostato) e obbligatori:
   - Numero di file (`rowQuantity`, da 1 a 50);
   - Numero massimo articoli per fila (`maxRowItemQuantity`, da 1 a 80);
-  - Inclinazione mappa (`tiltDegrees`, da 0 a 359 gradi; icona dell'angolo `MapConfiguration_Tilt.svg` dentro il
-    campo, quarta posizione di `pathIcon` di `app-filled-number-field`; il campo non accetta il segno meno).
-    Il backend accetta solo da -45 a 45.
+  - Inclinazione mappa (`tiltDegrees`, da -45 a 45 gradi; icona dell'angolo `MapConfiguration_Tilt.svg` dentro il
+    campo, quarta posizione di `pathIcon` di `app-filled-number-field`; con `isSigned` accetta il segno meno).
 - Valori iniziali `DEFAULT_MAP_GRID`: 1 fila, 1 articolo per fila, 0 gradi. Errori sotto i campi, Salva spento
   finché c'è un errore.
 - Sotto, la riga con "Icone elementi" (stesso aspetto delle etichette dei campi, allineata al bordo delle righe;

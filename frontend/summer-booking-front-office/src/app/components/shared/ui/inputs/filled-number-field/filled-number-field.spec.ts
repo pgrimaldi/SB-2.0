@@ -8,6 +8,7 @@ import { FilledNumberField } from './filled-number-field';
     label="Soglia"
     [isDecimal]="decimal()"
     [isCurrency]="currency()"
+    [isSigned]="signed()"
     [pathIcon]="['/assets/images/euro.svg']"
     [error]="error()"
     [(value)]="threshold"
@@ -17,14 +18,16 @@ class FilledNumberFieldHost {
   readonly threshold = signal<number | null>(3);
   readonly decimal = signal(false);
   readonly currency = signal(false);
+  readonly signed = signal(false);
   readonly error = signal<string | null>(null);
 }
 
 describe('FilledNumberField', () => {
-  const setup = async (decimal = false, currency = false) => {
+  const setup = async (decimal = false, currency = false, signed = false) => {
     const fixture = TestBed.createComponent(FilledNumberFieldHost);
     fixture.componentInstance.decimal.set(decimal);
     fixture.componentInstance.currency.set(currency);
+    fixture.componentInstance.signed.set(signed);
     await fixture.whenStable();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     const type = async (text: string) => {
@@ -101,6 +104,24 @@ describe('FilledNumberField', () => {
     await type('12,345');
     expect(input.value).toBe('12,34');
     expect(host.threshold()).toBe(12.34);
+  });
+
+  it('should accept a minus only at the start, with signed', async () => {
+    const { host, input, type } = await setup(false, false, true);
+
+    expect(input.getAttribute('inputmode')).toBeNull();
+    expect(input.getAttribute('dir')).toBe('ltr');
+    await type('-');
+    expect(input.value).toBe('-');
+    expect(host.threshold()).toBeNull();
+
+    await type('-0045-');
+    expect(input.value).toBe('-45');
+    expect(host.threshold()).toBe(-45);
+
+    await type('4-5');
+    expect(input.value).toBe('45');
+    expect(host.threshold()).toBe(45);
   });
 
   it('should write a number given from outside', async () => {

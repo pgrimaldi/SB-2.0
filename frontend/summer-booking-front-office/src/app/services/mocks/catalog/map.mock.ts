@@ -9,6 +9,7 @@ import {
   MAX_MAP_ROW_ITEM_QUANTITY,
   MAX_MAP_ROW_QUANTITY,
   MAX_MAP_TILT_DEGREES,
+  MIN_MAP_TILT_DEGREES,
   MapGrid,
 } from '../../../entities/settings/map-configuration/map-grid';
 import {
@@ -193,7 +194,7 @@ export const updateMapConfigurationMock = (
   const errors = [
     ...rangeError('rowQuantity', grid.rowQuantity, 1, MAX_MAP_ROW_QUANTITY),
     ...rangeError('maxRowItemQuantity', grid.maxRowItemQuantity, 1, MAX_MAP_ROW_ITEM_QUANTITY),
-    ...rangeError('tiltDegrees', grid.tiltDegrees, 0, MAX_MAP_TILT_DEGREES),
+    ...rangeError('tiltDegrees', grid.tiltDegrees, MIN_MAP_TILT_DEGREES, MAX_MAP_TILT_DEGREES),
   ];
   if (
     !isOneOf(grid.umbrellaIcons?.freeIcon ?? null, MapUmbrellaIcon) ||
