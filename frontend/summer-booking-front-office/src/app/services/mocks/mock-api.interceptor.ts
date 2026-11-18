@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { entriesListMock, userComboboxMock } from './audit/audit.mock';
+import { entriesListMock } from './audit/audit.mock';
 import { loginMock, logoutMock, refreshMock } from './auth/auth.mock';
 import { onlineServicesOptionsMock, updateOnlineServicesOptionsMock } from './booking/booking.mock';
 import {
@@ -111,6 +111,7 @@ import {
   deleteUserMock,
   selectedUserMock,
   updateUserMock,
+  userComboboxMock,
   usersListMock,
 } from './identity/identity.mock';
 import {

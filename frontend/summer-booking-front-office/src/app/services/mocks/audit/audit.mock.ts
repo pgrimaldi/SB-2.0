@@ -101,25 +101,16 @@ export const entriesListMock = (request: HttpRequest<unknown>): Observable<HttpE
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
-/**
- * `POST /api/identity/user-combobox` without a body: the users of the property, id and name, sorted
- * by name; here those that appear in its log, the only list the mocks use. 401 without a valid
- * access token.
- */
-export const userComboboxMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const property = DEMO_PROPERTY;
+/** The users that appear in the log of a property, once each: the users of the user-combobox mock. */
+export function auditUsers(propertyId: number): ComboboxItem[] {
   const users = new Map<string, ComboboxItem>();
   for (const row of AUDIT_ENTRIES) {
-    if (row.propertyId === property.id) {
+    if (row.propertyId === propertyId) {
       users.set(row.idUser, { id: row.idUser, value: row.actorName ?? '' });
     }
   }
-  const answer = [...users.values()].sort((first, second) => compare(first.value, second.value));
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+  return [...users.values()];
+}
 
 function entry(
   propertyId: number,

@@ -3,8 +3,10 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { UserRole } from '../../../entities/enums/user-role';
+import { Page, PageRequest } from '../../../entities/pagination/page';
 import { CreateUserRequest } from '../../../entities/settings/user-management/create-user-request';
 import { UpdateUserRequest } from '../../../entities/settings/user-management/update-user-request';
+import { UserItem } from '../../../entities/settings/user-management/user-item';
 import { UserSelectedItem } from '../../../entities/settings/user-management/user-selected-item';
 import { IdentityService } from './identity.service';
 
@@ -139,6 +141,43 @@ describe('IdentityService', () => {
     ).request;
     expect(request.method).toBe('DELETE');
     expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should ask one page of the users with the request of the table and read the page', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const identity = TestBed.inject(IdentityService);
+    const controller = TestBed.inject(HttpTestingController);
+    const pageRequest: PageRequest = {
+      page: 2,
+      pageSize: 10,
+      search: 'ferri',
+      filters: [],
+      sortField: 'role',
+      sortDirection: 'Ascending',
+    };
+    const page: Page<UserItem> = {
+      total: 11,
+      rows: [
+        Object.assign(new UserItem(), {
+          idUser: 'u1',
+          email: 'giulia.ferri@example.com',
+          role: UserRole.Admin,
+        }),
+      ],
+    };
+
+    let answer: Page<UserItem> | undefined;
+
+    identity.usersList(pageRequest).subscribe((value) => (answer = value));
+
+    const call = controller.expectOne(`${environment.apiBaseUrl}/identity/users-list`);
+    expect(call.request.method).toBe('POST');
+    expect(call.request.body).toEqual(pageRequest);
+    call.flush(page);
+    expect(answer).toEqual(page);
     controller.verify();
   });
 });

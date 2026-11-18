@@ -33,4 +33,21 @@ describe('WarehouseService', () => {
     }
     controller.verify();
   });
+
+  it('should ask the articles of the combobox without a body', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const warehouse = TestBed.inject(WarehouseService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    warehouse.articleCombobox().subscribe();
+
+    const request = controller.expectOne(
+      `${environment.apiBaseUrl}/warehouse/article-combobox`,
+    ).request;
+    expect(request.method).toBe('POST');
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
 });

@@ -58,7 +58,12 @@ import { Language } from '../../../entities/shared/language';
 import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
+import {
+  MockFieldError,
+  notFoundWithoutBody,
+  problem,
+  resourceNotFound,
+} from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
@@ -980,7 +985,7 @@ export const deleteBathhousePhotoMock = (
 /**
  * `POST /api/catalog/property-info/documents/{price-list|menu}` with the PDF in the multipart field
  * `file`: it replaces the one of that document. 422 catalog.invalid_pdf for another type or a file
- * over 10 MB; 404 resource.not_found for another document; 401 without a valid access token.
+ * over 10 MB; 404 without a body for another document; 401 without a valid access token.
  */
 export const uploadBathhouseDocumentMock = (
   request: HttpRequest<unknown>,
@@ -990,13 +995,13 @@ export const uploadBathhouseDocumentMock = (
   }
   const document = documentOf(request);
   if (!document) {
-    return resourceNotFound(request);
+    return notFoundWithoutBody(request);
   }
   const pdf = request.body instanceof FormData ? request.body.get('file') : null;
   if (!(pdf instanceof File) || pdf.type !== 'application/pdf' || pdf.size > MAX_PDF_BYTES) {
     return problem(request, 422, 'catalog.invalid_pdf', {
       title: 'Invalid PDF',
-      args: { maxBytes: MAX_PDF_BYTES, contentTypes: 'application/pdf' },
+      args: { maxBytes: MAX_PDF_BYTES, contentTypes: ['application/pdf'] },
     });
   }
   setDocument(document, URL.createObjectURL(pdf), pdf.name);
@@ -1005,7 +1010,7 @@ export const uploadBathhouseDocumentMock = (
 
 /**
  * `DELETE /api/catalog/property-info/documents/{price-list|menu}`: the document has no PDF any more.
- * 404 resource.not_found for another document; 401 without a valid access token.
+ * 404 without a body for another document; 401 without a valid access token.
  */
 export const deleteBathhouseDocumentMock = (
   request: HttpRequest<unknown>,
@@ -1015,7 +1020,7 @@ export const deleteBathhouseDocumentMock = (
   }
   const document = documentOf(request);
   if (!document) {
-    return resourceNotFound(request);
+    return notFoundWithoutBody(request);
   }
   setDocument(document, null, null);
   return propertyInfoAnswer(request);
@@ -1036,7 +1041,7 @@ function withImage(
   ) {
     return problem(request, 422, 'catalog.invalid_image', {
       title: 'Invalid image',
-      args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: PHOTO_TYPES.join(', ') },
+      args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: PHOTO_TYPES },
     });
   }
   return keep(image);

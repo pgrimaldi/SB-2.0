@@ -113,7 +113,7 @@ export const uploadMapBackgroundMock = (
   if (!(image instanceof File) || !IMAGE_TYPES.includes(image.type) || image.size > MAX_BYTES) {
     return problem(request, 422, 'map.invalid_image', {
       title: 'Invalid image',
-      args: { maxBytes: MAX_BYTES, contentTypes: IMAGE_TYPES.join(', ') },
+      args: { maxBytes: MAX_BYTES, contentTypes: IMAGE_TYPES },
     });
   }
   settings = {

@@ -9,9 +9,6 @@ import { PriceCalculationMethod } from '../../../entities/enums/price-calculatio
 import { PriceMonthlySetting } from '../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../entities/enums/price-weekend-setting';
 import {
-  MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
-  MAX_PACKAGE_ARTICLE_QUANTITY,
-  MAX_PACKAGE_PEOPLE_QUANTITY,
   MAX_PRICE_LIST_PRICE,
   PackageAddItemRequest,
 } from '../../../entities/settings/catalog/package-add-item-request';
@@ -36,6 +33,10 @@ import { activeArticleIdNamed, activeArticleName } from '../warehouse/warehouse.
 
 type PackageRow = PackageItem & { propertyId: number };
 
+/** The backend's ranges (`SavePriceListRequestValidator`): wider than the frontend's lists. */
+const PEOPLE_QUANTITY_RANGE = { from: 1, to: 100 };
+const ADDITIONAL_ITEM_QUANTITY_RANGE = { from: 0, to: 100 };
+const MAX_ARTICLE_QUANTITY = 100;
 const PACKAGE_NAMES = [
   'Ombrellone e 2 lettini',
   'Ombrellone, sdraio e lettino',
@@ -362,19 +363,27 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
       });
     }
   });
-  const limits = [
-    ['maxAdditionalItemQuantity', MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY],
-    ['maxPeopleQuantity', MAX_PACKAGE_PEOPLE_QUANTITY],
-    ['umbrellaQuantity', MAX_PACKAGE_ARTICLE_QUANTITY],
-    ['sunbedQuantity', MAX_PACKAGE_ARTICLE_QUANTITY],
-    ['deckchairQuantity', MAX_PACKAGE_ARTICLE_QUANTITY],
-    ['directorChairQuantity', MAX_PACKAGE_ARTICLE_QUANTITY],
-    ['cabinQuantity', MAX_PACKAGE_ARTICLE_QUANTITY],
-    ['tentQuantity', MAX_PACKAGE_ARTICLE_QUANTITY],
+  const ranges = [
+    ['maxAdditionalItemQuantity', ADDITIONAL_ITEM_QUANTITY_RANGE],
+    ['maxPeopleQuantity', PEOPLE_QUANTITY_RANGE],
   ] as const;
-  for (const [field, last] of limits) {
+  for (const [field, range] of ranges) {
     const quantity = body[field];
-    if (quantity != null && !(Number.isInteger(quantity) && quantity >= 1 && quantity <= last)) {
+    if (quantity != null && !isWholeNumberIn(quantity, range.from, range.to)) {
+      errors.push({ field, code: 'validation.out_of_range', args: { ...range } });
+    }
+  }
+  const articles = [
+    'umbrellaQuantity',
+    'sunbedQuantity',
+    'deckchairQuantity',
+    'directorChairQuantity',
+    'cabinQuantity',
+    'tentQuantity',
+  ] as const;
+  for (const field of articles) {
+    const quantity = body[field];
+    if (quantity != null && !isWholeNumberIn(quantity, 1, MAX_ARTICLE_QUANTITY)) {
       errors.push({ field, code: 'validation.invalid' });
     }
   }
@@ -877,3 +886,7 @@ export const updateAdditionalItemMock = (
   );
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+function isWholeNumberIn(value: number, from: number, to: number): boolean {
+  return Number.isInteger(value) && value >= from && value <= to;
+}

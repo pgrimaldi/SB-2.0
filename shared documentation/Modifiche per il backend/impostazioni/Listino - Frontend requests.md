@@ -312,7 +312,9 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   null, false o vuoti.
 - Risposta: 204 senza corpo.
 - Errori: 400 `validation.failed` con `errors[]`, un elemento per campo con i nomi del corpo qui sopra (es.
-  `translations[0].packageName`, `maxPeopleQuantity`, `reducedSeasonalPrices[0].endsOn`; un prezzo ridotto con giorni in comune con un altro:
+  `translations[0].packageName`, `maxPeopleQuantity`, `reducedSeasonalPrices[0].endsOn`; `maxPeopleQuantity` e
+  `maxAdditionalItemQuantity` fuori intervallo: `validation.out_of_range` con `args.from` e `args.to`, come
+  `InclusiveBetween`; un prezzo ridotto con giorni in comune con un altro:
   `reducedSeasonalPrices[i].startsOn` `validation.invalid`; un giorno non valido o ripetuto: `publicHolidayDates`
   `validation.invalid`; un prezzo intermedio non valido o ripetuto: `intermediatePrices` `validation.invalid`); 401 `auth.unauthenticated`.
 
@@ -511,8 +513,8 @@ Listino), come `duplicate-package-item`. Per il frontend sostituisce `POST /pric
 
 ## 11. POST /api/catalog/package-combobox
 
-Tendina a scelta multipla "Pacchetti" del pannello "Aggiungi nuovo articolo/servizio aggiuntivo" (pagina Listino),
-riletta a ogni apertura del pannello. Combobox standard come le altre del frontend (`catalog/sector-combobox`,
+Tendina a scelta multipla "Pacchetti" dei pannelli di aggiunta e di modifica degli articoli/servizi aggiuntivi
+(pagina Listino), riletta a ogni apertura del pannello. Combobox standard come le altre del frontend (`catalog/sector-combobox`,
 `warehouse/article-combobox`): tutti i pacchetti dello stabilimento, senza pagine, nel loro ordine.
 
 - POST senza corpo: lo stabilimento lo prende il backend dal token.
@@ -678,6 +680,12 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
   riusata da un periodo nuovo, non devono finire su quello.
 - Errori: come `POST /api/catalog/create-additional-services-article-item`, più 404 `resource.not_found` per un
   `idAdditionalItem` che non è dello stabilimento.
+
+## API esistenti usate così come sono
+
+I pannelli dei pacchetti e degli articoli aggiuntivi leggono i periodi della stagione corrente con
+`GET /api/catalog/tariff-periods`, così com'è (`key`, `name`, `ranges`): la `key` di ogni periodo è l'`idPeriod` dei
+prezzi per periodo e dei prezzi intermedi. **Non va cambiata.**
 
 ## Verifica
 

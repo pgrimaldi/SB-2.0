@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { UserRole } from '../../../entities/enums/user-role';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { CreateUserRequest } from '../../../entities/settings/user-management/create-user-request';
@@ -7,6 +8,7 @@ import { UpdateUserRequest } from '../../../entities/settings/user-management/up
 import { UserItem } from '../../../entities/settings/user-management/user-item';
 import { UserSelectedItem } from '../../../entities/settings/user-management/user-selected-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
+import { auditUsers } from '../audit/audit.mock';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
@@ -39,13 +41,16 @@ const PASSWORD_MAX_LENGTH = 128;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE = /^[0-9 ]{1,32}$/;
 const PHONE_PREFIX = /^\+?[0-9]{1,6}$/;
+/** `UserRole` lists the roles in the backend's order (`Role.SortOrder`). */
+const ROLE_ORDER: readonly (UserRole | null)[] = Object.values(UserRole);
 const ASSIGNABLE_ROLES: readonly unknown[] = Object.values(UserRole).filter(
   (role) => role !== UserRole.SuperAdmin && role !== UserRole.WebsiteAdmin,
 );
 
 /**
- * `POST /api/identity/users-list`: one page of the users of the property of the token. 401 without
- * a valid access token.
+ * `POST /api/identity/users-list`: one page of the users of the property of the token, by role (in
+ * the backend's order) then email unless sorted; `role` sorts by the same order. 401 without a valid
+ * access token.
  */
 export const usersListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -62,14 +67,36 @@ export const usersListMock = (request: HttpRequest<unknown>): Observable<HttpEve
       (!search || [row.email, row.phone].some((text) => text?.toLowerCase().includes(search))),
   ).map((row) => onlyFieldsOf(UserItem, row));
   const field = SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
+  const sign = body.sortDirection === 'Descending' ? -1 : 1;
+  if (field && field !== 'role') {
     found.sort((first, second) => sign * compare(first[field], second[field]));
+  } else {
+    const roleSign = field ? sign : 1;
+    found.sort(
+      (first, second) =>
+        roleSign * (roleRank(first.role) - roleRank(second.role)) ||
+        compare(first.email, second.email),
+    );
   }
   const answer: Page<UserItem> = {
     total: found.length,
     rows: found.slice((page - 1) * pageSize, page * pageSize),
   };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+};
+
+/**
+ * `POST /api/identity/user-combobox` without a body: the users of the property, id and name, sorted
+ * by name; here those that appear in its log (`auditUsers`), the only list the mocks use. 401
+ * without a valid access token.
+ */
+export const userComboboxMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const answer: ComboboxItem[] = [...auditUsers(DEMO_PROPERTY.id)].sort((first, second) =>
+    compare(first.value, second.value),
+  );
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
@@ -288,6 +315,11 @@ function user(
     emailIsContact: true,
     phoneIsContact: phone !== null,
   };
+}
+
+function roleRank(role: UserRole | null): number {
+  const rank = ROLE_ORDER.indexOf(role);
+  return rank === -1 ? ROLE_ORDER.length : rank;
 }
 
 function compare(first: string | null, second: string | null): number {

@@ -58,6 +58,13 @@ export function forbidden(request: HttpRequest<unknown>): Observable<never> {
   return problem(request, 403, 'auth.forbidden', { title: 'Operation not allowed' });
 }
 
+/** A route value the backend does not know (`Results.NotFound()`): 404 without a body. */
+export function notFoundWithoutBody(request: HttpRequest<unknown>): Observable<never> {
+  return throwError(
+    () => new HttpErrorResponse({ status: 404, statusText: STATUS_TEXTS[404], url: request.url }),
+  ).pipe(delay(150));
+}
+
 /** An article that does not exist, or no longer: the operation is cancelled. */
 export function resourceNotFound(request: HttpRequest<unknown>): Observable<never> {
   return problem(request, 404, 'resource.not_found', { title: 'Resource not found' });
