@@ -2442,7 +2442,7 @@ Stato: 200 OK.
 | `closingTime` | string (HH:mm) \| null | `19:00` |
 | `isFreeCancellation` | boolean | `true` |
 | `cancellationNoticeHours` | number (intero) \| null | `48` |
-| `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
+| `petPolicy` | string (enum PetPolicy) | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
 
 ### POST `/api/catalog/property-info/save-bathhouse-configuration-general`
@@ -2496,7 +2496,7 @@ Informazioni stabilimento: salvataggio delle informazioni generali.
 | `closingTime` | string (HH:mm) \| null | `19:00` |
 | `isFreeCancellation` | boolean | `true` |
 | `cancellationNoticeHours` | number (intero) \| null | `48` |
-| `petPolicy` | string (enum PetPolicy) \| null | `Allowed` |
+| `petPolicy` | string (enum PetPolicy) | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
 
 #### Response

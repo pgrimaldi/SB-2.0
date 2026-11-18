@@ -54,7 +54,8 @@ Tab Informazioni Generali: il frontend la chiama la prima volta che si apre la t
 Restituisce **solo i campi della tab**, con i nomi e i valori del frontend.
 
 - Nessun parametro.
-- Risposta 200. Uno stabilimento che non ha ancora salvato la scheda risponde con tutti i campi `null`.
+- Risposta 200. Uno stabilimento che non ha ancora salvato la scheda risponde con tutti i campi `null`, tranne
+  `isFreeCancellation` = `false` e `petPolicy` = `NotAllowed`, i default del database.
 
 ```json
 {
@@ -92,8 +93,8 @@ Da dove vengono i campi, rispetto a `PropertyInfoDto`:
 | `phone`, `whatsapp`, `email`, `website`, `facebook`, `instagram` | stessi nomi | |
 | `description`, `regulation` | stessi nomi | HTML con solo `<p>`, `<br>`, `<strong>`, `<em>`, `<u>`, `<ul>`, `<ol>`, `<li>` e `<a href>`. |
 | `openingTime`, `closingTime` | `openHoursFrom`, `openHoursTo` | Formato `HH:mm`, senza secondi (es. `"08:30"`). |
-| `isFreeCancellation`, `cancellationNoticeHours` | stessi nomi | Il frontend usa solo `true` con 48 o 24 ore, oppure `false` con `null`. |
-| `petPolicy` | `petsPolicy` | `Allowed`, `NotAllowed`, `OnRequest` (al posto di `allowed`, `not_allowed`, `on_request`); `null` se non scelta. |
+| `isFreeCancellation`, `cancellationNoticeHours` | stessi nomi | Il frontend usa solo `true` con 48 o 24 ore, oppure `false` con `null`. `isFreeCancellation` mai `null`. |
+| `petPolicy` | `petsPolicy` | `Allowed`, `NotAllowed`, `OnRequest` (al posto di `allowed`, `not_allowed`, `on_request`); mai `null`. |
 
 Non ci sono: `slug`, `latitude`, `longitude`, `virtualTourUrl`, `mainPhotoUrl`, `photos`, `menuPdf`, `priceListPdf` e
 `amenityCodes` (sono di altre tab o la pagina non li usa).
@@ -133,10 +134,11 @@ Bottone "Salva" della tab Informazioni Generali.
 
 - Salva **solo questi campi**: posizione, tour virtuale, slug, foto, PDF e servizi restano come sono.
 - Stesse regole di validazione di `PUT /property-info` per gli stessi dati. `bathhouseName` è obbligatorio (come
-  `name`); gli altri campi possono arrivare `null`.
+  `name`); `isFreeCancellation` e `petPolicy` arrivano sempre (il frontend parte da `false` e `NotAllowed`); gli altri
+  campi possono arrivare `null`.
 - Risposta: 204 senza corpo.
 - Errori: 400 `validation.failed` con `errors[]` sui nomi del corpo qui sopra (es. `bathhouseName` vuoto con
-  `validation.required`, `email` non valida con `validation.email`); 401 `auth.unauthenticated`; 403
+  `validation.required`, `email` non valida con `validation.email`, `petPolicy` mancante o diverso dai tre valori con `validation.invalid`); 401 `auth.unauthenticated`; 403
   `auth.forbidden`.
 
 ## 3. GET /api/catalog/property-info/bathhouse-configuration-services

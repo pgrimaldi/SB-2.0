@@ -16,6 +16,7 @@ import {
 } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseServiceGroup } from '../../../entities/enums/bathhouse-service-group';
+import { PetPolicy } from '../../../entities/enums/pet-policy';
 import {
   BathhouseMedia,
   MAX_BATHHOUSE_IMAGE_MEGABYTES,
@@ -684,8 +685,9 @@ let idOfferedServices = new Set<number>();
 
 /**
  * `GET /api/catalog/property-info/bathhouse-configuration-general`: the general information of the property of
- * the token, for the tab "Informazioni generali"; all empty until saved, a form to fill in. 401
- * without a valid access token.
+ * the token, for the tab "Informazioni generali"; all empty until saved, a form to fill in, except
+ * `isFreeCancellation` false and `petPolicy` NotAllowed, the defaults of the database. 401 without a
+ * valid access token.
  */
 export const bathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -728,8 +730,8 @@ export const bathhouseConfigurationServicesMock = (
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the tab, for the
  * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 without a
- * name, or with a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
- * `phoneErrors`); 401 without a valid access token.
+ * name, with a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
+ * `phoneErrors`), or without a `petPolicy` of `PetPolicy`; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -743,6 +745,9 @@ export const saveBathhouseConfigurationGeneralMock = (
     errors.push({ field: 'bathhouseName', code: 'validation.required' });
   }
   errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
+  if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
+    errors.push({ field: 'petPolicy', code: 'validation.invalid' });
+  }
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }

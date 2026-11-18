@@ -21,6 +21,6 @@ export class BathhouseGeneralInformation {
   closingTime: string | null = null;
   isFreeCancellation = false;
   cancellationNoticeHours: number | null = null;
-  petPolicy: PetPolicy | null = null;
+  petPolicy = PetPolicy.NotAllowed;
   regulation: string | null = null;
 }

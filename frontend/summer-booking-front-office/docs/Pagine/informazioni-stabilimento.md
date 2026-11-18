@@ -47,7 +47,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   Nessuna). L'API usa invece `isFreeCancellation` e `cancellationNoticeHours`, come il backend, e la tab converte: la
   tendina usa `[value]` / `(valueChange)` e non `[formField]`; ore diverse lette dal backend lasciano la tendina vuota.
 - Animali: tendina con l'enum `PetPolicy` (Ammessi, Non ammessi, Su richiesta); enum e non booleano perché le tendine
-  dell'app hanno valori stringa.
+  dell'app hanno valori stringa. Non è mai vuota: parte da "Non ammessi" (`PetPolicy.NotAllowed`), il default del
+  database e del backend, che non accetta `null`.
 - Nazione: tendina con le nazioni del backend (`lookups/countries`), nel suo ordine; senza nazione parte dalla prima
   voce della lista. Il valore è il codice ISO (`code`), così ogni voce resta legata alla sua nazione (es. per una
   bandiera, `assets/flags/<code in minuscolo>.svg`).

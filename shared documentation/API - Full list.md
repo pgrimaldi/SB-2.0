@@ -202,7 +202,7 @@ Nessun payload.
   "closingTime": "string (HH:mm) | null",
   "isFreeCancellation": "boolean",
   "cancellationNoticeHours": "number (intero) | null",
-  "petPolicy": "string (enum PetPolicy) | null",
+  "petPolicy": "string (enum PetPolicy)",
   "regulation": "string (HTML) | null"
 }
 ```
@@ -233,7 +233,7 @@ Nessun payload.
 | `closingTime` | string (HH:mm) \| null |
 | `isFreeCancellation` | boolean |
 | `cancellationNoticeHours` | number (intero) \| null |
-| `petPolicy` | string (enum PetPolicy) \| null |
+| `petPolicy` | string (enum PetPolicy) |
 | `regulation` | string (HTML) \| null |
 
 ### GET `/api/catalog/lookups/countries`
@@ -288,7 +288,7 @@ Nessun payload.
   "closingTime": "string (HH:mm) | null",
   "isFreeCancellation": "boolean",
   "cancellationNoticeHours": "number (intero) | null",
-  "petPolicy": "string (enum PetPolicy) | null",
+  "petPolicy": "string (enum PetPolicy)",
   "regulation": "string (HTML) | null"
 }
 ```
@@ -319,7 +319,7 @@ Nessun corpo (204).
 | `closingTime` | string (HH:mm) \| null |
 | `isFreeCancellation` | boolean |
 | `cancellationNoticeHours` | number (intero) \| null |
-| `petPolicy` | string (enum PetPolicy) \| null |
+| `petPolicy` | string (enum PetPolicy) |
 | `regulation` | string (HTML) \| null |
 
 **Response tabella**
