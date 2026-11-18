@@ -67,11 +67,11 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   return ok(request, newSession());
 };
 
-/** `POST /api/identity/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
+/**
+ * `POST /api/identity/auth/logout`: revokes the session of the refresh cookie, if there is one, and
+ * clears the cookie; always 204, also when the session was already closed, as the backend.
+ */
 export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-  if (!readCookie()) {
-    return unauthorized(request, ApiErrorCode.AuthSessionExpired, 'No valid session');
-  }
   removeCookie();
   accessTokens.clear(); // the one test account: its access tokens stop working with the session
   return of(new HttpResponse<void>({ status: 204, url: request.url })).pipe(delay(150));

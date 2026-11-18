@@ -12,7 +12,7 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
 import {
@@ -106,6 +106,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     ]),
   ) as Readonly<Record<keyof BathhouseGeneralInformation, Signal<string | null>>>;
   private readonly countries = signal<readonly Country[]>([]);
+  protected readonly countriesLoadError = signal<string | null>(null);
   protected readonly countryOptions = computed<readonly SelectOption[]>(() =>
     this.countries().flatMap(({ code, name }) =>
       code ? [{ value: code, label: name ?? code }] : [],
@@ -164,21 +165,18 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       if (!this.auth.user()) {
         return;
       }
-      const subscription = untracked(() => {
+      const subscriptions = untracked(() => {
         this.isLoading.set(true);
         this.error.set(null);
-        return forkJoin({
-          information: this.cache.generalInformation(),
-          countries: this.cache.countries(),
-        }).subscribe({
-          next: ({ information, countries }) => {
-            this.loaded = {
-              ...onlyFieldsOf(BathhouseGeneralInformation, information),
-              country: information.country ?? countries.at(0)?.code ?? null,
-            };
+        this.countriesLoadError.set(null);
+        const information = this.cache.generalInformation().subscribe({
+          next: (information) => {
+            this.loaded = withFirstCountry(
+              onlyFieldsOf(BathhouseGeneralInformation, information),
+              this.countries(),
+            );
             this.information.set(this.loaded);
             this.informationForm().reset();
-            this.countries.set(countries);
             this.isLoading.set(false);
           },
           error: (error: unknown) => {
@@ -186,8 +184,20 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
             this.isLoading.set(false);
           },
         });
+        const countries = this.cache.countries().subscribe({
+          next: (countries) => {
+            this.countries.set(countries);
+            this.chooseFirstCountry();
+          },
+          error: (error: unknown) => {
+            const problem = toApiProblem(error);
+            this.countries.set([]);
+            this.countriesLoadError.set(this.errorText.instant(problem.code, problem.args));
+          },
+        });
+        return [information, countries];
       });
-      onCleanup(() => subscription.unsubscribe());
+      onCleanup(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
     });
   }
 
@@ -248,9 +258,26 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     });
   }
 
+  /** Countries that arrive after the information: the first one, when none is saved or chosen. */
+  private chooseFirstCountry(): void {
+    if (this.isLoading() || this.loaded.country !== null || this.information().country !== null) {
+      return;
+    }
+    this.loaded = withFirstCountry(this.loaded, this.countries());
+    this.information.update((information) => ({ ...information, country: this.loaded.country }));
+  }
+
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+/** Without a saved country, the first one of the backend's list. */
+function withFirstCountry(
+  information: BathhouseGeneralInformation,
+  countries: readonly Country[],
+): BathhouseGeneralInformation {
+  return { ...information, country: information.country ?? countries.at(0)?.code ?? null };
 }
 
 /** Hours of notice other than the choices, kept by the backend, show no choice. */

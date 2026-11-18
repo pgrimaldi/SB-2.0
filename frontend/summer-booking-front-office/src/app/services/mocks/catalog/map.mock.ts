@@ -20,10 +20,10 @@ import {
   MapSettings,
 } from '../../../entities/settings/map-configuration/map-settings';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { IMAGE_UPLOAD_TYPES } from '../../../entities/shared/image-upload-types';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const MAX_BYTES = MAX_MAP_BACKGROUND_MEGABYTES * 1024 * 1024;
 const SECTOR_AREAS: (ComboboxItem & { propertyId: number })[] = [
   { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01', value: 'Area lettini' },
@@ -111,10 +111,14 @@ export const uploadMapBackgroundMock = (
     return unauthorized(request);
   }
   const image = request.body instanceof FormData ? request.body.get('file') : null;
-  if (!(image instanceof File) || !IMAGE_TYPES.includes(image.type) || image.size > MAX_BYTES) {
+  if (
+    !(image instanceof File) ||
+    !IMAGE_UPLOAD_TYPES.includes(image.type) ||
+    image.size > MAX_BYTES
+  ) {
     return problem(request, 422, ApiErrorCode.MapInvalidImage, {
       title: 'Invalid image',
-      args: { maxBytes: MAX_BYTES, contentTypes: IMAGE_TYPES },
+      args: { maxBytes: MAX_BYTES, contentTypes: IMAGE_UPLOAD_TYPES },
     });
   }
   settings = {

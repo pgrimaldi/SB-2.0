@@ -15,7 +15,9 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { UploadContentType } from '../../../../entities/enums/upload-content-type';
 import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { IMAGE_UPLOAD_TYPES } from '../../../../entities/shared/image-upload-types';
 import { environment } from '../../../../../environments/environment';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
@@ -64,9 +66,6 @@ const POSITION_ZOOM = 15;
 const COORDINATE_FACTOR = 1_000_000;
 const GALLERY_ROW_SLOT_QUANTITY = 4;
 const MEGABYTE = 1024 * 1024;
-/** The images the backend takes, as in `accept`. */
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
-const PDF_TYPE = 'application/pdf';
 /** The same answers the backend gives, before sending a file it would refuse. */
 const INVALID_IMAGE: ApiProblem = {
   status: 422,
@@ -136,8 +135,8 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   protected readonly removeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   /** [X]. */
   protected readonly popupIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
-  protected readonly imageTypes = IMAGE_TYPES.join(',');
-  protected readonly pdfType = PDF_TYPE;
+  protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
+  protected readonly pdfType = UploadContentType.Pdf;
   protected readonly mapId = environment.googleMapsMapId;
   protected readonly isMapReady = signal(false);
   protected readonly isMapFailed = signal(false);
@@ -330,7 +329,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
     if (!pdf) {
       return;
     }
-    if (pdf.type !== PDF_TYPE || pdf.size > MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE) {
+    if (pdf.type !== UploadContentType.Pdf || pdf.size > MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE) {
       this.documentsError.set(INVALID_PDF);
       return;
     }
@@ -451,5 +450,7 @@ function roundCoordinate(value: number): number {
 }
 
 function isImage(file: File): boolean {
-  return IMAGE_TYPES.includes(file.type) && file.size <= MAX_BATHHOUSE_IMAGE_MEGABYTES * MEGABYTE;
+  return (
+    IMAGE_UPLOAD_TYPES.includes(file.type) && file.size <= MAX_BATHHOUSE_IMAGE_MEGABYTES * MEGABYTE
+  );
 }

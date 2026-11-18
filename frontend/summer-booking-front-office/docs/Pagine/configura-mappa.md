@@ -47,7 +47,8 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
   - Al passaggio del mouse (non sul tocco) aprono sotto la casella un'anteprima grande come una finestrella
     (40rem, cornice bianca con bordo scuro sottile, overlay CDK `cdkConnectedOverlay` che resta dentro lo schermo),
     anche in sola lettura.
-- "Sfondo personalizzato": `app-file-drop-zone` (solo jpg, jpeg e png, `accept="image/jpeg,image/png"`) e
+- "Sfondo personalizzato": `app-file-drop-zone` (png, jpeg e webp come il backend: `IMAGE_UPLOAD_TYPES` di
+  `entities/shared/image-upload-types.ts`, la stessa lista della tab Media di Informazioni stabilimento) e
   l'anteprima dell'immagine scelta.
 - L'immagine scelta in Modifica parte subito, senza Salva, con `MapService.uploadBackground`
   (`POST /api/catalog/map/background`, multipart con il campo `file`).

@@ -25,6 +25,7 @@ import {
   MapBackground,
   MapSettings,
 } from '../../../../../entities/settings/map-configuration/map-settings';
+import { IMAGE_UPLOAD_TYPES } from '../../../../../entities/shared/image-upload-types';
 import { MapService } from '../../../../../services/api/catalog/map.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
@@ -82,6 +83,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected readonly uploadIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
   protected readonly deleteIcon = ['/assets/images/MapConfiguration_DeleteRed.svg'] as const;
   protected readonly maxImageMegabytes = MAX_MAP_BACKGROUND_MEGABYTES;
+  protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
   protected readonly isEditing = signal(false);
   protected readonly isBusy = signal(false);
   protected readonly isSaving = signal(false);

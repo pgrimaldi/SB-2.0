@@ -52,6 +52,9 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Nazione: tendina con le nazioni del backend (`lookups/countries`), nel suo ordine; senza nazione parte dalla prima
   voce della lista. Il valore è il codice ISO (`code`), così ogni voce resta legata alla sua nazione (es. per una
   bandiera, `assets/flags/<code in minuscolo>.svg`).
+- Le nazioni si caricano a parte dai dati della tab: se arrivano dopo, la prima voce si sceglie allora (solo se lo
+  stabilimento non ne ha una e l'utente non l'ha scelta). Se non si caricano, l'errore compare solo sotto Nazione
+  (`countriesLoadError`, come le altre tendine) e il resto della tab funziona.
 - Sotto, a destra, "Modifica" sblocca i campi e lascia il posto ad Annulla e Salva; senza Nome stabilimento Salva è
   spento.
 - Sui telefoni i campi vanno uno per riga, tranne Cap (spostato sotto Città) con Provincia e Regione con Nazione, a metà

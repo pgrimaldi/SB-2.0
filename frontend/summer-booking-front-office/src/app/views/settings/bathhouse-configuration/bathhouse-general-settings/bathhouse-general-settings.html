@@ -54,7 +54,7 @@
         'management.settings.bathhouse_configuration.general_information.choose' | translate
       "
       [options]="countryOptions()"
-      [error]="fieldErrors.country()"
+      [error]="countriesLoadError() ?? fieldErrors.country()"
       [formField]="informationForm.country"
     />
   </div>

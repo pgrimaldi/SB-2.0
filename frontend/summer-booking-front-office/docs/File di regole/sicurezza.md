@@ -129,8 +129,8 @@ header di sicurezza e CSP.
 
 ## Logout
 
-- La sessione si chiude nel browser solo dopo che il server l'ha revocata (o risponde 401: sessione già chiusa), con
-  un nuovo tentativo automatico. I due tentativi e la pausa fra loro stanno in un solo turno del lucchetto e valgono
+- La sessione si chiude nel browser solo dopo la risposta del server, che è sempre 204, anche se la sessione era già
+  chiusa (un 401, per esempio da un proxy, vale come sessione già chiusa), con un nuovo tentativo automatico. I due tentativi e la pausa fra loro stanno in un solo turno del lucchetto e valgono
   solo per la sessione che ha chiesto il logout.
 - Se non riesce, l'utente resta connesso e vede il popup "Disconnessione Fallita" (`app-alert-popup`).
 - Il logout vale per tutte le schede aperte della sessione e cancella il segno condiviso, quello della scheda e il

@@ -53,7 +53,7 @@
 <div class="map__background__panel__custom">
   <app-file-drop-zone
     class="map__background__panel__drop"
-    accept="image/jpeg,image/png"
+    [accept]="imageTypes"
     [text]="'management.settings.map_configuration.background.drop' | translate"
     [pathIcon]="uploadIcon"
     [previewUrl]="imagePreviewUrl()"

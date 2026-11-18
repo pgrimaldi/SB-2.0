@@ -9,6 +9,7 @@ import { TableServiceAvailabilityMode } from '../../../entities/enums/table-serv
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
+import { UploadContentType } from '../../../entities/enums/upload-content-type';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import {
@@ -55,6 +56,7 @@ import { TableServiceAddItemRequest } from '../../../entities/settings/services/
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
+import { IMAGE_UPLOAD_TYPES } from '../../../entities/shared/image-upload-types';
 import { Language } from '../../../entities/shared/language';
 import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -899,7 +901,6 @@ let bathhouseMedia: BathhouseMedia = {
   menuPdfUrl: null,
   menuPdfFileName: null,
 };
-const PHOTO_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const MAX_PHOTO_BYTES = MAX_BATHHOUSE_IMAGE_MEGABYTES * 1024 * 1024;
 const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * 1024 * 1024;
 
@@ -1007,10 +1008,10 @@ export const uploadBathhouseDocumentMock = (
     return notFoundWithoutBody(request);
   }
   const pdf = request.body instanceof FormData ? request.body.get('file') : null;
-  if (!(pdf instanceof File) || pdf.type !== 'application/pdf' || pdf.size > MAX_PDF_BYTES) {
+  if (!(pdf instanceof File) || pdf.type !== UploadContentType.Pdf || pdf.size > MAX_PDF_BYTES) {
     return problem(request, 422, ApiErrorCode.CatalogInvalidPdf, {
       title: 'Invalid PDF',
-      args: { maxBytes: MAX_PDF_BYTES, contentTypes: ['application/pdf'] },
+      args: { maxBytes: MAX_PDF_BYTES, contentTypes: [UploadContentType.Pdf] },
     });
   }
   setDocument(document, URL.createObjectURL(pdf), pdf.name);
@@ -1045,12 +1046,12 @@ function withImage(
   const image = request.body instanceof FormData ? request.body.get('file') : null;
   if (
     !(image instanceof File) ||
-    !PHOTO_TYPES.includes(image.type) ||
+    !IMAGE_UPLOAD_TYPES.includes(image.type) ||
     image.size > MAX_PHOTO_BYTES
   ) {
     return problem(request, 422, ApiErrorCode.CatalogInvalidImage, {
       title: 'Invalid image',
-      args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: PHOTO_TYPES },
+      args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: IMAGE_UPLOAD_TYPES },
     });
   }
   return keep(image);
