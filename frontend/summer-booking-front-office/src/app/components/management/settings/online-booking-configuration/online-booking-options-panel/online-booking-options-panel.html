@@ -72,6 +72,7 @@
               <app-filled-time-field
                 class="online__booking__options__panel__time"
                 [pathIcon]="clockIcon"
+                [error]="validationText.text(halfDay.start)"
                 [formField]="halfDay.start"
               />
             </div>
@@ -85,6 +86,7 @@
               <app-filled-time-field
                 class="online__booking__options__panel__time"
                 [pathIcon]="clockIcon"
+                [error]="validationText.text(halfDay.end)"
                 [formField]="halfDay.end"
               />
             </div>

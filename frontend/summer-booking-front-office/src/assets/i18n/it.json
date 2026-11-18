@@ -2007,6 +2007,10 @@
     "phone_digits": "Solo numeri e spazi: il prefisso va nel campo accanto",
     "phone_digits_without_prefix": "Solo numeri e spazi, senza +",
     "phone_max_length": "Il numero può avere al massimo {{max}} caratteri, spazi compresi",
+    "time_not_after_end": "Non può essere dopo l'orario di fine",
+    "time_not_before_start": "Non può essere prima dell'orario di inizio",
+    "time_before_end": "Deve precedere l'orario di fine",
+    "time_after_start": "Deve seguire l'orario di inizio",
     "seasons": {
       "period_name": {
         "taken": "Esiste già un periodo con questo nome in questa stagione."

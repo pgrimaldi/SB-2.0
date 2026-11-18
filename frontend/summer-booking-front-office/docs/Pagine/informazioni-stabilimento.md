@@ -37,8 +37,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
     per questi numeri);
   - Sito web, Facebook e Instagram un terzo ciascuno;
   - Descrizione su tutta la riga;
-  - Orario di apertura (due `app-filled-time-field` "Dalle" e "Alle", `HH:mm`), Cancellazione e Animali, un terzo
-    ciascuno;
+  - Orario di apertura (due `app-filled-time-field` "Dalle" e "Alle", `HH:mm`, con `strictTimeRange`: "Alle" dopo "Dalle",
+    come vuole il backend), Cancellazione e Animali, un terzo ciascuno;
   - Regolamento su tutta la riga.
 - Descrizione e Regolamento usano `app-rich-text-field` (grassetto, corsivo, sottolineato, elenco puntato e numerato,
   link), alte 6.25rem (`--rich-text-field-height`) con lo scorrimento interno. Icone provvisorie `GeneralIcon_Bold.svg` …

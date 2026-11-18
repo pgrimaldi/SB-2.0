@@ -31,7 +31,7 @@ import { AutomaticPriceServices } from '../../../../../entities/settings/service
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { requiredText } from '../../../../shared/forms/validators';
+import { requiredText, timeRange } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-tab/automatic-price-general-info-tab';
@@ -101,6 +101,11 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+    });
+    applyEach(path.validityPeriods, (period) => {
+      applyEach(period.timeSlots, (timeSlot) => {
+        timeRange(timeSlot.startTime, timeSlot.endTime);
+      });
     });
   });
   /** The form as it was when the panel opened. */

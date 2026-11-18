@@ -35,7 +35,7 @@ Leggi i file della riga che corrisponde alla richiesta (anche più righe se la r
 | Come lavorare, documenti da aggiornare, dove stanno i documenti | `collaborazione.md` |
 | Nuovo componente, servizio, behaviour, entità, cartelle, nomi, dipendenze, librerie | `architettura.md` |
 | Wrapper, elementi grafici, popup, bottoni, titoli, icone dei componenti | `componenti-e-wrapper.md` |
-| Form, popup con campi, validazioni, messaggi di errore dei campi, Salva/Annulla, date Dal/Al, spinner | `form-e-validazioni.md` |
+| Form, popup con campi, validazioni, messaggi di errore dei campi, Salva/Annulla, date Dal/Al, orari Dalle/Alle, spinner | `form-e-validazioni.md` |
 | Tabelle, elenchi, paginazione, filtri, ordinamento, ricerca, azioni di riga | `tabelle.md` e `api-e-mock.md` |
 | API, chiamate al backend, mock, contratti, combobox, caricamento di file, codici di errore, download | `api-e-mock.md` |
 | Traduzioni, lingue, arabo/RTL, testi, date e numeri mostrati | `traduzioni-e-lingue.md` |

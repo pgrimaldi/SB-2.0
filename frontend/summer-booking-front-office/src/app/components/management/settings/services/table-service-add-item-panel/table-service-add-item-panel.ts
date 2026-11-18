@@ -35,7 +35,7 @@ import { ServiceTranslation } from '../../../../../entities/settings/services/se
 import { TableServiceAddItemRequest } from '../../../../../entities/settings/services/table-service-add-item-request';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { requiredText } from '../../../../shared/forms/validators';
+import { requiredText, timeRange } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
@@ -112,9 +112,11 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
         ({ valueOf }) => !valueOf(availability.isSameTimeForAllDays),
       );
       disabled(availability.endTime, ({ valueOf }) => !valueOf(availability.isSameTimeForAllDays));
+      timeRange(availability.startTime, availability.endTime);
       applyEach(availability.days, (day) => {
         disabled(day.startTime, ({ valueOf }) => valueOf(availability.isSameTimeForAllDays));
         disabled(day.endTime, ({ valueOf }) => valueOf(availability.isSameTimeForAllDays));
+        timeRange(day.startTime, day.endTime);
       });
     });
   });

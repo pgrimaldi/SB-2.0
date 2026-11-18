@@ -58,6 +58,22 @@ export interface PhoneMaxLengthError extends ValidationError {
   readonly max: number;
 }
 
+export interface TimeNotAfterEndError extends ValidationError {
+  readonly kind: 'time_not_after_end';
+}
+
+export interface TimeNotBeforeStartError extends ValidationError {
+  readonly kind: 'time_not_before_start';
+}
+
+export interface TimeBeforeEndError extends ValidationError {
+  readonly kind: 'time_before_end';
+}
+
+export interface TimeAfterStartError extends ValidationError {
+  readonly kind: 'time_after_start';
+}
+
 /** First and last day, at midnight UTC as ISO strings. */
 export interface DayRange {
   startsOn: string | null;
@@ -145,6 +161,44 @@ export function phoneNumberWithoutPrefix<TPathKind extends PathKind = PathKind.R
   validate(path, ({ value }) =>
     phoneError(value(), maxLength, { kind: 'phone_digits_without_prefix' }),
   );
+}
+
+/**
+ * A start and an end time (`HH:mm`): when both are set, the end cannot come before the start (the
+ * same time is fine). Each field gets its own error, so the message shows under the one the user
+ * changed.
+ */
+export function timeRange<TPathKind extends PathKind = PathKind.Root>(
+  start: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  end: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(start, ({ value, valueOf }): TimeNotAfterEndError | undefined =>
+    isEarlier(valueOf(end), value()) ? { kind: 'time_not_after_end' } : undefined,
+  );
+  validate(end, ({ value, valueOf }): TimeNotBeforeStartError | undefined =>
+    isEarlier(value(), valueOf(start)) ? { kind: 'time_not_before_start' } : undefined,
+  );
+}
+
+/** The same, where the backend wants the end strictly after the start: the same time is an error. */
+export function strictTimeRange<TPathKind extends PathKind = PathKind.Root>(
+  start: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  end: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(start, ({ value, valueOf }): TimeBeforeEndError | undefined =>
+    isNotLater(valueOf(end), value()) ? { kind: 'time_before_end' } : undefined,
+  );
+  validate(end, ({ value, valueOf }): TimeAfterStartError | undefined =>
+    isNotLater(value(), valueOf(start)) ? { kind: 'time_after_start' } : undefined,
+  );
+}
+
+function isEarlier(time: string | null, other: string | null): boolean {
+  return !!time && !!other && time < other;
+}
+
+function isNotLater(time: string | null, other: string | null): boolean {
+  return !!time && !!other && time <= other;
 }
 
 function phoneError<TDigitsError extends ValidationError>(

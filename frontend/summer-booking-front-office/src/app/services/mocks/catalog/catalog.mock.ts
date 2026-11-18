@@ -731,7 +731,8 @@ export const bathhouseConfigurationServicesMock = (
  * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the tab, for the
  * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 without a
  * name, with a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
- * `phoneErrors`), or without a `petPolicy` of `PetPolicy`; 401 without a valid access token.
+ * `phoneErrors`), without a `petPolicy` of `PetPolicy`, or with a `closingTime` not after the
+ * `openingTime`; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -747,6 +748,9 @@ export const saveBathhouseConfigurationGeneralMock = (
   errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
   if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
     errors.push({ field: 'petPolicy', code: 'validation.invalid' });
+  }
+  if (body.openingTime && body.closingTime && body.closingTime <= body.openingTime) {
+    errors.push({ field: 'closingTime', code: 'validation.out_of_range' });
   }
   if (errors.length) {
     return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });

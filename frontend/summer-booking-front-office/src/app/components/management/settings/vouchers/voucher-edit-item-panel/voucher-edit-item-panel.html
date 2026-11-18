@@ -100,6 +100,7 @@
                       <app-filled-time-field
                         class="voucher__edit__item__panel__field"
                         [pathIcon]="clockIcon"
+                        [error]="validationText.text(timeSlot.from)"
                         [formField]="timeSlot.from"
                       />
                     </div>
@@ -110,6 +111,7 @@
                       <app-filled-time-field
                         class="voucher__edit__item__panel__field"
                         [pathIcon]="clockIcon"
+                        [error]="validationText.text(timeSlot.to)"
                         [formField]="timeSlot.to"
                       />
                     </div>

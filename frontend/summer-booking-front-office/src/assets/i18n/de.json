@@ -2007,6 +2007,10 @@
     "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
     "phone_digits_without_prefix": "Nur Ziffern und Leerzeichen, ohne +",
     "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen",
+    "time_not_after_end": "Darf nicht nach der Endzeit liegen",
+    "time_not_before_start": "Darf nicht vor der Startzeit liegen",
+    "time_before_end": "Muss vor der Endzeit liegen",
+    "time_after_start": "Muss nach der Startzeit liegen",
     "seasons": {
       "period_name": {
         "taken": "In dieser Saison gibt es bereits einen Zeitraum mit diesem Namen."

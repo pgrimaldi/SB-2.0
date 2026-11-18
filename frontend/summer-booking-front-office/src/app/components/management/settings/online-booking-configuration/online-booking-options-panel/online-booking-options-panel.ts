@@ -30,7 +30,7 @@ import { LegendItem } from '../../../../../entities/settings/online-booking-conf
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { greaterThan } from '../../../../shared/forms/validators';
+import { greaterThan, timeRange } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -118,7 +118,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private readonly sectorService = inject(SectorService);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
-  private readonly validationText = inject(ValidationTextBehaviour);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -158,6 +158,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     max(path.supplementValue, ({ valueOf }) =>
       valueOf(path.supplementType) === SupplementType.Percentage ? 100 : undefined,
     );
+    timeRange(path.morningStartTime, path.morningEndTime);
+    timeRange(path.afternoonStartTime, path.afternoonEndTime);
   });
   protected readonly halfDays = [
     {

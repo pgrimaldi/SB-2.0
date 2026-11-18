@@ -44,7 +44,7 @@ import { AutomaticPriceValidityPeriod } from '../../../../../entities/settings/s
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { requiredText } from '../../../../shared/forms/validators';
+import { requiredText, timeRange } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
@@ -147,6 +147,16 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         },
       );
     });
+    applyWhen(
+      path.validityPeriods,
+      () => this.selectedTab() === PanelTab.PricesValidity,
+      (periods) =>
+        applyEach(periods, (period) => {
+          applyEach(period.timeSlots, (timeSlot) => {
+            timeRange(timeSlot.startTime, timeSlot.endTime);
+          });
+        }),
+    );
   });
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
   private readonly pristine = signal(newDraft());

@@ -39,7 +39,7 @@ import { ServiceTranslation } from '../../../../../entities/settings/services/se
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { requiredText } from '../../../../shared/forms/validators';
+import { requiredText, timeRange } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab';
@@ -118,6 +118,10 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+    });
+    applyEach(path.bookingOptions, (option) => {
+      timeRange(option.managementStartTime, option.managementEndTime);
+      timeRange(option.onlineStartTime, option.onlineEndTime);
     });
   });
   /** The form as it was when the panel opened, with an empty price for every period. */

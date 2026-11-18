@@ -2007,6 +2007,10 @@
     "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
     "phone_digits_without_prefix": "只能输入数字和空格，不含 +",
     "phone_max_length": "号码最多 {{max}} 个字符（含空格）",
+    "time_not_after_end": "不能晚于结束时间",
+    "time_not_before_start": "不能早于开始时间",
+    "time_before_end": "必须早于结束时间",
+    "time_after_start": "必须晚于开始时间",
     "seasons": {
       "period_name": {
         "taken": "本季节已存在同名的时段。"

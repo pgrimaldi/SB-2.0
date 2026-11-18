@@ -42,7 +42,7 @@ import { VoucherValidityPeriod } from '../../../../../entities/settings/vouchers
 import { DAYS_OF_WEEK } from '../../../../../entities/shared/days-of-week';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
-import { minItems, requiredText } from '../../../../shared/forms/validators';
+import { minItems, requiredText, strictTimeRange } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -112,6 +112,9 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
       required(period.validFrom);
       required(period.validTo);
       minItems(period.daysOfWeek, 1);
+      applyEach(period.timeSlots, (timeSlot) => {
+        strictTimeRange(timeSlot.from, timeSlot.to);
+      });
     });
     required(path.discountType);
     required(path.discountValue);

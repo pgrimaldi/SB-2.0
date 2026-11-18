@@ -27,6 +27,11 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   `invalidate.phone_max_length` (es. `PHONE_MAX_LENGTH`, 32, il limite del backend).
 - `phoneNumberWithoutPrefix(path, lunghezza)`: le stesse regole per un numero che non ha accanto il campo del prefisso;
   il primo errore è `invalidate.phone_digits_without_prefix` ("Solo numeri e spazi, senza +").
+- `timeRange(inizio, fine)`: due orari `HH:mm`; se ci sono tutti e due la fine non può venire prima dell'inizio (uguali
+  vanno bene). L'errore va su tutti e due i campi, ognuno col suo testo (`invalidate.time_not_after_end`,
+  `invalidate.time_not_before_start`), così si vede sotto quello che l'utente ha cambiato.
+- `strictTimeRange(inizio, fine)`: lo stesso dove il backend vuole la fine strettamente dopo l'inizio, quindi anche
+  uguali è un errore (`invalidate.time_before_end`, `invalidate.time_after_start`).
 - `webLink(path)`: un testo che non è un link completo http o https (`invalidate.web_link`). Il campo vuoto lo lascia
   a `requiredText`.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
@@ -118,6 +123,17 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   durante la chiamata (es. il popup di login chiuso e riaperto) lo spinner si rivede.
 - Un errore arrivato per un tentativo il cui popup è stato chiuso non compare nel popup riaperto.
 - Azioni di tabella (interruttore, duplica, elimina): spinner a pagina intera, vedi `tabelle.md`.
+
+## Coppie Dal / Al e Dalle / Alle
+
+- In ogni form la fine di una coppia non viene mai prima dell'inizio: il "Al" non prima del "Dal", l'"Alle" non prima
+  del "Dalle". Uguali vanno bene (es. 01/06–01/06, 09:00–09:00), salvo dove il backend lo vieta o l'utente dice
+  altrimenti. Ogni coppia nuova segue la stessa regola.
+- Orari: ogni coppia di `app-filled-time-field` ha `timeRange`, o `strictTimeRange` dove il backend vuole la fine
+  strettamente dopo l'inizio (orario di apertura di Informazioni stabilimento, fasce orarie dei voucher). Ognuno dei
+  due campi ha il suo `[error]`. Nei pannelli che salvano una tab alla volta il controllo vale solo sulla tab aperta,
+  come gli altri (`applyWhen` su `selectedTab()`).
+- Giorni: sotto.
 
 ## Campi data e coppie Dal / Al
 

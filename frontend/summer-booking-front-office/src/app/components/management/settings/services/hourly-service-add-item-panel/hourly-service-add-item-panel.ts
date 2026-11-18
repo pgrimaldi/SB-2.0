@@ -40,7 +40,7 @@ import { ServiceTranslation } from '../../../../../entities/settings/services/se
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { requiredText } from '../../../../shared/forms/validators';
+import { requiredText, timeRange } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-service-bookings-tab';
@@ -119,6 +119,14 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+    });
+    applyEach(path.periodAvailabilities, (periodAvailability) => {
+      applyEach(periodAvailability.availabilityOptions, (option) => {
+        timeRange(option.startTime, option.endTime);
+      });
+    });
+    applyEach(path.bookingOptions, (option) => {
+      timeRange(option.availabilityOption.startTime, option.availabilityOption.endTime);
     });
   });
   /** The form as it was when the panel opened, with an empty availability option for every period. */
