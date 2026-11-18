@@ -233,6 +233,33 @@ Rotte, corpi, risposte e gli altri errori restano quelli di oggi: si aggiunge un
 - Il codice nuovo va aggiunto a `CatalogErrors`, accanto agli altri `pricing.period_*`. Il frontend aggiunge il suo
   testo ("Le date si sovrappongono al periodo …: scegli giorni liberi.") appena il codice esiste.
 
+## API esistenti usate così come sono
+
+Queste API del backend le usa già il frontend e, salvo le modifiche delle sezioni 3 e 4, **non vanno cambiate**: sono
+qui solo perché chi lavora sulla pagina sappia cosa il frontend si aspetta. Lo stabilimento viene sempre dal token.
+
+| Metodo | Rotta | Uso nella pagina |
+|---|---|---|
+| GET | `/api/catalog/season` | Riquadro delle date, all'apertura: 200 con `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` (giorni `yyyy-MM-dd`), oppure 204 senza corpo se la stagione non è ancora impostata (quattro date vuote). |
+| PUT | `/api/catalog/season` | "Salva" del riquadro delle date: le quattro date; 200 con le date salvate, che la pagina mostra. |
+| GET | `/api/catalog/tariff-periods` | Tab "Stagione Corrente": i periodi con `key`, `name` e `ranges` (`startsOn`, `endsOn`); `[]` senza stagione. Li legge anche la pagina Listino. |
+| GET | `/api/catalog/next-season/tariff-periods` | Tab "Prossima Stagione": lo stesso per la stagione successiva. |
+| POST | `/api/catalog/[next-season/]tariff-periods` | Popup "Imposta periodo": `name` e `ranges`; 201 con il periodo creato. Si aggiunge il controllo della sezione 4 e la `key` mai riusata della sezione 3. |
+| PUT | `/api/catalog/[next-season/]tariff-periods/{key}` | Popup "Modifica Periodo", "Aggiungi intervallo" e "Modifica Intervallo": il periodo intero (`name` e tutti i `ranges`); 200 con il periodo salvato. Si aggiunge il controllo della sezione 4. |
+| DELETE | `/api/catalog/tariff-periods/{key}` | Cestino di un periodo della stagione corrente, dopo la conferma; 204 senza corpo. Si aggiunge il controllo dei servizi della sezione 3. |
+| DELETE | `/api/catalog/next-season/tariff-periods/{key}` | Lo stesso per la stagione successiva; 204 senza corpo. |
+
+Il frontend si aspetta questi errori e li mostra così:
+
+| Status | `code` | Dove lo mostra |
+|---|---|---|
+| 400 | `validation.failed` | Con `errors[]`: le date sotto il loro campo; `name` sotto il nome; `ranges` sotto il calendario di "Imposta periodo" o sopra i bottoni degli altri popup. |
+| 409 | `pricing.period_name_taken` | Sotto il nome del periodo. |
+| 422 | `pricing.period_outside_season` | Sotto il calendario o sopra i bottoni del popup. |
+| 422 | `pricing.season_required` / `pricing.next_season_required` | Sopra i bottoni del popup. |
+| 404 | `pricing.period_not_found` | Nel popup o nell'avviso "Operazione non riuscita"; la tab ricarica i periodi. |
+| 409 | `pricing.period_in_use` | Avviso "Operazione non riuscita" con i nomi dei listini (`args.priceLists`). |
+
 ## Verifica
 
 - Una sola chiamata cancella intervalli di più periodi; gli altri intervalli e gli altri periodi restano, con la stessa
