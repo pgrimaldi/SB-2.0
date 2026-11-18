@@ -56,7 +56,7 @@
     <div class="bathhouse__media__settings__gallery">
       @for (photo of galleryPhotos(); track photo.idPhoto) {
         <div class="bathhouse__media__settings__photo">
-          <app-file-drop-zone [previewUrl]="photo.url" [disabled]="true" />
+          <app-file-drop-zone [previewUrl]="photo.url" [pathIcon]="imagesIcon" [disabled]="true" />
           <app-icon-button
             class="bathhouse__media__settings__remove"
             [label]="'table.actions.delete' | translate"

@@ -2004,6 +2004,8 @@
     "max_file_size": "The file is larger than {{max}} MB",
     "unknown_icon": "Icon does not exist",
     "web_link": "Enter a full link starting with http:// or https://",
+    "email": "Invalid email",
+    "max_length": "At most {{max}} characters",
     "phone_digits": "Only digits and spaces: the prefix goes in the field beside",
     "phone_digits_without_prefix": "Only digits and spaces, no +",
     "phone_max_length": "The number can have at most {{max}} characters, spaces included",

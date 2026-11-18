@@ -45,6 +45,15 @@ export interface WebLinkError extends ValidationError {
   readonly kind: 'web_link';
 }
 
+export interface EmailError extends ValidationError {
+  readonly kind: 'email';
+}
+
+export interface MaxLengthError extends ValidationError {
+  readonly kind: 'max_length';
+  readonly max: number;
+}
+
 export interface PhoneDigitsError extends ValidationError {
   readonly kind: 'phone_digits';
 }
@@ -142,6 +151,32 @@ export function webLink<TPathKind extends PathKind = PathKind.Root>(
   });
 }
 
+/** Like the backend: one `@`, neither first nor last. An empty field is left to `requiredText`. */
+export function emailAddress<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+): void {
+  validate(path, ({ value }): EmailError | undefined => {
+    const email = value();
+    return !email || isEmailAddress(email) ? undefined : { kind: 'email' };
+  });
+}
+
+/** The backend's check of an email: one `@`, neither first nor last. */
+export function isEmailAddress(text: string): boolean {
+  const at = text.indexOf('@');
+  return at > 0 && at < text.length - 1 && at === text.lastIndexOf('@');
+}
+
+/** Rich text (HTML) whose text, as the user sees it, is longer than `max` characters. */
+export function maxRichTextLength<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  max: number,
+): void {
+  validate(path, ({ value }): MaxLengthError | undefined =>
+    visibleTextLength(value()) > max ? { kind: 'max_length', max } : undefined,
+  );
+}
+
 /**
  * A phone number with something other than digits and spaces (the prefix has its own field), then
  * one longer than `maxLength` characters, spaces included.
@@ -211,6 +246,13 @@ function phoneError<TDigitsError extends ValidationError>(
     return digitsError;
   }
   return number.length > maxLength ? { kind: 'phone_max_length', max: maxLength } : undefined;
+}
+
+/** `DOMParser` builds an inert document: nothing in the HTML runs or loads. */
+function visibleTextLength(html: string | null): number {
+  return html
+    ? (new DOMParser().parseFromString(html, 'text/html').body.textContent ?? '').length
+    : 0;
 }
 
 function isWebLink(text: string): boolean {

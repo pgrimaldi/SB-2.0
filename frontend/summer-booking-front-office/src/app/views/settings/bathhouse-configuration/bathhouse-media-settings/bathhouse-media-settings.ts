@@ -1,4 +1,5 @@
 import { DOCUMENT } from '@angular/common';
+import { HttpStatusCode } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,9 +13,18 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  MAX_LENGTH,
+  TreeValidationResult,
+  form,
+  metadata,
+  readonly,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { isUploadable } from '../../../../behaviours/files/uploadable-file';
 import { UploadContentType } from '../../../../entities/enums/upload-content-type';
 import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
 import {
@@ -22,6 +32,7 @@ import {
   MAX_IMAGE_UPLOAD_MEGABYTES,
   MEGABYTE,
 } from '../../../../entities/shared/image-upload-types';
+import { PDF_UPLOAD_TYPES } from '../../../../entities/shared/pdf-upload-types';
 import { environment } from '../../../../../environments/environment';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
@@ -55,6 +66,7 @@ import {
   BathhouseMedia,
   MAX_BATHHOUSE_PDF_MEGABYTES,
   MAX_BATHHOUSE_PHOTO_QUANTITY,
+  MAX_VIRTUAL_TOUR_URL_LENGTH,
 } from '../../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseMediaRequest } from '../../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
 import { BathhousePhoto } from '../../../../entities/settings/bathhouse-configuration/bathhouse-photo';
@@ -70,17 +82,17 @@ const COORDINATE_FACTOR = 1_000_000;
 const GALLERY_ROW_SLOT_QUANTITY = 4;
 /** The same answers the backend gives, before sending a file it would refuse. */
 const INVALID_IMAGE: ApiProblem = {
-  status: 422,
+  status: HttpStatusCode.UnprocessableEntity,
   code: ApiErrorCode.CatalogInvalidImage,
   args: { maxBytes: MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE },
 };
 const INVALID_PDF: ApiProblem = {
-  status: 422,
+  status: HttpStatusCode.UnprocessableEntity,
   code: ApiErrorCode.CatalogInvalidPdf,
   args: { maxBytes: MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE },
 };
 const GALLERY_FULL: ApiProblem = {
-  status: 422,
+  status: HttpStatusCode.UnprocessableEntity,
   code: ApiErrorCode.CatalogGalleryFull,
   args: { max: MAX_BATHHOUSE_PHOTO_QUANTITY },
 };
@@ -146,6 +158,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   private readonly request = signal(new BathhouseMediaRequest());
   protected readonly mediaForm = form(this.request, (path) => {
     webLink(path.virtualTourUrl);
+    metadata(path.virtualTourUrl, MAX_LENGTH, () => MAX_VIRTUAL_TOUR_URL_LENGTH);
     readonly(path, () => !this.isEditing() || this.isSaving());
   });
   protected readonly fieldErrors = Object.fromEntries(
@@ -336,7 +349,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
     if (!pdf) {
       return;
     }
-    if (pdf.type !== UploadContentType.Pdf || pdf.size > MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE) {
+    if (!isUploadable(pdf, PDF_UPLOAD_TYPES, MAX_BATHHOUSE_PDF_MEGABYTES)) {
       this.documentsError.set(INVALID_PDF);
       return;
     }
@@ -425,7 +438,10 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   }
 }
 
-/** The links go into `src` and `href`: only https ones or ours are kept. */
+/**
+ * The links go into `src` and `href`: only https ones or ours are kept. A photo without one stays
+ * in the gallery, without preview, so it still counts and can be deleted.
+ */
 function mediaOf(answer: BathhouseMedia, origin: string): BathhouseMedia {
   const media = onlyFieldsOf(BathhouseMedia, answer);
   return {
@@ -433,8 +449,7 @@ function mediaOf(answer: BathhouseMedia, origin: string): BathhouseMedia {
     mainPhotoUrl: webLinkOf(media.mainPhotoUrl, origin),
     photos: (media.photos ?? [])
       .map((photo) => onlyFieldsOf(BathhousePhoto, photo))
-      .map((photo) => ({ ...photo, url: webLinkOf(photo.url, origin) }))
-      .filter(({ url }) => url !== null),
+      .map((photo) => ({ ...photo, url: webLinkOf(photo.url, origin) })),
     priceListPdfUrl: webLinkOf(media.priceListPdfUrl, origin),
     menuPdfUrl: webLinkOf(media.menuPdfUrl, origin),
   };
@@ -457,7 +472,5 @@ function roundCoordinate(value: number): number {
 }
 
 function isImage(file: File): boolean {
-  return (
-    IMAGE_UPLOAD_TYPES.includes(file.type) && file.size <= MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE
-  );
+  return isUploadable(file, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES);
 }

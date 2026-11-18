@@ -2004,6 +2004,8 @@
     "max_file_size": "Die Datei ist größer als {{max}} MB",
     "unknown_icon": "Symbol existiert nicht",
     "web_link": "Gib einen vollständigen Link ein, der mit http:// oder https:// beginnt",
+    "email": "Ungültige E-Mail-Adresse",
+    "max_length": "Höchstens {{max}} Zeichen",
     "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
     "phone_digits_without_prefix": "Nur Ziffern und Leerzeichen, ohne +",
     "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen",

@@ -40,6 +40,12 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   - Orario di apertura (due `app-filled-time-field` "Dalle" e "Alle", `HH:mm`, con `strictTimeRange`: "Alle" dopo "Dalle",
     come vuole il backend), Cancellazione e Animali, un terzo ciascuno;
   - Regolamento su tutta la riga.
+- Lunghezze massime come il backend e il database, costanti in `BathhouseGeneralInformation` (`MAX_LENGTH`, il campo
+  non accetta caratteri oltre): 255 per Nome stabilimento, Indirizzo, Città, Provincia, Regione, Sito web, Facebook e
+  Instagram (`MAX_BATHHOUSE_TEXT_LENGTH`); 16 per il Cap (`MAX_BATHHOUSE_POSTAL_CODE_LENGTH`); 255 per l'Email
+  (`MAX_EMAIL_LENGTH`), che ha anche `emailAddress`.
+- Descrizione e Regolamento: al massimo 5000 caratteri visibili (`MAX_BATHHOUSE_RICH_TEXT_LENGTH`, `maxRichTextLength`),
+  più stretto dei 20.000 caratteri di HTML del backend; oltre il limite l'errore va sotto il campo e Salva si spegne.
 - Descrizione e Regolamento usano `app-rich-text-field` (grassetto, corsivo, sottolineato, elenco puntato e numerato,
   link), alte 6.25rem (`--rich-text-field-height`) con lo scorrimento interno. Icone provvisorie `GeneralIcon_Bold.svg` …
   `GeneralIcon_TextLink.svg`, in attesa di quelle della grafica.
@@ -91,11 +97,14 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   puntini) e "Apri il documento".
 - Ogni foto caricata e ogni PDF presente hanno la piccola X in alto a destra (`app-icon-button`), che chiede conferma
   (`app-confirm-popup`, "Elimina immagine" / "Elimina documento") e poi chiama la cancellazione.
-- Prima di mandare un file la tab controlla tipo e peso (png, jpeg, webp fino a 5 MB; PDF fino a 10 MB) e il posto
-  libero nella galleria, con gli stessi codici di errore del backend (`catalog.invalid_image`, `catalog.invalid_pdf`,
+- Nelle anteprime vanno solo indirizzi https o dell'app. Una foto della galleria con l'url vuoto o non sicuro resta al
+  suo posto senza anteprima (icona delle immagini) ma con la X: conta nei 30 posti e si può cancellare.
+- Prima di mandare un file la tab controlla tipo, file non vuoto e peso (`isUploadable`: png, jpeg, webp fino a 5 MB;
+  PDF fino a 10 MB) e il posto libero nella galleria, con gli stessi codici di errore del backend (`catalog.invalid_image`, `catalog.invalid_pdf`,
   `catalog.gallery_full`). Gli errori compaiono sotto Immagini o sotto Documenti PDF.
 - Modifica, Annulla e Salva valgono per il link del tour virtuale e per la posizione: form Signal Forms su
-  `BathhouseMediaRequest` (`webLink` sul link, Salva spento finché non è valido).
+  `BathhouseMediaRequest` (`webLink` sul link, Salva spento finché non è valido). Il link ha al massimo 500 caratteri,
+  come il backend e il database (`MAX_VIRTUAL_TOUR_URL_LENGTH`, `MAX_LENGTH`: il campo non accetta caratteri oltre).
 - In Modifica un clic sulla mappa sposta il segnaposto (`positionClicked`, coordinate arrotondate a 6 decimali come le
   tiene il backend); in sola lettura il clic non fa nulla.
 - Salva manda `virtualTourUrl` (vuoto = `null`), `latitude` e `longitude`. Gli errori del backend compaiono sotto il

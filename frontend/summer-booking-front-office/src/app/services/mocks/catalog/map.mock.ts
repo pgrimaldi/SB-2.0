@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { isUploadable } from '../../../behaviours/files/uploadable-file';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
 import { MapMixedSpotIcon } from '../../../entities/enums/map-mixed-spot-icon';
@@ -104,7 +105,7 @@ export const mapSettingsMock = (request: HttpRequest<unknown>): Observable<HttpE
 /**
  * `POST /api/catalog/map/background` with the image in the multipart field `file`: it becomes the
  * custom background (an object URL stands for the address of the backend's storage). 422
- * map.invalid_image for a type other than png, jpeg or webp or a file over 5 MB; 401 without a
+ * map.invalid_image for a type other than png, jpeg or webp, an empty file or one over 5 MB; 401 without a
  * valid access token.
  */
 export const uploadMapBackgroundMock = (
@@ -116,8 +117,7 @@ export const uploadMapBackgroundMock = (
   const image = request.body instanceof FormData ? request.body.get('file') : null;
   if (
     !(image instanceof File) ||
-    !IMAGE_UPLOAD_TYPES.includes(image.type) ||
-    image.size > MAX_BYTES
+    !isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES)
   ) {
     return problem(request, 422, ApiErrorCode.MapInvalidImage, {
       title: 'Invalid image',

@@ -34,6 +34,14 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   uguali è un errore (`invalidate.time_before_end`, `invalidate.time_after_start`).
 - `webLink(path)`: un testo che non è un link completo http o https (`invalidate.web_link`). Il campo vuoto lo lascia
   a `requiredText`.
+- `emailAddress(path)`: un'email come la controlla il backend, cioè una sola `@`, né prima né ultima
+  (`invalidate.email`). Il campo vuoto lo lascia a `requiredText`. La lunghezza massima è `MAX_EMAIL_LENGTH` (255,
+  `entities/shared/email-address.ts`).
+- `maxRichTextLength(path, massimo)`: un testo di `app-rich-text-field` (HTML) con più di `massimo` caratteri visibili;
+  la formattazione non conta (`invalidate.max_length`, "Al massimo {{max}} caratteri"). L'editor non blocca la
+  scrittura: l'errore va sotto il campo e Salva si spegne.
+- Lunghezza massima di un campo di testo: `metadata(path, MAX_LENGTH, () => LIMITE)`, con il limite del backend in una
+  costante dell'entità. Il wrapper riceve `maxLength` e il campo non accetta caratteri oltre il limite.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
   giorno in comune con un altro (`invalidate.overlap`).
 - Messaggi generici di Angular: `invalidate.min` "Il valore minimo è {{min}}", `invalidate.max` "Il valore massimo è

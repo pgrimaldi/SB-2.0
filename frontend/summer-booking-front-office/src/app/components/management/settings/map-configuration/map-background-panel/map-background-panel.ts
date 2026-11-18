@@ -1,4 +1,5 @@
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
+import { HttpStatusCode } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,11 +15,13 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription, of, switchMap } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { isUploadable } from '../../../../../behaviours/files/uploadable-file';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { MapBackgroundImage } from '../../../../../entities/enums/map-background-image';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import {
   MapBackground,
@@ -43,6 +46,13 @@ const BACKGROUND_SLOTS = [
   null,
   null,
 ] as const;
+
+/** The backend's answer for an image it refuses, given before sending it. */
+const INVALID_IMAGE: ApiProblem = {
+  status: HttpStatusCode.UnprocessableEntity,
+  code: ApiErrorCode.MapInvalidImage,
+  args: { maxBytes: MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE },
+};
 
 const PREVIEW_POSITIONS: ConnectedPosition[] = [
   { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 8 },
@@ -155,6 +165,10 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.clearErrors();
     if (image.size > MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE) {
       this.isImageTooLarge.set(true);
+      return;
+    }
+    if (!isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES)) {
+      this.saveError.set(INVALID_IMAGE);
       return;
     }
     const shownSlot = this.chosenSlot();

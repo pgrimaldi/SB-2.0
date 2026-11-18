@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ErrorTextBehaviour } from '../../../../../../behaviours/errors/error-text.behaviour';
+import { isUploadable } from '../../../../../../behaviours/files/uploadable-file';
+import { ApiErrorCode } from '../../../../../../entities/errors/api-error-codes';
 import {
   IMAGE_UPLOAD_TYPES,
   MAX_IMAGE_UPLOAD_MEGABYTES,
@@ -37,6 +40,9 @@ export class ServicesImages<K extends string = string> {
   protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
   protected readonly maxImageMegabytes = MAX_IMAGE_UPLOAD_MEGABYTES;
   protected readonly isImageTooLarge = signal(false);
+  /** The backend's answer for an image it would refuse for another reason, e.g. an empty file. */
+  protected readonly invalidImageText = signal<string | null>(null);
+  private readonly errorText = inject(ErrorTextBehaviour);
 
   protected chooseImage(files: readonly File[]): void {
     const [image] = files;
@@ -44,7 +50,17 @@ export class ServicesImages<K extends string = string> {
       return;
     }
     this.isImageTooLarge.set(image.size > MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE);
-    if (!this.isImageTooLarge()) {
+    const isInvalid =
+      !this.isImageTooLarge() &&
+      !isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES);
+    this.invalidImageText.set(
+      isInvalid
+        ? this.errorText.instant(ApiErrorCode.CatalogInvalidImage, {
+            maxBytes: MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE,
+          })
+        : null,
+    );
+    if (!this.isImageTooLarge() && !isInvalid) {
       this.imageChosen.emit(image);
     }
   }

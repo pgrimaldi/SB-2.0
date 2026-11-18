@@ -1,5 +1,7 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { isUploadable } from '../../../behaviours/files/uploadable-file';
+import { isEmailAddress } from '../../../components/shared/forms/validators';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
@@ -9,12 +11,13 @@ import { TableServiceAvailabilityMode } from '../../../entities/enums/table-serv
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
-import { UploadContentType } from '../../../entities/enums/upload-content-type';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import {
   BathhouseGeneralInformation,
   MAX_BATHHOUSE_PHONE_LENGTH,
+  MAX_BATHHOUSE_POSTAL_CODE_LENGTH,
+  MAX_BATHHOUSE_TEXT_LENGTH,
 } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseServiceGroup } from '../../../entities/enums/bathhouse-service-group';
@@ -55,6 +58,7 @@ import { TableServiceAddItemRequest } from '../../../entities/settings/services/
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
+import { MAX_EMAIL_LENGTH } from '../../../entities/shared/email-address';
 import {
   IMAGE_UPLOAD_TYPES,
   MAX_IMAGE_UPLOAD_MEGABYTES,
@@ -64,6 +68,7 @@ import { Language } from '../../../entities/shared/language';
 import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { PDF_UPLOAD_TYPES } from '../../../entities/shared/pdf-upload-types';
 import {
   MockFieldError,
   notFoundWithoutBody,
@@ -74,6 +79,11 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
 const COUNTRY_CODES = ['IT', 'FR', 'DE', 'CN'] as const;
+const COUNTRY_CODE_LENGTH = 2;
+/** The backend's limit of Descrizione and Regolamento, counted on their HTML. */
+const MAX_BACKEND_RICH_TEXT_LENGTH = 20_000;
+const MIN_NOTICE_HOURS = 1;
+const MAX_NOTICE_HOURS = 720;
 
 /**
  * `GET /api/catalog/lookups/countries`: the active countries, `code` = ISO code and `name` in the language
@@ -738,12 +748,30 @@ export const bathhouseConfigurationServicesMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body: services })).pipe(delay(300));
 };
 
+/** The backend's limits of the texts of the general information (Descrizione and Regolamento on their HTML). */
+const GENERAL_TEXT_LIMITS: Partial<Record<keyof BathhouseGeneralInformation, number>> = {
+  bathhouseName: MAX_BATHHOUSE_TEXT_LENGTH,
+  address: MAX_BATHHOUSE_TEXT_LENGTH,
+  postalCode: MAX_BATHHOUSE_POSTAL_CODE_LENGTH,
+  city: MAX_BATHHOUSE_TEXT_LENGTH,
+  province: MAX_BATHHOUSE_TEXT_LENGTH,
+  region: MAX_BATHHOUSE_TEXT_LENGTH,
+  email: MAX_EMAIL_LENGTH,
+  website: MAX_BATHHOUSE_TEXT_LENGTH,
+  facebook: MAX_BATHHOUSE_TEXT_LENGTH,
+  instagram: MAX_BATHHOUSE_TEXT_LENGTH,
+  description: MAX_BACKEND_RICH_TEXT_LENGTH,
+  regulation: MAX_BACKEND_RICH_TEXT_LENGTH,
+};
+
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the tab, for the
- * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 without a
- * name, with a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
- * `phoneErrors`), without a `petPolicy` of `PetPolicy`, or with a `closingTime` not after the
- * `openingTime`; 401 without a valid access token.
+ * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 with an
+ * error per field, as the backend: no name, a text over its limit (`GENERAL_TEXT_LIMITS`), an email
+ * that is not one, a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
+ * `phoneErrors`), a country code not of 2 letters, notice hours without free cancellation or out of
+ * 1-720, no `petPolicy` of `PetPolicy`, a `closingTime` not after the `openingTime`; 422
+ * catalog.country_not_found for a country not in the list; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -756,7 +784,38 @@ export const saveBathhouseConfigurationGeneralMock = (
   if (typeof body.bathhouseName !== 'string' || !body.bathhouseName.trim()) {
     errors.push({ field: 'bathhouseName', code: ApiErrorCode.ValidationRequired });
   }
+  for (const [field, max] of Object.entries(GENERAL_TEXT_LIMITS)) {
+    const value = body[field as keyof BathhouseGeneralInformation];
+    if (typeof value === 'string' && value.length > max) {
+      errors.push({ field, code: ApiErrorCode.ValidationMaxLength, args: { max } });
+    }
+  }
+  if (
+    typeof body.email === 'string' &&
+    body.email &&
+    body.email.length <= MAX_EMAIL_LENGTH &&
+    !isEmailAddress(body.email)
+  ) {
+    errors.push({ field: 'email', code: ApiErrorCode.ValidationEmail });
+  }
   errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
+  if (typeof body.country === 'string' && body.country.length !== COUNTRY_CODE_LENGTH) {
+    errors.push({
+      field: 'country',
+      code: ApiErrorCode.ValidationLength,
+      args: { min: COUNTRY_CODE_LENGTH, max: COUNTRY_CODE_LENGTH },
+    });
+  }
+  const hours = body.cancellationNoticeHours;
+  if (!body.isFreeCancellation && hours !== null && hours !== undefined) {
+    errors.push({ field: 'cancellationNoticeHours', code: ApiErrorCode.ValidationInvalid });
+  } else if (typeof hours === 'number' && (hours < MIN_NOTICE_HOURS || hours > MAX_NOTICE_HOURS)) {
+    errors.push({
+      field: 'cancellationNoticeHours',
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: MIN_NOTICE_HOURS, to: MAX_NOTICE_HOURS },
+    });
+  }
   if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
     errors.push({ field: 'petPolicy', code: ApiErrorCode.ValidationInvalid });
   }
@@ -767,6 +826,12 @@ export const saveBathhouseConfigurationGeneralMock = (
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
       errors,
+    });
+  }
+  const country = body.country?.toUpperCase();
+  if (country && !COUNTRY_CODES.some((code) => code === country)) {
+    return problem(request, 422, ApiErrorCode.CatalogCountryNotFound, {
+      title: 'Country not found',
     });
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
@@ -926,7 +991,7 @@ export const bathhouseConfigurationMediaMock = (
 /**
  * `POST /api/catalog/property-info/main-photo` with the image in the multipart field `file`: it
  * becomes the main photo (an object URL stands for the address of the backend's storage). 422
- * catalog.invalid_image for a type other than png, jpeg or webp or a file over 5 MB; 401 without a
+ * catalog.invalid_image for a type other than png, jpeg or webp, an empty file or one over 5 MB; 401 without a
  * valid access token. Like every call of `property-info`, it answers with the public card, here
  * only its media.
  */
@@ -997,8 +1062,8 @@ export const deleteBathhousePhotoMock = (
 
 /**
  * `POST /api/catalog/property-info/documents/{price-list|menu}` with the PDF in the multipart field
- * `file`: it replaces the one of that document. 422 catalog.invalid_pdf for another type or a file
- * over 10 MB; 404 without a body for another document; 401 without a valid access token.
+ * `file`: it replaces the one of that document. 422 catalog.invalid_pdf for another type, an empty
+ * file or one over 10 MB; 404 without a body for another document; 401 without a valid access token.
  */
 export const uploadBathhouseDocumentMock = (
   request: HttpRequest<unknown>,
@@ -1011,10 +1076,10 @@ export const uploadBathhouseDocumentMock = (
     return notFoundWithoutBody(request);
   }
   const pdf = request.body instanceof FormData ? request.body.get('file') : null;
-  if (!(pdf instanceof File) || pdf.type !== UploadContentType.Pdf || pdf.size > MAX_PDF_BYTES) {
+  if (!(pdf instanceof File) || !isUploadable(pdf, PDF_UPLOAD_TYPES, MAX_BATHHOUSE_PDF_MEGABYTES)) {
     return problem(request, 422, ApiErrorCode.CatalogInvalidPdf, {
       title: 'Invalid PDF',
-      args: { maxBytes: MAX_PDF_BYTES, contentTypes: [UploadContentType.Pdf] },
+      args: { maxBytes: MAX_PDF_BYTES, contentTypes: PDF_UPLOAD_TYPES },
     });
   }
   setDocument(document, URL.createObjectURL(pdf), pdf.name);
@@ -1049,8 +1114,7 @@ function withImage(
   const image = request.body instanceof FormData ? request.body.get('file') : null;
   if (
     !(image instanceof File) ||
-    !IMAGE_UPLOAD_TYPES.includes(image.type) ||
-    image.size > MAX_PHOTO_BYTES
+    !isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES)
   ) {
     return problem(request, 422, ApiErrorCode.CatalogInvalidImage, {
       title: 'Invalid image',

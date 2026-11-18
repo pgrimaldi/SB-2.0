@@ -34,4 +34,6 @@
   <p class="services__images__error">
     {{ 'invalidate.max_file_size' | translate: { max: maxImageMegabytes } }}
   </p>
+} @else if (invalidImageText(); as invalidImageText) {
+  <p class="services__images__error">{{ invalidImageText }}</p>
 }

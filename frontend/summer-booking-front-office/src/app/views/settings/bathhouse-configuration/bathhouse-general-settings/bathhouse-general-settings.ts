@@ -10,7 +10,15 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  MAX_LENGTH,
+  TreeValidationResult,
+  form,
+  metadata,
+  readonly,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
@@ -32,6 +40,8 @@ import {
   ButtonSize,
 } from '../../../../components/shared/ui/buttons/button/button';
 import {
+  emailAddress,
+  maxRichTextLength,
   phoneNumberWithoutPrefix,
   requiredText,
   strictTimeRange,
@@ -48,8 +58,12 @@ import { ApiProblem } from '../../../../entities/errors/api-problem';
 import {
   BathhouseGeneralInformation,
   MAX_BATHHOUSE_PHONE_LENGTH,
+  MAX_BATHHOUSE_POSTAL_CODE_LENGTH,
+  MAX_BATHHOUSE_RICH_TEXT_LENGTH,
+  MAX_BATHHOUSE_TEXT_LENGTH,
 } from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { Country } from '../../../../entities/shared/country';
+import { MAX_EMAIL_LENGTH } from '../../../../entities/shared/email-address';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
@@ -100,6 +114,23 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   private loaded = new BathhouseGeneralInformation();
   protected readonly informationForm = form(this.information, (path) => {
     requiredText(path.bathhouseName);
+    for (const text of [
+      path.bathhouseName,
+      path.address,
+      path.city,
+      path.province,
+      path.region,
+      path.website,
+      path.facebook,
+      path.instagram,
+    ]) {
+      metadata(text, MAX_LENGTH, () => MAX_BATHHOUSE_TEXT_LENGTH);
+    }
+    metadata(path.postalCode, MAX_LENGTH, () => MAX_BATHHOUSE_POSTAL_CODE_LENGTH);
+    metadata(path.email, MAX_LENGTH, () => MAX_EMAIL_LENGTH);
+    emailAddress(path.email);
+    maxRichTextLength(path.description, MAX_BATHHOUSE_RICH_TEXT_LENGTH);
+    maxRichTextLength(path.regulation, MAX_BATHHOUSE_RICH_TEXT_LENGTH);
     phoneNumberWithoutPrefix(path.phone, MAX_BATHHOUSE_PHONE_LENGTH);
     phoneNumberWithoutPrefix(path.whatsapp, MAX_BATHHOUSE_PHONE_LENGTH);
     strictTimeRange(path.openingTime, path.closingTime);

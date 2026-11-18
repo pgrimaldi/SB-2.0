@@ -175,8 +175,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   finiscono.
 - Le aree di caricamento sono sempre attive, anche fuori dalla modalità Modifica.
 - Ogni elemento caricato ha una piccola X in alto a destra che, dopo la conferma, chiama la sua API di cancellazione.
-- Prima di mandare il file il frontend controlla tipo e peso (e per una galleria il posto libero), con i codici di
-  errore del backend.
+- Prima di mandare il file il frontend controlla tipo, file non vuoto e peso con `isUploadable`
+  (`behaviours/files/uploadable-file.ts`), come il backend (e per una galleria il posto libero), con i codici di
+  errore del backend. I mock usano la stessa regola.
 - Un form con un solo allegato manda invece il file insieme agli altri dati, con il suo Salva.
 
 ## Id del database

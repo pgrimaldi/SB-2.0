@@ -58,6 +58,8 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
     l'anteprima di prima e il messaggio del codice d'errore sotto il riquadro (`map.invalid_image`).
   - Un file oltre 5 MB (`MAX_IMAGE_UPLOAD_MEGABYTES`, lo stesso limite di tutte le immagini) non parte: sotto il riquadro "Il file supera i 5 MB"
     (`invalidate.max_file_size`).
+  - Un file vuoto non parte (`isUploadable`): sotto il riquadro il messaggio di `map.invalid_image`, come lo darebbe il
+    backend.
 - Sopra l'anteprima, in alto a destra (a sinistra in arabo), il cestino rosso in un cerchio bianco
   (`app-icon-button` con `MapConfiguration_DeleteRed.svg`) chiama subito `MapService.removeBackground`
   (`DELETE /api/catalog/map/background`), senza Salva né popup di conferma; la sezione torna in sola lettura.
