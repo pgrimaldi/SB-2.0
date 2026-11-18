@@ -55,6 +55,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
 
   protected readonly isEditing = signal(false);
+  protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   private readonly services = signal<BathhouseServiceItem[]>([]);
   private loaded: BathhouseServiceItem[] = [];
@@ -81,6 +82,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
       const subscription = untracked(() => {
         this.isLoading.set(true);
         this.error.set(null);
+        this.isLoaded.set(false);
         return this.cache.services().subscribe({
           next: (services) => {
             const loaded = services.map((service) => onlyFieldsOf(BathhouseServiceItem, service));
@@ -89,6 +91,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
             this.services.set(loaded);
             this.servicesForm().reset();
             this.sections.set(sectionsOf(loaded));
+            this.isLoaded.set(true);
             this.isLoading.set(false);
           },
           error: (error: unknown) => {
@@ -106,7 +109,9 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    this.isEditing.set(true);
+    if (this.isLoaded()) {
+      this.isEditing.set(true);
+    }
   }
 
   protected async requestCancel(): Promise<void> {

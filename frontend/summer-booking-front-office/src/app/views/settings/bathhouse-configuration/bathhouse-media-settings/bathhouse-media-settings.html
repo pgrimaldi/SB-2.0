@@ -180,7 +180,12 @@
         {{ 'management.settings.bathhouse_configuration.media.save' | translate }}
       </app-button>
     } @else {
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!isLoaded()"
+        (clicked)="edit()"
+      >
         {{ 'management.settings.bathhouse_configuration.media.edit' | translate }}
       </app-button>
     }

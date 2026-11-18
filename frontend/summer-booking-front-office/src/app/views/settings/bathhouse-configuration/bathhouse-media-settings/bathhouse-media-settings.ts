@@ -195,6 +195,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   protected readonly isEditing = signal(false);
+  protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   /** A photo or a PDF is being uploaded or deleted: they are sent at once, one at a time. */
   protected readonly isActionRunning = signal(false);
@@ -219,6 +220,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
       const subscription = untracked(() => {
         this.isLoading.set(true);
         this.error.set(null);
+        this.isLoaded.set(false);
         return this.cache.media().subscribe({
           next: (answer) => {
             const media = mediaOf(answer, this.origin);
@@ -226,6 +228,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
             this.loaded = onlyFieldsOf(BathhouseMediaRequest, media);
             this.request.set(this.loaded);
             this.mediaForm().reset();
+            this.isLoaded.set(true);
             this.isLoading.set(false);
           },
           error: (error: unknown) => {
@@ -246,7 +249,9 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    this.isEditing.set(true);
+    if (this.isLoaded()) {
+      this.isEditing.set(true);
+    }
   }
 
   protected async requestCancel(): Promise<void> {

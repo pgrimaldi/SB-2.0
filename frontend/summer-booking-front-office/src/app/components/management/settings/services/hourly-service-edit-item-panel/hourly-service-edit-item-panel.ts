@@ -184,7 +184,10 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
   });
   protected readonly isSaveDisabled = computed(
-    () => this.loadingTabs().has(this.selectedTab()) || this.draftForm().invalid(),
+    () =>
+      this.loadingTabs().has(this.selectedTab()) ||
+      !this.loadedTabs().has(this.selectedTab()) ||
+      this.draftForm().invalid(),
   );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
@@ -229,6 +232,9 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected startEdit(): void {
+    if (this.isEditDisabled()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
   }
@@ -276,7 +282,12 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
     const idHourlyService = this.idHourlyService();
-    if (this.isSaving() || !this.auth.user()?.propertyId || !idHourlyService) {
+    if (
+      this.isSaving() ||
+      this.isSaveDisabled() ||
+      !this.auth.user()?.propertyId ||
+      !idHourlyService
+    ) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;

@@ -89,6 +89,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
 
   protected readonly isEditing = signal(false);
+  protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   private readonly information = signal(new BathhouseGeneralInformation());
   private loaded = new BathhouseGeneralInformation();
@@ -169,6 +170,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
         this.isLoading.set(true);
         this.error.set(null);
         this.countriesLoadError.set(null);
+        this.isLoaded.set(false);
         const information = this.cache.generalInformation().subscribe({
           next: (information) => {
             this.loaded = withFirstCountry(
@@ -177,6 +179,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
             );
             this.information.set(this.loaded);
             this.informationForm().reset();
+            this.isLoaded.set(true);
             this.isLoading.set(false);
           },
           error: (error: unknown) => {
@@ -218,7 +221,9 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    this.isEditing.set(true);
+    if (this.isLoaded()) {
+      this.isEditing.set(true);
+    }
   }
 
   protected async requestCancel(): Promise<void> {

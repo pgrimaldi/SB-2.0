@@ -79,7 +79,7 @@
     <app-button
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
-      [disabled]="isLoading()"
+      [disabled]="isLoading() || !isLoaded()"
       (clicked)="edit()"
     >
       {{ 'management.settings.seasons.season_dates.edit' | translate }}

@@ -86,6 +86,15 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   dell'app (regola globale in `styles.scss`, contro l'azzurro o il giallo di Chrome, Edge e Safari e il filtro di
   Firefox). Il riempimento automatico resta attivo.
 
+## Mai salvare sopra dati non letti
+
+- Un form che modifica dati letti dal server non si apre in modifica e non si salva finché quella lettura non è
+  riuscita: "Modifica" e "Salva" restano spenti (es. `isLoaded`, o la tab tra quelle caricate) e anche `edit()` e
+  `save()` non fanno niente senza i dati. Se la lettura fallisce restano spenti: mai mandare al backend valori vuoti o
+  di partenza al posto di quelli veri.
+- Vale per ogni form di modifica, pagine, tab, pannelli e popup, anche futuri. Prima di consegnare un form di creazione
+  o modifica si controlla che cosa parte quando la lettura fallisce.
+
 ## Modifiche non salvate
 
 - Quello che l'utente ha scritto e non ha salvato non si perde mai senza chiedere: vale per ogni form, di pagina o

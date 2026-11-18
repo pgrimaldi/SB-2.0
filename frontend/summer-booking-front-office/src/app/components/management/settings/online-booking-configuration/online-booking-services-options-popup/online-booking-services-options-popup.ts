@@ -125,6 +125,7 @@ export class OnlineBookingServicesOptionsPopup
     ]),
   ) as Readonly<Record<keyof OnlineBookingServicesOptions, Signal<string | null>>>;
   protected readonly isLoading = signal(false);
+  protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -174,7 +175,7 @@ export class OnlineBookingServicesOptionsPopup
   }
 
   protected save(): void {
-    if (this.isLoading() || this.isSaving() || !this.auth.user()?.propertyId) {
+    if (this.isLoading() || this.isSaving() || !this.isLoaded() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
@@ -240,6 +241,7 @@ export class OnlineBookingServicesOptionsPopup
         }
         this.loaded = loaded;
         this.fill(loaded);
+        this.isLoaded.set(true);
         this.isLoading.set(false);
       },
       error: (error: unknown) => {

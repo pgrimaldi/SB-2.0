@@ -41,7 +41,12 @@
         {{ 'management.settings.bathhouse_configuration.services.save' | translate }}
       </app-button>
     } @else {
-      <app-button [size]="ButtonSize.Small" [isFullWidth]="true" (clicked)="edit()">
+      <app-button
+        [size]="ButtonSize.Small"
+        [isFullWidth]="true"
+        [disabled]="!isLoaded()"
+        (clicked)="edit()"
+      >
         {{ 'management.settings.bathhouse_configuration.services.edit' | translate }}
       </app-button>
     }

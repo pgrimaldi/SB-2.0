@@ -179,7 +179,7 @@
       <app-button
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
-        [disabled]="isLoading() || draftForm().invalid()"
+        [disabled]="isLoading() || !isLoaded() || draftForm().invalid()"
         [isLoading]="isSaving()"
         (clicked)="save()"
       >

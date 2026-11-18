@@ -16,7 +16,8 @@ descrizioni delle pagine in `docs/Pagine/`.
   i documenti (contratti delle API, catalogo dei wrapper, questi file di regole, `docs/TODO.md`, i documenti di richieste
   al backend).
 - Form: Signal Forms, errori sotto i campi, Salva spento finché il form non è valido, spinner e campi bloccati durante
-  ogni chiamata, avviso prima di perdere le modifiche.
+  ogni chiamata, avviso prima di perdere le modifiche. Mai salvare sopra dati che non sono stati letti: Modifica e
+  Salva restano spenti finché la lettura dal server non è riuscita.
 - Tabelle: `app-table` si carica da sola con la richiesta standard delle tabelle.
 - Mai id del database scritti nel codice, mai un oggetto che contiene un solo valore, mai stringhe libere come opzioni.
 - Mai stringhe scritte a mano nel codice per valori con un significato (codici di errore, nomi di campi, scelte): si usa

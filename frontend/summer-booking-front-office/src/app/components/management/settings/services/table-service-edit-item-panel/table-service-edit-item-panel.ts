@@ -184,7 +184,10 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
   });
   protected readonly isSaveDisabled = computed(
-    () => this.loadingTabs().has(this.selectedTab()) || this.draftForm().invalid(),
+    () =>
+      this.loadingTabs().has(this.selectedTab()) ||
+      !this.loadedTabs().has(this.selectedTab()) ||
+      this.draftForm().invalid(),
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -213,6 +216,9 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected startEdit(): void {
+    if (this.isEditDisabled()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
   }
@@ -257,7 +263,12 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Salva: only the tab being edited, with its API. */
   protected save(): void {
     const idTableService = this.idTableService();
-    if (this.isSaving() || !this.auth.user()?.propertyId || !idTableService) {
+    if (
+      this.isSaving() ||
+      this.isSaveDisabled() ||
+      !this.auth.user()?.propertyId ||
+      !idTableService
+    ) {
       return;
     }
     const tab = this.selectedTab() as PanelTab;

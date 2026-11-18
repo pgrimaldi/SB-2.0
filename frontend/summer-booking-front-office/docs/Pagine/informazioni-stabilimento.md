@@ -55,8 +55,10 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Le nazioni si caricano a parte dai dati della tab: se arrivano dopo, la prima voce si sceglie allora (solo se lo
   stabilimento non ne ha una e l'utente non l'ha scelta). Se non si caricano, l'errore compare solo sotto Nazione
   (`countriesLoadError`, come le altre tendine) e il resto della tab funziona.
-- Sotto, a destra, "Modifica" sblocca i campi e lascia il posto ad Annulla e Salva; senza Nome stabilimento Salva è
-  spento.
+- Sotto, a destra, "Modifica" sblocca i campi e lascia il posto ad Annulla e Salva. In tutte e tre le tab "Modifica"
+  resta spento finché i dati della tab non sono arrivati (`isLoaded`): se il caricamento fallisce non si può salvare
+  una tab vuota sopra i dati veri. Senza Nome stabilimento Salva
+  è spento.
 - Sui telefoni i campi vanno uno per riga, tranne Cap (spostato sotto Città) con Provincia e Regione con Nazione, a metà
   riga ciascuno (Città da sola, così anche i nomi lunghi delle nazioni non si tagliano). Le righe passano i loro campi a
   un'unica griglia di sei colonne (`display: contents`), senza ripetere il markup.

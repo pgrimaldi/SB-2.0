@@ -67,6 +67,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   protected readonly dateIcon = ['/assets/images/GeneralIcon_CalendarFilled.svg'] as const;
   protected readonly isLoading = signal(false);
   protected readonly isEditing = signal(false);
+  protected readonly isLoaded = signal(false);
   protected readonly isSaving = signal(false);
   /** [X, warning]. */
   protected readonly alertIcons = [
@@ -108,6 +109,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       }
       const subscription = untracked(() => {
         this.error.set(null);
+        this.isLoaded.set(false);
         this.isLoading.set(true);
         return this.seasons.seasonDates().subscribe({
           next: (dates) => {
@@ -116,6 +118,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
             this.seasonDates.dates.set(this.loaded);
             this.datesForm().reset();
             this.isEditing.set(false);
+            this.isLoaded.set(true);
             this.isLoading.set(false);
           },
           error: (error: unknown) => {
@@ -133,7 +136,9 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    this.isEditing.set(true);
+    if (this.isLoaded()) {
+      this.isEditing.set(true);
+    }
   }
 
   protected async requestCancel(): Promise<void> {
@@ -150,7 +155,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    if (this.isSaving() || !this.auth.user()?.propertyId || !this.canSave()) {
+    if (this.isSaving() || !this.isLoaded() || !this.auth.user()?.propertyId || !this.canSave()) {
       return;
     }
     void submit(this.datesForm, async (): Promise<TreeValidationResult> => {
