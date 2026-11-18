@@ -27,7 +27,10 @@ import {
   ButtonAppearance,
   ButtonSize,
 } from '../../../../components/shared/ui/buttons/button/button';
-import { requiredText } from '../../../../components/shared/forms/validators';
+import {
+  phoneNumberWithoutPrefix,
+  requiredText,
+} from '../../../../components/shared/forms/validators';
 import { FilledTextField } from '../../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTimeField } from '../../../../components/shared/ui/inputs/filled-time-field/filled-time-field';
 import { RichTextField } from '../../../../components/shared/ui/inputs/rich-text-field/rich-text-field';
@@ -36,7 +39,10 @@ import { SelectOption } from '../../../../components/shared/ui/selects/select/se
 import { CancellationPolicy } from '../../../../entities/enums/cancellation-policy';
 import { PetPolicy } from '../../../../entities/enums/pet-policy';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
-import { BathhouseGeneralInformation } from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import {
+  BathhouseGeneralInformation,
+  MAX_BATHHOUSE_PHONE_LENGTH,
+} from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { Country } from '../../../../entities/shared/country';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
@@ -87,6 +93,8 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   private loaded = new BathhouseGeneralInformation();
   protected readonly informationForm = form(this.information, (path) => {
     requiredText(path.bathhouseName);
+    phoneNumberWithoutPrefix(path.phone, MAX_BATHHOUSE_PHONE_LENGTH);
+    phoneNumberWithoutPrefix(path.whatsapp, MAX_BATHHOUSE_PHONE_LENGTH);
     readonly(path, () => !this.isEditing() || this.isSaving());
   });
   protected readonly fieldErrors = Object.fromEntries(

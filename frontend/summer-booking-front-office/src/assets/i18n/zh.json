@@ -2005,6 +2005,7 @@
     "unknown_icon": "图标不存在",
     "web_link": "请输入以 http:// 或 https:// 开头的完整链接",
     "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
+    "phone_digits_without_prefix": "只能输入数字和空格，不含 +",
     "phone_max_length": "号码最多 {{max}} 个字符（含空格）",
     "seasons": {
       "period_name": {

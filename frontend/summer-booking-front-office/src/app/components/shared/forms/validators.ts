@@ -49,6 +49,10 @@ export interface PhoneDigitsError extends ValidationError {
   readonly kind: 'phone_digits';
 }
 
+export interface PhoneDigitsWithoutPrefixError extends ValidationError {
+  readonly kind: 'phone_digits_without_prefix';
+}
+
 export interface PhoneMaxLengthError extends ValidationError {
   readonly kind: 'phone_max_length';
   readonly max: number;
@@ -130,13 +134,29 @@ export function phoneNumber<TPathKind extends PathKind = PathKind.Root>(
   path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
   maxLength: number,
 ): void {
-  validate(path, ({ value }): PhoneDigitsError | PhoneMaxLengthError | undefined => {
-    const number = value() ?? '';
-    if (!/^[0-9 ]*$/.test(number)) {
-      return { kind: 'phone_digits' };
-    }
-    return number.length > maxLength ? { kind: 'phone_max_length', max: maxLength } : undefined;
-  });
+  validate(path, ({ value }) => phoneError(value(), maxLength, { kind: 'phone_digits' }));
+}
+
+/** The same rules, for a phone number with no prefix field beside it: its text asks for no `+`. */
+export function phoneNumberWithoutPrefix<TPathKind extends PathKind = PathKind.Root>(
+  path: SchemaPath<string | null, SchemaPathRules.Supported, TPathKind>,
+  maxLength: number,
+): void {
+  validate(path, ({ value }) =>
+    phoneError(value(), maxLength, { kind: 'phone_digits_without_prefix' }),
+  );
+}
+
+function phoneError<TDigitsError extends ValidationError>(
+  value: string | null,
+  maxLength: number,
+  digitsError: TDigitsError,
+): TDigitsError | PhoneMaxLengthError | undefined {
+  const number = value ?? '';
+  if (!/^[0-9 ]*$/.test(number)) {
+    return digitsError;
+  }
+  return number.length > maxLength ? { kind: 'phone_max_length', max: maxLength } : undefined;
 }
 
 function isWebLink(text: string): boolean {

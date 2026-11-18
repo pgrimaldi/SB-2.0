@@ -10,7 +10,10 @@ import { TableServiceBookingPayment } from '../../../entities/enums/table-servic
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
-import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import {
+  BathhouseGeneralInformation,
+  MAX_BATHHOUSE_PHONE_LENGTH,
+} from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseServiceGroup } from '../../../entities/enums/bathhouse-service-group';
 import {
@@ -725,7 +728,8 @@ export const bathhouseConfigurationServicesMock = (
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the tab, for the
  * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 without a
- * name; 401 without a valid access token.
+ * name, or with a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
+ * `phoneErrors`); 401 without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -734,11 +738,13 @@ export const saveBathhouseConfigurationGeneralMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<BathhouseGeneralInformation>;
+  const errors: MockFieldError[] = [];
   if (typeof body.bathhouseName !== 'string' || !body.bathhouseName.trim()) {
-    return problem(request, 400, 'validation.failed', {
-      title: 'Invalid request',
-      errors: [{ field: 'bathhouseName', code: 'validation.required' }],
-    });
+    errors.push({ field: 'bathhouseName', code: 'validation.required' });
+  }
+  errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
+  if (errors.length) {
+    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
@@ -746,6 +752,20 @@ export const saveBathhouseConfigurationGeneralMock = (
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/** A phone number of the property as the backend checks it: at most 32 characters, only digits and spaces. */
+function phoneErrors(field: string, value: unknown): MockFieldError[] {
+  if (value === null || value === undefined) {
+    return [];
+  }
+  if (typeof value !== 'string') {
+    return [{ field, code: 'validation.phone' }];
+  }
+  if (value.length > MAX_BATHHOUSE_PHONE_LENGTH) {
+    return [{ field, code: 'validation.max_length', args: { max: MAX_BATHHOUSE_PHONE_LENGTH } }];
+  }
+  return /^[0-9 ]*$/.test(value) ? [] : [{ field, code: 'validation.phone' }];
+}
 
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, the services the

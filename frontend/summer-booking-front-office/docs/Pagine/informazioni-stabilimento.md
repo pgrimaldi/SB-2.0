@@ -32,7 +32,9 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Campi bianchi con l'etichetta sopra, su righe:
   - Nome stabilimento 35% (obbligatorio, `requiredText`, con l'asterisco), Indirizzo 45%, Cap 20%;
   - Città, Provincia, Regione e Nazione un quarto ciascuno;
-  - Telefono, Whatsapp ed Email un terzo ciascuno (i due numeri con `isPhoneField`);
+  - Telefono, Whatsapp ed Email un terzo ciascuno (i due numeri con `isPhoneField` e `phoneNumberWithoutPrefix`:
+    solo cifre e spazi, al massimo 32 caratteri, `MAX_BATHHOUSE_PHONE_LENGTH`, come il backend, che non ha un prefisso
+    per questi numeri);
   - Sito web, Facebook e Instagram un terzo ciascuno;
   - Descrizione su tutta la riga;
   - Orario di apertura (due `app-filled-time-field` "Dalle" e "Alle", `HH:mm`), Cancellazione e Animali, un terzo

@@ -2406,8 +2406,8 @@ Stato: 200 OK.
   "province": "Roma",
   "region": "Lazio",
   "country": "IT",
-  "phone": "+39 06 1234567",
-  "whatsapp": "+39 333 1234567",
+  "phone": "06 1234567",
+  "whatsapp": "333 1234567",
   "email": "info@lidodemo.example",
   "website": "https://www.lidodemo.example",
   "facebook": "https://www.facebook.com/lidodemo.example",
@@ -2431,8 +2431,8 @@ Stato: 200 OK.
 | `province` | string \| null | `Roma` |
 | `region` | string \| null | `Lazio` |
 | `country` | string (ISO 3166-1 alpha-2) \| null | `IT` |
-| `phone` | string \| null | `+39 06 1234567` |
-| `whatsapp` | string \| null | `+39 333 1234567` |
+| `phone` | string \| null | `06 1234567` |
+| `whatsapp` | string \| null | `333 1234567` |
 | `email` | string \| null | `info@lidodemo.example` |
 | `website` | string \| null | `https://www.lidodemo.example` |
 | `facebook` | string \| null | `https://www.facebook.com/lidodemo.example` |
@@ -2460,8 +2460,8 @@ Informazioni stabilimento: salvataggio delle informazioni generali.
   "province": "Roma",
   "region": "Lazio",
   "country": "IT",
-  "phone": "+39 06 1234567",
-  "whatsapp": "+39 333 1234567",
+  "phone": "06 1234567",
+  "whatsapp": "333 1234567",
   "email": "info@lidodemo.example",
   "website": "https://www.lidodemo.example",
   "facebook": "https://www.facebook.com/lidodemo.example",
@@ -2485,8 +2485,8 @@ Informazioni stabilimento: salvataggio delle informazioni generali.
 | `province` | string \| null | `Roma` |
 | `region` | string \| null | `Lazio` |
 | `country` | string (ISO 3166-1 alpha-2) \| null | `IT` |
-| `phone` | string \| null | `+39 06 1234567` |
-| `whatsapp` | string \| null | `+39 333 1234567` |
+| `phone` | string \| null | `06 1234567` |
+| `whatsapp` | string \| null | `333 1234567` |
 | `email` | string \| null | `info@lidodemo.example` |
 | `website` | string \| null | `https://www.lidodemo.example` |
 | `facebook` | string \| null | `https://www.facebook.com/lidodemo.example` |

@@ -25,6 +25,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - `phoneNumber(path, lunghezza)`: un numero con qualcosa che non è una cifra o uno spazio (il prefisso ha il suo
   campo) dà `invalidate.phone_digits`; più lungo di `lunghezza` caratteri, spazi compresi, dà
   `invalidate.phone_max_length` (es. `PHONE_MAX_LENGTH`, 32, il limite del backend).
+- `phoneNumberWithoutPrefix(path, lunghezza)`: le stesse regole per un numero che non ha accanto il campo del prefisso;
+  il primo errore è `invalidate.phone_digits_without_prefix` ("Solo numeri e spazi, senza +").
 - `webLink(path)`: un testo che non è un link completo http o https (`invalidate.web_link`). Il campo vuoto lo lascia
   a `requiredText`.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un

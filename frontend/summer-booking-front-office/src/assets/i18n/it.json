@@ -2005,6 +2005,7 @@
     "unknown_icon": "Icona non esistente",
     "web_link": "Inserisci un link completo, che inizi con http:// o https://",
     "phone_digits": "Solo numeri e spazi: il prefisso va nel campo accanto",
+    "phone_digits_without_prefix": "Solo numeri e spazi, senza +",
     "phone_max_length": "Il numero può avere al massimo {{max}} caratteri, spazi compresi",
     "seasons": {
       "period_name": {

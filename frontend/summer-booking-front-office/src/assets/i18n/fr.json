@@ -2005,6 +2005,7 @@
     "unknown_icon": "Icône inexistante",
     "web_link": "Saisissez un lien complet commençant par http:// ou https://",
     "phone_digits": "Chiffres et espaces uniquement : l’indicatif va dans le champ à côté",
+    "phone_digits_without_prefix": "Chiffres et espaces uniquement, sans +",
     "phone_max_length": "Le numéro peut contenir au maximum {{max}} caractères, espaces compris",
     "seasons": {
       "period_name": {

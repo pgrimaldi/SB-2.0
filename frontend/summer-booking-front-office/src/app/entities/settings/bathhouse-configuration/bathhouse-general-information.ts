@@ -1,5 +1,7 @@
 import { PetPolicy } from '../../enums/pet-policy';
 
+export const MAX_BATHHOUSE_PHONE_LENGTH = 32;
+
 export class BathhouseGeneralInformation {
   bathhouseName: string | null = null;
   address: string | null = null;
