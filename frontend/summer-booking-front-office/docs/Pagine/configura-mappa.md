@@ -56,7 +56,7 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
     bloccata.
   - Se riesce la sezione torna da sola in sola lettura come dopo Salva; se fallisce resta in Modifica con
     l'anteprima di prima e il messaggio del codice d'errore sotto il riquadro (`map.invalid_image`).
-  - Un file oltre 5 MB (`MAX_MAP_BACKGROUND_MEGABYTES`) non parte: sotto il riquadro "Il file supera i 5 MB"
+  - Un file oltre 5 MB (`MAX_IMAGE_UPLOAD_MEGABYTES`, lo stesso limite di tutte le immagini) non parte: sotto il riquadro "Il file supera i 5 MB"
     (`invalidate.max_file_size`).
 - Sopra l'anteprima, in alto a destra (a sinistra in arabo), il cestino rosso in un cerchio bianco
   (`app-icon-button` con `MapConfiguration_DeleteRed.svg`) chiama subito `MapService.removeBackground`

@@ -1,5 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
+import {
+  IMAGE_UPLOAD_TYPES,
+  MAX_IMAGE_UPLOAD_MEGABYTES,
+  MEGABYTE,
+} from '../../../../../../entities/shared/image-upload-types';
 import { SectionTitle } from '../../../../../shared/ui/titles/section-title/section-title';
 import { FileDropZone } from '../../../../../shared/ui/uploads/file-drop-zone/file-drop-zone';
 
@@ -29,10 +34,17 @@ export class ServicesImages<K extends string = string> {
 
   protected readonly imagesIcon = ['/assets/images/GeneralIcon_Images.svg'] as const;
   protected readonly addImageIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
+  protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
+  protected readonly maxImageMegabytes = MAX_IMAGE_UPLOAD_MEGABYTES;
+  protected readonly isImageTooLarge = signal(false);
 
   protected chooseImage(files: readonly File[]): void {
     const [image] = files;
-    if (image) {
+    if (!image) {
+      return;
+    }
+    this.isImageTooLarge.set(image.size > MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE);
+    if (!this.isImageTooLarge()) {
       this.imageChosen.emit(image);
     }
   }

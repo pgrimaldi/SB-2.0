@@ -76,7 +76,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   - `app-services-highlighted`: "Metti in evidenza" con la sua (i), sul campo `isHighlighted`;
   - `app-services-images`: sezione Immagine servizio; riceve l'array delle icone (`ServicesImagesIcon`, valore e
     immagine), l'icona scelta, l'anteprima dell'immagine caricata e `isReadonly`; emette `iconChosen` e
-    `imageChosen`; generico sul tipo del valore;
+    `imageChosen`; generico sul tipo del valore; il riquadro di caricamento accetta solo png, jpeg e webp fino a 5 MB,
+    come il backend (`IMAGE_UPLOAD_TYPES`, `MAX_IMAGE_UPLOAD_MEGABYTES`): un file più grande non passa e sotto il
+    riquadro compare "Il file supera i 5 MB";
   - `app-services-popup-alternatives`: sezione Varianti, sull'elenco `variants` del form;
   - `app-services-price-vat`: Prezzo e IVA (%) affiancati, sui campi `price` e `vatRate`;
   - `app-services-period-prices`: "Abilita variazioni di prezzo per periodo" con la sua (i) e un pannello per

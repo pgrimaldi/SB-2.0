@@ -17,7 +17,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { UploadContentType } from '../../../../entities/enums/upload-content-type';
 import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
-import { IMAGE_UPLOAD_TYPES } from '../../../../entities/shared/image-upload-types';
+import {
+  IMAGE_UPLOAD_TYPES,
+  MAX_IMAGE_UPLOAD_MEGABYTES,
+  MEGABYTE,
+} from '../../../../entities/shared/image-upload-types';
 import { environment } from '../../../../../environments/environment';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
@@ -49,7 +53,6 @@ import { BathhouseDocument } from '../../../../entities/enums/bathhouse-document
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import {
   BathhouseMedia,
-  MAX_BATHHOUSE_IMAGE_MEGABYTES,
   MAX_BATHHOUSE_PDF_MEGABYTES,
   MAX_BATHHOUSE_PHOTO_QUANTITY,
 } from '../../../../entities/settings/bathhouse-configuration/bathhouse-media';
@@ -65,12 +68,11 @@ const POSITION_ZOOM = 15;
 /** The backend keeps 6 decimals of latitude and longitude (about 10 cm). */
 const COORDINATE_FACTOR = 1_000_000;
 const GALLERY_ROW_SLOT_QUANTITY = 4;
-const MEGABYTE = 1024 * 1024;
 /** The same answers the backend gives, before sending a file it would refuse. */
 const INVALID_IMAGE: ApiProblem = {
   status: 422,
   code: ApiErrorCode.CatalogInvalidImage,
-  args: { maxBytes: MAX_BATHHOUSE_IMAGE_MEGABYTES * MEGABYTE },
+  args: { maxBytes: MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE },
 };
 const INVALID_PDF: ApiProblem = {
   status: 422,
@@ -451,6 +453,6 @@ function roundCoordinate(value: number): number {
 
 function isImage(file: File): boolean {
   return (
-    IMAGE_UPLOAD_TYPES.includes(file.type) && file.size <= MAX_BATHHOUSE_IMAGE_MEGABYTES * MEGABYTE
+    IMAGE_UPLOAD_TYPES.includes(file.type) && file.size <= MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE
   );
 }

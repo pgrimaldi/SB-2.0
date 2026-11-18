@@ -36,5 +36,3 @@ export class MapSettings {
   icons = new MapIcons();
   resetDeletesBookings = false;
 }
-
-export const MAX_MAP_BACKGROUND_MEGABYTES = 5;

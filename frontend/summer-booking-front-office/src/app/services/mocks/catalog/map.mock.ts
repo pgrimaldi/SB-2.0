@@ -14,17 +14,20 @@ import {
   MapGrid,
 } from '../../../entities/settings/map-configuration/map-grid';
 import {
-  MAX_MAP_BACKGROUND_MEGABYTES,
   MapCustomArticleIcons,
   MapIcon,
   MapSettings,
 } from '../../../entities/settings/map-configuration/map-settings';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { IMAGE_UPLOAD_TYPES } from '../../../entities/shared/image-upload-types';
+import {
+  IMAGE_UPLOAD_TYPES,
+  MAX_IMAGE_UPLOAD_MEGABYTES,
+  MEGABYTE,
+} from '../../../entities/shared/image-upload-types';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
-const MAX_BYTES = MAX_MAP_BACKGROUND_MEGABYTES * 1024 * 1024;
+const MAX_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
 const SECTOR_AREAS: (ComboboxItem & { propertyId: number })[] = [
   { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01', value: 'Area lettini' },
   { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a02', value: 'Area ombrelloni' },

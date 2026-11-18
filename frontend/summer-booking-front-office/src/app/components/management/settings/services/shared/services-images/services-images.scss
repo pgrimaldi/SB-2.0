@@ -59,3 +59,10 @@
 .services__images__drop {
   height: 8rem;
 }
+
+.services__images__error {
+  margin: -0.5rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}

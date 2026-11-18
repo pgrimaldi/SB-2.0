@@ -21,11 +21,14 @@ import {
 import { MapBackgroundImage } from '../../../../../entities/enums/map-background-image';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import {
-  MAX_MAP_BACKGROUND_MEGABYTES,
   MapBackground,
   MapSettings,
 } from '../../../../../entities/settings/map-configuration/map-settings';
-import { IMAGE_UPLOAD_TYPES } from '../../../../../entities/shared/image-upload-types';
+import {
+  IMAGE_UPLOAD_TYPES,
+  MAX_IMAGE_UPLOAD_MEGABYTES,
+  MEGABYTE,
+} from '../../../../../entities/shared/image-upload-types';
 import { MapService } from '../../../../../services/api/catalog/map.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
@@ -82,7 +85,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected readonly chosenIcon = '/assets/images/MapConfiguration_Chosen.svg';
   protected readonly uploadIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
   protected readonly deleteIcon = ['/assets/images/MapConfiguration_DeleteRed.svg'] as const;
-  protected readonly maxImageMegabytes = MAX_MAP_BACKGROUND_MEGABYTES;
+  protected readonly maxImageMegabytes = MAX_IMAGE_UPLOAD_MEGABYTES;
   protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
   protected readonly isEditing = signal(false);
   protected readonly isBusy = signal(false);
@@ -150,7 +153,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
       return;
     }
     this.clearErrors();
-    if (image.size > MAX_MAP_BACKGROUND_MEGABYTES * 1024 * 1024) {
+    if (image.size > MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE) {
       this.isImageTooLarge.set(true);
       return;
     }

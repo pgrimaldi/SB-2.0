@@ -23,10 +23,15 @@
 </span>
 <app-file-drop-zone
   class="services__images__drop"
-  accept="image/*"
+  [accept]="imageTypes"
   [disabled]="isReadonly()"
   [text]="'management.settings.services.form.image.drop' | translate"
   [pathIcon]="addImageIcon"
   [previewUrl]="imagePreviewUrl()"
   (filesSelected)="chooseImage($event)"
 />
+@if (isImageTooLarge()) {
+  <p class="services__images__error">
+    {{ 'invalidate.max_file_size' | translate: { max: maxImageMegabytes } }}
+  </p>
+}

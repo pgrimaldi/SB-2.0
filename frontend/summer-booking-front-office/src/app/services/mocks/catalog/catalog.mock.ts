@@ -21,7 +21,6 @@ import { BathhouseServiceGroup } from '../../../entities/enums/bathhouse-service
 import { PetPolicy } from '../../../entities/enums/pet-policy';
 import {
   BathhouseMedia,
-  MAX_BATHHOUSE_IMAGE_MEGABYTES,
   MAX_BATHHOUSE_PDF_MEGABYTES,
   MAX_BATHHOUSE_PHOTO_QUANTITY,
   MAX_VIRTUAL_TOUR_URL_LENGTH,
@@ -56,7 +55,11 @@ import { TableServiceAddItemRequest } from '../../../entities/settings/services/
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
-import { IMAGE_UPLOAD_TYPES } from '../../../entities/shared/image-upload-types';
+import {
+  IMAGE_UPLOAD_TYPES,
+  MAX_IMAGE_UPLOAD_MEGABYTES,
+  MEGABYTE,
+} from '../../../entities/shared/image-upload-types';
 import { Language } from '../../../entities/shared/language';
 import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -901,8 +904,8 @@ let bathhouseMedia: BathhouseMedia = {
   menuPdfUrl: null,
   menuPdfFileName: null,
 };
-const MAX_PHOTO_BYTES = MAX_BATHHOUSE_IMAGE_MEGABYTES * 1024 * 1024;
-const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * 1024 * 1024;
+const MAX_PHOTO_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
+const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE;
 
 /**
  * `GET /api/catalog/property-info/bathhouse-configuration-media`: links of the main photo, of the gallery (in

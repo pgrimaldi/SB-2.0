@@ -1,7 +1,6 @@
 import { BathhousePhoto } from './bathhouse-photo';
 
 export const MAX_BATHHOUSE_PHOTO_QUANTITY = 30;
-export const MAX_BATHHOUSE_IMAGE_MEGABYTES = 5;
 export const MAX_BATHHOUSE_PDF_MEGABYTES = 10;
 export const MAX_VIRTUAL_TOUR_URL_LENGTH = 500;
 
