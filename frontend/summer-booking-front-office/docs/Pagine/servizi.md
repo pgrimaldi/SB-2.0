@@ -147,6 +147,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Salva (`isSaveDisabled` di `app-side-panel`) è spento finché mancano Nome e Descrizione nella lingua
   dell'utente, gli unici campi obbligatori: asterisco, "Campo obbligatorio" sotto il campo dopo averlo toccato,
   `requiredText` solo sulla traduzione principale.
+- Ogni coppia Dalle / alle ha `timeRange`: un "alle" prima del "dalle" dà l'errore sotto i due orari e Salva
+  resta spento.
 - Salva manda tutto il form all'API di creazione (risposta 204): spinner sul bottone e pannello bloccato; se riesce
   il pannello si chiude e la tabella si ricarica (`(created)`).
 - Se fallisce il pannello resta aperto con i dati: errori dei campi di primo livello sotto il campo, gli altri in
@@ -166,7 +168,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
 - Spinner su Salva e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(updated)`); se
   fallisce resta aperto in modifica, errori dei campi di primo livello sotto il campo, gli altri sopra i bottoni.
-- I campi obbligatori (nome e descrizione nella lingua dell'utente) contano solo sulla tab Info Generali.
+- I campi obbligatori (nome e descrizione nella lingua dell'utente) contano solo sulla tab Info Generali, le coppie
+  Dalle / alle (`timeRange`) solo sulla loro tab.
 - Cambiare tab in modifica con modifiche non salvate chiede "Modifiche non salvate" (Resta: si rimane sulla tab,
   la barra la segna di nuovo; Esci senza salvare: la tab torna ai valori letti e si cambia tab); senza modifiche
   si esce dalla modifica e si cambia tab. La X, Esc e il cambio di pagina chiedono lo stesso.
@@ -368,8 +371,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   obbligatori nella lingua dell'utente, e "Metti in evidenza" con la sua (i) (`app-services-highlighted`); niente
   immagine servizio.
 - Disponibilità e Prenotazioni (`app-table-service-availability-bookings-tab`): le tre sezioni sotto.
-- Nessuna validazione oltre a nome e descrizione, come negli altri pannelli.
-- Salva si accende con nome e descrizione e chiama `POST /api/catalog/create-table-service`
+- Validazioni come negli altri pannelli: nome e descrizione e le coppie Dalle / alle (`timeRange`).
+- Salva si accende con il form valido e chiama `POST /api/catalog/create-table-service`
   (`CatalogService.createTableService`, `TableServiceAddItemRequest`).
 
 #### Disponibilità (`app-table-service-availabilities`)

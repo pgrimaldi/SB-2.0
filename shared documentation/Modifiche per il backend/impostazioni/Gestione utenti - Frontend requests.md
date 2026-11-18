@@ -37,9 +37,15 @@ pagamenti, cassa, ordini, database, prenotazioni dei tavoli).
 - **Stabilimento**: tutte le API lo prendono dal token, comprese le tabelle (l'elenco degli utenti, il registro, la sua
   stampa e la sua esportazione) e le tendine (`*-combobox`), che sono POST senza corpo: nessuna richiesta lo contiene.
 - **Permessi**: le API degli utenti come `/api/identity/property-users` (`StaffManage`), quelle del registro come
-  `GET /api/audit/entries` (`AuditRead`). Senza permesso: 403 `auth.forbidden`.
+  `GET /api/audit/entries` (`AuditRead`). `user-combobox` chiede `AuditRead`, come il registro che la usa (sezione 6).
+  Senza permesso: 403 `auth.forbidden`.
+- **Token senza stabilimento**: 403 `account.property_required` per le API `/api/identity/*`
+  (`CurrentAccount.RequirePropertyId`), 403 `audit.property_required` per le API `/api/audit/*`
+  (`AuditEntryService.RequirePropertyId`), come oggi.
 - **JSON** in camelCase, con i nomi esatti di questo documento. I ruoli viaggiano con i codici di `RoleCodes`
-  (es. `cashoperator`), il prefisso del cellulare senza `+` (es. `39`).
+  (es. `cashoperator`). Il prefisso del cellulare viaggia senza `+` (es. `39`) e vale `null` quando l'utente non ha il
+  cellulare, anche nelle risposte: oggi `phone_country_code` di `identity.access_users` ha il valore predefinito `+39`
+  (`AccountConfiguration`, `HasDefaultValue`), quindi un account salvato senza prefisso lo riceve con il `+`.
 - **Errori** nel formato Problem Details del backend, con `code`. Senza token valido: 401 `auth.unauthenticated`.
 
 ## 1. POST /api/identity/users-list
@@ -119,6 +125,7 @@ e non lo fa modificare né eliminare.
 | Status | `code` | Quando |
 |---|---|---|
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
+| 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 2. POST /api/identity/create-user
@@ -147,12 +154,12 @@ Lo stabilimento lo prende dal token.
 
 | Campo | Tipo | Regola |
 |---|---|---|
-| `email` | string | Obbligatoria, email valida. |
-| `emailIsContact` | boolean | Casella "Abilita" accanto all'email: come `emailIsContact` di `property-users`. |
-| `password` | string | Obbligatoria, come per `property-users` (da 8 a 128 caratteri, non troppo comune). |
-| `phoneCountryCode` | string \| null | Prefisso senza `+` (es. `39`); `null` quando non c'è il cellulare. |
+| `email` | string | Obbligatoria, email valida, al massimo 255 caratteri, non già usata da un altro account. |
+| `emailIsContact` | boolean | Casella "Abilita" accanto all'email: come `emailIsContact` di `property-users`, ma salvata (sotto, "Caselle Abilita"). |
+| `password` | string | Obbligatoria, come per `property-users`: da 8 a 128 caratteri, non troppo comune (`IdentityRules.NewPassword`). Maiuscola, minuscola e numero li controlla solo il frontend. |
+| `phoneCountryCode` | string \| null | Prefisso senza `+` (es. `39`), da 1 a 6 cifre, al massimo 8 caratteri; `null` quando non c'è il cellulare. |
 | `phone` | string \| null | Numero senza prefisso, solo cifre e spazi, al massimo 32 caratteri; `null` se non c'è. |
-| `phoneIsContact` | boolean | Casella "Abilita" accanto al cellulare: come `phoneIsContact` di `property-users`. |
+| `phoneIsContact` | boolean | Casella "Abilita" accanto al cellulare: come `phoneIsContact` di `property-users`, ma salvata (sotto, "Caselle Abilita"). |
 | `role` | string | Obbligatorio: un codice di `RoleCodes` assegnabile dal pannello (`admin`, `lifeguard`, `manager`, `cashoperator`, `dailycashoperator`, `user1`, `waiter`, `affiliate`, `advancedlifeguard`, `marketing`). |
 
 ### Risposta
@@ -178,11 +185,33 @@ Come `POST /api/identity/property-users`:
 
 | Status | `code` | Quando |
 |---|---|---|
-| 400 | `validation.failed` | `errors[]` sui nomi del corpo: `validation.required` (`email`, `password`, `role`), `validation.email`, `validation.password_too_short` / `password_too_long` / `password_too_common`, `validation.phone` (`phone`), `validation.phone_prefix` (`phoneCountryCode`). Il frontend li mostra sotto i campi. |
+| 400 | `validation.failed` | `errors[]` sui nomi del corpo: `validation.required` (`email`, `password`, `role`), `validation.email` (`email`), `validation.max_length` con `args.max` (`email` oltre 255, `phone` oltre 32, `phoneCountryCode` oltre 8 caratteri), `validation.password_too_short` / `password_too_long` / `password_too_common` (`password`), `validation.phone` (`phone`), `validation.phone_prefix` (`phoneCountryCode`). Il frontend li mostra sotto i campi. |
 | 422 | `account.role_not_assignable` | Ruolo che non si assegna dal pannello (es. `superadmin`). |
-| 409 | `account.email_taken` | Esiste già un account con questa email. |
+| 409 | `account.email_taken` | Esiste già un account con questa email, di qualunque stabilimento. |
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
+| 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+
+Lunghezze e formati sono quelli di `CommonRules` (`BuildingBlocks.Application/Validation/CommonRules.cs`: email 255,
+cellulare 32, prefisso 8) e di `CreateStaffUserRequestValidator`
+(`Module.Identity/Application/Validators/AccountValidators.cs`).
+
+L'unicità dell'email oggi la controlla solo il servizio (`IAccountRepository.EmailExistsAsync`, su tutti gli account non
+eliminati, senza distinguere maiuscole e minuscole): `identity.access_users` non ha un indice unico sull'email.
+
+### Caselle "Abilita"
+
+Oggi il backend non salva `emailIsContact` e `phoneIsContact`: `StaffService.CreateAsync` e `StaffService.UpdateAsync`
+(`Module.Identity/Application/Services/StaffService.cs`) le mandano solo nell'evento `StaffContactChannelsChanged`
+(`PublishContactChannelsAsync`), che nessun modulo gestisce, e `identity.access_users` non ha colonne per loro. Senza
+salvarle, `get-selected-user` non ha valori da restituire e il popup "Modifica utente" non può mostrarle.
+
+Il backend deve:
+
+- salvarle per l'account a ogni `create-user` e `update-user`, così come arrivano (es. due colonne `email_is_contact` e
+  `phone_is_contact` di `identity.access_users`, `boolean NOT NULL DEFAULT false`, o dove preferisce il backend);
+- restituirle nelle risposte di `create-user`, `get-selected-user` e `update-user`;
+- restituire `false` per gli account che non le hanno mai ricevute.
 
 ## 3. GET /api/identity/get-selected-user
 
@@ -217,7 +246,8 @@ GET /api/identity/get-selected-user?idUser=3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03
 }
 ```
 
-`emailIsContact` e `phoneIsContact` sono i valori ricevuti l'ultima volta da `create-user` o `update-user`.
+`emailIsContact` e `phoneIsContact` sono i valori salvati (sezione 2, "Caselle Abilita"): quelli ricevuti l'ultima
+volta da `create-user` o `update-user`, `false` se non sono mai arrivati.
 
 ### Errori
 
@@ -229,6 +259,7 @@ Gli stessi di `update-user` per l'utente da leggere:
 | 403 | `account.role_not_assignable` | L'utente ha un ruolo che non si gestisce dal pannello (es. il titolare). |
 | 422 | `account.cannot_modify_self` | L'utente collegato chiede se stesso. |
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
+| 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 4. POST /api/identity/update-user
@@ -257,16 +288,23 @@ Tutti i campi del popup, cambiati o no; l'utente da modificare è `idUser`. Lo s
 | Campo | Tipo | Regola |
 |---|---|---|
 | `idUser` | string (UUID) | L'utente da modificare (`idUser` di `users-list`). |
-| `email` | string | Obbligatoria, email valida. |
-| `emailIsContact` | boolean | Come in `create-user`. |
+| `email` | string | Obbligatoria, email valida, al massimo 255 caratteri, non già usata da un altro account. |
+| `emailIsContact` | boolean | Come in `create-user`: salvata e restituita. |
 | `password` | string \| null | `null` = la password resta quella salvata; altrimenti la nuova password, con le regole di `create-user`. |
-| `phoneCountryCode` | string \| null | Prefisso senza `+` (es. `41`); `null` quando non c'è il cellulare. |
+| `phoneCountryCode` | string \| null | Prefisso senza `+` (es. `41`), da 1 a 6 cifre, al massimo 8 caratteri; `null` quando non c'è il cellulare. |
 | `phone` | string \| null | Numero senza prefisso, solo cifre e spazi, al massimo 32 caratteri; `null` = nessun cellulare. |
-| `phoneIsContact` | boolean | Come in `create-user`. |
+| `phoneIsContact` | boolean | Come in `create-user`: salvata e restituita. |
 | `role` | string | Obbligatorio: un codice di `RoleCodes` assegnabile dal pannello, come in `create-user`. |
 
 Diversamente dal `PATCH`, qui `null` non vuol dire "invariato" (tranne la password): il corpo è sempre tutto il popup,
 quindi ogni campo prende il valore ricevuto.
+
+### Sessioni dell'utente modificato
+
+Le sessioni dell'utente modificato si chiudono solo se cambia la password (`password` diversa da `null`) o se `role` è
+diverso da quello salvato. Oggi `StaffService.UpdateAsync` le chiude tutte (`SessionFactory.RevokeAllAsync`) appena
+`Role` non è `null`, anche se è lo stesso ruolo: siccome `update-user` manda sempre il ruolo, ogni Salva chiuderebbe le
+sessioni dell'utente anche quando cambiano solo il cellulare o una casella.
 
 ### Risposta
 
@@ -290,13 +328,14 @@ Come `PATCH /api/identity/property-users/{userId}`:
 
 | Status | `code` | Quando |
 |---|---|---|
-| 400 | `validation.failed` | `errors[]` sui nomi del corpo, come in `create-user` (con `validation.required` su `email` e `role`). |
+| 400 | `validation.failed` | `errors[]` sui nomi del corpo, come in `create-user` (con `validation.required` su `email` e `role`; le regole della password solo se `password` non è `null`). |
 | 422 | `account.role_not_assignable` | Il nuovo ruolo non si assegna dal pannello. |
 | 409 | `account.email_taken` | L'email è già di un altro account. |
 | 404 | `account.not_found` | `idUser` non è un utente dello stabilimento. |
 | 403 | `account.role_not_assignable` | L'utente da modificare ha un ruolo che non si gestisce dal pannello (es. il titolare). |
 | 422 | `account.cannot_modify_self` | L'utente collegato prova a modificare se stesso. |
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
+| 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 5. POST /api/audit/entries-list
@@ -304,7 +343,8 @@ Come `PATCH /api/identity/property-users/{userId}`:
 Tabella della schermata del registro (`/settings/user-management/logs`): il frontend la chiama all'apertura e ogni volta
 che cambiano pagina, numero di righe, ricerca, periodo, filtri o ordinamento. È un'**API nuova** per la tabella:
 `GET /api/audit/entries` resta com'è. Rispetto a quella, la tabella ha bisogno di filtrare più utenti insieme, di
-ordinare ogni colonna, della colonna "ID utente" e di righe con solo i campi mostrati.
+ordinare ogni colonna, della colonna "ID utente", del periodo letto come giorni nel fuso dell'utente e di righe con solo
+i campi mostrati.
 
 ### Richiesta
 
@@ -339,10 +379,35 @@ I filtri (un campo può mancare; più valori dello stesso campo = uno qualsiasi,
 
 | `field` | Valori | Significato |
 |---|---|---|
-| `datetimeFrom` | un valore, data e ora ISO 8601 UTC | Solo le voci da quel momento (il periodo scelto nella tendina delle date). |
-| `datetimeTo` | un valore, data e ora ISO 8601 UTC | Solo le voci fino a quel momento. |
-| `actionCode` | uno o più codici di azione di `AuditActionCodes` (es. `catalog.map_spot_updated`) | Le azioni scelte nel popup Filtri. |
+| `datetimeFrom` | un valore: il primo giorno del periodo a mezzanotte UTC (es. `2026-10-17T00:00:00.000Z`) | Solo le voci dal primo giorno, compreso (il periodo scelto nella tendina delle date; sotto, "Periodo"). |
+| `datetimeTo` | un valore: l'ultimo giorno del periodo alle 23:59:59.999 UTC (es. `2026-10-23T23:59:59.999Z`) | Solo le voci fino all'ultimo giorno, compreso. |
+| `actionCode` | uno o più codici di azione di `AuditActionCodes` (es. `catalog.map_spot_updated`), fino a tutti quelli del filtro | Le azioni scelte nel popup Filtri (sotto, "Limiti"). |
 | `idUser` | uno o più id di utenti (UUID) | Gli utenti scelti nel popup Filtri, o l'utente del bottone "Log" di una riga di Gestione utenti. Sono gli `actorUserId` delle voci. |
+
+### Periodo
+
+`datetimeFrom` e `datetimeTo` sono **giorni**, non istanti: il frontend manda il giorno scelto con un'ora fissa, senza
+conversione di fuso (`dateRangeFilters` in `behaviours/dates/date-periods.ts`). Il backend:
+
+- prende solo la data (`2026-10-17`, `2026-10-23`) e la legge nel fuso dell'header `X-Time-Zone` (nome IANA, es.
+  `Europe/Rome`; `Europe/Rome` se l'header manca o non è valido);
+- restituisce le voci con `occurredAt` dalla mezzanotte locale del primo giorno (compresa) alla mezzanotte locale del
+  giorno dopo l'ultimo (esclusa), quindi con tutto l'ultimo giorno;
+- accetta lo stesso giorno in `datetimeFrom` e `datetimeTo` (es. "Oggi").
+
+Oggi `GET /api/audit/entries` tratta `from` e `to` come istanti, con la fine esclusa (`AuditEntryRepository.Filter`:
+`OccurredAt >= from`, `OccurredAt < to`): con questi valori, a Roma con l'ora legale, perderebbe le voci tra mezzanotte
+e le 2 del primo giorno e mostrerebbe quelle tra mezzanotte e le 2 del giorno dopo l'ultimo.
+
+### Limiti
+
+- `actionCode`: il popup Filtri permette di scegliere tutte le azioni del catalogo (oggi 102, quelle di
+  `GET /api/audit/action-codes`), quindi questa API accetta almeno tutti i codici del catalogo. Il tetto di 50 codici di
+  `GET /api/audit/entries` (`AuditQueryRules.MaxActionCodes` in `Module.Audit/Application/Validators/AuditValidators.cs`,
+  400 oltre 50) qui non vale.
+- `search`: al massimo 100 caratteri (`AuditQueryRules.SearchMaxLength`, come `GET /api/audit/entries`); oltre, 400
+  `validation.failed` con `errors[]` `{ "field": "search", "code": "validation.max_length", "args": { "max": 100 } }`.
+  Il frontend non limita la lunghezza della ricerca: la manda senza spazi ai lati, da 3 caratteri in su.
 
 ### Risposta
 
@@ -379,9 +444,9 @@ Le voci sono le stesse di `GET /api/audit/entries`, con solo questi sette campi 
 
 | Campo | In `AuditEntryDto` | Note |
 |---|---|---|
-| `idAuditEntry` | `id` | Identificativo della voce, come testo. Non si mostra. |
+| `idAuditEntry` | `id` | Identificativo della voce (il numero `bigint` di `audit.trail_entries`), come testo. Non si mostra. |
 | `bookingNumber` | `bookingNumber` | Colonna "ID prenotazione"; `null` se la voce non riguarda una prenotazione. |
-| `userNumber` | — (nuovo) | Colonna "ID utente": codice breve e leggibile dell'utente che ha fatto l'azione; `null` se non c'è. |
+| `userNumber` | — (nuovo) | Colonna "ID utente": codice breve e leggibile dell'utente che ha fatto l'azione; `null` se non c'è. Origine, formato e ordinamento sono ancora da decidere: oggi né `identity.access_users` né `audit.trail_entries` hanno un campo così. |
 | `actorName` | `actorName` | Colonna "Nome completo". |
 | `spotLabel` | `spotLabel` | Colonna "Postazione"; `null` se la voce non riguarda una postazione. |
 | `actionCode` | `actionCode` | Colonna "Azione": il codice (`<modulo>.<azione>`), che il frontend traduce. |
@@ -391,19 +456,26 @@ Le voci sono le stesse di `GET /api/audit/entries`, con solo questi sette campi 
 
 | Status | `code` | Quando |
 |---|---|---|
-| 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
+| 400 | `validation.failed` | Con `errors[]`: `search` oltre 100 caratteri (`validation.max_length`); giorno di `datetimeTo` prima di quello di `datetimeFrom` (`validation.end_before_start`). |
 | 403 | `auth.forbidden` | Utente senza il permesso `AuditRead`. |
+| 403 | `audit.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 6. POST /api/identity/user-combobox
 
 La tendina degli utenti del frontend: **una sola per tutta l'app**, usata ovunque serva scegliere un utente (salvo
 diversa indicazione). In questa pagina è la tendina "Utente" del popup Filtri della schermata del registro, chiamata
-ogni volta che il popup si apre. È un'**API nuova** nello standard delle tendine del frontend: `GET /api/audit/actors`
-resta com'è.
+ogni volta che il popup si apre (tranne quando la schermata è aperta dal bottone "Log" di una riga e quell'utente è
+ancora nel filtro: allora la tendina contiene solo lui). La schermata aperta dal bottone "Log" di una riga la chiama
+anche una volta all'apertura, per mostrare il nome dell'utente al posto della sua email. È un'**API nuova** nello
+standard delle tendine del frontend: `GET /api/audit/actors` resta com'è.
 
 Quali utenti restituire lo decide il backend. Gli `id` devono essere quelli che filtrano il registro: il frontend li
-rimanda nel filtro `idUser` di `entries-list` e `print-log`.
+rimanda nel filtro `idUser` di `entries-list`, `print-log` ed `export-log`.
+
+Permesso: `AuditRead`, come la schermata del registro che la usa: chi apre il registro deve poter scegliere i suoi
+utenti. Oggi `AuditRead` e `StaffManage` li hanno gli stessi ruoli, `superadmin` e `admin`
+(`Shared/Security/RolePermissions.cs`).
 
 ### Richiesta
 
@@ -411,7 +483,8 @@ Come tutte le tendine del frontend, POST senza corpo: lo stabilimento lo prende 
 
 ### Risposta
 
-200 con un array (senza un oggetto che lo contiene), nell'ordine in cui mostrarlo:
+200 con un array (senza un oggetto che lo contiene). L'ordine non conta: il frontend mette le voci in ordine alfabetico
+di `value` nella lingua dell'app.
 
 ```json
 [
@@ -429,7 +502,8 @@ Come tutte le tendine del frontend, POST senza corpo: lo stabilimento lo prende 
 
 | Status | `code` | Quando |
 |---|---|---|
-| 403 | `auth.forbidden` | Utente senza il permesso di vedere gli utenti. |
+| 403 | `auth.forbidden` | Utente senza il permesso `AuditRead`. |
+| 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 7. POST /api/audit/print-log
@@ -458,8 +532,8 @@ Gli stessi filtri che la tabella del registro sta mostrando, senza pagina e righ
 
 | Campo | Tipo | Regola |
 |---|---|---|
-| `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Si cerca in nome dell'operatore, numero della prenotazione e postazione. |
-| `filters` | array | Un elemento per campo, `value` sempre un array di stringhe, `[]` se non ci sono filtri. `datetimeFrom` / `datetimeTo`: il periodo (date e ore ISO 8601 UTC, un valore ciascuno). `actionCode`: i codici delle azioni scelte (una qualsiasi). `idUser`: gli utenti scelti (uno qualsiasi). |
+| `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca, al massimo 100 caratteri. Si cerca in nome dell'operatore, numero della prenotazione e postazione. |
+| `filters` | array | Un elemento per campo, `value` sempre un array di stringhe, `[]` se non ci sono filtri. `datetimeFrom` / `datetimeTo`: il periodo, giorni come in `entries-list` (sezione 5, "Periodo"). `actionCode`: i codici delle azioni scelte (una qualsiasi), fino a tutti quelli del filtro. `idUser`: gli utenti scelti (uno qualsiasi). |
 | `sortField` | string | `bookingNumber`, `userNumber`, `actorName`, `spotLabel`, `actionCode` o `occurredAt`; `""` = le più recenti prima. |
 | `sortDirection` | string | `Ascending` o `Descending`. |
 
@@ -475,14 +549,34 @@ Gli stessi filtri che la tabella del registro sta mostrando, senza pagina e righ
 Se il backend sta su un dominio diverso da quello del frontend, deve esporre l'header con
 `Access-Control-Expose-Headers: Content-Disposition`.
 
+### Lingua, fuso, troppe voci e registro
+
+Valgono per la stampa e per l'esportazione (sezione 8):
+
+- **Lingua**: titoli delle colonne e nomi delle azioni nella lingua dell'header `Accept-Language` (la lingua scelta
+  nell'app: `it`, `en`, `fr`, `es`, `de`, `zh`, `ar`); se manca una traduzione l'italiano, poi il codice dell'azione,
+  come fa `AuditExportWriter`. Oggi `GET /api/audit/entries/export` usa invece la lingua dell'account di chi esporta
+  (`AuditExport.LanguageAsync`).
+- **Fuso**: "Data e ora" nel fuso dell'header `X-Time-Zone` (`Europe/Rome` se manca o non è valido), come la tabella
+  che la mostra nell'ora del dispositivo. Oggi l'esportazione scrive sempre l'ora italiana (`AuditExportWriter.Time`,
+  `ItalianTime`). Il periodo dei filtri segue la sezione 5.
+- **Troppe voci**: oltre 50.000 voci (`AuditQueryRules.ExportMaxRows`) nessun file e 422 `audit.export_too_large` con
+  `args.max` (50000) e `args.total` (le voci che rispettano i filtri), come `AuditExport.LoadAsync`.
+- **Registro**: ogni stampa e ogni esportazione riuscita scrive nel registro dello stabilimento
+  `audit.entries_exported` (categoria `Operator`, come `AuditEntryService.ExportAsync`), con nei metadati il formato del
+  file: il frontend ha già testo ("Registro esportato") e icona di questo codice. Un codice diverso per la stampa va
+  concordato prima, perché il frontend deve aggiungerne testi e icona.
+
 ### Errori
 
 Errori in JSON (Problem Details), anche se la risposta giusta è un file:
 
 | Status | `code` | Quando |
 |---|---|---|
-| 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
+| 400 | `validation.failed` | Con `errors[]`, come in `entries-list`: `search` oltre 100 caratteri, giorno di `datetimeTo` prima di quello di `datetimeFrom`. |
+| 422 | `audit.export_too_large` | Più di 50.000 voci: nessun file; `args.max` e `args.total`. |
 | 403 | `auth.forbidden` | Utente senza il permesso di leggere il registro (`AuditRead`, come `GET /api/audit/entries`). |
+| 403 | `audit.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 8. POST /api/audit/export-log
@@ -513,7 +607,8 @@ mostrando, senza pagina e righe per pagina, quindi **tutte** le voci che li risp
 ### Risposta
 
 200 con un file Excel (`xlsx`), binario, non JSON: una riga per voce, con le colonne della tabella (ID prenotazione,
-ID utente, Nome completo, Postazione, Azione, Data e ora).
+ID utente, Nome completo, Postazione, Azione, Data e ora). Lingua, fuso, limite di voci e registro come per la stampa
+(sezione 7, "Lingua, fuso, troppe voci e registro").
 
 | Header | Esempio | Note |
 |---|---|---|
@@ -529,8 +624,10 @@ Errori in JSON (Problem Details), come per `print-log`:
 
 | Status | `code` | Quando |
 |---|---|---|
-| 400 | `validation.failed` | Filtri non validi (es. `datetimeTo` prima di `datetimeFrom`), con `errors[]`. |
+| 400 | `validation.failed` | Con `errors[]`, come in `entries-list`: `search` oltre 100 caratteri, giorno di `datetimeTo` prima di quello di `datetimeFrom`. |
+| 422 | `audit.export_too_large` | Più di 50.000 voci: nessun file; `args.max` e `args.total`. |
 | 403 | `auth.forbidden` | Utente senza il permesso `AuditRead`. |
+| 403 | `audit.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## 9. Codici di azione del registro per i moduli futuri
@@ -597,6 +694,7 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
 | 403 | `account.role_not_assignable` | L'utente ha un ruolo che non si gestisce dal pannello (es. il titolare). |
 | 422 | `account.cannot_modify_self` | L'utente collegato prova a eliminare se stesso. |
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
+| 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 
 ## Verifica
@@ -604,20 +702,28 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
 - `users-list`: `rows` ha al massimo `pageSize` righe e `total` conta tutte quelle che rispettano la ricerca; la ricerca
   trova un utente da una parte della sua email o del suo cellulare, con maiuscole o minuscole; i tre ordinamenti
   funzionano nei due versi e `sortField` vuoto dà l'ordine del backend; ogni riga ha solo i cinque campi, con `role`
-  come codice di `RoleCodes`.
-- `create-user` crea l'utente nello stabilimento del token, risponde 201 con i sette campi e ha gli stessi controlli ed
-  errori di `property-users`; senza `role` dà 400 `validation.required` sul campo `role`.
+  come codice di `RoleCodes` e `phoneCountryCode` senza `+` (`null` senza cellulare).
+- `create-user` crea l'utente nello stabilimento del token, salva le due caselle "Abilita", risponde 201 con i sette
+  campi e ha gli stessi controlli ed errori di `property-users`; senza `role` dà 400 `validation.required` sul campo
+  `role`; un'email di 256 caratteri dà 400 `validation.max_length` su `email`.
 - `get-selected-user` restituisce l'utente `idUser` dello stabilimento del token con i sette campi, gli stessi che
-  `update-user` ha appena salvato.
+  `update-user` ha appena salvato, caselle "Abilita" comprese.
 - `update-user` cambia solo l'utente `idUser` dello stabilimento del token, con tutti i campi ricevuti (`password`
-  `null` la lascia com'è), e risponde 200 con i sette campi.
-- `entries-list` filtra più utenti e più azioni insieme, ordina tutte e sei le colonne nei due versi e restituisce
-  righe con solo i sette campi, `userNumber` compreso.
-- `user-combobox` restituisce `{ id, value }` per ogni utente da mostrare; gli `id` filtrano `entries-list`.
+  `null` la lascia com'è), e risponde 200 con i sette campi; con lo stesso ruolo e `password` `null` le sessioni
+  dell'utente restano aperte, con un ruolo diverso o una password nuova si chiudono.
+- `entries-list` filtra più utenti e più azioni insieme, accetta `actionCode` con tutti i codici del catalogo (più di
+  50), ordina tutte e sei le colonne nei due versi e restituisce righe con solo i sette campi, `userNumber` compreso;
+  con `X-Time-Zone: Europe/Rome` e un solo giorno restituisce le voci da mezzanotte a mezzanotte ora italiana; `search`
+  di 101 caratteri dà 400 `validation.max_length`.
+- `user-combobox` restituisce `{ id, value }` per ogni utente da mostrare; gli `id` filtrano `entries-list`; senza
+  `AuditRead` risponde 403 `auth.forbidden`.
 - `print-log` restituisce un file con tutte le voci che rispettano ricerca e filtri, nell'ordine chiesto, e il nome in
   `Content-Disposition`.
 - `export-log` accetta lo stesso corpo di `print-log` e restituisce un file `xlsx` con tutte le voci filtrate,
   nell'ordine chiesto, e il nome in `Content-Disposition`.
+- `print-log` ed `export-log`: testi nella lingua di `Accept-Language`, "Data e ora" nel fuso di `X-Time-Zone`, oltre
+  50.000 voci 422 `audit.export_too_large` senza file; ogni file scrive `audit.entries_exported` nel registro.
 - I codici della sezione 9, quando i loro moduli registrano le azioni, sono quelli della tabella, con la categoria
   `Operator`, e `GET /api/audit/action-codes` li restituisce.
-- Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.
+- Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene; un token senza stabilimento dà 403
+  `account.property_required` (`/api/identity/*`) o `audit.property_required` (`/api/audit/*`).

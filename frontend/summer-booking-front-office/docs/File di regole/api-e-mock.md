@@ -155,10 +155,13 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - La risposta è un array di `ComboboxItem` (`entities/combobox/combobox-item.ts`, `{ id, value }`: `id` è quello che
   si salva, `value` il testo mostrato), che il componente trasforma in `SelectOption`.
 - Il componente richiede l'elenco a ogni apertura del suo popup, pannello o tab; una risposta lenta di un'apertura
-  precedente non sostituisce quella nuova.
-- Ogni tendina che legge la sua lista da un'API usa la classe unica `DropdownList` (`behaviours/forms/dropdown-list.ts`):
-  `items()` le voci, `loadError()` il testo dell'errore, `load()` la lettura, `retry()` la rilettura dopo un errore,
-  `clear()` al reset, `destroy()` in `ngOnDestroy`. Mai segnali e subscription scritti a mano per una tendina.
+  precedente non sostituisce quella nuova. Gli elenchi `lookups` del backend (es. le nazioni) si leggono invece una volta
+  per pagina e restano nella cache della pagina (es. `BathhouseConfigurationCacheBehaviour.countries()`).
+- Ogni tendina che legge la sua lista da un'API usa la classe unica `DropdownList` (`behaviours/forms/dropdown-list.ts`),
+  creata con la funzione che chiama l'API, `ErrorTextBehaviour` e, se serve, una funzione da eseguire dopo ogni
+  risposta (es. scegliere la prima voce): `items()` le voci, `loadError()` il testo dell'errore, `load()` la lettura,
+  `retry()` la rilettura dopo un errore, `clear()` al reset, `destroy()` in `ngOnDestroy`. Mai segnali e subscription
+  scritti a mano per una tendina.
 - Se la lettura fallisce, sotto il campo compare il messaggio dell'errore (`[error]="<lista>.loadError() ?? ..."`,
   testo di `ErrorTextBehaviour.instant` dal `code`) e la tendina non mostra la sua dicitura (`placeholder` vuoto). Mai
   una lista vuota in silenzio.
@@ -173,11 +176,17 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   (`multipart/form-data`, campo `file`), senza aspettare un Salva.
 - Più file scelti insieme partono uno alla volta, in fila, con `app-page-spinner` che blocca tutto finché non
   finiscono.
-- Le aree di caricamento sono sempre attive, anche fuori dalla modalità Modifica.
+- Le aree di caricamento delle gallerie e dei media sono sempre attive, anche fuori dalla modalità Modifica. Un'area
+  che fa parte di un form con Modifica (es. lo sfondo di Configura mappa) è attiva solo in Modifica.
 - Ogni elemento caricato ha una piccola X in alto a destra che, dopo la conferma, chiama la sua API di cancellazione.
 - Prima di mandare il file il frontend controlla tipo, file non vuoto e peso con `isUploadable`
   (`behaviours/files/uploadable-file.ts`), come il backend (e per una galleria il posto libero), con i codici di
   errore del backend. I mock usano la stessa regola.
+- Tipi e pesi sono costanti condivise: `IMAGE_UPLOAD_TYPES` (png, jpeg, webp) e `MAX_IMAGE_UPLOAD_MEGABYTES` (5 MB,
+  lo stesso limite per tutte le immagini) in `entities/shared/image-upload-types.ts`, `PDF_UPLOAD_TYPES` in
+  `entities/shared/pdf-upload-types.ts`, con i tipi MIME dell'enum `UploadContentType`
+  (`entities/enums/upload-content-type.ts`). Il peso massimo dei PDF sta nell'entità della pagina (es.
+  `MAX_BATHHOUSE_PDF_MEGABYTES`). Gli stessi elenchi danno l'`accept` del campo che sceglie il file.
 - Un form con un solo allegato manda invece il file insieme agli altri dati, con il suo Salva.
 
 ## Id del database

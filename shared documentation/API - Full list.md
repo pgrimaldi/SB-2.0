@@ -184,7 +184,7 @@ Nessun payload.
 
 ```json
 {
-  "bathhouseName": "string",
+  "bathhouseName": "string | null",
   "address": "string | null",
   "postalCode": "string | null",
   "city": "string | null",
@@ -215,7 +215,7 @@ Nessun payload.
 
 | Campo | Tipo |
 |---|---|
-| `bathhouseName` | string |
+| `bathhouseName` | string \| null |
 | `address` | string \| null |
 | `postalCode` | string \| null |
 | `city` | string \| null |
@@ -270,7 +270,7 @@ Nessun payload.
 
 ```json
 {
-  "bathhouseName": "string",
+  "bathhouseName": "string | null",
   "address": "string | null",
   "postalCode": "string | null",
   "city": "string | null",
@@ -301,7 +301,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `bathhouseName` | string |
+| `bathhouseName` | string \| null |
 | `address` | string \| null |
 | `postalCode` | string \| null |
 | `city` | string \| null |
@@ -490,7 +490,7 @@ Nessun corpo (204).
   "photos": [
     {
       "id": "string (UUID)",
-      "url": "string",
+      "url": "string | null",
       "sortOrder": "number (intero)"
     }
   ],
@@ -521,7 +521,7 @@ Nessun corpo (204).
 | `mainPhotoUrl` | string \| null |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
 | `photos[].id` | string (UUID) |
-| `photos[].url` | string |
+| `photos[].url` | string \| null |
 | `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
 | `latitude` | number \| null |
@@ -547,7 +547,7 @@ Nessun payload.
   "photos": [
     {
       "id": "string (UUID)",
-      "url": "string",
+      "url": "string | null",
       "sortOrder": "number (intero)"
     }
   ],
@@ -576,7 +576,7 @@ Nessun payload.
 | `mainPhotoUrl` | string \| null |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
 | `photos[].id` | string (UUID) |
-| `photos[].url` | string |
+| `photos[].url` | string \| null |
 | `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
 | `latitude` | number \| null |
@@ -606,7 +606,7 @@ Nessun payload.
   "photos": [
     {
       "id": "string (UUID)",
-      "url": "string",
+      "url": "string | null",
       "sortOrder": "number (intero)"
     }
   ],
@@ -637,7 +637,7 @@ Nessun payload.
 | `mainPhotoUrl` | string \| null |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
 | `photos[].id` | string (UUID) |
-| `photos[].url` | string |
+| `photos[].url` | string \| null |
 | `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
 | `latitude` | number \| null |
@@ -663,7 +663,7 @@ Nessun payload.
   "photos": [
     {
       "id": "string (UUID)",
-      "url": "string",
+      "url": "string | null",
       "sortOrder": "number (intero)"
     }
   ],
@@ -692,7 +692,7 @@ Nessun payload.
 | `mainPhotoUrl` | string \| null |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
 | `photos[].id` | string (UUID) |
-| `photos[].url` | string |
+| `photos[].url` | string \| null |
 | `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
 | `latitude` | number \| null |
@@ -722,7 +722,7 @@ Nessun payload.
   "photos": [
     {
       "id": "string (UUID)",
-      "url": "string",
+      "url": "string | null",
       "sortOrder": "number (intero)"
     }
   ],
@@ -753,7 +753,7 @@ Nessun payload.
 | `mainPhotoUrl` | string \| null |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
 | `photos[].id` | string (UUID) |
-| `photos[].url` | string |
+| `photos[].url` | string \| null |
 | `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
 | `latitude` | number \| null |
@@ -779,7 +779,7 @@ Nessun payload.
   "photos": [
     {
       "id": "string (UUID)",
-      "url": "string",
+      "url": "string | null",
       "sortOrder": "number (intero)"
     }
   ],
@@ -808,7 +808,7 @@ Nessun payload.
 | `mainPhotoUrl` | string \| null |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) |
 | `photos[].id` | string (UUID) |
-| `photos[].url` | string |
+| `photos[].url` | string \| null |
 | `photos[].sortOrder` | number (intero) |
 | `virtualTourUrl` | string \| null |
 | `latitude` | number \| null |

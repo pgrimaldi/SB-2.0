@@ -46,8 +46,9 @@ pannello.
 - Le date (`app-datepicker`), il bottone Oggi e la tendina della parte della giornata sono commentati, con i loro
   import e il test del bottone Oggi (`it.skip`).
 - Resta solo la ricerca, larga 28rem e al centro dell'header (testo "Cerca...": vedi `tabelle.md`).
-- `ManagementFiltersBehaviour` dà le scelte dell'header come `filters` (`datetimeFrom`, `datetimeTo`,
-  `bookingDayType`), ma nessuna tabella lo usa: tutte mandano `filters: []`.
+- `ManagementFiltersBehaviour` dà le scelte dell'header come `filters` (`FilterField.DatetimeFrom`, `DatetimeTo`,
+  `BookingDayType`), ma nessuna tabella lo usa: le tabelle mandano solo i filtri della loro pagina (es. Database e
+  Log), le altre `filters: []`.
 - L'ingranaggio dell'header apre la sezione Impostazioni.
 
 ## Sezione Impostazioni

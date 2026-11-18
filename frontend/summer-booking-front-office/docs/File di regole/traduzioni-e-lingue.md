@@ -78,6 +78,8 @@ Regole per i testi tradotti, le 7 lingue, l'arabo da destra a sinistra, le chiav
 - Controlla: stesse chiavi in ogni lingua, nessun testo vuoto, stessi segnaposto `{{nome}}`, e sotto `error.`
   esattamente i codici conosciuti (`error.unknown`, `API_ERROR_CODES` e `FRONTEND_ERROR_CODES`).
 - Segnala anche i messaggi ICU non validi e gli argomenti o i tipi diversi tra le lingue.
+- Che ogni chiave scritta per intero nel codice esista in `it.json` lo controlla `npm run check:translation-keys`:
+  vedi `test-e-verifiche.md`.
 
 ## Plurali, numeri, valute e date nei testi (ICU)
 

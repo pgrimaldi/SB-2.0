@@ -80,6 +80,8 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
 const COUNTRY_CODES = ['IT', 'FR', 'DE', 'CN'] as const;
 const COUNTRY_CODE_LENGTH = 2;
+/** As `PUT /property-info/amenities`. */
+const MAX_SAVED_SERVICE_QUANTITY = 200;
 /** The backend's limit of Descrizione and Regolamento, counted on their HTML. */
 const MAX_BACKEND_RICH_TEXT_LENGTH = 20_000;
 const MIN_NOTICE_HOURS = 1;
@@ -707,7 +709,7 @@ let idOfferedServices = new Set<number>();
 /**
  * `GET /api/catalog/property-info/bathhouse-configuration-general`: the general information of the property of
  * the token, for the tab "Informazioni generali"; all empty until saved, a form to fill in, except
- * `isFreeCancellation` false and `petPolicy` NotAllowed, the defaults of the database. 401 without a
+ * `isFreeCancellation` false and `petPolicy` OnRequest, as the backend for a bathhouse without a card. 401 without a
  * valid access token.
  */
 export const bathhouseConfigurationGeneralMock = (
@@ -859,8 +861,9 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
 
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, the services the
- * property of the token offers: keeps them (until the page is reloaded). 204 without a body; 401
- * without a valid access token; 404 for a service that does not exist.
+ * property of the token offers: keeps them (until the page is reloaded), a repeated one once. 204
+ * without a body; 400 without `services` (never read as `[]`) or with more than 200; 404 for a
+ * service that does not exist; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -869,8 +872,19 @@ export const saveBathhouseConfigurationServicesMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as { services?: unknown };
-  const services = Array.isArray(body.services) ? (body.services as BathhouseServiceItem[]) : [];
-  const idServices = services.map(({ idService }) => idService);
+  if (!Array.isArray(body.services)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors: [{ field: 'services', code: ApiErrorCode.ValidationRequired }],
+    });
+  }
+  if (body.services.length > MAX_SAVED_SERVICE_QUANTITY) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors: [{ field: 'services', code: ApiErrorCode.ValidationInvalid }],
+    });
+  }
+  const idServices = (body.services as BathhouseServiceItem[]).map(({ idService }) => idService);
   if (!idServices.every(isServiceId)) {
     return resourceNotFound(request);
   }

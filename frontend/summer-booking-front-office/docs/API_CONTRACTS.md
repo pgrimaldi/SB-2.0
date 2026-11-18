@@ -435,7 +435,7 @@ Stato: 200 OK.
   "total": 2,
   "rows": [
     {
-      "idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01",
+      "idAuditEntry": "1287",
       "bookingNumber": "1234",
       "userNumber": "123",
       "actorName": "Giulia Ferri",
@@ -444,7 +444,7 @@ Stato: 200 OK.
       "occurredAt": "2026-10-23T11:11:00.000Z"
     },
     {
-      "idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11",
+      "idAuditEntry": "1265",
       "bookingNumber": "2741",
       "userNumber": "123",
       "actorName": "Giulia Ferri",
@@ -459,8 +459,8 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "catalog.map_spots_created", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b11", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "catalog.season_updated", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
-| `rows[].idAuditEntry` | string | `9a4c2e1f-7b3d-4e5a-8c6b-0d1e2f3a4b01` |
+| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "1287", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "catalog.map_spots_created", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "1265", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "catalog.season_updated", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
+| `rows[].idAuditEntry` | string | `1287` |
 | `rows[].bookingNumber` | string \| null | `1234` |
 | `rows[].userNumber` | string \| null | `123` |
 | `rows[].actorName` | string \| null | `Giulia Ferri` |
@@ -563,493 +563,6 @@ Il corpo è il file (binario), non JSON.
 |---|---|
 | `Content-Type` | `application/pdf` |
 | `Content-Disposition` | `attachment; filename="log-2026-10-26.pdf"` |
-
-## /seasons
-
-### GET `/api/catalog/season`
-
-Stagioni e periodi: date di stagione.
-
-#### Payload
-
-Nessun corpo né parametri: lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 200 OK (204 senza corpo se la stagione non è impostata).
-
-```json
-{
-  "startsOn": "2026-05-01",
-  "endsOn": "2026-09-30",
-  "nextStartsOn": "2027-05-01",
-  "nextEndsOn": "2027-09-30"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
-| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
-| `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
-| `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
-
-### PUT `/api/catalog/season`
-
-Stagioni e periodi: salva date di stagione.
-
-#### Payload
-
-```json
-{
-  "startsOn": "2026-05-01",
-  "endsOn": "2026-09-25",
-  "nextStartsOn": "2027-05-01",
-  "nextEndsOn": "2027-09-30"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
-| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
-| `nextStartsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
-| `nextEndsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
-
-#### Response
-
-Stato: 200 OK (le date salvate).
-
-```json
-{
-  "startsOn": "2026-05-01",
-  "endsOn": "2026-09-25",
-  "nextStartsOn": "2027-05-01",
-  "nextEndsOn": "2027-09-30"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
-| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
-| `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
-| `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
-
-### GET `/api/catalog/tariff-periods`
-
-Stagioni e periodi: periodi della stagione corrente.
-
-#### Payload
-
-Nessun corpo né parametri: lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 200 OK.
-
-```json
-[
-  {
-    "key": 0,
-    "name": "Bassa stagione",
-    "ranges": [
-      {
-        "startsOn": "2026-05-01",
-        "endsOn": "2026-06-15"
-      },
-      {
-        "startsOn": "2026-09-01",
-        "endsOn": "2026-09-30"
-      }
-    ]
-  },
-  {
-    "key": 1,
-    "name": "Media stagione",
-    "ranges": [
-      {
-        "startsOn": "2026-06-16",
-        "endsOn": "2026-07-15"
-      },
-      {
-        "startsOn": "2026-08-21",
-        "endsOn": "2026-08-31"
-      }
-    ]
-  },
-  {
-    "key": 2,
-    "name": "Alta stagione",
-    "ranges": [
-      {
-        "startsOn": "2026-07-16",
-        "endsOn": "2026-08-20"
-      }
-    ]
-  }
-]
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `0` |
-| `name` | string | `Bassa stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-15"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-15` |
-
-### GET `/api/catalog/next-season/tariff-periods`
-
-Stagioni e periodi: periodi della prossima stagione.
-
-#### Payload
-
-Nessun corpo né parametri: lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 200 OK.
-
-```json
-[
-  {
-    "key": 0,
-    "name": "Bassa stagione",
-    "ranges": [
-      {
-        "startsOn": "2027-05-01",
-        "endsOn": "2027-06-15"
-      },
-      {
-        "startsOn": "2027-09-01",
-        "endsOn": "2027-09-30"
-      }
-    ]
-  },
-  {
-    "key": 1,
-    "name": "Alta stagione",
-    "ranges": [
-      {
-        "startsOn": "2027-07-01",
-        "endsOn": "2027-08-31"
-      }
-    ]
-  }
-]
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `0` |
-| `name` | string | `Bassa stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-05-01", "endsOn": "2027-06-15"}, {"startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-15` |
-
-### POST `/api/catalog/tariff-periods`
-
-Stagioni e periodi: nuovo periodo della stagione corrente.
-
-#### Payload
-
-```json
-{
-  "name": "Media stagione",
-  "ranges": [
-    {
-      "startsOn": "2026-06-16",
-      "endsOn": "2026-07-31"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `name` | string | `Media stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-06-16", "endsOn": "2026-07-31"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-06-16` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-07-31` |
-
-#### Response
-
-Stato: 201 Created (il periodo creato).
-
-```json
-{
-  "key": 3,
-  "name": "Media stagione",
-  "ranges": [
-    {
-      "startsOn": "2026-06-16",
-      "endsOn": "2026-07-31"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `3` |
-| `name` | string | `Media stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-06-16", "endsOn": "2026-07-31"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-06-16` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-07-31` |
-
-### POST `/api/catalog/next-season/tariff-periods`
-
-Stagioni e periodi: nuovo periodo della prossima stagione.
-
-#### Payload
-
-```json
-{
-  "name": "Media stagione",
-  "ranges": [
-    {
-      "startsOn": "2027-06-16",
-      "endsOn": "2027-06-30"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `name` | string | `Media stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
-
-#### Response
-
-Stato: 201 Created (il periodo creato).
-
-```json
-{
-  "key": 2,
-  "name": "Media stagione",
-  "ranges": [
-    {
-      "startsOn": "2027-06-16",
-      "endsOn": "2027-06-30"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `2` |
-| `name` | string | `Media stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
-
-### DELETE `/api/catalog/tariff-periods/{key}`
-
-Stagioni e periodi: elimina periodo della stagione corrente.
-
-#### Payload
-
-Nessun corpo: la key del periodo va nell'indirizzo e lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### DELETE `/api/catalog/next-season/tariff-periods/{key}`
-
-Stagioni e periodi: elimina periodo della prossima stagione.
-
-#### Payload
-
-Nessun corpo: la key del periodo va nell'indirizzo e lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### PUT `/api/catalog/tariff-periods/{key}`
-
-Stagioni e periodi: modifica periodo della stagione corrente.
-
-#### Payload
-
-```json
-{
-  "name": "Bassa stagione",
-  "ranges": [
-    {
-      "startsOn": "2026-05-01",
-      "endsOn": "2026-06-10"
-    },
-    {
-      "startsOn": "2026-09-01",
-      "endsOn": "2026-09-30"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `name` | string | `Bassa stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
-
-#### Response
-
-Stato: 200 OK (il periodo salvato).
-
-```json
-{
-  "key": 0,
-  "name": "Bassa stagione",
-  "ranges": [
-    {
-      "startsOn": "2026-05-01",
-      "endsOn": "2026-06-10"
-    },
-    {
-      "startsOn": "2026-09-01",
-      "endsOn": "2026-09-30"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `0` |
-| `name` | string | `Bassa stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
-
-### PUT `/api/catalog/next-season/tariff-periods/{key}`
-
-Stagioni e periodi: modifica periodo della prossima stagione.
-
-#### Payload
-
-```json
-{
-  "name": "Altissima stagione",
-  "ranges": [
-    {
-      "startsOn": "2027-07-01",
-      "endsOn": "2027-08-31"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `name` | string | `Altissima stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
-
-#### Response
-
-Stato: 200 OK (il periodo salvato).
-
-```json
-{
-  "key": 1,
-  "name": "Altissima stagione",
-  "ranges": [
-    {
-      "startsOn": "2027-07-01",
-      "endsOn": "2027-08-31"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `key` | number (intero) | `1` |
-| `name` | string | `Altissima stagione` |
-| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
-
-### POST `/api/catalog/tariff-periods/bulk-delete-ranges`
-
-Stagioni e periodi: elimina intervalli della stagione corrente.
-
-#### Payload
-
-```json
-{
-  "ranges": [
-    {
-      "key": 0,
-      "startsOn": "2026-09-01",
-      "endsOn": "2026-09-30"
-    },
-    {
-      "key": 1,
-      "startsOn": "2026-08-21",
-      "endsOn": "2026-08-31"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) | `[{"key": 0, "startsOn": "2026-09-01", "endsOn": "2026-09-30"}, {"key": 1, "startsOn": "2026-08-21", "endsOn": "2026-08-31"}]` |
-| `ranges[].key` | number (intero) | `0` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-09-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/catalog/next-season/tariff-periods/bulk-delete-ranges`
-
-Stagioni e periodi: elimina intervalli della prossima stagione.
-
-#### Payload
-
-```json
-{
-  "ranges": [
-    {
-      "key": 0,
-      "startsOn": "2027-09-01",
-      "endsOn": "2027-09-30"
-    }
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) | `[{"key": 0, "startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
-| `ranges[].key` | number (intero) | `0` |
-| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-09-01` |
-| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
 
 ## /warehouse
 
@@ -2347,6 +1860,491 @@ Stato: 200 OK.
 
 ## /catalog
 
+### GET `/api/catalog/season`
+
+Stagioni e periodi: date di stagione.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK (204 senza corpo se la stagione non è impostata).
+
+```json
+{
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-30",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
+
+### PUT `/api/catalog/season`
+
+Stagioni e periodi: salva date di stagione.
+
+#### Payload
+
+```json
+{
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-25",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
+| `nextStartsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
+| `nextEndsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
+
+#### Response
+
+Stato: 200 OK (le date salvate).
+
+```json
+{
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-25",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
+| `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
+| `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
+
+### GET `/api/catalog/tariff-periods`
+
+Stagioni e periodi: periodi della stagione corrente.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "key": 0,
+    "name": "Bassa stagione",
+    "ranges": [
+      {
+        "startsOn": "2026-05-01",
+        "endsOn": "2026-06-15"
+      },
+      {
+        "startsOn": "2026-09-01",
+        "endsOn": "2026-09-30"
+      }
+    ]
+  },
+  {
+    "key": 1,
+    "name": "Media stagione",
+    "ranges": [
+      {
+        "startsOn": "2026-06-16",
+        "endsOn": "2026-07-15"
+      },
+      {
+        "startsOn": "2026-08-21",
+        "endsOn": "2026-08-31"
+      }
+    ]
+  },
+  {
+    "key": 2,
+    "name": "Alta stagione",
+    "ranges": [
+      {
+        "startsOn": "2026-07-16",
+        "endsOn": "2026-08-10"
+      }
+    ]
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `0` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-15"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-15` |
+
+### GET `/api/catalog/next-season/tariff-periods`
+
+Stagioni e periodi: periodi della prossima stagione.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "key": 0,
+    "name": "Bassa stagione",
+    "ranges": [
+      {
+        "startsOn": "2027-05-01",
+        "endsOn": "2027-06-15"
+      },
+      {
+        "startsOn": "2027-09-01",
+        "endsOn": "2027-09-30"
+      }
+    ]
+  },
+  {
+    "key": 1,
+    "name": "Alta stagione",
+    "ranges": [
+      {
+        "startsOn": "2027-07-01",
+        "endsOn": "2027-08-31"
+      }
+    ]
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `0` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-05-01", "endsOn": "2027-06-15"}, {"startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-15` |
+
+### POST `/api/catalog/tariff-periods`
+
+Stagioni e periodi: nuovo periodo della stagione corrente.
+
+#### Payload
+
+```json
+{
+  "name": "Ferragosto",
+  "ranges": [
+    {
+      "startsOn": "2026-08-11",
+      "endsOn": "2026-08-20"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Ferragosto` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-08-11", "endsOn": "2026-08-20"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-08-11` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-08-20` |
+
+#### Response
+
+Stato: 201 Created (il periodo creato).
+
+```json
+{
+  "key": 3,
+  "name": "Ferragosto",
+  "ranges": [
+    {
+      "startsOn": "2026-08-11",
+      "endsOn": "2026-08-20"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `3` |
+| `name` | string | `Ferragosto` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-08-11", "endsOn": "2026-08-20"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-08-11` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-08-20` |
+
+### POST `/api/catalog/next-season/tariff-periods`
+
+Stagioni e periodi: nuovo periodo della prossima stagione.
+
+#### Payload
+
+```json
+{
+  "name": "Media stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-06-16",
+      "endsOn": "2027-06-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Media stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
+
+#### Response
+
+Stato: 201 Created (il periodo creato).
+
+```json
+{
+  "key": 2,
+  "name": "Media stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-06-16",
+      "endsOn": "2027-06-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `2` |
+| `name` | string | `Media stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
+
+### DELETE `/api/catalog/tariff-periods/{key}`
+
+Stagioni e periodi: elimina periodo della stagione corrente.
+
+#### Payload
+
+Nessun corpo: la key del periodo va nell'indirizzo e lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### DELETE `/api/catalog/next-season/tariff-periods/{key}`
+
+Stagioni e periodi: elimina periodo della prossima stagione.
+
+#### Payload
+
+Nessun corpo: la key del periodo va nell'indirizzo e lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### PUT `/api/catalog/tariff-periods/{key}`
+
+Stagioni e periodi: modifica periodo della stagione corrente.
+
+#### Payload
+
+```json
+{
+  "name": "Bassa stagione",
+  "ranges": [
+    {
+      "startsOn": "2026-05-01",
+      "endsOn": "2026-06-10"
+    },
+    {
+      "startsOn": "2026-09-01",
+      "endsOn": "2026-09-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
+
+#### Response
+
+Stato: 200 OK (il periodo salvato).
+
+```json
+{
+  "key": 0,
+  "name": "Bassa stagione",
+  "ranges": [
+    {
+      "startsOn": "2026-05-01",
+      "endsOn": "2026-06-10"
+    },
+    {
+      "startsOn": "2026-09-01",
+      "endsOn": "2026-09-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `0` |
+| `name` | string | `Bassa stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
+
+### PUT `/api/catalog/next-season/tariff-periods/{key}`
+
+Stagioni e periodi: modifica periodo della prossima stagione.
+
+#### Payload
+
+```json
+{
+  "name": "Altissima stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-07-01",
+      "endsOn": "2027-08-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Altissima stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
+
+#### Response
+
+Stato: 200 OK (il periodo salvato).
+
+```json
+{
+  "key": 1,
+  "name": "Altissima stagione",
+  "ranges": [
+    {
+      "startsOn": "2027-07-01",
+      "endsOn": "2027-08-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `key` | number (intero) | `1` |
+| `name` | string | `Altissima stagione` |
+| `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
+
+### POST `/api/catalog/tariff-periods/bulk-delete-ranges`
+
+Stagioni e periodi: elimina intervalli della stagione corrente.
+
+#### Payload
+
+```json
+{
+  "ranges": [
+    {
+      "key": 0,
+      "startsOn": "2026-09-01",
+      "endsOn": "2026-09-30"
+    },
+    {
+      "key": 1,
+      "startsOn": "2026-08-21",
+      "endsOn": "2026-08-31"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) | `[{"key": 0, "startsOn": "2026-09-01", "endsOn": "2026-09-30"}, {"key": 1, "startsOn": "2026-08-21", "endsOn": "2026-08-31"}]` |
+| `ranges[].key` | number (intero) | `0` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-09-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/next-season/tariff-periods/bulk-delete-ranges`
+
+Stagioni e periodi: elimina intervalli della prossima stagione.
+
+#### Payload
+
+```json
+{
+  "ranges": [
+    {
+      "key": 0,
+      "startsOn": "2027-09-01",
+      "endsOn": "2027-09-30"
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `ranges[]` | SeasonPeriodIntervalItem[] (array di oggetti, da 1 a 300) | `[{"key": 0, "startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
+| `ranges[].key` | number (intero) | `0` |
+| `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-09-01` |
+| `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
 ### GET `/api/catalog/lookups/countries`
 
 Catalogo: nazioni.
@@ -2424,7 +2422,7 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `bathhouseName` | string | `Lido Demo` |
+| `bathhouseName` | string \| null | `Lido Demo` |
 | `address` | string \| null | `Lungomare dei Pini 12` |
 | `postalCode` | string \| null | `00100` |
 | `city` | string \| null | `Roma` |
@@ -2478,7 +2476,7 @@ Informazioni stabilimento: salvataggio delle informazioni generali.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `bathhouseName` | string | `Lido Demo` |
+| `bathhouseName` | string \| null | `Lido Demo` |
 | `address` | string \| null | `Lungomare dei Pini 12` |
 | `postalCode` | string \| null | `00100` |
 | `city` | string \| null | `Roma` |
@@ -7798,7 +7796,7 @@ Stato: 200 OK.
 | `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
 | `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].url` | string \| null | `https://media.example.com/lido-demo/bar.webp` |
 | `photos[].sortOrder` | number (intero) | `1` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
 | `latitude` | number \| null | `44.063812` |
@@ -7851,7 +7849,7 @@ Stato: 200 OK.
 | `mainPhotoUrl` | string \| null | `null` |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
 | `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].url` | string \| null | `https://media.example.com/lido-demo/bar.webp` |
 | `photos[].sortOrder` | number (intero) | `1` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
 | `latitude` | number \| null | `44.063812` |
@@ -7912,7 +7910,7 @@ Stato: 200 OK.
 | `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
 | `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].url` | string \| null | `https://media.example.com/lido-demo/bar.webp` |
 | `photos[].sortOrder` | number (intero) | `1` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
 | `latitude` | number \| null | `44.063812` |
@@ -7960,7 +7958,7 @@ Stato: 200 OK.
 | `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
 | `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/ombrelloni.webp` |
+| `photos[].url` | string \| null | `https://media.example.com/lido-demo/ombrelloni.webp` |
 | `photos[].sortOrder` | number (intero) | `2` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
 | `latitude` | number \| null | `44.063812` |
@@ -8021,7 +8019,7 @@ Stato: 200 OK.
 | `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
 | `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].url` | string \| null | `https://media.example.com/lido-demo/bar.webp` |
 | `photos[].sortOrder` | number (intero) | `1` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
 | `latitude` | number \| null | `44.063812` |
@@ -8071,7 +8069,7 @@ Stato: 200 OK.
 | `mainPhotoUrl` | string \| null | `https://media.example.com/lido-demo/spiaggia.webp` |
 | `photos[]` | PropertyInfoPhoto[] (array di oggetti) | `[{"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01", "url": "https://media.example.com/lido-demo/bar.webp", "sortOrder": 1}, {"id": "0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02", "url": "https://media.example.com/lido-demo/ombrelloni.webp", "sortOrder": 2}]` |
 | `photos[].id` | string (UUID) | `0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01` |
-| `photos[].url` | string | `https://media.example.com/lido-demo/bar.webp` |
+| `photos[].url` | string \| null | `https://media.example.com/lido-demo/bar.webp` |
 | `photos[].sortOrder` | number (intero) | `1` |
 | `virtualTourUrl` | string \| null | `https://tour.example.com/lido-demo` |
 | `latitude` | number \| null | `44.063812` |

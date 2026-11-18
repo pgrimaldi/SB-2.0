@@ -36,7 +36,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   a `requiredText`.
 - `emailAddress(path)`: un'email come la controlla il backend, cioè una sola `@`, né prima né ultima
   (`invalidate.email`). Il campo vuoto lo lascia a `requiredText`. La lunghezza massima è `MAX_EMAIL_LENGTH` (255,
-  `entities/shared/email-address.ts`).
+  `entities/shared/email-address.ts`). Lo stesso controllo fuori da un form (es. nei mock) è `isEmailAddress(testo)`.
 - `maxRichTextLength(path, massimo)`: un testo di `app-rich-text-field` (HTML) con più di `massimo` caratteri visibili;
   la formattazione non conta (`invalidate.max_length`, "Al massimo {{max}} caratteri"). L'editor non blocca la
   scrittura: l'errore va sotto il campo e Salva si spegne.
@@ -44,6 +44,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   costante dell'entità. Il wrapper riceve `maxLength` e il campo non accetta caratteri oltre il limite.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
   giorno in comune con un altro (`invalidate.overlap`).
+- `isTextTaken(testo, altri)`: vero se il testo è uguale a uno degli altri, senza badare a maiuscole e spazi agli
+  estremi. Serve ai controlli "nome già usato" che il form fa da sé con `validate`, con un errore della pagina sotto
+  `invalidate.` (es. il nome di un periodo in Stagioni e periodi).
 - Messaggi generici di Angular: `invalidate.min` "Il valore minimo è {{min}}", `invalidate.max` "Il valore massimo è
   {{max}}".
 
@@ -167,9 +170,10 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   sempre svuotato) e l'utente lo sceglie di nuovo.
 - Se c'è anche un altro limite (es. i giorni della stagione) vale il più stretto; i giorni già presi da altri periodi
   si spengono con `disabledPeriods`. Ogni nuova coppia fa lo stesso.
-- Un periodo di giorni si chiama come nel backend, `startsOn` / `endsOn`: i periodi di `app-period-calendar`, i
-  `disabledPeriods` di `app-period-calendar` e `app-filled-date-field`, `DayRange` di `noOverlap` / `noOverlaps`
-  (`components/shared/forms/validators.ts`) e le entità che li usano (es. `SeasonPeriodInterval`,
-  `PackageReducedSeasonalPrice`, `OnlineBookingPeriod`).
+- Un periodo di giorni dei componenti comuni si chiama `startsOn` / `endsOn`, come nel backend: i periodi di
+  `app-period-calendar`, i `disabledPeriods` di `app-period-calendar` e `app-filled-date-field`, `DayRange` di
+  `noOverlap` / `noOverlaps` (`components/shared/forms/validators.ts`) e le entità che li usano (es.
+  `SeasonPeriodInterval`, `PackageReducedSeasonalPrice`, `OnlineBookingPeriod`). Le altre coppie usano i nomi della loro
+  API (es. `validFrom` / `validTo` dei voucher, `dateFrom` / `dateTo` di Servizi e Prenotazioni online).
 - Formato delle date mostrate e adattatore nativo: vedi `traduzioni-e-lingue.md`; date UTC nelle API: vedi
   `api-e-mock.md`.
