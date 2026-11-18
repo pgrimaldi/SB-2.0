@@ -32,10 +32,12 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import {
-  ApiValidationError,
+  apiFieldError,
+  apiFieldErrors,
   apiFieldErrorsOrGeneral,
 } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import {
   MAX_SEASON_PERIOD_NAME_LENGTH,
@@ -46,8 +48,11 @@ import { SeasonService } from '../../../../../services/api/seasons/season.servic
 import { isTextTaken, requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
+import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
+
+const NAME_FIELD = 'name' satisfies keyof SeasonPeriodItem;
 
 @Component({
   selector: 'app-season-period-edit-popup',
@@ -86,6 +91,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
     readonly(path, () => this.isLoading());
   });
   protected readonly nameError = this.validationText.message(this.draftForm.name);
+  protected readonly rangesError = this.validationText.message(this.draftForm);
   protected readonly canSave = computed(() => this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -125,21 +131,21 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
-        if (problem.code === 'pricing.period_name_taken') {
-          const nameTaken: ApiValidationError = {
-            kind: 'api',
-            fieldTree: this.draftForm.name,
-            code: problem.code,
-          };
-          return nameTaken;
+        if (problem.code === ApiErrorCode.PricingPeriodNameTaken) {
+          return apiFieldError(this.draftForm.name, problem.code);
         }
-        if ((problem.errors ?? []).some(({ field }) => field !== 'name')) {
-          this.error.set(problem);
-          return [];
+        const ranges = rangesErrors(problem, this.draftForm);
+        const others = withoutRangesErrors(problem);
+        if ((others.errors ?? []).some(({ field }) => field !== NAME_FIELD)) {
+          this.error.set(others);
+          return ranges;
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
-        );
+        if (!ranges.length) {
+          return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+            this.error.set(general),
+          );
+        }
+        return [...ranges, ...apiFieldErrors(others, this.draftForm)];
       } finally {
         this.isLoading.set(false);
       }

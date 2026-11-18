@@ -1,6 +1,7 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
@@ -232,7 +233,7 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
   }
   const errors = itemErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
       errors,
     });
@@ -263,7 +264,7 @@ export const warehouseEditMock = (
   }
   const errors = itemErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
       errors,
     });
@@ -390,17 +391,17 @@ function itemErrors(body: ItemBody): MockFieldError[] {
   const thresholdQuantity = body.thresholdQuantity;
   const errors: MockFieldError[] = [];
   if (!wholeNumber(body.totalQuantity) || body.totalQuantity === 0) {
-    errors.push({ field: 'totalQuantity', code: 'validation.invalid' });
+    errors.push({ field: 'totalQuantity', code: ApiErrorCode.ValidationInvalid });
   }
   if (thresholdQuantity !== null && !wholeNumber(thresholdQuantity)) {
-    errors.push({ field: 'thresholdQuantity', code: 'validation.invalid' });
+    errors.push({ field: 'thresholdQuantity', code: ApiErrorCode.ValidationInvalid });
   }
   if (
     typeof body.isThresholdWarningActive !== 'boolean' ||
     (body.isThresholdWarningActive &&
       !(typeof thresholdQuantity === 'number' && thresholdQuantity > 0))
   ) {
-    errors.push({ field: 'isThresholdWarningActive', code: 'validation.invalid' });
+    errors.push({ field: 'isThresholdWarningActive', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }

@@ -1,5 +1,6 @@
 import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SeasonDates } from '../../../entities/settings/seasons/season-dates';
 import { SeasonPeriodAddRequest } from '../../../entities/settings/seasons/season-period-add-request';
 import { SeasonPeriodInterval } from '../../../entities/settings/seasons/season-period-interval';
@@ -118,13 +119,13 @@ export const saveSeasonDatesMock = (
     const hasFrom = isDay(body[from]);
     const hasTo = isDay(body[to]);
     if (!hasFrom) {
-      errors.push({ field: from, code: 'validation.required' });
+      errors.push({ field: from, code: ApiErrorCode.ValidationRequired });
     }
     if (!hasTo) {
-      errors.push({ field: to, code: 'validation.required' });
+      errors.push({ field: to, code: ApiErrorCode.ValidationRequired });
     }
     if (hasFrom && hasTo && (body[to] as string) < (body[from] as string)) {
-      errors.push({ field: to, code: 'validation.end_before_start' });
+      errors.push({ field: to, code: ApiErrorCode.ValidationEndBeforeStart });
     }
   };
   checkRange('startsOn', 'endsOn');
@@ -134,10 +135,13 @@ export const saveSeasonDatesMock = (
     isDay(body.nextStartsOn) &&
     (body.nextStartsOn as string) <= (body.endsOn as string)
   ) {
-    errors.push({ field: 'nextStartsOn', code: 'validation.out_of_range' });
+    errors.push({ field: 'nextStartsOn', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const dates: SeasonDatesRow = {
     propertyId: property.id,
@@ -202,7 +206,10 @@ export const createSeasonPeriodMock = (
   const body = (request.body ?? {}) as Partial<SeasonPeriodAddRequest>;
   const errors = savePeriodErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const property = DEMO_PROPERTY;
   const season = seasonOf(property.id, isNextSeason);
@@ -212,11 +219,13 @@ export const createSeasonPeriodMock = (
   const periods = periodsOf(property.id, isNextSeason);
   const name = (body.name as string).trim();
   if (periods.some((row) => row.name?.toLowerCase() === name.toLowerCase())) {
-    return problem(request, 409, 'pricing.period_name_taken', { title: 'Period name taken' });
+    return problem(request, 409, ApiErrorCode.PricingPeriodNameTaken, {
+      title: 'Period name taken',
+    });
   }
   const ranges = (body.ranges as SeasonPeriodInterval[]).map(daysOf);
   if (!ranges.every((range) => isInside(range, season))) {
-    return problem(request, 422, 'pricing.period_outside_season', {
+    return problem(request, 422, ApiErrorCode.PricingPeriodOutsideSeason, {
       title: 'Period outside the season',
       args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
@@ -257,15 +266,15 @@ export const deleteSeasonPeriodMock = (
   }
   const property = DEMO_PROPERTY;
   if (!SEASON_DATES.some((row) => row.propertyId === property.id)) {
-    return problem(request, 422, 'pricing.season_required', { title: 'Season required' });
+    return problem(request, 422, ApiErrorCode.PricingSeasonRequired, { title: 'Season required' });
   }
   const period = periodsOf(property.id, isNextSeason).find((row) => row.key === key);
   if (!period) {
-    return problem(request, 404, 'pricing.period_not_found', { title: 'Period not found' });
+    return problem(request, 404, ApiErrorCode.PricingPeriodNotFound, { title: 'Period not found' });
   }
   const priceLists = isNextSeason ? [] : priceListsUsingPeriod(key);
   if (priceLists.length) {
-    return problem(request, 409, 'pricing.period_in_use', {
+    return problem(request, 409, ApiErrorCode.PricingPeriodInUse, {
       title: 'Period in use',
       args: { priceLists },
     });
@@ -294,7 +303,10 @@ export const updateSeasonPeriodMock = (
   const body = (request.body ?? {}) as Partial<SeasonPeriodUpdateRequest>;
   const errors = savePeriodErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const property = DEMO_PROPERTY;
   const season = seasonOf(property.id, isNextSeason);
@@ -304,18 +316,20 @@ export const updateSeasonPeriodMock = (
   const periods = periodsOf(property.id, isNextSeason);
   const period = periods.find((row) => row.key === key);
   if (!period) {
-    return problem(request, 404, 'pricing.period_not_found', { title: 'Period not found' });
+    return problem(request, 404, ApiErrorCode.PricingPeriodNotFound, { title: 'Period not found' });
   }
   const name = (body.name as string).trim();
   const isNameTaken = periods.some(
     (row) => row !== period && row.name?.toLowerCase() === name.toLowerCase(),
   );
   if (isNameTaken) {
-    return problem(request, 409, 'pricing.period_name_taken', { title: 'Period name taken' });
+    return problem(request, 409, ApiErrorCode.PricingPeriodNameTaken, {
+      title: 'Period name taken',
+    });
   }
   const ranges = (body.ranges as SeasonPeriodInterval[]).map(daysOf);
   if (!ranges.every((range) => isInside(range, season))) {
-    return problem(request, 422, 'pricing.period_outside_season', {
+    return problem(request, 422, ApiErrorCode.PricingPeriodOutsideSeason, {
       title: 'Period outside the season',
       args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
@@ -345,9 +359,9 @@ export const deleteSeasonRangesMock = (
   const body = (request.body ?? {}) as { ranges?: unknown };
   const ranges: unknown[] = Array.isArray(body.ranges) ? body.ranges : [];
   if (!ranges.length || ranges.length > DELETE_RANGES_MAX || !ranges.every(isRangeOfPeriod)) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
-      errors: [{ field: 'ranges', code: 'validation.required' }],
+      errors: [{ field: 'ranges', code: ApiErrorCode.ValidationRequired }],
     });
   }
   const property = DEMO_PROPERTY;
@@ -357,7 +371,7 @@ export const deleteSeasonRangesMock = (
   const periods = periodsOf(property.id, isNextSeason);
   const toDelete = (ranges as SeasonPeriodIntervalItem[]).map(daysOfRangeOfPeriod);
   if (!toDelete.every((item) => periods.some(({ key }) => key === item.key))) {
-    return problem(request, 404, 'pricing.period_not_found', { title: 'Period not found' });
+    return problem(request, 404, ApiErrorCode.PricingPeriodNotFound, { title: 'Period not found' });
   }
   const isListed = (key: number | null, range: SeasonPeriodInterval): boolean =>
     toDelete.some(
@@ -374,10 +388,12 @@ export const deleteSeasonRangesMock = (
     ),
   );
   if (!isKnown) {
-    return problem(request, 404, 'pricing.period_range_not_found', { title: 'Range not found' });
+    return problem(request, 404, ApiErrorCode.PricingPeriodRangeNotFound, {
+      title: 'Range not found',
+    });
   }
   if (periods.some((period) => period.ranges.every((range) => isListed(period.key, range)))) {
-    return problem(request, 422, 'pricing.period_ranges_required', {
+    return problem(request, 422, ApiErrorCode.PricingPeriodRangesRequired, {
       title: 'A period needs at least one range',
     });
   }
@@ -393,37 +409,39 @@ function savePeriodErrors(
 ): MockFieldError[] {
   const errors: MockFieldError[] = [];
   if (typeof body.name !== 'string' || !body.name.trim()) {
-    errors.push({ field: 'name', code: 'validation.required' });
+    errors.push({ field: 'name', code: ApiErrorCode.ValidationRequired });
   } else if (body.name.length > MAX_SEASON_PERIOD_NAME_LENGTH) {
     errors.push({
       field: 'name',
-      code: 'validation.max_length',
+      code: ApiErrorCode.ValidationMaxLength,
       args: { max: MAX_SEASON_PERIOD_NAME_LENGTH },
     });
   }
   const ranges: SeasonPeriodInterval[] = Array.isArray(body.ranges) ? body.ranges : [];
   if (!ranges.length) {
-    errors.push({ field: 'ranges', code: 'validation.required' });
+    errors.push({ field: 'ranges', code: ApiErrorCode.ValidationRequired });
   } else if (ranges.length > MAX_SEASON_PERIOD_RANGES) {
-    errors.push({ field: 'ranges', code: 'validation.invalid' });
+    errors.push({ field: 'ranges', code: ApiErrorCode.ValidationInvalid });
   }
   ranges.forEach((range, index) => {
     if (!isDay(range?.startsOn) || !isDay(range?.endsOn)) {
-      errors.push({ field: `ranges[${index}]`, code: 'validation.required' });
+      errors.push({ field: `ranges[${index}]`, code: ApiErrorCode.ValidationRequired });
     } else if (!isValidRange(range)) {
-      errors.push({ field: `ranges[${index}]`, code: 'validation.end_before_start' });
+      errors.push({ field: `ranges[${index}]`, code: ApiErrorCode.ValidationEndBeforeStart });
     }
   });
   if (!errors.length && hasOverlap(ranges.map(daysOf), [])) {
-    errors.push({ field: 'ranges', code: 'validation.invalid' });
+    errors.push({ field: 'ranges', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
 
 function seasonRequired(request: HttpRequest<unknown>, isNextSeason: boolean): Observable<never> {
   return isNextSeason
-    ? problem(request, 422, 'pricing.next_season_required', { title: 'Next season required' })
-    : problem(request, 422, 'pricing.season_required', { title: 'Season required' });
+    ? problem(request, 422, ApiErrorCode.PricingNextSeasonRequired, {
+        title: 'Next season required',
+      })
+    : problem(request, 422, ApiErrorCode.PricingSeasonRequired, { title: 'Season required' });
 }
 
 /** The periods of the current or of the next season of the property, in the order of their first day. */

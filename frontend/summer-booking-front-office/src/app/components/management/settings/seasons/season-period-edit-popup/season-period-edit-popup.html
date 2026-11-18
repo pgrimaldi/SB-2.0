@@ -16,6 +16,9 @@
       />
     </app-form-row>
 
+    @if (rangesError(); as rangesError) {
+      <p class="season__period__edit__popup__error">{{ rangesError }}</p>
+    }
     @if (errorMessage(); as errorMessage) {
       <p class="season__period__edit__popup__error">{{ errorMessage }}</p>
     }

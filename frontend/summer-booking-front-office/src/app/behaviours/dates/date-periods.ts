@@ -1,3 +1,5 @@
+import { FilterField } from '../../entities/enums/filter-field';
+
 import { DateRange } from '../../entities/shared/date-range';
 import { PageFilter } from '../../entities/pagination/page';
 
@@ -16,8 +18,8 @@ export function utcDayEnd(day: Date): string {
 export function dateRangeFilters(range: DateRange | null): PageFilter[] {
   return range
     ? [
-        { field: 'datetimeFrom', value: [utcDayStart(range.start)] },
-        { field: 'datetimeTo', value: [utcDayEnd(range.end)] },
+        { field: FilterField.DatetimeFrom, value: [utcDayStart(range.start)] },
+        { field: FilterField.DatetimeTo, value: [utcDayEnd(range.end)] },
       ]
     : [];
 }

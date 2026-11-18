@@ -2020,7 +2020,8 @@
         "invalid": "Invalid date ranges: a period can have at most {{max}} and they cannot share any day."
       },
       "season_required": "First set and save the start and end dates of the current season.",
-      "next_season_required": "First set and save the start and end dates of the next season."
+      "next_season_required": "First set and save the start and end dates of the next season.",
+      "next_season_too_early": "The next season must start after the end of the current one."
     },
     "catalog": {
       "price": {

@@ -1,11 +1,26 @@
 import { FieldTree, ValidationError } from '@angular/forms/signals';
 import { ApiProblem, ApiProblemArgs } from '../../entities/errors/api-problem';
 
+/** The `kind` of every error of the backend on a field: its text is `error.<code>`, not `invalidate.<kind>`. */
+export const API_ERROR_KIND = 'api';
+
 /** An error of the backend on one field: its text is the translation `error.<code>`. */
 export interface ApiValidationError extends ValidationError.WithFieldTree {
-  readonly kind: 'api';
+  readonly kind: typeof API_ERROR_KIND;
   readonly code: string;
   readonly args?: ApiProblemArgs;
+}
+
+/**
+ * An error of the backend on `fieldTree`, e.g. a code that comes without `errors[]` but is about one
+ * field: the action of `submit()` returns it and it shows under that field until the field changes.
+ */
+export function apiFieldError(
+  fieldTree: FieldTree<unknown>,
+  code: string,
+  args?: ApiProblemArgs,
+): ApiValidationError {
+  return { kind: API_ERROR_KIND, fieldTree, code, args };
 }
 
 /**
@@ -20,7 +35,7 @@ export function apiFieldErrors<TModel extends object>(
   const value = form().value();
   return (problem.errors ?? [])
     .filter(({ field }) => Object.hasOwn(value, field) && !isId(field))
-    .map(({ field, code, args }) => ({ kind: 'api', fieldTree: fields[field], code, args }));
+    .map(({ field, code, args }) => apiFieldError(fields[field], code, args));
 }
 
 /**

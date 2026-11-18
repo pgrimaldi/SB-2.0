@@ -6,6 +6,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ElectronicReceiptAccount } from '../../../../../entities/settings/taxation/electronic-receipt-account';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
 import { ElectronicReceiptAccountForm } from './electronic-receipt-account-form';
@@ -100,9 +101,9 @@ describe('ElectronicReceiptAccountForm', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'vatNumber', code: 'validation.invalid' }],
+              errors: [{ field: 'vatNumber', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),

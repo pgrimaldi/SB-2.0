@@ -1,6 +1,7 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import {
   MAX_SECTOR_NAME_LENGTH,
@@ -111,7 +112,9 @@ export const addSectorItemMock = (
     return nameError;
   }
   if (isNameTaken(property.id, sectorName)) {
-    return problem(request, 409, 'catalog.sector_name_taken', { title: 'Sector name taken' });
+    return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken, {
+      title: 'Sector name taken',
+    });
   }
   SECTORS.push({ propertyId: property.id, idSector: crypto.randomUUID(), sectorName });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -146,7 +149,9 @@ export const updateSectorItemMock = (
     return nameError;
   }
   if (isNameTaken(property.id, sectorName, sector)) {
-    return problem(request, 409, 'catalog.sector_name_taken', { title: 'Sector name taken' });
+    return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken, {
+      title: 'Sector name taken',
+    });
   }
   sector.sectorName = sectorName;
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -172,7 +177,7 @@ export const deleteSectorItemsMock = (
   }
   const used = sectors.find((sector) => sector.usage);
   if (used?.usage) {
-    return problem(request, 409, 'catalog.sector_in_use', {
+    return problem(request, 409, ApiErrorCode.CatalogSectorInUse, {
       title: 'Sector in use',
       args: { sectorName: used.sectorName ?? '', ...used.usage },
     });
@@ -218,16 +223,16 @@ function sectorNameError(
   if (sectorName && sectorName.length <= MAX_SECTOR_NAME_LENGTH) {
     return null;
   }
-  return problem(request, 400, 'validation.failed', {
+  return problem(request, 400, ApiErrorCode.ValidationFailed, {
     title: 'Invalid request',
     errors: [
       sectorName
         ? {
             field: 'sectorName',
-            code: 'validation.max_length',
+            code: ApiErrorCode.ValidationMaxLength,
             args: { max: MAX_SECTOR_NAME_LENGTH },
           }
-        : { field: 'sectorName', code: 'validation.required' },
+        : { field: 'sectorName', code: ApiErrorCode.ValidationRequired },
     ],
   });
 }

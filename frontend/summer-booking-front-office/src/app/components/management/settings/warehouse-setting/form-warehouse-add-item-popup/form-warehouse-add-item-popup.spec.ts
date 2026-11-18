@@ -6,6 +6,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseAddItemPopup } from './form-warehouse-add-item-popup';
@@ -239,7 +240,7 @@ describe('FormWarehouseAddItemPopup', () => {
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
+            error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
           }),
       ),
     );
@@ -279,9 +280,9 @@ describe('FormWarehouseAddItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'totalQuantity', code: 'validation.invalid' }],
+              errors: [{ field: 'totalQuantity', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),

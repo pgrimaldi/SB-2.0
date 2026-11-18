@@ -58,6 +58,7 @@ import {
   PaymentStatusFilter,
 } from '../../../entities/database/existing-booking-filters';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
+import { FilterField } from '../../../entities/enums/filter-field';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
 import { ApiProblem } from '../../../entities/errors/api-problem';
@@ -463,10 +464,10 @@ export class Database {
 /** One filter per field with its chosen values (alternatives); a field with no choice is left out. */
 function pageFiltersOf(filters: ExistingBookingFilters): PageFilter[] {
   const all: PageFilter[] = [
-    { field: 'bookingTypology', value: [...filters.bookingTypologies] },
-    { field: 'agreementBooking', value: [...filters.agreementBookings] },
-    { field: 'idAffiliatedHotel', value: filters.affiliatedHotels.map(({ id }) => id) },
-    { field: 'paymentStatus', value: [...filters.paymentStatuses] },
+    { field: FilterField.BookingTypology, value: [...filters.bookingTypologies] },
+    { field: FilterField.AgreementBooking, value: [...filters.agreementBookings] },
+    { field: FilterField.IdAffiliatedHotel, value: filters.affiliatedHotels.map(({ id }) => id) },
+    { field: FilterField.PaymentStatus, value: [...filters.paymentStatuses] },
   ];
   return all.filter(({ value }) => value.length);
 }

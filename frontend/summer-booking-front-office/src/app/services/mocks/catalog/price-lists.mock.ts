@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
@@ -320,7 +321,10 @@ export const createPackageMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = packageErrors(body, language);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const row: PackageRow = {
     propertyId: DEMO_PROPERTY.id,
@@ -351,14 +355,14 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
   if (typeof main?.packageName !== 'string' || !main.packageName.trim()) {
     errors.push({
       field: `translations[${Math.max(index, 0)}].packageName`,
-      code: 'validation.required',
+      code: ApiErrorCode.ValidationRequired,
     });
   }
   translations.forEach(({ packageName }, translationIndex) => {
     if (typeof packageName === 'string' && packageName.trim().length > MAX_PACKAGE_NAME_LENGTH) {
       errors.push({
         field: `translations[${translationIndex}].packageName`,
-        code: 'validation.max_length',
+        code: ApiErrorCode.ValidationMaxLength,
         args: { max: MAX_PACKAGE_NAME_LENGTH },
       });
     }
@@ -370,7 +374,7 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
   for (const [field, range] of ranges) {
     const quantity = body[field];
     if (quantity != null && !isWholeNumberIn(quantity, range.from, range.to)) {
-      errors.push({ field, code: 'validation.out_of_range', args: { ...range } });
+      errors.push({ field, code: ApiErrorCode.ValidationOutOfRange, args: { ...range } });
     }
   }
   const articles = [
@@ -384,7 +388,7 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
   for (const field of articles) {
     const quantity = body[field];
     if (quantity != null && !isWholeNumberIn(quantity, 1, MAX_ARTICLE_QUANTITY)) {
-      errors.push({ field, code: 'validation.invalid' });
+      errors.push({ field, code: ApiErrorCode.ValidationInvalid });
     }
   }
   errors.push(...choiceErrors(body));
@@ -393,18 +397,21 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
     const field = `reducedSeasonalPrices[${reducedIndex}]`;
     const name = reduced.reducedSeasonalPriceName?.trim();
     if (!name) {
-      errors.push({ field: `${field}.reducedSeasonalPriceName`, code: 'validation.required' });
+      errors.push({
+        field: `${field}.reducedSeasonalPriceName`,
+        code: ApiErrorCode.ValidationRequired,
+      });
     } else if (name.length > MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH) {
       errors.push({
         field: `${field}.reducedSeasonalPriceName`,
-        code: 'validation.max_length',
+        code: ApiErrorCode.ValidationMaxLength,
         args: { max: MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH },
       });
     }
     if (!reduced.startsOn || !reduced.endsOn) {
-      errors.push({ field: `${field}.startsOn`, code: 'validation.required' });
+      errors.push({ field: `${field}.startsOn`, code: ApiErrorCode.ValidationRequired });
     } else if (reduced.endsOn < reduced.startsOn) {
-      errors.push({ field: `${field}.endsOn`, code: 'validation.end_before_start' });
+      errors.push({ field: `${field}.endsOn`, code: ApiErrorCode.ValidationEndBeforeStart });
     } else if (
       reducedPrices.some(
         (other, otherIndex) =>
@@ -415,7 +422,7 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
           other.startsOn.slice(0, 10) <= (reduced.endsOn as string).slice(0, 10),
       )
     ) {
-      errors.push({ field: `${field}.startsOn`, code: 'validation.invalid' });
+      errors.push({ field: `${field}.startsOn`, code: ApiErrorCode.ValidationInvalid });
     }
   });
   if (
@@ -427,7 +434,7 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
         ),
     )
   ) {
-    errors.push({ field: 'reducedSeasonalPrices', code: 'validation.invalid' });
+    errors.push({ field: 'reducedSeasonalPrices', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
@@ -489,7 +496,10 @@ export const updatePackageMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = packageErrors(body, language);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
   PACKAGE_DETAILS.set(
@@ -666,7 +676,7 @@ function choiceErrors(body: {
   for (const [field, values] of enums) {
     const value = body[field];
     if (value != null && !(Object.values(values) as unknown[]).includes(value)) {
-      errors.push({ field, code: 'validation.invalid' });
+      errors.push({ field, code: ApiErrorCode.ValidationInvalid });
     }
   }
   const dates = body.publicHolidayDates ?? [];
@@ -675,7 +685,7 @@ function choiceErrors(body: {
     dates.some((date) => typeof date !== 'string' || Number.isNaN(Date.parse(date))) ||
     new Set(dates.map((date: string) => date.slice(0, 10))).size !== dates.length
   ) {
-    errors.push({ field: 'publicHolidayDates', code: 'validation.invalid' });
+    errors.push({ field: 'publicHolidayDates', code: ApiErrorCode.ValidationInvalid });
   }
   const sectorPrices = body.sectorPrices ?? [];
   if (
@@ -685,7 +695,7 @@ function choiceErrors(body: {
         !!row && [row.seasonalHalfDayPrice, row.seasonalPrice].every(isPrice),
     )
   ) {
-    errors.push({ field: 'sectorPrices', code: 'validation.invalid' });
+    errors.push({ field: 'sectorPrices', code: ApiErrorCode.ValidationInvalid });
   }
   const periodPrices = body.periodPrices ?? [];
   if (
@@ -707,7 +717,7 @@ function choiceErrors(body: {
         ].every(isPrice),
     )
   ) {
-    errors.push({ field: 'periodPrices', code: 'validation.invalid' });
+    errors.push({ field: 'periodPrices', code: ApiErrorCode.ValidationInvalid });
   }
   const prices = body.intermediatePrices ?? [];
   if (
@@ -720,7 +730,7 @@ function choiceErrors(body: {
       ),
     ).size !== prices.length
   ) {
-    errors.push({ field: 'intermediatePrices', code: 'validation.invalid' });
+    errors.push({ field: 'intermediatePrices', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
@@ -792,7 +802,10 @@ export const createAdditionalItemMock = (
   }
   const errors = choiceErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const row: AdditionalItemRow = {
     propertyId: property.id,
@@ -875,7 +888,10 @@ export const updateAdditionalItemMock = (
   }
   const errors = choiceErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   row.additionalItemName = name;
   ADDITIONAL_ITEM_DETAILS.set(

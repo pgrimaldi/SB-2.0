@@ -55,7 +55,7 @@ export function problem(
 
 /** The property is not one the user may work on: the operation is cancelled. */
 export function forbidden(request: HttpRequest<unknown>): Observable<never> {
-  return problem(request, 403, 'auth.forbidden', { title: 'Operation not allowed' });
+  return problem(request, 403, ApiErrorCode.AuthForbidden, { title: 'Operation not allowed' });
 }
 
 /** A route value the backend does not know (`Results.NotFound()`): 404 without a body. */
@@ -67,7 +67,7 @@ export function notFoundWithoutBody(request: HttpRequest<unknown>): Observable<n
 
 /** An article that does not exist, or no longer: the operation is cancelled. */
 export function resourceNotFound(request: HttpRequest<unknown>): Observable<never> {
-  return problem(request, 404, 'resource.not_found', { title: 'Resource not found' });
+  return problem(request, 404, ApiErrorCode.ResourceNotFound, { title: 'Resource not found' });
 }
 
 function randomHex(bytes: number): string {

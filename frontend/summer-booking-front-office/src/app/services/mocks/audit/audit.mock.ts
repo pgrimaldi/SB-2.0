@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { FilterField } from '../../../entities/enums/filter-field';
 import {
   DEFAULT_PAGE_SIZE,
   Page,
@@ -75,10 +76,10 @@ export const entriesListMock = (request: HttpRequest<unknown>): Observable<HttpE
   const page = positiveInteger(body.page, 1);
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const from = filterValue(body.filters, 'datetimeFrom');
-  const to = filterValue(body.filters, 'datetimeTo');
-  const actionCodes = filterValues(body.filters, 'actionCode');
-  const idUsers = filterValues(body.filters, 'idUser');
+  const from = filterValue(body.filters, FilterField.DatetimeFrom);
+  const to = filterValue(body.filters, FilterField.DatetimeTo);
+  const actionCodes = filterValues(body.filters, FilterField.ActionCode);
+  const idUsers = filterValues(body.filters, FilterField.IdUser);
   const found = AUDIT_ENTRIES.filter(
     (row) =>
       row.propertyId === property.id &&
@@ -142,7 +143,7 @@ function compare(first: string | null, second: string | null): number {
   return first.localeCompare(second, 'it', { sensitivity: 'base' });
 }
 
-function filterValue(filters: unknown, field: string): string | null {
+function filterValue(filters: unknown, field: FilterField): string | null {
   const filter = Array.isArray(filters)
     ? (filters as Partial<PageFilter>[]).find((item) => item.field === field)
     : undefined;
@@ -150,7 +151,7 @@ function filterValue(filters: unknown, field: string): string | null {
   return typeof value === 'string' ? value : null;
 }
 
-function filterValues(filters: unknown, field: string): string[] {
+function filterValues(filters: unknown, field: FilterField): string[] {
   const filter = Array.isArray(filters)
     ? (filters as Partial<PageFilter>[]).find((item) => item.field === field)
     : undefined;

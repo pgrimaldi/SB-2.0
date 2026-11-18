@@ -57,7 +57,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   bottone che salva è spento finché il form non è valido.
 - Anche gli errori del backend su un campo (`errors[]` di Problem Details, con `field` uguale al nome nella richiesta)
   vanno sotto quel campo: si invia con `submit()` dei Signal Forms e, se la chiamata fallisce, l'azione restituisce
-  `apiFieldErrorsOrGeneral(problem, form, …)` (`behaviours/validation/api-field-errors.ts`, errori `kind: 'api'`).
+  `apiFieldErrorsOrGeneral(problem, form, …)` (`behaviours/validation/api-field-errors.ts`; questi errori hanno
+  `kind` = `API_ERROR_KIND`).
 - Lo fanno tutti i form con chiamate, e ogni campo, interruttore compreso, ha il suo `[error]`.
 - Di un errore del backend `ValidationTextBehaviour` mostra il testo `error.<code>` (`ErrorTextBehaviour.instant`);
   Angular lo toglie appena il campo cambia.
@@ -65,7 +66,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
   non riguarda un campo (es. rete assente).
 - Un codice del backend che arriva senza `errors[]` ma riguarda un solo campo (es. `pricing.period_name_taken`, nome
-  già usato) il form lo mette sotto quel campo, restituendolo da `submit()` come errore `api` di quel campo.
+  già usato) il form lo mette sotto quel campo, restituendo da `submit()` `apiFieldError(campo, codice)`. Un errore del
+  backend su un campo si crea solo con `apiFieldError`, mai scrivendo l'oggetto con il suo `kind`.
 - Un errore su un id (un campo che comincia con `id`, come `idPeriod`) non va mai sotto un campo ma nel messaggio
   generale: l'id non si vede e il form resterebbe bloccato senza spiegazione.
 - Il backend non segnala mai un id in `errors[]`: un id non valido annulla l'operazione con un errore generale (codici:

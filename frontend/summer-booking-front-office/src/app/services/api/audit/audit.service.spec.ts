@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { FilterField } from '../../../entities/enums/filter-field';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { AuditEntryItem } from '../../../entities/settings/user-management/audit-entry-item';
@@ -16,7 +17,7 @@ describe('AuditService', () => {
     const controller = TestBed.inject(HttpTestingController);
     const filters: AuditLogFiltersRequest = {
       search: 'ferri',
-      filters: [{ field: 'datetimeFrom', value: ['2026-10-20T00:00:00.000Z'] }],
+      filters: [{ field: FilterField.DatetimeFrom, value: ['2026-10-20T00:00:00.000Z'] }],
       sortField: 'occurredAt',
       sortDirection: 'Descending',
     };
@@ -43,7 +44,7 @@ describe('AuditService', () => {
       page: 1,
       pageSize: 10,
       search: '',
-      filters: [{ field: 'idUser', value: ['3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01'] }],
+      filters: [{ field: FilterField.IdUser, value: ['3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01'] }],
       sortField: 'occurredAt',
       sortDirection: 'Descending',
     };

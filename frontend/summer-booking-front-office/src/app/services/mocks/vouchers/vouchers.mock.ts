@@ -2,6 +2,7 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { DiscountScope } from '../../../entities/enums/discount-scope';
 import { DiscountType } from '../../../entities/enums/discount-type';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherItem } from '../../../entities/settings/vouchers/voucher-item';
@@ -168,7 +169,10 @@ export const addVoucherItemMock = (
   const property = DEMO_PROPERTY;
   const errors = voucherErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   VOUCHERS.push({ propertyId: property.id, idVoucher: crypto.randomUUID(), ...savedFields(body) });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -196,7 +200,10 @@ export const updateVoucherItemMock = (
   }
   const errors = voucherErrors(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   Object.assign(voucher, savedFields(body));
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -230,56 +237,56 @@ export const selectedVoucherItemMock = (
 function voucherErrors(body: AddVoucherBody): MockFieldError[] {
   const errors: MockFieldError[] = [];
   if (typeof body.voucherName !== 'string' || !body.voucherName.trim()) {
-    errors.push({ field: 'voucherName', code: 'validation.required' });
+    errors.push({ field: 'voucherName', code: ApiErrorCode.ValidationRequired });
   }
   const periods = Array.isArray(body.validityPeriods) ? body.validityPeriods : [];
   if (!periods.length) {
-    errors.push({ field: 'validityPeriods', code: 'validation.required' });
+    errors.push({ field: 'validityPeriods', code: ApiErrorCode.ValidationRequired });
   }
   periods.forEach((period, index) => {
     const at = `validityPeriods[${index}]`;
     const isFromDay = isDay(period.validFrom);
     const isToDay = isDay(period.validTo);
     if (!isFromDay) {
-      errors.push({ field: `${at}.validFrom`, code: 'validation.required' });
+      errors.push({ field: `${at}.validFrom`, code: ApiErrorCode.ValidationRequired });
     }
     if (!isToDay) {
-      errors.push({ field: `${at}.validTo`, code: 'validation.required' });
+      errors.push({ field: `${at}.validTo`, code: ApiErrorCode.ValidationRequired });
     }
     if (isFromDay && isToDay && (period.validTo as string) < (period.validFrom as string)) {
-      errors.push({ field: `${at}.validTo`, code: 'validation.end_before_start' });
+      errors.push({ field: `${at}.validTo`, code: ApiErrorCode.ValidationEndBeforeStart });
     }
     const days = Array.isArray(period.daysOfWeek) ? period.daysOfWeek : [];
     if (!days.length || days.some((day) => !Number.isInteger(day) || day < 1 || day > 7)) {
-      errors.push({ field: `${at}.daysOfWeek`, code: 'validation.required' });
+      errors.push({ field: `${at}.daysOfWeek`, code: ApiErrorCode.ValidationRequired });
     }
     (Array.isArray(period.timeSlots) ? period.timeSlots : []).forEach((timeSlot, slotIndex) => {
       for (const side of ['from', 'to'] as const) {
         if (typeof timeSlot[side] !== 'string' || !TIME.test(timeSlot[side])) {
           errors.push({
             field: `${at}.timeSlots[${slotIndex}].${side}`,
-            code: 'validation.invalid',
+            code: ApiErrorCode.ValidationInvalid,
           });
         }
       }
     });
   });
   if (!Object.values(DiscountType).includes(body.discountType as DiscountType)) {
-    errors.push({ field: 'discountType', code: 'validation.required' });
+    errors.push({ field: 'discountType', code: ApiErrorCode.ValidationRequired });
   }
   const value = body.discountValue;
   const highest = body.discountType === DiscountType.Percentage ? 100 : Infinity;
   if (typeof value !== 'number' || value < 1 || value > highest) {
-    errors.push({ field: 'discountValue', code: 'validation.out_of_range' });
+    errors.push({ field: 'discountValue', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (!Object.values(DiscountScope).includes(body.discountScope as DiscountScope)) {
-    errors.push({ field: 'discountScope', code: 'validation.required' });
+    errors.push({ field: 'discountScope', code: ApiErrorCode.ValidationRequired });
   }
   if (!Number.isInteger(body.maxUseQuantity) || (body.maxUseQuantity as number) < 1) {
-    errors.push({ field: 'maxUseQuantity', code: 'validation.out_of_range' });
+    errors.push({ field: 'maxUseQuantity', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (typeof body.isEnabled !== 'boolean') {
-    errors.push({ field: 'isEnabled', code: 'validation.invalid' });
+    errors.push({ field: 'isEnabled', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }

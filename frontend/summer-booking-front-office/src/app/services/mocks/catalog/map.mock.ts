@@ -4,6 +4,7 @@ import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
 import { MapMixedSpotIcon } from '../../../entities/enums/map-mixed-spot-icon';
 import { MapUmbrellaIcon } from '../../../entities/enums/map-umbrella-icon';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import {
   MAP_CUSTOM_ARTICLE_QUANTITY,
   MAX_MAP_ROW_ITEM_QUANTITY,
@@ -77,11 +78,11 @@ function isOneOf(value: unknown, names: Record<string, string>): boolean {
 
 function rangeError(field: string, value: unknown, from: number, to: number): MockFieldError[] {
   if (value === null || value === undefined) {
-    return [{ field, code: 'validation.required' }];
+    return [{ field, code: ApiErrorCode.ValidationRequired }];
   }
   return Number.isInteger(value) && (value as number) >= from && (value as number) <= to
     ? []
-    : [{ field, code: 'validation.out_of_range', args: { from, to } }];
+    : [{ field, code: ApiErrorCode.ValidationOutOfRange, args: { from, to } }];
 }
 
 function answer(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
@@ -111,7 +112,7 @@ export const uploadMapBackgroundMock = (
   }
   const image = request.body instanceof FormData ? request.body.get('file') : null;
   if (!(image instanceof File) || !IMAGE_TYPES.includes(image.type) || image.size > MAX_BYTES) {
-    return problem(request, 422, 'map.invalid_image', {
+    return problem(request, 422, ApiErrorCode.MapInvalidImage, {
       title: 'Invalid image',
       args: { maxBytes: MAX_BYTES, contentTypes: IMAGE_TYPES },
     });
@@ -147,9 +148,9 @@ export const updateMapBackgroundMock = (
   }
   const name = (request.body as { backgroundName?: unknown } | null)?.backgroundName ?? null;
   if (name === null || !isOneOf(name, MapBackgroundImage)) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
-      errors: [{ field: 'backgroundName', code: 'validation.invalid' }],
+      errors: [{ field: 'backgroundName', code: ApiErrorCode.ValidationInvalid }],
     });
   }
   settings = {
@@ -200,7 +201,7 @@ export const updateMapConfigurationMock = (
     !isOneOf(grid.umbrellaIcons?.freeIcon ?? null, MapUmbrellaIcon) ||
     !isOneOf(grid.umbrellaIcons?.occupiedIcon ?? null, MapMixedSpotIcon)
   ) {
-    errors.push({ field: 'umbrellaIcons', code: 'validation.invalid' });
+    errors.push({ field: 'umbrellaIcons', code: ApiErrorCode.ValidationInvalid });
   }
   const variants = new Set(articles.map((article) => article.variant));
   if (
@@ -215,10 +216,13 @@ export const updateMapConfigurationMock = (
         !isOneOf(article.occupiedIcon, MapMixedSpotIcon),
     )
   ) {
-    errors.push({ field: 'customArticleIcons', code: 'validation.invalid' });
+    errors.push({ field: 'customArticleIcons', code: ApiErrorCode.ValidationInvalid });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   settings = {
     ...settings,

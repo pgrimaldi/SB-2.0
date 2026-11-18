@@ -16,6 +16,7 @@ import {
   readonly,
   required,
   submit,
+  ValidationError,
 } from '@angular/forms/signals';
 import { DateAdapter } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -29,6 +30,7 @@ import {
 import { SeasonDatesBehaviour } from '../../../../../behaviours/settings/season-dates.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonDates } from '../../../../../entities/settings/seasons/season-dates';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
@@ -170,6 +172,11 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       } catch (error: unknown) {
         return apiFieldErrorsOrGeneral(toApiProblem(error), this.datesForm, (general) =>
           this.error.set(general),
+        ).map((fieldError): ValidationError.WithFieldTree =>
+          fieldError.fieldTree === this.datesForm.nextStartsOn &&
+          fieldError.code === ApiErrorCode.ValidationOutOfRange
+            ? { kind: 'seasons.next_season_too_early', fieldTree: fieldError.fieldTree }
+            : fieldError,
         );
       } finally {
         this.isSaving.set(false);

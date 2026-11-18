@@ -31,10 +31,11 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import {
-  ApiValidationError,
+  apiFieldError,
   apiFieldErrorsOrGeneral,
 } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import {
   MAX_SECTOR_NAME_LENGTH,
@@ -116,13 +117,8 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
         this.updated.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
-        if (problem.code === 'catalog.sector_name_taken') {
-          const nameTaken: ApiValidationError = {
-            kind: 'api',
-            fieldTree: this.sectorForm.sectorName,
-            code: problem.code,
-          };
-          return nameTaken;
+        if (problem.code === ApiErrorCode.CatalogSectorNameTaken) {
+          return apiFieldError(this.sectorForm.sectorName, problem.code);
         }
         return apiFieldErrorsOrGeneral(problem, this.sectorForm, (general) =>
           this.error.set(general),

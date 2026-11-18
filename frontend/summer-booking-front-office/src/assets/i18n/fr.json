@@ -2020,7 +2020,8 @@
         "invalid": "Plages de dates non valides : une période peut en avoir au maximum {{max}} et elles ne peuvent pas avoir de jours en commun."
       },
       "season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison en cours.",
-      "next_season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison prochaine."
+      "next_season_required": "Définissez et enregistrez d'abord les dates de début et de fin de la saison prochaine.",
+      "next_season_too_early": "La prochaine saison doit commencer après la fin de la saison en cours."
     },
     "catalog": {
       "price": {

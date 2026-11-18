@@ -2020,7 +2020,8 @@
         "invalid": "Intervalli non validi: un periodo può averne al massimo {{max}} e non possono avere giorni in comune."
       },
       "season_required": "Imposta e salva prima le date di inizio e fine della stagione corrente.",
-      "next_season_required": "Imposta e salva prima le date di inizio e fine della prossima stagione."
+      "next_season_required": "Imposta e salva prima le date di inizio e fine della prossima stagione.",
+      "next_season_too_early": "La prossima stagione deve iniziare dopo la fine di quella corrente."
     },
     "catalog": {
       "price": {

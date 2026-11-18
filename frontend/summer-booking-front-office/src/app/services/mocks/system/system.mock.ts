@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import {
   EmailConfigurationData,
@@ -87,7 +88,7 @@ export const sendTestEmailMock = (
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
       errors,
     });
@@ -108,7 +109,7 @@ export const saveEmailConfigurationMock = (
   }
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
       errors,
     });
@@ -137,15 +138,15 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   for (const field of REQUIRED_EMAIL_FIELDS) {
     const value = body[field];
     if (typeof value !== 'string' || !value.trim()) {
-      errors.push({ field, code: 'validation.invalid' });
+      errors.push({ field, code: ApiErrorCode.ValidationInvalid });
     }
   }
   const port = body.smtpPort;
   if (!Number.isInteger(port) || (port as number) < 1 || (port as number) > 65535) {
-    errors.push({ field: 'smtpPort', code: 'validation.invalid' });
+    errors.push({ field: 'smtpPort', code: ApiErrorCode.ValidationInvalid });
   }
   if (!SMTP_SECURITIES.includes(body.smtpSecurity as SmtpSecurity)) {
-    errors.push({ field: 'smtpSecurity', code: 'validation.invalid' });
+    errors.push({ field: 'smtpSecurity', code: ApiErrorCode.ValidationInvalid });
   }
   const otherConnection = SMTP_CONNECTION_FIELDS.some(
     (field) => body[field] !== EMAIL_CONFIGURATION[field],
@@ -155,7 +156,7 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
       ? smtpPassword !== null && otherConnection
       : typeof body.smtpPassword !== 'string' || !body.smtpPassword
   ) {
-    errors.push({ field: 'smtpPassword', code: 'validation.invalid' });
+    errors.push({ field: 'smtpPassword', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
@@ -194,14 +195,14 @@ export const contactSupportMock = (
   for (const field of REQUIRED_FIELDS) {
     const value = body[field];
     if (typeof value !== 'string' || !value.trim()) {
-      errors.push({ field, code: 'validation.invalid' });
+      errors.push({ field, code: ApiErrorCode.ValidationInvalid });
     }
   }
   if (body.mobilePhone !== null && typeof body.mobilePhone !== 'string') {
-    errors.push({ field: 'mobilePhone', code: 'validation.invalid' });
+    errors.push({ field: 'mobilePhone', code: ApiErrorCode.ValidationInvalid });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
       title: 'Invalid request',
       errors,
     });

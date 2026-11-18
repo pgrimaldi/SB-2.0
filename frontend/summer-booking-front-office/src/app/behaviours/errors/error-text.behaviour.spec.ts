@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
+import { FilterField } from '../../entities/enums/filter-field';
+import { ApiErrorCode } from '../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../entities/errors/api-problem';
 import { ErrorTextBehaviour } from './error-text.behaviour';
 
@@ -82,11 +84,11 @@ describe('ErrorTextBehaviour', () => {
     const texts = await firstValueFrom(
       errors.fieldTexts({
         status: 400,
-        code: 'validation.failed',
+        code: ApiErrorCode.ValidationFailed,
         errors: [
-          { field: 'datetimeTo', code: 'validation.end_before_start' },
-          { field: 'name', code: 'validation.required' },
-          { field: 'name', code: 'validation.end_before_start' }, // second error of the same field
+          { field: FilterField.DatetimeTo, code: ApiErrorCode.ValidationEndBeforeStart },
+          { field: 'name', code: ApiErrorCode.ValidationRequired },
+          { field: 'name', code: ApiErrorCode.ValidationEndBeforeStart }, // second error of the same field
         ],
       }),
     );

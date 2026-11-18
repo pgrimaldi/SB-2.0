@@ -48,7 +48,7 @@ export const loginMock = (request: HttpRequest<unknown>): Observable<HttpEvent<u
         username?.trim().toLowerCase() === MOCK_ACCOUNT.username &&
         passwordSha256 === MOCK_ACCOUNT.passwordSha256;
       if (!valid) {
-        return unauthorized(request, 'auth.invalid_credentials', 'Invalid credentials');
+        return unauthorized(request, ApiErrorCode.AuthInvalidCredentials, 'Invalid credentials');
       }
       writeCookie(remember);
       return ok(request, newSession());
@@ -61,7 +61,7 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   const cookie = readCookie();
   if (!cookie || cookie.expiresAt <= Date.now()) {
     removeCookie();
-    return unauthorized(request, 'auth.session_expired', 'No valid session');
+    return unauthorized(request, ApiErrorCode.AuthSessionExpired, 'No valid session');
   }
   writeCookie(cookie.remember);
   return ok(request, newSession());
@@ -70,7 +70,7 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
 /** `POST /api/identity/auth/logout`: revokes the session of the refresh cookie; 401 when there is none. */
 export const logoutMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!readCookie()) {
-    return unauthorized(request, 'auth.session_expired', 'No valid session');
+    return unauthorized(request, ApiErrorCode.AuthSessionExpired, 'No valid session');
   }
   removeCookie();
   accessTokens.clear(); // the one test account: its access tokens stop working with the session
@@ -84,7 +84,7 @@ export function isAuthorized(request: HttpRequest<unknown>): boolean {
 
 export function unauthorized(
   request: HttpRequest<unknown>,
-  code: UnauthorizedCode = 'auth.unauthenticated',
+  code: UnauthorizedCode = ApiErrorCode.AuthUnauthenticated,
   title = 'Invalid or expired access token',
 ): Observable<never> {
   return problem(request, 401, code, { title });

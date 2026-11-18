@@ -2020,7 +2020,8 @@
         "invalid": "日期区间无效：一个时段最多可以有 {{max}} 个，且区间之间不能有相同的日期。"
       },
       "season_required": "请先设置并保存当前季节的开始和结束日期。",
-      "next_season_required": "请先设置并保存下一季节的开始和结束日期。"
+      "next_season_required": "请先设置并保存下一季节的开始和结束日期。",
+      "next_season_too_early": "下一季必须在本季结束之后开始。"
     },
     "catalog": {
       "price": {

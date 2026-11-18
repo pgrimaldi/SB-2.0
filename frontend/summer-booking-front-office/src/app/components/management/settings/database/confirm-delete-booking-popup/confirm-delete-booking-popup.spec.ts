@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { DatabaseService } from '../../../../../services/api/database/database.service';
 import { ConfirmDeleteBookingPopup } from './confirm-delete-booking-popup';
 
@@ -100,8 +101,8 @@ describe('ConfirmDeleteBookingPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
-              errors: [{ field: 'password', code: 'auth.invalid_credentials' }],
+              code: ApiErrorCode.ValidationFailed,
+              errors: [{ field: 'password', code: ApiErrorCode.AuthInvalidCredentials }],
             },
           }),
       ),

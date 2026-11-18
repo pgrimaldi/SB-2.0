@@ -6,6 +6,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DuplicateItemsPopup } from './duplicate-items-popup';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 
 @Component({
   imports: [DuplicateItemsPopup],
@@ -78,7 +79,7 @@ describe('DuplicateItemsPopup', () => {
           () =>
             new HttpErrorResponse({
               status: 400,
-              error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
+              error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
             }),
         );
     });

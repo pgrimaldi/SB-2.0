@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SystemService } from '../../../services/api/system/system.service';
 import { EmailConfiguration } from './email-configuration';
 
@@ -168,9 +169,9 @@ describe('EmailConfiguration', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'senderName', code: 'validation.invalid' }],
+              errors: [{ field: 'senderName', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),

@@ -9,6 +9,7 @@ import { TableServiceAvailabilityMode } from '../../../entities/enums/table-serv
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import {
   BathhouseGeneralInformation,
@@ -748,17 +749,20 @@ export const saveBathhouseConfigurationGeneralMock = (
   const body = (request.body ?? {}) as Partial<BathhouseGeneralInformation>;
   const errors: MockFieldError[] = [];
   if (typeof body.bathhouseName !== 'string' || !body.bathhouseName.trim()) {
-    errors.push({ field: 'bathhouseName', code: 'validation.required' });
+    errors.push({ field: 'bathhouseName', code: ApiErrorCode.ValidationRequired });
   }
   errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
   if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
-    errors.push({ field: 'petPolicy', code: 'validation.invalid' });
+    errors.push({ field: 'petPolicy', code: ApiErrorCode.ValidationInvalid });
   }
   if (body.openingTime && body.closingTime && body.closingTime <= body.openingTime) {
-    errors.push({ field: 'closingTime', code: 'validation.out_of_range' });
+    errors.push({ field: 'closingTime', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
@@ -773,12 +777,14 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
     return [];
   }
   if (typeof value !== 'string') {
-    return [{ field, code: 'validation.phone' }];
+    return [{ field, code: ApiErrorCode.ValidationPhone }];
   }
   if (value.length > MAX_BATHHOUSE_PHONE_LENGTH) {
-    return [{ field, code: 'validation.max_length', args: { max: MAX_BATHHOUSE_PHONE_LENGTH } }];
+    return [
+      { field, code: ApiErrorCode.ValidationMaxLength, args: { max: MAX_BATHHOUSE_PHONE_LENGTH } },
+    ];
   }
-  return /^[0-9 ]*$/.test(value) ? [] : [{ field, code: 'validation.phone' }];
+  return /^[0-9 ]*$/.test(value) ? [] : [{ field, code: ApiErrorCode.ValidationPhone }];
 }
 
 /**
@@ -828,18 +834,21 @@ export const saveBathhouseConfigurationMediaMock = (
   if (link && link.length > MAX_VIRTUAL_TOUR_URL_LENGTH) {
     errors.push({
       field: 'virtualTourUrl',
-      code: 'validation.max_length',
+      code: ApiErrorCode.ValidationMaxLength,
       args: { max: MAX_VIRTUAL_TOUR_URL_LENGTH },
     });
   } else if (link && !isHttpLink(link)) {
-    errors.push({ field: 'virtualTourUrl', code: 'validation.invalid' });
+    errors.push({ field: 'virtualTourUrl', code: ApiErrorCode.ValidationInvalid });
   }
   errors.push(
     ...coordinateErrors('latitude', latitude, longitude, MAX_LATITUDE),
     ...coordinateErrors('longitude', longitude, latitude, MAX_LONGITUDE),
   );
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   bathhouseMedia = { ...bathhouseMedia, virtualTourUrl: link, latitude, longitude };
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -856,9 +865,9 @@ function coordinateErrors(
   max: number,
 ): MockFieldError[] {
   if (value === null) {
-    return other === null ? [] : [{ field, code: 'validation.required' }];
+    return other === null ? [] : [{ field, code: ApiErrorCode.ValidationRequired }];
   }
-  return Math.abs(value) > max ? [{ field, code: 'validation.out_of_range' }] : [];
+  return Math.abs(value) > max ? [{ field, code: ApiErrorCode.ValidationOutOfRange }] : [];
 }
 
 function isHttpLink(link: string): boolean {
@@ -946,7 +955,7 @@ export const addBathhousePhotoMock = (
 ): Observable<HttpEvent<unknown>> =>
   withImage(request, (image) => {
     if (bathhouseMedia.photos.length >= MAX_BATHHOUSE_PHOTO_QUANTITY) {
-      return problem(request, 422, 'catalog.gallery_full', {
+      return problem(request, 422, ApiErrorCode.CatalogGalleryFull, {
         title: 'Gallery full',
         args: { max: MAX_BATHHOUSE_PHOTO_QUANTITY },
       });
@@ -973,7 +982,7 @@ export const deleteBathhousePhotoMock = (
   }
   const idPhoto = decodeURIComponent(request.url.split('/').pop() ?? '');
   if (!bathhouseMedia.photos.some((photo) => photo.idPhoto === idPhoto)) {
-    return problem(request, 404, 'catalog.photo_not_found', { title: 'Photo not found' });
+    return problem(request, 404, ApiErrorCode.CatalogPhotoNotFound, { title: 'Photo not found' });
   }
   bathhouseMedia = {
     ...bathhouseMedia,
@@ -999,7 +1008,7 @@ export const uploadBathhouseDocumentMock = (
   }
   const pdf = request.body instanceof FormData ? request.body.get('file') : null;
   if (!(pdf instanceof File) || pdf.type !== 'application/pdf' || pdf.size > MAX_PDF_BYTES) {
-    return problem(request, 422, 'catalog.invalid_pdf', {
+    return problem(request, 422, ApiErrorCode.CatalogInvalidPdf, {
       title: 'Invalid PDF',
       args: { maxBytes: MAX_PDF_BYTES, contentTypes: ['application/pdf'] },
     });
@@ -1039,7 +1048,7 @@ function withImage(
     !PHOTO_TYPES.includes(image.type) ||
     image.size > MAX_PHOTO_BYTES
   ) {
-    return problem(request, 422, 'catalog.invalid_image', {
+    return problem(request, 422, ApiErrorCode.CatalogInvalidImage, {
       title: 'Invalid image',
       args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: PHOTO_TYPES },
     });
@@ -1311,7 +1320,10 @@ export const createBarServiceMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = barServiceErrors(body, language);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const main = body.translations?.find((translation) => translation.language === language);
   const idBarService = crypto.randomUUID();
@@ -1344,16 +1356,16 @@ function generalErrors(body: CreateBarServiceBody, language: string): MockFieldE
   const main = translations[index];
   const at = `translations[${Math.max(index, 0)}]`;
   if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
-    errors.push({ field: `${at}.serviceName`, code: 'validation.required' });
+    errors.push({ field: `${at}.serviceName`, code: ApiErrorCode.ValidationRequired });
   }
   if (typeof main?.description !== 'string' || !main.description.trim()) {
-    errors.push({ field: `${at}.description`, code: 'validation.required' });
+    errors.push({ field: `${at}.description`, code: ApiErrorCode.ValidationRequired });
   }
   if (body.category != null && !Object.values(BarServiceCategory).includes(body.category)) {
-    errors.push({ field: 'category', code: 'validation.invalid' });
+    errors.push({ field: 'category', code: ApiErrorCode.ValidationInvalid });
   }
   if (body.icon != null && !Object.values(BarServiceIcon).includes(body.icon)) {
-    errors.push({ field: 'icon', code: 'validation.invalid' });
+    errors.push({ field: 'icon', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
@@ -1361,7 +1373,7 @@ function generalErrors(body: CreateBarServiceBody, language: string): MockFieldE
 /** A price, when given, not below 0. */
 function priceErrors(body: { price?: number | null }): MockFieldError[] {
   return body.price != null && !(typeof body.price === 'number' && body.price >= 0)
-    ? [{ field: 'price', code: 'validation.invalid' }]
+    ? [{ field: 'price', code: ApiErrorCode.ValidationInvalid }]
     : [];
 }
 
@@ -1395,7 +1407,10 @@ function updateBarService(
   }
   const errors = errorsOf(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const details = structuredClone(detailsOf(row));
   apply(details, structuredClone(body), row);
@@ -1756,7 +1771,10 @@ export const createStandardServiceMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [...standardGeneralErrors(body, language), ...priceErrors(body)];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const main = body.translations?.find((translation) => translation.language === language);
   const idStandardService = crypto.randomUUID();
@@ -1790,13 +1808,13 @@ function standardGeneralErrors(
   const main = translations[index];
   const at = `translations[${Math.max(index, 0)}]`;
   if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
-    errors.push({ field: `${at}.serviceName`, code: 'validation.required' });
+    errors.push({ field: `${at}.serviceName`, code: ApiErrorCode.ValidationRequired });
   }
   if (typeof main?.description !== 'string' || !main.description.trim()) {
-    errors.push({ field: `${at}.description`, code: 'validation.required' });
+    errors.push({ field: `${at}.description`, code: ApiErrorCode.ValidationRequired });
   }
   if (body.icon != null && !Object.values(StandardServiceIcon).includes(body.icon)) {
-    errors.push({ field: 'icon', code: 'validation.invalid' });
+    errors.push({ field: 'icon', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
@@ -1831,7 +1849,10 @@ function updateStandardService(
   }
   const errors = errorsOf(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const details = structuredClone(standardDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -2130,7 +2151,10 @@ export const createHourlyServiceMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [...standardGeneralErrors(body, language), ...hourlyPriceErrors(body)];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const main = body.translations?.find((translation) => translation.language === language);
   const idHourlyService = crypto.randomUUID();
@@ -2155,12 +2179,12 @@ function hourlyPriceErrors(body: {
     ...option.timeSlotPrices.flatMap(({ price }, index) =>
       priceErrors({ price }).map((): MockFieldError => ({
         field: `${at}.timeSlotPrices[${index}].price`,
-        code: 'validation.invalid',
+        code: ApiErrorCode.ValidationInvalid,
       })),
     ),
     ...priceErrors({ price: option.customTimeSlotPrice }).map((): MockFieldError => ({
       field: `${at}.customTimeSlotPrice`,
-      code: 'validation.invalid',
+      code: ApiErrorCode.ValidationInvalid,
     })),
   ];
   return [
@@ -2208,7 +2232,10 @@ function updateHourlyService(
   }
   const errors = errorsOf(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const details = structuredClone(hourlyDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -2406,7 +2433,10 @@ export const createAutomaticPriceMock = (
     ...priceErrors(body),
   ];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const main = body.translations?.find((translation) => translation.language === language);
   const idAutomaticPrice = crypto.randomUUID();
@@ -2539,7 +2569,10 @@ function updateAutomaticPrice(
     return resourceNotFound(request);
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const details = structuredClone(automaticDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -2616,7 +2649,7 @@ function automaticIconErrors(icon: string | null): MockFieldError[] {
     Object.values<string>(BarServiceIcon).includes(icon) ||
     Object.values<string>(StandardServiceIcon).includes(icon)
     ? []
-    : [{ field: 'icon', code: 'validation.invalid' }];
+    : [{ field: 'icon', code: ApiErrorCode.ValidationInvalid }];
 }
 
 /**
@@ -3068,7 +3101,10 @@ export const createTableServiceMock = (
     ...tableServiceErrors(body),
   ];
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const main = body.translations?.find((translation) => translation.language === language);
   const idTableService = crypto.randomUUID();
@@ -3197,7 +3233,10 @@ function updateTableService(
   }
   const errors = errorsOf(body);
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   const details = structuredClone(tableDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -3250,7 +3289,7 @@ export const updateTableServiceAvailabilityBookingsMock = (
 function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
   const errors: MockFieldError[] = [];
   const invalid = (field: string): void => {
-    errors.push({ field, code: 'validation.invalid' });
+    errors.push({ field, code: ApiErrorCode.ValidationInvalid });
   };
   if (!isValueOf(TableServiceAvailabilityMode, body.availabilityMode)) {
     invalid('availabilityMode');

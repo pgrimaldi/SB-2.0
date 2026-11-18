@@ -5,6 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Observable, Subject, map, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { PageRequest } from '../../../entities/pagination/page';
 import { FileDownloadBehaviour } from '../../../behaviours/files/file-download.behaviour';
 import { TaxationService } from '../../../services/api/taxation/taxation.service';
@@ -179,7 +180,7 @@ describe('Taxation', () => {
     answer.error(
       new HttpErrorResponse({
         status: 404,
-        error: { status: 404, code: 'resource.not_found', title: 'Resource not found' },
+        error: { status: 404, code: ApiErrorCode.ResourceNotFound, title: 'Resource not found' },
       }),
     );
     await settle(fixture);

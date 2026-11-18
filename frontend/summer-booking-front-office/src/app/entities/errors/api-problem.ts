@@ -1,3 +1,5 @@
+import { ApiErrorCode } from './api-error-codes';
+
 /**
  * Values for the placeholders of an error message, e.g. `{ umbrellaId: '42', date: '2026-08-01' }`:
  * raw values (ISO 8601 dates, numbers, `currency` codes) that the translation formats.
@@ -34,7 +36,7 @@ export const FRONTEND_ERROR_CODES = {
   /** 502, 503 or 504 from the infrastructure (proxy, CDN) instead of our backend. */
   unavailable: 'server.unavailable',
   /** Any other answer that is not our error format (e.g. an HTML page). */
-  unexpected: 'server.unexpected',
+  unexpected: ApiErrorCode.ServerUnexpected,
   /** An error raised in the browser, not by a call. */
   client: 'client.unexpected',
 } as const;

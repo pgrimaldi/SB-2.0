@@ -34,7 +34,9 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   tab Informazioni generali di Informazioni stabilimento.
 - Il "Dal" della prossima stagione si sceglie solo dopo la fine della corrente, come chiede il backend: `minDate` è
   il giorno dopo `endsOn`; se la fine della corrente si sposta oltre, il "Dal" della prossima si svuota, come
-  nelle coppie Dal / al.
+  nelle coppie Dal / al. Se il backend lo rifiuta comunque (`validation.out_of_range` su `nextStartsOn`), sotto il
+  campo compare `invalidate.seasons.next_season_too_early` ("La prossima stagione deve iniziare dopo la fine di quella
+  corrente.").
 - Tutte e quattro le date sono obbligatorie, anche quelle della prossima stagione: Salva spento finché ne manca una,
   errori sotto i campi.
 - Salva: `PUT /api/catalog/season` (`SeasonService.saveSeasonDates`) con le quattro date con gli stessi nomi e senza
@@ -155,8 +157,10 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   - "Modifica Intervallo" (`app-season-interval-edit-popup`, dalla matita della riga): Data inizio e Data fine,
     `app-filled-date-field` obbligatori già riempiti con la riga, Annulla e Salva; manda gli intervalli del periodo con
     quello cambiato.
-- Spinner, avviso di modifiche non salvate; gli errori del backend sugli intervalli (`ranges`, `ranges[0]`) e gli altri
-  codici (`pricing.*`) vanno sopra i bottoni, quelli sul nome sotto il campo.
+- Spinner, avviso di modifiche non salvate; gli errori del backend sugli intervalli (`ranges`, `ranges[i]…`) vanno
+  sopra i bottoni con il loro testo (`season-ranges-errors.ts`: `validation.invalid` su `ranges` dà
+  `invalidate.seasons.ranges.invalid`, gli altri il testo del loro codice), anche quando arrivano insieme a un errore
+  sul nome, che resta sotto il campo; gli altri codici (`pricing.*`) vanno sopra i bottoni.
 - Modifica Periodo, Aggiungi intervallo e Modifica Intervallo passano ogni errore alla tab con `(failed)`: su un 404
   (periodo o intervallo già eliminato da qualcun altro) il popup mostra l'errore come sempre e dietro la tab ricarica i
   periodi (`reloadIfGone`), come dopo le cancellazioni.

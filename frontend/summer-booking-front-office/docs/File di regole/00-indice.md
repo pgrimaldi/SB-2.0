@@ -19,6 +19,9 @@ descrizioni delle pagine in `docs/Pagine/`.
   ogni chiamata, avviso prima di perdere le modifiche.
 - Tabelle: `app-table` si carica da sola con la richiesta standard delle tabelle.
 - Mai id del database scritti nel codice, mai un oggetto che contiene un solo valore, mai stringhe libere come opzioni.
+- Mai stringhe scritte a mano nel codice per valori con un significato (codici di errore, nomi di campi, scelte): si usa
+  il membro di un enum o una costante (es. `ApiErrorCode.ValidationOutOfRange`). Se una stringa sembra inevitabile, prima
+  si dice all'utente dove e perché e si cerca una soluzione insieme.
 - Testi mai tagliati né a capo a metà parola, in tutte e 7 le lingue (italiano, inglese, francese, spagnolo, tedesco,
   cinese, arabo da destra a sinistra).
 - Niente secret, password o chiavi nel codice, nei file versionati o in chat.

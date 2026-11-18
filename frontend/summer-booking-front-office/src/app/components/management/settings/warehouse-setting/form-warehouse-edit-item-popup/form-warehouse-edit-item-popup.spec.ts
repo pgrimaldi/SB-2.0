@@ -6,6 +6,7 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseEditItemPopup } from './form-warehouse-edit-item-popup';
@@ -167,7 +168,7 @@ describe('FormWarehouseEditItemPopup', () => {
         () =>
           new HttpErrorResponse({
             status: 400,
-            error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
+            error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
           }),
       ),
     );
@@ -208,9 +209,9 @@ describe('FormWarehouseEditItemPopup', () => {
             status: 400,
             error: {
               status: 400,
-              code: 'validation.failed',
+              code: ApiErrorCode.ValidationFailed,
               title: 'Invalid request',
-              errors: [{ field: 'thresholdQuantity', code: 'validation.invalid' }],
+              errors: [{ field: 'thresholdQuantity', code: ApiErrorCode.ValidationInvalid }],
             },
           }),
       ),

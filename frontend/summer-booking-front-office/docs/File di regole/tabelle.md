@@ -32,8 +32,10 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
   (il backend lo cerca in alcuni campi specifici); `sortField` con il campo da ordinare o `''`; `sortDirection`
   `Ascending` / `Descending`.
 - `filters`: array di `{ field, value }` composto dalla pagina, `[]` se non ce ne sono. Un oggetto per campo, con
-  `value` sempre array di stringhe anche per un solo valore (es. `{ field: 'bookingTypology', value: ['Daily',
-  'SevenDays'] }`).
+  `value` sempre array di stringhe anche per un solo valore (es. `{ field: FilterField.BookingTypology, value:
+  ['Daily', 'SevenDays'] }`).
+- I nomi dei campi dei filtri stanno solo nell'enum `FilterField` (`entities/enums/filter-field.ts`), con i nomi del
+  backend: pagine, behaviour, mock e test usano il membro, mai la stringa. Un filtro nuovo aggiunge prima il suo membro.
 - I valori dello stesso campo sono alternative; un campo senza scelte non si manda.
 - Risposta `Page<T>`: `{ total, rows }`. La paginazione la fa il server.
 - Contratti delle API, date UTC e nomi degli enum: vedi `api-e-mock.md`.

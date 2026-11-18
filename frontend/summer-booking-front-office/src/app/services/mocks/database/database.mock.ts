@@ -2,8 +2,10 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, from, map, of, switchMap } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ExistingBookingItem } from '../../../entities/database/existing-booking-item';
+import { FilterField } from '../../../entities/enums/filter-field';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import {
   DEFAULT_PAGE_SIZE,
   Page,
@@ -278,8 +280,8 @@ function bookingPageMock(
   }));
 
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const from = filterValue(body.filters, 'datetimeFrom');
-  const to = filterValue(body.filters, 'datetimeTo');
+  const from = filterValue(body.filters, FilterField.DatetimeFrom);
+  const to = filterValue(body.filters, FilterField.DatetimeTo);
   // A booking is in the period when some of its days are.
   const found = bookings.filter(
     (item) =>
@@ -346,9 +348,9 @@ export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpE
         ? of(trashBookings(idBookings as string[])).pipe(
             map(() => new HttpResponse({ status: 204, url: request.url })),
           )
-        : problem(request, 400, 'validation.failed', {
+        : problem(request, 400, ApiErrorCode.ValidationFailed, {
             title: 'Invalid request',
-            errors: [{ field: 'password', code: 'auth.invalid_credentials' }],
+            errors: [{ field: 'password', code: ApiErrorCode.AuthInvalidCredentials }],
           }),
     ),
   );
@@ -441,7 +443,7 @@ function compare(first: string | null, second: string | null): number {
   return first.localeCompare(second, 'it', { sensitivity: 'base' });
 }
 
-function filterValue(filters: unknown, field: string): string | null {
+function filterValue(filters: unknown, field: FilterField): string | null {
   const filter = Array.isArray(filters)
     ? (filters as Partial<PageFilter>[]).find((item) => item.field === field)
     : undefined;

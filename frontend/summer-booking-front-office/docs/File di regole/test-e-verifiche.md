@@ -5,8 +5,11 @@ della consegna.
 
 ## Comandi di verifica
 
-- `npm run verify` è la verifica unica: lint, controllo dei tipi dei test (`tsc -p tsconfig.spec.json --noEmit`, perché
-  la build dei test non li controlla) e test unitari.
+- `npm run verify` è la verifica unica: lint, controllo delle chiavi di traduzione, controllo dei tipi dei test
+  (`tsc -p tsconfig.spec.json --noEmit`, perché la build dei test non li controlla) e test unitari.
+- Il controllo delle chiavi (`npm run check:translation-keys`, `scripts/check-translation-keys.mjs`) fallisce se una
+  chiave scritta per intero nel codice (template, componenti, `kind` delle validazioni sotto `invalidate.`) non esiste
+  in `it.json`, con file e riga. Le chiavi composte a runtime (es. `key + '.one.title'`) non le vede.
 - Va lanciato in locale prima di consegnare una modifica. La pipeline (`buildspec.yml`, fase build) lo esegue prima
   della build: se fallisce non si pubblica nulla.
 - Altri comandi standard: `npm run build:dev`, `npm run build:prod` quando pertinente, `npm run test:ci`,

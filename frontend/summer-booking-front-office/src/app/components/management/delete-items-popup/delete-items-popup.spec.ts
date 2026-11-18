@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { DeleteItemsPopup } from './delete-items-popup';
 
@@ -81,7 +82,7 @@ describe('DeleteItemsPopup', () => {
           () =>
             new HttpErrorResponse({
               status: 400,
-              error: { status: 400, code: 'validation.failed', title: 'Invalid request' },
+              error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
             }),
         );
     });
@@ -89,7 +90,7 @@ describe('DeleteItemsPopup', () => {
     await confirm();
     expect(host.open()).toBe(false);
     expect(host.deleted).toEqual([]);
-    expect(host.failed?.code).toBe('validation.failed');
+    expect(host.failed?.code).toBe(ApiErrorCode.ValidationFailed);
     expect(document.querySelector('.page__spinner')).toBeNull();
     // The message of the code (here the fallback key: the test has no translations).
     expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(

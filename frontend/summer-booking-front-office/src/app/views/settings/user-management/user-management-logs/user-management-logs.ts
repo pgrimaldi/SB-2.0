@@ -44,6 +44,7 @@ import { TableFilterBar } from '../../../../components/shared/ui/tables/table/ta
 import { TableHeadingAction } from '../../../../components/shared/ui/tables/table/table-heading-action';
 import { Table, TableColumn, TableLoad } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { FilterField } from '../../../../entities/enums/filter-field';
 import { PageFilter } from '../../../../entities/pagination/page';
 import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
@@ -384,8 +385,8 @@ function actionLabelOf(actions: UserManagementLogsTexts['actions'], actionCode: 
 /** One filter per field with its chosen values (alternatives); a field with no choice is left out. */
 function pageFiltersOf(filters: AuditLogFilters): PageFilter[] {
   const all: PageFilter[] = [
-    { field: 'actionCode', value: [...filters.actionCodes] },
-    { field: 'idUser', value: filters.users.map(({ id }) => id) },
+    { field: FilterField.ActionCode, value: [...filters.actionCodes] },
+    { field: FilterField.IdUser, value: filters.users.map(({ id }) => id) },
   ];
   return all.filter(({ value }) => value.length);
 }

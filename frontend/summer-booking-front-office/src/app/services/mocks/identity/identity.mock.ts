@@ -2,6 +2,7 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { UserRole } from '../../../entities/enums/user-role';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import { CreateUserRequest } from '../../../entities/settings/user-management/create-user-request';
 import { UpdateUserRequest } from '../../../entities/settings/user-management/update-user-request';
@@ -115,19 +116,22 @@ export const createUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
   const body = (request.body ?? {}) as CreateUserBody;
   const errors = userErrors(body, true);
   if (body.role == null) {
-    errors.push({ field: 'role', code: 'validation.required' });
+    errors.push({ field: 'role', code: ApiErrorCode.ValidationRequired });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   if (!ASSIGNABLE_ROLES.includes(body.role)) {
-    return problem(request, 422, 'account.role_not_assignable', {
+    return problem(request, 422, ApiErrorCode.AccountRoleNotAssignable, {
       title: 'Role cannot be assigned from the panel',
     });
   }
   const email = (body.email ?? '').trim();
   if (USERS.some((row) => row.email?.toLowerCase() === email.toLowerCase())) {
-    return problem(request, 409, 'account.email_taken', { title: 'Email already in use' });
+    return problem(request, 409, ApiErrorCode.AccountEmailTaken, { title: 'Email already in use' });
   }
   const phone = body.phone?.trim() || null;
   const user: UserRow = {
@@ -216,19 +220,22 @@ export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
   }
   const errors = userErrors(body, false);
   if (body.role == null) {
-    errors.push({ field: 'role', code: 'validation.required' });
+    errors.push({ field: 'role', code: ApiErrorCode.ValidationRequired });
   }
   if (errors.length) {
-    return problem(request, 400, 'validation.failed', { title: 'Invalid request', errors });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
   }
   if (!ASSIGNABLE_ROLES.includes(body.role)) {
-    return problem(request, 422, 'account.role_not_assignable', {
+    return problem(request, 422, ApiErrorCode.AccountRoleNotAssignable, {
       title: 'Role cannot be assigned from the panel',
     });
   }
   const email = (body.email ?? '').trim();
   if (USERS.some((row) => row !== user && row.email?.toLowerCase() === email.toLowerCase())) {
-    return problem(request, 409, 'account.email_taken', { title: 'Email already in use' });
+    return problem(request, 409, ApiErrorCode.AccountEmailTaken, { title: 'Email already in use' });
   }
   const phone = body.phone?.trim() || null;
   Object.assign(user, {
@@ -249,11 +256,11 @@ function isManageable(user: UserRow): boolean {
 }
 
 function accountNotFound(request: HttpRequest<unknown>): Observable<never> {
-  return problem(request, 404, 'account.not_found', { title: 'Account not found' });
+  return problem(request, 404, ApiErrorCode.AccountNotFound, { title: 'Account not found' });
 }
 
 function roleNotAssignable(request: HttpRequest<unknown>): Observable<never> {
-  return problem(request, 403, 'account.role_not_assignable', {
+  return problem(request, 403, ApiErrorCode.AccountRoleNotAssignable, {
     title: 'Role cannot be managed from the panel',
   });
 }
@@ -263,37 +270,37 @@ function userErrors(body: CreateUserBody, isPasswordRequired: boolean): MockFiel
   const errors: MockFieldError[] = [];
   const email = typeof body.email === 'string' ? body.email.trim() : '';
   if (!email) {
-    errors.push({ field: 'email', code: 'validation.required' });
+    errors.push({ field: 'email', code: ApiErrorCode.ValidationRequired });
   } else if (!EMAIL.test(email)) {
-    errors.push({ field: 'email', code: 'validation.email' });
+    errors.push({ field: 'email', code: ApiErrorCode.ValidationEmail });
   }
   const password = typeof body.password === 'string' ? body.password : '';
   if (!password) {
     if (isPasswordRequired) {
-      errors.push({ field: 'password', code: 'validation.required' });
+      errors.push({ field: 'password', code: ApiErrorCode.ValidationRequired });
     }
   } else if (!password.trim()) {
-    errors.push({ field: 'password', code: 'validation.required' });
+    errors.push({ field: 'password', code: ApiErrorCode.ValidationRequired });
   } else if (password.length < PASSWORD_MIN_LENGTH) {
     errors.push({
       field: 'password',
-      code: 'validation.password_too_short',
+      code: ApiErrorCode.ValidationPasswordTooShort,
       args: { min: PASSWORD_MIN_LENGTH },
     });
   } else if (password.length > PASSWORD_MAX_LENGTH) {
     errors.push({
       field: 'password',
-      code: 'validation.password_too_long',
+      code: ApiErrorCode.ValidationPasswordTooLong,
       args: { max: PASSWORD_MAX_LENGTH },
     });
   }
   const phone = typeof body.phone === 'string' ? body.phone.trim() : '';
   if (phone && !PHONE.test(phone)) {
-    errors.push({ field: 'phone', code: 'validation.phone' });
+    errors.push({ field: 'phone', code: ApiErrorCode.ValidationPhone });
   }
   const prefix = typeof body.phoneCountryCode === 'string' ? body.phoneCountryCode.trim() : '';
   if (prefix && !PHONE_PREFIX.test(prefix)) {
-    errors.push({ field: 'phoneCountryCode', code: 'validation.phone_prefix' });
+    errors.push({ field: 'phoneCountryCode', code: ApiErrorCode.ValidationPhonePrefix });
   }
   return errors;
 }

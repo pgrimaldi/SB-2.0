@@ -2020,7 +2020,8 @@
         "invalid": "Ungültige Datumsbereiche: Ein Zeitraum kann höchstens {{max}} haben und sie dürfen keine gemeinsamen Tage haben."
       },
       "season_required": "Lege zuerst Beginn und Ende der aktuellen Saison fest und speichere sie.",
-      "next_season_required": "Lege zuerst Beginn und Ende der nächsten Saison fest und speichere sie."
+      "next_season_required": "Lege zuerst Beginn und Ende der nächsten Saison fest und speichere sie.",
+      "next_season_too_early": "Die nächste Saison muss nach dem Ende der aktuellen beginnen."
     },
     "catalog": {
       "price": {

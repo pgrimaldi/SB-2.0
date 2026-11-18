@@ -15,6 +15,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
 import { environment } from '../../../../../environments/environment';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
@@ -69,17 +70,17 @@ const PDF_TYPE = 'application/pdf';
 /** The same answers the backend gives, before sending a file it would refuse. */
 const INVALID_IMAGE: ApiProblem = {
   status: 422,
-  code: 'catalog.invalid_image',
+  code: ApiErrorCode.CatalogInvalidImage,
   args: { maxBytes: MAX_BATHHOUSE_IMAGE_MEGABYTES * MEGABYTE },
 };
 const INVALID_PDF: ApiProblem = {
   status: 422,
-  code: 'catalog.invalid_pdf',
+  code: ApiErrorCode.CatalogInvalidPdf,
   args: { maxBytes: MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE },
 };
 const GALLERY_FULL: ApiProblem = {
   status: 422,
-  code: 'catalog.gallery_full',
+  code: ApiErrorCode.CatalogGalleryFull,
   args: { max: MAX_BATHHOUSE_PHOTO_QUANTITY },
 };
 

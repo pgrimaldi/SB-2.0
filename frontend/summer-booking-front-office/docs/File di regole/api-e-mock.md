@@ -50,8 +50,8 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - Per ogni API c'è anche la tabella degli errori possibili (status, `code`, quando) con un esempio JSON dell'errore.
 - I documenti si aggiornano tutti a ogni cambio di rotta, payload o risposta. A sviluppo finito resta solo
   `API_CONTRACTS.docx`.
-- Un codice di errore nuovo va aggiunto in `API_ERROR_CODES`, nel catalogo di `API_CONTRACTS.docx`, nei mock e nelle
-  traduzioni `error.` di ogni lingua.
+- Un codice di errore nuovo va aggiunto all'enum `ApiErrorCode`, nel catalogo di `API_CONTRACTS.docx`, nei mock e
+  nelle traduzioni `error.` di ogni lingua.
 - Richiesta standard delle tabelle (`PageRequest`, risposta `Page<T>`): vedi `tabelle.md`.
 - Stabilimento: nessuna API manda `idProperty`, nemmeno tabelle e tendine: il backend prende lo stabilimento dal
   token. Una chiamata che deve aspettare l'utente collegato controlla `this.auth.user()?.propertyId`, senza mandarlo.
@@ -103,8 +103,10 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - `toApiProblem` tiene solo `args` semplici (testi fino a 200 caratteri e numeri). Un elenco di testi (es. i nomi dei
   listini di `pricing.period_in_use`) diventa un testo solo, separato da virgole: i primi 20, poi "…", tagliato con
   "…" oltre i 200 caratteri.
-- I codici del backend sono in `entities/errors/api-error-codes.ts` (`API_ERROR_CODES`, lo stesso catalogo di
-  `API_CONTRACTS.docx`) e ognuno ha la sua traduzione in `error.`.
+- I codici del backend sono nell'enum `ApiErrorCode` di `entities/errors/api-error-codes.ts`, un membro per codice
+  (es. `ValidationOutOfRange = 'validation.out_of_range'`), lo stesso catalogo di `API_CONTRACTS.docx`; ognuno ha la sua
+  traduzione in `error.`. Componenti, mock e test usano sempre il membro (`ApiErrorCode.ValidationOutOfRange`), mai la
+  stringa: se un codice cambia, si cambia solo nell'enum. `API_ERROR_CODES` è l'elenco ricavato dall'enum.
 - Anche i mock rispondono in Problem Details (`problem()` in `services/mocks/errors/problem.mock.ts`), con `code`,
   `errors[]` per i campi e `traceId` come il backend, e solo con i codici del catalogo (`ApiErrorCode`).
 - Ogni errore di una chiamata diventa un `ApiProblem` con `toApiProblem` (`services/api/errors/`); i campi inviati

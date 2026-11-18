@@ -19,7 +19,6 @@ import {
   readonly,
   required,
   submit,
-  ValidationError,
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -34,15 +33,13 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodInterval } from '../../../../../entities/settings/seasons/season-period-interval';
-import {
-  MAX_SEASON_PERIOD_RANGES,
-  SeasonPeriodItem,
-} from '../../../../../entities/settings/seasons/season-period-item';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
 import { noOverlap } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
+import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 
 @Component({
@@ -146,20 +143,21 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
-        const isRangesInvalid = (problem.errors ?? []).some(
-          ({ field, code }) => field === 'ranges' && code === 'validation.invalid',
-        );
-        if (isRangesInvalid) {
-          const rangesInvalid: ValidationError.WithFieldTree & { readonly max: number } = {
-            kind: 'seasons.ranges.invalid',
-            max: MAX_SEASON_PERIOD_RANGES,
-            fieldTree: this.draftForm,
-          };
-          return rangesInvalid;
+        const ranges = rangesErrors(problem, this.draftForm);
+        if (!ranges.length) {
+          return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+            this.error.set(general),
+          );
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
-        );
+        const others = withoutRangesErrors(problem);
+        return others.errors?.length
+          ? [
+              ...ranges,
+              ...apiFieldErrorsOrGeneral(others, this.draftForm, (general) =>
+                this.error.set(general),
+              ),
+            ]
+          : ranges;
       } finally {
         this.isLoading.set(false);
       }
