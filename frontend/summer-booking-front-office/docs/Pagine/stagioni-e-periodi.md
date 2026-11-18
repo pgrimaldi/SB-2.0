@@ -103,7 +103,7 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 - Poi una sola chiamata, anche per intervalli di periodi diversi: `POST /api/catalog/tariff-periods/bulk-delete-ranges`
   (o `/api/catalog/next-season/tariff-periods/bulk-delete-ranges`), corpo `{ ranges }` con un
   `SeasonPeriodIntervalItem` (`key` del periodo, `startsOn`, `endsOn` come giorni) per intervallo, tutti o nessuno;
-  spinner a pagina intera e ricarica dei periodi. È un'API chiesta al backend
+  spinner a pagina intera e ricarica dei periodi, anche dopo un 404 (`reloadIfGone`). È un'API chiesta al backend
   (`shared documentation/Modifiche per il backend/impostazioni/Stagioni e periodi - Frontend requests.md`): finché non
   c'è risponde il mock.
 
@@ -113,7 +113,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   "Elimina"): apre `app-delete-items-popup` ("Vuoi eliminare il periodo …? Verranno eliminati anche tutti i suoi
   intervalli di date se presenti."), poi l'API del backend `DELETE /api/catalog/tariff-periods/{key}` (o
   `/api/catalog/next-season/tariff-periods/{key}`), senza corpo, con lo spinner a pagina intera e ricarica dei periodi
-  della tab; errore in "Operazione non riuscita".
+  della tab; errore in "Operazione non riuscita". Su un 404 (periodo già eliminato da qualcun altro) la tab ricarica
+  anche i periodi, con `(failed)` del popup e `reloadIfGone`, così chiuso l'avviso il periodo non c'è più.
 - Un periodo della stagione corrente con prezzi in qualche listino non si elimina: il backend risponde
   `pricing.period_in_use` con i nomi dei listini e il popup dice "Il periodo ha dei prezzi nei listini …: togli prima
   i suoi prezzi da questi listini, poi eliminalo.". Il controllo sui servizi è chiesto al backend (sezione 3 del
@@ -156,6 +157,9 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
     quello cambiato.
 - Spinner, avviso di modifiche non salvate; gli errori del backend sugli intervalli (`ranges`, `ranges[0]`) e gli altri
   codici (`pricing.*`) vanno sopra i bottoni, quelli sul nome sotto il campo.
+- Modifica Periodo, Aggiungi intervallo e Modifica Intervallo passano ogni errore alla tab con `(failed)`: su un 404
+  (periodo o intervallo già eliminato da qualcun altro) il popup mostra l'errore come sempre e dietro la tab ricarica i
+  periodi (`reloadIfGone`), come dopo le cancellazioni.
 - Due periodi della stessa stagione non hanno lo stesso nome, senza distinguere maiuscole e minuscole e gli spazi ai
   lati, come nel backend. "Imposta periodo" e "Modifica Periodo" ricevono i periodi della tab (`[periods]`) e lo
   controllano subito (`isTextTaken` di `validators.ts`, la modifica esclude il proprio periodo): sotto il nome

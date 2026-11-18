@@ -65,6 +65,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   /** The periods of the season, this one too: two periods of a season cannot have the same name. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly seasons = inject(SeasonService);
   private readonly auth = inject(AuthBehaviour);
@@ -123,6 +124,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
         this.updated.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
+        this.failed.emit(problem);
         if (problem.code === 'pricing.period_name_taken') {
           const nameTaken: ApiValidationError = {
             kind: 'api',

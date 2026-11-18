@@ -79,6 +79,9 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
   selezionati" la selezione si svuota. Dopo l'interruttore, riuscito o no, la tabella rilegge le righe e mostra lo
   stato del server.
 - L'errore di un'azione compare in un popup, non nella tabella: vedi "Errori delle azioni" in `api-e-mock.md`.
+- Se l'eliminazione fallisce, `app-delete-items-popup` mostra l'errore come sempre e lo passa anche alla pagina con
+  `(failed)` (facoltativo): la pagina può ricaricare quando serve, es. Stagioni e periodi dopo un 404 (elemento già
+  eliminato da qualcun altro) ricarica i periodi.
 
 ## Errore di caricamento
 

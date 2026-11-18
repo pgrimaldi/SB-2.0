@@ -37,6 +37,7 @@ export class DeleteItemsPopup<T = string> {
   /** [X of both popups, warning of the error popup]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly deleted = output<readonly T[]>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
@@ -64,9 +65,11 @@ export class DeleteItemsPopup<T = string> {
         this.deleted.emit(idItems);
       },
       error: (error: unknown) => {
+        const problem = toApiProblem(error);
         this.isLoading.set(false);
-        this.error.set(toApiProblem(error));
+        this.error.set(problem);
         this.isErrorShown.set(true);
+        this.failed.emit(problem);
       },
     });
   }

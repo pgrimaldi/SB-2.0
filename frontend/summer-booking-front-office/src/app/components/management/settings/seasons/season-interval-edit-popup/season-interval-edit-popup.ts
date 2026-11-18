@@ -61,6 +61,7 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
   /** The date intervals the season has already, this one too: it cannot overlap the others. */
   readonly seasonIntervals = input<readonly SeasonPeriodInterval[]>([]);
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly seasons = inject(SeasonService);
   private readonly auth = inject(AuthBehaviour);
@@ -146,8 +147,10 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);

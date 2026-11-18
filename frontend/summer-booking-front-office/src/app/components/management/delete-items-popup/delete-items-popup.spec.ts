@@ -5,6 +5,7 @@ import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import { DeleteItemsPopup } from './delete-items-popup';
 
 @Component({
@@ -16,6 +17,7 @@ import { DeleteItemsPopup } from './delete-items-popup';
     [action]="action"
     [(open)]="open"
     (deleted)="deleted = $event"
+    (failed)="failed = $event"
   />`,
 })
 class DeleteItemsPopupHost {
@@ -24,6 +26,7 @@ class DeleteItemsPopupHost {
   readonly open = signal(false);
   action: (idItems: string[]) => Observable<void> = vi.fn();
   deleted: readonly string[] = [];
+  failed: ApiProblem | null = null;
 }
 
 describe('DeleteItemsPopup', () => {
@@ -71,7 +74,7 @@ describe('DeleteItemsPopup', () => {
     expect(host.deleted).toEqual(['a1', 'a2']);
   });
 
-  it('should show the error in a popup when nothing is deleted', async () => {
+  it('should show the error in a popup and give it to the page when nothing is deleted', async () => {
     const { host, confirm } = await setup((page) => {
       page.action = () =>
         throwError(
@@ -86,6 +89,7 @@ describe('DeleteItemsPopup', () => {
     await confirm();
     expect(host.open()).toBe(false);
     expect(host.deleted).toEqual([]);
+    expect(host.failed?.code).toBe('validation.failed');
     expect(document.querySelector('.page__spinner')).toBeNull();
     // The message of the code (here the fallback key: the test has no translations).
     expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(

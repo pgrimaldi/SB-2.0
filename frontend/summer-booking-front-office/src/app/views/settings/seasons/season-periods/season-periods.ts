@@ -8,6 +8,7 @@ import {
   untracked,
   viewChildren,
 } from '@angular/core';
+import { HttpStatusCode } from '@angular/common/http';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -259,6 +260,12 @@ export class SeasonPeriods {
 
   protected reload(): void {
     this.reloads.update((count) => count + 1);
+  }
+
+  protected reloadIfGone(problem: ApiProblem): void {
+    if (problem.status === HttpStatusCode.NotFound) {
+      this.reload();
+    }
   }
 
   /** A period keeps at least one interval: when all of its would go, nothing is asked nor deleted. */

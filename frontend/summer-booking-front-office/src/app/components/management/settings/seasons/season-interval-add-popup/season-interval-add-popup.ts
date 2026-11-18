@@ -63,6 +63,7 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
   /** First and last day of the season of the tab: the days outside cannot be chosen. */
   readonly season = input<SeasonPeriodInterval | null>(null);
   readonly added = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly seasons = inject(SeasonService);
   private readonly auth = inject(AuthBehaviour);
@@ -144,6 +145,7 @@ export class SeasonIntervalAddPopup extends BasePopup implements UnsavedChanges,
         this.added.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
+        this.failed.emit(problem);
         const isRangesInvalid = (problem.errors ?? []).some(
           ({ field, code }) => field === 'ranges' && code === 'validation.invalid',
         );

@@ -15,7 +15,7 @@ con "Cancella selezionati"; il cestino di un intervallo ne cancella uno solo.
 |---|---|---|---|
 | 1 | POST | `/api/catalog/tariff-periods/bulk-delete-ranges` | Cancella intervalli di uno o più periodi della stagione corrente, tutti o nessuno |
 | 2 | POST | `/api/catalog/next-season/tariff-periods/bulk-delete-ranges` | Lo stesso per la stagione successiva |
-| 3 | DELETE | `/api/catalog/tariff-periods/{key}` | **Modifica**: prima di eliminare controlla anche i servizi che usano il periodo |
+| 3 | DELETE | `/api/catalog/tariff-periods/{key}` | **Modifica**: prima di eliminare controlla anche i servizi che usano il periodo; la `key` di un periodo eliminato non si riusa |
 | 4 | POST, PUT | `/api/catalog/[next-season/]tariff-periods[/{key}]` | **Modifica**: nessun giorno in comune tra periodi diversi della stessa stagione |
 
 Le API 1 e 2 sono **nuove**: oggi un intervallo si cancella solo con `PUT /tariff-periods/{key}`, un periodo alla volta.
@@ -106,7 +106,8 @@ Richiesta, risposta e gli altri errori sono gli stessi della sezione 1.
 ## 3. DELETE /api/catalog/tariff-periods/{key}: controllare anche i servizi
 
 API che esiste già (cestino di un periodo nella tab "Stagione Corrente"): rotta, risposta ed errori di oggi restano
-uguali, cambia solo il controllo che si fa prima di eliminare.
+uguali, cambia il controllo che si fa prima di eliminare. In più la `key` di un periodo eliminato non va data a un
+periodo nuovo (vedi "La `key` di un periodo eliminato non si riusa").
 
 ### Oggi
 
@@ -155,6 +156,26 @@ periodo della stagione.
 - La prossima stagione (`DELETE /api/catalog/next-season/tariff-periods/{key}`) oggi non fa nessun controllo: i prezzi
   di listini e servizi si legano ai periodi della stagione corrente, quindi lì non cambia niente.
 
+### La `key` di un periodo eliminato non si riusa
+
+Oggi `SeasonService.CreatePeriodAsync` dà al periodo nuovo la `key` più alta tra i periodi che esistono, più 1
+(`CreateNextPeriodAsync` fa lo stesso per la stagione successiva), e `DeletePeriodAsync` toglie le righe del periodo
+(`ReplacePeriodAsync` con una lista vuota). Eliminato il periodo con la `key` più alta, il periodo creato dopo riceve la
+stessa `key`. Le righe di altre tabelle ancora legate a quella `key` passano così al periodo nuovo: per esempio
+`pricing_suggested_prices`, oppure le righe di periodi che non esistono più e che `update-package` tiene così come
+arrivano (vedi il documento del Listino).
+
+Esempio: periodi 0 "Bassa", 1 "Media", 2 "Alta". Si elimina "Alta" e si crea "Ferragosto": oggi "Ferragosto" riceve
+`key` 2 e si ritrova i prezzi rimasti di "Alta".
+
+Cosa cambiare:
+
+- Una `key` già data a un periodo della stagione non va più data a un altro periodo, anche dopo che quello è stato
+  eliminato. Nell'esempio "Ferragosto" riceve `key` 3.
+- Il backend tiene il prossimo numero libero della stagione, che sale a ogni periodo creato e non scende quando un
+  periodo si elimina (es. una colonna sulla stagione), uno per la stagione corrente e uno per la successiva.
+- Le API non cambiano: `POST /api/catalog/[next-season/]tariff-periods` risponde come oggi, con la `key` nuova.
+
 ## 4. Nessun giorno in comune tra periodi diversi della stessa stagione
 
 Riguarda le API che salvano gli intervalli di un periodo, per tutte e due le stagioni:
@@ -202,6 +223,13 @@ Rotte, corpi, risposte e gli altri errori restano quelli di oggi: si aggiunge un
   `ReplacePeriodAsync` chiude già i vecchi intervalli del periodo prima di inserire i nuovi, quindi la modifica di un
   periodo non va in conflitto con se stessa. Prima della migrazione va controllato se nei dati esistenti ci sono già
   periodi con giorni in comune: in quel caso il vincolo non si può aggiungere finché non vengono sistemati.
+- Anche la stagione successiva deve salvare in due passi. Oggi `SeasonService.ReplaceNextPeriodAsync` toglie i vecchi
+  intervalli e aggiunge i nuovi con un solo `SaveChangesAsync`, e funziona solo perché
+  `catalog.pricing_next_season_periods` non ha vincoli. Con il vincolo nuovo deve fare come `ReplacePeriodAsync`: in
+  una transazione, prima elimina i vecchi intervalli del periodo e salva, poi inserisce i nuovi e salva. Altrimenti,
+  se l'inserimento arriva prima dell'eliminazione, la modifica di un periodo va in conflitto con se stessa. Esempio:
+  "Alta" della prossima stagione dal 01/07 al 31/07, modificata in 01/07–15/08 → il vincolo rifiuta il salvataggio
+  (500) anche se le date sono giuste.
 - Il codice nuovo va aggiunto a `CatalogErrors`, accanto agli altri `pricing.period_*`. Il frontend aggiunge il suo
   testo ("Le date si sovrappongono al periodo …: scegli giorni liberi.") appena il codice esiste.
 
@@ -218,7 +246,10 @@ Rotte, corpi, risposte e gli altri errori restano quelli di oggi: si aggiunge un
 - `DELETE /tariff-periods/{key}` di un periodo con prezzi solo in un servizio (o in un'opzione di un servizio orario)
   risponde 409 `pricing.period_in_use_by_services` con il nome del servizio in `args.services` e non elimina niente;
   con prezzi anche in un listino risponde come oggi, `pricing.period_in_use`.
+- Eliminato il periodo con la `key` più alta, il periodo creato subito dopo riceve una `key` mai usata nella stagione
+  (es. 3, non 2); lo stesso nella stagione successiva.
 - `POST` e `PUT` di un periodo con un giorno già preso da un altro periodo della stessa stagione (corrente o
   successiva) rispondono 409 `pricing.period_overlap` con il nome dell'altro periodo e non salvano niente; un periodo
-  che si sovrappone solo con se stesso (modifica delle sue date) si salva.
+  che si sovrappone solo con se stesso (modifica delle sue date) si salva, nella stagione corrente e nella successiva
+  (es. "Alta" dal 01/07–31/07 al 01/07–15/08 risponde 200).
 - Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.

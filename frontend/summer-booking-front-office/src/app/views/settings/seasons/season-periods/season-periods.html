@@ -142,6 +142,7 @@
   [pathIcon]="alertIcons"
   [(open)]="isDeleteAsked"
   (deleted)="reload()"
+  (failed)="reloadIfGone($event)"
 />
 <app-season-period-edit-popup
   [pathIcon]="closeIcon"
@@ -150,6 +151,7 @@
   [periods]="periodItems() ?? []"
   [(open)]="isEditPeriodOpen"
   (updated)="reload()"
+  (failed)="reloadIfGone($event)"
 />
 <app-season-interval-add-popup
   [pathIcon]="closeIcon"
@@ -159,6 +161,7 @@
   [seasonIntervals]="seasonIntervals()"
   [(open)]="isAddIntervalOpen"
   (added)="reload()"
+  (failed)="reloadIfGone($event)"
 />
 <app-season-interval-edit-popup
   [pathIcon]="closeIcon"
@@ -169,6 +172,7 @@
   [seasonIntervals]="seasonIntervals()"
   [(open)]="isEditIntervalOpen"
   (updated)="reload()"
+  (failed)="reloadIfGone($event)"
 />
 <app-delete-items-popup
   [idItems]="intervalsToDelete().intervals"
@@ -178,6 +182,7 @@
   [pathIcon]="alertIcons"
   [(open)]="isDeleteIntervalsAsked"
   (deleted)="reload()"
+  (failed)="reloadIfGone($event)"
 />
 <app-alert-popup
   [title]="'alert.error_title' | translate"
