@@ -15,12 +15,16 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../behaviours/validation/validation-text.behaviour';
 import {
   Button,
@@ -39,6 +43,7 @@ import { FilledSelect } from '../../../../components/shared/ui/selects/filled-se
 import { SelectOption } from '../../../../components/shared/ui/selects/select/select';
 import { CancellationPolicy } from '../../../../entities/enums/cancellation-policy';
 import { PetPolicy } from '../../../../entities/enums/pet-policy';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import {
   BathhouseGeneralInformation,
@@ -106,12 +111,15 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       this.validationText.message(this.informationForm[name]),
     ]),
   ) as Readonly<Record<keyof BathhouseGeneralInformation, Signal<string | null>>>;
-  private readonly countries = signal<readonly Country[]>([]);
-  protected readonly countriesLoadError = signal<string | null>(null);
+  protected readonly countries = new DropdownList(
+    () => this.cache.countries(),
+    this.errorText,
+    () => this.chooseFirstCountry(),
+  );
   protected readonly countryOptions = computed<readonly SelectOption[]>(() =>
-    this.countries().flatMap(({ code, name }) =>
-      code ? [{ value: code, label: name ?? code }] : [],
-    ),
+    this.countries
+      .items()
+      .flatMap(({ code, name }) => (code ? [{ value: code, label: name ?? code }] : [])),
   );
   private readonly texts = toSignal(
     this.translateService.stream(
@@ -166,16 +174,15 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       if (!this.auth.user()) {
         return;
       }
-      const subscriptions = untracked(() => {
+      const subscription = untracked(() => {
         this.isLoading.set(true);
         this.error.set(null);
-        this.countriesLoadError.set(null);
         this.isLoaded.set(false);
         const information = this.cache.generalInformation().subscribe({
           next: (information) => {
             this.loaded = withFirstCountry(
               onlyFieldsOf(BathhouseGeneralInformation, information),
-              this.countries(),
+              this.countries.items(),
             );
             this.information.set(this.loaded);
             this.informationForm().reset();
@@ -187,20 +194,10 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
             this.isLoading.set(false);
           },
         });
-        const countries = this.cache.countries().subscribe({
-          next: (countries) => {
-            this.countries.set(countries);
-            this.chooseFirstCountry();
-          },
-          error: (error: unknown) => {
-            const problem = toApiProblem(error);
-            this.countries.set([]);
-            this.countriesLoadError.set(this.errorText.instant(problem.code, problem.args));
-          },
-        });
-        return [information, countries];
+        this.countries.load();
+        return information;
       });
-      onCleanup(() => subscriptions.forEach((subscription) => subscription.unsubscribe()));
+      onCleanup(() => subscription.unsubscribe());
     });
   }
 
@@ -254,7 +251,11 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
         this.informationForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.informationForm, (general) =>
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.CatalogCountryNotFound) {
+          return apiFieldError(this.informationForm.country, problem.code, problem.args);
+        }
+        return apiFieldErrorsOrGeneral(problem, this.informationForm, (general) =>
           this.error.set(general),
         );
       } finally {
@@ -268,11 +269,12 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     if (this.isLoading() || this.loaded.country !== null || this.information().country !== null) {
       return;
     }
-    this.loaded = withFirstCountry(this.loaded, this.countries());
+    this.loaded = withFirstCountry(this.loaded, this.countries.items());
     this.information.update((information) => ({ ...information, country: this.loaded.country }));
   }
 
   ngOnDestroy(): void {
+    this.countries.destroy();
     this.unsaved.unwatch(this);
   }
 }

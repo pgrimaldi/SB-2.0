@@ -156,9 +156,16 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   si salva, `value` il testo mostrato), che il componente trasforma in `SelectOption`.
 - Il componente richiede l'elenco a ogni apertura del suo popup, pannello o tab; una risposta lenta di un'apertura
   precedente non sostituisce quella nuova.
-- Se la lettura fallisce, sotto il campo compare il messaggio dell'errore (`[error]` del wrapper, testo di
-  `ErrorTextBehaviour.instant` dal `code`, in un segnale `<lista>LoadError` del componente) e la tendina non mostra la
-  sua dicitura (`placeholder` vuoto). Mai una lista vuota in silenzio. Il messaggio sparisce alla lettura successiva.
+- Ogni tendina che legge la sua lista da un'API usa la classe unica `DropdownList` (`behaviours/forms/dropdown-list.ts`):
+  `items()` le voci, `loadError()` il testo dell'errore, `load()` la lettura, `retry()` la rilettura dopo un errore,
+  `clear()` al reset, `destroy()` in `ngOnDestroy`. Mai segnali e subscription scritti a mano per una tendina.
+- Se la lettura fallisce, sotto il campo compare il messaggio dell'errore (`[error]="<lista>.loadError() ?? ..."`,
+  testo di `ErrorTextBehaviour.instant` dal `code`) e la tendina non mostra la sua dicitura (`placeholder` vuoto). Mai
+  una lista vuota in silenzio.
+- Dopo un errore, quando l'utente prova ad aprire la tendina (clic, Invio o Spazio: `(openRequest)` dei wrapper
+  `app-filled-select`, `app-filled-multi-select`, `app-filled-icon-select`, legato a `<lista>.retry()`) la lista si
+  rilegge: se riesce l'errore sparisce e compaiono le voci. Con la lista già letta non parte nessuna chiamata. Una
+  tendina in sola lettura o disabilitata non rilegge.
 
 ## Caricamento di file
 

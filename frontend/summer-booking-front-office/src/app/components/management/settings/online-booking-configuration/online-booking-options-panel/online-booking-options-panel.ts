@@ -13,15 +13,15 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormField, applyWhen, form, max } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { OnlineBookingAudience } from '../../../../../entities/enums/online-booking-audience';
 import { OnlineBookingBlock } from '../../../../../entities/enums/online-booking-block';
 import { SupplementType } from '../../../../../entities/enums/supplement-type';
@@ -29,7 +29,6 @@ import { BookingLimitRule } from '../../../../../entities/settings/online-bookin
 import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
-import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { greaterThan, timeRange } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
@@ -141,11 +140,12 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     '/assets/images/GeneralIcon_OrderedList.svg',
     '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
-  private readonly sectors = signal<readonly ComboboxItem[]>([]);
-  protected readonly sectorsLoadError = signal<string | null>(null);
-  private sectorsSubscription?: Subscription;
+  protected readonly sectors = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.sectorService.sectorCombobox() : EMPTY),
+    this.errorText,
+  );
   protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
-    this.sectors().map(({ id, value }) => ({ value: id, label: value })),
+    this.sectors.items().map(({ id, value }) => ({ value: id, label: value })),
   );
 
   private readonly draft = signal(new OnlineBookingOptions());
@@ -230,7 +230,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
       if (this.open()) {
         untracked(() => {
           this.reset();
-          this.loadSectors();
+          this.sectors.load();
         });
       }
     });
@@ -305,25 +305,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.draftForm().reset();
   }
 
-  /** At every opening: a slower answer of an earlier opening must not replace this list. */
-  private loadSectors(): void {
-    this.sectorsSubscription?.unsubscribe();
-    this.sectorsLoadError.set(null);
-    if (!this.auth.user()?.propertyId) {
-      return;
-    }
-    this.sectorsSubscription = this.sectorService.sectorCombobox().subscribe({
-      next: (sectors) => this.sectors.set(sectors),
-      error: (error: unknown) => {
-        const problem = toApiProblem(error);
-        this.sectors.set([]);
-        this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
-      },
-    });
-  }
-
   ngOnDestroy(): void {
-    this.sectorsSubscription?.unsubscribe();
+    this.sectors.destroy();
     this.unsaved.unwatch(this);
   }
 }

@@ -265,14 +265,15 @@
               | translate
           "
           [placeholder]="
-            sectorsLoadError()
+            sectors.loadError()
               ? ''
               : ('management.settings.online_booking_configuration.booking_options.choose'
                 | translate)
           "
           [options]="sectorOptions()"
           [formField]="rule.idSector"
-          [error]="sectorsLoadError()"
+          [error]="sectors.loadError()"
+          (openRequest)="sectors.retry()"
         />
         <div class="online__booking__options__panel__rule__dates">
           <app-filled-date-field

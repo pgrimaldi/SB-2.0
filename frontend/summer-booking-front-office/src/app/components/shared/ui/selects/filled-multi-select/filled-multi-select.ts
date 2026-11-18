@@ -34,6 +34,11 @@ export class FilledMultiSelect<K extends string = string> {
   readonly isPanelSizedToOptions = input(false);
   /** The panel was closed: a Signal Forms `[formField]` marks the select as touched. */
   readonly touch = output<void>();
+  /**
+   * The user tried to open the list (click, Enter or Space), also while it has no options and so
+   * does not open: e.g. to read again a list that could not be loaded.
+   */
+  readonly openRequest = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
@@ -47,6 +52,12 @@ export class FilledMultiSelect<K extends string = string> {
       this.error();
       this.matSelect().updateErrorState();
     });
+  }
+
+  protected requestOpen(): void {
+    if (!this.disabled()) {
+      this.openRequest.emit();
+    }
   }
 
   /** A list sized to its options is never narrower than the field. */

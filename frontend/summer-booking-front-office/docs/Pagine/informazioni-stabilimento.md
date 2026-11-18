@@ -54,7 +54,11 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   bandiera, `assets/flags/<code in minuscolo>.svg`).
 - Le nazioni si caricano a parte dai dati della tab: se arrivano dopo, la prima voce si sceglie allora (solo se lo
   stabilimento non ne ha una e l'utente non l'ha scelta). Se non si caricano, l'errore compare solo sotto Nazione
-  (`countriesLoadError`, come le altre tendine) e il resto della tab funziona.
+  (`DropdownList`, come le altre tendine) e il resto della tab funziona. Dopo un errore, aprire la tendina in Modifica
+  (clic, Invio o Spazio: `(openRequest)` di `app-filled-select`) rilegge le nazioni; con la lista già caricata non parte
+  nessuna chiamata.
+- Se il salvataggio risponde `catalog.country_not_found` (nazione non più nel catalogo), l'errore va sotto Nazione
+  (`apiFieldError`) e sparisce appena si sceglie un'altra nazione.
 - Sotto, a destra, "Modifica" sblocca i campi e lascia il posto ad Annulla e Salva. In tutte e tre le tab "Modifica"
   resta spento finché i dati della tab non sono arrivati (`isLoaded`): se il caricamento fallisce non si può salvare
   una tab vuota sopra i dati veri. Senza Nome stabilimento Salva

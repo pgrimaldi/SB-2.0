@@ -20,13 +20,14 @@
       <app-filled-multi-select
         [label]="'management.settings.database.filters.agreement_structure.label' | translate"
         [placeholder]="
-          affiliatedHotelsLoadError()
+          affiliatedHotels.loadError()
             ? ''
             : ('management.settings.database.filters.choose' | translate)
         "
         [options]="affiliatedHotelOptions()"
         [(value)]="idAffiliatedHotels"
-        [error]="affiliatedHotelsLoadError()"
+        [error]="affiliatedHotels.loadError()"
+        (openRequest)="affiliatedHotels.retry()"
       />
       <app-filled-multi-select
         [label]="'management.settings.database.filters.payment_status.label' | translate"

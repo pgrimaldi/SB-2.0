@@ -21,16 +21,16 @@ import {
 } from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, firstValueFrom, of, switchMap } from 'rxjs';
+import { EMPTY, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
@@ -64,11 +64,12 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
 
-  private readonly articles = signal<readonly ComboboxItem[]>([]);
-  protected readonly articlesLoadError = signal<string | null>(null);
-  private articlesSubscription?: Subscription;
+  protected readonly articles = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.warehouse.articleCombobox() : EMPTY),
+    this.errorText,
+  );
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
-    this.articles().map(({ id, value }) => ({ value: id, label: value })),
+    this.articles.items().map(({ id, value }) => ({ value: id, label: value })),
   );
   private readonly draft = signal(new WarehouseItem());
   protected readonly draftForm = form(this.draft, (path) => {
@@ -112,7 +113,7 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
       if (this.open()) {
         untracked(() => {
           this.reset();
-          this.loadArticles();
+          this.articles.load();
         });
       }
     });
@@ -182,25 +183,8 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     this.error.set(null);
   }
 
-  private loadArticles(): void {
-    // A slower answer of an earlier opening must not replace the list of this one.
-    this.articlesSubscription?.unsubscribe();
-    this.articlesLoadError.set(null);
-    if (!this.auth.user()?.propertyId) {
-      return;
-    }
-    this.articlesSubscription = this.warehouse.articleCombobox().subscribe({
-      next: (articles) => this.articles.set(articles),
-      error: (error: unknown) => {
-        const problem = toApiProblem(error);
-        this.articles.set([]);
-        this.articlesLoadError.set(this.errorText.instant(problem.code, problem.args));
-      },
-    });
-  }
-
   override ngOnDestroy(): void {
-    this.articlesSubscription?.unsubscribe();
+    this.articles.destroy();
     this.unsaved.unwatch(this);
     super.ngOnDestroy();
   }

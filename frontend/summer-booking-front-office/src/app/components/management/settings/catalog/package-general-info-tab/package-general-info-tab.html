@@ -73,20 +73,22 @@
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
   [placeholder]="
-    sectorAreasLoadError() ? '' : ('management.settings.catalog.packages.form.choose' | translate)
+    sectorAreas.loadError() ? '' : ('management.settings.catalog.packages.form.choose' | translate)
   "
   [options]="sectorAreaOptions()"
   [formField]="form().idSectorAreas"
-  [error]="sectorAreasLoadError() ?? validationText.text(form().idSectorAreas)"
+  [error]="sectorAreas.loadError() ?? validationText.text(form().idSectorAreas)"
+  (openRequest)="sectorAreas.retry()"
 />
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.sectors' | translate"
   [placeholder]="
-    sectorsLoadError() ? '' : ('management.settings.catalog.packages.form.all_sectors' | translate)
+    sectors.loadError() ? '' : ('management.settings.catalog.packages.form.all_sectors' | translate)
   "
   [options]="sectorOptions()"
   [formField]="form().idSectors"
-  [error]="sectorsLoadError() ?? validationText.text(form().idSectors)"
+  [error]="sectors.loadError() ?? validationText.text(form().idSectors)"
+  (openRequest)="sectors.retry()"
 />
 
 <div class="package__general__info__tab__options">

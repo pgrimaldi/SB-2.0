@@ -9,11 +9,12 @@
         [label]="'management.settings.warehouse.form.name' | translate"
         [isMandatory]="true"
         [placeholder]="
-          articlesLoadError() ? '' : ('management.settings.warehouse.form.choose' | translate)
+          articles.loadError() ? '' : ('management.settings.warehouse.form.choose' | translate)
         "
         [options]="articleOptions()"
         [formField]="draftForm.idArticle"
-        [error]="articlesLoadError() ?? idArticleError()"
+        [error]="articles.loadError() ?? idArticleError()"
+        (openRequest)="articles.retry()"
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.quantity' | translate"

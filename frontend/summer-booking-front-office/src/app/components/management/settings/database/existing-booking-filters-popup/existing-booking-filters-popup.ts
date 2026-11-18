@@ -14,13 +14,14 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import {
   ExistingBookingFilterTexts,
   filterOptionsOf,
 } from '../../../../../behaviours/database/existing-booking-filter-options';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -33,7 +34,6 @@ import {
   PaymentStatusFilter,
 } from '../../../../../entities/database/existing-booking-filters';
 import { DatabaseService } from '../../../../../services/api/database/database.service';
-import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
@@ -64,10 +64,11 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
   protected readonly agreementBookings = signal<readonly AgreementBookingFilter[]>([]);
   protected readonly idAffiliatedHotels = signal<readonly string[]>([]);
   protected readonly paymentStatuses = signal<readonly PaymentStatusFilter[]>([]);
-  private readonly affiliatedHotels = signal<readonly ComboboxItem[]>([]);
-  protected readonly affiliatedHotelsLoadError = signal<string | null>(null);
+  protected readonly affiliatedHotels = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.database.affiliatedHotelCombobox() : EMPTY),
+    this.errorText,
+  );
   private pristineChoices = '';
-  private affiliatedHotelsSubscription?: Subscription;
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.database.filters',
@@ -80,7 +81,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
     filterOptionsOf(Object.values(AgreementBookingFilter), this.texts()?.agreement_booking.options),
   );
   protected readonly affiliatedHotelOptions = computed<readonly SelectOption[]>(() =>
-    this.affiliatedHotels().map((hotel) => ({ value: hotel.id, label: hotel.value })),
+    this.affiliatedHotels.items().map((hotel) => ({ value: hotel.id, label: hotel.value })),
   );
   protected readonly paymentStatusOptions = computed(() =>
     filterOptionsOf(Object.values(PaymentStatusFilter), this.texts()?.payment_status.options),
@@ -93,7 +94,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
       if (this.open()) {
         untracked(() => {
           this.reset();
-          this.loadAffiliatedHotels();
+          this.affiliatedHotels.load();
         });
       }
     });
@@ -155,7 +156,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
   /** With their names, for the chips: from the list of the server, or as they were applied. */
   private chosenHotels(): ComboboxItem[] {
     const known = new Map(
-      [...this.filters().affiliatedHotels, ...this.affiliatedHotels()].map((hotel) => [
+      [...this.filters().affiliatedHotels, ...this.affiliatedHotels.items()].map((hotel) => [
         hotel.id,
         hotel,
       ]),
@@ -163,26 +164,9 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
     return this.idAffiliatedHotels().flatMap((id) => known.get(id) ?? []);
   }
 
-  private loadAffiliatedHotels(): void {
-    // A slower answer of an earlier opening must not replace the list of this one.
-    this.affiliatedHotelsSubscription?.unsubscribe();
-    this.affiliatedHotelsLoadError.set(null);
-    if (!this.auth.user()?.propertyId) {
-      return;
-    }
-    this.affiliatedHotelsSubscription = this.database.affiliatedHotelCombobox().subscribe({
-      next: (hotels) => this.affiliatedHotels.set(hotels),
-      error: (error: unknown) => {
-        const problem = toApiProblem(error);
-        this.affiliatedHotels.set([]);
-        this.affiliatedHotelsLoadError.set(this.errorText.instant(problem.code, problem.args));
-      },
-    });
-  }
-
   override ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.affiliatedHotelsSubscription?.unsubscribe();
+    this.affiliatedHotels.destroy();
     super.ngOnDestroy();
   }
 }

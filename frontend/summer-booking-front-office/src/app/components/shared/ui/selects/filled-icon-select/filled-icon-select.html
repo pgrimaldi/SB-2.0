@@ -24,6 +24,9 @@
     [value]="value()"
     (valueChange)="value.set($event)"
     (closed)="touch.emit()"
+    (click)="requestOpen()"
+    (keydown.enter)="requestOpen()"
+    (keydown.space)="requestOpen()"
   >
     <mat-select-trigger>
       @if (selected(); as option) {

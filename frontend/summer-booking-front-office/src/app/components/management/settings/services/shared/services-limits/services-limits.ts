@@ -5,16 +5,14 @@ import {
   computed,
   inject,
   input,
-  signal,
 } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { AuthBehaviour } from '../../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../../behaviours/errors/error-text.behaviour';
-import { ComboboxItem } from '../../../../../../entities/combobox/combobox-item';
+import { DropdownList } from '../../../../../../behaviours/forms/dropdown-list';
 import { SectorService } from '../../../../../../services/api/catalog/sector.service';
-import { toApiProblem } from '../../../../../../services/api/errors/to-api-problem';
 import { FormRow } from '../../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../../shared/ui/forms/form-row/form-row-label';
 import { FilledMultiSelect } from '../../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
@@ -36,28 +34,20 @@ export class ServicesLimits implements OnDestroy {
   private readonly sectorService = inject(SectorService);
   private readonly errorText = inject(ErrorTextBehaviour);
 
-  private readonly sectors = signal<readonly ComboboxItem[]>([]);
-  protected readonly sectorsLoadError = signal<string | null>(null);
-  private readonly sectorsSubscription?: Subscription;
+  protected readonly sectors = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.sectorService.sectorCombobox() : EMPTY),
+    this.errorText,
+  );
   protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
-    this.sectors().map(({ id, value }) => ({ value: id, label: value })),
+    this.sectors.items().map(({ id, value }) => ({ value: id, label: value })),
   );
 
   /** Read every time the section is shown, i.e. at every opening of the Prices tab. */
   constructor() {
-    if (this.auth.user()?.propertyId) {
-      this.sectorsSubscription = this.sectorService.sectorCombobox().subscribe({
-        next: (sectors) => this.sectors.set(sectors),
-        error: (error: unknown) => {
-          const problem = toApiProblem(error);
-          this.sectors.set([]);
-          this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
-        },
-      });
-    }
+    this.sectors.load();
   }
 
   ngOnDestroy(): void {
-    this.sectorsSubscription?.unsubscribe();
+    this.sectors.destroy();
   }
 }

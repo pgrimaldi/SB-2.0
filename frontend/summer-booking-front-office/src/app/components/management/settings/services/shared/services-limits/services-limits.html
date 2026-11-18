@@ -6,12 +6,13 @@
   <app-filled-multi-select
     class="services__limits__sectors"
     [placeholder]="
-      sectorsLoadError()
+      sectors.loadError()
         ? ''
         : ('management.settings.services.form.prices.limits.all_sectors' | translate)
     "
     [options]="sectorOptions()"
     [formField]="form()"
-    [error]="sectorsLoadError()"
+    [error]="sectors.loadError()"
+    (openRequest)="sectors.retry()"
   />
 </app-form-row>

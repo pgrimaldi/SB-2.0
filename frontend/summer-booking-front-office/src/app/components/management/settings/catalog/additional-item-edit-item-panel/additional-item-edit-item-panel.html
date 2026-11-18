@@ -11,24 +11,26 @@
       [label]="'management.settings.catalog.additional_items.form.article' | translate"
       [isMandatory]="true"
       [placeholder]="
-        articlesLoadError()
+        articles.loadError()
           ? ''
           : ('management.settings.catalog.additional_items.form.choose' | translate)
       "
       [options]="articleOptions()"
       [formField]="draftForm.idArticle"
-      [error]="articlesLoadError() ?? validationText.text(draftForm.idArticle)"
+      [error]="articles.loadError() ?? validationText.text(draftForm.idArticle)"
+      (openRequest)="articles.retry()"
     />
     <app-filled-multi-select
       [label]="'management.settings.catalog.additional_items.form.packages' | translate"
       [placeholder]="
-        packagesLoadError()
+        packages.loadError()
           ? ''
           : ('management.settings.catalog.additional_items.form.all_packages' | translate)
       "
       [options]="packageOptions()"
       [formField]="draftForm.idPackages"
-      [error]="packagesLoadError() ?? validationText.text(draftForm.idPackages)"
+      [error]="packages.loadError() ?? validationText.text(draftForm.idPackages)"
+      (openRequest)="packages.retry()"
     />
 
     <div class="additional__item__edit__item__panel__options">

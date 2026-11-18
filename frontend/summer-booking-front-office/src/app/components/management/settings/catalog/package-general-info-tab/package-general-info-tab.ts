@@ -5,15 +5,14 @@ import {
   computed,
   inject,
   input,
-  signal,
 } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import {
   MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
   MAX_PACKAGE_ARTICLE_QUANTITY,
@@ -23,7 +22,6 @@ import {
 import { Language } from '../../../../../entities/shared/language';
 import { MapService } from '../../../../../services/api/catalog/map.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
-import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
@@ -84,17 +82,19 @@ export class PackageGeneralInfoTab implements OnDestroy {
     { field: 'tentQuantity', label: `${ARTICLES_KEY}.tent` },
   ];
 
-  private readonly sectors = signal<readonly ComboboxItem[]>([]);
-  protected readonly sectorsLoadError = signal<string | null>(null);
-  private readonly sectorsSubscription?: Subscription;
-  protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
-    this.sectors().map(({ id, value }) => ({ value: id, label: value })),
+  protected readonly sectors = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.sectorService.sectorCombobox() : EMPTY),
+    this.errorText,
   );
-  private readonly sectorAreas = signal<readonly ComboboxItem[]>([]);
-  protected readonly sectorAreasLoadError = signal<string | null>(null);
-  private readonly sectorAreasSubscription?: Subscription;
+  protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
+    this.sectors.items().map(({ id, value }) => ({ value: id, label: value })),
+  );
+  protected readonly sectorAreas = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.mapService.sectorAreaCombobox() : EMPTY),
+    this.errorText,
+  );
   protected readonly sectorAreaOptions = computed<readonly SelectOption[]>(() =>
-    this.sectorAreas().map(({ id, value }) => ({ value: id, label: value })),
+    this.sectorAreas.items().map(({ id, value }) => ({ value: id, label: value })),
   );
 
   protected readonly mainTranslation = computed(
@@ -114,24 +114,8 @@ export class PackageGeneralInfoTab implements OnDestroy {
 
   /** The sectors and the areas are read every time the tab is shown. */
   constructor() {
-    if (this.auth.user()?.propertyId) {
-      this.sectorsSubscription = this.sectorService.sectorCombobox().subscribe({
-        next: (sectors) => this.sectors.set(sectors),
-        error: (error: unknown) => {
-          const problem = toApiProblem(error);
-          this.sectors.set([]);
-          this.sectorsLoadError.set(this.errorText.instant(problem.code, problem.args));
-        },
-      });
-      this.sectorAreasSubscription = this.mapService.sectorAreaCombobox().subscribe({
-        next: (sectorAreas) => this.sectorAreas.set(sectorAreas),
-        error: (error: unknown) => {
-          const problem = toApiProblem(error);
-          this.sectorAreas.set([]);
-          this.sectorAreasLoadError.set(this.errorText.instant(problem.code, problem.args));
-        },
-      });
-    }
+    this.sectors.load();
+    this.sectorAreas.load();
   }
 
   /** The name of a language in the main one, with a capital letter (e.g. "Inglese"). */
@@ -150,8 +134,8 @@ export class PackageGeneralInfoTab implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.sectorsSubscription?.unsubscribe();
-    this.sectorAreasSubscription?.unsubscribe();
+    this.sectors.destroy();
+    this.sectorAreas.destroy();
   }
 }
 

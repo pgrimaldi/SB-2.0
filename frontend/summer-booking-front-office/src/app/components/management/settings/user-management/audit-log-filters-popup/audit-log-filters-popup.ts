@@ -14,9 +14,10 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -25,7 +26,6 @@ import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behav
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../../entities/settings/user-management/audit-log-filters';
 import { IdentityService } from '../../../../../services/api/identity/identity.service';
-import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
@@ -60,10 +60,11 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   protected readonly ButtonSize = ButtonSize;
   protected readonly actionCodes = signal<readonly string[]>([]);
   protected readonly idUsers = signal<readonly string[]>([]);
-  private readonly users = signal<readonly ComboboxItem[]>([]);
-  protected readonly usersLoadError = signal<string | null>(null);
+  protected readonly users = new DropdownList(
+    () => (this.auth.user()?.propertyId ? this.identity.userCombobox() : EMPTY),
+    this.errorText,
+  );
   private pristineChoices = '';
-  private usersSubscription?: Subscription;
   private readonly actionTexts = toSignal(
     this.translateService.stream(
       'management.settings.user_management.logs.actions',
@@ -74,7 +75,10 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   );
   protected readonly userOptions = computed<readonly SelectOption[]>(() =>
     byLabel(
-      (this.onlyUsers() ?? this.users()).map((user) => ({ value: user.id, label: user.value })),
+      (this.onlyUsers() ?? this.users.items()).map((user) => ({
+        value: user.id,
+        label: user.value,
+      })),
       this.language(),
     ),
   );
@@ -87,7 +91,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
         untracked(() => {
           this.reset();
           if (!this.onlyUsers()) {
-            this.loadUsers();
+            this.users.load();
           }
         });
       }
@@ -138,31 +142,14 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   /** With their names, for the chips: from the list of the server, or as they were applied. */
   private chosenUsers(): ComboboxItem[] {
     const known = new Map(
-      [...this.filters().users, ...this.users()].map((user) => [user.id, user]),
+      [...this.filters().users, ...this.users.items()].map((user) => [user.id, user]),
     );
     return this.idUsers().flatMap((id) => known.get(id) ?? []);
   }
 
-  private loadUsers(): void {
-    // A slower answer of an earlier opening must not replace the list of this one.
-    this.usersSubscription?.unsubscribe();
-    this.usersLoadError.set(null);
-    if (!this.auth.user()?.propertyId) {
-      return;
-    }
-    this.usersSubscription = this.identity.userCombobox().subscribe({
-      next: (users) => this.users.set(users),
-      error: (error: unknown) => {
-        const problem = toApiProblem(error);
-        this.users.set([]);
-        this.usersLoadError.set(this.errorText.instant(problem.code, problem.args));
-      },
-    });
-  }
-
   override ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.usersSubscription?.unsubscribe();
+    this.users.destroy();
     super.ngOnDestroy();
   }
 }

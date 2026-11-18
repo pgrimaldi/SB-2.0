@@ -17,6 +17,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -83,19 +84,23 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   });
   /** The form with nothing chosen: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(JSON.stringify(new AdditionalItemAddItemRequest()));
-  private readonly articles = signal<readonly ComboboxItem[]>([]);
-  protected readonly articlesLoadError = signal<string | null>(null);
+  protected readonly articles = new DropdownList(
+    () => this.warehouse.articleCombobox(),
+    this.errorText,
+  );
   /** The name of the chosen article, in the rows of the intermediate prices. */
   protected readonly articleName = computed(
-    () => this.articles().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
+    () => this.articles.items().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
   );
   protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
-    this.articles().map(({ id, value }) => ({ value: id, label: value })),
+    this.articles.items().map(({ id, value }) => ({ value: id, label: value })),
   );
-  private readonly packages = signal<readonly ComboboxItem[]>([]);
-  protected readonly packagesLoadError = signal<string | null>(null);
+  protected readonly packages = new DropdownList(
+    () => this.priceLists.packageCombobox(),
+    this.errorText,
+  );
   protected readonly packageOptions = computed<readonly SelectOption[]>(() =>
-    this.packages().map(({ id, value }) => ({ value: id, label: value })),
+    this.packages.items().map(({ id, value }) => ({ value: id, label: value })),
   );
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
@@ -165,10 +170,8 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draft.set(new AdditionalItemAddItemRequest());
     this.draftForm().reset();
     this.pristine.set(JSON.stringify(new AdditionalItemAddItemRequest()));
-    this.articles.set([]);
-    this.articlesLoadError.set(null);
-    this.packages.set([]);
-    this.packagesLoadError.set(null);
+    this.articles.clear();
+    this.packages.clear();
     this.sectors.set([]);
     this.periods.set([]);
     this.isPriceListLoaded.set(false);
@@ -180,26 +183,8 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     if (!this.auth.user()?.propertyId) {
       return;
     }
-    this.loadings.add(
-      this.warehouse.articleCombobox().subscribe({
-        next: (articles) => this.articles.set(articles),
-        error: (error: unknown) => {
-          const problem = toApiProblem(error);
-          this.articles.set([]);
-          this.articlesLoadError.set(this.errorText.instant(problem.code, problem.args));
-        },
-      }),
-    );
-    this.loadings.add(
-      this.priceLists.packageCombobox().subscribe({
-        next: (packages) => this.packages.set(packages),
-        error: (error: unknown) => {
-          const problem = toApiProblem(error);
-          this.packages.set([]);
-          this.packagesLoadError.set(this.errorText.instant(problem.code, problem.args));
-        },
-      }),
-    );
+    this.articles.load();
+    this.packages.load();
     this.isFetching.set(true);
     this.loadings.add(
       forkJoin([this.sectorService.sectorCombobox(), this.seasons.periodList(false)])
@@ -241,5 +226,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
     this.loadings.unsubscribe();
+    this.articles.destroy();
+    this.packages.destroy();
   }
 }
