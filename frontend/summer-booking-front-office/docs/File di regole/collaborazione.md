@@ -29,6 +29,10 @@ Come si lavora con l'utente e dove stanno i documenti del frontend, da tenere ag
   siano solo modifiche pertinenti e nessun file generato, locale o sensibile.
 - Quando il contesto della chat diventa troppo esteso e può compromettere precisione o continuità, si avvisa l'utente in
   anticipo e gli si consiglia chiaramente di aprire una nuova chat, che riparte da `docs/File di regole/00-indice.md`.
+- Una pagina è chiusa solo dopo un audit completo e i test dell'utente. L'audit confronta regole, codice del frontend
+  (componenti, servizi, mock, test, documenti), backend e struttura del database (mai righe di dati), e controlla che il
+  documento delle richieste al backend della pagina contenga tutti i requisiti. Ogni punto trovato va nella lista per
+  l'utente: nessuno resta solo nei resoconti.
 
 ## Documentazione
 
