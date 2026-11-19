@@ -37,6 +37,7 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-tab/automatic-price-general-info-tab';
 import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-validity-tab/automatic-price-prices-validity-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -109,7 +110,7 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
     });
   });
   /** The form as it was when the panel opened. */
-  private readonly pristine = JSON.stringify(newDraft());
+  private readonly pristine = comparableJson(newDraft());
   /** The services of the property for "Validità sui servizi"; null until they are read. */
   protected readonly services = signal<AutomaticPriceServices | null>(null);
   protected readonly isFetching = signal(false);
@@ -139,7 +140,7 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine);
+    return this.open() && (this.image() !== null || comparableJson(this.draft()) !== this.pristine);
   }
 
   protected chooseIcon(icon: BarServiceIcon | StandardServiceIcon): void {

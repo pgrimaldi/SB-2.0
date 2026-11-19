@@ -4,10 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
-import { SaveSectorRequest } from '../../../entities/settings/rows-and-sectors/save-sector-request';
 import { Sector } from '../../../entities/settings/rows-and-sectors/sector';
 import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
-import { onlyFieldsOf } from '../only-fields-of';
 
 @Injectable({ providedIn: 'root' })
 export class SectorService {
@@ -22,18 +20,14 @@ export class SectorService {
     this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sector-combobox`, null);
 
   /** The backend puts the new sector at the end of the order. Answers 201 with the sector created. */
-  readonly addSector = (request: SaveSectorRequest): Observable<Sector> =>
-    this.httpClient.post<Sector>(
-      `${this.endpoint}/sectors`,
-      onlyFieldsOf(SaveSectorRequest, request),
-    );
+  readonly addSector = (name: string): Observable<Sector> =>
+    this.httpClient.post<Sector>(`${this.endpoint}/sectors`, { name });
 
   /** The new name of the sector. Answers 200 with the sector saved. */
-  readonly updateSector = (idSector: string, request: SaveSectorRequest): Observable<Sector> =>
-    this.httpClient.put<Sector>(
-      `${this.endpoint}/sectors/${encodeURIComponent(idSector)}`,
-      onlyFieldsOf(SaveSectorRequest, request),
-    );
+  readonly updateSector = (idSector: string, name: string): Observable<Sector> =>
+    this.httpClient.put<Sector>(`${this.endpoint}/sectors/${encodeURIComponent(idSector)}`, {
+      name,
+    });
 
   /** Answers 204 with no body. */
   readonly deleteSector = (idSector: string): Observable<void> =>

@@ -36,7 +36,7 @@ import {
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { SaveSectorRequest } from '../../../../../entities/settings/rows-and-sectors/save-sector-request';
+import { Sector } from '../../../../../entities/settings/rows-and-sectors/sector';
 import { MAX_SECTOR_NAME_LENGTH } from '../../../../../entities/settings/rows-and-sectors/sector-item';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
@@ -44,6 +44,7 @@ import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
+import { sameText } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-sector-add-popup',
@@ -65,7 +66,7 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly isLoading = signal(false);
-  private readonly sector = signal(new SaveSectorRequest());
+  private readonly sector = signal(new Sector());
   protected readonly sectorForm = form(this.sector, (path) => {
     requiredText(path.name);
     metadata(path.name, MAX_LENGTH, () => MAX_SECTOR_NAME_LENGTH);
@@ -91,7 +92,7 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && !!this.sector().name;
+    return this.open() && !sameText(this.sector().name, null);
   }
 
   protected save(): void {
@@ -102,7 +103,7 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.sectors.addSector(this.sector()));
+        await firstValueFrom(this.sectors.addSector(this.sector().name ?? ''));
         this.isLoading.set(false);
         this.close();
         this.added.emit();
@@ -145,7 +146,7 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   }
 
   private reset(): void {
-    this.sector.set(new SaveSectorRequest());
+    this.sector.set(new Sector());
     this.sectorForm().reset();
     this.error.set(null);
   }

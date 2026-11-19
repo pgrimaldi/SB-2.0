@@ -56,6 +56,7 @@ import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 import { IdentityService } from '../../../../services/api/identity/identity.service';
+import { comparableJson } from '../../../../components/shared/forms/text-comparison';
 
 interface UserManagementLogsTexts {
   date_filter: {
@@ -400,7 +401,7 @@ function pageFiltersOf(filters: AuditLogFilters): PageFilter[] {
 }
 
 function sameFilters(first: readonly PageFilter[], second: readonly PageFilter[]): boolean {
-  return JSON.stringify(first) === JSON.stringify(second);
+  return comparableJson(first) === comparableJson(second);
 }
 
 function logUserOf(state: unknown): ComboboxItem | null {

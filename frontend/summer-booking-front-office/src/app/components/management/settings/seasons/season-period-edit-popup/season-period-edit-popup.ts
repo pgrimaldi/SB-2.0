@@ -51,6 +51,7 @@ import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 const NAME_FIELD = 'name' satisfies keyof SeasonPeriodItem;
 
@@ -111,7 +112,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== JSON.stringify(this.original());
+    return this.open() && comparableJson(this.draft()) !== comparableJson(this.original());
   }
 
   protected save(): void {

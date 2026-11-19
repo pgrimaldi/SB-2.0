@@ -105,7 +105,7 @@ export const entriesListMock = (request: HttpRequest<unknown>): Observable<HttpE
       row.propertyId === DEMO_PROPERTY.id &&
       (!search ||
         [row.actorName, row.bookingNumber, row.spotLabel].some((text) =>
-          text?.toLowerCase().includes(search),
+          text?.trim().toLowerCase().includes(search),
         )) &&
       (!fromDay || (day !== null && day >= fromDay)) &&
       (!toDay || (day !== null && day <= toDay)) &&
@@ -227,7 +227,7 @@ function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? 1 : -1;
   }
-  return first.localeCompare(second, 'it', { sensitivity: 'base' });
+  return first.trim().localeCompare(second.trim(), 'it', { sensitivity: 'base' });
 }
 
 function filterValue(filters: unknown, field: FilterField): string | null {

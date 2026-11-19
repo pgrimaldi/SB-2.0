@@ -20,6 +20,12 @@ descrizioni delle pagine in `docs/Pagine/`.
   Salva restano spenti finché la lettura dal server non è riuscita.
 - Tabelle: `app-table` si carica da sola con la richiesta standard delle tabelle.
 - Mai id del database scritti nel codice, mai un oggetto che contiene un solo valore, mai stringhe libere come opzioni.
+- Ogni confronto di testi si fa **sempre** sui testi senza spazi all'inizio e alla fine, ovunque (componenti,
+  behaviour, servizi, mock): uguaglianze, "nome già usato", "ci sono modifiche?", ricerche e ordinamenti. Le funzioni
+  sono in `components/shared/forms/text-comparison.ts`: `sameText` e `sameTextIgnoringCase` per due testi,
+  `comparableJson` per due modelli (testi senza spazi ai lati, un testo vuoto conta come `null`); per cercare e ordinare
+  `trim()` su tutti e due i lati. Non riguarda i valori tecnici che nessuno scrive (codici, enum, id, chiavi, URL,
+  date ISO, nomi dei campi).
 - Mai stringhe scritte a mano nel codice per valori con un significato (codici di errore, nomi di campi, scelte): si usa
   il membro di un enum o una costante (es. `ApiErrorCode.ValidationOutOfRange`). Se una stringa sembra inevitabile, prima
   si dice all'utente dove e perché e si cerca una soluzione insieme.

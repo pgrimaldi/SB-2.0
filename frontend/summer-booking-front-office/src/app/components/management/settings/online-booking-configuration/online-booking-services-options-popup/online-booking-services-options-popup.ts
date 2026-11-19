@@ -47,6 +47,7 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServicesOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
@@ -175,8 +176,8 @@ export class OnlineBookingServicesOptionsPopup
     return (
       this.open() &&
       !this.isLoading() &&
-      JSON.stringify(this.draft()) !==
-        JSON.stringify(this.loaded ?? new OnlineBookingServicesOptions())
+      comparableJson(this.draft()) !==
+        comparableJson(this.loaded ?? new OnlineBookingServicesOptions())
     );
   }
 

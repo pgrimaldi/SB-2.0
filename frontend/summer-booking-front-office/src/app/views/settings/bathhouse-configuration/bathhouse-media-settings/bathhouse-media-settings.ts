@@ -75,6 +75,7 @@ import { BathhousePhoto } from '../../../../entities/settings/bathhouse-configur
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
+import { comparableJson } from '../../../../components/shared/forms/text-comparison';
 
 const CENTER_OF_ITALY: MapPosition = { latitude: 41.87194, longitude: 12.56738 };
 const ITALY_ZOOM = 5;
@@ -272,7 +273,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     const current = this.request();
     return (Object.keys(this.loaded) as (keyof BathhouseMediaRequest)[]).some(
-      (name) => current[name] !== this.loaded[name],
+      (name) => comparableJson(current[name]) !== comparableJson(this.loaded[name]),
     );
   }
 

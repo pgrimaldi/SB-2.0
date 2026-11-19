@@ -64,6 +64,7 @@ import {
   sectorPricesOf,
 } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface PackageFormTexts {
   tabs: {
@@ -153,7 +154,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   });
   protected readonly reducedSeasonalPriceIndex = signal<number | null>(null);
   /** The form with nothing typed: with an empty price for every row once the rows are read. */
-  private readonly pristine = signal(JSON.stringify(newDraft()));
+  private readonly pristine = signal(comparableJson(newDraft()));
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** The rows of the price list are read once per opening, the first time its tab is shown. */
@@ -198,7 +199,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (JSON.stringify(this.draft()) !== this.pristine() || this.isReducedSeasonalPriceTyped())
+      (comparableJson(this.draft()) !== this.pristine() || this.isReducedSeasonalPriceTyped())
     );
   }
 
@@ -209,7 +210,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
       return false;
     }
     const shown = this.draft().reducedSeasonalPrices[index] ?? new PackageReducedSeasonalPrice();
-    return JSON.stringify(this.reducedSeasonalPrice()) !== JSON.stringify(shown);
+    return comparableJson(this.reducedSeasonalPrice()) !== comparableJson(shown);
   }
 
   protected save(): void {
@@ -247,7 +248,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.error.set(null);
     this.draft.set(newDraft());
     this.draftForm().reset();
-    this.pristine.set(JSON.stringify(newDraft()));
+    this.pristine.set(comparableJson(newDraft()));
     this.reducedSeasonalPrice.set(new PackageReducedSeasonalPrice());
     this.reducedSeasonalPriceForm().reset();
     this.reducedSeasonalPriceIndex.set(null);
@@ -292,7 +293,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.periods.set(periods);
     this.draftForm.sectorPrices().value.set(sectorPrices);
     this.draftForm.periodPrices().value.set(periodPrices);
-    this.pristine.set(JSON.stringify(Object.assign(newDraft(), { sectorPrices, periodPrices })));
+    this.pristine.set(comparableJson(Object.assign(newDraft(), { sectorPrices, periodPrices })));
   }
 
   ngOnDestroy(): void {

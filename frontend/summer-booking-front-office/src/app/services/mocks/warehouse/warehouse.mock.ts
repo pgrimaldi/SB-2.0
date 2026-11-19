@@ -7,6 +7,7 @@ import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { sameText } from '../../../components/shared/forms/text-comparison';
 
 /**
  * Rows of `catalog.inventory_items`: same structure as the sample DB, invented values (no data of
@@ -334,7 +335,8 @@ export function activeArticleIdNamed(propertyId: number, name: string | null): s
   return (
     INVENTORY_ITEMS.find(
       (row) =>
-        row.name === name &&
+        name !== null &&
+        sameText(row.name, name) &&
         row.propertyId === propertyId &&
         row.isActive &&
         row.deletedAt === null,
@@ -444,7 +446,9 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
 
   // The server decides where to search: the mock looks in the article name, ignoring case.
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = search ? items.filter((item) => item.name?.toLowerCase().includes(search)) : items;
+  const found = search
+    ? items.filter((item) => item.name?.trim().toLowerCase().includes(search))
+    : items;
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -482,7 +486,7 @@ function compare(first: string | number | null, second: string | number | null):
   }
   return typeof first === 'number' && typeof second === 'number'
     ? first - second
-    : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
+    : String(first).trim().localeCompare(String(second).trim(), 'it', { sensitivity: 'base' });
 }
 
 function wholeNumber(value: unknown): value is number {

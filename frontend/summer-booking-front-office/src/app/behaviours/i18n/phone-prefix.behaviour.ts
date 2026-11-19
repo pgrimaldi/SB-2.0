@@ -41,7 +41,7 @@ export class PhonePrefixBehaviour {
       label: names.of(country) ?? country,
       shortLabel: `+${PhonePrefix[country]}`,
       icon: `/assets/flags/${country.toLowerCase()}.svg`,
-    })).sort((first, second) => first.label.localeCompare(second.label, language));
+    })).sort((first, second) => first.label.trim().localeCompare(second.label.trim(), language));
     return [
       ...options.filter(({ value }) => value === DEFAULT_PHONE_COUNTRY),
       ...options.filter(({ value }) => value !== DEFAULT_PHONE_COUNTRY),

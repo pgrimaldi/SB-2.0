@@ -57,6 +57,7 @@ import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-
 import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/hourly-service-general-info-tab';
 import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -215,7 +216,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()))
+      (this.image() !== null || comparableJson(this.draft()) !== comparableJson(this.pristine()))
     );
   }
 

@@ -58,6 +58,7 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { sameText } from '../../../../shared/forms/text-comparison';
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 
@@ -196,7 +197,7 @@ export class VoucherAddItemPanel extends BasePopup implements UnsavedChanges, On
     const draft = this.draft();
     return (
       this.open() &&
-      (draft.voucherName !== null ||
+      (!sameText(draft.voucherName, start.voucherName) ||
         draft.validityPeriods.length > 0 ||
         draft.discountType !== start.discountType ||
         draft.discountValue !== start.discountValue ||

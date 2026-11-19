@@ -32,6 +32,7 @@
   [sector]="sectorToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [sectorToEdit()?.idSector ?? null])"
 />
 
 <app-delete-items-popup
@@ -42,6 +43,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idSectorsToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idSectorsToDuplicate()"
@@ -51,6 +53,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idSectorsToDuplicate())"
 />
 
 <app-table-error-popup

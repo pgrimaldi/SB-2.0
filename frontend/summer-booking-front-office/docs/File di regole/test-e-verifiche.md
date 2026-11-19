@@ -33,6 +33,8 @@ della consegna.
   `.spec.ts`.
 - `src/test-setup.ts` (in `angular.json`, `setupFiles`; escluso dalla build dell'app in `tsconfig.app.json`) dopo ogni
   test annulla stub, spie e timer finti, svuota `localStorage` e `sessionStorage` e rimette `lang`/`dir` di `<html>`.
+- Lo stesso file dà a `<dialog>` i metodi che jsdom non ha (`showModal`, `close`), che cambiano solo `open`: li usa
+  `app-page-spinner`.
 - Motivo: un oggetto globale lasciato a metà fa fallire a caso, secondo l'ordine dei file, i test di altri file.
 
 ## Prettier

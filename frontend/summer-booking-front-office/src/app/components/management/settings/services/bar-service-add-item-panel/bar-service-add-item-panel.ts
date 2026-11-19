@@ -46,6 +46,7 @@ import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
 import { ServiceGeneralInfoTab } from '../service-general-info-tab/service-general-info-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -125,7 +126,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     });
   });
   /** The form as it was when the panel opened, with an empty price for every period. */
-  private readonly pristine = signal(JSON.stringify(newDraft()));
+  private readonly pristine = signal(comparableJson(newDraft()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
@@ -155,7 +156,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine())
+      this.open() && (this.image() !== null || comparableJson(this.draft()) !== this.pristine())
     );
   }
 
@@ -236,7 +237,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       .value.set(
         periods.map(({ key }) => Object.assign(new ServicePeriodPrice(), { idPeriod: key })),
       );
-    this.pristine.set(JSON.stringify(this.draft()));
+    this.pristine.set(comparableJson(this.draft()));
   }
 
   private setImage(image: File | null): void {

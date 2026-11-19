@@ -45,7 +45,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - `noOverlap(path, altri)` / `noOverlaps(path, altri)`: un intervallo di giorni (o una lista di intervalli) che ha un
   giorno in comune con un altro (`invalidate.overlap`).
 - `isTextTaken(testo, altri)`: vero se il testo è uguale a uno degli altri, senza badare a maiuscole e spazi agli
-  estremi. Serve ai controlli "nome già usato" che il form fa da sé con `validate`, con un errore della pagina sotto
+  estremi (ogni confronto di testi ignora gli spazi agli estremi: vedi `00-indice.md`). Serve ai controlli "nome già usato" che il form fa da sé con `validate`, con un errore della pagina sotto
   `invalidate.` (es. il nome di un periodo in Stagioni e periodi).
 - Messaggi generici di Angular: `invalidate.min` "Il valore minimo è {{min}}", `invalidate.max` "Il valore massimo è
   {{max}}".
@@ -120,7 +120,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - Quello che l'utente ha scritto e non ha salvato non si perde mai senza chiedere: vale per ogni form, di pagina o
   popup, presente e futuro.
 - Ogni form implementa `UnsavedChanges` con `hasUnsavedChanges()` (per i Signal Forms `form().dirty()`, per un popup
-  i valori diversi da quelli di apertura, solo mentre è aperto).
+  i valori diversi da quelli di apertura, solo mentre è aperto). I valori si confrontano senza spazi ai lati
+  (`comparableJson`, `sameText`): aggiungere solo spazi non è una modifica, e la stessa regola vale per il Salva che
+  chiude senza chiamate quando non è cambiato nulla.
 - Il form si registra con `UnsavedChangesBehaviour.watch(this)` nel costruttore e `unwatch(this)` in `ngOnDestroy`
   (`behaviours/forms/`).
 - Poi, senza altro codice: uscire dalla pagina chiede prima (guard `unsavedChangesGuard` su tutte le pagine del

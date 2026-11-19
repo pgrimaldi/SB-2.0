@@ -37,7 +37,7 @@ import {
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { SaveSectorRequest } from '../../../../../entities/settings/rows-and-sectors/save-sector-request';
+import { Sector } from '../../../../../entities/settings/rows-and-sectors/sector';
 import {
   MAX_SECTOR_NAME_LENGTH,
   SectorItem,
@@ -48,6 +48,7 @@ import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
+import { sameText } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-sector-edit-popup',
@@ -61,6 +62,8 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
   /** The row of the pencil, with the name it has now. */
   readonly sector = input<SectorItem | null>(null);
   readonly updated = output<void>();
+  /** Every error of the save, e.g. for the page to reload the table on a 404. */
+  readonly failed = output<ApiProblem>();
 
   private readonly sectors = inject(SectorService);
   private readonly auth = inject(AuthBehaviour);
@@ -71,7 +74,7 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly isLoading = signal(false);
-  private readonly draft = signal(new SaveSectorRequest());
+  private readonly draft = signal(new Sector());
   protected readonly sectorForm = form(this.draft, (path) => {
     requiredText(path.name);
     metadata(path.name, MAX_LENGTH, () => MAX_SECTOR_NAME_LENGTH);
@@ -97,7 +100,7 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && this.draft().name !== this.original().name;
+    return this.open() && !this.isUnchanged();
   }
 
   protected save(): void {
@@ -105,7 +108,7 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
     if (this.isLoading() || !this.auth.user()?.propertyId || !idSector || !this.canSave()) {
       return;
     }
-    if (this.draft().name?.trim() === this.original().name) {
+    if (this.isUnchanged()) {
       this.close();
       return;
     }
@@ -113,12 +116,13 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.sectors.updateSector(idSector, this.draft()));
+        await firstValueFrom(this.sectors.updateSector(idSector, this.draft().name ?? ''));
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
+        this.failed.emit(problem);
         if (problem.code === ApiErrorCode.CatalogSectorNameTaken) {
           return apiFieldError(this.sectorForm.name, problem.code);
         }
@@ -155,8 +159,13 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
     };
   }
 
-  private original(): SaveSectorRequest {
-    return { ...new SaveSectorRequest(), name: this.sector()?.sectorName ?? null };
+  private isUnchanged(): boolean {
+    return sameText(this.draft().name, this.original().name);
+  }
+
+  private original(): Sector {
+    const row = this.sector();
+    return { ...new Sector(), id: row?.idSector ?? null, name: row?.sectorName ?? null };
   }
 
   private reset(): void {

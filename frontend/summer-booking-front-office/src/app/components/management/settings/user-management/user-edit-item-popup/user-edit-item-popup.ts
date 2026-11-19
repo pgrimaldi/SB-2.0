@@ -71,6 +71,7 @@ import { FilledIconSelect } from '../../../../shared/ui/selects/filled-icon-sele
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface UserRoleTexts {
   admin: string;
@@ -214,7 +215,7 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   hasUnsavedChanges(): boolean {
     const loaded = this.loaded();
     return (
-      this.open() && loaded !== null && JSON.stringify(this.draft()) !== JSON.stringify(loaded)
+      this.open() && loaded !== null && comparableJson(this.draft()) !== comparableJson(loaded)
     );
   }
 

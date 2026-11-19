@@ -38,6 +38,7 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-existing-booking-filters-popup',
@@ -145,7 +146,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
   }
 
   private choices(): string {
-    return JSON.stringify([
+    return comparableJson([
       this.bookingTypologies(),
       this.agreementBookings(),
       this.idAffiliatedHotels(),

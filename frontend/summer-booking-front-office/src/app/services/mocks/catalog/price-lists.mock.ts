@@ -176,7 +176,7 @@ export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpE
       ...onlyFieldsOf(PackageItem, row),
       packageName: packageNameIn(row, language),
     }))
-    .filter(({ packageName }) => !search || packageName?.toLowerCase().includes(search));
+    .filter(({ packageName }) => !search || packageName?.trim().toLowerCase().includes(search));
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -256,11 +256,11 @@ export const duplicatePackageItemsMock = (
 function copyName(item: PackageRow): string {
   const taken = new Set(
     PACKAGES.filter((row) => row.propertyId === item.propertyId).map((row) =>
-      row.packageName?.toLowerCase(),
+      row.packageName?.trim().toLowerCase(),
     ),
   );
   let copy = `${item.packageName} (copia)`;
-  for (let number = 2; taken.has(copy.toLowerCase()); number++) {
+  for (let number = 2; taken.has(copy.trim().toLowerCase()); number++) {
     copy = `${item.packageName} (copia ${number})`;
   }
   return copy;
@@ -296,7 +296,7 @@ function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? -1 : 1;
   }
-  return first.localeCompare(second, 'it', { sensitivity: 'base', numeric: true });
+  return first.trim().localeCompare(second.trim(), 'it', { sensitivity: 'base', numeric: true });
 }
 
 function positiveInteger(value: unknown, fallback: number): number {
@@ -554,7 +554,7 @@ export const additionalItemListMock = (
   const found = ADDITIONAL_ITEMS.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.additionalItemName?.toLowerCase().includes(search)),
+      (!search || row.additionalItemName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(AdditionalItem, row));
   const field = ADDITIONAL_ITEM_SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -628,11 +628,11 @@ export const duplicateAdditionalItemsMock = (
 function additionalItemCopyName(item: AdditionalItemRow): string {
   const taken = new Set(
     ADDITIONAL_ITEMS.filter((row) => row.propertyId === item.propertyId).map((row) =>
-      row.additionalItemName?.toLowerCase(),
+      row.additionalItemName?.trim().toLowerCase(),
     ),
   );
   let copy = `${item.additionalItemName} (copia)`;
-  for (let number = 2; taken.has(copy.toLowerCase()); number++) {
+  for (let number = 2; taken.has(copy.trim().toLowerCase()); number++) {
     copy = `${item.additionalItemName} (copia ${number})`;
   }
   return copy;

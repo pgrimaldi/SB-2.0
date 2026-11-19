@@ -5,6 +5,7 @@ import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { UserRole } from '../../../entities/enums/user-role';
 import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
 // Test account of the mock. Only the SHA-256 of the password is kept: the readable password
 // never appears in the repository nor in the published JavaScript.
@@ -53,7 +54,7 @@ export const loginMock = (request: HttpRequest<unknown>): Observable<HttpEvent<u
     delay(400),
     switchMap((passwordSha256) => {
       const valid =
-        username?.trim().toLowerCase() === MOCK_ACCOUNT.username &&
+        sameTextIgnoringCase(username, MOCK_ACCOUNT.username) &&
         passwordSha256 === MOCK_ACCOUNT.passwordSha256;
       if (!valid) {
         return unauthorized(request, ApiErrorCode.AuthInvalidCredentials);

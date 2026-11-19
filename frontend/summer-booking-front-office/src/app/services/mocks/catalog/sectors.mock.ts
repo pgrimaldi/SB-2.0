@@ -1,8 +1,12 @@
 import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import {
+  TABLE_PAGE_SIZE_OPTIONS,
+  TABLE_SEARCH_MAX_LENGTH,
+} from '../../../components/shared/ui/tables/table/table';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
-import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import { Page, PageRequest, SortDirection } from '../../../entities/pagination/page';
 import { Sector } from '../../../entities/settings/rows-and-sectors/sector';
 import {
   MAX_SECTOR_NAME_LENGTH,
@@ -10,8 +14,9 @@ import {
 } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { problem } from '../errors/problem.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
 interface SectorUsage {
   mapSpots: number;
@@ -45,25 +50,31 @@ const SECTORS: SectorRow[] = SECTOR_NAMES.map((sectorName, index) => ({
   ...(index === 0 ? { usage: { mapSpots: 14, priceLists: 1, stayLimits: 0, discounts: 0 } } : {}),
 }));
 
-const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['sectorName'] as const;
+const SORT_DIRECTIONS: readonly SortDirection[] = ['Ascending', 'Descending'];
 
 /**
  * `POST /api/catalog/sectors-list`: one page of the sectors (rows) of the property of the token, in
- * their own order unless sorted. 401 without a valid access token.
+ * their own order unless sorted. 400 `validation.invalid` on `page`, `pageSize`, `sortField`,
+ * `sortDirection` or `filters` out of the table's rules and `validation.max_length` on a `search`
+ * over 100 characters; 401 without a valid access token.
  */
 export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
+  const errors = tableRequestErrors(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
+  }
   const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const { page = 1, pageSize = TABLE_PAGE_SIZE_OPTIONS[0] } = body;
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
   const found = SECTORS.filter(
     (row) =>
-      row.propertyId === property.id && (!search || row.sectorName?.toLowerCase().includes(search)),
+      row.propertyId === property.id &&
+      (!search || row.sectorName?.trim().toLowerCase().includes(search)),
   )
     .sort((first, second) => first.sortOrder - second.sortOrder)
     .map((row) => onlyFieldsOf(SectorItem, row));
@@ -203,6 +214,10 @@ export const deleteSectorsMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as { idSectors?: unknown };
+  const idSectorsError = emptyIdSectorsError(request, body.idSectors);
+  if (idSectorsError) {
+    return idSectorsError;
+  }
   const sectors = sectorsOf(DEMO_PROPERTY.id, body.idSectors);
   if (!sectors) {
     return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
@@ -232,6 +247,10 @@ export const duplicateSectorsMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as { idSectors?: unknown };
+  const idSectorsError = emptyIdSectorsError(request, body.idSectors);
+  if (idSectorsError) {
+    return idSectorsError;
+  }
   const sectors = sectorsOf(DEMO_PROPERTY.id, body.idSectors);
   if (!sectors) {
     return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
@@ -246,6 +265,18 @@ export const duplicateSectorsMock = (
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/** `idSectors` missing or empty: `validation.required`, as in the requests doc. */
+function emptyIdSectorsError(
+  request: HttpRequest<unknown>,
+  idSectors: unknown,
+): Observable<never> | null {
+  return Array.isArray(idSectors) && idSectors.length
+    ? null
+    : problem(request, 400, ApiErrorCode.ValidationFailed, {
+        errors: [{ field: 'idSectors', code: ApiErrorCode.ValidationRequired }],
+      });
+}
 
 /** As the backend's validator: not blank, at most 100 characters before the spaces are removed. */
 function sectorNameError(request: HttpRequest<unknown>, name: unknown): Observable<never> | null {
@@ -280,7 +311,7 @@ function isNameTaken(propertyId: number, sectorName: string, renamed?: SectorRow
     (row) =>
       row !== renamed &&
       row.propertyId === propertyId &&
-      row.sectorName?.toLowerCase() === sectorName.toLowerCase(),
+      sameTextIgnoringCase(row.sectorName, sectorName),
   );
 }
 
@@ -299,23 +330,49 @@ function sectorsOf(propertyId: number, idSectors: unknown): SectorRow[] | null {
 function copyName(sector: SectorRow): string {
   const taken = new Set(
     SECTORS.filter((row) => row.propertyId === sector.propertyId).map((row) =>
-      row.sectorName?.toLowerCase(),
+      row.sectorName?.trim().toLowerCase(),
     ),
   );
-  let copy = `${sector.sectorName} (copia)`;
-  for (let number = 2; taken.has(copy.toLowerCase()); number++) {
-    copy = `${sector.sectorName} (copia ${number})`;
+  for (let number = 1; ; number++) {
+    const suffix = number === 1 ? ' (copia)' : ` (copia ${number})`;
+    const copy = `${(sector.sectorName ?? '').slice(0, MAX_SECTOR_NAME_LENGTH - suffix.length)}${suffix}`;
+    if (!taken.has(copy.trim().toLowerCase())) {
+      return copy;
+    }
   }
-  return copy;
 }
 
 function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? -1 : 1;
   }
-  return first.localeCompare(second, 'it', { sensitivity: 'base', numeric: true });
+  return first.trim().localeCompare(second.trim(), 'it', { sensitivity: 'base', numeric: true });
 }
 
-function positiveInteger(value: unknown, fallback: number): number {
-  return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
+/** The common rules of the table requests, and the search at most 100 characters. */
+function tableRequestErrors(body: Partial<PageRequest>): MockFieldError[] {
+  const wrong = [
+    { field: 'page', isWrong: !Number.isInteger(body.page) || (body.page ?? 0) < 1 },
+    { field: 'pageSize', isWrong: !TABLE_PAGE_SIZE_OPTIONS.includes(body.pageSize ?? 0) },
+    {
+      field: 'sortField',
+      isWrong: !!body.sortField && !SORT_FIELDS.some((name) => name === body.sortField),
+    },
+    {
+      field: 'sortDirection',
+      isWrong: !SORT_DIRECTIONS.some((direction) => direction === body.sortDirection),
+    },
+    { field: 'filters', isWrong: !Array.isArray(body.filters) || body.filters.length > 0 },
+  ];
+  const errors: MockFieldError[] = wrong
+    .filter(({ isWrong }) => isWrong)
+    .map(({ field }) => ({ field, code: ApiErrorCode.ValidationInvalid }));
+  if (typeof body.search === 'string' && body.search.length > TABLE_SEARCH_MAX_LENGTH) {
+    errors.push({
+      field: 'search',
+      code: ApiErrorCode.ValidationMaxLength,
+      args: { max: TABLE_SEARCH_MAX_LENGTH, min: 0 },
+    });
+  }
+  return errors;
 }

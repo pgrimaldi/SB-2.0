@@ -41,6 +41,7 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-season-interval-edit-popup',
@@ -116,7 +117,7 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== JSON.stringify(this.original());
+    return this.open() && comparableJson(this.draft()) !== comparableJson(this.original());
   }
 
   protected save(): void {

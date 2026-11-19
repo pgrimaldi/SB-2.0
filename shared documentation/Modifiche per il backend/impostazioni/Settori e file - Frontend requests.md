@@ -23,7 +23,8 @@ Aggiungi, Modifica ed Elimina di una riga usano le API che ci sono già, così c
 - **Modulo**: le API stanno in Catalog (`Module.Catalog`), accanto a `/api/catalog/sectors` (`Endpoints/SeasonEndpoints.cs`,
   `Application/Services/SectorService.cs`), con i dati di `MapSector` (`catalog.map_sectors`).
 - **Le API esistenti non cambiano**: `GET`, `POST`, `PUT` e `DELETE /api/catalog/sectors` restano come sono: stesse
-  rotte, richieste, risposte e comportamento.
+  rotte, richieste, risposte e comportamento, salvo la risposta ai salvataggi contemporanei dello stesso nome (vedi
+  "Due salvataggi dello stesso nome nello stesso momento").
 - **Permesso**: per l'API 1 `CatalogRead`, come `GET /api/catalog/sectors`; per le API 2 e 3 `CatalogSettings`, come
   `POST`, `PUT` e `DELETE /api/catalog/sectors`. Senza permesso 403 `auth.forbidden`; senza token valido 401
   `auth.unauthenticated`.
@@ -73,9 +74,20 @@ Il corpo è la richiesta standard delle tabelle del frontend, uguale per tutte l
 | `sortField` | string | `sectorName`, oppure `""` per l'ordine del backend: `sort_order`, poi `id`, come oggi `GET /api/catalog/sectors` (`SectorRepository.ListAsync`). |
 | `sortDirection` | string | `Ascending` o `Descending`. Conta solo con `sortField` non vuoto: con `sortField` `""` il frontend manda `Ascending` e il backend usa il suo ordine. |
 
-Ordinamento per `sectorName`: sul nome, senza distinguere maiuscole e minuscole. Due settori dello stesso stabilimento
-non hanno lo stesso nome (indice `uq_catalog_map_sectors_property_name` su `property_id` e `lower(name)`, solo sulle
-righe non eliminate), quindi non ci sono parità.
+Ordinamento per `sectorName`: **ordine naturale** del nome, cioè i numeri dentro il nome si confrontano come numeri,
+non cifra per cifra. Maiuscole e minuscole non contano e le lettere accentate stanno accanto a quelle senza accento.
+
+| `sortDirection` | Ordine atteso |
+|---|---|
+| `Ascending` | Fila 1, Fila 2, Fila 9, Fila 10, Fila 11, Gazebo, Settore Est |
+| `Descending` | Settore Est, Gazebo, Fila 11, Fila 10, Fila 9, Fila 2, Fila 1 |
+
+Il semplice `ORDER BY lower(name)` non basta: con l'ordinamento del database (`en_US.utf8`) mette "Fila 10" e
+"Fila 11" prima di "Fila 2". Come ottenere l'ordine naturale (per esempio una collation ICU con l'ordine numerico,
+`und-u-kn-true`, che PostgreSQL supporta già, o un'altra soluzione) lo decide lo sviluppatore backend: l'agente glielo
+chiede prima di scrivere codice; il risultato deve essere quello della tabella sopra, con paginazione e `total` fatti
+dal database su quell'ordine. A parità di ordine (nomi che differiscono solo per maiuscole o accenti) vale l'ordine del
+backend: `sort_order`, poi `id`.
 
 Valori non validi: 400 `validation.failed` con un errore `validation.invalid` sul campo: `page` (meno di 1),
 `pageSize` (non 10, 20, 50 o 100), `sortField` (non `sectorName` né `""`), `sortDirection` (non `Ascending` o
@@ -155,14 +167,16 @@ settori in una sola chiamata, tutto o niente**. È un'**API nuova**. Il cestino 
 |---|---|---|
 | `idSectors` | array di string (UUID) | Gli `idSector` delle righe di `sectors-list` (il `public_id` dei settori), almeno uno. Lo stesso id ripetuto conta una volta. La selezione della tabella può comprendere righe di più pagine, quindi anche tutti i settori dello stabilimento. |
 
-Il frontend non ha un tetto al numero di id. Se il backend ne vuole uno (come i 300 di `BulkIdsRequest.MaxIds`),
-chiedere allo sviluppatore quale e scriverlo qui, così il frontend lo rispetta.
+Il frontend non ha un tetto al numero di id. Se ne serve uno (come i 300 di `BulkIdsRequest.MaxIds`), lo decide lo
+sviluppatore backend: l'agente glielo chiede prima di scrivere codice e lo scrive qui, così il frontend lo rispetta.
 
 ### Risposta
 
 204 senza corpo. Dopo il 204 la tabella si ricarica con `sectors-list`.
 
 ### Errori
+
+Nell'ordine in cui si controllano:
 
 | Status | `code` | Quando |
 |---|---|---|
@@ -174,7 +188,8 @@ chiedere allo sviluppatore quale e scriverlo qui, così il frontend lo rispetta.
 | 404 | `catalog.sector_not_found` | Un id non è un settore dello stabilimento (anche perché già eliminato). Non si elimina nessun settore. |
 | 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`) e **in più `sectorName`**, il nome di quel settore: con più settori il messaggio deve dire quale. |
 
-Con più settori che non si possono eliminare, la risposta è l'errore del primo nell'ordine di `idSectors`.
+Prima si controlla che tutti gli id siano settori dello stabilimento (404 se uno non lo è), poi che nessuno sia usato:
+con più settori in uso, `sectorName` e i conteggi sono quelli del primo in uso nell'ordine di `idSectors`.
 
 ```json
 {
@@ -207,7 +222,9 @@ Bottone "Duplica" di una riga (un id) e "Duplica selezione" della tabella (uno o
   - va in **fondo all'ordine** (`sort_order`, come `NextSortOrderAsync`), nell'ordine di `idSectors`;
   - è solo il settore: postazioni della mappa, prezzi dei listini, limiti di soggiorno e sconti restano sul settore di
     partenza, la copia non è usata da nessuno;
-  - nel registro una voce `catalog.sector_created`, come `SectorService.CreateAsync`.
+  - nel registro una voce `catalog.sector_created`, come `SectorService.CreateAsync`;
+  - mai un 500 per il nome di una copia, anche se nello stesso momento un altro utente salva quel nome (vedi "Due
+    salvataggi dello stesso nome nello stesso momento").
 - **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
 
 ### Richiesta
@@ -232,6 +249,8 @@ Per un eventuale tetto al numero di id vale la nota della sezione 2.
 
 ### Errori
 
+Nell'ordine in cui si controllano:
+
 | Status | `code` | Quando |
 |---|---|---|
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
@@ -243,6 +262,31 @@ Per un eventuale tetto al numero di id vale la nota della sezione 2.
 
 Il frontend mostra ogni errore di questa API nell'avviso "Operazione non riuscita", con il testo del suo `code`.
 
+## API esistenti usate così come sono
+
+Il frontend le chiama senza modifiche; qui solo come le usa e dove mostra le risposte.
+
+| Azione | API | Corpo | Risposta | Errori e dove li mostra il frontend |
+|---|---|---|---|---|
+| Salva del popup "Aggiungi settore/fila" | `POST /api/catalog/sectors` | `{ "name": "Fila 9" }` (`SaveSectorRequest`) | 201 con `SectorDto`: il frontend non la legge e ricarica la tabella | `validation.failed` su `name` e 409 `catalog.sector_name_taken` sotto il campo del nome; gli altri sopra i bottoni del popup. |
+| Salva del popup della matita | `PUT /api/catalog/sectors/{id}`, con l'`idSector` della riga | `{ "name": "Fila 2 lato mare" }` | 200 con `SectorDto`: il frontend non la legge e ricarica la tabella | Come l'aggiunta; 404 `catalog.sector_not_found` sopra i bottoni. |
+| Cestino di una riga | `DELETE /api/catalog/sectors/{id}`, con l'`idSector` della riga | Nessuno | 204: il frontend ricarica la tabella | Nell'avviso "Operazione non riuscita". Il 409 `catalog.sector_in_use` di questa API non ha `sectorName`: il frontend aggiunge da sé il nome della riga, il backend non deve cambiare nulla. |
+
+### Due salvataggi dello stesso nome nello stesso momento
+
+Oggi `POST` e `PUT /api/catalog/sectors` controllano il nome già usato prima di salvare (`SectorService.CreateAsync` e
+`UpdateAsync`, `Application/Services/SectorService.cs:42` e `:55`, con `EnsureNameFreeAsync` alle righe 84-87). Se due
+utenti salvano lo stesso nome nello stesso momento, passano tutti e due il controllo; al salvataggio l'indice unico
+`uq_catalog_map_sectors_property_name` (`property_id`, `lower(name)`, righe non eliminate) blocca il secondo, ma
+l'errore del database non è gestito e `GlobalExceptionHandler` (`Boot/Web/ProblemDetailsWriter.cs:34-56`) risponde 500
+`server.unexpected`. Il frontend mostra allora un messaggio generico sopra i bottoni invece del nome già usato sotto il
+campo.
+
+Cosa serve al frontend: anche in questo caso 409 `catalog.sector_name_taken`, senza `errors[]`, come quando il controllo
+trova il nome (il frontend lo mostra già sotto il campo del nome); per `bulk-duplicate` (sezione 3) mai un 500 per il
+nome di una copia. Come ottenerlo (riconoscere la violazione dell'indice, riprovare, bloccare...) lo decide lo
+sviluppatore backend: l'agente glielo chiede prima di scrivere codice. Il resto del contratto non cambia.
+
 ## Verifica
 
 API 1, con uno stabilimento di prova con 12 settori e un token con `catalog.read`:
@@ -250,8 +294,9 @@ API 1, con uno stabilimento di prova con 12 settori e un token con `catalog.read
 1. Con `page` 1, `pageSize` 10, `search` `""`, `sortField` `""`: `total` 12, 10 righe nell'ordine di
    `GET /api/catalog/sectors`, ognuna con solo `idSector` e `sectorName` (gli `id` e i `name` di quella lista); `page` 2
    dà le ultime 2; `page` 3 dà `rows` vuoto e `total` 12.
-2. `sortField` `sectorName`: righe in ordine di nome senza distinguere maiuscole e minuscole; con `Descending`
-   l'ordine opposto.
+2. `sortField` `sectorName` con settori "Fila 1", "Fila 2", "Fila 9", "Fila 10", "Fila 11", "fila 3": righe in
+   ordine naturale, Fila 1, Fila 2, fila 3, Fila 9, Fila 10, Fila 11; con `Descending` l'ordine opposto; "Fila 10" non
+   viene mai prima di "Fila 2".
 3. `search` `fila` trova i settori che hanno "Fila", "fila" o "FILA" nel nome, e `total` conta solo quelli; `search`
    `%` trova solo i nomi che contengono il carattere `%`.
 4. Un settore eliminato (`deleted_at` valorizzato) non compare e non conta in `total`.
@@ -276,3 +321,10 @@ API 2 e 3, con un token con `catalog.settings`:
 5. `bulk-duplicate` dello stesso settore due volte di seguito: due copie con nomi diversi.
 6. `idSectors` vuoto: 400 `validation.failed` con `validation.required` su `idSectors`; senza `catalog.settings` 403
    `auth.forbidden`.
+
+Salvataggi contemporanei:
+
+1. Due `POST /api/catalog/sectors` con lo stesso nome (o con nomi che differiscono solo per maiuscole e spazi ai lati)
+   mandati insieme: uno risponde 201, l'altro 409 `catalog.sector_name_taken`, mai 500; nello stabilimento c'è un solo
+   settore con quel nome.
+2. Lo stesso con un `PUT /api/catalog/sectors/{id}` che rinomina un settore mentre un `POST` crea lo stesso nome.

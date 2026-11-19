@@ -43,6 +43,7 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-additional-item-add-item-panel',
@@ -83,7 +84,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     maxPrices(path.intermediatePrices, intermediatePricesOf);
   });
   /** The form with nothing chosen: with an empty price for every row once the rows are read. */
-  private readonly pristine = signal(JSON.stringify(new AdditionalItemAddItemRequest()));
+  private readonly pristine = signal(comparableJson(new AdditionalItemAddItemRequest()));
   protected readonly articles = new DropdownList(
     () => this.warehouse.articleCombobox(),
     this.errorText,
@@ -129,7 +130,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== this.pristine();
+    return this.open() && comparableJson(this.draft()) !== this.pristine();
   }
 
   protected save(): void {
@@ -169,7 +170,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     this.error.set(null);
     this.draft.set(new AdditionalItemAddItemRequest());
     this.draftForm().reset();
-    this.pristine.set(JSON.stringify(new AdditionalItemAddItemRequest()));
+    this.pristine.set(comparableJson(new AdditionalItemAddItemRequest()));
     this.articles.clear();
     this.packages.clear();
     this.sectors.set([]);
@@ -217,7 +218,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draftForm.sectorPrices().value.set(sectorPrices);
     this.draftForm.periodPrices().value.set(periodPrices);
     this.pristine.set(
-      JSON.stringify(
+      comparableJson(
         Object.assign(new AdditionalItemAddItemRequest(), { sectorPrices, periodPrices }),
       ),
     );

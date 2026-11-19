@@ -21,6 +21,7 @@ import { auditUsers } from '../audit/audit.mock';
 import { MOCK_SIGNED_IN_USER, isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
 type UserRow = UserItem & UserSelectedItem & { propertyId: number };
 type CreateUserBody = Partial<CreateUserRequest>;
@@ -88,7 +89,8 @@ export const usersListMock = (request: HttpRequest<unknown>): Observable<HttpEve
   const found = USERS.filter(
     (row) =>
       row.propertyId === DEMO_PROPERTY.id &&
-      (!search || [row.email, row.phone].some((text) => text?.toLowerCase().includes(search))),
+      (!search ||
+        [row.email, row.phone].some((text) => text?.trim().toLowerCase().includes(search))),
   ).map((row) => onlyFieldsOf(UserItem, row));
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   const sign = field && sortDirection === 'Descending' ? -1 : 1;
@@ -142,7 +144,7 @@ export const createUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
     return problem(request, 422, ApiErrorCode.AccountRoleNotAssignable);
   }
   const email = (body.email ?? '').trim();
-  if (USERS.some((row) => row.email?.toLowerCase() === email.toLowerCase())) {
+  if (USERS.some((row) => sameTextIgnoringCase(row.email, email))) {
     return problem(request, 409, ApiErrorCode.AccountEmailTaken);
   }
   const phone = body.phone?.trim() || null;
@@ -216,7 +218,7 @@ export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
     return user;
   }
   const email = (body.email ?? '').trim();
-  if (USERS.some((row) => row !== user && row.email?.toLowerCase() === email.toLowerCase())) {
+  if (USERS.some((row) => row !== user && sameTextIgnoringCase(row.email, email))) {
     return problem(request, 409, ApiErrorCode.AccountEmailTaken);
   }
   if (!ASSIGNABLE_ROLES.includes(body.role)) {
@@ -382,5 +384,5 @@ function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? 1 : -1;
   }
-  return first.localeCompare(second, 'it', { sensitivity: 'base' });
+  return first.trim().localeCompare(second.trim(), 'it', { sensitivity: 'base' });
 }

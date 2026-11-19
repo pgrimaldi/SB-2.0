@@ -56,6 +56,7 @@ import { SectionTitle } from '../../../../shared/ui/titles/section-title/section
 import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 @Component({
   selector: 'app-additional-item-edit-item-panel',
@@ -162,7 +163,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== JSON.stringify(this.pristine());
+    return this.open() && comparableJson(this.draft()) !== comparableJson(this.pristine());
   }
 
   protected startEdit(): void {

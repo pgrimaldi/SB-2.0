@@ -41,6 +41,7 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
 import { TableServiceGeneralInfoTab } from '../table-service-general-info-tab/table-service-general-info-tab';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -121,7 +122,7 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     });
   });
   /** The form as it was when the panel opened. */
-  private readonly pristine = JSON.stringify(newDraft());
+  private readonly pristine = comparableJson(newDraft());
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(() => this.draftForm().invalid());
   private readonly error = signal<ApiProblem | null>(null);
@@ -142,7 +143,7 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== this.pristine;
+    return this.open() && comparableJson(this.draft()) !== this.pristine;
   }
 
   protected save(): void {

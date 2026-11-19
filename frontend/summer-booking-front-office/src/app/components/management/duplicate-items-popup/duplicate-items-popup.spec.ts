@@ -7,6 +7,7 @@ import { Observable, Subject, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DuplicateItemsPopup } from './duplicate-items-popup';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 
 @Component({
   imports: [DuplicateItemsPopup],
@@ -17,6 +18,7 @@ import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
     [action]="action"
     [(open)]="open"
     (duplicated)="duplicated = $event"
+    (failed)="failed = $event"
   />`,
 })
 class DuplicateItemsPopupHost {
@@ -25,6 +27,7 @@ class DuplicateItemsPopupHost {
   readonly open = signal(false);
   action: (idItems: string[]) => Observable<void> = vi.fn();
   duplicated: readonly string[] = [];
+  failed: ApiProblem | null = null;
 }
 
 describe('DuplicateItemsPopup', () => {
@@ -72,7 +75,7 @@ describe('DuplicateItemsPopup', () => {
     expect(host.duplicated).toEqual(['a1', 'a2']);
   });
 
-  it('should show the error in a popup when nothing is duplicated', async () => {
+  it('should show the error in a popup and give it to the page when nothing is duplicated', async () => {
     const { host, confirm } = await setup((page) => {
       page.action = () =>
         throwError(
@@ -87,6 +90,7 @@ describe('DuplicateItemsPopup', () => {
     await confirm();
     expect(host.open()).toBe(false);
     expect(host.duplicated).toEqual([]);
+    expect(host.failed?.code).toBe(ApiErrorCode.ValidationFailed);
     expect(document.querySelector('.page__spinner')).toBeNull();
     // The message of the code (here the fallback key: the test has no translations).
     expect(document.querySelector('.alert__popup__text')?.textContent?.trim()).toBe(

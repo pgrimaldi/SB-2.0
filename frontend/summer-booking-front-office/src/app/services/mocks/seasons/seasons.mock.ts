@@ -20,6 +20,7 @@ import { servicesUsingPeriod } from '../catalog/catalog.mock';
 import { priceListsUsingPeriod } from '../catalog/price-lists.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
 type SeasonDatesRow = SeasonDates & { propertyId: number };
 /** The days of its date ranges as the backend keeps them (`2026-05-01`). */
@@ -248,7 +249,7 @@ export const createSeasonPeriodMock = (
   }
   const periods = periodsOf(property.id, isNextSeason);
   const name = (body.name as string).trim();
-  if (periods.some((row) => row.name?.toLowerCase() === name.toLowerCase())) {
+  if (periods.some((row) => sameTextIgnoringCase(row.name, name))) {
     return problem(request, 409, ApiErrorCode.PricingPeriodNameTaken);
   }
   const ranges = (body.ranges as SeasonPeriodInterval[]).map(daysOf);
@@ -357,9 +358,7 @@ export const updateSeasonPeriodMock = (
     return problem(request, 404, ApiErrorCode.PricingPeriodNotFound);
   }
   const name = (body.name as string).trim();
-  const isNameTaken = periods.some(
-    (row) => row !== period && row.name?.toLowerCase() === name.toLowerCase(),
-  );
+  const isNameTaken = periods.some((row) => row !== period && sameTextIgnoringCase(row.name, name));
   if (isNameTaken) {
     return problem(request, 409, ApiErrorCode.PricingPeriodNameTaken);
   }

@@ -56,6 +56,7 @@ import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
 import { ServiceGeneralInfoTab } from '../service-general-info-tab/service-general-info-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -212,7 +213,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()))
+      (this.image() !== null || comparableJson(this.draft()) !== comparableJson(this.pristine()))
     );
   }
 

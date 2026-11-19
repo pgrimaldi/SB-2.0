@@ -60,6 +60,7 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 
@@ -206,7 +207,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   hasUnsavedChanges(): boolean {
     const loaded = this.loaded();
     return (
-      this.open() && loaded !== null && JSON.stringify(this.draft()) !== JSON.stringify(loaded)
+      this.open() && loaded !== null && comparableJson(this.draft()) !== comparableJson(loaded)
     );
   }
 

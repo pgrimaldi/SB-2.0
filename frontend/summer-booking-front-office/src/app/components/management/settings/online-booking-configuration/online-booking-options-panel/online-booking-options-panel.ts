@@ -46,6 +46,7 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface BookingOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
@@ -266,7 +267,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() && JSON.stringify(this.draft()) !== JSON.stringify(new OnlineBookingOptions())
+      this.open() && comparableJson(this.draft()) !== comparableJson(new OnlineBookingOptions())
     );
   }
 

@@ -34,6 +34,7 @@ import { BathhouseServiceItem } from '../../../../entities/settings/bathhouse-co
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
+import { comparableJson } from '../../../../components/shared/forms/text-comparison';
 
 interface ServiceSection {
   readonly group: BathhouseServiceGroup;
@@ -167,7 +168,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
 }
 
 function selectionOf(services: readonly BathhouseServiceItem[]): string {
-  return JSON.stringify(
+  return comparableJson(
     services.filter(({ isSelected }) => isSelected).map(({ idService }) => idService),
   );
 }

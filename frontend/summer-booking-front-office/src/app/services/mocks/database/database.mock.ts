@@ -285,7 +285,7 @@ function bookingPageMock(
   // A booking is in the period when some of its days are.
   const found = bookings.filter(
     (item) =>
-      (!search || item.customerName?.toLowerCase().includes(search)) &&
+      (!search || item.customerName?.trim().toLowerCase().includes(search)) &&
       (!from || (item.dateTo ?? '') >= from) &&
       (!to || (item.dateFrom ?? '') <= to),
   );
@@ -439,7 +439,7 @@ function compare(first: string | null, second: string | null): number {
   if (first === null || second === null) {
     return first === second ? 0 : first === null ? -1 : 1;
   }
-  return first.localeCompare(second, 'it', { sensitivity: 'base' });
+  return first.trim().localeCompare(second.trim(), 'it', { sensitivity: 'base' });
 }
 
 function filterValue(filters: unknown, field: FilterField): string | null {

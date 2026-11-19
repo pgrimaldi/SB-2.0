@@ -31,6 +31,7 @@ import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-select/filled-multi-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { AUDIT_ACTIONS } from '../audit-actions';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 /** The translated backend action codes: `actions.<module>.<action>`. */
 type ActionTexts = Partial<Record<string, Partial<Record<string, string>>>>;
@@ -136,7 +137,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
   }
 
   private choices(): string {
-    return JSON.stringify([this.actionCodes(), this.idUsers()]);
+    return comparableJson([this.actionCodes(), this.idUsers()]);
   }
 
   /** With their names, for the chips: from the list of the server, or as they were applied. */
@@ -165,6 +166,6 @@ function actionOptionsOf(texts: ActionTexts | undefined): SelectOption[] {
 /** A to Z by name, in the alphabet of the current language. */
 function byLabel(options: SelectOption[], language: string): SelectOption[] {
   return options.sort((first, second) =>
-    first.label.localeCompare(second.label, language, { sensitivity: 'base' }),
+    first.label.trim().localeCompare(second.label.trim(), language, { sensitivity: 'base' }),
   );
 }

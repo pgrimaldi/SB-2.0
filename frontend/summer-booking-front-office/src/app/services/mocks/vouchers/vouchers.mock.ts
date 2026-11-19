@@ -89,7 +89,7 @@ export const voucherListMock = (request: HttpRequest<unknown>): Observable<HttpE
   const found = VOUCHERS.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.voucherName?.toLowerCase().includes(search)),
+      (!search || row.voucherName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(VoucherItem, row));
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -346,7 +346,7 @@ function compare(first: string | number | null, second: string | number | null):
   }
   return typeof first === 'number' && typeof second === 'number'
     ? first - second
-    : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
+    : String(first).trim().localeCompare(String(second).trim(), 'it', { sensitivity: 'base' });
 }
 
 function positiveInteger(value: unknown, fallback: number): number {

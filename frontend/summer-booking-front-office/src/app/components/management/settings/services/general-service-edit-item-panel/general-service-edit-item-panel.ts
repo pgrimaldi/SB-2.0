@@ -55,6 +55,7 @@ import { GeneralServiceBookingsTab } from '../general-service-bookings-tab/gener
 import { GeneralServiceGeneralInfoTab } from '../general-service-general-info-tab/general-service-general-info-tab';
 import { GeneralServicePricesTab } from '../general-service-prices-tab/general-service-prices-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -210,7 +211,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()))
+      (this.image() !== null || comparableJson(this.draft()) !== comparableJson(this.pristine()))
     );
   }
 

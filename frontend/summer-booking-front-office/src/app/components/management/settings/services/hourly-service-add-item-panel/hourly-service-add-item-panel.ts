@@ -47,6 +47,7 @@ import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-
 import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/hourly-service-general-info-tab';
 import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -130,7 +131,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     });
   });
   /** The form as it was when the panel opened, with an empty availability option for every period. */
-  private readonly pristine = signal(JSON.stringify(newDraft()));
+  private readonly pristine = signal(comparableJson(newDraft()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
@@ -160,7 +161,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
 
   hasUnsavedChanges(): boolean {
     return (
-      this.open() && (this.image() !== null || JSON.stringify(this.draft()) !== this.pristine())
+      this.open() && (this.image() !== null || comparableJson(this.draft()) !== this.pristine())
     );
   }
 
@@ -244,7 +245,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
         }),
       ),
     );
-    this.pristine.set(JSON.stringify(this.draft()));
+    this.pristine.set(comparableJson(this.draft()));
   }
 
   private setImage(image: File | null): void {

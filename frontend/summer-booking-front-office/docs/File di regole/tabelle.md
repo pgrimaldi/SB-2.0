@@ -73,7 +73,7 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
 
 - Ogni azione di tabella (interruttore, duplica, elimina, di una riga o delle righe scelte) usa lo spinner a pagina
   intera: `app-page-spinner` copre la pagina fino alla risposta, anche se dura poco, e intanto un'altra azione non
-  parte.
+  parte, né con il mouse né con la tastiera (è un `<dialog>` modale del browser, che Esc non chiude).
 - Elimina e duplica chiedono conferma con `app-delete-items-popup` / `app-duplicate-items-popup`
   (`components/management/`): la pagina passa `translationKey` (il gruppo di testi), `action` (la funzione che chiama
   la sua API) e `pathIcon`. Appena confermato, il popup si chiude e parte lo spinner.
@@ -84,9 +84,10 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
   selezionati" la selezione si svuota. Dopo l'interruttore, riuscito o no, la tabella rilegge le righe e mostra lo
   stato del server.
 - L'errore di un'azione compare in un popup, non nella tabella: vedi "Errori delle azioni" in `api-e-mock.md`.
-- Se l'eliminazione fallisce, `app-delete-items-popup` mostra l'errore come sempre e lo passa anche alla pagina con
-  `(failed)` (facoltativo): la pagina può ricaricare quando serve, es. Stagioni e periodi dopo un 404 (elemento già
-  eliminato da qualcun altro) ricarica i periodi.
+- Se l'eliminazione o la duplicazione fallisce, `app-delete-items-popup` / `app-duplicate-items-popup` mostra l'errore
+  come sempre e lo passa anche alla pagina con `(failed)` (facoltativo): la pagina può ricaricare quando serve, es.
+  Stagioni e periodi dopo un 404 (elemento già eliminato da qualcun altro) ricarica i periodi, Settori e file dopo
+  `catalog.sector_not_found` ricarica la tabella e toglie dalla selezione gli id dell'azione.
 
 ## Errore di caricamento
 

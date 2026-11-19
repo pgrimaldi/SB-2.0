@@ -18,6 +18,7 @@ import {
 } from '../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { SectorService } from '../../../services/api/catalog/sector.service';
 
@@ -130,10 +131,25 @@ export class RowsAndSectors {
     this.editing.set(true);
   }
 
-  protected forgetDeleted(idSectors: readonly string[]): void {
+  protected forgetDeleted(idSectors: readonly (string | null)[]): void {
     this.idSelectedSectors.update((idSelected) =>
       idSelected.filter((idSelectedSector) => !idSectors.includes(String(idSelectedSector))),
     );
+  }
+
+  /**
+   * A sector deleted meanwhile by someone else: the table shows it is gone and the ids of the action
+   * leave the selection (all of them after an action on the selection, where nothing was done).
+   */
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idSectors: readonly (string | null)[],
+  ): void {
+    if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+      this.forgetDeleted(idSectors);
+      table.reload();
+    }
   }
 }
 

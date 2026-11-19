@@ -54,6 +54,7 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
 import { TableServiceGeneralInfoTab } from '../table-service-general-info-tab/table-service-general-info-tab';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -208,7 +209,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && JSON.stringify(this.draft()) !== JSON.stringify(this.pristine());
+    return this.open() && comparableJson(this.draft()) !== comparableJson(this.pristine());
   }
 
   protected isLoading(tab: PanelTab): boolean {

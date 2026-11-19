@@ -1425,7 +1425,7 @@ export const barServiceListMock = (
   const found = BAR_SERVICES.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
+      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(BarServiceItem, row));
   const field = BAR_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -1722,7 +1722,7 @@ export const standardServiceListMock = (
   const found = STANDARD_SERVICES.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
+      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(StandardServiceItem, row));
   const field = STANDARD_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -2082,7 +2082,7 @@ export const hourlyServiceListMock = (
   const found = HOURLY_SERVICES.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
+      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(HourlyServiceItem, row));
   const field = HOURLY_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -2828,7 +2828,7 @@ export const automaticPriceListMock = (
   const found = AUTOMATIC_PRICES.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
+      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(AutomaticPriceItem, row));
   const field = AUTOMATIC_PRICE_SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -2928,7 +2928,7 @@ export const tableServiceListMock = (
   const found = TABLE_SERVICES.filter(
     (row) =>
       row.propertyId === property.id &&
-      (!search || row.serviceName?.toLowerCase().includes(search)),
+      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
   ).map((row) => onlyFieldsOf(TableServiceItem, row));
   const field = TABLE_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
@@ -3527,7 +3527,7 @@ function compare(first: string | number | null, second: string | number | null):
   }
   return typeof first === 'number' && typeof second === 'number'
     ? first - second
-    : String(first).localeCompare(String(second), 'it', { sensitivity: 'base' });
+    : String(first).trim().localeCompare(String(second).trim(), 'it', { sensitivity: 'base' });
 }
 
 function positiveInteger(value: unknown, fallback: number): number {

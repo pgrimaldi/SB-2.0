@@ -71,6 +71,7 @@ import {
 } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface PackageFormTexts {
   tabs: {
@@ -221,7 +222,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (JSON.stringify(this.draft()) !== JSON.stringify(this.pristine()) ||
+      (comparableJson(this.draft()) !== comparableJson(this.pristine()) ||
         this.isReducedSeasonalPriceTyped())
     );
   }
@@ -293,7 +294,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       return false;
     }
     const shown = this.draft().reducedSeasonalPrices[index] ?? new PackageReducedSeasonalPrice();
-    return JSON.stringify(this.reducedSeasonalPrice()) !== JSON.stringify(shown);
+    return comparableJson(this.reducedSeasonalPrice()) !== comparableJson(shown);
   }
 
   private cancelEdit(): void {

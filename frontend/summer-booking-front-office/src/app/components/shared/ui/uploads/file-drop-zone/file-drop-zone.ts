@@ -68,8 +68,8 @@ export class FileDropZone {
       .split(',')
       .map((type) => type.trim().toLowerCase())
       .filter(Boolean);
-    const name = file.name.toLowerCase();
-    const mime = file.type.toLowerCase();
+    const name = file.name.trim().toLowerCase();
+    const mime = file.type.trim().toLowerCase();
     return (
       !types.length ||
       types.some((type) =>

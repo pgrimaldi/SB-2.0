@@ -22,6 +22,7 @@ import { Session } from '../../entities/auth/session';
 import { TabMessage } from '../../entities/auth/tab-message';
 import { AuthService } from '../../services/api/auth/auth.service';
 import { AUTH_LOCK } from './auth-lock';
+import { sameText } from '../../components/shared/forms/text-comparison';
 
 /**
  * Non-secret mark that a sign-in happened in this browser, so that start-up asks for a new access
@@ -399,7 +400,7 @@ function sameUser(a: AuthUser | null, b: AuthUser | null): boolean {
     (!!a &&
       !!b &&
       a.id === b.id &&
-      a.email === b.email &&
+      sameText(a.email, b.email) &&
       a.role === b.role &&
       a.propertyId === b.propertyId)
   );

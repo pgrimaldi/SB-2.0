@@ -3,7 +3,6 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
-import { SaveSectorRequest } from '../../../entities/settings/rows-and-sectors/save-sector-request';
 import { Sector } from '../../../entities/settings/rows-and-sectors/sector';
 import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { SectorService } from './sector.service';
@@ -61,7 +60,7 @@ describe('SectorService', () => {
     controller.verify();
   });
 
-  it('should add a sector sending only the name', () => {
+  it('should add a sector sending the name', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -70,9 +69,7 @@ describe('SectorService', () => {
     const sector: Sector = { id: 's9', name: 'Fila 9', sortOrder: 8 };
     let answer: Sector | undefined;
 
-    sectors
-      .addSector({ name: 'Fila 9', extra: 'not sent' } as SaveSectorRequest)
-      .subscribe((created) => (answer = created));
+    sectors.addSector('Fila 9').subscribe((created) => (answer = created));
 
     const call = controller.expectOne(
       ({ method, url }) => method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sectors`,
@@ -92,9 +89,7 @@ describe('SectorService', () => {
     const sector: Sector = { id: 's1', name: 'Fila A', sortOrder: 0 };
     let answer: Sector | undefined;
 
-    sectors
-      .updateSector('s1', { name: 'Fila A', extra: 'not sent' } as SaveSectorRequest)
-      .subscribe((saved) => (answer = saved));
+    sectors.updateSector('s1', 'Fila A').subscribe((saved) => (answer = saved));
 
     const call = controller.expectOne(
       ({ method, url }) =>
@@ -120,6 +115,22 @@ describe('SectorService', () => {
         method === 'DELETE' && url === `${environment.apiBaseUrl}/catalog/sectors/s1`,
     );
     expect(call.request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should encode the id of the sector in the address', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const sectors = TestBed.inject(SectorService);
+    const controller = TestBed.inject(HttpTestingController);
+    const encoded = `${environment.apiBaseUrl}/catalog/sectors/..%2Fsettings%3Fx%3D1`;
+
+    sectors.updateSector('../settings?x=1', 'Fila A').subscribe();
+    sectors.deleteSector('../settings?x=1').subscribe();
+
+    controller.expectOne(({ method, url }) => method === 'PUT' && url === encoded);
+    controller.expectOne(({ method, url }) => method === 'DELETE' && url === encoded);
     controller.verify();
   });
 
