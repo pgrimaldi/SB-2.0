@@ -22,7 +22,9 @@ Rotta `/settings/sharing`, vista `views/settings/sharing/` (`Sharing`).
 - Il campo dei giorni segue l'interruttore "Durata minima": spento con l'interruttore spento (regola `disabled` sul
   campo), acceso con l'interruttore acceso.
 - Acceso, il valore dei giorni deve essere maggiore di 0 (`greaterThan`, messaggio "Il valore dei giorni deve essere
-  superiore a 0" sotto il campo, mostrato appena si accende l'interruttore); finché non lo è Salva resta spento.
+  superiore a 0" sotto il campo, mostrato ogni volta che l'utente accende l'interruttore, anche se era già acceso
+  all'apertura); finché non lo è Salva resta spento. Un effetto segna il campo come toccato quando l'interruttore è
+  toccato e acceso: Signal Forms ignora `markAsTouched()` su un campo spento.
 - Salva manda sempre tutti i valori della pagina (anche quelli non cambiati), con lo spinner sul bottone.
 - Se il salvataggio riesce, i valori restano, il form non ha più modifiche e compare `app-message-popup` "Impostazioni
   salvate" / "Salvataggio avvenuto correttamente." con Chiudi (testi `management.settings.sharing.saved`).

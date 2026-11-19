@@ -54,18 +54,20 @@
   <app-file-drop-zone
     class="map__background__panel__drop"
     [accept]="imageTypes"
-    [text]="'management.settings.map_configuration.background.drop' | translate"
-    [pathIcon]="uploadIcon"
+    [text]="
+      hasCustomImage() ? '' : ('management.settings.map_configuration.background.drop' | translate)
+    "
+    [pathIcon]="hasCustomImage() ? imageIcon : uploadIcon"
     [previewUrl]="imagePreviewUrl()"
     [disabled]="!isEditing() || isBusy()"
     (filesSelected)="chooseImage($event)"
   />
-  @if (imagePreviewUrl()) {
+  @if (hasCustomImage()) {
     <app-icon-button
       class="map__background__panel__delete"
       [pathIcon]="deleteIcon"
       [disabled]="!isEditing() || isBusy()"
-      (click)="removeImage()"
+      (click)="askDeletion()"
     />
   }
   @if (isBusy() && !isSaving()) {
@@ -114,3 +116,14 @@
     </app-button>
   }
 </div>
+
+<app-confirm-popup
+  [pathIcon]="popupIcons"
+  [title]="'management.settings.map_configuration.background.delete.title' | translate"
+  [text]="'management.settings.map_configuration.background.delete.text' | translate"
+  [texts]="'management.settings.map_configuration.background.delete' | translate"
+  [danger]="true"
+  [open]="isDeletionAsked()"
+  (openChange)="closeDeletion($event)"
+  (confirmed)="confirmDeletion()"
+/>

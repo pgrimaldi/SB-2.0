@@ -1,4 +1,5 @@
 import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
+import { DOCUMENT } from '@angular/common';
 import { HttpStatusCode } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -15,6 +16,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription, of, switchMap } from 'rxjs';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { fileLinkOf } from '../../../../../behaviours/files/file-link';
 import { isUploadable } from '../../../../../behaviours/files/uploadable-file';
 import {
   UnsavedChanges,
@@ -36,6 +38,7 @@ import { MapService } from '../../../../../services/api/catalog/map.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
+import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
 import { Spinner } from '../../../../shared/ui/spinners/spinner/spinner';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { FileDropZone } from '../../../../shared/ui/uploads/file-drop-zone/file-drop-zone';
@@ -67,6 +70,7 @@ const PREVIEW_POSITIONS: ConnectedPosition[] = [
     Button,
     CdkConnectedOverlay,
     CdkOverlayOrigin,
+    ConfirmPopup,
     FileDropZone,
     IconButton,
     SectionTitle,
@@ -81,6 +85,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly mapService = inject(MapService);
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly origin = inject(DOCUMENT).location.origin;
 
   readonly settings = input<MapSettings | null>(null);
   readonly loadError = input<ApiProblem | null>(null);
@@ -94,15 +99,21 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected readonly titleIcon = ['/assets/images/MapConfiguration_Palette.svg'] as const;
   protected readonly chosenIcon = '/assets/images/MapConfiguration_Chosen.svg';
   protected readonly uploadIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
+  protected readonly imageIcon = ['/assets/images/GeneralIcon_Images.svg'] as const;
   protected readonly deleteIcon = ['/assets/images/MapConfiguration_DeleteRed.svg'] as const;
+  protected readonly popupIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly maxImageMegabytes = MAX_IMAGE_UPLOAD_MEGABYTES;
   protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
   protected readonly isEditing = signal(false);
   protected readonly isBusy = signal(false);
   protected readonly isSaving = signal(false);
+  readonly isCallRunning = this.isBusy.asReadonly();
   protected readonly chosenSlot = signal<number | null>(null);
   protected readonly previewedSlot = signal<number | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
+  /** Also with a link that is not safe: shown without preview, it can still be deleted. */
+  protected readonly hasCustomImage = signal(false);
+  protected readonly isDeletionAsked = signal(false);
   protected readonly isImageTooLarge = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -120,8 +131,11 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   );
   private savedSlot: number | null = null;
   private savedPreviewUrl: string | null = null;
+  private savedHasCustomImage = false;
   /** Address made in the browser for the last uploaded image: freed when it is replaced. */
   private localUrl: string | null = null;
+  /** Address of the image still travelling: freed with its answer, or when the page closes first. */
+  private uploadingUrl: string | null = null;
   private request?: Subscription;
 
   constructor() {
@@ -137,7 +151,9 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.isEditing() &&
-      (this.chosenSlot() !== this.savedSlot || this.imagePreviewUrl() !== this.savedPreviewUrl)
+      (this.chosenSlot() !== this.savedSlot ||
+        this.imagePreviewUrl() !== this.savedPreviewUrl ||
+        this.hasCustomImage() !== this.savedHasCustomImage)
     );
   }
 
@@ -150,6 +166,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected chooseSlot(slot: number): void {
     this.chosenSlot.set(slot);
     this.imagePreviewUrl.set(null);
+    this.hasCustomImage.set(false);
     this.clearErrors();
   }
 
@@ -175,28 +192,47 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     }
     const shownSlot = this.chosenSlot();
     const shownUrl = this.imagePreviewUrl();
+    const shownCustomImage = this.hasCustomImage();
     const url = URL.createObjectURL(image);
+    this.uploadingUrl = url;
     this.chosenSlot.set(null);
     this.imagePreviewUrl.set(url);
+    this.hasCustomImage.set(true);
     this.isBusy.set(true);
     this.request = this.mapService.uploadBackground(image).subscribe({
       next: () => {
+        this.uploadingUrl = null;
         this.keepLocalUrl(url);
-        this.saved(null, url);
+        this.saved(null, url, true);
       },
       error: (error: unknown) => {
+        this.uploadingUrl = null;
         URL.revokeObjectURL(url);
         this.chosenSlot.set(shownSlot);
         this.imagePreviewUrl.set(shownUrl);
+        this.hasCustomImage.set(shownCustomImage);
         this.isBusy.set(false);
         this.error.set(toApiProblem(error));
       },
     });
   }
 
-  /** Deleted at once, without Salva nor confirmation. */
-  protected removeImage(): void {
-    if (this.isBusy()) {
+  protected askDeletion(): void {
+    if (this.isEditing() && !this.isBusy()) {
+      this.isDeletionAsked.set(true);
+    }
+  }
+
+  protected closeDeletion(isOpen: boolean): void {
+    if (!isOpen) {
+      this.isDeletionAsked.set(false);
+    }
+  }
+
+  /** Deleted once confirmed, without Salva, only in Modifica. */
+  protected confirmDeletion(): void {
+    this.isDeletionAsked.set(false);
+    if (!this.isEditing() || this.isBusy()) {
       return;
     }
     this.clearErrors();
@@ -204,7 +240,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.request = this.mapService.removeBackground().subscribe({
       next: () => {
         this.keepLocalUrl(null);
-        this.saved(null, null);
+        this.saved(null, null, false);
       },
       error: (error: unknown) => {
         this.isBusy.set(false);
@@ -222,6 +258,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected cancel(): void {
     this.chosenSlot.set(this.savedSlot);
     this.imagePreviewUrl.set(this.savedPreviewUrl);
+    this.hasCustomImage.set(this.savedHasCustomImage);
     this.clearErrors();
     this.isEditing.set(false);
   }
@@ -243,7 +280,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.request = this.mapService.updateBackground(name).subscribe({
       next: () => {
         this.keepLocalUrl(null);
-        this.saved(slot, null);
+        this.saved(slot, null, false);
       },
       error: (error: unknown) => {
         this.isBusy.set(false);
@@ -258,14 +295,21 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     const slot = BACKGROUND_SLOTS.findIndex((name) => name !== null && name === background?.name);
     this.keepLocalUrl(null);
     this.clearErrors();
-    this.saved(slot < 0 ? null : slot, background?.isCustom ? background.url : null);
+    const isCustom = background?.isCustom ?? false;
+    this.saved(
+      slot < 0 ? null : slot,
+      isCustom ? fileLinkOf(background?.url ?? null, this.origin) : null,
+      isCustom,
+    );
   }
 
-  private saved(slot: number | null, previewUrl: string | null): void {
+  private saved(slot: number | null, previewUrl: string | null, hasCustomImage: boolean): void {
     this.savedSlot = slot;
     this.savedPreviewUrl = previewUrl;
+    this.savedHasCustomImage = hasCustomImage;
     this.chosenSlot.set(slot);
     this.imagePreviewUrl.set(previewUrl);
+    this.hasCustomImage.set(hasCustomImage);
     this.isBusy.set(false);
     this.isSaving.set(false);
     this.isEditing.set(false);
@@ -288,5 +332,8 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.unsaved.unwatch(this);
     this.request?.unsubscribe();
     this.keepLocalUrl(null);
+    if (this.uploadingUrl) {
+      URL.revokeObjectURL(this.uploadingUrl);
+    }
   }
 }

@@ -19,6 +19,10 @@ descrizioni delle pagine in `docs/Pagine/`.
   ogni chiamata, avviso prima di perdere le modifiche. Mai salvare sopra dati che non sono stati letti: Modifica e
   Salva restano spenti finché la lettura dal server non è riuscita.
 - Tabelle: `app-table` si carica da sola con la richiesta standard delle tabelle.
+- Ogni cancellazione chiede **sempre** conferma prima di chiamare l'API (popup rosso: `app-confirm-popup` o
+  `app-delete-items-popup` per le tabelle): righe di tabella, file e immagini caricati, sfondi, qualunque dato salvato.
+  Le X dentro un form che tolgono un valore senza chiamare un'API (es. un'icona del reticolo, una data dei festivi)
+  non chiedono: la modifica la salva Salva e la toglie Annulla.
 - Mai id del database scritti nel codice, mai un oggetto che contiene un solo valore, mai stringhe libere come opzioni.
 - Ogni confronto di testi si fa **sempre** sui testi senza spazi all'inizio e alla fine, ovunque (componenti,
   behaviour, servizi, mock): uguaglianze, "nome già usato", "ci sono modifiche?", ricerche e ordinamenti. Le funzioni

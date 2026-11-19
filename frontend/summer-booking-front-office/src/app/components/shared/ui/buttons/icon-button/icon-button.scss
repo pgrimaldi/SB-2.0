@@ -14,6 +14,11 @@
   );
 }
 
+// Disabled: no click reaches a `(click)` bound on the element either.
+:host(.icon__button__disabled) {
+  pointer-events: none;
+}
+
 .icon__button {
   background: var(--icon-button-background, #ebebeb);
 

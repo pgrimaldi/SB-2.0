@@ -24,6 +24,7 @@ import { ValidationTextBehaviour } from '../../../behaviours/validation/validati
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/checkbox';
+import { comparableJson } from '../../../components/shared/forms/text-comparison';
 import { greaterThan } from '../../../components/shared/forms/validators';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
@@ -64,6 +65,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
 
   private readonly information = signal(new SharingGeneralInformation());
+  private savedInformation = new SharingGeneralInformation();
   private readonly loaded = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly saved = signal(false);
@@ -99,7 +101,8 @@ export class Sharing implements UnsavedChanges, OnDestroy {
     this.unsaved.watch(this);
     // Turning the minimum on with no valid days says at once why Salva is off.
     effect(() => {
-      if (this.informationForm.isMinimumBookingDayEnabled().dirty()) {
+      const minimum = this.informationForm.isMinimumBookingDayEnabled();
+      if (minimum.dirty() && minimum.value()) {
         untracked(() => this.informationForm.minimumBookingDayQuantity().markAsTouched());
       }
     });
@@ -112,6 +115,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
         this.error.set(null);
         return this.sharing.generalInformation().subscribe({
           next: (information) => {
+            this.savedInformation = information;
             this.information.set(information);
             this.informationForm().reset();
             this.loaded.set(true);
@@ -127,7 +131,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.informationForm().dirty();
+    return comparableJson(this.information()) !== comparableJson(this.savedInformation);
   }
 
   protected save(): void {
@@ -140,6 +144,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
       try {
         const sent = this.information();
         await firstValueFrom(this.sharing.saveInformation(sent));
+        this.savedInformation = sent;
         this.informationForm().reset();
         this.saved.set(true);
       } catch (error: unknown) {

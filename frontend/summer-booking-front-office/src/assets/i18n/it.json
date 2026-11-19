@@ -1605,7 +1605,13 @@
           "title": "Imposta sfondo",
           "templates": "Sfondo mappa",
           "custom": "Sfondo personalizzato",
-          "drop": "Trascina un'immagine qui o clicca per caricare"
+          "drop": "Trascina un'immagine qui o clicca per caricare",
+          "delete": {
+            "title": "Elimina sfondo",
+            "text": "Vuoi davvero eliminare lo sfondo personalizzato?",
+            "cancel": "Annulla",
+            "confirm": "Elimina"
+          }
         },
         "grid": {
           "title": "Imposta reticolo",
@@ -1631,7 +1637,7 @@
         "reset": "Reimposta mappa",
         "reset_popup": {
           "title": "Reimposta mappa",
-          "text": "Stai reimpostando l'intera mappa.\n\nVerranno eliminati gli articoli inseriti sulla mappa e il reticolo tornerà a 1 fila con 1 articolo e inclinazione 0°. Sfondo e icone restano come sono. L'azione è irreversibile.",
+          "text": "Stai reimpostando l'intera mappa.\n\nVerranno eliminati gli articoli inseriti sulla mappa e il reticolo andrà impostato di nuovo. Sfondo, icone e inclinazione restano come sono. L'azione è irreversibile.",
           "cancel": "Annulla e mantieni la mappa configurata",
           "confirm": "Procedi ed elimina la mappa configurata"
         }

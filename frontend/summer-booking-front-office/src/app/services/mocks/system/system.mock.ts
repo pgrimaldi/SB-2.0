@@ -1,5 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
+import { comparableJson } from '../../../components/shared/forms/text-comparison';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import {
@@ -147,7 +148,7 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
     errors.push({ field: 'smtpSecurity', code: ApiErrorCode.ValidationInvalid });
   }
   const otherConnection = SMTP_CONNECTION_FIELDS.some(
-    (field) => body[field] !== EMAIL_CONFIGURATION[field],
+    (field) => comparableJson(body[field]) !== comparableJson(EMAIL_CONFIGURATION[field]),
   );
   if (
     body.smtpPassword === null

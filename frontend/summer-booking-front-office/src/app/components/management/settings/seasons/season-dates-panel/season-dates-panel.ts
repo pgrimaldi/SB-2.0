@@ -37,6 +37,7 @@ import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/seaso
 import { onlyFieldsOf } from '../../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { DATA_RELOAD } from '../../../../shared/ui/data/data-reload';
 import { AlertPopup } from '../../../../shared/ui/dialogs/alert-popup/alert-popup';
@@ -136,7 +137,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.datesForm().dirty();
+    return comparableJson(this.dates()) !== comparableJson(this.loaded);
   }
 
   protected edit(): void {

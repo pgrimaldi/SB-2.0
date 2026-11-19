@@ -37,7 +37,8 @@ Rotta `/settings/email-configuration`, vista `views/settings/email-configuration
 - "Salva" e "Invia email test" mandano `smtpPassword: null` (il server usa quella salvata) oppure la password nuova
   scritta. Dopo un salvataggio riuscito il campo torna vuoto.
 - La password salvata non può andare a un'altra destinazione: se server, porta, nome utente o tipo di sicurezza sono
-  diversi da quelli salvati, va riscritta. Errore subito sotto il campo, "Hai cambiato i parametri di connessione:
+  diversi da quelli salvati (confrontati con `comparableJson`: i testi senza spazi ai lati, un campo vuoto come
+  `null`), va riscritta. Lo stesso server scritto con spazi ai lati non la fa riscrivere. Errore subito sotto il campo, "Hai cambiato i parametri di connessione:
   riscrivi la password o inseriscine una nuova." (`invalidate.email_configuration.smtp_password.retype`); Salva spento e
   Invia email test non parte. Il contratto chiede lo stesso controllo al server.
 - Nessun hash nel browser: il server deve poterla usare e la salva cifrata; il trasporto lo protegge HTTPS.

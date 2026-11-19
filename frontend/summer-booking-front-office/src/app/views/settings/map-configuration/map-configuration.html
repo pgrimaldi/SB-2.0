@@ -14,7 +14,7 @@
     [appearance]="ButtonAppearance.Secondary"
     [size]="ButtonSize.Small"
     [pathIcon]="resetIcon"
-    [disabled]="!settings()"
+    [disabled]="!settings() || isPanelCallRunning()"
     (clicked)="askReset()"
   >
     {{ 'management.settings.map_configuration.reset' | translate }}

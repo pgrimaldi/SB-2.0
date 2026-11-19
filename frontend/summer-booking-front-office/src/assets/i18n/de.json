@@ -1605,7 +1605,13 @@
           "title": "Hintergrund festlegen",
           "templates": "Kartenhintergrund",
           "custom": "Eigener Hintergrund",
-          "drop": "Bild hierher ziehen oder zum Hochladen klicken"
+          "drop": "Bild hierher ziehen oder zum Hochladen klicken",
+          "delete": {
+            "title": "Hintergrund löschen",
+            "text": "Möchtest du den eigenen Hintergrund wirklich löschen?",
+            "cancel": "Abbrechen",
+            "confirm": "Löschen"
+          }
         },
         "grid": {
           "title": "Raster festlegen",
@@ -1631,7 +1637,7 @@
         "reset": "Karte zurücksetzen",
         "reset_popup": {
           "title": "Karte zurücksetzen",
-          "text": "Du setzt die gesamte Karte zurück.\n\nDie Artikel auf der Karte werden gelöscht und das Raster wird auf 1 Reihe mit 1 Artikel und 0° Neigung zurückgesetzt. Hintergrund und Symbole bleiben unverändert. Dies kann nicht rückgängig gemacht werden.",
+          "text": "Du setzt die gesamte Karte zurück.\n\nDie Artikel auf der Karte werden gelöscht und das Raster muss neu eingestellt werden. Hintergrund, Symbole und Neigung bleiben unverändert. Dies kann nicht rückgängig gemacht werden.",
           "cancel": "Abbrechen und Karte behalten",
           "confirm": "Fortfahren und Karte löschen"
         }

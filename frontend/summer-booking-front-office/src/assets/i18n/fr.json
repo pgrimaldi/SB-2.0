@@ -1605,7 +1605,13 @@
           "title": "Définir le fond",
           "templates": "Fond de carte",
           "custom": "Fond personnalisé",
-          "drop": "Glissez une image ici ou cliquez pour la charger"
+          "drop": "Glissez une image ici ou cliquez pour la charger",
+          "delete": {
+            "title": "Supprimer le fond",
+            "text": "Voulez-vous vraiment supprimer le fond personnalisé ?",
+            "cancel": "Annuler",
+            "confirm": "Supprimer"
+          }
         },
         "grid": {
           "title": "Définir la grille",
@@ -1631,7 +1637,7 @@
         "reset": "Réinitialiser la carte",
         "reset_popup": {
           "title": "Réinitialiser la carte",
-          "text": "Vous réinitialisez toute la carte.\n\nLes articles placés sur la carte seront supprimés et la grille reviendra à 1 rangée de 1 article, inclinaison 0°. Le fond et les icônes restent inchangés. Cette action est irréversible.",
+          "text": "Vous réinitialisez toute la carte.\n\nLes articles placés sur la carte seront supprimés et la grille devra être définie à nouveau. Le fond, les icônes et l'inclinaison restent inchangés. Cette action est irréversible.",
           "cancel": "Annuler et garder la carte",
           "confirm": "Continuer et supprimer la carte"
         }

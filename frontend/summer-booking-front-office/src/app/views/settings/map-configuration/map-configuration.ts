@@ -2,16 +2,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  computed,
   effect,
   inject,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../behaviours/errors/error-text.behaviour';
+import {
+  UnsavedChanges,
+  UnsavedChangesBehaviour,
+} from '../../../behaviours/forms/unsaved-changes.behaviour';
 import { MapBackgroundPanel } from '../../../components/management/settings/map-configuration/map-background-panel/map-background-panel';
 import { MapGridPanel } from '../../../components/management/settings/map-configuration/map-grid-panel/map-grid-panel';
 import {
@@ -38,6 +44,13 @@ export class MapConfiguration implements OnDestroy {
   private readonly mapService = inject(MapService);
   private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly errorText = inject(ErrorTextBehaviour);
+  private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly backgroundPanel = viewChild(MapBackgroundPanel);
+  private readonly gridPanel = viewChild(MapGridPanel);
+  /** A panel still waiting for an answer: a reset now would mix the two answers. */
+  protected readonly isPanelCallRunning = computed(
+    () => !!this.backgroundPanel()?.isCallRunning() || !!this.gridPanel()?.isCallRunning(),
+  );
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -79,9 +92,19 @@ export class MapConfiguration implements OnDestroy {
     });
   }
 
-  protected askReset(): void {
-    this.resetError.set(null);
-    this.isResetAsked.set(true);
+  /** The reset refills both panels: changes not saved yet are lost only if the user says so. */
+  protected async askReset(): Promise<void> {
+    if (this.isPanelCallRunning()) {
+      return;
+    }
+    const panels: UnsavedChanges = {
+      hasUnsavedChanges: () =>
+        !!this.backgroundPanel()?.hasUnsavedChanges() || !!this.gridPanel()?.hasUnsavedChanges(),
+    };
+    if (await this.unsaved.confirmDiscard(panels)) {
+      this.resetError.set(null);
+      this.isResetAsked.set(true);
+    }
   }
 
   /** The answer carries the settings after the reset: no further GET. */

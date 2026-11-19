@@ -13,6 +13,7 @@ import {
   MAX_MAP_TILT_DEGREES,
   MIN_MAP_TILT_DEGREES,
   MapGrid,
+  OCCUPIED_UMBRELLA_ICONS,
 } from '../../../entities/settings/map-configuration/map-grid';
 import {
   MapCustomArticleIcons,
@@ -36,8 +37,10 @@ const SECTOR_AREAS: (ComboboxItem & { propertyId: number })[] = [
   { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a04', value: 'Parcheggio' },
 ];
 
+/** As the backend: a name without the spaces at the sides; none chosen is the default (`name` null). */
 function icon(name: string | null): MapIcon {
-  return { iconId: null, name, url: null, isDefault: name === null };
+  const chosen = name?.trim() || null;
+  return { iconId: null, name: chosen, url: null, isDefault: chosen === null };
 }
 
 function article(
@@ -76,8 +79,9 @@ function noContent(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(300));
 }
 
-function isOneOf(value: unknown, names: Record<string, string>): boolean {
-  return value === null || Object.values(names).includes(value as string);
+/** `null` (no icon) or one of the names, without the spaces at the sides. */
+function isOneOf(value: unknown, names: readonly string[]): boolean {
+  return value === null || (typeof value === 'string' && names.includes(value.trim()));
 }
 
 function rangeError(field: string, value: unknown, from: number, to: number): MockFieldError[] {
@@ -143,8 +147,8 @@ export const removeMapBackgroundMock = (
 
 /**
  * `PUT /api/catalog/map/update-background` with `backgroundName`, one of the frontend's backgrounds:
- * it replaces the uploaded one. 204; 400 validation.invalid for another name; 401 without a valid
- * access token.
+ * it replaces the uploaded one. 204; 400 validation.required without a name, validation.invalid for
+ * another name; 401 without a valid access token.
  */
 export const updateMapBackgroundMock = (
   request: HttpRequest<unknown>,
@@ -152,28 +156,36 @@ export const updateMapBackgroundMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const name = (request.body as { backgroundName?: unknown } | null)?.backgroundName ?? null;
-  if (name === null || !isOneOf(name, MapBackgroundImage)) {
+  const name = (request.body as { backgroundName?: unknown } | null)?.backgroundName;
+  const isMissing =
+    name === undefined || name === null || (typeof name === 'string' && !name.trim());
+  if (isMissing || typeof name !== 'string' || !isOneOf(name, Object.values(MapBackgroundImage))) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      errors: [{ field: 'backgroundName', code: ApiErrorCode.ValidationInvalid }],
+      errors: [
+        {
+          field: 'backgroundName',
+          code: isMissing ? ApiErrorCode.ValidationRequired : ApiErrorCode.ValidationInvalid,
+        },
+      ],
     });
   }
   settings = {
     ...settings,
-    background: { iconId: null, name: name as string, url: null, isCustom: false },
+    background: { iconId: null, name: name.trim(), url: null, isCustom: false },
   };
   return noContent(request);
 };
 
 /**
- * `POST /api/catalog/map/reset`: the spots are deleted and the grid goes back to 1 row of 1 item
- * with tilt 0; background and icons stay. 200 with the whole map; 401 without a valid access token.
+ * `POST /api/catalog/map/reset`: the spots are deleted and the grid is emptied (0 rows, 0 items per
+ * row), as the backend's `MapLayout.ClearGrid`; background, icons and tilt stay. 200 with the whole
+ * map; 401 without a valid access token.
  */
 export const resetMapMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  settings = { ...settings, rows: 1, columns: 1, tiltDegrees: 0 };
+  settings = { ...settings, rows: 0, columns: 0 };
   return of(
     new HttpResponse({
       status: 200,
@@ -203,8 +215,9 @@ export const updateMapConfigurationMock = (
     ...rangeError('tiltDegrees', grid.tiltDegrees, MIN_MAP_TILT_DEGREES, MAX_MAP_TILT_DEGREES),
   ];
   if (
-    !isOneOf(grid.umbrellaIcons?.freeIcon ?? null, MapUmbrellaIcon) ||
-    !isOneOf(grid.umbrellaIcons?.occupiedIcon ?? null, MapMixedSpotIcon)
+    !grid.umbrellaIcons ||
+    !isOneOf(grid.umbrellaIcons.freeIcon, Object.values(MapUmbrellaIcon)) ||
+    !isOneOf(grid.umbrellaIcons.occupiedIcon, OCCUPIED_UMBRELLA_ICONS)
   ) {
     errors.push({ field: 'umbrellaIcons', code: ApiErrorCode.ValidationInvalid });
   }
@@ -217,8 +230,8 @@ export const updateMapConfigurationMock = (
         !Number.isInteger(article.variant) ||
         (article.variant as number) < 1 ||
         (article.variant as number) > MAP_CUSTOM_ARTICLE_QUANTITY ||
-        !isOneOf(article.freeIcon, MapMixedSpotIcon) ||
-        !isOneOf(article.occupiedIcon, MapMixedSpotIcon),
+        !isOneOf(article.freeIcon, Object.values(MapMixedSpotIcon)) ||
+        !isOneOf(article.occupiedIcon, Object.values(MapMixedSpotIcon)),
     )
   ) {
     errors.push({ field: 'customArticleIcons', code: ApiErrorCode.ValidationInvalid });

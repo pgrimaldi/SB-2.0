@@ -29,6 +29,7 @@ import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { ElectronicReceiptAccount } from '../../../../../entities/settings/taxation/electronic-receipt-account';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { TaxationService } from '../../../../../services/api/taxation/taxation.service';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
@@ -193,7 +194,7 @@ export class ElectronicReceiptAccountForm implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.accountForm().dirty();
+    return comparableJson(this.account()) !== comparableJson(this.savedAccount);
   }
 
   protected save(): void {

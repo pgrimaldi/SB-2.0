@@ -18,7 +18,7 @@ import { resolveIcons } from '../../icons/icons';
 export class FileDropZone {
   readonly text = input<string>();
   readonly previewUrl = input<string | null>();
-  /** File types, as in `<input accept>`: MIME types (`image/*`, `application/pdf`) or extensions. */
+  /** Types offered by the file window, as in `<input accept>`: other files still reach the page. */
   readonly accept = input<string>();
   readonly isMultiple = input(false);
   readonly disabled = input(false);
@@ -39,11 +39,14 @@ export class FileDropZone {
   }
 
   protected dragOver(event: DragEvent): void {
+    // Without it the browser opens the dropped file in the tab, leaving the app: disabled too.
+    event.preventDefault();
     if (this.disabled()) {
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'none';
+      }
       return;
     }
-    // Without it the browser opens the dropped file instead of giving it to the page.
-    event.preventDefault();
     this.isDragging.set(true);
   }
 
@@ -55,30 +58,11 @@ export class FileDropZone {
     }
   }
 
+  /** Every file as chosen: the page checks type and weight and tells the user what is wrong. */
   private give(files: File[]): void {
-    const accepted = files.filter((file) => this.isAccepted(file));
-    const given = this.isMultiple() ? accepted : accepted.slice(0, 1);
+    const given = this.isMultiple() ? files : files.slice(0, 1);
     if (given.length) {
       this.filesSelected.emit(given);
     }
-  }
-
-  private isAccepted(file: File): boolean {
-    const types = (this.accept() ?? '')
-      .split(',')
-      .map((type) => type.trim().toLowerCase())
-      .filter(Boolean);
-    const name = file.name.trim().toLowerCase();
-    const mime = file.type.trim().toLowerCase();
-    return (
-      !types.length ||
-      types.some((type) =>
-        type.startsWith('.')
-          ? name.endsWith(type)
-          : type.endsWith('/*')
-            ? mime.startsWith(type.slice(0, -1))
-            : mime === type,
-      )
-    );
   }
 }

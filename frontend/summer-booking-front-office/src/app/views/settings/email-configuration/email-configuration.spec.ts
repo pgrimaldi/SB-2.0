@@ -344,4 +344,28 @@ describe('EmailConfiguration', () => {
     expect(element.querySelector('mat-select')?.getAttribute('aria-disabled')).toBe('true');
     expect(yes.disabled).toBe(false);
   });
+
+  it('should count as a change only a value different from the one read, spaces at the sides aside', async () => {
+    const { fixture, type, allowChanges } = await setup();
+    await allowChanges();
+
+    await type(1, 'Lido Nuovo');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await type(1, ' Lido Demo ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('should keep the saved password for the same server, user and security typed with spaces at the sides', async () => {
+    const { element, buttons, type, allowChanges } = await setup();
+    const passwordError = () =>
+      element
+        .querySelectorAll('app-filled-text-field')[4]
+        .querySelector('.filled__text__field__error');
+    await allowChanges();
+
+    await type(2, ' smtp.lido-demo.example ');
+    await type(4, ' prenotazioni@lido-demo.example ');
+    expect(passwordError()).toBeNull();
+    expect(buttons()[2].disabled).toBe(false);
+  });
 });

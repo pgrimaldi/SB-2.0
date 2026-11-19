@@ -1605,7 +1605,13 @@
           "title": "Set background",
           "templates": "Map background",
           "custom": "Custom background",
-          "drop": "Drag an image here or click to upload"
+          "drop": "Drag an image here or click to upload",
+          "delete": {
+            "title": "Delete background",
+            "text": "Do you really want to delete the custom background?",
+            "cancel": "Cancel",
+            "confirm": "Delete"
+          }
         },
         "grid": {
           "title": "Set grid",
@@ -1631,7 +1637,7 @@
         "reset": "Reset map",
         "reset_popup": {
           "title": "Reset map",
-          "text": "You are resetting the whole map.\n\nThe items placed on the map will be deleted and the grid will go back to 1 row with 1 item and 0° tilt. Background and icons stay as they are. This cannot be undone.",
+          "text": "You are resetting the whole map.\n\nThe items placed on the map will be deleted and the grid will have to be set again. Background, icons and tilt stay as they are. This cannot be undone.",
           "cancel": "Cancel and keep the configured map",
           "confirm": "Continue and delete the configured map"
         }

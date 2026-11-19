@@ -28,6 +28,7 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
+import { comparableJson } from '../../../../components/shared/forms/text-comparison';
 import { DATA_RELOAD } from '../../../../components/shared/ui/data/data-reload';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
 import {
@@ -236,7 +237,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.informationForm().dirty();
+    return comparableJson(this.information()) !== comparableJson(this.loaded);
   }
 
   /** The choice becomes the free cancellation and its hours of notice, as the API has them. */

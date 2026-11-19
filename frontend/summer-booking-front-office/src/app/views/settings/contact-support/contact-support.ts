@@ -21,6 +21,7 @@ import {
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
+import { comparableJson } from '../../../components/shared/forms/text-comparison';
 import { requiredText } from '../../../components/shared/forms/validators';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
@@ -124,7 +125,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.contactForm().dirty();
+    return comparableJson(this.contact()) !== comparableJson(new ContactSupportRequest());
   }
 
   protected send(event: Event): void {

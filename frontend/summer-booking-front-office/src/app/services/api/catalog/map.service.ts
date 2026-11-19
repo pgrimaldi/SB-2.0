@@ -35,7 +35,7 @@ export class MapService {
   readonly updateConfiguration = (grid: MapGrid): Observable<void> =>
     this.httpClient.put<void>(`${this.endpoint}/update-configuration`, onlyFieldsOf(MapGrid, grid));
 
-  /** Deletes the spots on the map and brings the grid back to 1 row of 1 item, tilt 0. */
+  /** Deletes the spots on the map and empties the grid (0 × 0); background, icons and tilt stay. */
   readonly reset = (): Observable<MapLayout> =>
     this.httpClient.post<MapLayout>(`${this.endpoint}/reset`, null);
 

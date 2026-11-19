@@ -30,6 +30,7 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../behaviours/forms/unsaved-changes.behaviour';
+import { comparableJson } from '../../../components/shared/forms/text-comparison';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
@@ -120,9 +121,8 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     return (
       this.passwordSaved() &&
       !!saved &&
-      // An emptied field is null, while the server may answer an empty text.
       SMTP_CONNECTION_FIELDS.some(
-        (field) => (this.configuration()[field] || null) !== (saved[field] || null),
+        (field) => comparableJson(this.configuration()[field]) !== comparableJson(saved[field]),
       )
     );
   });
@@ -225,7 +225,8 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.configurationForm().dirty();
+    const saved = this.savedConnection();
+    return !!saved && comparableJson(this.configuration()) !== comparableJson(saved);
   }
 
   /** Reset: the values of the server again (what was typed is lost), read-only until "Sì" again. */

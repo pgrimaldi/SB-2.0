@@ -202,4 +202,13 @@ describe('ContactSupport', () => {
     await type(2, 'anna@example.com');
     expect(emailError()).toBeNull();
   });
+
+  it('should count as a change only a text typed, not spaces', async () => {
+    const { fixture, type } = await setup();
+
+    await type(0, 'Anna');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await type(0, '   ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
 });

@@ -6,16 +6,19 @@
 <div class="map__grid__panel__fields">
   <app-filled-number-field
     [label]="'management.settings.map_configuration.grid.rows' | translate"
+    [isMandatory]="true"
     [formField]="gridForm.rowQuantity"
     [error]="fieldErrors.rowQuantity()"
   />
   <app-filled-number-field
     [label]="'management.settings.map_configuration.grid.row_items' | translate"
+    [isMandatory]="true"
     [formField]="gridForm.maxRowItemQuantity"
     [error]="fieldErrors.maxRowItemQuantity()"
   />
   <app-filled-number-field
     [label]="'management.settings.map_configuration.grid.tilt' | translate"
+    [isMandatory]="true"
     [pathIcon]="tiltIcons"
     [isSigned]="true"
     [formField]="gridForm.tiltDegrees"

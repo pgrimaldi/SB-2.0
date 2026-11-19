@@ -183,4 +183,13 @@ describe('ElectronicReceiptAccountForm', () => {
     expect(editable()).toEqual([]);
     expect(button('edit')).not.toBeNull();
   });
+
+  it('should count as a change only a value different from the saved one, spaces at the sides aside', async () => {
+    const { fixture, inputs, type } = await setup();
+
+    await type(inputs()[0], 'Bagno Esempio');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+    await type(inputs()[0], '   ');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
 });

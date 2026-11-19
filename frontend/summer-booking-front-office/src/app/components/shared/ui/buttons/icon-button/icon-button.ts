@@ -14,6 +14,7 @@ import { resolveIcons } from '../../icons/icons';
   templateUrl: './icon-button.html',
   styleUrl: './icon-button.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.icon__button__disabled]': 'disabled()' },
 })
 export class IconButton {
   readonly label = input<string>();

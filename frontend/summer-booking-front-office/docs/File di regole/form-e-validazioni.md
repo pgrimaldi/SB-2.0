@@ -119,10 +119,16 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 
 - Quello che l'utente ha scritto e non ha salvato non si perde mai senza chiedere: vale per ogni form, di pagina o
   popup, presente e futuro.
-- Ogni form implementa `UnsavedChanges` con `hasUnsavedChanges()` (per i Signal Forms `form().dirty()`, per un popup
-  i valori diversi da quelli di apertura, solo mentre è aperto). I valori si confrontano senza spazi ai lati
-  (`comparableJson`, `sameText`): aggiungere solo spazi non è una modifica, e la stessa regola vale per il Salva che
-  chiude senza chiamate quando non è cambiato nulla.
+- Ogni form implementa `UnsavedChanges` con `hasUnsavedChanges()`, che confronta i valori del form con quelli letti o
+  salvati l'ultima volta (`comparableJson`, `sameText`), mai con `form().dirty()`: `dirty()` resta vero anche quando un
+  valore torna com'era (un numero rimesso, un'icona scelta di nuovo) e farebbe chiedere senza nulla da perdere.
+  - Un popup confronta con i valori di apertura, solo mentre è aperto.
+  - Un form che non legge nulla (es. Contattaci) confronta con il modello vuoto.
+  - Un campo che il server non rimanda (PIN, password) confronta con il campo vuoto: scriverlo è una modifica.
+- I valori si confrontano senza spazi ai lati: aggiungere solo spazi non è una modifica, e la stessa regola vale per il
+  Salva che chiude senza chiamate quando non è cambiato nulla.
+- `dirty()` e `markAsDirty()` restano solo dove conta che l'utente abbia toccato un campo: mostrare il suo errore
+  (`ValidationTextBehaviour`) o un comportamento della pagina legato al tocco (es. il minimo di giorni di Sharing).
 - Il form si registra con `UnsavedChangesBehaviour.watch(this)` nel costruttore e `unwatch(this)` in `ngOnDestroy`
   (`behaviours/forms/`).
 - Poi, senza altro codice: uscire dalla pagina chiede prima (guard `unsavedChangesGuard` su tutte le pagine del

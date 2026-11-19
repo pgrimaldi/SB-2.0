@@ -24,9 +24,21 @@ export const MIN_MAP_TILT_DEGREES = -45;
 export const MAX_MAP_TILT_DEGREES = 45;
 export const MAP_CUSTOM_ARTICLE_QUANTITY = 8;
 
+export const OCCUPIED_UMBRELLA_ICONS: readonly MapMixedSpotIcon[] = [
+  MapMixedSpotIcon.MixedSpot3,
+  MapMixedSpotIcon.MixedSpot4,
+  MapMixedSpotIcon.MixedSpot9,
+  MapMixedSpotIcon.MixedSpot13,
+  MapMixedSpotIcon.MixedSpot16,
+  MapMixedSpotIcon.MixedSpot18,
+  MapMixedSpotIcon.MixedSpot19,
+  MapMixedSpotIcon.MixedSpot32,
+  MapMixedSpotIcon.MixedSpot36,
+];
+
 export const DEFAULT_MAP_GRID: Readonly<MapGrid> = {
-  rowQuantity: 1,
-  maxRowItemQuantity: 1,
+  rowQuantity: null,
+  maxRowItemQuantity: null,
   tiltDegrees: 0,
   umbrellaIcons: new MapElementIcons<MapUmbrellaIcon, MapMixedSpotIcon>(),
   customArticleIcons: Array.from({ length: MAP_CUSTOM_ARTICLE_QUANTITY }, (_, index) =>

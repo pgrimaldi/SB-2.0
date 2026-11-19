@@ -1605,7 +1605,13 @@
           "title": "Configurar fondo",
           "templates": "Fondo del mapa",
           "custom": "Fondo personalizado",
-          "drop": "Arrastra una imagen aquí o haz clic para subirla"
+          "drop": "Arrastra una imagen aquí o haz clic para subirla",
+          "delete": {
+            "title": "Eliminar fondo",
+            "text": "¿Seguro que quieres eliminar el fondo personalizado?",
+            "cancel": "Cancelar",
+            "confirm": "Eliminar"
+          }
         },
         "grid": {
           "title": "Configurar cuadrícula",
@@ -1631,7 +1637,7 @@
         "reset": "Restablecer mapa",
         "reset_popup": {
           "title": "Restablecer mapa",
-          "text": "Estás restableciendo todo el mapa.\n\nSe eliminarán los artículos colocados en el mapa y la cuadrícula volverá a 1 fila con 1 artículo e inclinación 0°. El fondo y los iconos no cambian. Esta acción es irreversible.",
+          "text": "Estás restableciendo todo el mapa.\n\nSe eliminarán los artículos colocados en el mapa y habrá que configurar de nuevo la cuadrícula. El fondo, los iconos y la inclinación no cambian. Esta acción es irreversible.",
           "cancel": "Cancelar y conservar el mapa",
           "confirm": "Continuar y eliminar el mapa"
         }

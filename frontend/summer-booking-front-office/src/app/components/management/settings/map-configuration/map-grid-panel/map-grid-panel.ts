@@ -42,10 +42,15 @@ import {
   MapArticleIcons,
   MapElementIcons,
   MapGrid,
+  OCCUPIED_UMBRELLA_ICONS,
 } from '../../../../../entities/settings/map-configuration/map-grid';
-import { MapSettings } from '../../../../../entities/settings/map-configuration/map-settings';
+import {
+  MapIcon,
+  MapSettings,
+} from '../../../../../entities/settings/map-configuration/map-settings';
 import { MapService } from '../../../../../services/api/catalog/map.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
+import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import {
@@ -65,17 +70,8 @@ interface IconPicking {
 
 const RED_CLOSE_ICON = '/assets/images/MapConfiguration_CloseRed.svg';
 
-const OCCUPIED_UMBRELLA_ICONS = [
-  MapMixedSpotIcon.MixedSpot3,
-  MapMixedSpotIcon.MixedSpot4,
-  MapMixedSpotIcon.MixedSpot9,
-  MapMixedSpotIcon.MixedSpot13,
-  MapMixedSpotIcon.MixedSpot16,
-  MapMixedSpotIcon.MixedSpot18,
-  MapMixedSpotIcon.MixedSpot19,
-  MapMixedSpotIcon.MixedSpot32,
-  MapMixedSpotIcon.MixedSpot36,
-];
+/** An icon the backend says is chosen, without a name of the frontend: shown as unknown. */
+const UNNAMED_ICON = 'UnnamedIcon';
 
 /** The icons a button can show: `article` null is the umbrella. */
 function choicesOf(article: number | null, isOccupied: boolean): readonly string[] {
@@ -132,6 +128,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   protected readonly tiltIcons = ['', '', '', '/assets/images/MapConfiguration_Tilt.svg'] as const;
   protected readonly isEditing = signal(false);
   protected readonly isSaving = signal(false);
+  readonly isCallRunning = this.isSaving.asReadonly();
   private saved: MapGrid = { ...DEFAULT_MAP_GRID };
   private readonly grid = signal<MapGrid>({ ...DEFAULT_MAP_GRID });
   protected readonly gridForm = form(this.grid, (path) => {
@@ -211,7 +208,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.gridForm().dirty();
+    return comparableJson(this.grid()) !== comparableJson(this.saved);
   }
 
   protected edit(): void {
@@ -239,7 +236,6 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   protected chooseUmbrellaIcon(icon: MapUmbrellaIcon): void {
     const field = this.gridForm.umbrellaIcons.freeIcon;
     field().value.set(icon);
-    field().markAsDirty();
   }
 
   protected emptyIconButton(article: number | null, isOccupied: boolean): void {
@@ -252,7 +248,6 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
         : this.gridForm.customArticleIcons[article - 1];
     const field = isOccupied ? icons.occupiedIcon : icons.freeIcon;
     field().value.set(null);
-    field().markAsDirty();
   }
 
   protected chooseMixedSpotIcon(icon: MapMixedSpotIcon): void {
@@ -267,7 +262,6 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
         ? icons.occupiedIcon
         : icons.freeIcon;
     field().value.set(icon);
-    field().markAsDirty();
   }
 
   protected async requestCancel(): Promise<void> {
@@ -276,8 +270,9 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
     }
   }
 
+  /** A new copy: Signal Forms drops the errors of the backend only on fields whose value changes. */
   protected cancel(): void {
-    this.grid.set(this.saved);
+    this.grid.set(structuredClone(this.saved));
     this.gridForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -289,7 +284,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
       return;
     }
     this.error.set(null);
-    if (!this.gridForm().dirty()) {
+    if (!this.hasUnsavedChanges()) {
       this.isEditing.set(false);
       return;
     }
@@ -314,19 +309,19 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   /** Names as they arrive: a name this page does not know stays, shown as unknown. */
   private gridOf({ rows, columns, tiltDegrees, icons }: MapSettings): MapGrid {
     return {
-      rowQuantity: rows ?? DEFAULT_MAP_GRID.rowQuantity,
-      maxRowItemQuantity: columns ?? DEFAULT_MAP_GRID.maxRowItemQuantity,
+      rowQuantity: setOrNull(rows),
+      maxRowItemQuantity: setOrNull(columns),
       tiltDegrees: tiltDegrees ?? DEFAULT_MAP_GRID.tiltDegrees,
       umbrellaIcons: {
-        freeIcon: icons.umbrella.free.name as MapUmbrellaIcon | null,
-        occupiedIcon: icons.umbrella.occupied.name as MapMixedSpotIcon | null,
+        freeIcon: nameOf(icons.umbrella.free) as MapUmbrellaIcon | null,
+        occupiedIcon: nameOf(icons.umbrella.occupied) as MapMixedSpotIcon | null,
       },
       customArticleIcons: DEFAULT_MAP_GRID.customArticleIcons.map(({ variant }) => {
         const pair = icons.customArticles.find((article) => article.variant === variant)?.icons;
         return {
           variant,
-          freeIcon: (pair?.free.name ?? null) as MapMixedSpotIcon | null,
-          occupiedIcon: (pair?.occupied.name ?? null) as MapMixedSpotIcon | null,
+          freeIcon: nameOf(pair?.free) as MapMixedSpotIcon | null,
+          occupiedIcon: nameOf(pair?.occupied) as MapMixedSpotIcon | null,
         };
       }),
     };
@@ -349,4 +344,17 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+/** 0 rows or items per row: the backend's grid not set yet, an empty field to fill in. */
+function setOrNull(quantity: number | null): number | null {
+  return quantity !== null && quantity > 0 ? quantity : null;
+}
+
+/** Null only for no icon chosen: one chosen without a name must not be saved over as null. */
+function nameOf(icon: MapIcon | undefined): string | null {
+  if (!icon) {
+    return null;
+  }
+  return icon.name ?? (icon.isDefault ? null : UNNAMED_ICON);
 }
