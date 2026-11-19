@@ -12,26 +12,29 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 
 ## Tabella
 
-- Colonne Email, Cellulare (prefisso con il `+` e numero, es. `+39 3401112201`) e Tipo di account, tutte ordinabili.
+- Colonne Email, Cellulare (prefisso con un solo `+` e numero, es. `+39 3401112201`, anche se il valore salvato ha già
+  il `+`) e Tipo di account, tutte ordinabili.
 - Tipo di account è `role`, enum `UserRole` con i codici dei ruoli del personale di `RoleCodes` del backend (es.
-  `cashoperator`), tradotto con `management.settings.user_management.role.*`.
+  `cashoperator`), tradotto con `management.settings.user_management.role.*`; un ruolo che il frontend non conosce
+  mostra il suo codice.
 - Barra di ricerca sotto il titolo (`isSearchable`, inviata come `search`); senza caselle.
 - Azioni di riga:
   - "Log": bottone a parola (`TableRowAction.text`) con a sinistra la cartellina `UserManagement_Log.svg`; apre la
     schermata Log già filtrata su quell'utente.
   - Cestino e matita (`standardRowActions` con `delete` ed `edit`).
-- Sulla riga del Titolare (`isOwner` = ruolo `superadmin`) il cestino non c'è e la matita è spenta con il tooltip "Il
-  titolare non può essere modificato". Sulle altre righe, compresa quella dell'utente collegato, cestino e matita sono
-  attivi.
+- Le righe che il backend non lascia gestire dal pannello (`isLocked`) non hanno il cestino e hanno la matita spenta,
+  con il tooltip "Questo utente non si può modificare da qui" (`user_not_editable`): il Titolare (`superadmin`), i
+  Website admin (`websiteadmin`) e l'utente collegato (`idUser` uguale all'`id` dell'utente del token). Sulle altre
+  righe cestino e matita sono attivi.
 
 ## Elimina
 
 - Il cestino apre la conferma di `app-delete-items-popup` ("Vuoi eliminare l'utente <email>?", testi
   `management.settings.user_management.delete`).
 - Con Elimina chiama l'API di cancellazione con lo spinner a pagina intera; se riesce, ricarica la tabella.
-- Un errore va in "Operazione non riuscita" e la tabella non si ricarica: es. 404 `account.not_found` (utente che non
-  c'è più), 422 `account.cannot_modify_self` (riga dell'utente collegato), 403 `account.role_not_assignable` (ruolo che
-  non si gestisce dal pannello, es. Website admin).
+- Un errore va in "Operazione non riuscita": es. 404 `account.not_found` (utente che non c'è più), 422
+  `account.cannot_modify_self` (riga dell'utente collegato), 403 `account.role_not_assignable` (ruolo che non si
+  gestisce dal pannello). Dopo un 404 la tabella si ricarica (`(failed)` del popup), così l'utente sparisce.
 
 ## Popup "Aggiungi nuovo utente"
 
@@ -39,14 +42,16 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   (`components/management/settings/user-management/user-add-item-popup/`), form `CreateUserRequest`, titolo con
   `app-section-title`.
 - Campi:
-  - Email (obbligatoria) con la casella "Abilita" accanto (`emailIsContact`). Formato e lunghezza (al massimo 255
-    caratteri) li controlla il backend, che li segnala sotto il campo;
+  - Email (obbligatoria) con la casella "Abilita" accanto (`emailIsContact`): `emailAddress`, cioè una sola `@`, né
+    all'inizio né alla fine, e al massimo 255 caratteri (`MAX_EMAIL_LENGTH`, il campo non accetta caratteri oltre),
+    come il backend;
   - Prefisso: `app-filled-icon-select` largo 7rem con bandiera e prefisso. Voci di `PhonePrefixBehaviour`: tutti i paesi
     di `PhonePrefix`, l'Italia prima e già scelta, poi in ordine di nome nella lingua dell'app. Scrive in
     `phoneCountryCode` il prefisso senza `+` (es. `39`), mandato solo se c'è il numero;
   - Cellulare (`phone`): solo cifre e spazi, al massimo 32 caratteri, con la casella "Abilita" accanto
     (`phoneIsContact`). Le caselle "Abilita" restano sulla riga del campo anche con l'errore sotto il campo;
-  - Password (obbligatoria), nascosta con l'occhietto (`autocomplete="new-password"`);
+  - Password (obbligatoria), nascosta con l'occhietto (`autocomplete="new-password"`), al massimo 128 caratteri
+    (`PASSWORD_MAX_LENGTH`, come il backend: il campo non accetta caratteri oltre);
   - Tipo di account (`role`, obbligatorio con l'asterisco, `required`): i ruoli che il backend permette di assegnare dal
     pannello, quindi senza Titolare e Website admin.
 - Le caselle "Abilita" il backend oggi non le salva: la richiesta è nel documento delle richieste al backend della
@@ -59,12 +64,12 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   `entities/settings/user-management/create-user-request.ts`, usata da entrambi i popup), con l'errore sotto il campo.
   Il backend chiede da 8 a 128 caratteri e una password non comune; maiuscola, minuscola e numero li controlla solo il
   frontend.
-- "Salva" in basso a destra è spento finché il form non è valido (email o password mancanti, password senza le regole,
-  cellulare con caratteri diversi da cifre e spazi o più lungo di 32 caratteri, tipo di account non scelto) e durante
-  la chiamata. Chiama la creazione con lo spinner sul bottone e i campi bloccati.
+- "Salva" in basso a destra è spento finché il form non è valido (email o password mancanti, email non valida,
+  password senza le regole, cellulare con caratteri diversi da cifre e spazi o più lungo di 32 caratteri, tipo di
+  account non scelto) e durante la chiamata. Chiama la creazione con lo spinner sul bottone e i campi bloccati.
 - Se riesce, il popup si chiude e la tabella si ricarica. Se fallisce, gli errori dei campi (`errors[]`) vanno sotto i
-  campi (es. `validation.password_too_short`, `validation.max_length`), gli altri sopra il bottone (es. 409
-  `account.email_taken`, 422 `account.role_not_assignable`).
+  campi (es. `validation.password_too_short`, `validation.max_length`); 409 `account.email_taken` va sotto Email e 422
+  `account.role_not_assignable` sotto Tipo di account (`apiFieldError`); gli altri sopra il bottone.
 - La password non resta in memoria dopo la chiusura: il form si svuota a ogni apertura e chiusura.
 - Chiede prima di perdere i dati scritti (`UnsavedChangesBehaviour`).
 
@@ -73,7 +78,10 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 - La matita apre `app-user-edit-item-popup` (copia del popup di aggiunta, input `idUser`).
 - All'apertura legge l'utente e riempie il form, con i campi bloccati durante la chiamata. Se la lettura fallisce
   l'errore va sopra Salva (es. 404 `account.not_found`, 422 `account.cannot_modify_self` per l'utente collegato, 403
-  `account.role_not_assignable` per un ruolo che non si gestisce dal pannello) e Salva resta spento.
+  `account.role_not_assignable` per un ruolo che non si gestisce dal pannello) e Salva resta spento. Ogni errore della
+  lettura e del salvataggio passa alla pagina con `(failed)`: dopo un 404 la tabella si ricarica.
+- Il prefisso è quello letto; se l'utente ha il cellulare ma non il prefisso, la tendina mostra l'Italia e Salva manda
+  `39`, cioè quello che l'utente vede.
 - Campi, regole ed errori come nell'aggiunta, con il Tipo di account obbligatorio.
 - La password non è obbligatoria: vuota (`null`) = resta quella salvata (testo "Password impostata: scrivi per
   cambiarla"); se scritta vale `passwordRules`.
@@ -89,9 +97,12 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   utenti.
 - `app-table` con, sotto il titolo, la tendina delle date, "Filtri", la ricerca ed "Esporta" e "Stampa" in fondo alla
   riga.
-- Colonne, tutte ordinabili: ID prenotazione, Nome completo, Postazione, Azione e Data e ora (ora locale).
+- Colonne: ID prenotazione, Nome completo, Postazione, Azione e Data e ora (ora locale). Tutte ordinabili tranne Azione:
+  il backend ordina per codice, e i nomi tradotti sembrerebbero in disordine.
   Azione è il codice del backend tradotto con `management.settings.user_management.logs.actions.<modulo>.<azione>`, o il
   codice stesso se manca la traduzione.
+- La ricerca accetta al massimo 100 caratteri (`MAX_AUDIT_SEARCH_LENGTH`, `searchMaxLength` di `app-table`), come il
+  backend.
 
 ### Periodo
 
@@ -144,7 +155,8 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 - Chiamano le API di export e stampa con gli stessi filtri che la tabella sta mostrando (`AuditLogFiltersRequest`:
   `search`, `filters`, `sortField`, `sortDirection`, presi da `table.currentRequest()`, senza pagina), con lo spinner
   sul bottone e l'altro spento.
-- Il file ricevuto si salva con `FileDownloadBehaviour` (nome da `Content-Disposition`, di riserva `log` / `log-print`).
+- Il file ricevuto si salva con `FileDownloadBehaviour` (nome da `Content-Disposition`, di riserva `log.xlsx` /
+  `log-print.xlsx`).
   Stampa ed Esporta ricevono lo stesso file Excel (`xlsx`), che l'utente stampa dal suo programma.
 - Un errore mostra in "Operazione non riuscita" il messaggio del suo codice (`ErrorTextBehaviour`, testi `error.`),
   es. 422 `audit.export_too_large` con il numero di voci (`args.total`) e il massimo (`args.max`). Le due API non hanno

@@ -77,7 +77,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
   non riguarda un campo (es. rete assente).
 - Un codice del backend che arriva senza `errors[]` ma riguarda un solo campo (es. `pricing.period_name_taken`, nome
-  già usato) il form lo mette sotto quel campo, restituendo da `submit()` `apiFieldError(campo, codice)`. Un errore del
+  già usato; `account.email_taken` sotto Email) il form lo mette sotto quel campo, restituendo da `submit()` `apiFieldError(campo, codice)`. Un errore del
   backend su un campo si crea solo con `apiFieldError`, mai scrivendo l'oggetto con il suo `kind`.
 - Un errore su un id (un campo che comincia con `id`, come `idPeriod`) non va mai sotto un campo ma nel messaggio
   generale: l'id non si vede e il form resterebbe bloccato senza spiegazione.
@@ -111,6 +111,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   valore, tutti gli altri com'erano. Mai solo i campi cambiati, mai solo le voci selezionate di una lista (es. la tab
   Servizi rimanda tutti i servizi letti, ognuno con `isSelected` vero o falso), mai un corpo a cui manca qualcosa che il
   backend potrebbe cancellare. Vale per pagine, tab, pannelli e popup, anche futuri.
+- In una tab o pagina con caricamenti di file immediati (es. la tab Media di Informazioni stabilimento) il modello che
+  Salva rimanda sono i campi del suo form (lì link del tour e posizione); i file si caricano e si tolgono con le loro API
+  (vedi "Caricamento di file" in `api-e-mock.md`) e non passano dal Salva, la cui API non li tocca.
 
 ## Modifiche non salvate
 

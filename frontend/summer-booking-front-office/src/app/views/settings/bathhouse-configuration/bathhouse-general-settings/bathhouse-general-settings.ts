@@ -28,6 +28,7 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
+import { DATA_RELOAD } from '../../../../components/shared/ui/data/data-reload';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
 import {
   apiFieldError,
@@ -97,6 +98,7 @@ const NOTICE_HOURS: Readonly<Record<CancellationPolicy, number | null>> = {
 })
 export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
   private readonly catalog = inject(CatalogService);
   private readonly errorText = inject(ErrorTextBehaviour);
@@ -202,6 +204,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   constructor() {
     this.unsaved.watch(this);
     effect((onCleanup) => {
+      this.dataReload?.();
       if (!this.auth.user()) {
         return;
       }
@@ -277,8 +280,10 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       try {
         const sent = this.information();
         await firstValueFrom(this.catalog.saveBathhouseConfigurationGeneral(sent));
-        this.loaded = sent;
-        this.cache.keepGeneralInformation(sent);
+        const saved = savedAs(sent);
+        this.loaded = saved;
+        this.information.set(saved);
+        this.cache.keepGeneralInformation(saved);
         this.informationForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
@@ -308,6 +313,16 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     this.countries.destroy();
     this.unsaved.unwatch(this);
   }
+}
+
+/** As the backend keeps the information: texts without spaces at the ends, an empty one null. */
+function savedAs(information: BathhouseGeneralInformation): BathhouseGeneralInformation {
+  return Object.fromEntries(
+    Object.entries(information).map(([field, value]) => [
+      field,
+      typeof value === 'string' ? value.trim() || null : value,
+    ]),
+  ) as BathhouseGeneralInformation;
 }
 
 /** Without a saved country, the first one of the backend's list. */

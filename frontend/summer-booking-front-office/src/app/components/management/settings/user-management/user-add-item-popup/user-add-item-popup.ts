@@ -1,3 +1,4 @@
+import { HttpStatusCode } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,9 +14,11 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
+  MAX_LENGTH,
   TreeValidationResult,
   disabled,
   form,
+  metadata,
   required,
   submit,
 } from '@angular/forms/signals';
@@ -27,7 +30,10 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import {
   PhoneCountry,
@@ -35,15 +41,23 @@ import {
 } from '../../../../../behaviours/i18n/phone-prefix.behaviour';
 import { PhonePrefix } from '../../../../../entities/enums/phone-prefix';
 import { UserRole } from '../../../../../entities/enums/user-role';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import {
   CreateUserRequest,
+  PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   PHONE_MAX_LENGTH,
 } from '../../../../../entities/settings/user-management/create-user-request';
+import { MAX_EMAIL_LENGTH } from '../../../../../entities/shared/email-address';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { IdentityService } from '../../../../../services/api/identity/identity.service';
-import { passwordRules, phoneNumber, requiredText } from '../../../../shared/forms/validators';
+import {
+  emailAddress,
+  passwordRules,
+  phoneNumber,
+  requiredText,
+} from '../../../../shared/forms/validators';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -129,8 +143,11 @@ export class UserAddItemPopup extends BasePopup implements UnsavedChanges, OnDes
   private readonly draft = signal(emptyDraft());
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.email);
+    emailAddress(path.email);
+    metadata(path.email, MAX_LENGTH, () => MAX_EMAIL_LENGTH);
     requiredText(path.password);
     passwordRules(path.password, PASSWORD_MIN_LENGTH);
+    metadata(path.password, MAX_LENGTH, () => PASSWORD_MAX_LENGTH);
     phoneNumber(path.phone, PHONE_MAX_LENGTH);
     required(path.role);
     disabled(path, () => this.isLoading());
@@ -201,9 +218,7 @@ export class UserAddItemPopup extends BasePopup implements UnsavedChanges, OnDes
         this.close();
         this.added.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
-        );
+        return this.errorsOf(toApiProblem(error));
       } finally {
         this.isLoading.set(false);
       }
@@ -254,6 +269,20 @@ export class UserAddItemPopup extends BasePopup implements UnsavedChanges, OnDes
       ...draft,
       phoneCountryCode: this.phonePrefix.prefixFor(draft.phone, draft.phoneCountryCode),
     };
+  }
+
+  /** Codes that come without `errors[]` but are about one field go under it. */
+  private errorsOf(problem: ApiProblem): TreeValidationResult {
+    if (problem.code === ApiErrorCode.AccountEmailTaken) {
+      return apiFieldError(this.draftForm.email, problem.code, problem.args);
+    }
+    if (
+      problem.code === ApiErrorCode.AccountRoleNotAssignable &&
+      problem.status === HttpStatusCode.UnprocessableEntity
+    ) {
+      return apiFieldError(this.draftForm.role, problem.code, problem.args);
+    }
+    return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general));
   }
 
   override ngOnDestroy(): void {

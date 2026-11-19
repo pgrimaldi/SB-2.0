@@ -42,7 +42,7 @@ Vanno aggiunti a `CatalogErrors`, accanto agli altri `pricing.period_*`. Il fron
 | `PeriodRangeNotFound` | `pricing.period_range_not_found` | 404 | nessuno | 1, 2 |
 | `PeriodRangesRequired` | `pricing.period_ranges_required` | 422 | nessuno | 1, 2 |
 | `PeriodInUseByServices` | `pricing.period_in_use_by_services` | 409 | `services`: array di stringhe, mai vuoto | 3 |
-| `PeriodOverlap` | `pricing.period_overlap` | 409 | `periodName`: stringa | 4, 5 |
+| `PeriodOverlap` | `pricing.period_overlap` | 409 | `periodName`: stringa, `""` se l'altro periodo non c'è più (sezione 5) | 4, 5 |
 
 ## Regole comuni
 
@@ -63,18 +63,28 @@ Valgono per le API 1 e 2.
   `failed` e cancellano quello che possono, queste due fanno tutti i controlli prima di cancellare e salvano in una sola
   transazione. Se un controllo fallisce non si cancella niente.
 - **Errori** nel formato Problem Details del backend (`ProblemDetailsWriter`), con `code`.
+- **`args` degli errori di campo**: `ValidatorExtensions.ToFieldError`
+  (`BuildingBlocks.Application/Validation/ValidatorExtensions.cs`) copia sempre tutti i segnaposto che FluentValidation
+  dà alla regola, quindi `validation.max_length` e `validation.password_too_long` hanno `args.max` e anche
+  `args.min` = 0; `validation.min_length` e `validation.password_too_short` `args.min` e anche `args.max` = -1; una
+  lunghezza esatta (`Length(2)`) `args.min` e `args.max` uguali; una regola di confronto (`GreaterThan`,
+  `GreaterThanOrEqualTo`, anche con un altro `WithErrorCode`) `args.value` con il valore confrontato; `InclusiveBetween`
+  `args.from` e `args.to` (provato con FluentValidation 12.1.1, la versione del backend). Il frontend usa solo gli args
+  dei suoi testi, quelli scritti nelle tabelle di questo documento.
 - **Prima del codice dell'endpoint**, come per tutte le API: senza token valido 401 `auth.unauthenticated`; senza
   permesso 403 `auth.forbidden`; poi la lettura del corpo. Un corpo che non si legge (assente, non JSON, la data
-  `2026-02-30`, una `key` che non è un numero intero o non sta in `short`) non arriva all'endpoint e risponde 400 senza
-  `errors[]`, come per le altre API, senza codice da scrivere (in Development il binding lancia
-  `BadHttpRequestException` e `GlobalExceptionHandler` risponde `validation.failed`).
+  `2026-02-30`, una `key` che non è un numero intero o non sta in `short`) non arriva all'endpoint e risponde 400, come
+  per le altre API, senza codice da scrivere: in Development con `validation.failed` senza `errors[]` (il binding
+  lancia `BadHttpRequestException`, che `GlobalExceptionHandler` trasforma), negli altri ambienti senza corpo
+  (`Boot/Program.cs` non imposta `RouteHandlerOptions.ThrowOnBadRequest`, che fuori da Development è falso). Il
+  frontend manda sempre JSON valido.
 
 ## 1. POST /api/catalog/tariff-periods/bulk-delete-ranges
 
 Tab "Stagione Corrente": bottone "Cancella selezionati" (con almeno due intervalli spuntati) e cestino di un intervallo
 (un solo elemento), dopo la conferma nel popup. Il frontend non manda la richiesta se un periodo resterebbe senza
-intervalli (mostra un avviso): il 422 `pricing.period_ranges_required` arriva solo se nel frattempo qualcun altro ha
-cancellato degli intervalli.
+intervalli o se gli intervalli scelti sono più di 300 (mostra un avviso): il 422 `pricing.period_ranges_required`
+arriva solo se nel frattempo qualcun altro ha cancellato degli intervalli, e il 400 oltre 300 non arriva mai.
 
 ### Richiesta
 
@@ -147,8 +157,8 @@ risposta:
 
 ### Risposta
 
-204 senza corpo. Dopo il 204 la tab ricarica i periodi con `GET /tariff-periods`; dopo un errore li ricarica solo se lo
-status è 404. Il frontend mostra ogni errore di questa API nell'avviso "Operazione non riuscita", con il testo del suo
+204 senza corpo. Dopo il 204 la tab ricarica i periodi con `GET /tariff-periods`; dopo un errore li ricarica se lo
+status è 404, 409 o 422. Il frontend mostra ogni errore di questa API nell'avviso "Operazione non riuscita", con il testo del suo
 `code` (per un 400 il testo generico di `validation.failed`, senza i singoli campi).
 
 ### Errori
@@ -159,7 +169,7 @@ Nell'ordine in cui si controllano:
 |---|---|---|
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 | 403 | `auth.forbidden` | Utente senza il permesso `CatalogSettings`. |
-| 400 | `validation.failed` | Corpo che non si legge (vedi "Regole comuni"): senza `errors[]`. |
+| 400 | `validation.failed` in Development, senza corpo negli altri ambienti | Corpo che non si legge (vedi "Regole comuni"): senza `errors[]`. |
 | 400 | `validation.failed` | `ranges` assente, `null` o vuota: `errors[]` con `field` `ranges` e `code` `validation.required`. |
 | 400 | `validation.failed` | Più di 300 elementi: `errors[]` con solo `field` `ranges` e `code` `validation.invalid`. |
 | 400 | `validation.failed` | Un elemento `null`: `field` `ranges[i]` e `code` `validation.required`. |
@@ -198,7 +208,7 @@ Tab "Prossima Stagione": come la sezione 1, sulle righe della stagione successiv
 - le righe si eliminano togliendole da `season.NextSeasonPeriods`, come fa oggi `ReplaceNextPeriodAsync`
   (`SoftDeleteInterceptor` le trasforma in `deleted_at`);
 - le voci del registro hanno `season` = `next`, come le altre API della stagione successiva;
-- dopo il 204, e dopo un 404, la tab ricarica i periodi con `GET /next-season/tariff-periods`.
+- dopo il 204, e dopo un 404, un 409 o un 422, la tab ricarica i periodi con `GET /next-season/tariff-periods`.
 
 Richiesta, risposta, ordine delle operazioni, blocco della stagione e gli altri errori sono gli stessi della sezione 1.
 
@@ -442,8 +452,10 @@ Rotte, corpi, risposte e gli altri errori restano quelli di oggi: si aggiunge un
   l'inserimento arriva prima dell'eliminazione, la modifica di un periodo va in conflitto con se stessa. Esempio: "Alta"
   della prossima stagione dal 01/07 al 31/07, modificata in 01/07–15/08: il vincolo rifiuterebbe il salvataggio anche
   se le date sono giuste.
-- Il frontend mostra il 409 sopra i bottoni del popup che salva ("Imposta periodo", "Modifica Periodo", "Aggiungi
-  intervallo", "Modifica Intervallo"), con il nome di `args.periodName`.
+- Il frontend mostra il 409 sotto il calendario di "Imposta periodo" e sopra i bottoni degli altri popup che salvano
+  ("Modifica Periodo", "Aggiungi intervallo", "Modifica Intervallo"), con il nome di `args.periodName`; con
+  `periodName` `""` mostra un testo senza nome ("Le date si sovrappongono a un altro intervallo della stagione"). Poi
+  la tab ricarica i periodi.
 
 ## 5. Una scrittura alla volta sui periodi di una stagione
 
@@ -465,7 +477,43 @@ Riguarda queste API, per tutte e due le stagioni: `POST`, `PUT` e `DELETE` di
 
 ### Cosa cambiare
 
-- Ogni API dell'elenco, dopo il validatore (quelle che lo hanno) e lo stabilimento, apre una transazione (isolamento
+**Cosa deve succedere.** È il risultato richiesto e non cambia, qualunque sia il modo scelto per ottenerlo:
+
+- Due scritture sulla stessa stagione non si mescolano mai: la seconda fa i suoi controlli e la sua scrittura solo
+  quando la prima ha finito, sui dati già salvati dalla prima. Nell'esempio di "Oggi" il periodo non resta mai con gli
+  intervalli di tutti e due i salvataggi, e la risposta non è mai 500.
+- I controlli (nome, giorni della stagione, sovrapposizioni della sezione 4, intervalli delle API 1 e 2, listini e
+  servizi della sezione 3), il contatore della `key` (sezione 3) e la scrittura lavorano sugli stessi dati: se un
+  controllo fallisce non si salva nulla. La voce del registro si scrive dopo il salvataggio, come oggi.
+- Senza la stagione le risposte restano quelle di oggi (`RequireSeasonAsync` / `RequireNextSeasonAsync`: 422
+  `pricing.season_required` o `pricing.next_season_required`).
+- Il vincolo del database resta come protezione per le scritture che non passano da queste API. Se il salvataggio
+  degli intervalli nuovi lancia una `DbUpdateException` con dentro una `PostgresException` con `SqlState` `23P01`
+  (`PostgresErrorCodes.ExclusionViolation`) e `ConstraintName` `ex_catalog_pricing_tariff_periods_no_overlap` o
+  `ex_catalog_pricing_next_season_periods_no_overlap` (il vincolo nuovo della sezione 4), il backend non risponde mai
+  500: non salva nulla e risponde 409 `pricing.period_overlap`, come il controllo della sezione 4, con
+  `args.periodName` = il nome del primo periodo, in ordine di primo giorno, diverso da quello che si salvava, che ha
+  giorni in comune con gli intervalli della richiesta (`""` se nel frattempo non ce n'è più nessuno). Nessuna voce nel
+  registro.
+- Le risposte riuscite non cambiano.
+
+**Come ottenerlo lo decide lo sviluppatore backend.** L'agente che implementa questa sezione, prima di scrivere codice,
+si ferma e chiede allo sviluppatore backend come aprire nel modulo Catalog la transazione della richiesta e il blocco
+della stagione, e implementa solo la strada scelta. Gli porta questi fatti:
+
+- `SeasonService` non ha il `DbContext` (costruttore in `Module.Catalog/Application/Services/SeasonService.cs`) e
+  `IUnitOfWork` del Catalog ha solo `SaveChangesAsync`
+  (`Module.Catalog/Application/Abstractions/ICatalogRepositories.cs`): oggi il servizio non può aprire una
+  transazione.
+- L'unica transazione dei periodi è quella che `ReplacePeriodAsync` apre da sé
+  (`Module.Catalog/Infrastructure/Repositories/SeasonSectorRepositories.cs`, `BeginTransactionAsync`); EF non permette
+  di aprirne una seconda sulla stessa connessione.
+- Nel backend non c'è ancora nessun blocco `FOR UPDATE` scritto nel codice: lo cita solo un commento di
+  `Module.Booking/Infrastructure/Configurations/BookingNumberSequenceConfiguration.cs`.
+
+La strada proposta, da far confermare allo sviluppatore:
+
+- ogni API dell'elenco, dopo il validatore (quelle che lo hanno) e lo stabilimento, apre una transazione (isolamento
   di default, `READ COMMITTED`) e blocca la riga della stagione dello stabilimento:
 
   ```sql
@@ -474,24 +522,14 @@ Riguarda queste API, per tutte e due le stagioni: `POST`, `PUT` e `DELETE` di
 
   Solo dopo legge la stagione con i periodi (`FindAsync`, attraverso `RequireSeasonAsync` / `RequireNextSeasonAsync`):
   una lettura fatta prima del blocco resterebbe nel change tracker con i dati vecchi. Una seconda scrittura sulla
-  stessa stagione aspetta che la prima finisca e poi legge i dati già salvati. Senza la riga della stagione il blocco
-  non trova niente e `RequireSeasonAsync` risponde 422 `pricing.season_required`, come oggi.
-- Nella stessa transazione stanno i controlli (nome, giorni della stagione, sovrapposizioni della sezione 4, intervalli
-  delle API 1 e 2, listini e servizi della sezione 3), il contatore della `key` (sezione 3) e la scrittura; poi il
-  commit. La voce del registro si scrive dopo il commit, come oggi.
-- `ReplacePeriodAsync` non apre più una sua transazione (oggi `BeginTransactionAsync`): usa quella della richiesta, che
-  EF non permette di aprire due volte sulla stessa connessione. I suoi due `SaveChangesAsync` restano; lo stesso vale
-  per il salvataggio a due passi della stagione successiva (sezione 4).
-- Il vincolo del database resta come protezione per le scritture che non passano da queste API. Se il salvataggio degli
-  intervalli nuovi lancia una `DbUpdateException` con dentro una `PostgresException` con `SqlState` `23P01`
-  (`PostgresErrorCodes.ExclusionViolation`) e `ConstraintName` `ex_catalog_pricing_tariff_periods_no_overlap` o
-  `ex_catalog_pricing_next_season_periods_no_overlap`, il backend non risponde mai 500: annulla la transazione, svuota
-  il change tracker (`ChangeTracker.Clear()`), rilegge i periodi non eliminati della stagione e risponde 409
-  `pricing.period_overlap`, come il controllo della sezione 4, con `args.periodName` = il nome del primo periodo, in
-  ordine di primo giorno, diverso da quello che si salvava, che ha giorni in comune con gli intervalli della richiesta
-  (`""` se nel frattempo non ce n'è più nessuno). Nessuna voce nel registro.
-- Le risposte riuscite non cambiano.
-- Fuori da questa richiesta, a giudizio dello sviluppatore backend: se lo stesso blocco debba valere anche per
+  stessa stagione aspetta che la prima finisca e poi legge i dati già salvati;
+- controlli, contatore della `key` e scrittura stanno in quella transazione, poi il commit;
+- `ReplacePeriodAsync` non apre più una sua transazione e usa quella della richiesta; i suoi due `SaveChangesAsync`
+  restano, come il salvataggio a due passi della stagione successiva (sezione 4);
+- sul `23P01` qui sopra: annulla la transazione, svuota il change tracker (`ChangeTracker.Clear()`), rilegge i periodi
+  non eliminati della stagione per trovare `args.periodName` e risponde 409.
+
+Fuori da questa richiesta, a giudizio dello sviluppatore backend: se lo stesso blocco debba valere anche per
   `PUT /api/catalog/season` (che senza date della stagione successiva ne cancella i periodi, `PricingSeason.cs`) e per
   i salvataggi di listini e servizi che aggiungono prezzi a un periodo mentre lo si elimina. L'agente che implementa
   questa sezione glielo chiede prima di scrivere codice; il frontend non ne dipende.
@@ -513,17 +551,26 @@ Le `GET` chiedono il permesso `CatalogRead`, le altre `CatalogSettings`.
 | DELETE | `/api/catalog/tariff-periods/{key}` | Cestino di un periodo della stagione corrente, dopo la conferma; 204 senza corpo. Si aggiungono il controllo dei servizi della sezione 3 e il blocco della sezione 5. |
 | DELETE | `/api/catalog/next-season/tariff-periods/{key}` | Lo stesso per la stagione successiva; 204 senza corpo. Si aggiunge il blocco della sezione 5. |
 
+`tier` dei periodi della stagione corrente: ogni `PUT /api/catalog/tariff-periods/{key}` riscrive le righe del periodo
+con `tier` = `custom` (`TariffPeriod.Create`, `Module.Catalog/Domain/Entities/TariffPeriod.cs`; colonna
+`catalog.pricing_tariff_periods.tier`, valore predefinito `custom`; la tabella della stagione successiva non ha la
+colonna). La pagina non legge e non mostra `tier`, e oggi nessun codice del backend lo legge. Se un `tier` diverso da
+`custom` (es. caricato da un import dei dati) deve restare dopo il salvataggio, lo decide lo sviluppatore backend:
+l'agente che lavora su questa pagina glielo chiede prima di scrivere codice. Il contratto dell'API non cambia.
+
 ## Dove il frontend mostra gli errori
 
-Per tutte le API della pagina, comprese le nuove:
+Per tutte le API della pagina, comprese le nuove. Dopo un 404, un 409 o un 422 di un popup o di un'eliminazione la tab
+ricarica i periodi, così i controlli del frontend lavorano sulla lista nuova; dopo `pricing.period_outside_season`
+rilegge anche le date della stagione (se il riquadro delle date non ha modifiche non salvate).
 
 | Status | `code` | Dove lo mostra |
 |---|---|---|
 | 400 | `validation.failed` con `errors[]` | Date della stagione (`PUT /season`): sotto il campo; `validation.end_before_start` su `endsOn` o `nextEndsOn`, `validation.out_of_range` su `nextStartsOn` (la prossima stagione non inizia dopo la fine della corrente, testo "La prossima stagione deve iniziare dopo la fine di quella corrente."), `validation.required` su `nextStartsOn` o `nextEndsOn` quando c'è solo l'altra. Periodi: `name` sotto il nome; `ranges` e `ranges[i]` sotto il calendario di "Imposta periodo" o sopra i bottoni degli altri popup. API 1 e 2: nell'avviso "Operazione non riuscita", con il testo generico. |
-| 400 | `validation.failed` senza `errors[]` | Corpo che non si legge (es. `startsOn` o `endsOn` `null` in `PUT /season`): sotto le date del riquadro o sopra i bottoni del popup; per le API 1 e 2 nell'avviso "Operazione non riuscita". |
+| 400 | `validation.failed` senza `errors[]` in Development, senza corpo negli altri ambienti | Corpo che non si legge (es. `startsOn` o `endsOn` `null` in `PUT /season`): sotto le date del riquadro o sopra i bottoni del popup; per le API 1 e 2 nell'avviso "Operazione non riuscita". Senza corpo il testo è quello generico (`server.unexpected`, `toApiProblem`). |
 | 409 | `pricing.period_name_taken` | Sotto il nome del periodo ("Imposta periodo", "Modifica Periodo"); sopra i bottoni in "Aggiungi intervallo" e "Modifica Intervallo", che non hanno il nome. |
 | 422 | `pricing.period_outside_season` | Sotto il calendario di "Imposta periodo" o sopra i bottoni degli altri popup. |
-| 409 | `pricing.period_overlap` | Sopra i bottoni del popup che salva, con `args.periodName`. |
+| 409 | `pricing.period_overlap` | Sotto il calendario di "Imposta periodo" o sopra i bottoni degli altri popup, con `args.periodName`; con `periodName` `""` un testo senza nome. |
 | 422 | `pricing.season_required` / `pricing.next_season_required` | Sopra i bottoni del popup; per le eliminazioni (periodo, API 1 e 2) nell'avviso "Operazione non riuscita". |
 | 404 | `pricing.period_not_found` | Nel popup o nell'avviso "Operazione non riuscita"; la tab ricarica i periodi. |
 | 404 | `pricing.period_range_not_found` | Avviso "Operazione non riuscita" (API 1 e 2); la tab ricarica i periodi. |

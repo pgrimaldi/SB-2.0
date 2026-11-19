@@ -221,6 +221,8 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Blue header, striped rows, rounded corners; otherwise the clean, minimal default look. */
   readonly useAppTheme = input(false);
   readonly isSearchable = input(false);
+  /** Characters the search field accepts at most (the backend's limit); none: no limit. */
+  readonly searchMaxLength = input<number | null>(null);
   /** Buttons of every row, in the last column; empty or `null`: no such column. */
   readonly rowActions = input<readonly TableRowAction<T>[] | null>([]);
   /** Switch of every row, before its buttons: it shows the row's `isEnabled`; `null`: no switch. */

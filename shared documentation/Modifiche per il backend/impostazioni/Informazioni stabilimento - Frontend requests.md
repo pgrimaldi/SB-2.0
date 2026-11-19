@@ -72,7 +72,7 @@ Valgono per le sei API nuove.
   com'è. Non vanno fatti richiamando `PUT /property-info`, che riscrive tutta la scheda (anche posizione e tour
   virtuale).
 - **Ordine dei controlli**, uguale per tutte: 1) token e permesso (401, 403 `auth.forbidden`); 2) corpo JSON leggibile
-  (altrimenti 400); 3) validazione del corpo (400 `validation.failed`); 4) stabilimento dal token (403 `catalog.property_required`, 404
+  (altrimenti 400: il frontend manda sempre JSON valido, quindi `code` ed `errors[]` di questo 400 non contano); 3) validazione del corpo (400 `validation.failed`); 4) stabilimento dal token (403 `catalog.property_required`, 404
   `catalog.property_not_found`); 5) i controlli sui dati della singola API (422 della API 2, 404 della API 4); 6)
   salvataggio. Se un controllo fallisce non si salva nulla.
 - **Errori** nel formato Problem Details del backend (`Boot/Web/ProblemDetailsWriter.cs`), con `code` e `traceId`, più
@@ -94,6 +94,15 @@ Valgono per le sei API nuove.
   ]
 }
 ```
+
+- **`args` degli errori di campo**: `ValidatorExtensions.ToFieldError`
+  (`BuildingBlocks.Application/Validation/ValidatorExtensions.cs`) copia sempre tutti i segnaposto che FluentValidation
+  dà alla regola, quindi `validation.max_length` e `validation.password_too_long` hanno `args.max` e anche
+  `args.min` = 0; `validation.min_length` e `validation.password_too_short` `args.min` e anche `args.max` = -1; una
+  lunghezza esatta (`Length(2)`) `args.min` e `args.max` uguali; una regola di confronto (`GreaterThan`,
+  `GreaterThanOrEqualTo`, anche con un altro `WithErrorCode`) `args.value` con il valore confrontato; `InclusiveBetween`
+  `args.from` e `args.to` (provato con FluentValidation 12.1.1, la versione del backend). Il frontend usa solo gli args
+  dei suoi testi, quelli scritti nelle tabelle di questo documento.
 
 ## 1. GET /api/catalog/property-info/bathhouse-configuration-general
 
@@ -233,11 +242,11 @@ Bottone "Salva" della tab Informazioni Generali.
 | `phone`, `whatsapp` | `validation.phone` | | Fino a 32 caratteri, ma non solo cifre e spazi. |
 | `email` | `validation.email` | | Non vuota, fino a 255 caratteri, e senza esattamente una `@` o con la `@` all'inizio o alla fine. |
 | `description`, `regulation` | `validation.max_length` | `max` = 20000 | HTML più lungo di 20.000 caratteri. Il frontend limita a 5.000 i caratteri di testo visibile, non l'HTML: con molta formattazione questo errore può arrivare, e va sotto il campo. |
-| `country` | `validation.invalid` | il frontend non li usa | Non `null` e non lungo 2 caratteri (regola `Length(2)`: FluentValidation dà `ExactLengthValidator`, che `ValidatorExtensions` traduce in `validation.invalid`). |
+| `country` | `validation.invalid` | `min` = 2, `max` = 2; il frontend non li legge | Non `null` e non lungo 2 caratteri (regola `Length(2)`: FluentValidation dà `ExactLengthValidator`, che `ValidatorExtensions` traduce in `validation.invalid`). |
 | `openingTime`, `closingTime` | `validation.invalid` | | **Nuova.** Non `null` e non nel formato `HH:mm` (da `00:00` a `23:59`). |
-| `closingTime` | `validation.out_of_range` | il frontend non li usa | Con tutti e due gli orari validi, `closingTime` non è dopo `openingTime` (uguale non vale). |
+| `closingTime` | `validation.out_of_range` | `value` = `openingTime` come lo confronta la regola (es. `"08:30:00"` con `TimeOnly`); il frontend non lo legge | Con tutti e due gli orari validi, `closingTime` non è dopo `openingTime` (uguale non vale). |
 | `isFreeCancellation` | `validation.required` | | **Nuova.** Mancante o `null`. |
-| `cancellationNoticeHours` | `validation.invalid` | | Non `null` con `isFreeCancellation` = `false`. |
+| `cancellationNoticeHours` | `validation.invalid` | | Non `null` con `isFreeCancellation` = `false`. Con `isFreeCancellation` mancante o `null` c'è solo l'errore su `isFreeCancellation` (sotto); la regola qui sotto vale comunque. |
 | `cancellationNoticeHours` | `validation.out_of_range` | `from` = 1, `to` = 720 | Non `null` e fuori da 1-720. |
 | `petPolicy` | `validation.invalid` | | Mancante, `null` o diverso da `Allowed`, `NotAllowed`, `OnRequest` (la regola di oggi controlla i codici `allowed`…; qui valgono i nomi .NET). |
 
@@ -327,8 +336,9 @@ Bottone "Salva" della tab Servizi.
   Si salva con `Bathhouse.SetAmenities` passando le dotazioni di prima, più gli id con `true`, meno gli id con `false`;
   a differenza di `PUT /property-info/amenities`, che sostituisce tutte le dotazioni con quelle ricevute.
 - `services` mancante o `null` è un errore e non si salva nulla.
-- `isSelected` mancante o non boolean in un elemento: 400 `validation.required` su `services[i].isSelected` e non si
-  salva nulla.
+- `isSelected` mancante o non boolean in un elemento non `null`: 400 `validation.required` su
+  `services[i].isSelected` e non si salva nulla. Un elemento `null` non dà errori di validazione: risponde 404 dopo i
+  controlli del corpo (tabella sotto).
 - Lo stesso `idService` ripetuto nella lista: 400 `validation.invalid` su `services` e non si salva nulla (non si
   saprebbe quale `isSelected` vale).
 - Al massimo 200 elementi, come `PUT /property-info/amenities`.
@@ -342,7 +352,7 @@ Bottone "Salva" della tab Servizi.
 |---|---|---|
 | 400 | `validation.failed` con `errors[]` = `[{ "field": "services", "code": "validation.required", "args": {} }]` | `services` mancante o `null`. |
 | 400 | `validation.failed` con `errors[]` = `[{ "field": "services", "code": "validation.invalid", "args": {} }]` | Più di 200 elementi, o lo stesso `idService` ripetuto. |
-| 400 | `validation.failed` con `errors[]` = `[{ "field": "services[i].isSelected", "code": "validation.required", "args": {} }]` | `isSelected` mancante o non boolean nell'elemento `i`. |
+| 400 | `validation.failed` con `errors[]` = `[{ "field": "services[i].isSelected", "code": "validation.required", "args": {} }]` | `isSelected` mancante o non boolean nell'elemento `i`, non `null`. I tre 400 arrivano insieme in `errors[]`, prima di ogni 404. |
 | 403, 404 | `catalog.property_required`, `catalog.property_not_found` | Regole comuni. |
 | 404 | `resource.not_found`, senza `errors[]` | Un elemento `null` o senza `idService`, o con un `idService` che la API 3 non restituirebbe (non esiste, è cancellato, non è attivo o non ha sezione). |
 
@@ -356,8 +366,8 @@ Tab Media: il frontend la chiama la prima volta che si apre la tab e mostra la p
 del tour virtuale e i due PDF.
 
 - Nessun parametro.
-- Risposta 200 con i 9 campi qui sotto, sempre tutti. Uno stabilimento senza scheda risponde con tutti i campi `null`
-  e `photos` = `[]`.
+- Risposta 200 con i 9 campi qui sotto, sempre tutti. Uno stabilimento senza scheda risponde con `photos` = `[]` e gli
+  altri 8 campi `null`.
 
 ```json
 {
@@ -383,7 +393,7 @@ del tour virtuale e i due PDF.
 | `virtualTourUrl` | string o `null` | `virtualTourUrl` | |
 | `latitude`, `longitude` | number o `null` | `latitude`, `longitude` | Colonne `numeric(9,6)`. `null` tutti e due se la posizione non è stata scelta. |
 | `priceListPdfUrl`, `menuPdfUrl` | string o `null` | `priceListPdf.url`, `menuPdf.url` | Link del PDF (sezione 9); `null` se non c'è il file. |
-| `priceListPdfFileName`, `menuPdfFileName` | string o `null` | `priceListPdf.fileName`, `menuPdf.fileName` | Il nome del file, che la tab mostra; `null` se non c'è il file. Viene dal percorso salvato (`Path.GetFileName`): il nome caricato con i caratteri diversi da lettere, cifre, `.`, `-` e `_` cambiati in `_` (`ObjectStorage.SaveAsync`); `file.pdf` se il file non si trova in `catalog.media_assets`. |
+| `priceListPdfFileName`, `menuPdfFileName` | string o `null` | `priceListPdf.fileName`, `menuPdf.fileName` | Il nome del file, che la tab mostra; `null` se non c'è il file. Viene dal percorso salvato (`Path.GetFileName`): il nome caricato con i caratteri diversi da lettere, cifre, `.`, `-` e `_` cambiati in `_` (`S3ObjectStorage.SaveAsync`, `BuildingBlocks.Infrastructure/Storage/ObjectStorage.cs`); `file.pdf` se il file non si trova in `catalog.media_assets`. |
 
 Non ci sono: i campi delle altre tab e `slug`.
 
@@ -580,10 +590,10 @@ link intero nel percorso e lo restituisce così com'è. Le chiavi di configurazi
 `Storage:PublicBaseUrls` (lo dà la configurazione di ogni ambiente). I file caricati dalla pagina vanno sull'origine di
 `Catalog:Media:Origin` (`s3_us_east_2`).
 
-Cosa fa il frontend: nella tab Media usa solo link https o dell'app stessa. Una foto della galleria con un link `null`
-o diverso resta al suo posto senza anteprima, con la X per cancellarla, e conta nei 30 posti; l'immagine principale o
-un PDF con un link così si vedono come assenti, senza X, e caricandone un altro si sostituiscono. Nella tab Servizi
-`iconUrl` va così com'è in `<img src>`.
+Cosa fa il frontend: in `src` e `href` usa solo link https o dell'app stessa (`fileLinkOf`), nella tab Media e per le
+icone della tab Servizi. Una foto della galleria, l'immagine principale o un PDF con un link diverso restano visibili
+senza anteprima (il PDF con il nome del file, senza "Apri il documento"), con la X per cancellarli; una foto conta nei
+30 posti. Un link `null` vuol dire file assente. Un'icona con un link diverso non si mostra.
 
 Richiesta, in **ogni ambiente, sviluppo compreso**:
 
@@ -613,9 +623,11 @@ cambiate** (salvo i link, sezione 9): sono qui solo perché chi lavora sulla pag
 
 Rispondono 200 con la scheda (`PropertyInfoDto`) e chiedono `CatalogSettings` (senza: 403 `auth.forbidden`) e lo
 stabilimento dal token, come le API nuove (403 `catalog.property_required`, 404 `catalog.property_not_found`); se lo
-stabilimento non ha ancora la scheda, la crea la prima chiamata riuscita. Il frontend legge dalla risposta solo
-`mainPhotoUrl`, `photos` (`id`, `url`, `sortOrder`), `priceListPdf` e `menuPdf` (`fileName`, `url`); tour virtuale e
-posizione restano quelli che ha già. Si aspetta questi limiti e codici, che controlla anche lui prima di mandare il
+stabilimento non ha ancora la scheda, la crea la prima chiamata riuscita. Il frontend legge dalla risposta tutti i
+media: `mainPhotoUrl`, `photos` (`id`, `url`, `sortOrder`), `virtualTourUrl`, `latitude`, `longitude`,
+`priceListPdf` e `menuPdf` (`fileName`, `url`). La tab Media e la sua cache prendono questi campi dalla risposta,
+quindi anche link del tour e posizione devono restare nella risposta con i valori salvati, come oggi
+(`PropertyInfoService.ToDtoAsync`). Si aspetta questi limiti e codici, che controlla anche lui prima di mandare il
 file:
 
 | Codice | Status | Quando |
@@ -630,8 +642,8 @@ file:
 Con uno stabilimento di prova e un token con `catalog.read` e `catalog.settings`:
 
 1. **Senza scheda**: la API 1 risponde con i 20 campi, tutti `null` tranne `"isFreeCancellation": false` e
-   `"petPolicy": "OnRequest"`; la API 3 con la lista e `isSelected` sempre `false`; la API 5 con i 9 campi `null` e
-   `"photos": []`. Mai 404.
+   `"petPolicy": "OnRequest"`; la API 3 con la lista e `isSelected` sempre `false`; la API 5 con `"photos": []` e gli
+   altri 8 campi `null`. Mai 404.
 2. **API 2**: dopo un 204 la API 1 restituisce i valori mandati, con gli orari `"HH:mm"` (non `"08:30:00"`) e
    `petPolicy` col nome .NET; `catalog.properties.name` = `bathhouseName` senza spazi ai lati; al primo salvataggio
    `catalog.bathhouses.slug` non è più `NULL`; `catalog.properties.country_id` è la nazione di `country`; latitudine,
@@ -650,9 +662,13 @@ Con uno stabilimento di prova e un token con `catalog.read` e `catalog.settings`
    `idService` che non esiste 404 `resource.not_found`, e in tutti questi casi la API 3 dà la selezione di prima; una
    dotazione di un servizio non attivo o senza sezione, presente prima, c'è ancora dopo il salvataggio (`SELECT` su
    `catalog.bathhouse_amenities` della scheda).
-7. **API 6**: dopo un 204 la API 5 restituisce link e posizione mandati, e la API 1 gli stessi valori di prima; su uno
+7. **API 6**: dopo un 204 la API 5 restituisce link e posizione mandati e gli stessi `mainPhotoUrl`, `photos`,
+   `priceListPdfUrl`, `priceListPdfFileName`, `menuPdfUrl` e `menuPdfFileName` di prima (foto e PDF non cambiano), e la
+   API 1 gli stessi valori di prima; su uno
    stabilimento che ha la scheda solo da un caricamento di foto (nome `NULL`) risponde 204, non 500; con la sola
-   `latitude` risponde 400 con `field` `longitude` e `code` `validation.required`.
+   `latitude` risponde 400 con `field` `longitude` e `code` `validation.required`. Dopo un 204, una chiamata riuscita a
+   una API di foto e PDF (es. `POST /api/catalog/property-info/photos`) risponde con i `virtualTourUrl`, `latitude` e
+   `longitude` appena salvati.
 8. **Link**: in ogni ambiente, sviluppo compreso, ogni link di icone, foto e PDF della API 3, della API 5 e delle API di
    foto e PDF comincia con `https://`, e nessun file che esiste ha il link `null`.
 9. **Accesso**: senza token 401 `auth.unauthenticated`; senza permesso 403 `auth.forbidden`; token senza stabilimento

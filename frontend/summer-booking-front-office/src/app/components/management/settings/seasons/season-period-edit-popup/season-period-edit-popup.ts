@@ -48,7 +48,7 @@ import { SeasonService } from '../../../../../services/api/seasons/season.servic
 import { isTextTaken, requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
-import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
+import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 
@@ -133,6 +133,10 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.PricingPeriodNameTaken) {
           return apiFieldError(this.draftForm.name, problem.code);
+        }
+        const overlap = periodOverlapError(problem, this.draftForm);
+        if (overlap) {
+          return overlap;
         }
         const ranges = rangesErrors(problem, this.draftForm);
         const others = withoutRangesErrors(problem);

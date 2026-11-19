@@ -1,3 +1,4 @@
+import { HttpStatusCode } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -18,6 +19,7 @@ import {
 } from '../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { UserRole } from '../../../entities/enums/user-role';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import { AuditLogUserState } from '../../../entities/settings/user-management/audit-log-user-state';
 import { IdentityService } from '../../../services/api/identity/identity.service';
 
@@ -48,8 +50,12 @@ interface UserRow {
   email: string | null;
   phone: string | null;
   role: string | null;
-  isOwner: boolean;
+  /** The owner, the user signed in and the Website admins are not managed from this page. */
+  isLocked: boolean;
 }
+
+/** Roles the backend does not let the panel manage (`Role.IsAssignableViaPanel`). */
+const LOCKED_ROLES: readonly string[] = [UserRole.SuperAdmin, UserRole.WebsiteAdmin];
 
 const USER_ROLE_KEYS: Record<UserRole, keyof UserManagementTexts['role']> = {
   [UserRole.SuperAdmin]: 'super_admin',
@@ -132,9 +138,9 @@ export class UserManagement {
     { field: 'phone', header: this.headers().mobile_phone, sortable: true },
     { field: 'role', header: this.headers().account_type, sortable: true },
   ]);
-  private readonly ownerNotEditable = toSignal(
+  private readonly userNotEditable = toSignal(
     this.translateService.stream(
-      'management.settings.user_management.owner_not_editable',
+      'management.settings.user_management.user_not_editable',
     ) as Observable<string>,
     { initialValue: '' },
   );
@@ -144,8 +150,8 @@ export class UserManagement {
       edit: ({ idUser }) => idUser && this.openEdit(idUser),
     },
     {
-      delete: { isHidden: ({ isOwner }) => isOwner },
-      edit: { isDisabled: ({ isOwner }) => isOwner, disabledLabel: this.ownerNotEditable },
+      delete: { isHidden: ({ isLocked }) => isLocked },
+      edit: { isDisabled: ({ isLocked }) => isLocked, disabledLabel: this.userNotEditable },
     },
   );
   private readonly logText = toSignal(
@@ -178,12 +184,11 @@ export class UserManagement {
               idUser: item.idUser,
               email: item.email,
               phone: item.phone
-                ? [item.phoneCountryCode && `+${item.phoneCountryCode}`, item.phone]
-                    .filter(Boolean)
-                    .join(' ')
+                ? [phonePrefixOf(item.phoneCountryCode), item.phone].filter(Boolean).join(' ')
                 : null,
-              role: item.role ? texts.role[USER_ROLE_KEYS[item.role]] : null,
-              isOwner: item.role === UserRole.SuperAdmin,
+              role: item.role ? (texts.role[USER_ROLE_KEYS[item.role]] ?? item.role) : null,
+              isLocked:
+                LOCKED_ROLES.includes(item.role ?? '') || item.idUser === this.auth.user()?.id,
             })),
           })),
         ),
@@ -201,6 +206,13 @@ export class UserManagement {
     this.editing.set(true);
   }
 
+  /** A user deleted meanwhile by someone else: the table shows it is gone. */
+  protected reloadIfGone(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.status === HttpStatusCode.NotFound) {
+      table.reload();
+    }
+  }
+
   protected openLogs(): void {
     void this.router.navigateByUrl('/settings/user-management/logs');
   }
@@ -210,4 +222,10 @@ export class UserManagement {
     const state: AuditLogUserState = { logUser: { id: idUser, value: email ?? '' } };
     void this.router.navigateByUrl('/settings/user-management/logs', { state });
   }
+}
+
+/** The prefix with one `+`, also when the saved value already has it. */
+function phonePrefixOf(prefix: string | null): string | null {
+  const digits = prefix?.trim().replace(/^\+/, '');
+  return digits ? `+${digits}` : null;
 }

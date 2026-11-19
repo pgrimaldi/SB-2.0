@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,10 +14,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
+import { fileLinkOf } from '../../../../behaviours/files/file-link';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
+import { DATA_RELOAD } from '../../../../components/shared/ui/data/data-reload';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
 import {
   Button,
@@ -34,7 +37,14 @@ import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 
 interface ServiceSection {
   readonly group: BathhouseServiceGroup;
-  readonly services: readonly { readonly index: number; readonly service: BathhouseServiceItem }[];
+  readonly services: readonly ServiceCheckbox[];
+}
+
+interface ServiceCheckbox {
+  readonly index: number;
+  readonly service: BathhouseServiceItem;
+  /** `iconUrl` only when it is an https link or ours. */
+  readonly iconUrl: string | null;
 }
 
 @Component({
@@ -46,10 +56,12 @@ interface ServiceSection {
 })
 export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
   private readonly catalog = inject(CatalogService);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
+  private readonly origin = inject(DOCUMENT).location.origin;
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
@@ -76,6 +88,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   constructor() {
     this.unsaved.watch(this);
     effect((onCleanup) => {
+      this.dataReload?.();
       if (!this.auth.user()) {
         return;
       }
@@ -90,7 +103,7 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
             this.loadedSelection = selectionOf(loaded);
             this.services.set(loaded);
             this.servicesForm().reset();
-            this.sections.set(sectionsOf(loaded));
+            this.sections.set(sectionsOf(loaded, this.origin));
             this.isLoaded.set(true);
             this.isLoading.set(false);
           },
@@ -160,12 +173,12 @@ function selectionOf(services: readonly BathhouseServiceItem[]): string {
 }
 
 /** The four sections in their order, each with its services in the order of the answer. */
-function sectionsOf(services: readonly BathhouseServiceItem[]): ServiceSection[] {
+function sectionsOf(services: readonly BathhouseServiceItem[], origin: string): ServiceSection[] {
   return Object.values(BathhouseServiceGroup)
     .map((group) => ({
       group,
       services: services
-        .map((service, index) => ({ index, service }))
+        .map((service, index) => ({ index, service, iconUrl: fileLinkOf(service.iconUrl, origin) }))
         .filter(({ service }) => service.categoryCode === group),
     }))
     .filter(({ services }) => services.length);

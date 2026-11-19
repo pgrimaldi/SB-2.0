@@ -29,6 +29,8 @@ const MIN_LENGTH = 3;
 })
 export class SearchField implements OnDestroy {
   readonly placeholder = input<string>();
+  /** Characters the field accepts at most (the backend's limit); none: no limit. */
+  readonly maxLength = input<number | null>(null);
   /** Icons as Material icon names (Material Symbols font): [magnifier, X]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [magnifier, X]. */

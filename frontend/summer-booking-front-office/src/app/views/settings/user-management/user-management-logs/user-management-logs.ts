@@ -51,7 +51,10 @@ import { PageFilter } from '../../../../entities/pagination/page';
 import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
 import { AuditLogUserState } from '../../../../entities/settings/user-management/audit-log-user-state';
-import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
+import {
+  AuditLogFiltersRequest,
+  MAX_AUDIT_SEARCH_LENGTH,
+} from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
@@ -95,8 +98,8 @@ interface AuditEntryRow {
   occurredAt: string | null;
 }
 
-const EXPORT_FALLBACK_NAME = 'log';
-const PRINT_FALLBACK_NAME = 'log-print';
+const EXPORT_FALLBACK_NAME = 'log.xlsx';
+const PRINT_FALLBACK_NAME = 'log-print.xlsx';
 
 @Component({
   selector: 'app-user-management-logs',
@@ -132,6 +135,7 @@ export class UserManagementLogs {
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
+  protected readonly searchMaxLength = MAX_AUDIT_SEARCH_LENGTH;
   protected readonly loadFailed = signal(false);
   protected readonly isExporting = signal(false);
   protected readonly isPrinting = signal(false);
@@ -269,7 +273,7 @@ export class UserManagementLogs {
     { field: 'bookingNumber', header: this.headers().booking_number, sortable: true },
     { field: 'actorName', header: this.headers().full_name, sortable: true },
     { field: 'spotLabel', header: this.headers().spot, sortable: true },
-    { field: 'actionCode', header: this.headers().action, width: 24, sortable: true },
+    { field: 'actionCode', header: this.headers().action, width: 24 },
     { field: 'occurredAt', header: this.headers().occurred_at, width: 18, sortable: true },
   ]);
 

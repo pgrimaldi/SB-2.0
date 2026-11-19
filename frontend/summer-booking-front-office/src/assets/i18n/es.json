@@ -120,7 +120,7 @@
     },
     "map": {
       "spots_outside_grid": "Hay puestos fuera de estas medidas: se necesitan al menos {{rows}} filas y {{columns}} artículos por fila.",
-      "invalid_image": "Imagen no válida: usa PNG, JPEG o WebP de hasta 5 MB."
+      "invalid_image": "La imagen debe ser PNG, JPEG o WebP y no superar los 5 MB."
     },
     "catalog": {
       "sector_in_use": "El sector/fila {{sectorName}} está en uso y no se puede eliminar: puestos en el mapa {{mapSpots}}, tarifas {{priceLists}}, límites de estancia {{stayLimits}}, descuentos {{discounts}}.",
@@ -1144,7 +1144,7 @@
           }
         },
         "log": "Log",
-        "owner_not_editable": "El propietario no se puede modificar"
+        "user_not_editable": "Este usuario no se puede modificar aquí"
       },
       "seasons": {
         "season_dates": {
@@ -1230,7 +1230,8 @@
             "title": "Eliminar intervalos",
             "text": "¿Quieres eliminar los {{count}} intervalos seleccionados?"
           },
-          "period_left_empty": "Un periodo debe tener al menos un intervalo. Para eliminarlo por completo, usa la papelera junto a su nombre."
+          "period_left_empty": "Un periodo debe tener al menos un intervalo. Para eliminarlo por completo, usa la papelera junto a su nombre.",
+          "too_many": "Puedes eliminar como máximo {{max}} intervalos a la vez. Quita de la selección los que sobran."
         }
       },
       "services": {

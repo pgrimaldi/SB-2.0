@@ -142,8 +142,9 @@ header di sicurezza e CSP.
 - Niente `bypassSecurityTrust*`, niente HTML costruito a mano.
 - `[innerHTML]` solo con testi sanificati da Angular (toglie script, attributi di evento e link `javascript:`): le
   traduzioni (`appI18nText`) e l'HTML dei termini e condizioni di Fiscalizzazione (`termsAndConditions`).
-- I link che arrivano dal backend (foto, PDF) finiscono in `src` e `href` solo se sono https o del nostro dominio
-  (tab Media, `webLinkOf`).
+- I link dei file che arrivano dal backend (foto, PDF, icone) finiscono in `src` e `href` solo se sono https o del
+  nostro dominio (`fileLinkOf`, `behaviours/files/file-link.ts`). Un file con un link non sicuro resta visibile senza
+  anteprima, e si può cancellare.
 - I link esterni si aprono in una nuova scheda con `rel="noopener noreferrer"`.
 
 ## Dipendenze

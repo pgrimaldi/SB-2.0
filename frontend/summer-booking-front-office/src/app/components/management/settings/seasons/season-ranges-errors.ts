@@ -4,6 +4,7 @@ import {
   apiFieldError,
 } from '../../../../behaviours/validation/api-field-errors';
 import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { OverlapError } from '../../../shared/forms/validators';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import {
   MAX_SEASON_PERIOD_RANGES,
@@ -11,6 +12,8 @@ import {
 } from '../../../../entities/settings/seasons/season-period-item';
 
 const RANGES_FIELD = 'ranges' satisfies keyof SeasonPeriodItem;
+/** The argument of `pricing.period_overlap` with the name of the other period. */
+const PERIOD_NAME_ARG = 'periodName';
 
 export interface RangesInvalidError extends ValidationError.WithFieldTree {
   readonly kind: 'seasons.ranges.invalid';
@@ -33,6 +36,23 @@ export function rangesErrors(
         ? { kind: 'seasons.ranges.invalid', max: MAX_SEASON_PERIOD_RANGES, fieldTree }
         : apiFieldError(fieldTree, code, args),
     );
+}
+
+/**
+ * `pricing.period_overlap` on `fieldTree`: with the name of the other period its own text; without it
+ * (that period was deleted meanwhile) the text of an overlap the form finds (`invalidate.overlap`).
+ * Null for any other code.
+ */
+export function periodOverlapError(
+  problem: ApiProblem,
+  fieldTree: FieldTree<unknown>,
+): (OverlapError & ValidationError.WithFieldTree) | ApiValidationError | null {
+  if (problem.code !== ApiErrorCode.PricingPeriodOverlap) {
+    return null;
+  }
+  return problem.args?.[PERIOD_NAME_ARG]
+    ? apiFieldError(fieldTree, problem.code, problem.args)
+    : { kind: 'overlap', fieldTree };
 }
 
 /** The same problem without its errors on the intervals. */

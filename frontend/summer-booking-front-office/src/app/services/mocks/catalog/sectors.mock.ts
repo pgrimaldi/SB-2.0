@@ -112,9 +112,7 @@ export const addSectorItemMock = (
     return nameError;
   }
   if (isNameTaken(property.id, sectorName)) {
-    return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken, {
-      title: 'Sector name taken',
-    });
+    return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken);
   }
   SECTORS.push({ propertyId: property.id, idSector: crypto.randomUUID(), sectorName });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -149,9 +147,7 @@ export const updateSectorItemMock = (
     return nameError;
   }
   if (isNameTaken(property.id, sectorName, sector)) {
-    return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken, {
-      title: 'Sector name taken',
-    });
+    return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken);
   }
   sector.sectorName = sectorName;
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
@@ -178,7 +174,6 @@ export const deleteSectorItemsMock = (
   const used = sectors.find((sector) => sector.usage);
   if (used?.usage) {
     return problem(request, 409, ApiErrorCode.CatalogSectorInUse, {
-      title: 'Sector in use',
       args: { sectorName: used.sectorName ?? '', ...used.usage },
     });
   }
@@ -224,7 +219,6 @@ function sectorNameError(
     return null;
   }
   return problem(request, 400, ApiErrorCode.ValidationFailed, {
-    title: 'Invalid request',
     errors: [
       sectorName
         ? {

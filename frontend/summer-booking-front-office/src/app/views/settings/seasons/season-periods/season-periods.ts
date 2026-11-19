@@ -33,9 +33,13 @@ import { DATA_RELOAD } from '../../../../components/shared/ui/data/data-reload';
 import { AlertPopup } from '../../../../components/shared/ui/dialogs/alert-popup/alert-popup';
 import { ExpansionPanel } from '../../../../components/shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { SectionTitle } from '../../../../components/shared/ui/titles/section-title/section-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { SeasonPeriodInterval } from '../../../../entities/settings/seasons/season-period-interval';
-import { SeasonPeriodIntervalItem } from '../../../../entities/settings/seasons/season-period-interval-item';
+import {
+  MAX_BULK_DELETE_RANGES,
+  SeasonPeriodIntervalItem,
+} from '../../../../entities/settings/seasons/season-period-interval-item';
 import {
   MAX_SEASON_PERIOD_RANGES,
   SeasonPeriodItem,
@@ -63,6 +67,13 @@ interface IntervalsToDelete {
   intervals: SeasonPeriodIntervalItem[];
   name: string | null;
 }
+
+/** Answers after which the list on screen is no longer the one of the server. */
+const STALE_STATUSES: readonly number[] = [
+  HttpStatusCode.NotFound,
+  HttpStatusCode.Conflict,
+  HttpStatusCode.UnprocessableEntity,
+];
 
 @Component({
   selector: 'app-season-periods',
@@ -127,14 +138,18 @@ export class SeasonPeriods {
   protected readonly intervalsToDelete = signal<IntervalsToDelete>({ intervals: [], name: null });
   protected readonly isPeriodLeftEmpty = signal(false);
   protected readonly isPeriodFull = signal(false);
+  protected readonly isTooManyIntervals = signal(false);
   protected readonly maxRanges = MAX_SEASON_PERIOD_RANGES;
+  protected readonly maxDeletedRanges = MAX_BULK_DELETE_RANGES;
   private readonly reloads = signal(0);
   /** Chosen date intervals of all the periods of the tab, as the list gave them. */
   private readonly selectedIntervals = signal<ReadonlySet<SeasonPeriodInterval>>(new Set());
   protected readonly selectedTotal = computed(() => this.selectedIntervals().size);
   protected readonly periodItems = signal<SeasonPeriodItem[] | null>(null);
   /** The list was read: while it is read again, or if that fails, nothing starts from it. */
-  protected readonly isLoaded = signal(false);
+  private readonly isLoaded = signal(false);
+  /** The periods and the season dates (the limits of the popups) were both read. */
+  protected readonly canAct = computed(() => this.isLoaded() && this.seasonDates.isLoaded());
   protected readonly periods = computed<SeasonPeriodRow[] | null>(() => {
     const items = this.periodItems();
     if (!items) {
@@ -204,8 +219,14 @@ export class SeasonPeriods {
   protected readonly deleteIntervals = (intervals: SeasonPeriodIntervalItem[]) =>
     this.seasons.deleteRanges(this.isNextSeason, intervals);
 
+  protected openAdd(): void {
+    if (this.canAct()) {
+      this.isAddOpen.set(true);
+    }
+  }
+
   protected askDelete(period: SeasonPeriodRow): void {
-    if (!this.isLoaded()) {
+    if (!this.canAct()) {
       return;
     }
     this.periodToDelete.set(period);
@@ -213,14 +234,14 @@ export class SeasonPeriods {
   }
 
   protected askDeleteInterval(interval: SeasonIntervalRow): void {
-    if (!this.isLoaded()) {
+    if (!this.canAct()) {
       return;
     }
     this.askDeleteIntervals(new Set([interval.item]), `${interval.startsOn} – ${interval.endsOn}`);
   }
 
   protected editPeriod(period: SeasonPeriodRow): void {
-    if (!this.isLoaded()) {
+    if (!this.canAct()) {
       return;
     }
     this.periodToEdit.set(period.item);
@@ -228,7 +249,7 @@ export class SeasonPeriods {
   }
 
   protected addInterval(period: SeasonPeriodRow): void {
-    if (!this.isLoaded()) {
+    if (!this.canAct()) {
       return;
     }
     if (period.item.ranges.length >= MAX_SEASON_PERIOD_RANGES) {
@@ -240,7 +261,7 @@ export class SeasonPeriods {
   }
 
   protected editInterval(period: SeasonPeriodRow, interval: SeasonIntervalRow): void {
-    if (!this.isLoaded()) {
+    if (!this.canAct()) {
       return;
     }
     this.periodOfInterval.set(period.item);
@@ -249,7 +270,7 @@ export class SeasonPeriods {
   }
 
   protected askDeleteSelected(): void {
-    if (!this.isLoaded()) {
+    if (!this.canAct()) {
       return;
     }
     this.askDeleteIntervals(this.selectedIntervals(), null);
@@ -284,9 +305,17 @@ export class SeasonPeriods {
     this.reloads.update((count) => count + 1);
   }
 
-  protected reloadIfGone(problem: ApiProblem): void {
-    if (problem.status === HttpStatusCode.NotFound) {
+  /**
+   * An answer that says the list on screen is old (a period or an interval gone, a name or days taken
+   * meanwhile, a period outside the season): the list is read again, and the season dates too when a
+   * period went outside them.
+   */
+  protected reloadIfStale(problem: ApiProblem): void {
+    if (STALE_STATUSES.includes(problem.status)) {
       this.reload();
+    }
+    if (problem.code === ApiErrorCode.PricingPeriodOutsideSeason) {
+      this.seasonDates.reload();
     }
   }
 
@@ -302,6 +331,10 @@ export class SeasonPeriods {
         .filter((range) => chosen.has(range))
         .map(({ startsOn, endsOn }) => ({ key, startsOn, endsOn })),
     );
+    if (intervals.length > MAX_BULK_DELETE_RANGES) {
+      this.isTooManyIntervals.set(true);
+      return;
+    }
     if (intervals.length) {
       this.intervalsToDelete.set({ intervals, name });
       this.isDeleteIntervalsAsked.set(true);

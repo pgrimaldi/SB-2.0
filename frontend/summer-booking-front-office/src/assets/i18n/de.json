@@ -120,7 +120,7 @@
     },
     "map": {
       "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
-      "invalid_image": "Ungültiges Bild: PNG, JPEG oder WebP bis 5 MB verwenden."
+      "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein."
     },
     "catalog": {
       "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}.",
@@ -1144,7 +1144,7 @@
           }
         },
         "log": "Log",
-        "owner_not_editable": "Der Inhaber kann nicht bearbeitet werden"
+        "user_not_editable": "Dieser Benutzer kann hier nicht bearbeitet werden"
       },
       "seasons": {
         "season_dates": {
@@ -1230,7 +1230,8 @@
             "title": "Datumsbereiche löschen",
             "text": "Möchtest du die {{count}} ausgewählten Datumsbereiche löschen?"
           },
-          "period_left_empty": "Ein Zeitraum braucht mindestens einen Datumsbereich. Um ihn ganz zu löschen, verwende den Papierkorb neben seinem Namen."
+          "period_left_empty": "Ein Zeitraum braucht mindestens einen Datumsbereich. Um ihn ganz zu löschen, verwende den Papierkorb neben seinem Namen.",
+          "too_many": "Du kannst höchstens {{max}} Datumsbereiche auf einmal löschen. Entferne die überzähligen aus der Auswahl."
         }
       },
       "services": {

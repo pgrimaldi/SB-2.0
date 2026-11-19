@@ -2,6 +2,7 @@ import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, from, of, switchMap } from 'rxjs';
 import { AuthSession, AuthUser, LoginRequest } from '../../../entities/auth/credentials';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { UserRole } from '../../../entities/enums/user-role';
 import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
@@ -11,9 +12,16 @@ const MOCK_ACCOUNT = {
   id: '0f3c2a1b-7d6e-4f5a-9b8c-1d2e3f4a5b6c',
   username: 'summertest465@gmail.com',
   propertyId: DEMO_PROPERTY.publicId,
-  role: 'manager',
+  role: UserRole.Admin,
   passwordSha256: '42862e8e5e2e0915ad980297cc224059dcc424323ea325a9754839c79bca93f5',
 };
+
+/** The test account as a user of its property, e.g. a row of the users mock. */
+export const MOCK_SIGNED_IN_USER = {
+  id: MOCK_ACCOUNT.id,
+  email: MOCK_ACCOUNT.username,
+  role: MOCK_ACCOUNT.role,
+} as const;
 
 /** As in the backend configuration (`Auth:*`). */
 const ACCESS_TOKEN_SECONDS = 10080 * 60;
@@ -48,7 +56,7 @@ export const loginMock = (request: HttpRequest<unknown>): Observable<HttpEvent<u
         username?.trim().toLowerCase() === MOCK_ACCOUNT.username &&
         passwordSha256 === MOCK_ACCOUNT.passwordSha256;
       if (!valid) {
-        return unauthorized(request, ApiErrorCode.AuthInvalidCredentials, 'Invalid credentials');
+        return unauthorized(request, ApiErrorCode.AuthInvalidCredentials);
       }
       writeCookie(remember);
       return ok(request, newSession());
@@ -61,7 +69,7 @@ export const refreshMock = (request: HttpRequest<unknown>): Observable<HttpEvent
   const cookie = readCookie();
   if (!cookie || cookie.expiresAt <= Date.now()) {
     removeCookie();
-    return unauthorized(request, ApiErrorCode.AuthSessionExpired, 'No valid session');
+    return unauthorized(request, ApiErrorCode.AuthSessionExpired);
   }
   writeCookie(cookie.remember);
   return ok(request, newSession());
@@ -85,9 +93,8 @@ export function isAuthorized(request: HttpRequest<unknown>): boolean {
 export function unauthorized(
   request: HttpRequest<unknown>,
   code: UnauthorizedCode = ApiErrorCode.AuthUnauthenticated,
-  title = 'Invalid or expired access token',
 ): Observable<never> {
-  return problem(request, 401, code, { title });
+  return problem(request, 401, code);
 }
 
 type UnauthorizedCode = Extract<ApiErrorCode, `auth.${string}`>;

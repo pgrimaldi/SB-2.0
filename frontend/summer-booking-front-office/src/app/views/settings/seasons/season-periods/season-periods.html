@@ -35,7 +35,7 @@
         class="season__periods__delete"
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
-        [disabled]="!isLoaded()"
+        [disabled]="!canAct()"
         (clicked)="askDeleteSelected()"
       >
         {{ 'management.settings.seasons.periods.delete_selected' | translate }}
@@ -46,8 +46,8 @@
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [pathIcon]="addIcon"
-      [disabled]="!isLoaded()"
-      (clicked)="isAddOpen.set(true)"
+      [disabled]="!canAct()"
+      (clicked)="openAdd()"
     >
       {{ 'management.settings.seasons.periods.add' | translate }}
     </app-button>
@@ -65,7 +65,7 @@
           class="season__periods__icon"
           [label]="'table.actions.delete' | translate"
           [pathIcon]="deleteIcon"
-          [disabled]="!isLoaded()"
+          [disabled]="!canAct()"
           (click)="askDelete(period)"
         />
         <app-icon-button
@@ -73,7 +73,7 @@
           class="season__periods__icon season__periods__name__icon"
           [label]="'table.actions.edit' | translate"
           [pathIcon]="editIcon"
-          [disabled]="!isLoaded()"
+          [disabled]="!canAct()"
           (click)="editPeriod(period)"
         />
         <app-icon-button
@@ -81,7 +81,7 @@
           class="season__periods__icon season__periods__name__icon"
           [label]="'management.settings.seasons.add_interval_popup.title' | translate"
           [pathIcon]="addIntervalIcon"
-          [disabled]="!isLoaded()"
+          [disabled]="!canAct()"
           (click)="addInterval(period)"
         />
         <div class="season__periods__dates">
@@ -108,14 +108,14 @@
                     class="season__periods__icon"
                     [label]="'table.actions.delete' | translate"
                     [pathIcon]="deleteIcon"
-                    [disabled]="!isLoaded()"
+                    [disabled]="!canAct()"
                     (click)="askDeleteInterval(interval)"
                   />
                   <app-icon-button
                     class="season__periods__icon"
                     [label]="'table.actions.edit' | translate"
                     [pathIcon]="editIcon"
-                    [disabled]="!isLoaded()"
+                    [disabled]="!canAct()"
                     (click)="editInterval(period, interval)"
                   />
                 </span>
@@ -140,6 +140,7 @@
   [periods]="periodItems() ?? []"
   [(open)]="isAddOpen"
   (added)="reload()"
+  (failed)="reloadIfStale($event)"
 />
 <app-delete-items-popup
   [idItems]="keysToDelete()"
@@ -149,7 +150,7 @@
   [pathIcon]="alertIcons"
   [(open)]="isDeleteAsked"
   (deleted)="reload()"
-  (failed)="reloadIfGone($event)"
+  (failed)="reloadIfStale($event)"
 />
 <app-season-period-edit-popup
   [pathIcon]="closeIcon"
@@ -158,7 +159,7 @@
   [periods]="periodItems() ?? []"
   [(open)]="isEditPeriodOpen"
   (updated)="reload()"
-  (failed)="reloadIfGone($event)"
+  (failed)="reloadIfStale($event)"
 />
 <app-season-interval-add-popup
   [pathIcon]="closeIcon"
@@ -168,7 +169,7 @@
   [seasonIntervals]="seasonIntervals()"
   [(open)]="isAddIntervalOpen"
   (added)="reload()"
-  (failed)="reloadIfGone($event)"
+  (failed)="reloadIfStale($event)"
 />
 <app-season-interval-edit-popup
   [pathIcon]="closeIcon"
@@ -179,7 +180,7 @@
   [seasonIntervals]="seasonIntervals()"
   [(open)]="isEditIntervalOpen"
   (updated)="reload()"
-  (failed)="reloadIfGone($event)"
+  (failed)="reloadIfStale($event)"
 />
 <app-delete-items-popup
   [idItems]="intervalsToDelete().intervals"
@@ -189,7 +190,7 @@
   [pathIcon]="alertIcons"
   [(open)]="isDeleteIntervalsAsked"
   (deleted)="reload()"
-  (failed)="reloadIfGone($event)"
+  (failed)="reloadIfStale($event)"
 />
 <app-alert-popup
   [title]="'alert.error_title' | translate"
@@ -204,4 +205,13 @@
   [texts]="'alert' | translate"
   [pathIcon]="alertIcons"
   [(open)]="isPeriodFull"
+/>
+<app-alert-popup
+  [title]="'alert.error_title' | translate"
+  [text]="
+    'management.settings.seasons.delete_intervals.too_many' | translate: { max: maxDeletedRanges }
+  "
+  [texts]="'alert' | translate"
+  [pathIcon]="alertIcons"
+  [(open)]="isTooManyIntervals"
 />

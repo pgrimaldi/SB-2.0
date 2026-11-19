@@ -39,7 +39,7 @@ import { SeasonService } from '../../../../../services/api/seasons/season.servic
 import { noOverlap } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
-import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
+import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 
 @Component({
@@ -150,6 +150,10 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
+        const overlap = periodOverlapError(problem, this.draftForm);
+        if (overlap) {
+          return overlap;
+        }
         const ranges = rangesErrors(problem, this.draftForm);
         if (!ranges.length) {
           return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>

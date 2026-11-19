@@ -120,7 +120,7 @@
     },
     "map": {
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
-      "invalid_image": "Invalid image: use PNG, JPEG or WebP up to 5 MB."
+      "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB."
     },
     "catalog": {
       "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}.",
@@ -1144,7 +1144,7 @@
           }
         },
         "log": "Log",
-        "owner_not_editable": "The owner cannot be edited"
+        "user_not_editable": "This user cannot be edited here"
       },
       "seasons": {
         "season_dates": {
@@ -1230,7 +1230,8 @@
             "title": "Delete date ranges",
             "text": "Do you want to delete the {{count}} selected date ranges?"
           },
-          "period_left_empty": "A period needs at least one date range. To delete it completely, use the bin next to its name."
+          "period_left_empty": "A period needs at least one date range. To delete it completely, use the bin next to its name.",
+          "too_many": "You can delete at most {{max}} date ranges at a time. Remove the extra ones from the selection."
         }
       },
       "services": {

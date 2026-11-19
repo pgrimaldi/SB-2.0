@@ -1,3 +1,4 @@
+import { HttpStatusCode } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,9 +15,11 @@ import {
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FormField,
+  MAX_LENGTH,
   TreeValidationResult,
   disabled,
   form,
+  metadata,
   required,
   submit,
 } from '@angular/forms/signals';
@@ -28,7 +31,10 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import {
   PhoneCountry,
@@ -36,16 +42,24 @@ import {
 } from '../../../../../behaviours/i18n/phone-prefix.behaviour';
 import { PhonePrefix } from '../../../../../entities/enums/phone-prefix';
 import { UserRole } from '../../../../../entities/enums/user-role';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import {
+  PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   PHONE_MAX_LENGTH,
 } from '../../../../../entities/settings/user-management/create-user-request';
 import { UpdateUserRequest } from '../../../../../entities/settings/user-management/update-user-request';
 import { UserSelectedItem } from '../../../../../entities/settings/user-management/user-selected-item';
+import { MAX_EMAIL_LENGTH } from '../../../../../entities/shared/email-address';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { IdentityService } from '../../../../../services/api/identity/identity.service';
-import { passwordRules, phoneNumber, requiredText } from '../../../../shared/forms/validators';
+import {
+  emailAddress,
+  passwordRules,
+  phoneNumber,
+  requiredText,
+} from '../../../../shared/forms/validators';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -107,6 +121,8 @@ const ASSIGNABLE_USER_ROLES: readonly { role: UserRole; key: keyof UserRoleTexts
 export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly idUser = input<string | null>(null);
   readonly updated = output<void>();
+  /** Every error of the read and of the save, e.g. for the page to reload the table on a 404. */
+  readonly failed = output<ApiProblem>();
 
   private readonly identity = inject(IdentityService);
   private readonly errorText = inject(ErrorTextBehaviour);
@@ -134,7 +150,10 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   private readonly loaded = signal<UpdateUserRequest | null>(null);
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.email);
+    emailAddress(path.email);
+    metadata(path.email, MAX_LENGTH, () => MAX_EMAIL_LENGTH);
     passwordRules(path.password, PASSWORD_MIN_LENGTH);
+    metadata(path.password, MAX_LENGTH, () => PASSWORD_MAX_LENGTH);
     phoneNumber(path.phone, PHONE_MAX_LENGTH);
     required(path.role);
     disabled(path, () => this.isLoading() || this.isFetching());
@@ -213,9 +232,9 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
-        );
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        return this.errorsOf(problem);
       } finally {
         this.isLoading.set(false);
       }
@@ -272,7 +291,11 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
           this.draft.set(request);
           this.draftForm().reset();
         },
-        error: (error: unknown) => this.error.set(toApiProblem(error)),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.error.set(problem);
+          this.failed.emit(problem);
+        },
       });
   }
 
@@ -296,6 +319,20 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
       ...draft,
       phoneCountryCode: this.phonePrefix.prefixFor(draft.phone, draft.phoneCountryCode),
     };
+  }
+
+  /** Codes that come without `errors[]` but are about one field go under it. */
+  private errorsOf(problem: ApiProblem): TreeValidationResult {
+    if (problem.code === ApiErrorCode.AccountEmailTaken) {
+      return apiFieldError(this.draftForm.email, problem.code, problem.args);
+    }
+    if (
+      problem.code === ApiErrorCode.AccountRoleNotAssignable &&
+      problem.status === HttpStatusCode.UnprocessableEntity
+    ) {
+      return apiFieldError(this.draftForm.role, problem.code, problem.args);
+    }
+    return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general));
   }
 
   override ngOnDestroy(): void {

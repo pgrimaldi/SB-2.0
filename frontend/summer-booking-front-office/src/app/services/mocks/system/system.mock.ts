@@ -89,7 +89,6 @@ export const sendTestEmailMock = (
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -110,7 +109,6 @@ export const saveEmailConfigurationMock = (
   const errors = emailConfigurationErrors(request.body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -203,7 +201,6 @@ export const contactSupportMock = (
   }
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }

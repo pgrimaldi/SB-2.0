@@ -68,7 +68,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   prima voce si sceglie allora (solo se lo stabilimento non ne ha una e l'utente non l'ha scelta). Se la lettura
   fallisce, l'errore compare solo sotto Nazione e il resto della tab funziona. Dopo l'errore, aprire la tendina in
   Modifica (clic, Invio o Spazio: `(openRequest)` di `app-filled-select`, legato a `retry()`) rilegge le nazioni; con la
-  lista già caricata non parte nessuna chiamata, e in sola lettura la tendina non rilegge.
+  lista già caricata non parte nessuna chiamata, e in sola lettura la tendina non rilegge. Con l'errore la tendina
+  non mostra la sua dicitura ("Scegli"), come le altre tendine.
 - Se il salvataggio risponde `catalog.country_not_found` (codice che non è nel catalogo del backend), l'errore va sotto
   Nazione (`apiFieldError`) e sparisce appena si sceglie un'altra nazione.
 - Salva manda tutti i campi della tab, cambiati o no, ed è spento finché il form non è valido (es. senza Nome
@@ -76,13 +77,16 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Sui telefoni i campi vanno uno per riga, tranne Cap (spostato sotto Città) con Provincia e Regione con Nazione, a metà
   riga ciascuno (Città da sola, così anche i nomi lunghi delle nazioni non si tagliano). Le righe passano i loro campi a
   un'unica griglia di sei colonne (`display: contents`), senza ripetere il markup.
+- Dopo un salvataggio riuscito la tab e la cache tengono i valori come li salva il backend: testi senza spazi ai lati e
+  un testo vuoto `null`.
 - I campi che il backend restituisce `null` restano vuoti, come un form da compilare. I mock partono con tutti i campi
   `null`, tranne `isFreeCancellation` (`false`, Cancellazione "Nessuna") e `petPolicy` (`OnRequest`).
 
 ## Tab 2 – Servizi
 
 - Componente `BathhouseServicesSettings`, modello `BathhouseServiceItem`. Mostra i servizi del backend come caselle di
-  spunta (`app-checkbox`, con l'icona `iconUrl` e il nome) in quattro sezioni fisse con `app-section-title`, sempre in
+  spunta (`app-checkbox`, con l'icona `iconUrl`, solo se è un indirizzo https o dell'app, e il nome) in quattro sezioni
+  fisse con `app-section-title`, sempre in
   quest'ordine: Accessibilità e Comfort, Sport e attività, Ristorazione e extra, Spiaggia (enum
   `BathhouseServiceGroup`). Tre servizi per riga, uno sui telefoni.
 - Ogni servizio va nella sezione del suo `categoryCode`, nell'ordine della risposta. Sezione e ordine li decide il
@@ -104,9 +108,9 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Foto e PDF seguono lo standard dei caricamenti (vedi `api-e-mock.md`): le aree delle immagini e i bottoni "Carica"
   sono sempre attivi, anche fuori da Modifica, e ogni file scelto parte subito, uno alla volta, con `app-page-spinner`
   che blocca la pagina; il primo errore ferma la fila.
-- Le API di foto e PDF sono quelle del backend e rispondono con tutta la scheda (`PropertyInfoMedia`): `CatalogService`
-  ne tiene i media, con la galleria ordinata per `sortOrder`, la tab li mostra e li passa alla cache (`keepMedia`). Il
-  link del tour e la posizione restano quelli già letti dalla tab.
+- Le API di foto e PDF sono quelle del backend e rispondono con tutta la scheda dello stabilimento: `CatalogService` ne
+  legge solo i media (`PropertyInfoMedia`, compresi link del tour e posizione), con la galleria ordinata per
+  `sortOrder`; la tab li mostra e li passa alla cache (`keepMedia`).
 - Immagine principale: un solo file, che sostituisce quello di prima. Galleria: righe da 4 (2 sui telefoni); le caselle
   vuote completano la riga, con almeno una libera finché le foto non sono 30, e accettano più file insieme: partono
   quelli validi finché c'è posto, per gli altri compare l'errore (`catalog.invalid_image` o `catalog.gallery_full`).
@@ -118,10 +122,11 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   puntini) e "Apri il documento", che lo apre in una nuova scheda; senza file "Nessun file selezionato".
 - Ogni foto caricata e ogni PDF presente hanno la piccola X in alto a destra (`app-icon-button`), che chiede conferma
   (`app-confirm-popup`, "Elimina immagine" / "Elimina documento") e poi chiama la cancellazione.
-- Nelle anteprime e nei link vanno solo indirizzi https o dell'app. Una foto della galleria con l'url vuoto o non
-  sicuro resta al suo posto senza anteprima (icona delle immagini) ma con la X: conta nei 30 posti e si può cancellare.
-  L'immagine principale o un PDF con il link vuoto o non sicuro si vedono come assenti, senza X: si sostituiscono
-  caricandone un altro.
+- Nelle anteprime e nei link vanno solo indirizzi https o dell'app (`fileLinkOf`, `behaviours/files/file-link.ts`).
+  Una foto della galleria con un link non sicuro resta al suo posto senza anteprima (icona delle immagini) ma con la X:
+  conta nei 30 posti e si può cancellare. Lo stesso vale per l'immagine principale (icona delle immagini, senza testo)
+  e per un PDF (nome del file senza "Apri il documento"): presenti, con la X, si cancellano o si sostituiscono
+  caricandone un altro. Un link `null` vuol dire file assente.
 - La CSP pubblicata (`docs/README_DEPLOY.md`) accetta immagini solo dal nostro dominio, da Google e `data:`: le foto e
   le icone dei servizi su un altro dominio richiedono quel dominio in `img-src` (vedi `docs/SECURITY_TODO.md`).
 - Modifica, Annulla e Salva valgono per il link del tour virtuale e per la posizione: form Signal Forms su
@@ -140,6 +145,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Le tre GET e le nazioni si chiamano la prima volta che una tab le chiede; tornando sulla tab si riusa la risposta.
   Uscendo dalla pagina e rientrando si richiamano. Una chiamata fallita non resta in cache: tornando sulla tab si
   riprova.
+- Le risposte valgono per un valore di `DATA_RELOAD` (la lingua): quando cambia, la cache le scarta e la tab aperta
+  rilegge, come le altre pagine.
 - Dopo un salvataggio, e dopo ogni caricamento o cancellazione di foto e PDF, la cache prende i dati salvati
   (`keepGeneralInformation`, `keepServices`, `keepMedia`): tornando sulla tab si vedono senza richiamare la GET.
 - La cache tiene i dati del server, non quelli scritti e non salvati: cambiando tab con modifiche in sospeso compare il

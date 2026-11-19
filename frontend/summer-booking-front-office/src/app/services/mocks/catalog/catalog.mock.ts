@@ -49,6 +49,7 @@ import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/ser
 import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
 import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
 import { ServicePeriodAvailability } from '../../../entities/settings/services/service-period-availability';
+import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
 import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
@@ -743,7 +744,7 @@ export const bathhouseConfigurationServicesMock = (
       idService,
       name: names[Math.max(language, 0)],
       categoryCode,
-      iconUrl: `/assets/images/BathhouseConfiguration_${icon}.svg`,
+      iconUrl: completeLink(`/assets/images/BathhouseConfiguration_${icon}.svg`),
       isSelected: idOfferedServices.has(idService),
     }),
   );
@@ -771,8 +772,9 @@ const GENERAL_TEXT_LIMITS: Partial<Record<keyof BathhouseGeneralInformation, num
  * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 with an
  * error per field, as the backend: no name, a text over its limit (`GENERAL_TEXT_LIMITS`), an email
  * that is not one, a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
- * `phoneErrors`), a country code not of 2 letters, notice hours without free cancellation or out of
- * 1-720, no `petPolicy` of `PetPolicy`, a `closingTime` not after the `openingTime`; 422
+ * `phoneErrors`), a country code not of 2 letters, a time not `HH:mm`, no `isFreeCancellation`,
+ * notice hours with `isFreeCancellation` false and out of 1-720 (two errors when both), no
+ * `petPolicy` of `PetPolicy`, a `closingTime` not after the `openingTime`; 422
  * catalog.country_not_found for a country not in the list; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
@@ -789,7 +791,7 @@ export const saveBathhouseConfigurationGeneralMock = (
   for (const [field, max] of Object.entries(GENERAL_TEXT_LIMITS)) {
     const value = body[field as keyof BathhouseGeneralInformation];
     if (typeof value === 'string' && value.length > max) {
-      errors.push({ field, code: ApiErrorCode.ValidationMaxLength, args: { max } });
+      errors.push({ field, code: ApiErrorCode.ValidationMaxLength, args: { max, min: 0 } });
     }
   }
   if (
@@ -802,12 +804,26 @@ export const saveBathhouseConfigurationGeneralMock = (
   }
   errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
   if (typeof body.country === 'string' && body.country.length !== COUNTRY_CODE_LENGTH) {
-    errors.push({ field: 'country', code: ApiErrorCode.ValidationInvalid });
+    errors.push({
+      field: 'country',
+      code: ApiErrorCode.ValidationInvalid,
+      args: { min: COUNTRY_CODE_LENGTH, max: COUNTRY_CODE_LENGTH },
+    });
+  }
+  if (body.openingTime !== null && body.openingTime !== undefined && !isTime(body.openingTime)) {
+    errors.push({ field: 'openingTime', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (body.closingTime !== null && body.closingTime !== undefined && !isTime(body.closingTime)) {
+    errors.push({ field: 'closingTime', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (typeof body.isFreeCancellation !== 'boolean') {
+    errors.push({ field: 'isFreeCancellation', code: ApiErrorCode.ValidationRequired });
   }
   const hours = body.cancellationNoticeHours;
-  if (!body.isFreeCancellation && hours !== null && hours !== undefined) {
+  if (body.isFreeCancellation === false && hours !== null && hours !== undefined) {
     errors.push({ field: 'cancellationNoticeHours', code: ApiErrorCode.ValidationInvalid });
-  } else if (typeof hours === 'number' && (hours < MIN_NOTICE_HOURS || hours > MAX_NOTICE_HOURS)) {
+  }
+  if (typeof hours === 'number' && (hours < MIN_NOTICE_HOURS || hours > MAX_NOTICE_HOURS)) {
     errors.push({
       field: 'cancellationNoticeHours',
       code: ApiErrorCode.ValidationOutOfRange,
@@ -817,20 +833,25 @@ export const saveBathhouseConfigurationGeneralMock = (
   if (!Object.values<unknown>(PetPolicy).includes(body.petPolicy)) {
     errors.push({ field: 'petPolicy', code: ApiErrorCode.ValidationInvalid });
   }
-  if (body.openingTime && body.closingTime && body.closingTime <= body.openingTime) {
-    errors.push({ field: 'closingTime', code: ApiErrorCode.ValidationOutOfRange });
+  if (
+    isTime(body.openingTime) &&
+    isTime(body.closingTime) &&
+    body.closingTime <= body.openingTime
+  ) {
+    errors.push({
+      field: 'closingTime',
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { value: `${body.openingTime}:00` },
+    });
   }
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
   const country = body.country?.toUpperCase();
   if (country && !COUNTRY_CODES.some((code) => code === country)) {
-    return problem(request, 422, ApiErrorCode.CatalogCountryNotFound, {
-      title: 'Country not found',
-    });
+    return problem(request, 422, ApiErrorCode.CatalogCountryNotFound);
   }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
@@ -838,6 +859,13 @@ export const saveBathhouseConfigurationGeneralMock = (
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/** `HH:mm` on 24 hours, as the backend wants the opening hours. */
+function isTime(value: unknown): value is string {
+  return typeof value === 'string' && TIME_PATTERN.test(value);
+}
+
+const TIME_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
 
 /** A phone number of the property as the backend checks it: at most 32 characters, only digits and spaces. */
 function phoneErrors(field: string, value: unknown): MockFieldError[] {
@@ -849,7 +877,11 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
   }
   if (value.length > MAX_BATHHOUSE_PHONE_LENGTH) {
     return [
-      { field, code: ApiErrorCode.ValidationMaxLength, args: { max: MAX_BATHHOUSE_PHONE_LENGTH } },
+      {
+        field,
+        code: ApiErrorCode.ValidationMaxLength,
+        args: { max: MAX_BATHHOUSE_PHONE_LENGTH, min: 0 },
+      },
     ];
   }
   return /^[0-9 ]*$/.test(value) ? [] : [{ field, code: ApiErrorCode.ValidationPhone }];
@@ -858,10 +890,10 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, every
  * service the tab read, each with `isSelected`: a service is offered or not as its `isSelected` says,
- * a service not in the list stays as it was (until the page is reloaded). 204 without a body; 400
- * without `services` (never read as `[]`), with more than 200, with an `isSelected` that is not
- * true or false or with a repeated `idService`; 404 for a service that does not exist; 401 without a
- * valid access token.
+ * a service not in the list stays as it was (until the page is reloaded). 204 without a body; first
+ * 400 without `services` (never read as `[]`), with more than 200 or a repeated `idService`, with an
+ * `isSelected` that is not true or false in an element; then 404 for a null element, one without
+ * `idService` or with a service that does not exist; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -872,34 +904,33 @@ export const saveBathhouseConfigurationServicesMock = (
   const body = (request.body ?? {}) as { services?: unknown };
   if (!Array.isArray(body.services)) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors: [{ field: 'services', code: ApiErrorCode.ValidationRequired }],
     });
   }
-  if (body.services.length > MAX_SAVED_SERVICE_QUANTITY) {
-    return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
-      errors: [{ field: 'services', code: ApiErrorCode.ValidationInvalid }],
-    });
-  }
   const services = body.services as (BathhouseServiceItem | null)[];
-  if (!services.every((service) => isServiceId(service?.idService))) {
-    return resourceNotFound(request);
-  }
-  const errors: MockFieldError[] = services.flatMap((service, index) =>
-    typeof service?.isSelected === 'boolean'
-      ? []
-      : [{ field: `services[${index}].isSelected`, code: ApiErrorCode.ValidationRequired }],
+  const idServices = services.flatMap((service) =>
+    service?.idService === undefined || service.idService === null ? [] : [service.idService],
   );
-  const idServices = services.map((service) => service?.idService);
-  if (new Set(idServices).size !== idServices.length) {
+  const errors: MockFieldError[] = [];
+  if (
+    services.length > MAX_SAVED_SERVICE_QUANTITY ||
+    new Set(idServices).size !== idServices.length
+  ) {
     errors.push({ field: 'services', code: ApiErrorCode.ValidationInvalid });
   }
+  services.forEach((service, index) => {
+    if (service !== null && typeof service.isSelected !== 'boolean') {
+      errors.push({
+        field: `services[${index}].isSelected`,
+        code: ApiErrorCode.ValidationRequired,
+      });
+    }
+  });
   if (errors.length) {
-    return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
-      errors,
-    });
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
+  }
+  if (!services.every((service) => isServiceId(service?.idService))) {
+    return resourceNotFound(request);
   }
   const offered = new Set(idOfferedServices);
   for (const { idService, isSelected } of services as BathhouseServiceItem[]) {
@@ -940,7 +971,7 @@ export const saveBathhouseConfigurationMediaMock = (
     errors.push({
       field: 'virtualTourUrl',
       code: ApiErrorCode.ValidationMaxLength,
-      args: { max: MAX_VIRTUAL_TOUR_URL_LENGTH },
+      args: { max: MAX_VIRTUAL_TOUR_URL_LENGTH, min: 0 },
     });
   } else if (link && !isHttpLink(link)) {
     errors.push({ field: 'virtualTourUrl', code: ApiErrorCode.ValidationInvalid });
@@ -951,7 +982,6 @@ export const saveBathhouseConfigurationMediaMock = (
   );
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -972,7 +1002,9 @@ function coordinateErrors(
   if (value === null) {
     return other === null ? [] : [{ field, code: ApiErrorCode.ValidationRequired }];
   }
-  return Math.abs(value) > max ? [{ field, code: ApiErrorCode.ValidationOutOfRange }] : [];
+  return Math.abs(value) > max
+    ? [{ field, code: ApiErrorCode.ValidationOutOfRange, args: { from: -max, to: max } }]
+    : [];
 }
 
 function isHttpLink(link: string): boolean {
@@ -983,17 +1015,22 @@ function isHttpLink(link: string): boolean {
   }
 }
 
+/** Complete links, as the backend gives them: here files of the app, on its own origin. */
+function completeLink(path: string): string {
+  return new URL(path, globalThis.location.origin).href;
+}
+
 /** The media of the property of the token: the Media tab reads them and its uploads change them. */
 let bathhouseMedia: BathhouseMedia = {
-  mainPhotoUrl: '/assets/images/hub/hero-beach-desktop.webp',
+  mainPhotoUrl: completeLink('/assets/images/hub/hero-beach-desktop.webp'),
   photos: [
     {
       idPhoto: '0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e01',
-      url: '/assets/images/hub/hero-beach-mobile-863.webp',
+      url: completeLink('/assets/images/hub/hero-beach-mobile-863.webp'),
     },
     {
       idPhoto: '0193f2a4-6b1c-7d2e-8f30-4a5b6c7d8e02',
-      url: '/assets/images/hub/hero-beach-mobile-1290.webp',
+      url: completeLink('/assets/images/hub/hero-beach-mobile-1290.webp'),
     },
   ],
   virtualTourUrl: 'https://tour.example.com/lido-demo',
@@ -1060,7 +1097,6 @@ export const addBathhousePhotoMock = (
   withImage(request, (image) => {
     if (bathhouseMedia.photos.length >= MAX_BATHHOUSE_PHOTO_QUANTITY) {
       return problem(request, 422, ApiErrorCode.CatalogGalleryFull, {
-        title: 'Gallery full',
         args: { max: MAX_BATHHOUSE_PHOTO_QUANTITY },
       });
     }
@@ -1086,7 +1122,7 @@ export const deleteBathhousePhotoMock = (
   }
   const idPhoto = decodeURIComponent(request.url.split('/').pop() ?? '');
   if (!bathhouseMedia.photos.some((photo) => photo.idPhoto === idPhoto)) {
-    return problem(request, 404, ApiErrorCode.CatalogPhotoNotFound, { title: 'Photo not found' });
+    return problem(request, 404, ApiErrorCode.CatalogPhotoNotFound);
   }
   bathhouseMedia = {
     ...bathhouseMedia,
@@ -1113,7 +1149,6 @@ export const uploadBathhouseDocumentMock = (
   const pdf = request.body instanceof FormData ? request.body.get('file') : null;
   if (!(pdf instanceof File) || !isUploadable(pdf, PDF_UPLOAD_TYPES, MAX_BATHHOUSE_PDF_MEGABYTES)) {
     return problem(request, 422, ApiErrorCode.CatalogInvalidPdf, {
-      title: 'Invalid PDF',
       args: { maxBytes: MAX_PDF_BYTES, contentTypes: PDF_UPLOAD_TYPES },
     });
   }
@@ -1152,7 +1187,6 @@ function withImage(
     !isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES)
   ) {
     return problem(request, 422, ApiErrorCode.CatalogInvalidImage, {
-      title: 'Invalid image',
       args: { maxBytes: MAX_PHOTO_BYTES, contentTypes: IMAGE_UPLOAD_TYPES },
     });
   }
@@ -1424,7 +1458,6 @@ export const createBarServiceMock = (
   const errors = barServiceErrors(body, language);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -1511,7 +1544,6 @@ function updateBarService(
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -1875,7 +1907,6 @@ export const createStandardServiceMock = (
   const errors = [...standardGeneralErrors(body, language), ...priceErrors(body)];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -1953,7 +1984,6 @@ function updateStandardService(
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -2138,20 +2168,24 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
  * period.
  */
 export function servicesUsingPeriod(key: number): string[] {
-  const usesPeriod = (periods: readonly { idPeriod: number | null }[]): boolean =>
-    periods.some(({ idPeriod }) => idPeriod === key);
+  const hasPrice = (prices: readonly ServicePeriodPrice[]): boolean =>
+    prices.some(({ idPeriod, price }) => idPeriod === key && price !== null);
+  const hasOptions = (availabilities: readonly ServicePeriodAvailability[]): boolean =>
+    availabilities.some(
+      ({ idPeriod, availabilityOptions }) => idPeriod === key && availabilityOptions.length > 0,
+    );
   const names = [
     ...BAR_SERVICES.filter((row) => {
       const details = detailsOf(row);
-      return details.isPeriodPricingEnabled && usesPeriod(details.periodPrices);
+      return details.isPeriodPricingEnabled && hasPrice(details.periodPrices);
     }).map(({ serviceName }) => serviceName),
     ...STANDARD_SERVICES.filter((row) => {
       const details = standardDetailsOf(row);
-      return details.isPeriodPricingEnabled && usesPeriod(details.periodPrices);
+      return details.isPeriodPricingEnabled && hasPrice(details.periodPrices);
     }).map(({ serviceName }) => serviceName),
     ...HOURLY_SERVICES.filter((row) => {
       const details = hourlyDetailsOf(row);
-      return details.isPeriodPricingEnabled && usesPeriod(details.periodAvailabilities);
+      return details.isPeriodPricingEnabled && hasOptions(details.periodAvailabilities);
     }).map(({ serviceName }) => serviceName),
   ];
   return [...new Set(names.filter((name): name is string => !!name))];
@@ -2280,7 +2314,6 @@ export const createHourlyServiceMock = (
   const errors = [...standardGeneralErrors(body, language), ...hourlyPriceErrors(body)];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -2361,7 +2394,6 @@ function updateHourlyService(
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -2562,7 +2594,6 @@ export const createAutomaticPriceMock = (
   ];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -2698,7 +2729,6 @@ function updateAutomaticPrice(
   }
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -3230,7 +3260,6 @@ export const createTableServiceMock = (
   ];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -3362,7 +3391,6 @@ function updateTableService(
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }

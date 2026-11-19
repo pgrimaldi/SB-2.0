@@ -322,7 +322,6 @@ export const createPackageMock = (
   const errors = packageErrors(body, language);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -497,7 +496,6 @@ export const updatePackageMock = (
   const errors = packageErrors(body, language);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -803,7 +801,6 @@ export const createAdditionalItemMock = (
   const errors = choiceErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -889,7 +886,6 @@ export const updateAdditionalItemMock = (
   const errors = choiceErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }

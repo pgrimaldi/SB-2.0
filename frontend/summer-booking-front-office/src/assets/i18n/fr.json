@@ -120,7 +120,7 @@
     },
     "map": {
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
-      "invalid_image": "Image non valide : utilisez PNG, JPEG ou WebP jusqu'à 5 Mo."
+      "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo."
     },
     "catalog": {
       "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}.",
@@ -1144,7 +1144,7 @@
           }
         },
         "log": "Log",
-        "owner_not_editable": "Le propriétaire ne peut pas être modifié"
+        "user_not_editable": "Cet utilisateur ne peut pas être modifié ici"
       },
       "seasons": {
         "season_dates": {
@@ -1230,7 +1230,8 @@
             "title": "Supprimer les plages de dates",
             "text": "Voulez-vous supprimer les {{count}} plages de dates sélectionnées ?"
           },
-          "period_left_empty": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom."
+          "period_left_empty": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom.",
+          "too_many": "Vous pouvez supprimer au maximum {{max}} plages de dates à la fois. Retirez celles en trop de la sélection."
         }
       },
       "services": {

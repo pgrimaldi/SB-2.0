@@ -2575,7 +2575,12 @@ Informazioni stabilimento: salvataggio dei servizi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `services` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/doccia.svg", "isSelected": false}]` |
+| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/doccia.svg", "isSelected": false}]` |
+| `services[].idService` | number (intero) | `14` |
+| `services[].name` | string | `Accesso disabili` |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
+| `services[].iconUrl` | string \| null | `https://media.example.com/icons/accesso-disabili.svg` |
+| `services[].isSelected` | boolean | `true` |
 
 #### Response
 

@@ -21,8 +21,9 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
   la tabella.
 - Righe per pagina: 10 per tutte le tabelle; 20, 50 o 100 con il selettore del paginatore. Per un numero fisso senza
   selettore c'è `isPageSizeSelectorHidden`.
-- Ricerca: `isSearchable`, inviata a `load` come `search`. Ordinamento: colonne `sortable`, inviato come `sortField` e
-  `sortDirection`.
+- Ricerca: `isSearchable`, inviata a `load` come `search`; se il backend ha un limite di caratteri, la pagina lo passa
+  con `searchMaxLength` e il campo non accetta caratteri oltre. Ordinamento: colonne `sortable`, inviato come
+  `sortField` e `sortDirection`.
 
 ## Richiesta e risposta standard
 

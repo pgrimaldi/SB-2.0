@@ -51,7 +51,9 @@
         'management.settings.bathhouse_configuration.general_information.country' | translate
       "
       [placeholder]="
-        'management.settings.bathhouse_configuration.general_information.choose' | translate
+        countries.loadError()
+          ? ''
+          : ('management.settings.bathhouse_configuration.general_information.choose' | translate)
       "
       [options]="countryOptions()"
       [error]="countries.loadError() ?? fieldErrors.country()"

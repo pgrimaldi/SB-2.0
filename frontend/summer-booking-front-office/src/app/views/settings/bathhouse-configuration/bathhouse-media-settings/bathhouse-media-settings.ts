@@ -24,6 +24,7 @@ import {
 } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { fileLinkOf } from '../../../../behaviours/files/file-link';
 import { isUploadable } from '../../../../behaviours/files/uploadable-file';
 import { UploadContentType } from '../../../../entities/enums/upload-content-type';
 import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
@@ -41,6 +42,7 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../behaviours/forms/unsaved-changes.behaviour';
 import { GoogleMapsBehaviour } from '../../../../behaviours/maps/google-maps.behaviour';
+import { DATA_RELOAD } from '../../../../components/shared/ui/data/data-reload';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../behaviours/validation/validation-text.behaviour';
@@ -120,6 +122,7 @@ type MediaCall = () => Observable<BathhouseMedia>;
 })
 export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   private readonly auth = inject(AuthBehaviour);
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly cache = inject(BathhouseConfigurationCacheBehaviour);
   private readonly catalog = inject(CatalogService);
   private readonly errorText = inject(ErrorTextBehaviour);
@@ -173,9 +176,17 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   });
   protected readonly center = computed(() => this.position() ?? CENTER_OF_ITALY);
   protected readonly zoom = computed(() => (this.position() ? POSITION_ZOOM : ITALY_ZOOM));
+  /** As the server sent them: the links go into `src` and `href` only through `fileLinkOf`. */
   private readonly media = signal(new BathhouseMedia());
-  protected readonly mainPhotoUrl = computed(() => this.media().mainPhotoUrl);
-  protected readonly galleryPhotos = computed(() => this.media().photos);
+  protected readonly mainPhotoUrl = computed(() =>
+    fileLinkOf(this.media().mainPhotoUrl, this.origin),
+  );
+  /** Also with a link that is not safe: shown without preview, it can still be deleted. */
+  protected readonly hasMainPhoto = computed(() => this.media().mainPhotoUrl !== null);
+  /** A photo without a safe link stays without preview, so it still counts and can be deleted. */
+  protected readonly galleryPhotos = computed(() =>
+    this.media().photos.map((photo) => ({ ...photo, url: fileLinkOf(photo.url, this.origin) })),
+  );
   /** Rows of the gallery always full, with at least one free place until the gallery is full. */
   protected readonly emptyGallerySlots = computed(() => {
     const photoQuantity = this.galleryPhotos().length;
@@ -189,14 +200,17 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
     {
       kind: BathhouseDocument.PriceList,
       name: 'management.settings.bathhouse_configuration.media.documents.price_list',
-      url: this.media().priceListPdfUrl,
+      url: fileLinkOf(this.media().priceListPdfUrl, this.origin),
       fileName: this.media().priceListPdfFileName,
+      isPresent:
+        this.media().priceListPdfUrl !== null || this.media().priceListPdfFileName !== null,
     },
     {
       kind: BathhouseDocument.Menu,
       name: 'management.settings.bathhouse_configuration.media.documents.menu',
-      url: this.media().menuPdfUrl,
+      url: fileLinkOf(this.media().menuPdfUrl, this.origin),
       fileName: this.media().menuPdfFileName,
+      isPresent: this.media().menuPdfUrl !== null || this.media().menuPdfFileName !== null,
     },
   ]);
   protected readonly isLoading = signal(false);
@@ -227,6 +241,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
       () => this.isMapFailed.set(true),
     );
     effect((onCleanup) => {
+      this.dataReload?.();
       if (!this.auth.user()) {
         return;
       }
@@ -236,7 +251,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
         this.isLoaded.set(false);
         return this.cache.media().subscribe({
           next: (answer) => {
-            const media = mediaOf(answer, this.origin);
+            const media = mediaOf(answer);
             this.media.set(media);
             this.loaded = onlyFieldsOf(BathhouseMediaRequest, media);
             this.request.set(this.loaded);
@@ -422,7 +437,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
 
   /** The answer holds all the media as saved, link of the virtual tour and position too. */
   private keep(answer: BathhouseMedia): void {
-    const media = mediaOf(answer, this.origin);
+    const media = mediaOf(answer);
     this.media.set(media);
     this.cache.keepMedia(media);
   }
@@ -437,33 +452,12 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   }
 }
 
-/**
- * The links go into `src` and `href`: only https ones or ours are kept. A photo without one stays
- * in the gallery, without preview, so it still counts and can be deleted.
- */
-function mediaOf(answer: BathhouseMedia, origin: string): BathhouseMedia {
+function mediaOf(answer: BathhouseMedia): BathhouseMedia {
   const media = onlyFieldsOf(BathhouseMedia, answer);
   return {
     ...media,
-    mainPhotoUrl: webLinkOf(media.mainPhotoUrl, origin),
-    photos: (media.photos ?? [])
-      .map((photo) => onlyFieldsOf(BathhousePhoto, photo))
-      .map((photo) => ({ ...photo, url: webLinkOf(photo.url, origin) })),
-    priceListPdfUrl: webLinkOf(media.priceListPdfUrl, origin),
-    menuPdfUrl: webLinkOf(media.menuPdfUrl, origin),
+    photos: (media.photos ?? []).map((photo) => onlyFieldsOf(BathhousePhoto, photo)),
   };
-}
-
-function webLinkOf(link: string | null, origin: string): string | null {
-  if (!link) {
-    return null;
-  }
-  try {
-    const url = new URL(link, origin);
-    return url.protocol === 'https:' || url.origin === origin ? url.href : null;
-  } catch {
-    return null;
-  }
 }
 
 function roundCoordinate(value: number): number {

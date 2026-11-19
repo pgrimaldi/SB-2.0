@@ -105,7 +105,8 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
 - Il server può rispondere con dati tradotti, quindi ogni caricamento di dati del server si rifà quando cambia la
   lingua: chi carica dati legge il segnale `DATA_RELOAD` (`components/shared/ui/data/data-reload.ts`, fornito in
   `app.config.ts` con la lingua corrente), come fa `app-table` (ricarica la pagina corrente, senza tornare a pagina 1).
-  Anche ogni nuovo caricamento (dettaglio, elenco di una select…) dipende da `DATA_RELOAD`.
+  Anche ogni nuovo caricamento (dettaglio, elenco di una select…) dipende da `DATA_RELOAD`, e una cache di pagina
+  (es. `BathhouseConfigurationCacheBehaviour`) scarta le sue risposte quando cambia.
 - Le enum viaggiano con i nomi dei membri .NET (es. `FullDay`), tranne i ruoli degli utenti (`UserRole`), che usano i
   codici di `RoleCodes` del backend (es. `cashoperator`).
 - Il prefisso del telefono viaggia senza `+` (es. `39`): `PhonePrefix` (`entities/enums/phone-prefix.ts`) dà il
@@ -128,8 +129,10 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   (es. `ValidationOutOfRange = 'validation.out_of_range'`), lo stesso catalogo di `API_CONTRACTS.docx`; ognuno ha la sua
   traduzione in `error.`. Componenti, mock e test usano sempre il membro (`ApiErrorCode.ValidationOutOfRange`), mai la
   stringa: se un codice cambia, si cambia solo nell'enum. `API_ERROR_CODES` è l'elenco ricavato dall'enum.
-- Anche i mock rispondono in Problem Details (`problem()` in `services/mocks/errors/problem.mock.ts`), con `code`,
-  `errors[]` per i campi e `traceId` come il backend, e solo con i codici del catalogo (`ApiErrorCode`).
+- Anche i mock rispondono in Problem Details (`problem()` in `services/mocks/errors/problem.mock.ts`) come
+  `ProblemDetailsWriter` del backend: `title` uguale al `code`, `type` `https://errors.summerbooking/<code con / al posto
+  dei punti>`, `args` solo quando ci sono, `errors[]` per i campi con il loro `args` (anche `{}`) e `traceId`, e solo
+  con i codici del catalogo (`ApiErrorCode`).
 - Ogni errore di una chiamata diventa un `ApiProblem` con `toApiProblem` (`services/api/errors/`); i campi inviati
   dal server si tengono solo se ben formati.
 - Gli errori che non arrivano dal backend ricevono un codice del frontend (`FRONTEND_ERROR_CODES`):

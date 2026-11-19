@@ -5,6 +5,7 @@
     type="search"
     autocomplete="off"
     [placeholder]="placeholder() ?? ''"
+    [attr.maxlength]="maxLength()"
     [value]="text()"
     (input)="text.set(field.value)"
   />

@@ -104,12 +104,15 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
     this.unsaved.watch(this);
     effect((onCleanup) => {
       this.dataReload?.();
-      if (!this.auth.user()?.propertyId) {
+      this.seasonDates.reloads();
+      // Dates typed and not saved are never lost: they are read again only without changes.
+      if (!this.auth.user()?.propertyId || untracked(() => this.hasUnsavedChanges())) {
         return;
       }
       const subscription = untracked(() => {
         this.error.set(null);
         this.isLoaded.set(false);
+        this.seasonDates.isLoaded.set(false);
         this.isLoading.set(true);
         return this.seasons.seasonDates().subscribe({
           next: (dates) => {
@@ -119,6 +122,7 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
             this.datesForm().reset();
             this.isEditing.set(false);
             this.isLoaded.set(true);
+            this.seasonDates.isLoaded.set(true);
             this.isLoading.set(false);
           },
           error: (error: unknown) => {
@@ -164,7 +168,6 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
       try {
         const sent = this.dates();
         if (await this.hasPeriodsOutside(sent)) {
-          this.cancel();
           this.isPeriodsOutsideShown.set(true);
           return;
         }

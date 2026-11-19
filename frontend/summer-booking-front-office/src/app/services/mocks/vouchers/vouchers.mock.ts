@@ -170,7 +170,6 @@ export const addVoucherItemMock = (
   const errors = voucherErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -201,7 +200,6 @@ export const updateVoucherItemMock = (
   const errors = voucherErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }

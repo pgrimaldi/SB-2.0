@@ -36,12 +36,16 @@
       <app-file-drop-zone
         class="bathhouse__media__settings__main__image"
         [accept]="imageTypes"
-        [text]="'management.settings.bathhouse_configuration.media.images.main_hint' | translate"
-        [pathIcon]="addImageIcon"
+        [text]="
+          hasMainPhoto()
+            ? ''
+            : ('management.settings.bathhouse_configuration.media.images.main_hint' | translate)
+        "
+        [pathIcon]="hasMainPhoto() ? imagesIcon : addImageIcon"
         [previewUrl]="mainPhotoUrl()"
         (filesSelected)="uploadMainPhoto($event)"
       />
-      @if (mainPhotoUrl()) {
+      @if (hasMainPhoto()) {
         <app-icon-button
           class="bathhouse__media__settings__remove"
           [label]="'table.actions.delete' | translate"
@@ -105,7 +109,7 @@
       <div class="bathhouse__media__settings__document">
         <div class="bathhouse__media__settings__document__details">
           <p class="bathhouse__media__settings__document__name">{{ document.name | translate }}</p>
-          @if (document.url; as url) {
+          @if (document.isPresent) {
             @if (document.fileName; as fileName) {
               <p
                 class="bathhouse__media__settings__document__file bathhouse__media__settings__document__file__name"
@@ -115,14 +119,18 @@
               </p>
             }
             <span class="bathhouse__media__settings__document__open">
-              <a
-                class="bathhouse__media__settings__document__file bathhouse__media__settings__document__link"
-                target="_blank"
-                rel="noopener noreferrer"
-                [href]="url"
-              >
-                {{ 'management.settings.bathhouse_configuration.media.documents.open' | translate }}
-              </a>
+              @if (document.url; as url) {
+                <a
+                  class="bathhouse__media__settings__document__file bathhouse__media__settings__document__link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [href]="url"
+                >
+                  {{
+                    'management.settings.bathhouse_configuration.media.documents.open' | translate
+                  }}
+                </a>
+              }
               <app-icon-button
                 class="bathhouse__media__settings__document__remove"
                 [label]="'table.actions.delete' | translate"

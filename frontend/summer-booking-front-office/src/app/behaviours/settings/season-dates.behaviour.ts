@@ -9,6 +9,14 @@ import { SeasonPeriodInterval } from '../../entities/settings/seasons/season-per
 @Injectable()
 export class SeasonDatesBehaviour {
   readonly dates = signal<SeasonDates | null>(null);
+  /** The dates were read: while they are read, or if that fails, nothing starts from them. */
+  readonly isLoaded = signal(false);
+  /** Asks the panel to read the dates again, e.g. after a period refused as outside them. */
+  readonly reloads = signal(0);
+
+  reload(): void {
+    this.reloads.update((count) => count + 1);
+  }
 
   /** First and last day of the current season, or of the next one; null while one of them is missing. */
   rangeOf(isNextSeason: boolean): SeasonPeriodInterval | null {

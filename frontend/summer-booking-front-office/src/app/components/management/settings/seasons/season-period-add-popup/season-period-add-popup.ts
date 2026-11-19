@@ -56,7 +56,7 @@ import {
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
-import { rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
+import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 
@@ -78,6 +78,8 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
   /** The periods the season has already: the new one cannot have the name of one of them. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   readonly added = output<void>();
+  /** Every error of the save, e.g. for the tab to read its periods again. */
+  readonly failed = output<ApiProblem>();
 
   private readonly seasons = inject(SeasonService);
   private readonly auth = inject(AuthBehaviour);
@@ -166,11 +168,16 @@ export class SeasonPeriodAddPopup extends BasePopup implements UnsavedChanges, O
         this.added.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
+        this.failed.emit(problem);
         if (problem.code === ApiErrorCode.PricingPeriodNameTaken) {
           return apiFieldError(this.draftForm.name, problem.code);
         }
         if (problem.code === ApiErrorCode.PricingPeriodOutsideSeason) {
           return apiFieldError(this.draftForm.ranges, problem.code);
+        }
+        const overlap = periodOverlapError(problem, this.draftForm.ranges);
+        if (overlap) {
+          return overlap;
         }
         const ranges = rangesErrors(problem, this.draftForm.ranges);
         if (!ranges.length) {

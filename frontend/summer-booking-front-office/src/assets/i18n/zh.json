@@ -120,7 +120,7 @@
     },
     "map": {
       "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
-      "invalid_image": "图片无效：请使用不超过 5 MB 的 PNG、JPEG 或 WebP。"
+      "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。"
     },
     "catalog": {
       "sector_in_use": "区域/排 {{sectorName}} 正在使用，无法删除：地图上的位置 {{mapSpots}}，价目表 {{priceLists}}，停留限制 {{stayLimits}}，折扣 {{discounts}}。",
@@ -1144,7 +1144,7 @@
           }
         },
         "log": "日志",
-        "owner_not_editable": "无法修改所有者"
+        "user_not_editable": "无法在此处修改该用户"
       },
       "seasons": {
         "season_dates": {
@@ -1230,7 +1230,8 @@
             "title": "删除日期区间",
             "text": "要删除选中的 {{count}} 个日期区间吗？"
           },
-          "period_left_empty": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。"
+          "period_left_empty": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。",
+          "too_many": "每次最多可以删除 {{max}} 个日期区间。请从选择中移除多余的区间。"
         }
       },
       "services": {

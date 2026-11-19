@@ -35,6 +35,7 @@
   [idUser]="idUserToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table)"
 />
 <app-delete-items-popup
   [idItems]="idUsersToDelete()"
@@ -44,6 +45,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="table.reload()"
+  (failed)="reloadIfGone($event, table)"
 />
 
 <app-table-error-popup

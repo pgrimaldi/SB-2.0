@@ -31,4 +31,19 @@ describe('AuthService', () => {
     });
     controller.verify();
   });
+
+  it('should sign out with a POST without a body, the refresh token travelling in its cookie', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const auth = TestBed.inject(AuthService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    auth.logout().subscribe();
+
+    const call = controller.expectOne(`${environment.apiBaseUrl}/identity/auth/logout`).request;
+    expect(call.method).toBe('POST');
+    expect(call.body).toBeNull();
+    controller.verify();
+  });
 });

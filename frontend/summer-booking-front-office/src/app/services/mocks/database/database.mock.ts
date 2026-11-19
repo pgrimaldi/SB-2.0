@@ -349,7 +349,6 @@ export const moveToTrashMock = (request: HttpRequest<unknown>): Observable<HttpE
             map(() => new HttpResponse({ status: 204, url: request.url })),
           )
         : problem(request, 400, ApiErrorCode.ValidationFailed, {
-            title: 'Invalid request',
             errors: [{ field: 'password', code: ApiErrorCode.AuthInvalidCredentials }],
           }),
     ),

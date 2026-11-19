@@ -120,7 +120,6 @@ export const uploadMapBackgroundMock = (
     !isUploadable(image, IMAGE_UPLOAD_TYPES, MAX_IMAGE_UPLOAD_MEGABYTES)
   ) {
     return problem(request, 422, ApiErrorCode.MapInvalidImage, {
-      title: 'Invalid image',
       args: { maxBytes: MAX_BYTES, contentTypes: IMAGE_UPLOAD_TYPES },
     });
   }
@@ -156,7 +155,6 @@ export const updateMapBackgroundMock = (
   const name = (request.body as { backgroundName?: unknown } | null)?.backgroundName ?? null;
   if (name === null || !isOneOf(name, MapBackgroundImage)) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors: [{ field: 'backgroundName', code: ApiErrorCode.ValidationInvalid }],
     });
   }
@@ -227,7 +225,6 @@ export const updateMapConfigurationMock = (
   }
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }

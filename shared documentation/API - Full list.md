@@ -366,7 +366,15 @@ Nessun payload.
 
 ```json
 {
-  "services": "BathhouseServiceItem[] (array di oggetti)"
+  "services": [
+    {
+      "idService": "number (intero)",
+      "name": "string",
+      "categoryCode": "string (enum BathhouseServiceGroup)",
+      "iconUrl": "string | null",
+      "isSelected": "boolean"
+    }
+  ]
 }
 ```
 
@@ -378,7 +386,12 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `services` | BathhouseServiceItem[] (array di oggetti) |
+| `services[]` | BathhouseServiceItem[] (array di oggetti) |
+| `services[].idService` | number (intero) |
+| `services[].name` | string |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) |
+| `services[].iconUrl` | string \| null |
+| `services[].isSelected` | boolean |
 
 **Response tabella**
 

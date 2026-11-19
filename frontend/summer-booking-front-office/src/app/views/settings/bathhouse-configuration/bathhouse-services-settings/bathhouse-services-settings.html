@@ -11,7 +11,7 @@
         @for (item of section.services; track item.service.idService) {
           <app-checkbox [formField]="servicesForm[item.index].isSelected">
             <span class="bathhouse__services__settings__service">
-              @if (item.service.iconUrl; as iconUrl) {
+              @if (item.iconUrl; as iconUrl) {
                 <img [src]="iconUrl" width="20" height="20" alt="" />
               }
               {{ item.service.name }}

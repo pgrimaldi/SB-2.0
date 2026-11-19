@@ -234,7 +234,6 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
   const errors = itemErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
@@ -265,7 +264,6 @@ export const warehouseEditMock = (
   const errors = itemErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      title: 'Invalid request',
       errors,
     });
   }
