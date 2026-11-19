@@ -1083,7 +1083,6 @@ Nessun corpo (204).
     {
       "idAuditEntry": "string",
       "bookingNumber": "string | null",
-      "userNumber": "string | null",
       "actorName": "string | null",
       "spotLabel": "string | null",
       "actionCode": "string | null",
@@ -1114,7 +1113,6 @@ Nessun corpo (204).
 | `rows[]` | AuditEntryItem[] (array di oggetti) |
 | `rows[].idAuditEntry` | string |
 | `rows[].bookingNumber` | string \| null |
-| `rows[].userNumber` | string \| null |
 | `rows[].actorName` | string \| null |
 | `rows[].spotLabel` | string \| null |
 | `rows[].actionCode` | string \| null |

@@ -142,7 +142,9 @@
       "period_outside_season": "时段日期必须在季节范围内。",
       "period_range_not_found": "日期区间已不存在：可能已被删除。",
       "period_ranges_required": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。",
-      "period_in_use": "该时段在价目表 {{priceLists}} 中有价格：请先从这些价目表中删除其价格，然后再删除该时段。"
+      "period_in_use": "该时段在价目表 {{priceLists}} 中有价格：请先从这些价目表中删除其价格，然后再删除该时段。",
+      "period_in_use_by_services": "该时段被服务 {{services}} 使用：请先从这些服务中删除其价格，然后再删除该时段。",
+      "period_overlap": "日期与时段 {{periodName}} 重叠：请选择不在其他时段中的日期。"
     }
   },
   "alert": {
@@ -943,7 +945,6 @@
           },
           "table": {
             "booking_number": "预订编号",
-            "user_number": "用户编号",
             "full_name": "全名",
             "spot": "位置",
             "action": "操作",
@@ -1101,7 +1102,6 @@
               "marked_not_done": "订单已标记为未完成"
             }
           },
-          "not_implemented": "该服务尚未实现",
           "clear_filters": "清除筛选",
           "filters_popup": {
             "title": "筛选",

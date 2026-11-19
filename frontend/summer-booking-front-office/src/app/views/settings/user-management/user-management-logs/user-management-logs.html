@@ -85,10 +85,10 @@
 
 <app-alert-popup
   [title]="'alert.error_title' | translate"
-  [text]="'management.settings.user_management.logs.not_implemented' | translate"
+  [text]="downloadErrorMessage() ?? ''"
   [texts]="'alert' | translate"
   [pathIcon]="alertIcons"
-  [(open)]="isNotImplementedShown"
+  [(open)]="isDownloadErrorShown"
 />
 
 <app-table-error-popup

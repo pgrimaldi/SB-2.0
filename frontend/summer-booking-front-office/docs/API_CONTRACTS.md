@@ -437,7 +437,6 @@ Stato: 200 OK.
     {
       "idAuditEntry": "1287",
       "bookingNumber": "1234",
-      "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "A1",
       "actionCode": "catalog.map_spots_created",
@@ -446,7 +445,6 @@ Stato: 200 OK.
     {
       "idAuditEntry": "1265",
       "bookingNumber": "2741",
-      "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "D2",
       "actionCode": "catalog.season_updated",
@@ -459,10 +457,9 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "1287", "bookingNumber": "1234", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "catalog.map_spots_created", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "1265", "bookingNumber": "2741", "userNumber": "123", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "catalog.season_updated", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
+| `rows[]` | AuditEntryItem[] (array di oggetti) | `[{"idAuditEntry": "1287", "bookingNumber": "1234", "actorName": "Giulia Ferri", "spotLabel": "A1", "actionCode": "catalog.map_spots_created", "occurredAt": "2026-10-23T11:11:00.000Z"}, {"idAuditEntry": "1265", "bookingNumber": "2741", "actorName": "Giulia Ferri", "spotLabel": "D2", "actionCode": "catalog.season_updated", "occurredAt": "2026-10-17T14:05:00.000Z"}]` |
 | `rows[].idAuditEntry` | string | `1287` |
 | `rows[].bookingNumber` | string \| null | `1234` |
-| `rows[].userNumber` | string \| null | `123` |
 | `rows[].actorName` | string \| null | `Giulia Ferri` |
 | `rows[].spotLabel` | string \| null | `A1` |
 | `rows[].actionCode` | string \| null | `catalog.map_spots_created` |
@@ -2521,14 +2518,14 @@ Stato: 200 OK.
     "idService": 14,
     "name": "Accesso disabili",
     "categoryCode": "accessibility_comfort",
-    "iconUrl": "/media/icons/accesso-disabili.svg",
+    "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
     "isSelected": true
   },
   {
     "idService": 31,
     "name": "Doccia",
     "categoryCode": "accessibility_comfort",
-    "iconUrl": "/media/icons/doccia.svg",
+    "iconUrl": "https://media.example.com/icons/doccia.svg",
     "isSelected": true
   },
   {
@@ -2546,7 +2543,7 @@ Stato: 200 OK.
 | `idService` | number (intero) | `14` |
 | `name` | string | `Accesso disabili` |
 | `categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
-| `iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
+| `iconUrl` | string \| null | `https://media.example.com/icons/accesso-disabili.svg` |
 | `isSelected` | boolean | `true` |
 
 ### POST `/api/catalog/property-info/save-bathhouse-configuration-services`
@@ -2562,14 +2559,14 @@ Informazioni stabilimento: salvataggio dei servizi.
       "idService": 14,
       "name": "Accesso disabili",
       "categoryCode": "accessibility_comfort",
-      "iconUrl": "/media/icons/accesso-disabili.svg",
+      "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
       "isSelected": true
     },
     {
       "idService": 31,
       "name": "Doccia",
       "categoryCode": "accessibility_comfort",
-      "iconUrl": "/media/icons/doccia.svg",
+      "iconUrl": "https://media.example.com/icons/doccia.svg",
       "isSelected": true
     }
   ]
@@ -2578,11 +2575,11 @@ Informazioni stabilimento: salvataggio dei servizi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "/media/icons/doccia.svg", "isSelected": true}]` |
+| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/doccia.svg", "isSelected": true}]` |
 | `services[].idService` | number (intero) | `14` |
 | `services[].name` | string | `Accesso disabili` |
 | `services[].categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
-| `services[].iconUrl` | string \| null | `/media/icons/accesso-disabili.svg` |
+| `services[].iconUrl` | string \| null | `https://media.example.com/icons/accesso-disabili.svg` |
 | `services[].isSelected` | boolean | `true` |
 
 #### Response

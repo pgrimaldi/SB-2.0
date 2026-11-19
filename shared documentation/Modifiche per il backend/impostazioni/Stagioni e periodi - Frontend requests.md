@@ -348,7 +348,7 @@ Le `GET` chiedono il permesso `CatalogRead`, le altre `CatalogSettings`.
 
 | Metodo | Rotta | Uso nella pagina |
 |---|---|---|
-| GET | `/api/catalog/season` | Riquadro delle date, all'apertura e al cambio lingua: 200 con `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` (giorni `yyyy-MM-dd`), oppure 204 senza corpo se la stagione non è ancora impostata (quattro date vuote). |
+| GET | `/api/catalog/season` | Riquadro delle date, all'apertura e al cambio lingua: 200 con `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` (giorni `yyyy-MM-dd`), oppure 204 senza corpo se la stagione non è ancora impostata. Con il 204, o con un primo giorno `null`, la pagina mostra l'1 gennaio dell'anno in corso (stagione corrente) e dell'anno dopo (prossima) e li manda con il primo Salva; i giorni finali restano vuoti. |
 | PUT | `/api/catalog/season` | "Salva" del riquadro delle date: le quattro date; 200 con le date salvate, che la pagina mostra. Il backend non controlla i periodi: prima di chiamarla il frontend legge i periodi delle due stagioni e non salva se un intervallo resterebbe fuori dalle nuove date. |
 | GET | `/api/catalog/tariff-periods` | Tab "Stagione Corrente": i periodi con `key`, `name` e `ranges` (`startsOn`, `endsOn`), in ordine di primo giorno; `[]` senza stagione. Li leggono anche le pagine Listino e Servizi. |
 | GET | `/api/catalog/next-season/tariff-periods` | Tab "Prossima Stagione": lo stesso per la stagione successiva. |

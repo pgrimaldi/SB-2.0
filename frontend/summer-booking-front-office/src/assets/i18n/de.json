@@ -142,7 +142,9 @@
       "period_outside_season": "Die Daten des Zeitraums müssen innerhalb der Saison liegen.",
       "period_range_not_found": "Der Datumsbereich ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "period_ranges_required": "Ein Zeitraum braucht mindestens einen Datumsbereich. Um ihn ganz zu löschen, verwende den Papierkorb neben seinem Namen.",
-      "period_in_use": "Der Zeitraum hat Preise in den Preislisten {{priceLists}}: Entferne zuerst seine Preise aus diesen Preislisten und lösche ihn dann."
+      "period_in_use": "Der Zeitraum hat Preise in den Preislisten {{priceLists}}: Entferne zuerst seine Preise aus diesen Preislisten und lösche ihn dann.",
+      "period_in_use_by_services": "Der Zeitraum wird von den Leistungen {{services}} verwendet: Entferne zuerst seine Preise aus diesen Leistungen und lösche ihn dann.",
+      "period_overlap": "Die Daten überschneiden sich mit dem Zeitraum {{periodName}}: Wähle Tage, die nicht schon in einem anderen Zeitraum liegen."
     }
   },
   "alert": {
@@ -943,7 +945,6 @@
           },
           "table": {
             "booking_number": "Buchungs-ID",
-            "user_number": "Benutzer-ID",
             "full_name": "Vollständiger Name",
             "spot": "Platz",
             "action": "Aktion",
@@ -1101,7 +1102,6 @@
               "marked_not_done": "Bestellung als nicht erledigt markiert"
             }
           },
-          "not_implemented": "Der Dienst ist noch nicht implementiert",
           "clear_filters": "Filter zurücksetzen",
           "filters_popup": {
             "title": "Filter",

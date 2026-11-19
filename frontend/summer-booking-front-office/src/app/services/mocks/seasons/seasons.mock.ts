@@ -13,6 +13,7 @@ import {
 import { SeasonPeriodUpdateRequest } from '../../../entities/settings/seasons/season-period-update-request';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
+import { servicesUsingPeriod } from '../catalog/catalog.mock';
 import { priceListsUsingPeriod } from '../catalog/price-lists.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
@@ -194,7 +195,8 @@ export const seasonPeriodListMock = (
  * created; 401 without a valid access token; 400 with one error per wrong field; 422
  * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 409
  * `pricing.period_name_taken` for the name of another period of the season; 422
- * `pricing.period_outside_season` for a day outside the season.
+ * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
+ * `periodName` for a day already in another period of the season.
  */
 export const createSeasonPeriodMock = (
   request: HttpRequest<unknown>,
@@ -230,6 +232,10 @@ export const createSeasonPeriodMock = (
       args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
   }
+  const overlapping = periods.find((row) => hasOverlap(ranges, row.ranges));
+  if (overlapping) {
+    return periodOverlap(request, overlapping);
+  }
   const period: PeriodRow = {
     propertyId: property.id,
     isNextSeason,
@@ -254,7 +260,8 @@ export const createSeasonPeriodMock = (
  * the period of that season goes away with all its date ranges (until the page is reloaded). 204
  * without a body; 401 without a valid access token; 422 `pricing.season_required` while the property
  * has no season; 404 `pricing.period_not_found`; 409 `pricing.period_in_use` with the names of the
- * price lists in `priceLists` when a period of the current season has prices in them.
+ * price lists in `priceLists` when a period of the current season has prices in them, otherwise 409
+ * `pricing.period_in_use_by_services` with the names of the services in `services` when services use it.
  */
 export const deleteSeasonPeriodMock = (
   request: HttpRequest<unknown>,
@@ -279,6 +286,13 @@ export const deleteSeasonPeriodMock = (
       args: { priceLists },
     });
   }
+  const services = isNextSeason ? [] : servicesUsingPeriod(key);
+  if (services.length) {
+    return problem(request, 409, ApiErrorCode.PricingPeriodInUseByServices, {
+      title: 'Period in use by services',
+      args: { services },
+    });
+  }
   PERIODS.splice(PERIODS.indexOf(period), 1);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -290,7 +304,8 @@ export const deleteSeasonPeriodMock = (
  * token; 400 with one error per wrong field; 422 `pricing.season_required` /
  * `pricing.next_season_required` while the season has no dates; 404 `pricing.period_not_found`; 409
  * `pricing.period_name_taken` for the name of another period of the season; 422
- * `pricing.period_outside_season` for a day outside the season.
+ * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
+ * `periodName` for a day already in another period of the season.
  */
 export const updateSeasonPeriodMock = (
   request: HttpRequest<unknown>,
@@ -333,6 +348,10 @@ export const updateSeasonPeriodMock = (
       title: 'Period outside the season',
       args: { seasonStartsOn: season.startsOn as string, seasonEndsOn: season.endsOn as string },
     });
+  }
+  const overlapping = periods.find((row) => row !== period && hasOverlap(ranges, row.ranges));
+  if (overlapping) {
+    return periodOverlap(request, overlapping);
   }
   period.name = name;
   period.ranges = sorted(ranges);
@@ -434,6 +453,14 @@ function savePeriodErrors(
     errors.push({ field: 'ranges', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
+}
+
+/** A day of the new ranges is already in another period of the season. */
+function periodOverlap(request: HttpRequest<unknown>, other: PeriodRow): Observable<never> {
+  return problem(request, 409, ApiErrorCode.PricingPeriodOverlap, {
+    title: 'Period overlap',
+    args: { periodName: other.name ?? '' },
+  });
 }
 
 function seasonRequired(request: HttpRequest<unknown>, isNextSeason: boolean): Observable<never> {

@@ -191,6 +191,7 @@ Come `POST /api/identity/property-users`:
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
 | 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 401 | `auth.session_expired` | L'account dell'utente collegato è stato cancellato nel frattempo (`CurrentAccount.GetAsync`, come oggi in `StaffService`). |
 
 Lunghezze e formati sono quelli di `CommonRules` (`BuildingBlocks.Application/Validation/CommonRules.cs`: email 255,
 cellulare 32, prefisso 8) e di `CreateStaffUserRequestValidator`
@@ -261,6 +262,7 @@ Gli stessi di `update-user` per l'utente da leggere:
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
 | 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 401 | `auth.session_expired` | L'account dell'utente collegato è stato cancellato nel frattempo (`CurrentAccount.GetAsync`, come oggi in `StaffService`). |
 
 ## 4. POST /api/identity/update-user
 
@@ -337,13 +339,14 @@ Come `PATCH /api/identity/property-users/{userId}`:
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
 | 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 401 | `auth.session_expired` | L'account dell'utente collegato è stato cancellato nel frattempo (`CurrentAccount.GetAsync`, come oggi in `StaffService`). |
 
 ## 5. POST /api/audit/entries-list
 
 Tabella della schermata del registro (`/settings/user-management/logs`): il frontend la chiama all'apertura e ogni volta
 che cambiano pagina, numero di righe, ricerca, periodo, filtri o ordinamento. È un'**API nuova** per la tabella:
 `GET /api/audit/entries` resta com'è. Rispetto a quella, la tabella ha bisogno di filtrare più utenti insieme, di
-ordinare ogni colonna, della colonna "ID utente", del periodo letto come giorni nel fuso dell'utente e di righe con solo
+ordinare ogni colonna, del periodo letto come giorni nel fuso dell'utente e di righe con solo
 i campi mostrati.
 
 ### Richiesta
@@ -372,7 +375,7 @@ Il corpo è la richiesta standard delle tabelle:
 | `pageSize` | number | Righe per pagina: 10, 20, 50 o 100. |
 | `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Si cerca in nome dell'operatore, numero della prenotazione e postazione, senza distinguere maiuscole e minuscole. |
 | `filters` | array | Un elemento per campo, `value` sempre un array di stringhe; `[]` = nessun filtro. Campi qui sotto. |
-| `sortField` | string | Una delle sei colonne: `bookingNumber`, `userNumber`, `actorName`, `spotLabel`, `actionCode`, `occurredAt`; `""` = le più recenti prima. |
+| `sortField` | string | Una delle cinque colonne: `bookingNumber`, `actorName`, `spotLabel`, `actionCode`, `occurredAt`; `""` = le più recenti prima. |
 | `sortDirection` | string | `Ascending` o `Descending`. |
 
 I filtri (un campo può mancare; più valori dello stesso campo = uno qualsiasi, campi diversi = tutti insieme):
@@ -421,7 +424,6 @@ richiesta (al massimo `pageSize` righe).
     {
       "idAuditEntry": "1287",
       "bookingNumber": "1234",
-      "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "A1",
       "actionCode": "catalog.map_spots_created",
@@ -430,7 +432,6 @@ richiesta (al massimo `pageSize` righe).
     {
       "idAuditEntry": "1265",
       "bookingNumber": "2741",
-      "userNumber": "123",
       "actorName": "Giulia Ferri",
       "spotLabel": "D2",
       "actionCode": "catalog.season_updated",
@@ -440,13 +441,12 @@ richiesta (al massimo `pageSize` righe).
 }
 ```
 
-Le voci sono le stesse di `GET /api/audit/entries`, con solo questi sette campi per riga:
+Le voci sono le stesse di `GET /api/audit/entries`, con solo questi sei campi per riga:
 
 | Campo | In `AuditEntryDto` | Note |
 |---|---|---|
 | `idAuditEntry` | `id` | Identificativo della voce (il numero `bigint` di `audit.trail_entries`), come testo. Non si mostra. |
 | `bookingNumber` | `bookingNumber` | Colonna "ID prenotazione"; `null` se la voce non riguarda una prenotazione. |
-| `userNumber` | — (nuovo) | Colonna "ID utente": codice breve e leggibile dell'utente che ha fatto l'azione; `null` se non c'è. Origine, formato e ordinamento sono ancora da decidere: oggi né `identity.access_users` né `audit.trail_entries` hanno un campo così. |
 | `actorName` | `actorName` | Colonna "Nome completo". |
 | `spotLabel` | `spotLabel` | Colonna "Postazione"; `null` se la voce non riguarda una postazione. |
 | `actionCode` | `actionCode` | Colonna "Azione": il codice (`<modulo>.<azione>`), che il frontend traduce. |
@@ -534,7 +534,7 @@ Gli stessi filtri che la tabella del registro sta mostrando, senza pagina e righ
 |---|---|---|
 | `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca, al massimo 100 caratteri. Si cerca in nome dell'operatore, numero della prenotazione e postazione. |
 | `filters` | array | Un elemento per campo, `value` sempre un array di stringhe, `[]` se non ci sono filtri. `datetimeFrom` / `datetimeTo`: il periodo, giorni come in `entries-list` (sezione 5, "Periodo"). `actionCode`: i codici delle azioni scelte (una qualsiasi), fino a tutti quelli del filtro. `idUser`: gli utenti scelti (uno qualsiasi). |
-| `sortField` | string | `bookingNumber`, `userNumber`, `actorName`, `spotLabel`, `actionCode` o `occurredAt`; `""` = le più recenti prima. |
+| `sortField` | string | `bookingNumber`, `actorName`, `spotLabel`, `actionCode` o `occurredAt`; `""` = le più recenti prima. |
 | `sortDirection` | string | `Ascending` o `Descending`. |
 
 ### Risposta
@@ -607,7 +607,7 @@ mostrando, senza pagina e righe per pagina, quindi **tutte** le voci che li risp
 ### Risposta
 
 200 con un file Excel (`xlsx`), binario, non JSON: una riga per voce, con le colonne della tabella (ID prenotazione,
-ID utente, Nome completo, Postazione, Azione, Data e ora). Lingua, fuso, limite di voci e registro come per la stampa
+Nome completo, Postazione, Azione, Data e ora). Lingua, fuso, limite di voci e registro come per la stampa
 (sezione 7, "Lingua, fuso, troppe voci e registro").
 
 | Header | Esempio | Note |
@@ -696,6 +696,7 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
 | 403 | `account.property_required` | Token senza stabilimento. |
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 401 | `auth.session_expired` | L'account dell'utente collegato è stato cancellato nel frattempo (`CurrentAccount.GetAsync`, come oggi in `StaffService`). |
 
 ## Verifica
 
@@ -712,7 +713,7 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
   `null` la lascia com'è), e risponde 200 con i sette campi; con lo stesso ruolo e `password` `null` le sessioni
   dell'utente restano aperte, con un ruolo diverso o una password nuova si chiudono.
 - `entries-list` filtra più utenti e più azioni insieme, accetta `actionCode` con tutti i codici del catalogo (più di
-  50), ordina tutte e sei le colonne nei due versi e restituisce righe con solo i sette campi, `userNumber` compreso;
+  50), ordina tutte e cinque le colonne nei due versi e restituisce righe con solo i sei campi;
   con `X-Time-Zone: Europe/Rome` e un solo giorno restituisce le voci da mezzanotte a mezzanotte ora italiana; `search`
   di 101 caratteri dà 400 `validation.max_length`.
 - `user-combobox` restituisce `{ id, value }` per ogni utente da mostrare; gli `id` filtrano `entries-list`; senza

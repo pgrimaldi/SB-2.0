@@ -142,7 +142,9 @@
       "period_outside_season": "Las fechas del periodo deben estar dentro de la temporada.",
       "period_range_not_found": "El intervalo ya no existe: puede que ya se haya eliminado.",
       "period_ranges_required": "Un periodo debe tener al menos un intervalo. Para eliminarlo por completo, usa la papelera junto a su nombre.",
-      "period_in_use": "El periodo tiene precios en las tarifas {{priceLists}}: quita primero sus precios de estas tarifas y luego elimínalo."
+      "period_in_use": "El periodo tiene precios en las tarifas {{priceLists}}: quita primero sus precios de estas tarifas y luego elimínalo.",
+      "period_in_use_by_services": "El periodo lo usan los servicios {{services}}: quita primero sus precios de estos servicios y luego elimínalo.",
+      "period_overlap": "Las fechas se solapan con el periodo {{periodName}}: elige días que no estén ya en otro periodo."
     }
   },
   "alert": {
@@ -943,7 +945,6 @@
           },
           "table": {
             "booking_number": "ID reserva",
-            "user_number": "ID usuario",
             "full_name": "Nombre completo",
             "spot": "Puesto",
             "action": "Acción",
@@ -1101,7 +1102,6 @@
               "marked_not_done": "Pedido marcado como no servido"
             }
           },
-          "not_implemented": "El servicio aún no está implementado",
           "clear_filters": "Borrar filtros",
           "filters_popup": {
             "title": "Filtros",

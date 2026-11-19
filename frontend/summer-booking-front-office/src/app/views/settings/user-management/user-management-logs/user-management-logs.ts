@@ -9,11 +9,11 @@ import {
 } from '@angular/core';
 import { Location } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, map, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import {
   dateRangeFilters,
@@ -22,6 +22,7 @@ import {
   thisWeekPeriod,
   todayPeriod,
 } from '../../../../behaviours/dates/date-periods';
+import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
 import { FileDownloadBehaviour } from '../../../../behaviours/files/file-download.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import {
@@ -45,6 +46,7 @@ import { TableHeadingAction } from '../../../../components/shared/ui/tables/tabl
 import { Table, TableColumn, TableLoad } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
 import { FilterField } from '../../../../entities/enums/filter-field';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { PageFilter } from '../../../../entities/pagination/page';
 import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
@@ -52,6 +54,7 @@ import { AuditLogUserState } from '../../../../entities/settings/user-management
 import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
+import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 import { IdentityService } from '../../../../services/api/identity/identity.service';
 
 interface UserManagementLogsTexts {
@@ -65,7 +68,6 @@ interface UserManagementLogsTexts {
   };
   table: {
     booking_number: string;
-    user_number: string;
     full_name: string;
     spot: string;
     action: string;
@@ -87,7 +89,6 @@ interface AuditLogFilterChip extends FilterChip {
 interface AuditEntryRow {
   idAuditEntry: string | null;
   bookingNumber: string | null;
-  userNumber: string | null;
   actorName: string | null;
   spotLabel: string | null;
   actionCode: string | null;
@@ -126,6 +127,7 @@ export class UserManagementLogs {
   private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly location = inject(Location);
   private readonly fileDownload = inject(FileDownloadBehaviour);
+  private readonly errorText = inject(ErrorTextBehaviour);
   private readonly table = viewChild.required<Table<AuditEntryRow, object>>(Table);
 
   protected readonly ButtonAppearance = ButtonAppearance;
@@ -133,7 +135,14 @@ export class UserManagementLogs {
   protected readonly loadFailed = signal(false);
   protected readonly isExporting = signal(false);
   protected readonly isPrinting = signal(false);
-  protected readonly isNotImplementedShown = signal(false);
+  private readonly downloadError = signal<ApiProblem | null>(null);
+  protected readonly downloadErrorMessage = toSignal(
+    toObservable(this.downloadError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
+  protected readonly isDownloadErrorShown = signal(false);
   protected readonly params = computed<object | null>(() =>
     this.auth.user()?.propertyId ? {} : null,
   );
@@ -249,7 +258,6 @@ export class UserManagementLogs {
     {
       initialValue: {
         booking_number: '',
-        user_number: '',
         full_name: '',
         spot: '',
         action: '',
@@ -259,7 +267,6 @@ export class UserManagementLogs {
   );
   protected readonly columns = computed<readonly TableColumn<AuditEntryRow>[]>(() => [
     { field: 'bookingNumber', header: this.headers().booking_number, sortable: true },
-    { field: 'userNumber', header: this.headers().user_number, sortable: true },
     { field: 'actorName', header: this.headers().full_name, sortable: true },
     { field: 'spotLabel', header: this.headers().spot, sortable: true },
     { field: 'actionCode', header: this.headers().action, width: 24, sortable: true },
@@ -368,8 +375,9 @@ export class UserManagementLogs {
     try {
       const file = await firstValueFrom(call({ search, filters, sortField, sortDirection }));
       this.fileDownload.save(file, fallbackName);
-    } catch {
-      this.isNotImplementedShown.set(true);
+    } catch (error: unknown) {
+      this.downloadError.set(toApiProblem(error));
+      this.isDownloadErrorShown.set(true);
     } finally {
       isRunning.set(false);
     }

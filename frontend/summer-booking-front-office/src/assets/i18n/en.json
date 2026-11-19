@@ -142,7 +142,9 @@
       "period_outside_season": "The period dates must be within the season.",
       "period_range_not_found": "The date range is no longer there: it may already have been deleted.",
       "period_ranges_required": "A period needs at least one date range. To delete it completely, use the bin next to its name.",
-      "period_in_use": "The period has prices in the price lists {{priceLists}}: first remove its prices from these price lists, then delete it."
+      "period_in_use": "The period has prices in the price lists {{priceLists}}: first remove its prices from these price lists, then delete it.",
+      "period_in_use_by_services": "The period is used by the services {{services}}: first remove its prices from these services, then delete it.",
+      "period_overlap": "The dates overlap the period {{periodName}}: choose days that are not already in another period."
     }
   },
   "alert": {
@@ -943,7 +945,6 @@
           },
           "table": {
             "booking_number": "Booking ID",
-            "user_number": "User ID",
             "full_name": "Full name",
             "spot": "Spot",
             "action": "Action",
@@ -1101,7 +1102,6 @@
               "marked_not_done": "Order marked as not fulfilled"
             }
           },
-          "not_implemented": "The service is not implemented yet",
           "clear_filters": "Clear filters",
           "filters_popup": {
             "title": "Filters",

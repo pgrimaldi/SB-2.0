@@ -57,6 +57,8 @@ export enum ApiErrorCode {
   PricingPeriodRangeNotFound = 'pricing.period_range_not_found',
   PricingPeriodRangesRequired = 'pricing.period_ranges_required',
   PricingPeriodInUse = 'pricing.period_in_use',
+  PricingPeriodInUseByServices = 'pricing.period_in_use_by_services',
+  PricingPeriodOverlap = 'pricing.period_overlap',
 }
 
 export const API_ERROR_CODES: readonly ApiErrorCode[] = Object.values(ApiErrorCode);

@@ -49,6 +49,8 @@ Valgono per tutte e sei le API.
 - **Permessi**: le GET come `GET /property-info` (`CatalogRead`), i salvataggi come `PUT /property-info`
   (`CatalogSettings`). Senza permesso: 403 `auth.forbidden`.
 - **JSON** in camelCase, con i nomi esatti di questo documento. Gli enum viaggiano con il nome .NET (es. `OnRequest`).
+  `categoryCode` dei servizi (API 3) non è un enum .NET: è un codice di testo in snake_case (es. `accessibility_comfort`)
+  e va mandato così.
 - **Salvataggi**: rispondono 204 senza corpo e salvano **solo i campi della loro tab**; il resto della scheda resta
   com'è. Non vanno fatti richiamando `PUT /property-info`, che sostituisce tutta la scheda.
 - **Errori** nel formato Problem Details del backend, con `code`. Gli errori di validazione sono 400
@@ -99,9 +101,9 @@ Da dove vengono i campi, rispetto a `PropertyInfoDto`:
 | `postalCode` | `cap` | |
 | `country` | `countryCode` | Codice ISO 3166-1 alpha-2 (es. `IT`). |
 | `phone`, `whatsapp`, `email`, `website`, `facebook`, `instagram` | stessi nomi | |
-| `description`, `regulation` | stessi nomi | HTML con solo `<p>`, `<br>`, `<strong>`, `<em>`, `<u>`, `<ul>`, `<ol>`, `<li>` e `<a href>`. |
+| `description`, `regulation` | stessi nomi | HTML con solo `<p>`, `<br>`, `<strong>`, `<em>`, `<u>`, `<ul>`, `<ol>`, `<li>` e `<a>`. Ogni `<a>` ha `href` (mai `javascript:`), `target="_blank"` e `rel="noopener noreferrer nofollow"`, che l'editor aggiunge sempre: il backend li deve accettare. |
 | `openingTime`, `closingTime` | `openHoursFrom`, `openHoursTo` | Formato `HH:mm`, senza secondi (es. `"08:30"`). |
-| `isFreeCancellation`, `cancellationNoticeHours` | stessi nomi | Il frontend usa solo `true` con 48 o 24 ore, oppure `false` con `null`. `isFreeCancellation` mai `null`. |
+| `isFreeCancellation`, `cancellationNoticeHours` | stessi nomi | La tendina sceglie `true` con 48 o 24 ore, oppure `false` con `null`. Una combinazione diversa letta dalla API 1 (es. `true` con 72 ore) lascia la tendina vuota e il salvataggio la rimanda così com'è. `isFreeCancellation` mai `null`. |
 | `petPolicy` | `petsPolicy` | `Allowed`, `NotAllowed`, `OnRequest` (al posto di `allowed`, `not_allowed`, `on_request`); mai `null`. |
 
 Non ci sono: `slug`, `latitude`, `longitude`, `virtualTourUrl`, `mainPhotoUrl`, `photos`, `menuPdf`, `priceListPdf` e
@@ -171,7 +173,7 @@ Bottone "Salva" della tab Informazioni Generali.
 | `description`, `regulation` | `validation.max_length` (`args.max` = 20000) | HTML più lungo di 20.000 caratteri. |
 | `phone`, `whatsapp` | `validation.max_length` (`args.max` = 32) | Più di 32 caratteri. |
 | `phone`, `whatsapp` | `validation.phone` | Caratteri diversi da cifre e spazi. |
-| `country` | `validation.length` (`args.min` = `args.max` = 2) | Non è un codice di 2 lettere. |
+| `country` | `validation.invalid` | Non è un codice di 2 lettere (regola `Length(2)` di oggi: FluentValidation dà `ExactLengthValidator`, che `ValidatorExtensions` traduce in `validation.invalid`). |
 | `closingTime` | `validation.out_of_range` | Con tutti e due gli orari, `closingTime` non è dopo `openingTime`. |
 | `cancellationNoticeHours` | `validation.invalid` | Non `null` con `isFreeCancellation` = `false`. |
 | `cancellationNoticeHours` | `validation.out_of_range` (`args.from` = 1, `args.to` = 720) | Fuori da 1-720. |
@@ -207,7 +209,7 @@ Tab Servizi: il frontend la chiama la prima volta che si apre la tab e mostra un
     "idService": 14,
     "name": "Accesso disabili",
     "categoryCode": "accessibility_comfort",
-    "iconUrl": "/media/icons/accesso-disabili.svg",
+    "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
     "isSelected": true
   },
   {
@@ -225,7 +227,7 @@ Tab Servizi: il frontend la chiama la prima volta che si apre la tab e mostra un
 | `idService` | `catalog.service_amenities.id` (es. 14 per "Accesso disabili" nel database locale). Il frontend riconosce i servizi da questo id. |
 | `name` | Il nome del servizio nella lingua della richiesta (traduzioni della dotazione). |
 | `categoryCode` | La **sezione della pagina** in cui va il servizio: `accessibility_comfort`, `sport_activities`, `food_extra` o `beach`. Non sono le categorie di `GET /lookups/amenity-categories`: vedi "Sezione e ordine dei servizi". Mai `null`. |
-| `iconUrl` | Link dell'icona del servizio; `null` se non c'è. |
+| `iconUrl` | Link completo **https** dell'icona del servizio, costruito come i link dei file (`PublicFileUrlResolver`, vedi API 5); `null` se non c'è. |
 | `isSelected` | `true` se lo stabilimento offre il servizio (è tra le `amenityCodes` della scheda). |
 
 ### Sezione e ordine dei servizi
@@ -323,7 +325,7 @@ Bottone "Salva" della tab Servizi.
       "idService": 14,
       "name": "Accesso disabili",
       "categoryCode": "accessibility_comfort",
-      "iconUrl": "/media/icons/accesso-disabili.svg",
+      "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
       "isSelected": true
     }
   ]

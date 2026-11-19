@@ -26,7 +26,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 - Lettura: `GET /api/catalog/season` (`SeasonService.seasonDates`), all'apertura e al cambio lingua. `SeasonDates` ha i
   nomi del backend `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` e date senza ora (`2026-05-01`), che
   `SeasonService` converte a mezzanotte UTC per la pagina.
-  - 204 = stagione non impostata, quattro date vuote; la prossima stagione può essere null.
+  - 204 = stagione non impostata: nessuna data dal backend (i primi giorni li sceglie la pagina, vedi sotto); la
+    prossima stagione può essere null.
   - I confini della stagione sono quelli della tabella `catalog.pricing_seasons` del backend.
   - Se la lettura fallisce, il messaggio del `code` compare sotto le due righe, sopra il bottone.
 - Se `catalog/season` non manda un "Dal", al caricamento diventa l'1 gennaio dell'anno in corso (stagione corrente)
@@ -136,8 +137,9 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   `pricing.period_in_use` con i nomi dei listini e il popup dice "Il periodo ha dei prezzi nei listini …: togli prima
   i suoi prezzi da questi listini, poi eliminalo.".
 - Il controllo sui servizi che usano il periodo è chiesto al backend (sezione 3 del documento di richieste della
-  pagina), con il codice `pricing.period_in_use_by_services` (`args.services`): il codice non è ancora in
-  `ApiErrorCode` né nelle traduzioni, quindi l'avviso mostrerebbe il testo generico (`error.unknown`).
+  pagina): un periodo usato da servizi risponde `pricing.period_in_use_by_services` con i loro nomi (`args.services`)
+  e il popup dice "Il periodo è usato dai servizi …: togli prima i suoi prezzi da questi servizi, poi eliminalo.". I
+  mock lo simulano con i servizi che hanno prezzi o disponibilità sul periodo (`servicesUsingPeriod`).
 - Subito a destra del nome (`appExpansionPanelTitleAside`) una matita (tooltip "Modifica") e un "+"
   (`Seasons_AddInterval.svg`, il + sottile di Aggiungi nuova regola nell'azzurro di matita e cestino, tooltip
   "Aggiungi intervallo").
@@ -203,8 +205,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 - Il backend controlla le sovrapposizioni solo dentro lo stesso periodo (`SaveTariffPeriodRequestValidator`, per le
   due stagioni; nel database il vincolo `ex_catalog_pricing_tariff_periods_no_overlap`, solo per la stagione
   corrente): quelle tra periodi diversi le impedisce solo il frontend. Il controllo è chiesto al backend (sezioni 4 e 5
-  del documento di richieste della pagina), con il codice `pricing.period_overlap` (`args.periodName`), che non è
-  ancora in `ApiErrorCode` né nelle traduzioni.
+  del documento di richieste della pagina), con il codice `pricing.period_overlap` (`args.periodName`), che il popup
+  mostra sopra i bottoni ("Le date si sovrappongono al periodo …"); i mock lo simulano.
 - Di solito il messaggio non compare, perché i giorni presi sono grigi (`disabledPeriods`):
   - in Imposta periodo `app-period-calendar` riceve gli intervalli della stagione e quelli già scelti nel popup e,
     dopo il primo clic, mette in grigio anche i giorni dal prossimo intervallo preso in poi;

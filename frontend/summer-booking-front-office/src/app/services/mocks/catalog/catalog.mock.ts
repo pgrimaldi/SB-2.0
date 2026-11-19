@@ -802,11 +802,7 @@ export const saveBathhouseConfigurationGeneralMock = (
   }
   errors.push(...phoneErrors('phone', body.phone), ...phoneErrors('whatsapp', body.whatsapp));
   if (typeof body.country === 'string' && body.country.length !== COUNTRY_CODE_LENGTH) {
-    errors.push({
-      field: 'country',
-      code: ApiErrorCode.ValidationLength,
-      args: { min: COUNTRY_CODE_LENGTH, max: COUNTRY_CODE_LENGTH },
-    });
+    errors.push({ field: 'country', code: ApiErrorCode.ValidationInvalid });
   }
   const hours = body.cancellationNoticeHours;
   if (!body.isFreeCancellation && hours !== null && hours !== undefined) {
@@ -1708,7 +1704,7 @@ const STANDARD_SERVICE_DETAILS = new Map<string, StandardServiceAddItemRequest>(
       price: 3,
       vatRate: 22,
       isPeriodPricingEnabled: true,
-      periodPrices: [{ idPeriod: 0, price: 2.5 }],
+      periodPrices: [{ idPeriod: 1, price: 2.5 }],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
         {
@@ -2110,6 +2106,31 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
     }),
   ],
 ]);
+
+/**
+ * The services of the property with prices (bar and standard) or availabilities (hourly) for the
+ * period `key` of the current season, each name once: what the backend checks before deleting a
+ * period.
+ */
+export function servicesUsingPeriod(key: number): string[] {
+  const usesPeriod = (periods: readonly { idPeriod: number | null }[]): boolean =>
+    periods.some(({ idPeriod }) => idPeriod === key);
+  const names = [
+    ...BAR_SERVICES.filter((row) => {
+      const details = detailsOf(row);
+      return details.isPeriodPricingEnabled && usesPeriod(details.periodPrices);
+    }).map(({ serviceName }) => serviceName),
+    ...STANDARD_SERVICES.filter((row) => {
+      const details = standardDetailsOf(row);
+      return details.isPeriodPricingEnabled && usesPeriod(details.periodPrices);
+    }).map(({ serviceName }) => serviceName),
+    ...HOURLY_SERVICES.filter((row) => {
+      const details = hourlyDetailsOf(row);
+      return details.isPeriodPricingEnabled && usesPeriod(details.periodAvailabilities);
+    }).map(({ serviceName }) => serviceName),
+  ];
+  return [...new Set(names.filter((name): name is string => !!name))];
+}
 
 function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
   return (

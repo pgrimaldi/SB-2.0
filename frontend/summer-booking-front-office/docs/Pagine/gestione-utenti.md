@@ -89,7 +89,7 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   utenti.
 - `app-table` con, sotto il titolo, la tendina delle date, "Filtri", la ricerca ed "Esporta" e "Stampa" in fondo alla
   riga.
-- Colonne, tutte ordinabili: ID prenotazione, ID utente, Nome completo, Postazione, Azione e Data e ora (ora locale).
+- Colonne, tutte ordinabili: ID prenotazione, Nome completo, Postazione, Azione e Data e ora (ora locale).
   Azione è il codice del backend tradotto con `management.settings.user_management.logs.actions.<modulo>.<azione>`, o il
   codice stesso se manca la traduzione.
 
@@ -146,9 +146,8 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   sul bottone e l'altro spento.
 - Il file ricevuto si salva con `FileDownloadBehaviour` (nome da `Content-Disposition`, di riserva `log` / `log-print`).
   Aprire la stampa del browser richiederebbe `blob:` in `frame-src` della CSP.
-- Qualunque errore mostra in "Operazione non riuscita" il testo fisso "Il servizio non è ancora implementato"
-  (`management.settings.user_management.logs.not_implemented`), anche 422 `audit.export_too_large`, che ha già il suo
-  testo in `error.`: da riportare al messaggio del codice d'errore quando il backend avrà le API. Le due API non hanno
+- Un errore mostra in "Operazione non riuscita" il messaggio del suo codice (`ErrorTextBehaviour`, testi `error.`),
+  es. 422 `audit.export_too_large` con il numero di voci (`args.total`) e il massimo (`args.max`). Le due API non hanno
   mock.
 
 ## API
