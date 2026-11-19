@@ -170,6 +170,8 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
   private readonly pristine = signal(newDraft());
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  /** Prices read for periods the tab does not show (e.g. of no current period): sent back as read. */
+  private readonly hiddenPeriodPrices = signal<readonly ServicePeriodPrice[]>([]);
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
@@ -383,6 +385,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         Object.assign(new StandardServiceUpdatePricesRequest(), {
           idStandardService,
           ...pick(draft, tab),
+          periodPrices: [...draft.periodPrices, ...this.hiddenPeriodPrices()],
         }),
       );
     }
@@ -403,6 +406,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.isEditing.set(false);
     this.isSaving.set(false);
     this.draft.set(newDraft());
+    this.hiddenPeriodPrices.set([]);
     this.pristine.set(newDraft());
     this.draftForm().reset();
     this.periods.set([]);
@@ -434,6 +438,7 @@ export class GeneralServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     periods: readonly SeasonPeriodItem[],
   ): void {
     this.periods.set(periods);
+    this.hiddenPeriodPrices.set(hiddenOf(prices.periodPrices, periods));
     this.applyLoaded({
       price: prices.price,
       vatRate: prices.vatRate,
@@ -499,6 +504,14 @@ function newDraft(): StandardServiceAddItemRequest {
 }
 
 /** The values of the fields of one tab. */
+/** The rows read for a period the tab does not show. */
+function hiddenOf<T extends { idPeriod: number | null }>(
+  rows: readonly T[],
+  periods: readonly SeasonPeriodItem[],
+): T[] {
+  const idPeriods = new Set(periods.map(({ key }) => key));
+  return rows.filter(({ idPeriod }) => idPeriod === null || !idPeriods.has(idPeriod));
+}
 function pick(
   values: StandardServiceAddItemRequest,
   tab: PanelTab,

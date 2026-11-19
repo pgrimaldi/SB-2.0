@@ -142,7 +142,9 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    this.isEditing.set(true);
+    if (this.settings()) {
+      this.isEditing.set(true);
+    }
   }
 
   protected chooseSlot(slot: number): void {
@@ -228,7 +230,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected save(): void {
     const slot = this.chosenSlot();
     const name = slot === null ? null : BACKGROUND_SLOTS[slot];
-    if (this.isBusy()) {
+    if (this.isBusy() || !this.settings()) {
       return;
     }
     this.clearErrors();

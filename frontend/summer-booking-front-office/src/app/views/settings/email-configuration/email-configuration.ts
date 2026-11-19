@@ -127,7 +127,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     );
   });
   /** The last reading arrived: nothing can be changed before the values of the server are there. */
-  private readonly loaded = signal(false);
+  protected readonly loaded = signal(false);
   protected readonly configurationForm = form(this.configuration, (path) => {
     // Read-only also while a call runs: a reading would overwrite what is typed meanwhile, and Salva
     // or the test email have already sent the values (rule: nothing changes until the server answers).
@@ -270,7 +270,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
     call: (request: EmailConfigurationRequest) => Observable<void>,
     done: (sent: EmailConfigurationRequest) => void,
   ): void {
-    if (this.isBusy() || !this.auth.user()?.propertyId) {
+    if (this.isBusy() || !this.loaded() || !this.auth.user()?.propertyId) {
       return;
     }
     void submit(this.configurationForm, async (): Promise<TreeValidationResult> => {

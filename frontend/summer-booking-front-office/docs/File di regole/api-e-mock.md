@@ -66,6 +66,27 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   API nel documento di richieste della pagina (`shared documentation/Modifiche per il backend/`).
 - Le API usate così come sono stanno nella sezione "API esistenti usate così come sono" dello stesso documento.
 
+## Documenti delle richieste al backend
+
+- Ogni documento `<Pagina> - Frontend requests.md` è **comprovato dal codice**: ogni frase su cosa fa oggi il backend
+  corrisponde al suo codice (classi e metodi citati), e ogni frase su cosa manda, si aspetta o mostra il frontend
+  corrisponde al codice del frontend. Prima di dichiararlo finito si verifica sul codice, mai a memoria.
+- È scritto **per un agente che lavora sul backend**, che deve poterlo eseguire senza sbagliare: per ogni API rotta,
+  metodo, permesso, corpo e risposta con tipi e nullabilità, validazioni con `code`, `field` e `args`, ordine dei
+  controlli, modifiche al database con la migration, effetti (registro, sessioni), e una sezione Verifica con prove
+  concrete. Niente alternative lasciate aperte, frasi vaghe o contraddizioni tra sezioni.
+- All'utente si chiede solo ciò che cambia quello che il frontend manda, riceve o mostra. Le scelte interne del
+  backend (dove salvare un dato, indici, valori di default delle colonne, blocchi, caricamento dei dati iniziali) le
+  decide lo sviluppatore backend: il documento lo scrive in modo esplicito ("lo decide lo sviluppatore backend: l'agente
+  glielo chiede prima di scrivere codice"), tenendo fisso il contratto dell'API.
+- Un'API di salvataggio chiesta al backend riceve tutto il modello letto, con le modifiche dell'utente, e non tocca mai
+  dati che mancano dal corpo o che la pagina non mostra (es. il salvataggio dei servizi di Informazioni stabilimento
+  riceve tutti i servizi con `isSelected` vero o falso; le altre dotazioni restano): vedi "Mai salvare sopra dati non
+  letti" in `form-e-validazioni.md`.
+- I documenti del collega backend (`shared documentation/backend/` e tutto quello che sta in `backend/`) non si
+  modificano mai: si leggono soltanto. Nostri sono i documenti del frontend, quelli delle API che generiamo e i
+  documenti delle richieste.
+
 ## Date, orari e header
 
 - Date verso e dal server sempre in ISO 8601 UTC.

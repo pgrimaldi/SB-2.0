@@ -215,7 +215,9 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    this.isEditing.set(true);
+    if (this.settings()) {
+      this.isEditing.set(true);
+    }
   }
 
   protected chosenIconUrl(article: number | null, isOccupied: boolean): string | null {
@@ -283,7 +285,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
 
   /** Nothing changed: no call. Through submit(): an error of the backend on a field goes under it. */
   protected save(): void {
-    if (!this.canSave()) {
+    if (!this.canSave() || !this.settings()) {
       return;
     }
     this.error.set(null);

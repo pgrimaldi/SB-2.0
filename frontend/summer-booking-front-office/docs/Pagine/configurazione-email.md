@@ -46,6 +46,9 @@ Rotta `/settings/email-configuration`, vista `views/settings/email-configuration
 
 - "Reset" rifà la GET e riscrive tutti i campi (ciò che era stato scritto si perde), con lo spinner sul bottone, e
   rimette la pagina in sola lettura con "Sì" di nuovo premibile.
+- "Salva" e "Invia email test" restano spenti finché la lettura della configurazione non è riuscita, anche dopo un
+  Reset la cui rilettura fallisce (`loaded`), e nel codice non partono senza i dati letti: mai una configurazione
+  vuota al posto di quella salvata.
 - "Invia email test" manda i valori presenti nei campi, anche non salvati, con lo spinner. Se riesce compare
   `app-message-popup` "Email di test inviata".
 - "Salva" manda gli stessi valori, con lo stesso corpo, con lo spinner. Se riesce compare `app-message-popup`

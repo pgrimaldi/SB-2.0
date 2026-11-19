@@ -50,9 +50,10 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   orari "Alle" deve venire dopo "Dalle" (uguale non va), come vuole il backend.
 - Descrizione e Regolamento: `app-rich-text-field` (grassetto, corsivo, sottolineato, elenco puntato e numerato, link),
   alte 6.25rem (`--rich-text-field-height`) con lo scorrimento interno. Al massimo 5000 caratteri visibili,
-  formattazione esclusa (`MAX_BATHHOUSE_RICH_TEXT_LENGTH`, `maxRichTextLength`), più stretto dei 20.000 caratteri di
-  HTML del backend; oltre il limite l'errore va sotto il campo e Salva si spegne. Icone provvisorie
-  `GeneralIcon_Bold.svg` … `GeneralIcon_TextLink.svg`, in attesa di quelle della grafica.
+  formattazione esclusa (`MAX_BATHHOUSE_RICH_TEXT_LENGTH`, `maxRichTextLength`): oltre il limite l'errore va sotto il
+  campo e Salva si spegne. Il backend conta invece l'HTML (al massimo 20.000 caratteri): con molta formattazione il
+  suo `validation.max_length` può arrivare e va sotto il campo. Icone provvisorie `GeneralIcon_Bold.svg` …
+  `GeneralIcon_TextLink.svg`, in attesa di quelle della grafica.
 - Cancellazione: tendina con le scelte dell'enum `CancellationPolicy` (Gratuita entro 48 ore, Gratuita entro 24 ore,
   Nessuna). L'API usa invece `isFreeCancellation` e `cancellationNoticeHours`, come il backend, e la tab converte: la
   tendina usa `[value]` / `(valueChange)` e non `[formField]`; ore diverse lette dal backend lasciano la tendina vuota.
@@ -87,8 +88,9 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Ogni servizio va nella sezione del suo `categoryCode`, nell'ordine della risposta. Sezione e ordine li decide il
   backend: il frontend non ha tabelle di id. Una sezione senza servizi non compare; un servizio con un altro
   `categoryCode` non si vede e al salvataggio resta com'è.
-- Modifica sblocca le caselle; Salva, sempre attivo, manda i soli servizi spuntati (`services`), ognuno con tutti i
-  suoi campi. Gli errori del salvataggio compaiono in fondo alla tab.
+- Modifica sblocca le caselle; Salva, sempre attivo, manda tutti i servizi letti (`services`), ognuno con tutti i
+  suoi campi e `isSelected` vero o falso come l'ha lasciato l'utente. Gli errori del salvataggio compaiono in fondo
+  alla tab.
 - Una modifica non salvata è un servizio spuntato o tolto rispetto a quelli letti.
 
 ## Tab 3 – Media
@@ -120,8 +122,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
   sicuro resta al suo posto senza anteprima (icona delle immagini) ma con la X: conta nei 30 posti e si può cancellare.
   L'immagine principale o un PDF con il link vuoto o non sicuro si vedono come assenti, senza X: si sostituiscono
   caricandone un altro.
-- La CSP pubblicata (`docs/README_DEPLOY.md`) accetta immagini solo dal nostro dominio, da Google e `data:`: le foto su
-  un altro dominio richiedono quel dominio in `img-src` (vedi `docs/SECURITY_TODO.md`).
+- La CSP pubblicata (`docs/README_DEPLOY.md`) accetta immagini solo dal nostro dominio, da Google e `data:`: le foto e
+  le icone dei servizi su un altro dominio richiedono quel dominio in `img-src` (vedi `docs/SECURITY_TODO.md`).
 - Modifica, Annulla e Salva valgono per il link del tour virtuale e per la posizione: form Signal Forms su
   `BathhouseMediaRequest` (`webLink` sul link: completo, http o https; Salva spento finché non è valido). Il link ha al
   massimo 500 caratteri, come il backend e il database (`MAX_VIRTUAL_TOUR_URL_LENGTH`, `MAX_LENGTH`: il campo non
@@ -155,8 +157,8 @@ l'utente autenticato.
   (`catalog.countries.sort_order`, poi il codice).
 - `POST /api/catalog/property-info/save-bathhouse-configuration-general`: Salva della tab 1, con tutti i campi.
 - `GET /api/catalog/property-info/bathhouse-configuration-services`: i servizi della tab 2 (`BathhouseServiceItem[]`).
-- `POST /api/catalog/property-info/save-bathhouse-configuration-services`: Salva della tab 2, `{ services }` con i soli
-  servizi spuntati.
+- `POST /api/catalog/property-info/save-bathhouse-configuration-services`: Salva della tab 2, `{ services }` con tutti i
+  servizi letti, ognuno con `isSelected`.
 - `GET /api/catalog/property-info/bathhouse-configuration-media`: i media della tab 3 (`BathhouseMedia`).
 - `POST /api/catalog/property-info/save-bathhouse-configuration-media`: Salva della tab 3 (`BathhouseMediaRequest`).
 - `POST` / `DELETE /api/catalog/property-info/main-photo`: immagine principale.

@@ -105,6 +105,12 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   di partenza al posto di quelli veri.
 - Vale per ogni form di modifica, pagine, tab, pannelli e popup, anche futuri. Prima di consegnare un form di creazione
   o modifica si controlla che cosa parte quando la lettura fallisce.
+- Vale anche per le API di salvataggio chieste al backend: cambiano solo i dati che la pagina ha letto e mostrato, mai
+  quelli che l'utente non ha visto.
+- Salva rimanda **sempre tutto il modello letto** dal backend: i campi e le voci che l'utente ha cambiato con il nuovo
+  valore, tutti gli altri com'erano. Mai solo i campi cambiati, mai solo le voci selezionate di una lista (es. la tab
+  Servizi rimanda tutti i servizi letti, ognuno con `isSelected` vero o falso), mai un corpo a cui manca qualcosa che il
+  backend potrebbe cancellare. Vale per pagine, tab, pannelli e popup, anche futuri.
 
 ## Modifiche non salvate
 

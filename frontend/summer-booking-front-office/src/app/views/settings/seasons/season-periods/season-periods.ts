@@ -133,6 +133,8 @@ export class SeasonPeriods {
   private readonly selectedIntervals = signal<ReadonlySet<SeasonPeriodInterval>>(new Set());
   protected readonly selectedTotal = computed(() => this.selectedIntervals().size);
   protected readonly periodItems = signal<SeasonPeriodItem[] | null>(null);
+  /** The list was read: while it is read again, or if that fails, nothing starts from it. */
+  protected readonly isLoaded = signal(false);
   protected readonly periods = computed<SeasonPeriodRow[] | null>(() => {
     const items = this.periodItems();
     if (!items) {
@@ -182,10 +184,12 @@ export class SeasonPeriods {
       }
       const subscription = untracked(() => {
         this.error.set(null);
+        this.isLoaded.set(false);
         return this.seasons.periodList(this.isNextSeason).subscribe({
           next: (items) => {
             this.selectedIntervals.set(new Set());
             this.periodItems.set(items);
+            this.isLoaded.set(true);
           },
           error: (error: unknown) => this.error.set(toApiProblem(error)),
         });
@@ -201,20 +205,32 @@ export class SeasonPeriods {
     this.seasons.deleteRanges(this.isNextSeason, intervals);
 
   protected askDelete(period: SeasonPeriodRow): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.periodToDelete.set(period);
     this.isDeleteAsked.set(true);
   }
 
   protected askDeleteInterval(interval: SeasonIntervalRow): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.askDeleteIntervals(new Set([interval.item]), `${interval.startsOn} – ${interval.endsOn}`);
   }
 
   protected editPeriod(period: SeasonPeriodRow): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.periodToEdit.set(period.item);
     this.isEditPeriodOpen.set(true);
   }
 
   protected addInterval(period: SeasonPeriodRow): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     if (period.item.ranges.length >= MAX_SEASON_PERIOD_RANGES) {
       this.isPeriodFull.set(true);
       return;
@@ -224,12 +240,18 @@ export class SeasonPeriods {
   }
 
   protected editInterval(period: SeasonPeriodRow, interval: SeasonIntervalRow): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.periodOfInterval.set(period.item);
     this.intervalToEdit.set(interval.item);
     this.isEditIntervalOpen.set(true);
   }
 
   protected askDeleteSelected(): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.askDeleteIntervals(this.selectedIntervals(), null);
   }
 

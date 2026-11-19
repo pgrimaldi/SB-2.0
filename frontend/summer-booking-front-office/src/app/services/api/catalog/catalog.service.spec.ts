@@ -249,7 +249,8 @@ describe('CatalogService', () => {
       unexpectedFlag: 'extra-field',
     });
 
-    catalog.saveBathhouseConfigurationServices([service]).subscribe();
+    const notOffered = Object.assign(new BathhouseServiceItem(), { idService: 7, name: 'Wifi' });
+    catalog.saveBathhouseConfigurationServices([service, notOffered]).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -258,7 +259,10 @@ describe('CatalogService', () => {
           `${environment.apiBaseUrl}/catalog/property-info/save-bathhouse-configuration-services`,
     ).request;
     expect(request.body).toEqual({
-      services: [{ ...new BathhouseServiceItem(), idService: 3, name: 'Doccia', isSelected: true }],
+      services: [
+        { ...new BathhouseServiceItem(), idService: 3, name: 'Doccia', isSelected: true },
+        { ...new BathhouseServiceItem(), idService: 7, name: 'Wifi', isSelected: false },
+      ],
     });
     controller.verify();
   });

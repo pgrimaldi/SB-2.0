@@ -268,7 +268,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    if (this.isSaving()) {
+    if (this.isSaving() || !this.isLoaded()) {
       return;
     }
     void submit(this.informationForm, async (): Promise<TreeValidationResult> => {

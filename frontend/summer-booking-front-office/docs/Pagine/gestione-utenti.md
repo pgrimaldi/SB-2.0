@@ -145,7 +145,7 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   `search`, `filters`, `sortField`, `sortDirection`, presi da `table.currentRequest()`, senza pagina), con lo spinner
   sul bottone e l'altro spento.
 - Il file ricevuto si salva con `FileDownloadBehaviour` (nome da `Content-Disposition`, di riserva `log` / `log-print`).
-  Aprire la stampa del browser richiederebbe `blob:` in `frame-src` della CSP.
+  Stampa ed Esporta ricevono lo stesso file Excel (`xlsx`), che l'utente stampa dal suo programma.
 - Un errore mostra in "Operazione non riuscita" il messaggio del suo codice (`ErrorTextBehaviour`, testi `error.`),
   es. 422 `audit.export_too_large` con il numero di voci (`args.total`) e il massimo (`args.max`). Le due API non hanno
   mock.

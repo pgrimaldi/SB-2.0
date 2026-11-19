@@ -81,8 +81,8 @@ export class CatalogService {
     );
 
   /**
-   * Every service of the catalogue, with the name in the language of the request (Accept-Language)
-   * and whether the property offers it.
+   * The services of the catalogue the page shows (active, with a section), with the name in the
+   * language of the request (Accept-Language) and whether the property offers it.
    */
   readonly bathhouseConfigurationServices = (): Observable<BathhouseServiceItem[]> =>
     this.httpClient.get<BathhouseServiceItem[]>(
@@ -142,7 +142,7 @@ export class CatalogService {
       onlyFieldsOf(BathhouseGeneralInformation, information),
     );
 
-  /** Only the services the property offers. Answers 204 with no body. */
+  /** Every service read, each with `isSelected` as the user left it. Answers 204 with no body. */
   readonly saveBathhouseConfigurationServices = (
     services: readonly BathhouseServiceItem[],
   ): Observable<void> =>

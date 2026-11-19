@@ -166,6 +166,9 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected startEdit(): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
   }
@@ -182,7 +185,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
 
   protected save(): void {
     const idAdditionalItem = this.idAdditionalItem();
-    if (this.isSaving() || !this.auth.user()?.propertyId || !idAdditionalItem) {
+    if (this.isSaving() || !this.isLoaded() || !this.auth.user()?.propertyId || !idAdditionalItem) {
       return;
     }
 

@@ -724,7 +724,7 @@ export const bathhouseConfigurationGeneralMock = (
 };
 
 /**
- * `GET /api/catalog/property-info/bathhouse-configuration-services`: every service of the catalogue, in the order
+ * `GET /api/catalog/property-info/bathhouse-configuration-services`: the services of the catalogue the page shows, in the order
  * of the categories and then of the services, with the name in the language of `Accept-Language`;
  * offered by the property of the token as last saved, none at the start. 401 without a valid access
  * token.
@@ -856,10 +856,12 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
 }
 
 /**
- * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, the services the
- * property of the token offers: keeps them (until the page is reloaded), a repeated one once. 204
- * without a body; 400 without `services` (never read as `[]`) or with more than 200; 404 for a
- * service that does not exist; 401 without a valid access token.
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, every
+ * service the tab read, each with `isSelected`: a service is offered or not as its `isSelected` says,
+ * a service not in the list stays as it was (until the page is reloaded). 204 without a body; 400
+ * without `services` (never read as `[]`), with more than 200, with an `isSelected` that is not
+ * true or false or with a repeated `idService`; 404 for a service that does not exist; 401 without a
+ * valid access token.
  */
 export const saveBathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -880,11 +882,34 @@ export const saveBathhouseConfigurationServicesMock = (
       errors: [{ field: 'services', code: ApiErrorCode.ValidationInvalid }],
     });
   }
-  const idServices = (body.services as BathhouseServiceItem[]).map(({ idService }) => idService);
-  if (!idServices.every(isServiceId)) {
+  const services = body.services as (BathhouseServiceItem | null)[];
+  if (!services.every((service) => isServiceId(service?.idService))) {
     return resourceNotFound(request);
   }
-  idOfferedServices = new Set(idServices);
+  const errors: MockFieldError[] = services.flatMap((service, index) =>
+    typeof service?.isSelected === 'boolean'
+      ? []
+      : [{ field: `services[${index}].isSelected`, code: ApiErrorCode.ValidationRequired }],
+  );
+  const idServices = services.map((service) => service?.idService);
+  if (new Set(idServices).size !== idServices.length) {
+    errors.push({ field: 'services', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      title: 'Invalid request',
+      errors,
+    });
+  }
+  const offered = new Set(idOfferedServices);
+  for (const { idService, isSelected } of services as BathhouseServiceItem[]) {
+    if (isSelected) {
+      offered.add(idService as number);
+    } else {
+      offered.delete(idService as number);
+    }
+  }
+  idOfferedServices = offered;
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 

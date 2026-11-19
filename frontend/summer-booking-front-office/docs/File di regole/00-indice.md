@@ -41,7 +41,7 @@ Leggi i file della riga che corrisponde alla richiesta (anche più righe se la r
 | Wrapper, elementi grafici, popup, bottoni, titoli, icone dei componenti | `componenti-e-wrapper.md` |
 | Form, popup con campi, validazioni, messaggi di errore dei campi, Salva/Annulla, date Dal/Al, orari Dalle/Alle, spinner | `form-e-validazioni.md` |
 | Tabelle, elenchi, paginazione, filtri, ordinamento, ricerca, azioni di riga | `tabelle.md` e `api-e-mock.md` |
-| API, chiamate al backend, mock, contratti, combobox, caricamento di file, codici di errore, download | `api-e-mock.md` |
+| API, chiamate al backend, mock, contratti, documenti delle richieste al backend, combobox, caricamento di file, codici di errore, download | `api-e-mock.md` |
 | Traduzioni, lingue, arabo/RTL, testi, date e numeri mostrati | `traduzioni-e-lingue.md` |
 | Stili, SCSS, layout, misure, responsive, risoluzioni, mockup della grafica | `html-scss-e-layout.md` |
 | Immagini, icone, font, asset, bandiere | `asset-e-icone.md` |

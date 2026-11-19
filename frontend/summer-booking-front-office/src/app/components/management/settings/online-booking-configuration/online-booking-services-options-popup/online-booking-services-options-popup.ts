@@ -97,6 +97,8 @@ export class OnlineBookingServicesOptionsPopup
 
   private readonly draft = signal(new OnlineBookingServicesOptions());
   private loaded: OnlineBookingServicesOptions | null = null;
+  /** Whether a supplement was chosen: only a change to none by the user empties its value. */
+  private hadSupplement: boolean | null = null;
   protected readonly draftForm = form(this.draft, (path) => {
     applyWhen(
       path.supplementValue,
@@ -159,9 +161,13 @@ export class OnlineBookingServicesOptionsPopup
       onCleanup(() => subscription?.unsubscribe());
     });
     effect(() => {
-      if (!this.hasSupplement()) {
-        untracked(() => this.draftForm.supplementValue().value.set(null));
-      }
+      const hasSupplement = this.hasSupplement();
+      untracked(() => {
+        if (this.hadSupplement && !hasSupplement) {
+          this.draftForm.supplementValue().value.set(null);
+        }
+        this.hadSupplement = hasSupplement;
+      });
     });
   }
 
@@ -221,13 +227,10 @@ export class OnlineBookingServicesOptionsPopup
     };
   }
 
-  /** The saved options are asked only the first time: then the popup shows the last ones kept. */
+  /** The saved options are read at every opening: the popup always starts from the server. */
   private load(): Subscription | undefined {
     this.error.set(null);
-    if (this.loaded) {
-      this.fill(this.loaded);
-      return;
-    }
+    this.isLoaded.set(false);
     if (!this.auth.user()?.propertyId) {
       return;
     }
@@ -236,9 +239,6 @@ export class OnlineBookingServicesOptionsPopup
     return this.booking.onlineServicesOptions().subscribe({
       next: (options) => {
         const loaded = onlyFieldsOf(OnlineBookingServicesOptions, options);
-        if (loaded.supplementType === SupplementType.None) {
-          loaded.supplementValue = null;
-        }
         this.loaded = loaded;
         this.fill(loaded);
         this.isLoaded.set(true);
@@ -252,6 +252,7 @@ export class OnlineBookingServicesOptionsPopup
   }
 
   private fill(options: OnlineBookingServicesOptions): void {
+    this.hadSupplement = null;
     this.draft.set(options);
     this.draftForm().reset();
   }

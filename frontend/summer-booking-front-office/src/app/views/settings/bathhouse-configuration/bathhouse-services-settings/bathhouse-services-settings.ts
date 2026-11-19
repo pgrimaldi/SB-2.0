@@ -128,18 +128,14 @@ export class BathhouseServicesSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected async save(): Promise<void> {
-    if (this.isSaving()) {
+    if (this.isSaving() || !this.isLoaded()) {
       return;
     }
     this.isSaving.set(true);
     this.error.set(null);
     try {
       const sent = this.services();
-      await firstValueFrom(
-        this.catalog.saveBathhouseConfigurationServices(
-          sent.filter(({ isSelected }) => isSelected),
-        ),
-      );
+      await firstValueFrom(this.catalog.saveBathhouseConfigurationServices(sent));
       this.loaded = sent;
       this.loadedSelection = selectionOf(sent);
       this.cache.keepServices(sent);

@@ -366,15 +366,7 @@ Nessun payload.
 
 ```json
 {
-  "services": [
-    {
-      "idService": "number (intero)",
-      "name": "string",
-      "categoryCode": "string (enum BathhouseServiceGroup)",
-      "iconUrl": "string | null",
-      "isSelected": "boolean"
-    }
-  ]
+  "services": "BathhouseServiceItem[] (array di oggetti)"
 }
 ```
 
@@ -386,12 +378,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `services[]` | BathhouseServiceItem[] (array di oggetti) |
-| `services[].idService` | number (intero) |
-| `services[].name` | string |
-| `services[].categoryCode` | string (enum BathhouseServiceGroup) |
-| `services[].iconUrl` | string \| null |
-| `services[].isSelected` | boolean |
+| `services` | BathhouseServiceItem[] (array di oggetti) |
 
 **Response tabella**
 
@@ -850,10 +837,10 @@ Nessun payload.
   "rows": [
     {
       "idUser": "string (UUID)",
-      "email": "string | null",
+      "email": "string",
       "phoneCountryCode": "string | null",
       "phone": "string | null",
-      "role": "string (enum UserRole) | null"
+      "role": "string (enum UserRole)"
     }
   ]
 }
@@ -879,10 +866,10 @@ Nessun payload.
 | `total` | number (intero) |
 | `rows[]` | UserItem[] (array di oggetti) |
 | `rows[].idUser` | string (UUID) |
-| `rows[].email` | string \| null |
+| `rows[].email` | string |
 | `rows[].phoneCountryCode` | string \| null |
 | `rows[].phone` | string \| null |
-| `rows[].role` | string (enum UserRole) \| null |
+| `rows[].role` | string (enum UserRole) |
 
 ### POST `/api/identity/create-user`
 
@@ -910,7 +897,7 @@ Nessun payload.
   "phoneCountryCode": "string | null",
   "phone": "string | null",
   "phoneIsContact": "boolean",
-  "role": "string (enum UserRole) | null"
+  "role": "string (enum UserRole)"
 }
 ```
 
@@ -936,7 +923,7 @@ Nessun payload.
 | `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
 | `phoneIsContact` | boolean |
-| `role` | string (enum UserRole) \| null |
+| `role` | string (enum UserRole) |
 
 ### GET `/api/identity/get-selected-user?idUser={idUser}`
 
@@ -958,7 +945,7 @@ Nessun payload.
   "phoneCountryCode": "string | null",
   "phone": "string | null",
   "phoneIsContact": "boolean",
-  "role": "string (enum UserRole) | null"
+  "role": "string (enum UserRole)"
 }
 ```
 
@@ -978,7 +965,7 @@ Nessun payload.
 | `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
 | `phoneIsContact` | boolean |
-| `role` | string (enum UserRole) \| null |
+| `role` | string (enum UserRole) |
 
 ### POST `/api/identity/update-user`
 
@@ -1007,7 +994,7 @@ Nessun payload.
   "phoneCountryCode": "string | null",
   "phone": "string | null",
   "phoneIsContact": "boolean",
-  "role": "string (enum UserRole) | null"
+  "role": "string (enum UserRole)"
 }
 ```
 
@@ -1034,7 +1021,7 @@ Nessun payload.
 | `phoneCountryCode` | string \| null |
 | `phone` | string \| null |
 | `phoneIsContact` | boolean |
-| `role` | string (enum UserRole) \| null |
+| `role` | string (enum UserRole) |
 
 ### DELETE `/api/identity/property-users/{id}`
 
@@ -1085,8 +1072,8 @@ Nessun corpo (204).
       "bookingNumber": "string | null",
       "actorName": "string | null",
       "spotLabel": "string | null",
-      "actionCode": "string | null",
-      "occurredAt": "string (data e ora ISO 8601 UTC) | null"
+      "actionCode": "string",
+      "occurredAt": "string (data e ora ISO 8601 UTC)"
     }
   ]
 }
@@ -1115,8 +1102,8 @@ Nessun corpo (204).
 | `rows[].bookingNumber` | string \| null |
 | `rows[].actorName` | string \| null |
 | `rows[].spotLabel` | string \| null |
-| `rows[].actionCode` | string \| null |
-| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null |
+| `rows[].actionCode` | string |
+| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) |
 
 ### POST `/api/identity/user-combobox`
 

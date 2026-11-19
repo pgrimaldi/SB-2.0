@@ -87,7 +87,7 @@
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
       [pathIcon]="sendTestIcon"
-      [disabled]="isBusy() && !isSendingTest()"
+      [disabled]="(isBusy() && !isSendingTest()) || !loaded()"
       [isLoading]="isSendingTest()"
       (clicked)="sendTestEmail()"
     >
@@ -106,7 +106,7 @@
     <app-button
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
-      [disabled]="(isBusy() && !isSaving()) || configurationForm().invalid()"
+      [disabled]="(isBusy() && !isSaving()) || !loaded() || configurationForm().invalid()"
       [isLoading]="isSaving()"
       (clicked)="save()"
     >

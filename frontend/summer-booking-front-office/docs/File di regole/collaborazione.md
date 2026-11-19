@@ -33,6 +33,11 @@ Come si lavora con l'utente e dove stanno i documenti del frontend, da tenere ag
   (componenti, servizi, mock, test, documenti), backend e struttura del database (mai righe di dati), e controlla che il
   documento delle richieste al backend della pagina contenga tutti i requisiti. Ogni punto trovato va nella lista per
   l'utente: nessuno resta solo nei resoconti.
+- La lista dei punti aperti di un audit la tiene aggiornata chi fa l'audit: ogni punto si segna chiuso appena è fatto o
+  confermato dall'utente.
+- Un incarico dato a un altro agente ripete sempre le regole che lo riguardano: sul database solo query di struttura
+  (`information_schema`, `pg_catalog`), mai righe di dati; backend e documenti del collega in sola lettura; niente
+  credenziali.
 
 ## Documentazione
 

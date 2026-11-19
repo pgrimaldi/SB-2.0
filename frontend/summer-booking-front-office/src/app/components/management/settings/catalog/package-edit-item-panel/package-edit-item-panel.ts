@@ -227,6 +227,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected startEdit(): void {
+    if (!this.isLoaded()) {
+      return;
+    }
     this.error.set(null);
     this.isEditing.set(true);
   }
@@ -240,7 +243,12 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
 
   protected save(): void {
     const idPackage = this.idPackage();
-    if (this.isSaving() || this.reducedSeasonalPriceIndex() !== null || !idPackage) {
+    if (
+      this.isSaving() ||
+      !this.isLoaded() ||
+      this.reducedSeasonalPriceIndex() !== null ||
+      !idPackage
+    ) {
       return;
     }
 

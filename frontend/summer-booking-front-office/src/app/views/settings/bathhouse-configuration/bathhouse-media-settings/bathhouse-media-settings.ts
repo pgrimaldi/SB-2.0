@@ -281,7 +281,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   }
 
   protected save(): void {
-    if (this.isSaving()) {
+    if (this.isSaving() || !this.isLoaded()) {
       return;
     }
     void submit(this.mediaForm, async (): Promise<TreeValidationResult> => {
@@ -420,10 +420,9 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
     }
   }
 
-  /** The link of the virtual tour and the position stay the saved ones: they are saved apart. */
+  /** The answer holds all the media as saved, link of the virtual tour and position too. */
   private keep(answer: BathhouseMedia): void {
-    const { virtualTourUrl, latitude, longitude } = this.media();
-    const media = { ...mediaOf(answer, this.origin), virtualTourUrl, latitude, longitude };
+    const media = mediaOf(answer, this.origin);
     this.media.set(media);
     this.cache.keepMedia(media);
   }

@@ -102,16 +102,19 @@ describe('EmailConfiguration', () => {
     expect(element.querySelector('.mat-mdc-select-value')?.textContent?.trim()).toBe('TLS');
   });
 
-  it('should show the error when the configuration does not arrive', async () => {
-    const { element } = await setup(
+  it('should show the error when the configuration does not arrive, and send nothing', async () => {
+    const { element, buttons } = await setup(
       vi.fn(() => throwError(() => new HttpErrorResponse({ status: 0, statusText: 'Unknown' }))),
     );
 
     expect(element.querySelector('.email__configuration__error')?.textContent?.trim()).not.toBe('');
-    // Without the values of the server nothing can be changed: Reset reads them again.
+    // Without the values of the server nothing can be changed or sent: Reset reads them again.
     expect(
       element.querySelector<HTMLButtonElement>('.email__configuration__override button')!.disabled,
     ).toBe(true);
+    const [sendTest, , save] = buttons();
+    expect(sendTest.disabled).toBe(true);
+    expect(save.disabled).toBe(true);
   });
 
   it('should send the values in the fields as the test email, then say it was sent', async () => {

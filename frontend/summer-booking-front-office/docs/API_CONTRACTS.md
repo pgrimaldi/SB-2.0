@@ -169,10 +169,10 @@ Stato: 200 OK.
 | `total` | number (intero) | `2` |
 | `rows[]` | UserItem[] (array di oggetti) | `[{"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01", "email": "giulia.ferri@example.com", "phoneCountryCode": "39", "phone": "3401112201", "role": "superadmin"}, {"idUser": "3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d02", "email": "marco.bianchi@example.com", "phoneCountryCode": "39", "phone": "3401112202", "role": "admin"}]` |
 | `rows[].idUser` | string (UUID) | `3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d01` |
-| `rows[].email` | string \| null | `giulia.ferri@example.com` |
+| `rows[].email` | string | `giulia.ferri@example.com` |
 | `rows[].phoneCountryCode` | string \| null | `39` |
 | `rows[].phone` | string \| null | `3401112201` |
-| `rows[].role` | string (enum UserRole) \| null | `superadmin` |
+| `rows[].role` | string (enum UserRole) | `superadmin` |
 
 ### POST `/api/identity/create-user`
 
@@ -226,7 +226,7 @@ Stato: 201 Created (l'utente creato).
 | `phoneCountryCode` | string \| null | `39` |
 | `phone` | string \| null | `3401112299` |
 | `phoneIsContact` | boolean | `false` |
-| `role` | string (enum UserRole) \| null | `waiter` |
+| `role` | string (enum UserRole) | `waiter` |
 
 ### GET `/api/identity/get-selected-user?idUser={idUser}`
 
@@ -268,7 +268,7 @@ Stato: 200 OK.
 | `phoneCountryCode` | string \| null | `39` |
 | `phone` | string \| null | `3401112203` |
 | `phoneIsContact` | boolean | `true` |
-| `role` | string (enum UserRole) \| null | `manager` |
+| `role` | string (enum UserRole) | `manager` |
 
 ### POST `/api/identity/update-user`
 
@@ -324,7 +324,7 @@ Stato: 200 OK (l'utente aggiornato).
 | `phoneCountryCode` | string \| null | `41` |
 | `phone` | string \| null | `79 123 45 67` |
 | `phoneIsContact` | boolean | `false` |
-| `role` | string (enum UserRole) \| null | `manager` |
+| `role` | string (enum UserRole) | `manager` |
 
 ### DELETE `/api/identity/property-users/{id}`
 
@@ -462,8 +462,8 @@ Stato: 200 OK.
 | `rows[].bookingNumber` | string \| null | `1234` |
 | `rows[].actorName` | string \| null | `Giulia Ferri` |
 | `rows[].spotLabel` | string \| null | `A1` |
-| `rows[].actionCode` | string \| null | `catalog.map_spots_created` |
-| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) \| null | `2026-10-23T11:11:00.000Z` |
+| `rows[].actionCode` | string | `catalog.map_spots_created` |
+| `rows[].occurredAt` | string (data e ora ISO 8601 UTC) | `2026-10-23T11:11:00.000Z` |
 
 ### POST `/api/audit/export-log`
 
@@ -558,8 +558,8 @@ Il corpo è il file (binario), non JSON.
 
 | Header | Esempio |
 |---|---|
-| `Content-Type` | `application/pdf` |
-| `Content-Disposition` | `attachment; filename="log-2026-10-26.pdf"` |
+| `Content-Type` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| `Content-Disposition` | `attachment; filename="log-2026-10-26.xlsx"` |
 
 ## /warehouse
 
@@ -2567,7 +2567,7 @@ Informazioni stabilimento: salvataggio dei servizi.
       "name": "Doccia",
       "categoryCode": "accessibility_comfort",
       "iconUrl": "https://media.example.com/icons/doccia.svg",
-      "isSelected": true
+      "isSelected": false
     }
   ]
 }
@@ -2575,12 +2575,7 @@ Informazioni stabilimento: salvataggio dei servizi.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/doccia.svg", "isSelected": true}]` |
-| `services[].idService` | number (intero) | `14` |
-| `services[].name` | string | `Accesso disabili` |
-| `services[].categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
-| `services[].iconUrl` | string \| null | `https://media.example.com/icons/accesso-disabili.svg` |
-| `services[].isSelected` | boolean | `true` |
+| `services` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/doccia.svg", "isSelected": false}]` |
 
 #### Response
 

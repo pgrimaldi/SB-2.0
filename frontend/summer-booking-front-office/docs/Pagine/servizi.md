@@ -255,6 +255,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   la sezione `app-services-booking-option` sull'elenco `bookingOptions`.
 - Il form ha anche `price`, `vatRate`, `isPeriodPricingEnabled`, `periodPrices`, `idSectors`,
   `isOnlinePurchaseEnabled` e `bookingOptions`.
+- Nella modifica (bar, servizi standard e servizi orari), Salva della tab Prezzi rimanda anche i prezzi per periodo (e
+  per i servizi orari le disponibilità) letti per periodi che la tab non mostra, es. non più nella stagione corrente
+  (`hiddenPeriodPrices`, `hiddenPeriodAvailabilities`): niente di quello che è stato letto si perde.
 - Icone: 21 PNG grigi 29×29, ridotti tutti dello stesso fattore, `Services_Standard<Nome>.png`, enum
   `StandardServiceIcon` (Surfing, Surfboard, Sailing, Kitesurfing, Volleyball, Baseball, Basketball, Cricket,
   SportsField, Tennis, Pool, Locker, Lock, Cabin, Shower, Baby, Accessible, Parking, Pets, Motorcycle, Bicycle);

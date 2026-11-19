@@ -104,6 +104,9 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
 
 - La selezione vale per tutti i periodi della tab, tiene gli intervalli così come li ha dati la lista e si azzera a
   ogni ricarica riuscita dei periodi e cambiando tab.
+- Finché la lista dei periodi non è stata letta (durante ogni ricarica, o se la ricarica fallisce) tutte le azioni sui
+  periodi sono spente (`isLoaded`): Aggiungi periodo, cestini, matite, "+" ed "Elimina selezionati". Così un popup
+  non parte mai da una lista vecchia e non rimanda intervalli già cambiati o eliminati.
 - Con almeno due intervalli selezionati, anche in periodi diversi, compaiono a destra di "Mostra tutti":
   - "Annulla selezione" (bianco con bordo e testo azzurri), che toglie tutte le selezioni;
   - il bottone rosso "Cancella selezionati" (`--color__layout__error`, come "Cancella dati" della pagina Database),
@@ -138,8 +141,9 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   i suoi prezzi da questi listini, poi eliminalo.".
 - Il controllo sui servizi che usano il periodo è chiesto al backend (sezione 3 del documento di richieste della
   pagina): un periodo usato da servizi risponde `pricing.period_in_use_by_services` con i loro nomi (`args.services`)
-  e il popup dice "Il periodo è usato dai servizi …: togli prima i suoi prezzi da questi servizi, poi eliminalo.". I
-  mock lo simulano con i servizi che hanno prezzi o disponibilità sul periodo (`servicesUsingPeriod`).
+  e il popup dice "Il periodo è usato dai servizi …: togli prima i suoi prezzi da questi servizi, poi eliminalo.".
+  Bloccano solo i servizi con i prezzi per periodo attivi; i prezzi suggeriti non bloccano. I mock lo simulano con i
+  servizi che hanno i prezzi per periodo attivi e prezzi o disponibilità sul periodo (`servicesUsingPeriod`).
 - Subito a destra del nome (`appExpansionPanelTitleAside`) una matita (tooltip "Modifica") e un "+"
   (`Seasons_AddInterval.svg`, il + sottile di Aggiungi nuova regola nell'azzurro di matita e cestino, tooltip
   "Aggiungi intervallo").
