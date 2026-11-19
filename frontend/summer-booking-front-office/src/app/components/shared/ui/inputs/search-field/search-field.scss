@@ -77,6 +77,14 @@
   }
 }
 
+// The text reached the limit: as the error under a field.
+.search__field__limit {
+  margin: 0.25rem 0 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 // Our X replaces the one Chrome and Edge draw by themselves in search inputs.
 .search__field input::-webkit-search-cancel-button {
   appearance: none;

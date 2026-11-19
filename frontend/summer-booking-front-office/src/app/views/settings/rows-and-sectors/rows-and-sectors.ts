@@ -1,7 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
 import { SectorAddPopup } from '../../../components/management/settings/rows-and-sectors/sector-add-popup/sector-add-popup';
@@ -16,6 +17,7 @@ import {
   TableRowId,
 } from '../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { SectorService } from '../../../services/api/catalog/sector.service';
 
@@ -91,10 +93,18 @@ export class RowsAndSectors {
   protected readonly load: TableLoad<object, SectorItem> = (request) =>
     this.sectors.sectorList(request);
 
-  protected readonly deleteSectors = (idSectors: string[]) =>
-    this.sectors.deleteSectorItems(idSectors);
+  protected readonly deleteSectors = (idSectors: string[]) => {
+    const sectorName = this.sectorNameToDelete();
+    return sectorName === null
+      ? this.sectors.deleteSectors(idSectors)
+      : this.sectors
+          .deleteSector(idSectors[0])
+          .pipe(
+            catchError((error: unknown) => throwError(() => withSectorName(error, sectorName))),
+          );
+  };
   protected readonly duplicateSectors = (idSectors: string[]) =>
-    this.sectors.duplicateSectorItems(idSectors);
+    this.sectors.duplicateSectors(idSectors);
 
   protected askDelete(idSectors: readonly TableRowId[], sectorName: string | null = null): void {
     this.idSectorsToDelete.set(idSectors.map(String));
@@ -125,4 +135,28 @@ export class RowsAndSectors {
       idSelected.filter((idSelectedSector) => !idSectors.includes(String(idSelectedSector))),
     );
   }
+}
+
+/** The single delete of the backend answers `catalog.sector_in_use` without the name of the sector. */
+function withSectorName(error: unknown, sectorName: string): unknown {
+  if (!(error instanceof HttpErrorResponse)) {
+    return error;
+  }
+  const body: unknown = error.error;
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    !('code' in body) ||
+    body.code !== ApiErrorCode.CatalogSectorInUse
+  ) {
+    return error;
+  }
+  const args = 'args' in body && typeof body.args === 'object' ? body.args : null;
+  return new HttpErrorResponse({
+    error: { ...body, args: { sectorName, ...args } },
+    headers: error.headers,
+    status: error.status,
+    statusText: error.statusText,
+    url: error.url ?? undefined,
+  });
 }

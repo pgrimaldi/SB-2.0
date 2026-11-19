@@ -3,6 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
+import { SaveSectorRequest } from '../../../entities/settings/rows-and-sectors/save-sector-request';
+import { Sector } from '../../../entities/settings/rows-and-sectors/sector';
 import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { SectorService } from './sector.service';
 
@@ -65,43 +67,59 @@ describe('SectorService', () => {
     });
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
+    const sector: Sector = { id: 's9', name: 'Fila 9', sortOrder: 8 };
+    let answer: Sector | undefined;
 
     sectors
-      .addSectorItem({
-        idSector: null,
-        sectorName: 'Fila 9',
-        extra: 'not sent',
-      } as SectorItem)
-      .subscribe();
+      .addSector({ name: 'Fila 9', extra: 'not sent' } as SaveSectorRequest)
+      .subscribe((created) => (answer = created));
 
     const call = controller.expectOne(
-      ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/add-sector-item`,
+      ({ method, url }) => method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sectors`,
     );
-    expect(call.request.body).toEqual({ sectorName: 'Fila 9' });
+    expect(call.request.body).toEqual({ name: 'Fila 9' });
+    call.flush(sector, { status: 201, statusText: 'Created' });
+    expect(answer).toEqual(sector);
     controller.verify();
   });
 
-  it('should rename a sector sending its id and the new name', () => {
+  it('should rename a sector with its id in the address and the new name', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const sectors = TestBed.inject(SectorService);
+    const controller = TestBed.inject(HttpTestingController);
+    const sector: Sector = { id: 's1', name: 'Fila A', sortOrder: 0 };
+    let answer: Sector | undefined;
+
+    sectors
+      .updateSector('s1', { name: 'Fila A', extra: 'not sent' } as SaveSectorRequest)
+      .subscribe((saved) => (answer = saved));
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'PUT' && url === `${environment.apiBaseUrl}/catalog/sectors/s1`,
+    );
+    expect(call.request.body).toEqual({ name: 'Fila A' });
+    call.flush(sector);
+    expect(answer).toEqual(sector);
+    controller.verify();
+  });
+
+  it('should delete one sector by its id', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
 
-    sectors
-      .updateSectorItem({
-        idSector: 's1',
-        sectorName: 'Fila A',
-        extra: 'not sent',
-      } as SectorItem)
-      .subscribe();
+    sectors.deleteSector('s1').subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-sector-item`,
+        method === 'DELETE' && url === `${environment.apiBaseUrl}/catalog/sectors/s1`,
     );
-    expect(call.request.body).toEqual({ idSector: 's1', sectorName: 'Fila A' });
+    expect(call.request.body).toBeNull();
     controller.verify();
   });
 
@@ -112,11 +130,11 @@ describe('SectorService', () => {
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
 
-    sectors.deleteSectorItems(['s1', 's2']).subscribe();
+    sectors.deleteSectors(['s1', 's2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/delete-sector-item`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sectors/bulk-delete`,
     );
     expect(call.request.body).toEqual({ idSectors: ['s1', 's2'] });
     controller.verify();
@@ -129,11 +147,11 @@ describe('SectorService', () => {
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
 
-    sectors.duplicateSectorItems(['s1', 's2']).subscribe();
+    sectors.duplicateSectors(['s1', 's2']).subscribe();
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-sector-item`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sectors/bulk-duplicate`,
     );
     expect(call.request.body).toEqual({ idSectors: ['s1', 's2'] });
     controller.verify();

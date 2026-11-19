@@ -21,9 +21,11 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
   la tabella.
 - Righe per pagina: 10 per tutte le tabelle; 20, 50 o 100 con il selettore del paginatore. Per un numero fisso senza
   selettore c'è `isPageSizeSelectorHidden`.
-- Ricerca: `isSearchable`, inviata a `load` come `search`; se il backend ha un limite di caratteri, la pagina lo passa
-  con `searchMaxLength` e il campo non accetta caratteri oltre. Ordinamento: colonne `sortable`, inviato come
-  `sortField` e `sortDirection`.
+- Ricerca: `isSearchable`, inviata a `load` come `search`. In tutte le tabelle accetta al massimo 100 caratteri
+  (`TABLE_SEARCH_MAX_LENGTH`, il limite delle liste del backend, `searchMaxLength` di `app-table`): il campo non accetta
+  caratteri oltre e, arrivati al limite, sotto la barra compare "Al massimo 100 caratteri" (`table.search.max_length`,
+  le stesse parole di `invalidate.max_length`). Ordinamento: colonne `sortable`, inviato come `sortField` e
+  `sortDirection`.
 
 ## Richiesta e risposta standard
 

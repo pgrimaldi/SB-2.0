@@ -99,7 +99,7 @@ Il corpo è la richiesta standard delle tabelle:
 |---|---|---|
 | `page` | number | Pagina richiesta, da 1. |
 | `pageSize` | number | Righe per pagina: 10, 20, 50 o 100. |
-| `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Il frontend lo manda senza spazi ai lati, da 3 caratteri in su. Trova gli utenti la cui email o il cui cellulare (il numero salvato, senza prefisso) contiene il testo, senza distinguere maiuscole e minuscole. |
+| `search` | string | Testo della barra di ricerca, `""` = nessuna ricerca. Il frontend lo manda senza spazi ai lati, da 3 caratteri in su e al massimo 100 (il campo non ne accetta di più). Trova gli utenti la cui email o il cui cellulare (il numero salvato, senza prefisso) contiene il testo, senza distinguere maiuscole e minuscole. |
 | `filters` | array | Sempre `[]`: la tabella non ha filtri. |
 | `sortField` | string | `email`, `phone` (il numero, senza prefisso) o `role`; `""` = ordine del backend: ruolo, poi email, come oggi `property-users` (`AccountRepository.ListByPropertyAsync`). |
 | `sortDirection` | string | `Ascending` o `Descending`. |
@@ -513,7 +513,7 @@ e le 2 del primo giorno e mostrerebbe quelle tra mezzanotte e le 2 del giorno do
   voci, come oggi.
 - `search`: al massimo 100 caratteri (`AuditQueryRules.SearchMaxLength`, come `GET /api/audit/entries`); oltre, 400
   `validation.failed` con `errors[]` `{ "field": "search", "code": "validation.max_length", "args": { "max": 100, "min": 0 } }`.
-  Il campo di ricerca del frontend non accetta più di 100 caratteri (`MAX_AUDIT_SEARCH_LENGTH`) e la manda senza spazi
+  Il campo di ricerca del frontend, come in tutte le tabelle, non accetta più di 100 caratteri e la manda senza spazi
   ai lati, da 3 caratteri in su.
 - I validatori di `GET /api/audit/entries` (`AuditEntryListQueryValidator` e `AuditFilterValidator` in
   `Module.Audit/Application/Validators/AuditValidators.cs`) non si riusano così come sono: accettano `pageSize` 25

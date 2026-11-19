@@ -46,7 +46,8 @@
       "range": "{{start}} – {{end}} of {{total}}"
     },
     "search": {
-      "placeholder": "Search..."
+      "placeholder": "Search...",
+      "max_length": "At most {{max}} characters"
     },
     "load_error": {
       "title": "Error",

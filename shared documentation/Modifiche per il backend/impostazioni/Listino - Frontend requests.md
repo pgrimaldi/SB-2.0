@@ -91,7 +91,7 @@ frontend sostituisce `GET /price-lists?kind=package`.
 ## 2. POST /api/catalog/delete-package-item
 
 Cestino di una riga e "elimina selezionati" della tabella della tab "Pacchetti" (pagina Listino), come le altre tabelle
-(per esempio `catalog/delete-sector-item`). Per il frontend sostituisce `DELETE /price-lists/{id}` e
+(per esempio `vouchers/delete-voucher-item`). Per il frontend sostituisce `DELETE /price-lists/{id}` e
 `POST /price-lists/bulk-delete`, che dà un esito parziale: qui arrivano **uno o più id insieme**, tutto o niente.
 
 - Corpo: `idPackages`, gli `idPackage` delle righe di `packages-list`; uno solo con il cestino della
@@ -122,7 +122,7 @@ Cestino di una riga e "elimina selezionati" della tabella della tab "Pacchetti" 
 ## 3. POST /api/catalog/duplicate-package-item
 
 Bottone duplica di una riga e "duplica selezionati" della tabella della tab "Pacchetti" (pagina Listino), come le altre
-tabelle (per esempio `catalog/duplicate-sector-item`). Per il frontend sostituisce `POST /price-lists/{id}/duplicate` e
+tabelle (per esempio `vouchers/duplicate-voucher-item`). Per il frontend sostituisce `POST /price-lists/{id}/duplicate` e
 `POST /price-lists/bulk-duplicate`, che dà un esito parziale: qui arrivano **uno o più id insieme**, tutto o niente.
 
 - Corpo: `idPackages`, gli `idPackage` delle righe di `packages-list`; uno solo con il bottone della

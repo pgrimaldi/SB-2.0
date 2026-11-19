@@ -1,15 +1,16 @@
-import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpEvent, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
+import { Sector } from '../../../entities/settings/rows-and-sectors/sector';
 import {
   MAX_SECTOR_NAME_LENGTH,
   SectorItem,
 } from '../../../entities/settings/rows-and-sectors/sector-item';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { problem, resourceNotFound } from '../errors/problem.mock';
+import { problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 interface SectorUsage {
@@ -19,7 +20,7 @@ interface SectorUsage {
   discounts: number;
 }
 
-type SectorRow = SectorItem & { propertyId: number; usage?: SectorUsage };
+type SectorRow = SectorItem & { propertyId: number; sortOrder: number; usage?: SectorUsage };
 
 const SECTOR_NAMES = [
   'Fila 1',
@@ -40,6 +41,7 @@ const SECTORS: SectorRow[] = SECTOR_NAMES.map((sectorName, index) => ({
   propertyId: 1,
   idSector: `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a${String(index + 1).padStart(2, '0')}`,
   sectorName,
+  sortOrder: index,
   ...(index === 0 ? { usage: { mapSpots: 14, priceLists: 1, stayLimits: 0, discounts: 0 } } : {}),
 }));
 
@@ -62,7 +64,9 @@ export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEv
   const found = SECTORS.filter(
     (row) =>
       row.propertyId === property.id && (!search || row.sectorName?.toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(SectorItem, row));
+  )
+    .sort((first, second) => first.sortOrder - second.sortOrder)
+    .map((row) => onlyFieldsOf(SectorItem, row));
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -86,90 +90,122 @@ export const sectorComboboxMock = (
     return unauthorized(request);
   }
   const property = DEMO_PROPERTY;
-  const items: ComboboxItem[] = SECTORS.filter((row) => row.propertyId === property.id).map(
-    (row) => ({ id: row.idSector ?? '', value: row.sectorName ?? '' }),
-  );
+  const items: ComboboxItem[] = SECTORS.filter((row) => row.propertyId === property.id)
+    .sort((first, second) => first.sortOrder - second.sortOrder)
+    .map((row) => ({ id: row.idSector ?? '', value: row.sectorName ?? '' }));
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };
 
 /**
- * `POST /api/catalog/add-sector-item` with `sectorName`: the new sector goes at the end of the
- * order. 400 with validation.required / validation.max_length on sectorName; 409
- * `catalog.sector_name_taken` for a name the property has already (case-insensitive). 204 without a
- * body; 401 without a valid access token.
+ * `POST /api/catalog/sectors` with `name`: the new sector goes at the end of the order. 400 with
+ * validation.required / validation.max_length on name; 409 `catalog.sector_name_taken` for a name
+ * the property has already (case-insensitive). 201 with the sector and its `Location`; 401 without
+ * a valid access token.
  */
-export const addSectorItemMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
+export const addSectorMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { sectorName?: unknown };
-  const property = DEMO_PROPERTY;
-  const sectorName = typeof body.sectorName === 'string' ? body.sectorName.trim() : '';
-  const nameError = sectorNameError(request, sectorName);
+  const name = (request.body as { name?: unknown } | null)?.name;
+  const nameError = sectorNameError(request, name);
   if (nameError) {
     return nameError;
   }
+  const property = DEMO_PROPERTY;
+  const sectorName = String(name).trim();
   if (isNameTaken(property.id, sectorName)) {
     return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken);
   }
-  SECTORS.push({ propertyId: property.id, idSector: crypto.randomUUID(), sectorName });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  const sector: SectorRow = {
+    propertyId: property.id,
+    idSector: crypto.randomUUID(),
+    sectorName,
+    sortOrder: nextSortOrder(property.id),
+  };
+  SECTORS.push(sector);
+  return of(
+    new HttpResponse({
+      status: 201,
+      url: request.url,
+      headers: new HttpHeaders({ Location: `${request.url}/${sector.idSector}` }),
+      body: sectorOf(sector),
+    }),
+  ).pipe(delay(600));
 };
 
 /**
- * `POST /api/catalog/update-sector-item` with `idSector` and `sectorName`: the sector is renamed.
- * 404 `resource.not_found` for an id that is not a sector of the property; the same name errors as
- * the add (the sector's own name does not count as taken). 204 without a body; 401 without a valid
- * access token.
+ * `PUT /api/catalog/sectors/{id}` with `name`: the sector is renamed. The name is checked first (the
+ * same errors as the add, the sector's own name does not count as taken), then 404
+ * `catalog.sector_not_found` for an id that is not a sector of the property. 200 with the sector;
+ * 401 without a valid access token.
  */
-export const updateSectorItemMock = (
+export const updateSectorMock = (
   request: HttpRequest<unknown>,
+  idSector: string,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as {
-    idSector?: unknown;
-    sectorName?: unknown;
-  };
-  const property = DEMO_PROPERTY;
-  const sector = SECTORS.find(
-    (row) => row.idSector === body.idSector && row.propertyId === property.id,
-  );
-  if (!sector) {
-    return resourceNotFound(request);
-  }
-  const sectorName = typeof body.sectorName === 'string' ? body.sectorName.trim() : '';
-  const nameError = sectorNameError(request, sectorName);
+  const name = (request.body as { name?: unknown } | null)?.name;
+  const nameError = sectorNameError(request, name);
   if (nameError) {
     return nameError;
   }
+  const property = DEMO_PROPERTY;
+  const sector = sectorOfProperty(property.id, idSector);
+  if (!sector) {
+    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
+  }
+  const sectorName = String(name).trim();
   if (isNameTaken(property.id, sectorName, sector)) {
     return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken);
   }
   sector.sectorName = sectorName;
+  return of(new HttpResponse({ status: 200, url: request.url, body: sectorOf(sector) })).pipe(
+    delay(600),
+  );
+};
+
+/**
+ * `DELETE /api/catalog/sectors/{id}`: 404 `catalog.sector_not_found` for an id that is not a sector
+ * of the property; 409 `catalog.sector_in_use` with how many map spots, price lists, stay limits and
+ * discounts still use it (the mock uses "Fila 1"). 204 without a body; 401 without a valid access
+ * token.
+ */
+export const deleteSectorMock = (
+  request: HttpRequest<unknown>,
+  idSector: string,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const sector = sectorOfProperty(DEMO_PROPERTY.id, idSector);
+  if (!sector) {
+    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
+  }
+  if (sector.usage) {
+    return problem(request, 409, ApiErrorCode.CatalogSectorInUse, { args: { ...sector.usage } });
+  }
+  SECTORS.splice(SECTORS.indexOf(sector), 1);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * `POST /api/catalog/delete-sector-item` with `{ idSectors }`: all or nothing. If one id is not a
- * sector of the property nothing is deleted (404 `resource.not_found`); a sector still used by the
- * map, a price list, a stay limit or a discount stops it too (409 `catalog.sector_in_use`, the mock
- * uses "Fila 1"). Repeated ids count once. 204 without a body; 401 without a valid access token.
+ * `POST /api/catalog/sectors/bulk-delete` with `{ idSectors }`: all or nothing. If one id is not a
+ * sector of the property nothing is deleted (404 `catalog.sector_not_found`); a sector still used
+ * stops it too (409 `catalog.sector_in_use` with the name of that sector and its uses). Repeated ids
+ * count once. 204 without a body; 401 without a valid access token.
  */
-export const deleteSectorItemsMock = (
+export const deleteSectorsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idSectors?: string[] };
-  const property = DEMO_PROPERTY;
-  const sectors = sectorsOf(property.id, body.idSectors);
+  const body = (request.body ?? {}) as { idSectors?: unknown };
+  const sectors = sectorsOf(DEMO_PROPERTY.id, body.idSectors);
   if (!sectors) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
   }
   const used = sectors.find((sector) => sector.usage);
   if (used?.usage) {
@@ -184,51 +220,59 @@ export const deleteSectorItemsMock = (
 };
 
 /**
- * `POST /api/catalog/duplicate-sector-item` with `{ idSectors }`: all or nothing, like
- * the delete. The copies go at the end of the order; the name is chosen by the backend and is unique
- * in the property: the mock invents "Fila 2 (copia)", then "Fila 2 (copia 2)" and so on. A copy is
- * not used anywhere yet.
+ * `POST /api/catalog/sectors/bulk-duplicate` with `{ idSectors }`: all or nothing, like the delete.
+ * The copies go at the end of the order; the name is chosen by the backend and is unique in the
+ * property: the mock invents "Fila 2 (copia)", then "Fila 2 (copia 2)" and so on. A copy is not used
+ * anywhere yet. 204 without a body; 401 without a valid access token.
  */
-export const duplicateSectorItemsMock = (
+export const duplicateSectorsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idSectors?: string[] };
-  const property = DEMO_PROPERTY;
-  const sectors = sectorsOf(property.id, body.idSectors);
+  const body = (request.body ?? {}) as { idSectors?: unknown };
+  const sectors = sectorsOf(DEMO_PROPERTY.id, body.idSectors);
   if (!sectors) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
   }
   for (const sector of sectors) {
     SECTORS.push({
       propertyId: sector.propertyId,
       idSector: crypto.randomUUID(),
       sectorName: copyName(sector),
+      sortOrder: nextSortOrder(sector.propertyId),
     });
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
-function sectorNameError(
-  request: HttpRequest<unknown>,
-  sectorName: string,
-): Observable<never> | null {
-  if (sectorName && sectorName.length <= MAX_SECTOR_NAME_LENGTH) {
+/** As the backend's validator: not blank, at most 100 characters before the spaces are removed. */
+function sectorNameError(request: HttpRequest<unknown>, name: unknown): Observable<never> | null {
+  const text = typeof name === 'string' ? name : '';
+  if (text.trim() && text.length <= MAX_SECTOR_NAME_LENGTH) {
     return null;
   }
   return problem(request, 400, ApiErrorCode.ValidationFailed, {
     errors: [
-      sectorName
+      text.trim()
         ? {
-            field: 'sectorName',
+            field: 'name',
             code: ApiErrorCode.ValidationMaxLength,
-            args: { max: MAX_SECTOR_NAME_LENGTH },
+            args: { max: MAX_SECTOR_NAME_LENGTH, min: 0 },
           }
-        : { field: 'sectorName', code: ApiErrorCode.ValidationRequired },
+        : { field: 'name', code: ApiErrorCode.ValidationRequired },
     ],
   });
+}
+
+function sectorOf(row: SectorRow): Sector {
+  return { id: row.idSector, name: row.sectorName, sortOrder: row.sortOrder };
+}
+
+function nextSortOrder(propertyId: number): number {
+  const orders = SECTORS.filter((row) => row.propertyId === propertyId).map((row) => row.sortOrder);
+  return orders.length ? Math.max(...orders) + 1 : 0;
 }
 
 function isNameTaken(propertyId: number, sectorName: string, renamed?: SectorRow): boolean {
@@ -240,10 +284,14 @@ function isNameTaken(propertyId: number, sectorName: string, renamed?: SectorRow
   );
 }
 
+function sectorOfProperty(propertyId: number, idSector: string): SectorRow | undefined {
+  return SECTORS.find((row) => row.idSector === idSector && row.propertyId === propertyId);
+}
+
 function sectorsOf(propertyId: number, idSectors: unknown): SectorRow[] | null {
-  const ids = Array.isArray(idSectors) ? [...new Set(idSectors)] : [];
+  const ids = Array.isArray(idSectors) ? [...new Set<unknown>(idSectors)] : [];
   const sectors = ids
-    .map((id) => SECTORS.find((row) => row.idSector === id && row.propertyId === propertyId))
+    .map((id) => (typeof id === 'string' ? sectorOfProperty(propertyId, id) : undefined))
     .filter((sector): sector is SectorRow => sector !== undefined);
   return ids.length && sectors.length === ids.length ? sectors : null;
 }

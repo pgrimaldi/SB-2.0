@@ -101,8 +101,7 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   il backend ordina per codice, e i nomi tradotti sembrerebbero in disordine.
   Azione è il codice del backend tradotto con `management.settings.user_management.logs.actions.<modulo>.<azione>`, o il
   codice stesso se manca la traduzione.
-- La ricerca accetta al massimo 100 caratteri (`MAX_AUDIT_SEARCH_LENGTH`, `searchMaxLength` di `app-table`), come il
-  backend.
+- La ricerca accetta al massimo 100 caratteri, come in tutte le tabelle e come il backend del registro.
 
 ### Periodo
 

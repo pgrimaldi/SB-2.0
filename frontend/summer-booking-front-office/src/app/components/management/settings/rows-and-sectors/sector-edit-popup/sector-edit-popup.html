@@ -7,8 +7,8 @@
     <app-filled-text-field
       autocomplete="off"
       [placeholder]="'management.settings.rows_and_sectors.edit_popup.placeholder' | translate"
-      [formField]="sectorForm.sectorName"
-      [error]="sectorNameError()"
+      [formField]="sectorForm.name"
+      [error]="nameError()"
     />
 
     @if (errorMessage(); as errorMessage) {

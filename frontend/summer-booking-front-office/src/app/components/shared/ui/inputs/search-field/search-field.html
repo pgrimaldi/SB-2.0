@@ -43,3 +43,6 @@
     </button>
   }
 </mat-form-field>
+@if (limitText(); as limitText) {
+  <p class="search__field__limit">{{ limitText }}</p>
+}

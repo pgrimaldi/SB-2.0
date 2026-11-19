@@ -75,12 +75,13 @@ import {
   uploadMapBackgroundMock,
 } from './catalog/map.mock';
 import {
-  addSectorItemMock,
-  deleteSectorItemsMock,
-  duplicateSectorItemsMock,
+  addSectorMock,
+  deleteSectorMock,
+  deleteSectorsMock,
+  duplicateSectorsMock,
   sectorComboboxMock,
   sectorListMock,
-  updateSectorItemMock,
+  updateSectorMock,
 } from './catalog/sectors.mock';
 import {
   additionalItemListMock,
@@ -162,6 +163,9 @@ import {
 /** The tariff periods of the current or of the next season, with a period key or the bulk delete of ranges. */
 const TARIFF_PERIODS_URL =
   /^\/catalog\/(next-season\/)?tariff-periods(?:\/(\d+)|\/(bulk-delete-ranges))?$/;
+
+/** The sectors: the add, one sector by id, or the bulk delete and duplicate. */
+const SECTORS_URL = /^\/catalog\/sectors(?:\/(bulk-delete|bulk-duplicate)|\/([^/]+))?$/;
 
 /** Answers the mocked endpoints; included only in builds with mocks (see `mock-interceptors.ts`). */
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
@@ -947,32 +951,26 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return sectorComboboxMock(request);
   }
 
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/add-sector-item`
-  ) {
-    return addSectorItemMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-sector-item`
-  ) {
-    return updateSectorItemMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-sector-item`
-  ) {
-    return deleteSectorItemsMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-sector-item`
-  ) {
-    return duplicateSectorItemsMock(request);
+  const sectors = request.url.startsWith(environment.apiBaseUrl)
+    ? SECTORS_URL.exec(request.url.slice(environment.apiBaseUrl.length))
+    : null;
+  if (sectors) {
+    const [, bulk, idSector] = sectors;
+    if (request.method === 'POST' && bulk === undefined && idSector === undefined) {
+      return addSectorMock(request);
+    }
+    if (request.method === 'PUT' && idSector !== undefined) {
+      return updateSectorMock(request, decodeURIComponent(idSector));
+    }
+    if (request.method === 'DELETE' && idSector !== undefined) {
+      return deleteSectorMock(request, decodeURIComponent(idSector));
+    }
+    if (request.method === 'POST' && bulk === 'bulk-delete') {
+      return deleteSectorsMock(request);
+    }
+    if (request.method === 'POST' && bulk === 'bulk-duplicate') {
+      return duplicateSectorsMock(request);
+    }
   }
 
   if (

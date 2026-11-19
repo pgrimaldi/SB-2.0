@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Subscription, debounceTime, distinctUntilChanged, map, skip, startWith } from 'rxjs';
 import { resolveIcons } from '../../icons/icons';
+import { formatText } from '../../texts/format-text';
 
 const SEARCH_DELAY = 500;
 /** Shorter texts search for '' (everything). */
@@ -31,6 +32,8 @@ export class SearchField implements OnDestroy {
   readonly placeholder = input<string>();
   /** Characters the field accepts at most (the backend's limit); none: no limit. */
   readonly maxLength = input<number | null>(null);
+  /** Shown under the field once the text reaches `maxLength`, with `{{max}}`. */
+  readonly maxLengthText = input<string>();
   /** Icons as Material icon names (Material Symbols font): [magnifier, X]. */
   readonly matIcon = input<readonly string[] | null>();
   /** Icons as image paths, used when `matIcon` is not given: [magnifier, X]. */
@@ -40,6 +43,12 @@ export class SearchField implements OnDestroy {
 
   protected readonly icons = computed(() => resolveIcons(this.matIcon(), this.pathIcon()));
   protected readonly text = signal('');
+  protected readonly limitText = computed(() => {
+    const max = this.maxLength();
+    return max !== null && this.text().length >= max
+      ? formatText(this.maxLengthText(), { max })
+      : null;
+  });
   private readonly searchSubscription: Subscription;
 
   constructor() {

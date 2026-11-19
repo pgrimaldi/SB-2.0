@@ -51,10 +51,7 @@ import { PageFilter } from '../../../../entities/pagination/page';
 import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AuditLogFilters } from '../../../../entities/settings/user-management/audit-log-filters';
 import { AuditLogUserState } from '../../../../entities/settings/user-management/audit-log-user-state';
-import {
-  AuditLogFiltersRequest,
-  MAX_AUDIT_SEARCH_LENGTH,
-} from '../../../../entities/settings/user-management/audit-log-filters-request';
+import { AuditLogFiltersRequest } from '../../../../entities/settings/user-management/audit-log-filters-request';
 import { DateRange } from '../../../../entities/shared/date-range';
 import { AuditService } from '../../../../services/api/audit/audit.service';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
@@ -135,7 +132,6 @@ export class UserManagementLogs {
 
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
-  protected readonly searchMaxLength = MAX_AUDIT_SEARCH_LENGTH;
   protected readonly loadFailed = signal(false);
   protected readonly isExporting = signal(false);
   protected readonly isPrinting = signal(false);

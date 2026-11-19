@@ -73,6 +73,8 @@ export interface TablePaginatorTexts {
 
 export interface TableSearchTexts {
   placeholder?: string;
+  /** Under the search once the text reaches the limit, with `{{max}}`. */
+  max_length?: string;
 }
 
 export interface TableRowActionTexts {
@@ -118,6 +120,9 @@ export interface TableTexts {
 export const TABLE_PAGE_SIZE = 10;
 
 export const TABLE_PAGE_SIZE_OPTIONS: readonly number[] = [10, 20, 50, 100];
+
+/** Characters of the search at most, as the lists of the backend (e.g. `CatalogQueryRules.SearchMaxLength`). */
+export const TABLE_SEARCH_MAX_LENGTH = 100;
 
 /** The options of the page size selector open in the shared select panel (see the theme). */
 const SELECT_CONFIG: MatPaginatorSelectConfig = { panelClass: 'select__panel' };
@@ -221,8 +226,8 @@ export class Table<T, P extends object> implements OnDestroy {
   /** Blue header, striped rows, rounded corners; otherwise the clean, minimal default look. */
   readonly useAppTheme = input(false);
   readonly isSearchable = input(false);
-  /** Characters the search field accepts at most (the backend's limit); none: no limit. */
-  readonly searchMaxLength = input<number | null>(null);
+  /** Characters the search field accepts at most, the backend's limit; `null`: no limit. */
+  readonly searchMaxLength = input<number | null>(TABLE_SEARCH_MAX_LENGTH);
   /** Buttons of every row, in the last column; empty or `null`: no such column. */
   readonly rowActions = input<readonly TableRowAction<T>[] | null>([]);
   /** Switch of every row, before its buttons: it shows the row's `isEnabled`; `null`: no switch. */

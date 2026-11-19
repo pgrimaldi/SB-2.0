@@ -46,7 +46,8 @@
       "range": "{{start}} – {{end}}，共 {{total}}"
     },
     "search": {
-      "placeholder": "搜索..."
+      "placeholder": "搜索...",
+      "max_length": "最多 {{max}} 个字符"
     },
     "load_error": {
       "title": "错误",

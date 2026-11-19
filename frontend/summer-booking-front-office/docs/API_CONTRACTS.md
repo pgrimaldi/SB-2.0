@@ -6486,9 +6486,91 @@ Stato: 200 OK.
 | `rows[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `rows[].sectorName` | string \| null | `Fila 1` |
 
-### POST `/api/catalog/delete-sector-item`
+### POST `/api/catalog/sectors`
 
-Settori e file: eliminazione.
+Settori e file: aggiunta.
+
+#### Payload
+
+```json
+{
+  "name": "Fila 9"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Fila 9` |
+
+#### Response
+
+Stato: 201 Created (il settore creato).
+
+```json
+{
+  "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a13",
+  "name": "Fila 9",
+  "sortOrder": 12
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a13` |
+| `name` | string | `Fila 9` |
+| `sortOrder` | number (intero) | `12` |
+
+### PUT `/api/catalog/sectors/{id}`
+
+Settori e file: modifica.
+
+#### Payload
+
+```json
+{
+  "name": "Fila 2 lato mare"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `name` | string | `Fila 2 lato mare` |
+
+#### Response
+
+Stato: 200 OK (il settore salvato).
+
+```json
+{
+  "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
+  "name": "Fila 2 lato mare",
+  "sortOrder": 1
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02` |
+| `name` | string | `Fila 2 lato mare` |
+| `sortOrder` | number (intero) | `1` |
+
+### DELETE `/api/catalog/sectors/{id}`
+
+Settori e file: eliminazione di un settore.
+
+#### Payload
+
+Nessun corpo: l'id del settore va nell'indirizzo e lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/sectors/bulk-delete`
+
+Settori e file: eliminazione di più settori.
 
 #### Payload
 
@@ -6503,7 +6585,7 @@ Settori e file: eliminazione.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"]` |
+| `idSectors` | string[] (UUID, almeno due) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"]` |
 
 #### Response
 
@@ -6511,7 +6593,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/duplicate-sector-item`
+### POST `/api/catalog/sectors/bulk-duplicate`
 
 Settori e file: duplicazione.
 
@@ -6528,52 +6610,6 @@ Settori e file: duplicazione.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02"]` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/catalog/add-sector-item`
-
-Settori e file: aggiunta.
-
-#### Payload
-
-```json
-{
-  "sectorName": "Fila 9"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `sectorName` | string | `Fila 9` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/catalog/update-sector-item`
-
-Settori e file: modifica.
-
-#### Payload
-
-```json
-{
-  "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
-  "sectorName": "Fila 2 lato mare"
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02` |
-| `sectorName` | string | `Fila 2 lato mare` |
 
 #### Response
 

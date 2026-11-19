@@ -36,10 +36,8 @@ import {
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import {
-  MAX_SECTOR_NAME_LENGTH,
-  SectorItem,
-} from '../../../../../entities/settings/rows-and-sectors/sector-item';
+import { SaveSectorRequest } from '../../../../../entities/settings/rows-and-sectors/save-sector-request';
+import { MAX_SECTOR_NAME_LENGTH } from '../../../../../entities/settings/rows-and-sectors/sector-item';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { requiredText } from '../../../../shared/forms/validators';
@@ -67,13 +65,13 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   protected readonly ButtonAppearance = ButtonAppearance;
   protected readonly ButtonSize = ButtonSize;
   protected readonly isLoading = signal(false);
-  private readonly sector = signal(new SectorItem());
+  private readonly sector = signal(new SaveSectorRequest());
   protected readonly sectorForm = form(this.sector, (path) => {
-    requiredText(path.sectorName);
-    metadata(path.sectorName, MAX_LENGTH, () => MAX_SECTOR_NAME_LENGTH);
+    requiredText(path.name);
+    metadata(path.name, MAX_LENGTH, () => MAX_SECTOR_NAME_LENGTH);
     readonly(path, () => this.isLoading());
   });
-  protected readonly sectorNameError = this.validationText.message(this.sectorForm.sectorName);
+  protected readonly nameError = this.validationText.message(this.sectorForm.name);
   protected readonly canSave = computed(() => this.sectorForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -93,7 +91,7 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && !!this.sector().sectorName;
+    return this.open() && !!this.sector().name;
   }
 
   protected save(): void {
@@ -104,14 +102,14 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.sectors.addSectorItem(this.sector()));
+        await firstValueFrom(this.sectors.addSector(this.sector()));
         this.isLoading.set(false);
         this.close();
         this.added.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         if (problem.code === ApiErrorCode.CatalogSectorNameTaken) {
-          return apiFieldError(this.sectorForm.sectorName, problem.code);
+          return apiFieldError(this.sectorForm.name, problem.code);
         }
         return apiFieldErrorsOrGeneral(problem, this.sectorForm, (general) =>
           this.error.set(general),
@@ -147,7 +145,7 @@ export class SectorAddPopup extends BasePopup implements UnsavedChanges, OnDestr
   }
 
   private reset(): void {
-    this.sector.set(new SectorItem());
+    this.sector.set(new SaveSectorRequest());
     this.sectorForm().reset();
     this.error.set(null);
   }

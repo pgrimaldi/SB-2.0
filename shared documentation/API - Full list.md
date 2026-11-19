@@ -1728,13 +1728,99 @@ Nessun corpo (204).
 | `rows[].idSector` | string (UUID) |
 | `rows[].sectorName` | string \| null |
 
-### POST `/api/catalog/add-sector-item`
+### POST `/api/catalog/sectors`
 
 **Payload JSON**
 
 ```json
 {
-  "sectorName": "string"
+  "name": "string"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "id": "string (UUID)",
+  "name": "string",
+  "sortOrder": "number (intero)"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `name` | string |
+| `sortOrder` | number (intero) |
+
+### PUT `/api/catalog/sectors/{id}`
+
+**Payload JSON**
+
+```json
+{
+  "name": "string"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "id": "string (UUID)",
+  "name": "string",
+  "sortOrder": "number (intero)"
+}
+```
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `name` | string |
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `name` | string |
+| `sortOrder` | number (intero) |
+
+### DELETE `/api/catalog/sectors/{id}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/sectors/bulk-delete`
+
+**Payload JSON**
+
+```json
+{
+  "idSectors": "string[] (UUID, almeno due)"
 }
 ```
 
@@ -1746,63 +1832,13 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `sectorName` | string |
+| `idSectors` | string[] (UUID, almeno due) |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-sector-item`
-
-**Payload JSON**
-
-```json
-{
-  "idSector": "string (UUID)",
-  "sectorName": "string"
-}
-```
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idSector` | string (UUID) |
-| `sectorName` | string |
-
-**Response tabella**
-
-Nessun corpo (204).
-
-### POST `/api/catalog/delete-sector-item`
-
-**Payload JSON**
-
-```json
-{
-  "idSectors": "string[] (UUID, almeno uno)"
-}
-```
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-| Campo | Tipo |
-|---|---|
-| `idSectors` | string[] (UUID, almeno uno) |
-
-**Response tabella**
-
-Nessun corpo (204).
-
-### POST `/api/catalog/duplicate-sector-item`
+### POST `/api/catalog/sectors/bulk-duplicate`
 
 **Payload JSON**
 
