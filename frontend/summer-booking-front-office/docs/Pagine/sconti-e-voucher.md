@@ -22,6 +22,8 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   `.duplicate`; il nome per una riga, il numero per la selezione).
 - Dopo la conferma: spinner a pagina intera, tabella ricaricata, errore in "Operazione non riuscita" (icona
   `GeneralIcon_Warning.svg`).
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
+  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
 
 ## Popup "Aggiungi nuovo sconto/voucher"
 

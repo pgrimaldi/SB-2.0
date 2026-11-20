@@ -4,20 +4,29 @@ import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Subject, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
-import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
+import { WarehouseSelectedItem } from '../../../../../entities/warehouse/warehouse-selected-item';
+import { WarehouseSettingItem } from '../../../../../entities/warehouse/warehouse-setting-item';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseEditItemPopup } from './form-warehouse-edit-item-popup';
 
-const LETTINO: WarehouseItem = {
+const LETTINO_ROW: WarehouseSettingItem = {
   idArticle: 'a1',
   name: 'Lettino',
   totalQuantity: 120,
-  availableQuantity: 84,
   thresholdQuantity: 5,
-  isThresholdWarningActive: true,
+};
+
+const LETTINO: WarehouseSelectedItem = {
+  id: 'a1',
+  articleCode: 'sunbed',
+  name: 'Lettino',
+  totalQuantity: 120,
+  lowStockThreshold: 5,
+  lowStockAlertEnabled: true,
+  mapPlaceable: true,
 };
 
 @Component({
@@ -29,19 +38,21 @@ const LETTINO: WarehouseItem = {
   />`,
 })
 class FormWarehouseEditItemPopupHost {
-  readonly item = signal<WarehouseItem | null>(LETTINO);
+  readonly item = signal<WarehouseSettingItem | null>(LETTINO_ROW);
   readonly open = signal(false);
   saved = 0;
 }
 
 describe('FormWarehouseEditItemPopup', () => {
-  const setup = async () => {
-    const editWarehouseItem = vi.fn();
+  const setup = async (
+    selectedArticle = vi.fn((): Observable<WarehouseSelectedItem> => of(LETTINO)),
+  ) => {
+    const updateArticle = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: WarehouseService, useValue: { editWarehouseItem } },
+        { provide: WarehouseService, useValue: { selectedArticle, updateArticle } },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
@@ -69,13 +80,53 @@ describe('FormWarehouseEditItemPopup', () => {
       toggle,
       save,
       type,
-      editWarehouseItem,
+      selectedArticle,
+      updateArticle,
     };
   };
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
 
-  it('should detect changes against the opening values and forget them when reopened', async () => {
+  it('should read the article at every opening and keep Salva off until it arrives', async () => {
+    const answer = new Subject<WarehouseSelectedItem>();
+    const { fixture, host, inputs, save, selectedArticle } = await setup(vi.fn(() => answer));
+
+    expect(selectedArticle).toHaveBeenCalledWith('a1');
+    expect(save().disabled).toBe(true);
+    expect(inputs().every((input) => input.disabled || input.readOnly)).toBe(true);
+
+    answer.next(LETTINO);
+    await fixture.whenStable();
+    expect(save().disabled).toBe(false);
+
+    host.open.set(false);
+    await fixture.whenStable();
+    host.open.set(true);
+    await fixture.whenStable();
+    expect(selectedArticle).toHaveBeenCalledTimes(2);
+  });
+
+  it('should keep Salva off and show the error when the article cannot be read', async () => {
+    const { popup, save } = await setup(
+      vi.fn(() =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 404,
+              error: { status: 404, code: ApiErrorCode.InventoryItemNotFound },
+            }),
+        ),
+      ),
+    );
+
+    expect(save().disabled).toBe(true);
+    // The message of the code (here the fallback key: the test has no translations).
+    expect(
+      popup()!.querySelector('.form__warehouse__edit__item__popup__error')?.textContent?.trim(),
+    ).toBe('error.unknown');
+  });
+
+  it('should detect changes against the values read and forget them when reopened', async () => {
     const { fixture, host, inputs, toggle, type } = await setup();
     const component: FormWarehouseEditItemPopup = fixture.debugElement.query(
       By.directive(FormWarehouseEditItemPopup),
@@ -98,7 +149,7 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(component.hasUnsavedChanges()).toBe(false);
   });
 
-  it('should fill the form with the values of the row, with the article locked', async () => {
+  it('should fill the form with the article read, with the article locked', async () => {
     const { popup, inputs, toggle } = await setup();
     const select = popup()!.querySelector('mat-select')!;
 
@@ -108,14 +159,8 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(toggle().getAttribute('aria-checked')).toBe('true');
   });
 
-  it('should keep the alert off without a threshold above 0, even if the row has it on', async () => {
-    const { fixture, host, toggle } = await setup();
-
-    host.open.set(false);
-    host.item.set({ ...LETTINO, thresholdQuantity: null });
-    await fixture.whenStable();
-    host.open.set(true);
-    await fixture.whenStable();
+  it('should keep the alert off without a threshold above 0, even if the article has it on', async () => {
+    const { toggle } = await setup(vi.fn(() => of({ ...LETTINO, lowStockThreshold: null })));
 
     expect(toggle().disabled).toBe(true);
     expect(toggle().getAttribute('aria-checked')).toBe('false');
@@ -133,10 +178,10 @@ describe('FormWarehouseEditItemPopup', () => {
     expect(save().disabled).toBe(false);
   });
 
-  it('should save the new values with a spinner, then close and tell the page', async () => {
-    const { fixture, host, popup, inputs, toggle, save, type, editWarehouseItem } = await setup();
-    const answer = new Subject<void>();
-    editWarehouseItem.mockReturnValue(answer);
+  it('should send back the whole article read, with the changes, then close and tell the page', async () => {
+    const { fixture, host, popup, inputs, toggle, save, type, updateArticle } = await setup();
+    const answer = new Subject<WarehouseSelectedItem>();
+    updateArticle.mockReturnValue(answer);
     await type(inputs()[0], '100');
     await type(inputs()[1], '8');
     toggle().click();
@@ -144,17 +189,18 @@ describe('FormWarehouseEditItemPopup', () => {
 
     save().click();
     await fixture.whenStable();
-    expect(editWarehouseItem).toHaveBeenCalledWith({
-      ...LETTINO,
+    expect(updateArticle).toHaveBeenCalledWith('a1', {
+      articleCode: 'sunbed',
+      name: 'Lettino',
       totalQuantity: 100,
-      thresholdQuantity: 8,
-      isThresholdWarningActive: false,
+      lowStockThreshold: 8,
+      lowStockAlertEnabled: false,
     });
     expect(popup()!.querySelector('mat-progress-spinner')).not.toBeNull();
     save().click();
-    expect(editWarehouseItem).toHaveBeenCalledTimes(1);
+    expect(updateArticle).toHaveBeenCalledTimes(1);
 
-    answer.next();
+    answer.next({ ...LETTINO, totalQuantity: 100 });
     answer.complete();
     await fixture.whenStable();
     expect(host.open()).toBe(false);
@@ -162,13 +208,13 @@ describe('FormWarehouseEditItemPopup', () => {
   });
 
   it('should show the error of the API and keep the form when the article is not saved', async () => {
-    const { fixture, host, popup, inputs, save, type, editWarehouseItem } = await setup();
-    editWarehouseItem.mockReturnValue(
+    const { fixture, host, popup, inputs, save, type, updateArticle } = await setup();
+    updateArticle.mockReturnValue(
       throwError(
         () =>
           new HttpErrorResponse({
-            status: 400,
-            error: { status: 400, code: ApiErrorCode.ValidationFailed, title: 'Invalid request' },
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.InventoryNameTaken },
           }),
       ),
     );
@@ -178,7 +224,6 @@ describe('FormWarehouseEditItemPopup', () => {
     await fixture.whenStable();
     expect(host.open()).toBe(true);
     expect(host.saved).toBe(0);
-    // The message of the code (here the fallback key: the test has no translations).
     expect(
       popup()!.querySelector('.form__warehouse__edit__item__popup__error')?.textContent?.trim(),
     ).toBe('error.unknown');
@@ -201,8 +246,8 @@ describe('FormWarehouseEditItemPopup', () => {
   });
 
   it('should show an error of the API on a field under that field, until the field changes', async () => {
-    const { fixture, popup, inputs, save, type, editWarehouseItem } = await setup();
-    editWarehouseItem.mockReturnValue(
+    const { fixture, popup, inputs, save, type, updateArticle } = await setup();
+    updateArticle.mockReturnValue(
       throwError(
         () =>
           new HttpErrorResponse({
@@ -210,8 +255,7 @@ describe('FormWarehouseEditItemPopup', () => {
             error: {
               status: 400,
               code: ApiErrorCode.ValidationFailed,
-              title: 'Invalid request',
-              errors: [{ field: 'thresholdQuantity', code: ApiErrorCode.ValidationInvalid }],
+              errors: [{ field: 'lowStockThreshold', code: ApiErrorCode.ValidationOutOfRange }],
             },
           }),
       ),

@@ -80,14 +80,19 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
 - `idItems` sono gli elementi da eliminare, di solito gli id delle righe; `app-delete-items-popup` accetta qualunque
   tipo e lo passa uguale ad `action` (es. Stagioni e periodi passa la `key` del periodo o gli intervalli con la `key`
   del loro periodo).
+- Una riga e le righe scelte usano **sempre la stessa API**: una per Elimina e una per Duplica, con la lista degli id
+  (un id per il bottone della riga, tutti quelli scelti per la selezione), tutto o niente. Mai un'API per la riga
+  singola e un'altra per la selezione.
 - Dopo la risposta la tabella si ricarica (`reload()`): le righe eliminate escono dalla selezione e dopo "duplica
   selezionati" la selezione si svuota. Dopo l'interruttore, riuscito o no, la tabella rilegge le righe e mostra lo
   stato del server.
 - L'errore di un'azione compare in un popup, non nella tabella: vedi "Errori delle azioni" in `api-e-mock.md`.
-- Se l'eliminazione o la duplicazione fallisce, `app-delete-items-popup` / `app-duplicate-items-popup` mostra l'errore
-  come sempre e lo passa anche alla pagina con `(failed)` (facoltativo): la pagina può ricaricare quando serve, es.
-  Stagioni e periodi dopo un 404 (elemento già eliminato da qualcun altro) ricarica i periodi, Settori e file dopo
-  `catalog.sector_not_found` ricarica la tabella e toglie dalla selezione gli id dell'azione.
+- Se l'eliminazione o la duplicazione fallisce perché un elemento non c'è più (il 404 "non trovato" della sua API,
+  es. `inventory.item_not_found` o `catalog.sector_not_found`: eliminato nel frattempo da un altro utente), la pagina
+  **deve sempre** ricaricare la tabella e togliere dalla selezione gli id dell'azione (tutti, dopo un'azione sulle
+  righe scelte, dove non è stato fatto nulla). `app-delete-items-popup` / `app-duplicate-items-popup` mostrano l'errore
+  come sempre e lo passano alla pagina con `(failed)`: ogni pagina ascolta `(failed)` di tutti e due i popup (es.
+  `reloadIfGone` di Impostazioni magazzino e Settori e file; Stagioni e periodi ricarica i periodi).
 
 ## Errore di caricamento
 

@@ -43,6 +43,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idAdditionalItemsToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idAdditionalItemsToDuplicate()"
@@ -52,6 +53,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idAdditionalItemsToDuplicate())"
 />
 
 <app-table-error-popup

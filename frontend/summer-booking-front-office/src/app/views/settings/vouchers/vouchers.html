@@ -41,6 +41,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idVouchersToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idVouchersToDuplicate()"
@@ -50,6 +51,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idVouchersToDuplicate())"
 />
 
 <app-table-error-popup

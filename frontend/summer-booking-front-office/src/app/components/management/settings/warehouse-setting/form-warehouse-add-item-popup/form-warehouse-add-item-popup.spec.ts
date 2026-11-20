@@ -7,7 +7,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
-import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { FormWarehouseAddItemPopup } from './form-warehouse-add-item-popup';
 
@@ -212,7 +211,6 @@ describe('FormWarehouseAddItemPopup', () => {
     add().click();
     await fixture.whenStable();
     expect(addWarehouseItem).toHaveBeenCalledWith({
-      ...new WarehouseItem(),
       idArticle: 'a2',
       totalQuantity: 7,
       thresholdQuantity: 2,
@@ -230,6 +228,52 @@ describe('FormWarehouseAddItemPopup', () => {
     await fixture.whenStable();
     expect(host.open()).toBe(false);
     expect(host.added).toBe(1);
+  });
+
+  it('should leave threshold and alert as they are when the user does not fill them in', async () => {
+    const { fixture, popup, openSelect, addWarehouseItem } = await setup();
+    addWarehouseItem.mockReturnValue(of(undefined));
+    const [quantity] = popup()!.querySelectorAll<HTMLInputElement>('app-filled-number-field input');
+    const type = async (input: HTMLInputElement, text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
+    const add = () =>
+      [...popup()!.querySelectorAll<HTMLButtonElement>('app-button button')].find((button) =>
+        button.textContent?.includes('add'),
+      )!;
+    (await openSelect())[0].click();
+    await fixture.whenStable();
+    await type(quantity, '4');
+
+    add().click();
+    await fixture.whenStable();
+    expect(addWarehouseItem).toHaveBeenLastCalledWith({
+      idArticle: 'a1',
+      totalQuantity: 4,
+      thresholdQuantity: null,
+      isThresholdWarningActive: null,
+    });
+
+    // A threshold written, the alert untouched: only the threshold changes.
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    const [quantityAgain, thresholdAgain] = popup()!.querySelectorAll<HTMLInputElement>(
+      'app-filled-number-field input',
+    );
+    (await openSelect())[0].click();
+    await fixture.whenStable();
+    await type(quantityAgain, '4');
+    await type(thresholdAgain, '3');
+    add().click();
+    await fixture.whenStable();
+    expect(addWarehouseItem).toHaveBeenLastCalledWith({
+      idArticle: 'a1',
+      totalQuantity: 4,
+      thresholdQuantity: 3,
+      isThresholdWarningActive: null,
+    });
   });
 
   it('should show the error of the API and keep the form when the article is not added', async () => {

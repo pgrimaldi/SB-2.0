@@ -146,6 +146,11 @@
       "period_in_use": "El periodo tiene precios en las tarifas {{priceLists}}: quita primero sus precios de estas tarifas y luego elimínalo.",
       "period_in_use_by_services": "El periodo lo usan los servicios {{services}}: quita primero sus precios de estos servicios y luego elimínalo.",
       "period_overlap": "Las fechas se solapan con el periodo {{periodName}}: elige días que no estén ya en otro periodo."
+    },
+    "inventory": {
+      "item_not_found": "El artículo ya no existe: puede que ya se haya eliminado.",
+      "name_taken": "Otro artículo ya tiene este nombre.",
+      "item_in_use": "El artículo {{articleName}} se usa en las tarifas {{usedIn}} y no se puede eliminar: quítalo primero de estas tarifas."
     }
   },
   "alert": {

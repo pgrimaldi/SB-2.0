@@ -29,11 +29,10 @@ export class SectorService {
       name,
     });
 
-  /** Answers 204 with no body. */
-  readonly deleteSector = (idSector: string): Observable<void> =>
-    this.httpClient.delete<void>(`${this.endpoint}/sectors/${encodeURIComponent(idSector)}`);
-
-  /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
+  /**
+   * One sector (the trash of a row) or more (the selection), all or nothing: one id that cannot be
+   * deleted and none is. Answers 204 with no body.
+   */
   readonly deleteSectors = (idSectors: string[]): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/sectors/bulk-delete`, { idSectors });
 

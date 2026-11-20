@@ -6,6 +6,8 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { AutomaticPriceAddItemPanel } from '../../../../components/management/settings/services/automatic-price-add-item-panel/automatic-price-add-item-panel';
 import { AutomaticPriceEditItemPanel } from '../../../../components/management/settings/services/automatic-price-edit-item-panel/automatic-price-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
@@ -157,5 +159,16 @@ export class AutomaticPrices {
         (idSelectedAutomaticPrice) => !idAutomaticPrices.includes(String(idSelectedAutomaticPrice)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idAutomaticPrices: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idAutomaticPrices);
+      table.reload();
+    }
   }
 }

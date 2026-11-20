@@ -16,6 +16,8 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { AdditionalItem } from '../../../../entities/settings/catalog/additional-item';
 import { PriceListService } from '../../../../services/api/catalog/price-list.service';
 
@@ -133,5 +135,16 @@ export class AdditionalItems {
         (idSelectedAdditionalItem) => !idAdditionalItems.includes(String(idSelectedAdditionalItem)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idAdditionalItems: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idAdditionalItems);
+      table.reload();
+    }
   }
 }

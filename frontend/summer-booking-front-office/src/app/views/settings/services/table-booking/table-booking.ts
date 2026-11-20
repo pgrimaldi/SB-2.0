@@ -15,6 +15,8 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { TableServiceItem } from '../../../../entities/settings/services/table-service-item';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
@@ -130,5 +132,16 @@ export class TableBooking {
         (idSelectedTableService) => !idTableServices.includes(String(idSelectedTableService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idTableServices: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idTableServices);
+      table.reload();
+    }
   }
 }

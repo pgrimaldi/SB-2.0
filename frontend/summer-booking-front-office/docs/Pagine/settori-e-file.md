@@ -24,16 +24,14 @@ Rotta `/settings/rows-and-sectors` · vista `views/settings/rows-and-sectors/` (
 ## Azioni di riga e sui selezionati
 
 - Elimina (di riga e sui selezionati): `app-delete-items-popup` (testi
-  `management.settings.rows_and_sectors.delete.*`), poi:
-  - cestino di riga: `SectorService.deleteSector` (`DELETE /api/catalog/sectors/{id}`, 204);
-  - "Elimina selezione" (compare con almeno due righe scelte): `SectorService.deleteSectors`
-    (`POST /api/catalog/sectors/bulk-delete` con `{ idSectors }`, tutto o niente, 204), API nuova chiesta al backend
-    (sezione 2 del documento delle richieste).
+  `management.settings.rows_and_sectors.delete.*`), poi una sola API per tutti e due: `SectorService.deleteSectors`
+  (`POST /api/catalog/sectors/bulk-delete` con `{ idSectors }`: l'id della riga per il cestino, tutti gli id scelti
+  per "Elimina selezione", che compare con almeno due righe scelte; tutto o niente, 204), API nuova chiesta al
+  backend (sezione 2 del documento delle richieste).
   - Spinner a pagina intera, poi tabella ricaricata e righe tolte dalla selezione.
   - Un errore, per esempio 404 `catalog.sector_not_found` o 409 `catalog.sector_in_use`
-    (`error.catalog.sector_in_use` con nome e utilizzi), va nel popup "Operazione non riuscita". Il 409 di
-    `DELETE /api/catalog/sectors/{id}` non ha il nome del settore: la pagina aggiunge agli `args` il nome della riga
-    (`withSectorName`); quello di `bulk-delete` lo ha già.
+    (`error.catalog.sector_in_use` con nome e utilizzi: `sectorName` arriva dal backend anche con un id solo), va nel
+    popup "Operazione non riuscita".
   - Dopo `catalog.sector_not_found` (settore eliminato nel frattempo) la pagina ricarica la tabella e toglie dalla
     selezione gli id dell'azione (`reloadIfGone`): dopo "Elimina selezione" la selezione si svuota, perché con il tutto o
     niente non è stato eliminato nulla e non si sa quale id manca.

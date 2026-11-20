@@ -178,31 +178,8 @@ export const updateSectorMock = (
 };
 
 /**
- * `DELETE /api/catalog/sectors/{id}`: 404 `catalog.sector_not_found` for an id that is not a sector
- * of the property; 409 `catalog.sector_in_use` with how many map spots, price lists, stay limits and
- * discounts still use it (the mock uses "Fila 1"). 204 without a body; 401 without a valid access
- * token.
- */
-export const deleteSectorMock = (
-  request: HttpRequest<unknown>,
-  idSector: string,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const sector = sectorOfProperty(DEMO_PROPERTY.id, idSector);
-  if (!sector) {
-    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
-  }
-  if (sector.usage) {
-    return problem(request, 409, ApiErrorCode.CatalogSectorInUse, { args: { ...sector.usage } });
-  }
-  SECTORS.splice(SECTORS.indexOf(sector), 1);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-/**
- * `POST /api/catalog/sectors/bulk-delete` with `{ idSectors }`: all or nothing. If one id is not a
+ * `POST /api/catalog/sectors/bulk-delete` with `{ idSectors }`, one id or more: all or nothing. If
+ * one id is not a
  * sector of the property nothing is deleted (404 `catalog.sector_not_found`); a sector still used
  * stops it too (409 `catalog.sector_in_use` with the name of that sector and its uses). Repeated ids
  * count once. 204 without a body; 401 without a valid access token.

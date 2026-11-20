@@ -649,157 +649,6 @@ Stato: 200 OK.
 | `rows[].thresholdQuantity` | number (intero) \| null | `10` |
 | `rows[].isThresholdWarningActive` | boolean | `true` |
 
-### POST `/api/warehouse/article-combobox`
-
-Magazzino: articoli per la tendina.
-
-#### Payload
-
-Nessun corpo né parametri: lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 200 OK.
-
-```json
-[
-  {
-    "id": "4a9e2c1f-7b3d-4e8a-9c6b-2d1f5e7a8b9c",
-    "value": "Cabina"
-  },
-  {
-    "id": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
-    "value": "Lettino"
-  },
-  {
-    "id": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b",
-    "value": "Lettino XL"
-  },
-  {
-    "id": "6d1b8e4f-3c2a-4f9e-b7a5-9e8d7c6b5a4f",
-    "value": "Ombrellone"
-  }
-]
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `id` | string (UUID) | `4a9e2c1f-7b3d-4e8a-9c6b-2d1f5e7a8b9c` |
-| `value` | string | `Cabina` |
-
-### POST `/api/warehouse/add-warehouse-item`
-
-Magazzino: aggiunta di un articolo.
-
-#### Payload
-
-```json
-{
-  "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
-  "name": "Lettino",
-  "totalQuantity": 10,
-  "availableQuantity": 120,
-  "thresholdQuantity": 5,
-  "isThresholdWarningActive": true
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
-| `name` | string \| null | `Lettino` |
-| `totalQuantity` | number (intero > 0) | `10` |
-| `availableQuantity` | number (intero) \| null | `120` |
-| `thresholdQuantity` | number (intero ≥ 0) \| null | `5` |
-| `isThresholdWarningActive` | boolean | `true` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/warehouse/edit-warehouse-item`
-
-Magazzino: modifica di un articolo.
-
-#### Payload
-
-```json
-{
-  "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
-  "name": "Lettino",
-  "totalQuantity": 110,
-  "availableQuantity": 84,
-  "thresholdQuantity": 8,
-  "isThresholdWarningActive": true
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
-| `name` | string \| null | `Lettino` |
-| `totalQuantity` | number (intero > 0) | `110` |
-| `availableQuantity` | number (intero) \| null | `84` |
-| `thresholdQuantity` | number (intero ≥ 0) \| null | `8` |
-| `isThresholdWarningActive` | boolean | `true` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/warehouse/delete-warehouse-item`
-
-Magazzino: eliminazione di articoli.
-
-#### Payload
-
-```json
-{
-  "idItems": [
-    "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
-    "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"]` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
-### POST `/api/warehouse/duplicate-warehouse-item`
-
-Magazzino: duplicazione di articoli.
-
-#### Payload
-
-```json
-{
-  "idItems": [
-    "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c"
-  ]
-}
-```
-
-| Property | Tipo | Esempio |
-|---|---|---|
-| `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c"]` |
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
 ## /database
 
 ### POST `/api/database/existing-booking-list`
@@ -2335,6 +2184,265 @@ Stagioni e periodi: elimina intervalli della prossima stagione.
 | `ranges[].key` | number (intero) | `0` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-09-01` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-09-30` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/inventory-items-list`
+
+Impostazioni magazzino: elenco articoli.
+
+#### Payload
+
+```json
+{
+  "page": 1,
+  "pageSize": 10,
+  "search": "lett",
+  "filters": [],
+  "sortField": "name",
+  "sortDirection": "Ascending"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `page` | number (intero, da 1) | `1` |
+| `pageSize` | number (intero) | `10` |
+| `search` | string | `lett` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
+| `sortField` | string | `name` |
+| `sortDirection` | string (enum SortDirection) | `Ascending` |
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "total": 2,
+  "rows": [
+    {
+      "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+      "name": "Lettino",
+      "totalQuantity": 120,
+      "thresholdQuantity": 5
+    },
+    {
+      "idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b",
+      "name": "Lettino XL",
+      "totalQuantity": 16,
+      "thresholdQuantity": null
+    }
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `total` | number (intero) | `2` |
+| `rows[]` | WarehouseSettingItem[] (array di oggetti) | `[{"idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "name": "Lettino", "totalQuantity": 120, "thresholdQuantity": 5}, {"idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b", "name": "Lettino XL", "totalQuantity": 16, "thresholdQuantity": null}]` |
+| `rows[].idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
+| `rows[].name` | string | `Lettino` |
+| `rows[].totalQuantity` | number (intero) | `120` |
+| `rows[].thresholdQuantity` | number (intero) \| null | `5` |
+
+### POST `/api/catalog/article-combobox`
+
+Magazzino: articoli per la tendina.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "id": "4a9e2c1f-7b3d-4e8a-9c6b-2d1f5e7a8b9c",
+    "value": "Cabina"
+  },
+  {
+    "id": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+    "value": "Lettino"
+  },
+  {
+    "id": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b",
+    "value": "Lettino XL"
+  },
+  {
+    "id": "6d1b8e4f-3c2a-4f9e-b7a5-9e8d7c6b5a4f",
+    "value": "Ombrellone"
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `4a9e2c1f-7b3d-4e8a-9c6b-2d1f5e7a8b9c` |
+| `value` | string | `Cabina` |
+
+### POST `/api/catalog/add-warehouse-item`
+
+Magazzino: aggiunta di pezzi a un articolo.
+
+#### Payload
+
+```json
+{
+  "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+  "totalQuantity": 10,
+  "thresholdQuantity": null,
+  "isThresholdWarningActive": null
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
+| `totalQuantity` | number (intero > 0) | `10` |
+| `thresholdQuantity` | number (intero ≥ 0) \| null | `null` |
+| `isThresholdWarningActive` | boolean \| null | `null` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### GET `/api/catalog/inventory-items/{id}`
+
+Magazzino: articolo da modificare.
+
+#### Payload
+
+Nessun corpo: l'id dell'articolo va nell'indirizzo e lo stabilimento viene dal token (header Authorization: Bearer <accessToken>, come ogni chiamata).
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+{
+  "id": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+  "articleCode": "sunbed",
+  "name": "Lettino",
+  "totalQuantity": 120,
+  "lowStockThreshold": 5,
+  "lowStockAlertEnabled": true,
+  "mapPlaceable": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
+| `articleCode` | string \| null | `sunbed` |
+| `name` | string | `Lettino` |
+| `totalQuantity` | number (intero) | `120` |
+| `lowStockThreshold` | number (intero) \| null | `5` |
+| `lowStockAlertEnabled` | boolean | `true` |
+| `mapPlaceable` | boolean | `true` |
+
+### PUT `/api/catalog/edit-warehouse-item/{id}`
+
+Magazzino: modifica di un articolo.
+
+#### Payload
+
+```json
+{
+  "articleCode": "sunbed",
+  "name": "Lettino",
+  "totalQuantity": 110,
+  "lowStockThreshold": 8,
+  "lowStockAlertEnabled": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `articleCode` | string \| null | `sunbed` |
+| `name` | string | `Lettino` |
+| `totalQuantity` | number (intero > 0) | `110` |
+| `lowStockThreshold` | number (intero ≥ 0) \| null | `8` |
+| `lowStockAlertEnabled` | boolean | `true` |
+
+#### Response
+
+Stato: 200 OK (l'articolo salvato).
+
+```json
+{
+  "id": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+  "articleCode": "sunbed",
+  "name": "Lettino",
+  "totalQuantity": 110,
+  "lowStockThreshold": 8,
+  "lowStockAlertEnabled": true,
+  "mapPlaceable": true
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `id` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
+| `articleCode` | string \| null | `sunbed` |
+| `name` | string | `Lettino` |
+| `totalQuantity` | number (intero) | `110` |
+| `lowStockThreshold` | number (intero) \| null | `8` |
+| `lowStockAlertEnabled` | boolean | `true` |
+| `mapPlaceable` | boolean | `true` |
+
+### POST `/api/catalog/delete-warehouse-item`
+
+Magazzino: eliminazione di articoli.
+
+#### Payload
+
+```json
+{
+  "idItems": [
+    "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+    "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"]` |
+
+#### Response
+
+Stato: 204 No Content (nessun corpo).
+
+Nessun corpo.
+
+### POST `/api/catalog/duplicate-warehouse-item`
+
+Magazzino: duplicazione di articoli.
+
+#### Payload
+
+```json
+{
+  "idItems": [
+    "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
+    "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"
+  ]
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idItems` | string[] (UUID, almeno uno) | `["8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b"]` |
 
 #### Response
 
@@ -6554,23 +6662,9 @@ Stato: 200 OK (il settore salvato).
 | `name` | string | `Fila 2 lato mare` |
 | `sortOrder` | number (intero) | `1` |
 
-### DELETE `/api/catalog/sectors/{id}`
-
-Settori e file: eliminazione di un settore.
-
-#### Payload
-
-Nessun corpo: l'id del settore va nell'indirizzo e lo stabilimento viene dal token.
-
-#### Response
-
-Stato: 204 No Content (nessun corpo).
-
-Nessun corpo.
-
 ### POST `/api/catalog/sectors/bulk-delete`
 
-Settori e file: eliminazione di più settori.
+Settori e file: eliminazione di settori.
 
 #### Payload
 
@@ -6585,7 +6679,7 @@ Settori e file: eliminazione di più settori.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idSectors` | string[] (UUID, almeno due) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"]` |
+| `idSectors` | string[] (UUID, almeno uno) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03"]` |
 
 #### Response
 

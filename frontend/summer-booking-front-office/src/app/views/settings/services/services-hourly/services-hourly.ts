@@ -15,6 +15,8 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { HourlyServiceItem } from '../../../../entities/settings/services/hourly-service-item';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
@@ -130,5 +132,16 @@ export class ServicesHourly {
         (idSelectedHourlyService) => !idHourlyServices.includes(String(idSelectedHourlyService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idHourlyServices: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idHourlyServices);
+      table.reload();
+    }
   }
 }

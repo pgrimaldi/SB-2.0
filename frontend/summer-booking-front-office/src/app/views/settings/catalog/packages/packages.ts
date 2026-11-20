@@ -16,6 +16,8 @@ import {
   TableRowId,
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { PackageItem } from '../../../../entities/settings/catalog/package-item';
 import { PriceListService } from '../../../../services/api/catalog/price-list.service';
 
@@ -127,5 +129,16 @@ export class Packages {
     this.idSelectedPackages.update((idSelected) =>
       idSelected.filter((idSelectedPackage) => !idPackages.includes(String(idSelectedPackage))),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idPackages: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idPackages);
+      table.reload();
+    }
   }
 }

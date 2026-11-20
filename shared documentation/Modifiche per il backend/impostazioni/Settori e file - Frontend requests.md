@@ -12,19 +12,20 @@ ordinamento per nome e pagine, e i comandi per aggiungere, rinominare, duplicare
 | # | Metodo | Rotta | Cosa fa |
 |---|---|---|---|
 | 1 | POST | `/api/catalog/sectors-list` | Elenco dei settori per la tabella, a pagine |
-| 2 | POST | `/api/catalog/sectors/bulk-delete` | Elimina più settori insieme, tutto o niente |
+| 2 | POST | `/api/catalog/sectors/bulk-delete` | Elimina uno o più settori, tutto o niente |
 | 3 | POST | `/api/catalog/sectors/bulk-duplicate` | Duplica uno o più settori, tutto o niente |
 
-Aggiungi, Modifica ed Elimina di una riga usano le API che ci sono già, così come sono: `POST /api/catalog/sectors`,
-`PUT /api/catalog/sectors/{id}` e `DELETE /api/catalog/sectors/{id}`.
+Aggiungi e Modifica di una riga usano le API che ci sono già, così come sono: `POST /api/catalog/sectors` e
+`PUT /api/catalog/sectors/{id}`. Per eliminare, anche una riga sola, il frontend usa solo l'API 2.
 
 ## Regole comuni
 
 - **Modulo**: le API stanno in Catalog (`Module.Catalog`), accanto a `/api/catalog/sectors` (`Endpoints/SeasonEndpoints.cs`,
   `Application/Services/SectorService.cs`), con i dati di `MapSector` (`catalog.map_sectors`).
-- **Le API esistenti non cambiano**: `GET`, `POST`, `PUT` e `DELETE /api/catalog/sectors` restano come sono: stesse
-  rotte, richieste, risposte e comportamento, salvo la risposta ai salvataggi contemporanei dello stesso nome (vedi
-  "Due salvataggi dello stesso nome nello stesso momento").
+- **Le API esistenti non cambiano**: `GET`, `POST`, `PUT` e `DELETE /api/catalog/sectors` restano come sono (il
+  frontend non usa la `DELETE`: per eliminare usa solo la sezione 2): stesse rotte, richieste, risposte e
+  comportamento, salvo la risposta ai salvataggi contemporanei dello stesso nome (vedi "Due salvataggi dello stesso
+  nome nello stesso momento").
 - **Permesso**: per l'API 1 `CatalogRead`, come `GET /api/catalog/sectors`; per le API 2 e 3 `CatalogSettings`, come
   `POST`, `PUT` e `DELETE /api/catalog/sectors`. Senza permesso 403 `auth.forbidden`; senza token valido 401
   `auth.unauthenticated`.
@@ -137,9 +138,10 @@ testo del codice.
 
 ## 2. POST /api/catalog/sectors/bulk-delete
 
-"Elimina selezione" della tabella (compare con almeno due righe scelte), dopo la conferma nel popup: elimina **più
-settori in una sola chiamata, tutto o niente**. È un'**API nuova**. Il cestino di una riga usa
-`DELETE /api/catalog/sectors/{id}`, che c'è già e resta com'è.
+**L'unica API con cui il frontend elimina i settori**, dopo la conferma nel popup: il cestino di una riga la chiama con
+un id, "Elimina selezione" della tabella (compare con almeno due righe scelte) con tutti gli id scelti. Elimina **uno o
+più settori in una sola chiamata, tutto o niente**. È un'**API nuova**: il frontend non usa
+`DELETE /api/catalog/sectors/{id}`, che resta com'è.
 
 ### Cosa ci serve
 
@@ -165,7 +167,7 @@ settori in una sola chiamata, tutto o niente**. È un'**API nuova**. Il cestino 
 
 | Campo | Tipo | Regola |
 |---|---|---|
-| `idSectors` | array di string (UUID) | Gli `idSector` delle righe di `sectors-list` (il `public_id` dei settori), almeno uno. Lo stesso id ripetuto conta una volta. La selezione della tabella può comprendere righe di più pagine, quindi anche tutti i settori dello stabilimento. |
+| `idSectors` | array di string (UUID) | Gli `idSector` delle righe di `sectors-list` (il `public_id` dei settori), almeno uno: uno solo per il cestino di una riga, tutti quelli scelti per "Elimina selezione". Lo stesso id ripetuto conta una volta. La selezione della tabella può comprendere righe di più pagine, quindi anche tutti i settori dello stabilimento. |
 
 Il frontend non ha un tetto al numero di id. Se ne serve uno (come i 300 di `BulkIdsRequest.MaxIds`), lo decide lo
 sviluppatore backend: l'agente glielo chiede prima di scrivere codice e lo scrive qui, così il frontend lo rispetta.
@@ -186,7 +188,7 @@ Nell'ordine in cui si controllano:
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `catalog.sector_not_found` | Un id non è un settore dello stabilimento (anche perché già eliminato). Non si elimina nessun settore. |
-| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`) e **in più `sectorName`**, il nome di quel settore: con più settori il messaggio deve dire quale. |
+| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`) e **in più `sectorName`**, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. |
 
 Prima si controlla che tutti gli id siano settori dello stabilimento (404 se uno non lo è), poi che nessuno sia usato:
 con più settori in uso, `sectorName` e i conteggi sono quelli del primo in uso nell'ordine di `idSectors`.
@@ -270,7 +272,6 @@ Il frontend le chiama senza modifiche; qui solo come le usa e dove mostra le ris
 |---|---|---|---|---|
 | Salva del popup "Aggiungi settore/fila" | `POST /api/catalog/sectors` | `{ "name": "Fila 9" }` (`SaveSectorRequest`) | 201 con `SectorDto`: il frontend non la legge e ricarica la tabella | `validation.failed` su `name` e 409 `catalog.sector_name_taken` sotto il campo del nome; gli altri sopra i bottoni del popup. |
 | Salva del popup della matita | `PUT /api/catalog/sectors/{id}`, con l'`idSector` della riga | `{ "name": "Fila 2 lato mare" }` | 200 con `SectorDto`: il frontend non la legge e ricarica la tabella | Come l'aggiunta; 404 `catalog.sector_not_found` sopra i bottoni. |
-| Cestino di una riga | `DELETE /api/catalog/sectors/{id}`, con l'`idSector` della riga | Nessuno | 204: il frontend ricarica la tabella | Nell'avviso "Operazione non riuscita". Il 409 `catalog.sector_in_use` di questa API non ha `sectorName`: il frontend aggiunge da sé il nome della riga, il backend non deve cambiare nulla. |
 
 ### Due salvataggi dello stesso nome nello stesso momento
 
@@ -310,7 +311,7 @@ API 1, con uno stabilimento di prova con 12 settori e un token con `catalog.read
 API 2 e 3, con un token con `catalog.settings`:
 
 1. `bulk-delete` di due settori non usati: 204; non compaiono più in `sectors-list` né in `GET /api/catalog/sectors`, e
-   nel registro ci sono due voci `catalog.sector_deleted`.
+   nel registro ci sono due voci `catalog.sector_deleted`. Con un solo id non usato: 204 e una voce.
 2. `bulk-delete` di un settore non usato e di uno usato da una postazione: 409 `catalog.sector_in_use` con `args` del
    settore usato, `sectorName` compreso; nessuno dei due è eliminato.
 3. `bulk-delete` o `bulk-duplicate` con un id di un altro stabilimento o già eliminato: 404 `catalog.sector_not_found`
@@ -321,6 +322,8 @@ API 2 e 3, con un token con `catalog.settings`:
 5. `bulk-duplicate` dello stesso settore due volte di seguito: due copie con nomi diversi.
 6. `idSectors` vuoto: 400 `validation.failed` con `validation.required` su `idSectors`; senza `catalog.settings` 403
    `auth.forbidden`.
+7. `bulk-delete` con un solo id di un settore usato da una postazione: 409 `catalog.sector_in_use` con `sectorName` e
+   i conteggi; il settore non è eliminato.
 
 Salvataggi contemporanei:
 

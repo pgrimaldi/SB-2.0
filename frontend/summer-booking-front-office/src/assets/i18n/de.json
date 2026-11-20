@@ -146,6 +146,11 @@
       "period_in_use": "Der Zeitraum hat Preise in den Preislisten {{priceLists}}: Entferne zuerst seine Preise aus diesen Preislisten und lösche ihn dann.",
       "period_in_use_by_services": "Der Zeitraum wird von den Leistungen {{services}} verwendet: Entferne zuerst seine Preise aus diesen Leistungen und lösche ihn dann.",
       "period_overlap": "Die Daten überschneiden sich mit dem Zeitraum {{periodName}}: Wähle Tage, die nicht schon in einem anderen Zeitraum liegen."
+    },
+    "inventory": {
+      "item_not_found": "Der Artikel ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "name_taken": "Ein anderer Artikel hat bereits diesen Namen.",
+      "item_in_use": "Der Artikel {{articleName}} wird in den Preislisten {{usedIn}} verwendet und kann nicht gelöscht werden: Entferne ihn zuerst aus diesen Preislisten."
     }
   },
   "alert": {

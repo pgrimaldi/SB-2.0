@@ -60,6 +60,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `duplicate`), spinner a pagina intera, poi la tabella si ricarica.
 - Corpo con la sola lista degli id (es. `{ idBarServices }`), tutto o niente, 204. Le righe eliminate escono dalla
   selezione; dopo "duplica selezionati" la selezione si svuota.
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
+  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `delete-bar-service-item`, `duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `delete-standard-service-item`, `duplicate-standard-service-item` (`idStandardServices`);

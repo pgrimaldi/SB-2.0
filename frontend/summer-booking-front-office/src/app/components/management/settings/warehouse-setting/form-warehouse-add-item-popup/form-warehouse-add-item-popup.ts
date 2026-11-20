@@ -33,6 +33,7 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { WarehouseItem } from '../../../../../entities/warehouse/warehouse-item';
+import { WarehouseItemAddRequest } from '../../../../../entities/warehouse/warehouse-item-add-request';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { greaterThan } from '../../../../shared/forms/validators';
@@ -136,10 +137,11 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     }
 
     void submit(this.draftForm, async (): Promise<TreeValidationResult> => {
+      const request = this.request();
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.warehouse.addWarehouseItem(this.draft()));
+        await firstValueFrom(this.warehouse.addWarehouseItem(request));
         this.isLoading.set(false);
         this.close();
         this.added.emit();
@@ -181,6 +183,19 @@ export class FormWarehouseAddItemPopup extends BasePopup implements UnsavedChang
     this.draft.set(new WarehouseItem());
     this.draftForm().reset();
     this.error.set(null);
+  }
+
+  /** The popup does not show threshold and alert of the article: left untouched, they go as null. */
+  private request(): WarehouseItemAddRequest {
+    const { idArticle, totalQuantity, thresholdQuantity, isThresholdWarningActive } = this.draft();
+    return {
+      idArticle,
+      totalQuantity,
+      thresholdQuantity,
+      isThresholdWarningActive: this.draftForm.isThresholdWarningActive().dirty()
+        ? isThresholdWarningActive
+        : null,
+    };
   }
 
   override ngOnDestroy(): void {

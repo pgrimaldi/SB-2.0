@@ -59,6 +59,9 @@ export enum ApiErrorCode {
   PricingPeriodInUse = 'pricing.period_in_use',
   PricingPeriodInUseByServices = 'pricing.period_in_use_by_services',
   PricingPeriodOverlap = 'pricing.period_overlap',
+  InventoryItemNotFound = 'inventory.item_not_found',
+  InventoryNameTaken = 'inventory.name_taken',
+  InventoryItemInUse = 'inventory.item_in_use',
 }
 
 export const API_ERROR_CODES: readonly ApiErrorCode[] = Object.values(ApiErrorCode);

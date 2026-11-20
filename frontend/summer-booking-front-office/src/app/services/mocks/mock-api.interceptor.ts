@@ -76,7 +76,6 @@ import {
 } from './catalog/map.mock';
 import {
   addSectorMock,
-  deleteSectorMock,
   deleteSectorsMock,
   duplicateSectorsMock,
   sectorComboboxMock,
@@ -154,9 +153,11 @@ import {
 import {
   warehouseAddMock,
   articleComboboxMock,
-  warehouseDeleteMock,
+  deleteArticlesMock,
+  inventoryItemsListMock,
   warehouseDuplicateMock,
-  warehouseEditMock,
+  selectedArticleMock,
+  updateArticleMock,
   warehouseMock,
 } from './warehouse/warehouse.mock';
 
@@ -166,6 +167,8 @@ const TARIFF_PERIODS_URL =
 
 /** The sectors: the add, one sector by id, or the bulk delete and duplicate. */
 const SECTORS_URL = /^\/catalog\/sectors(?:\/(bulk-delete|bulk-duplicate)|\/([^/]+))?$/;
+const INVENTORY_ITEM_URL = /^\/catalog\/inventory-items\/([^/]+)$/;
+const EDIT_WAREHOUSE_ITEM_URL = /^\/catalog\/edit-warehouse-item\/([^/]+)$/;
 
 /** Answers the mocked endpoints; included only in builds with mocks (see `mock-interceptors.ts`). */
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
@@ -242,35 +245,48 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/warehouse/article-combobox`
+    request.url === `${environment.apiBaseUrl}/catalog/inventory-items-list`
+  ) {
+    return inventoryItemsListMock(request);
+  }
+
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/article-combobox`
   ) {
     return articleComboboxMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/warehouse/add-warehouse-item`
+    request.url === `${environment.apiBaseUrl}/catalog/add-warehouse-item`
   ) {
     return warehouseAddMock(request);
   }
 
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/warehouse/edit-warehouse-item`
-  ) {
-    return warehouseEditMock(request);
+  const inventoryItem = request.url.startsWith(environment.apiBaseUrl)
+    ? INVENTORY_ITEM_URL.exec(request.url.slice(environment.apiBaseUrl.length))
+    : null;
+  if (inventoryItem && request.method === 'GET') {
+    return selectedArticleMock(request, decodeURIComponent(inventoryItem[1]));
+  }
+  const editedItem = request.url.startsWith(environment.apiBaseUrl)
+    ? EDIT_WAREHOUSE_ITEM_URL.exec(request.url.slice(environment.apiBaseUrl.length))
+    : null;
+  if (editedItem && request.method === 'PUT') {
+    return updateArticleMock(request, decodeURIComponent(editedItem[1]));
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/warehouse/delete-warehouse-item`
+    request.url === `${environment.apiBaseUrl}/catalog/delete-warehouse-item`
   ) {
-    return warehouseDeleteMock(request);
+    return deleteArticlesMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/warehouse/duplicate-warehouse-item`
+    request.url === `${environment.apiBaseUrl}/catalog/duplicate-warehouse-item`
   ) {
     return warehouseDuplicateMock(request);
   }
@@ -961,9 +977,6 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     }
     if (request.method === 'PUT' && idSector !== undefined) {
       return updateSectorMock(request, decodeURIComponent(idSector));
-    }
-    if (request.method === 'DELETE' && idSector !== undefined) {
-      return deleteSectorMock(request, decodeURIComponent(idSector));
     }
     if (request.method === 'POST' && bulk === 'bulk-delete') {
       return deleteSectorsMock(request);

@@ -44,6 +44,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idBarServicesToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idBarServicesToDuplicate()"
@@ -53,6 +54,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idBarServicesToDuplicate())"
 />
 
 <app-table-error-popup

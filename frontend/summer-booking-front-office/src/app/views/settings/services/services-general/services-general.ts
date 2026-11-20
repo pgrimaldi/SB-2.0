@@ -6,6 +6,8 @@ import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { DateLanguageBehaviour } from '../../../../behaviours/i18n/date-language.behaviour';
 import { DeleteItemsPopup } from '../../../../components/management/delete-items-popup/delete-items-popup';
 import { DuplicateItemsPopup } from '../../../../components/management/duplicate-items-popup/duplicate-items-popup';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { GeneralServiceAddItemPanel } from '../../../../components/management/settings/services/general-service-add-item-panel/general-service-add-item-panel';
 import { GeneralServiceEditItemPanel } from '../../../../components/management/settings/services/general-service-edit-item-panel/general-service-edit-item-panel';
 import { standardRowActions } from '../../../../components/shared/tables/standard-row-actions';
@@ -158,5 +160,16 @@ export class ServicesGeneral {
           !idStandardServices.includes(String(idSelectedStandardService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idStandardServices: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idStandardServices);
+      table.reload();
+    }
   }
 }

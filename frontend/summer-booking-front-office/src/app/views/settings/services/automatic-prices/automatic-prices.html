@@ -44,6 +44,7 @@
   [pathIcon]="alertIcons"
   [(open)]="deleting"
   (deleted)="forgetDeleted($event); table.reload()"
+  (failed)="reloadIfGone($event, table, idAutomaticPricesToDelete())"
 />
 <app-duplicate-items-popup
   [idItems]="idAutomaticPricesToDuplicate()"
@@ -53,6 +54,7 @@
   [pathIcon]="alertIcons"
   [(open)]="duplicating"
   (duplicated)="afterDuplicate(); table.reload()"
+  (failed)="reloadIfGone($event, table, idAutomaticPricesToDuplicate())"
 />
 
 <app-table-error-popup

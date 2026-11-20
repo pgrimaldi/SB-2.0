@@ -21,6 +21,8 @@ import {
   TableRowId,
 } from '../../../components/shared/ui/tables/table/table';
 import { DiscountType } from '../../../entities/enums/discount-type';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../entities/errors/api-problem';
 import { VoucherService } from '../../../services/api/vouchers/voucher.service';
 
 interface VouchersTexts {
@@ -210,5 +212,16 @@ export class Vouchers {
     this.idSelectedVouchers.update((idSelected) =>
       idSelected.filter((idSelectedVoucher) => !idVouchers.includes(String(idSelectedVoucher))),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idVouchers: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idVouchers);
+      table.reload();
+    }
   }
 }

@@ -25,7 +25,7 @@ periodo, festivi, prezzi intermedi).
 | 9 | POST | `/api/catalog/delete-additional-services-article-item` | Cancella uno o più articoli aggiuntivi, tutti o nessuno |
 | 10 | POST | `/api/catalog/duplicate-additional-services-article-item` | Duplica uno o più articoli aggiuntivi, tutti o nessuno |
 | 11 | POST | `/api/catalog/package-combobox` | Tendina "Pacchetti" dei pannelli degli articoli aggiuntivi |
-| 12 | POST | `/api/warehouse/article-combobox` | Tendina "Seleziona articolo" (anche Impostazioni magazzino) |
+| 12 | POST | `/api/catalog/article-combobox` | Tendina "Seleziona articolo" (anche Impostazioni magazzino) |
 | 13 | POST | `/api/catalog/create-additional-services-article-item` | Crea un articolo aggiuntivo |
 | 14 | GET | `/api/catalog/get-additional-services-article-item` | Legge un articolo aggiuntivo per il pannello di modifica |
 | 15 | POST | `/api/catalog/update-additional-services-article-item` | Salva un articolo aggiuntivo modificato |
@@ -146,7 +146,7 @@ tabelle (per esempio `vouchers/duplicate-voucher-item`). Per il frontend sostitu
 
 Tendina a scelta multipla "Aree abilitate" della tab Info Generali dei pannelli "Aggiungi nuovo pacchetto" e
 "Modifica pacchetto" (pagina Listino), riletta a ogni apertura della tab. Combobox standard come le altre del frontend
-(`catalog/sector-combobox`, `warehouse/article-combobox`): tutte le aree della mappa dello stabilimento, senza pagine,
+(`catalog/sector-combobox`, `catalog/article-combobox`): tutte le aree della mappa dello stabilimento, senza pagine,
 nel loro ordine.
 
 - POST senza corpo: lo stabilimento lo prende il backend dal token.
@@ -515,7 +515,7 @@ Listino), come `duplicate-package-item`. Per il frontend sostituisce `POST /pric
 
 Tendina a scelta multipla "Pacchetti" dei pannelli di aggiunta e di modifica degli articoli/servizi aggiuntivi
 (pagina Listino), riletta a ogni apertura del pannello. Combobox standard come le altre del frontend (`catalog/sector-combobox`,
-`warehouse/article-combobox`): tutti i pacchetti dello stabilimento, senza pagine, nel loro ordine.
+`catalog/article-combobox`): tutti i pacchetti dello stabilimento, senza pagine, nel loro ordine.
 
 - POST senza corpo: lo stabilimento lo prende il backend dal token.
 - Risposta 200: un array di `{ id, value }`, con `id` = `idPackage` e `value` = nome del pacchetto, scelto
@@ -530,39 +530,17 @@ Tendina a scelta multipla "Pacchetti" dei pannelli di aggiunta e di modifica deg
 
 - Errori: 403 `auth.forbidden` per un utente senza il permesso per questa operazione; 401 `auth.unauthenticated`.
 
-## 12. POST /api/warehouse/article-combobox
+## 12. POST /api/catalog/article-combobox
 
 Tendina obbligatoria "Seleziona articolo" dei pannelli "Aggiungi nuovo articolo/servizio aggiuntivo" e "Modifica
-articolo/servizio aggiuntivo" (pagina Listino) e tendina "Articolo" del popup "Aggiungi articolo" (Impostazioni
-magazzino), riletta a ogni apertura del pannello o del popup. Combobox standard come le altre del frontend
-(`catalog/sector-combobox`, `catalog/package-combobox`): tutti gli articoli di magazzino dello stabilimento, senza
-pagine, in ordine di nome.
+articolo/servizio aggiuntivo" (pagina Listino), riletta a ogni apertura del pannello. È la stessa API della tendina
+"Articolo" del popup "Aggiungi articolo" delle Impostazioni magazzino: **si fa una volta sola**, come la descrive la
+sezione 2 di `Impostazioni magazzino - Frontend requests.md` (rotta, risposta `[{ id, value }]`, ordine, permesso
+`CatalogRead` o `InventoryRead`, errori e verifica).
 
-Oggi il backend non ha questa rotta: ha `GET /api/catalog/inventory-items/lookup` (`InventoryService.LookupAsync`), con
-gli stessi articoli e lo stesso ordine ma in un'altra forma (`{ id, name, articleCode }`). Quella resta com'è; la nuova
-può riusarne la logica e cambia solo rotta, metodo e nomi dei campi.
-
-- POST senza corpo: lo stabilimento lo prende il backend dal token.
-- Risposta 200: un array di `{ id, value }`, con `id` = l'id pubblico dell'articolo (`catalog.inventory_items.public_id`,
-  lo stesso `Id` di `inventory-items/lookup`) e `value` = il suo nome; solo gli articoli non eliminati, in ordine di
-  nome; array vuoto se non ce ne sono.
-
-```json
-[
-  { "id": "6f1d2c3b-4a5e-4f60-8b7c-9d0e1f2a3b01", "value": "Lettino" },
-  { "id": "6f1d2c3b-4a5e-4f60-8b7c-9d0e1f2a3b02", "value": "Ombrellone" },
-  { "id": "6f1d2c3b-4a5e-4f60-8b7c-9d0e1f2a3b03", "value": "Sdraio" }
-]
-```
-
-- L'`id` scelto è l'`idArticle` che il frontend manda in `create-additional-services-article-item` e
-  `update-additional-services-article-item` e che legge in `get-additional-services-article-item`: deve essere lo
-  stesso id.
-- Permesso: basta uno tra lettura del catalogo (`CatalogRead`, come le altre tendine del Listino) e lettura del
-  magazzino (`InventoryRead`, come `inventory-items/lookup`), così vede la tendina chi apre il Listino o le Impostazioni
-  magazzino.
-- Errori: 403 `auth.forbidden` per un utente senza il permesso; 403 `catalog.property_required` per un account senza
-  stabilimento; 401 `auth.unauthenticated`. Il frontend mostra l'errore sotto la tendina.
+Per il Listino conta in più: l'`id` scelto è l'`idArticle` che il frontend manda in
+`create-additional-services-article-item` e `update-additional-services-article-item` e che legge in
+`get-additional-services-article-item`: deve essere lo stesso id.
 
 ## 13. POST /api/catalog/create-additional-services-article-item
 
@@ -594,7 +572,7 @@ frontend manda tutto il modulo in una sola chiamata. Per il frontend sostituisce
 
 Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
 
-- `idArticle`: l'articolo di magazzino scelto in "Seleziona articolo" (id di `warehouse/article-combobox`),
+- `idArticle`: l'articolo di magazzino scelto in "Seleziona articolo" (id di `catalog/article-combobox`),
   obbligatorio, al posto di `items` (che per un articolo aggiuntivo ha un solo elemento). Il nome dell'articolo
   aggiuntivo è quello dell'articolo: il frontend non manda `name` né `translations`.
 - `idPackages`: pacchetti scelti in "Pacchetti" (id di `catalog/package-combobox`), `[]` = tutti i pacchetti, al

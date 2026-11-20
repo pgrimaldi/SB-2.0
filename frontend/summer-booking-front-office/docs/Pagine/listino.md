@@ -21,6 +21,8 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Duplica di riga e "duplica selezionati": `app-duplicate-items-popup`, poi
   `POST /api/catalog/duplicate-package-item` (stesso corpo, tutto o niente, 204; i nomi delle copie li sceglie
   il backend).
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
+  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
 - "Aggiungi pacchetto" apre `app-package-add-item-panel`, la matita `app-package-edit-item-panel`.
 
 ## Pannelli dei pacchetti
@@ -201,12 +203,14 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Cestino ed "elimina selezionati": `POST /api/catalog/delete-additional-services-article-item`.
 - Duplica e "duplica selezionati": `POST /api/catalog/duplicate-additional-services-article-item`.
 - Corpo `{ idAdditionalItems }`, tutto o niente, 204.
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
+  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
 
 ### Pannello Aggiungi (`app-additional-item-add-item-panel`)
 
 - In `components/management/settings/catalog/additional-item-add-item-panel/`: `app-side-panel` senza tab, modulo
   `AdditionalItemAddItemRequest`, conferma "Modifiche non salvate".
-- "Seleziona articolo", obbligatoria: articoli del magazzino da `POST /api/warehouse/article-combobox`
+- "Seleziona articolo", obbligatoria: articoli del magazzino da `POST /api/catalog/article-combobox`
   (`idArticle`).
 - "Pacchetti": scelta multipla da `POST /api/catalog/package-combobox` (`idPackages`; vuota = "Tutti i pacchetti").
 - Caselle "Prenotazioni online", "Solo online" e, in una cornice, "Imposta come articolo assegnabile su mappa"

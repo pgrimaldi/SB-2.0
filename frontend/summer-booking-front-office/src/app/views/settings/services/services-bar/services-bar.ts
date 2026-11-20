@@ -18,6 +18,8 @@ import {
 } from '../../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../../components/shared/ui/titles/page-title/page-title';
 import { BarServiceCategory } from '../../../../entities/enums/bar-service-category';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { ApiProblem } from '../../../../entities/errors/api-problem';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 
 interface ServicesBarTexts {
@@ -190,5 +192,16 @@ export class ServicesBar {
         (idSelectedBarService) => !idBarServices.includes(String(idSelectedBarService)),
       ),
     );
+  }
+
+  protected reloadIfGone(
+    problem: ApiProblem,
+    table: { reload(): void },
+    idBarServices: readonly string[],
+  ): void {
+    if (problem.code === ApiErrorCode.ResourceNotFound) {
+      this.forgetDeleted(idBarServices);
+      table.reload();
+    }
   }
 }

@@ -1796,31 +1796,13 @@ Nessun corpo (204).
 | `name` | string |
 | `sortOrder` | number (intero) |
 
-### DELETE `/api/catalog/sectors/{id}`
-
-**Payload JSON**
-
-Nessun payload.
-
-**Response JSON**
-
-Nessun corpo (204).
-
-**Payload tabella**
-
-Nessun payload.
-
-**Response tabella**
-
-Nessun corpo (204).
-
 ### POST `/api/catalog/sectors/bulk-delete`
 
 **Payload JSON**
 
 ```json
 {
-  "idSectors": "string[] (UUID, almeno due)"
+  "idSectors": "string[] (UUID, almeno uno)"
 }
 ```
 
@@ -1832,7 +1814,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `idSectors` | string[] (UUID, almeno due) |
+| `idSectors` | string[] (UUID, almeno uno) |
 
 **Response tabella**
 
@@ -2363,7 +2345,7 @@ Nessun payload.
 
 ## Impostazioni magazzino
 
-### POST `/api/warehouse/list`
+### POST `/api/catalog/inventory-items-list`
 
 **Payload JSON**
 
@@ -2393,9 +2375,7 @@ Nessun payload.
       "idArticle": "string (UUID)",
       "name": "string",
       "totalQuantity": "number (intero)",
-      "availableQuantity": "number (intero)",
-      "thresholdQuantity": "number (intero) | null",
-      "isThresholdWarningActive": "boolean"
+      "thresholdQuantity": "number (intero) | null"
     }
   ]
 }
@@ -2419,15 +2399,13 @@ Nessun payload.
 | Campo | Tipo |
 |---|---|
 | `total` | number (intero) |
-| `rows[]` | WarehouseItem[] (array di oggetti) |
+| `rows[]` | WarehouseSettingItem[] (array di oggetti) |
 | `rows[].idArticle` | string (UUID) |
 | `rows[].name` | string |
 | `rows[].totalQuantity` | number (intero) |
-| `rows[].availableQuantity` | number (intero) |
 | `rows[].thresholdQuantity` | number (intero) \| null |
-| `rows[].isThresholdWarningActive` | boolean |
 
-### POST `/api/warehouse/article-combobox`
+### POST `/api/catalog/article-combobox`
 
 **Payload JSON**
 
@@ -2455,18 +2433,16 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### POST `/api/warehouse/add-warehouse-item`
+### POST `/api/catalog/add-warehouse-item`
 
 **Payload JSON**
 
 ```json
 {
   "idArticle": "string (UUID)",
-  "name": "string | null",
   "totalQuantity": "number (intero > 0)",
-  "availableQuantity": "number (intero) | null",
   "thresholdQuantity": "number (intero ≥ 0) | null",
-  "isThresholdWarningActive": "boolean"
+  "isThresholdWarningActive": "boolean | null"
 }
 ```
 
@@ -2479,51 +2455,101 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idArticle` | string (UUID) |
-| `name` | string \| null |
 | `totalQuantity` | number (intero > 0) |
-| `availableQuantity` | number (intero) \| null |
 | `thresholdQuantity` | number (intero ≥ 0) \| null |
-| `isThresholdWarningActive` | boolean |
+| `isThresholdWarningActive` | boolean \| null |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/warehouse/edit-warehouse-item`
+### GET `/api/catalog/inventory-items/{id}`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+```json
+{
+  "id": "string (UUID)",
+  "articleCode": "string | null",
+  "name": "string",
+  "totalQuantity": "number (intero)",
+  "lowStockThreshold": "number (intero) | null",
+  "lowStockAlertEnabled": "boolean",
+  "mapPlaceable": "boolean"
+}
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `articleCode` | string \| null |
+| `name` | string |
+| `totalQuantity` | number (intero) |
+| `lowStockThreshold` | number (intero) \| null |
+| `lowStockAlertEnabled` | boolean |
+| `mapPlaceable` | boolean |
+
+### PUT `/api/catalog/edit-warehouse-item/{id}`
 
 **Payload JSON**
 
 ```json
 {
-  "idArticle": "string (UUID)",
-  "name": "string | null",
+  "articleCode": "string | null",
+  "name": "string",
   "totalQuantity": "number (intero > 0)",
-  "availableQuantity": "number (intero) | null",
-  "thresholdQuantity": "number (intero ≥ 0) | null",
-  "isThresholdWarningActive": "boolean"
+  "lowStockThreshold": "number (intero ≥ 0) | null",
+  "lowStockAlertEnabled": "boolean"
 }
 ```
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+{
+  "id": "string (UUID)",
+  "articleCode": "string | null",
+  "name": "string",
+  "totalQuantity": "number (intero)",
+  "lowStockThreshold": "number (intero) | null",
+  "lowStockAlertEnabled": "boolean",
+  "mapPlaceable": "boolean"
+}
+```
 
 **Payload tabella**
 
 | Campo | Tipo |
 |---|---|
-| `idArticle` | string (UUID) |
-| `name` | string \| null |
+| `articleCode` | string \| null |
+| `name` | string |
 | `totalQuantity` | number (intero > 0) |
-| `availableQuantity` | number (intero) \| null |
-| `thresholdQuantity` | number (intero ≥ 0) \| null |
-| `isThresholdWarningActive` | boolean |
+| `lowStockThreshold` | number (intero ≥ 0) \| null |
+| `lowStockAlertEnabled` | boolean |
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `id` | string (UUID) |
+| `articleCode` | string \| null |
+| `name` | string |
+| `totalQuantity` | number (intero) |
+| `lowStockThreshold` | number (intero) \| null |
+| `lowStockAlertEnabled` | boolean |
+| `mapPlaceable` | boolean |
 
-### POST `/api/warehouse/delete-warehouse-item`
+### POST `/api/catalog/delete-warehouse-item`
 
 **Payload JSON**
 
@@ -2547,7 +2573,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/warehouse/duplicate-warehouse-item`
+### POST `/api/catalog/duplicate-warehouse-item`
 
 **Payload JSON**
 
@@ -3116,7 +3142,7 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### POST `/api/warehouse/article-combobox`
+### POST `/api/catalog/article-combobox`
 
 **Payload JSON**
 

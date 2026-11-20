@@ -101,23 +101,6 @@ describe('SectorService', () => {
     controller.verify();
   });
 
-  it('should delete one sector by its id', () => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    });
-    const sectors = TestBed.inject(SectorService);
-    const controller = TestBed.inject(HttpTestingController);
-
-    sectors.deleteSector('s1').subscribe();
-
-    const call = controller.expectOne(
-      ({ method, url }) =>
-        method === 'DELETE' && url === `${environment.apiBaseUrl}/catalog/sectors/s1`,
-    );
-    expect(call.request.body).toBeNull();
-    controller.verify();
-  });
-
   it('should encode the id of the sector in the address', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -127,27 +110,29 @@ describe('SectorService', () => {
     const encoded = `${environment.apiBaseUrl}/catalog/sectors/..%2Fsettings%3Fx%3D1`;
 
     sectors.updateSector('../settings?x=1', 'Fila A').subscribe();
-    sectors.deleteSector('../settings?x=1').subscribe();
 
     controller.expectOne(({ method, url }) => method === 'PUT' && url === encoded);
-    controller.expectOne(({ method, url }) => method === 'DELETE' && url === encoded);
     controller.verify();
   });
 
-  it('should delete the chosen sectors in one call', () => {
+  it('should delete one sector or more with the same API', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
 
+    sectors.deleteSectors(['s1']).subscribe();
     sectors.deleteSectors(['s1', 's2']).subscribe();
 
-    const call = controller.expectOne(
+    const calls = controller.match(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sectors/bulk-delete`,
     );
-    expect(call.request.body).toEqual({ idSectors: ['s1', 's2'] });
+    expect(calls.map((call) => call.request.body)).toEqual([
+      { idSectors: ['s1'] },
+      { idSectors: ['s1', 's2'] },
+    ]);
     controller.verify();
   });
 

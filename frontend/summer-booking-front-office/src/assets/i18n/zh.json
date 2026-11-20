@@ -146,6 +146,11 @@
       "period_in_use": "该时段在价目表 {{priceLists}} 中有价格：请先从这些价目表中删除其价格，然后再删除该时段。",
       "period_in_use_by_services": "该时段被服务 {{services}} 使用：请先从这些服务中删除其价格，然后再删除该时段。",
       "period_overlap": "日期与时段 {{periodName}} 重叠：请选择不在其他时段中的日期。"
+    },
+    "inventory": {
+      "item_not_found": "物品已不存在：可能已被删除。",
+      "name_taken": "已有其他物品使用此名称。",
+      "item_in_use": "物品 {{articleName}} 用于价目表 {{usedIn}}，无法删除：请先从这些价目表中移除它。"
     }
   },
   "alert": {

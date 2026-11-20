@@ -1,8 +1,7 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { DeleteItemsPopup } from '../../../components/management/delete-items-popup/delete-items-popup';
 import { SectorAddPopup } from '../../../components/management/settings/rows-and-sectors/sector-add-popup/sector-add-popup';
@@ -94,16 +93,7 @@ export class RowsAndSectors {
   protected readonly load: TableLoad<object, SectorItem> = (request) =>
     this.sectors.sectorList(request);
 
-  protected readonly deleteSectors = (idSectors: string[]) => {
-    const sectorName = this.sectorNameToDelete();
-    return sectorName === null
-      ? this.sectors.deleteSectors(idSectors)
-      : this.sectors
-          .deleteSector(idSectors[0])
-          .pipe(
-            catchError((error: unknown) => throwError(() => withSectorName(error, sectorName))),
-          );
-  };
+  protected readonly deleteSectors = (idSectors: string[]) => this.sectors.deleteSectors(idSectors);
   protected readonly duplicateSectors = (idSectors: string[]) =>
     this.sectors.duplicateSectors(idSectors);
 
@@ -151,28 +141,4 @@ export class RowsAndSectors {
       table.reload();
     }
   }
-}
-
-/** The single delete of the backend answers `catalog.sector_in_use` without the name of the sector. */
-function withSectorName(error: unknown, sectorName: string): unknown {
-  if (!(error instanceof HttpErrorResponse)) {
-    return error;
-  }
-  const body: unknown = error.error;
-  if (
-    typeof body !== 'object' ||
-    body === null ||
-    !('code' in body) ||
-    body.code !== ApiErrorCode.CatalogSectorInUse
-  ) {
-    return error;
-  }
-  const args = 'args' in body && typeof body.args === 'object' ? body.args : null;
-  return new HttpErrorResponse({
-    error: { ...body, args: { sectorName, ...args } },
-    headers: error.headers,
-    status: error.status,
-    statusText: error.statusText,
-    url: error.url ?? undefined,
-  });
 }
