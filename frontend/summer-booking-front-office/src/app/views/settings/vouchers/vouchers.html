@@ -31,6 +31,7 @@
   [idVoucher]="idVoucherToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idVoucherToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup

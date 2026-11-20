@@ -106,7 +106,8 @@
       "password_too_common": "此密码过于常见：请选择更安全的密码。"
     },
     "resource": {
-      "not_found": "该项目已不存在。"
+      "not_found": "该项目已不存在。",
+      "version_conflict": "其他用户已同时修改了这些数据：数据已重新加载。请重新进行修改。"
     },
     "account": {
       "email_taken": "已存在使用此电子邮件的账户。",
@@ -514,7 +515,7 @@
           "add": "添加",
           "save": "保存",
           "field_names": {
-            "total": "总数"
+            "quantity": "数量"
           }
         },
         "delete": {

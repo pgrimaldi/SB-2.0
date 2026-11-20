@@ -5,4 +5,5 @@ export class HourlyServiceSelectedPrices {
   periodAvailabilities: ServicePeriodAvailability[] = [];
   idSectors: string[] = [];
   isOnlinePurchaseEnabled: boolean | null = null;
+  version: string | null = null;
 }

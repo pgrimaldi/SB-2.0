@@ -126,7 +126,7 @@ export class ServicesHourly {
     }
   }
 
-  protected forgetDeleted(idHourlyServices: readonly string[]): void {
+  protected forgetDeleted(idHourlyServices: readonly (string | null)[]): void {
     this.idSelectedHourlyServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedHourlyService) => !idHourlyServices.includes(String(idSelectedHourlyService)),
@@ -137,7 +137,7 @@ export class ServicesHourly {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idHourlyServices: readonly string[],
+    idHourlyServices: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idHourlyServices);

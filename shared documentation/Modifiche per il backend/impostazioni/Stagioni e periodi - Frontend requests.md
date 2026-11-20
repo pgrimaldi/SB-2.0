@@ -18,12 +18,13 @@ con "Cancella selezionati"; il cestino di un intervallo ne cancella uno solo.
 | 3 | DELETE, POST | `/api/catalog/tariff-periods/{key}`, `/api/catalog/[next-season/]tariff-periods` | **Modifica**: prima di eliminare un periodo controlla anche i servizi che lo usano; la `key` di un periodo eliminato non si riusa |
 | 4 | POST, PUT | `/api/catalog/[next-season/]tariff-periods[/{key}]` | **Modifica**: nessun giorno in comune tra periodi diversi della stessa stagione |
 | 5 | POST, PUT, DELETE | `/api/catalog/[next-season/]tariff-periods[/{key}]` e le API 1 e 2 | **Modifica**: una scrittura alla volta sui periodi di una stagione; una sovrapposizione rifiutata dal database risponde 409, mai 500 |
+| 6 | GET + PUT | `/api/catalog/season` e `/api/catalog/[next-season/]tariff-periods[/{key}]` | **Modifica**: controllo di versione: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
 
 `[next-season/]` vuol dire: tutte e due le rotte, quella della stagione corrente e quella con `/next-season`.
 
 Le API 1 e 2 sono **nuove**: oggi un intervallo si cancella solo con `PUT /tariff-periods/{key}`, un periodo alla volta.
 Il frontend ha bisogno di cancellare con **una sola chiamata** intervalli di periodi diversi, e di non cancellarne
-nessuno se uno non si può cancellare. La 3, la 4 e la 5 sono **modifiche** ad API che esistono già.
+nessuno se uno non si può cancellare. La 3, la 4, la 5 e la 6 sono **modifiche** ad API che esistono già.
 
 Tutto sta nel modulo Catalog (`Module.Catalog`): `Endpoints/SeasonEndpoints.cs`,
 `Application/Services/SeasonService.cs`, `Application/Dtos/SeasonDtos.cs`, `Application/Validators/SeasonValidators.cs`,
@@ -44,6 +45,10 @@ Vanno aggiunti a `CatalogErrors`, accanto agli altri `pricing.period_*`. Il fron
 | `PeriodInUseByServices` | `pricing.period_in_use_by_services` | 409 | `services`: array di stringhe, mai vuoto | 3 |
 | `PeriodOverlap` | `pricing.period_overlap` | 409 | `periodName`: stringa, `""` se l'altro periodo non c'è più (sezione 5) | 4, 5 |
 
+La sezione 6 usa anche `resource.version_conflict` (409, nessun `args`), il codice unico del controllo di versione per
+tutte le API, lo stesso di Impostazioni magazzino: non è un codice del Catalog. Se il backend non lo ha ancora, dove
+definirlo (un posto solo per tutti i moduli) lo decide lo sviluppatore backend: l'agente glielo chiede.
+
 ## Regole comuni
 
 Valgono per le API 1 e 2.
@@ -52,7 +57,7 @@ Valgono per le API 1 e 2.
   `SeasonEndpoints.Map`, con la logica in `SeasonService`.
 - **Le API esistenti non cambiano**: `/api/catalog/season`, `/api/catalog/tariff-periods` e
   `/api/catalog/next-season/tariff-periods`, con le loro sotto-rotte (`GET`, `POST`, `PUT` e `DELETE /{key}`), restano
-  come sono; le due nuove si aggiungono. Le uniche modifiche sono quelle delle sezioni 3, 4 e 5.
+  come sono; le due nuove si aggiungono. Le uniche modifiche sono quelle delle sezioni 3, 4, 5 e 6.
 - **Stabilimento dal token**: come per le altre API dei periodi (`CurrentProperty`); nessuna richiesta lo contiene.
   Token senza stabilimento: 403 `catalog.property_required`; stabilimento del token non trovato: 404
   `catalog.property_not_found`.
@@ -386,7 +391,8 @@ Rotte, corpi, risposte e gli altri errori restano quelli di oggi: si aggiunge un
 - Ordine dei controlli di creazione e modifica, dopo i controlli di "Regole comuni": validatore (400), stabilimento
   (403 / 404 `catalog.property_*`), blocco della stagione (sezione 5), stagione (422 `pricing.season_required`; per la
   stagione successiva anche 422 `pricing.next_season_required`), solo nella modifica il periodo (404
-  `pricing.period_not_found`), nome (409 `pricing.period_name_taken`), giorni della stagione (422
+  `pricing.period_not_found`) e la sua versione (409 `resource.version_conflict`, sezione 6), nome (409
+  `pricing.period_name_taken`), giorni della stagione (422
   `pricing.period_outside_season`), poi il controllo **nuovo**, in `EnsurePeriodAllowed` / `EnsureNextPeriodAllowed`.
 - Il controllo nuovo: nessun intervallo della richiesta deve avere giorni in comune con gli intervalli degli **altri**
   periodi della stessa stagione (righe non eliminate; nella modifica senza contare quelli del periodo stesso, che
@@ -534,20 +540,143 @@ Fuori da questa richiesta, a giudizio dello sviluppatore backend: se lo stesso b
   i salvataggi di listini e servizi che aggiungono prezzi a un periodo mentre lo si elimina. L'agente che implementa
   questa sezione glielo chiede prima di scrivere codice; il frontend non ne dipende.
 
+## 6. Controllo di versione sui salvataggi di modifica
+
+Oggi, se due utenti modificano la stessa cosa, vince chi salva per ultimo. Il riquadro delle date rimanda le quattro
+date lette all'apertura; i popup "Modifica Periodo", "Aggiungi intervallo" e "Modifica Intervallo" rimandano il periodo
+intero letto con la lista della tab (nome e tutti gli intervalli). Così cancellano, senza che nessuno se ne accorga,
+quello che un altro utente ha cambiato nel frattempo: un intervallo aggiunto da un altro utente allo stesso periodo
+sparisce al Salva di "Modifica Periodo", un intervallo cancellato con le API 1 e 2 torna, un nome cambiato torna
+quello di prima. Il blocco della sezione 5 mette in fila le scritture ma non cambia questo risultato: la seconda
+scrittura salva comunque i dati che aveva letto. Il backend non ha un controllo di concorrenza su queste API: nessun
+token di concorrenza in `PricingSeasonConfiguration`, `TariffPeriodConfiguration` e
+`NextSeasonTariffPeriodConfiguration`, nessun `If-Match` in `Endpoints/SeasonEndpoints.cs`. Il frontend chiede lo
+schema di **concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
+(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
+unico per tutte le API**: `resource.version_conflict`.
+
+### Cosa ci serve
+
+- **Versione nelle letture**: ogni lettura della tabella sotto restituisce, insieme ai dati, il campo `version`
+  (stringa opaca): `GET /api/catalog/season` una per le quattro date, `GET /api/catalog/[next-season/]tariff-periods`
+  una per **ogni periodo** della lista. Cambia ogni volta che cambiano i dati che il salvataggio corrispondente scrive,
+  anche quando li cambia un'altra API, e solo allora: la versione di un periodo cambia con la `PUT` del periodo e con le
+  API 1 e 2 quando tolgono intervalli a quel periodo, non quando cambia un altro periodo della stagione; la versione
+  delle date cambia solo con `PUT /api/catalog/season`.
+- **`If-Match` nei salvataggi**: il frontend manda la versione letta nell'header `If-Match: "<version>"`. Se non è più
+  quella attuale, il backend non salva niente e risponde **409 `resource.version_conflict`**, senza `errors[]`. Senza
+  `If-Match` risponde allo stesso modo: il frontend lo manda sempre. Unica eccezione: la `PUT /api/catalog/season` di
+  uno stabilimento senza stagione (la `GET` ha risposto 204, quindi il frontend non ha una versione) arriva senza
+  `If-Match` e crea la stagione, come oggi; se intanto la stagione esiste (l'ha creata un altro utente) risponde 409
+  `resource.version_conflict` e non cambia niente.
+- **`ETag` nelle risposte**: ogni salvataggio riuscito restituisce la nuova versione nell'header `ETag: "<version>"`.
+  Se `SeasonDto` e `TariffPeriodDto` ricevono il campo `version`, nelle risposte di `PUT /api/catalog/season` e di
+  `POST` e `PUT` dei periodi vale la versione nuova, uguale all'`ETag`: il frontend la legge solo dall'`ETag`.
+- **Ordine dei controlli**: nella `PUT /api/catalog/[next-season/]tariff-periods/{key}` il 409
+  `resource.version_conflict` si controlla dopo il 404 `pricing.period_not_found` e prima dei controlli sul contenuto
+  (409 `pricing.period_name_taken`, 422 `pricing.period_outside_season`, 409 `pricing.period_overlap`), nella
+  transazione e dopo il blocco della stagione della sezione 5: così due salvataggi insieme dello stesso periodo con la
+  stessa versione non passano tutti e due. Nella `PUT /api/catalog/season` si controlla dopo il validatore (400) e lo
+  stabilimento (403 `catalog.property_required`, 404 `catalog.property_not_found`); anche qui due salvataggi insieme
+  con la stessa versione non passano tutti e due.
+- **Come farlo lo sceglie lo sviluppatore del backend**: l'agente glielo chiede prima di scrivere codice. I fatti da
+  portargli: le date sono una riga di `catalog.pricing_seasons` (una per stabilimento), quindi basta un token della
+  riga (per esempio `xmin` di Npgsql, come nel documento offline); un periodo invece non è una riga, sono le righe con
+  la stessa `period_group_key` della stagione in `catalog.pricing_tariff_periods` (stagione corrente) o
+  `catalog.pricing_next_season_periods` (successiva), una per intervallo, che la `PUT` sostituisce tutte
+  (`ReplacePeriodAsync`, `ReplaceNextPeriodAsync`): la versione di un periodo va calcolata sul gruppo (per esempio un
+  hash di nome e intervalli, come fanno i mock del frontend) o tenuta altrove. Il frontend tratta la versione come una
+  stringa opaca e non la confronta mai.
+
+### API coinvolte
+
+| Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
+|---|---|---|
+| `GET /api/catalog/season` (`SeasonDto` con in più `version`; il 204 resta senza corpo) | `PUT /api/catalog/season` | Le quattro date della stagione |
+| `GET /api/catalog/tariff-periods` (ogni `TariffPeriodDto` con in più `version`) | `PUT /api/catalog/tariff-periods/{key}` | Nome e intervalli del periodo `{key}` della stagione corrente |
+| `GET /api/catalog/next-season/tariff-periods` (lo stesso) | `PUT /api/catalog/next-season/tariff-periods/{key}` | Nome e intervalli del periodo `{key}` della stagione successiva |
+
+Le altre API di questo documento non ne hanno bisogno: la creazione di un periodo (`POST`) non rimanda dati letti, le
+cancellazioni (`DELETE` del periodo, API 1 e 2) tolgono solo quello che l'utente ha scelto e rispondono già 404 se non
+c'è più. Le API 1 e 2 cambiano però la versione dei periodi a cui tolgono intervalli. `GET /tariff-periods` la leggono
+anche le pagine Listino e Servizi, che non usano `version`.
+
+### Richiesta e risposta
+
+Lettura dei periodi (`GET /api/catalog/tariff-periods`), con la versione di ogni periodo:
+
+```json
+[
+  {
+    "key": 2,
+    "name": "Alta stagione",
+    "ranges": [{ "startsOn": "2026-08-01", "endsOn": "2026-08-31" }],
+    "version": "5d41402a"
+  }
+]
+```
+
+Lettura delle date (`GET /api/catalog/season`):
+
+```json
+{
+  "startsOn": "2026-05-01",
+  "endsOn": "2026-09-30",
+  "nextStartsOn": "2027-05-01",
+  "nextEndsOn": "2027-09-30",
+  "version": "9e107d9d"
+}
+```
+
+Salvataggio di un periodo: il corpo resta quello di oggi, la versione letta va nell'header.
+
+```http
+PUT /api/catalog/tariff-periods/2
+If-Match: "5d41402a"
+Content-Type: application/json
+
+{
+  "name": "Alta stagione",
+  "ranges": [{ "startsOn": "2026-08-01", "endsOn": "2026-09-15" }]
+}
+```
+
+Risposta 200 con l'header `ETag: "7c9e6679"` e lo stesso corpo di oggi. `PUT /api/catalog/season` allo stesso modo,
+con `If-Match` della versione delle date e la risposta 200 con l'`ETag`.
+
+Versione non più attuale:
+
+```json
+{
+  "type": "https://errors.summerbooking/resource/version_conflict",
+  "title": "resource.version_conflict",
+  "status": 409,
+  "code": "resource.version_conflict",
+  "traceId": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+}
+```
+
+### Cosa fa il frontend
+
+Con 409 `resource.version_conflict` mostra l'avviso "Nel frattempo un altro utente ha modificato questi dati: li abbiamo
+ricaricati. Rifai le tue modifiche." e rilegge i dati: il riquadro delle date rimette le date lette e rilegge
+`GET /api/catalog/season`; i popup dei periodi si chiudono e la tab rilegge i periodi. Non mostra mai il testo
+generico per questo codice.
+
 ## API esistenti usate così come sono
 
-Queste API del backend le usa già il frontend e, salvo le modifiche delle sezioni 3, 4 e 5, **non vanno cambiate**:
+Queste API del backend le usa già il frontend e, salvo le modifiche delle sezioni 3, 4, 5 e 6, **non vanno cambiate**:
 sono qui solo perché chi lavora sulla pagina sappia cosa il frontend si aspetta. Lo stabilimento viene sempre dal token.
 Le `GET` chiedono il permesso `CatalogRead`, le altre `CatalogSettings`.
 
 | Metodo | Rotta | Uso nella pagina |
 |---|---|---|
-| GET | `/api/catalog/season` | Riquadro delle date, all'apertura e al cambio lingua: 200 con `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` (giorni `yyyy-MM-dd`), oppure 204 senza corpo se la stagione non è ancora impostata. Con il 204, o con un primo giorno `null`, la pagina mostra l'1 gennaio dell'anno in corso (stagione corrente) e dell'anno dopo (prossima) e li manda con il primo Salva; i giorni finali restano vuoti. |
-| PUT | `/api/catalog/season` | "Salva" del riquadro delle date: le quattro date; 200 con le date salvate, che la pagina mostra. Il backend non controlla i periodi: prima di chiamarla il frontend legge i periodi delle due stagioni e non salva se un intervallo resterebbe fuori dalle nuove date. |
-| GET | `/api/catalog/tariff-periods` | Tab "Stagione Corrente": i periodi con `key`, `name` e `ranges` (`startsOn`, `endsOn`), in ordine di primo giorno; `[]` senza stagione. Li leggono anche le pagine Listino e Servizi. |
+| GET | `/api/catalog/season` | Riquadro delle date, all'apertura e al cambio lingua: 200 con `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` (giorni `yyyy-MM-dd`) e `version` (sezione 6), oppure 204 senza corpo se la stagione non è ancora impostata. Con il 204, o con un primo giorno `null`, la pagina mostra l'1 gennaio dell'anno in corso (stagione corrente) e dell'anno dopo (prossima) e li manda con il primo Salva; i giorni finali restano vuoti. |
+| PUT | `/api/catalog/season` | "Salva" del riquadro delle date: le quattro date, con `If-Match` della versione letta (senza, dopo il 204: sezione 6); 200 con le date salvate, che la pagina mostra, e la nuova versione nell'`ETag`, che la pagina tiene per il salvataggio dopo. Il backend non controlla i periodi: prima di chiamarla il frontend legge i periodi delle due stagioni e non salva se un intervallo resterebbe fuori dalle nuove date. |
+| GET | `/api/catalog/tariff-periods` | Tab "Stagione Corrente": i periodi con `key`, `name`, `ranges` (`startsOn`, `endsOn`) e `version` (sezione 6), in ordine di primo giorno; `[]` senza stagione. Li leggono anche le pagine Listino e Servizi. |
 | GET | `/api/catalog/next-season/tariff-periods` | Tab "Prossima Stagione": lo stesso per la stagione successiva. |
 | POST | `/api/catalog/[next-season/]tariff-periods` | Popup "Imposta periodo": `name` e `ranges`; 201 con il periodo creato. Si aggiungono il controllo della sezione 4, la `key` mai riusata della sezione 3 e il blocco della sezione 5. |
-| PUT | `/api/catalog/[next-season/]tariff-periods/{key}` | Popup "Modifica Periodo", "Aggiungi intervallo" e "Modifica Intervallo": il periodo intero (`name` e tutti i `ranges`), senza controllo di versione (vale l'ultimo salvataggio); 200 con il periodo salvato. Si aggiungono il controllo della sezione 4 e il blocco della sezione 5. |
+| PUT | `/api/catalog/[next-season/]tariff-periods/{key}` | Popup "Modifica Periodo", "Aggiungi intervallo" e "Modifica Intervallo": il periodo intero (`name` e tutti i `ranges`), con `If-Match` della `version` del periodo letta con la lista; 200 con il periodo salvato e l'`ETag`, che la pagina non usa (chiude il popup e ricarica i periodi). Si aggiungono il controllo della sezione 4, il blocco della sezione 5 e il controllo di versione della sezione 6. |
 | DELETE | `/api/catalog/tariff-periods/{key}` | Cestino di un periodo della stagione corrente, dopo la conferma; 204 senza corpo. Si aggiungono il controllo dei servizi della sezione 3 e il blocco della sezione 5. |
 | DELETE | `/api/catalog/next-season/tariff-periods/{key}` | Lo stesso per la stagione successiva; 204 senza corpo. Si aggiunge il blocco della sezione 5. |
 
@@ -571,6 +700,7 @@ rilegge anche le date della stagione (se il riquadro delle date non ha modifiche
 | 409 | `pricing.period_name_taken` | Sotto il nome del periodo ("Imposta periodo", "Modifica Periodo"); sopra i bottoni in "Aggiungi intervallo" e "Modifica Intervallo", che non hanno il nome. |
 | 422 | `pricing.period_outside_season` | Sotto il calendario di "Imposta periodo" o sopra i bottoni degli altri popup. |
 | 409 | `pricing.period_overlap` | Sotto il calendario di "Imposta periodo" o sopra i bottoni degli altri popup, con `args.periodName`; con `periodName` `""` un testo senza nome. |
+| 409 | `resource.version_conflict` | Riquadro delle date e popup "Modifica Periodo", "Aggiungi intervallo" e "Modifica Intervallo": l'avviso della sezione 6, mai il testo generico; il riquadro rilegge le date, i popup si chiudono e la tab ricarica i periodi. |
 | 422 | `pricing.season_required` / `pricing.next_season_required` | Sopra i bottoni del popup; per le eliminazioni (periodo, API 1 e 2) nell'avviso "Operazione non riuscita". |
 | 404 | `pricing.period_not_found` | Nel popup o nell'avviso "Operazione non riuscita"; la tab ricarica i periodi. |
 | 404 | `pricing.period_range_not_found` | Avviso "Operazione non riuscita" (API 1 e 2); la tab ricarica i periodi. |
@@ -632,13 +762,34 @@ Sezione 4:
 
 Sezione 5:
 
-- Due `PUT` nello stesso momento dello stesso periodo rispondono tutte e due 200; il periodo resta con gli intervalli
-  di quella che salva per ultima, mai con quelli di tutte e due, mai 500.
+- Due `PUT` nello stesso momento dello stesso periodo con lo stesso `If-Match`: una risponde 200, l'altra 409
+  `resource.version_conflict` (sezione 6); il periodo resta con gli intervalli della prima, mai con quelli di tutte e
+  due, mai 500.
 - Due salvataggi nello stesso momento di periodi diversi con giorni in comune (`POST` o `PUT`): uno riesce, l'altro
   risponde 409 `pricing.period_overlap` con il nome del primo.
 - Due `POST` nello stesso momento ricevono `key` diverse e restano due periodi.
 - Vincolo come protezione: in una connessione a parte, senza bloccare la stagione, inserire con SQL una riga di un altro
   periodo della stessa stagione e non fare commit; chiamare la `PUT` di un periodo con giorni in comune con quella
   riga; fare commit della connessione a parte. La `PUT` risponde 409 `pricing.period_overlap` con il nome di quel periodo, mai 500.
+
+Sezione 6, con un token con il permesso `CatalogSettings`:
+
+1. `GET /api/catalog/tariff-periods` risponde con una `version` per periodo (per esempio `v1` per "Alta");
+   `PUT /api/catalog/tariff-periods/{key}` di "Alta" con `If-Match: "v1"`: 200 con l'header `ETag` di una versione
+   nuova, diversa da `v1`; una nuova `GET` risponde per "Alta" con quella versione e per gli altri periodi con la
+   versione di prima.
+2. La stessa `PUT` con `If-Match: "v1"` dopo la prima: 409 `resource.version_conflict` senza `errors[]`; il periodo non
+   cambia.
+3. `GET` (versione `v1` di "Bassa", con due intervalli), poi API 1 che toglie un intervallo di "Bassa", poi `PUT` di
+   "Bassa" con `If-Match: "v1"`: 409 `resource.version_conflict`; l'intervallo resta tolto.
+4. `PUT` di un periodo senza `If-Match`: 409 `resource.version_conflict`. Con un `If-Match` vecchio e insieme un nome
+   già preso: 409 `resource.version_conflict`, non `pricing.period_name_taken`; con una `key` che non esiste: 404
+   `pricing.period_not_found`.
+5. Le stesse prove 1, 2 e 4 su `/api/catalog/next-season/tariff-periods`.
+6. `GET /api/catalog/season` risponde con `version` (`v1`); `PUT /api/catalog/season` con `If-Match: "v1"`: 200 con
+   l'`ETag` di una versione nuova; la stessa `PUT` con `If-Match: "v1"` dopo la prima, o senza `If-Match`: 409
+   `resource.version_conflict` e le date non cambiano.
+7. Stabilimento senza stagione: `GET /api/catalog/season` risponde 204; `PUT /api/catalog/season` senza `If-Match`:
+   200 con l'`ETag`, la stagione c'è; una seconda `PUT` senza `If-Match`: 409 `resource.version_conflict`.
 
 Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.

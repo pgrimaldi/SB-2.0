@@ -186,7 +186,7 @@ export class ServicesBar {
     }
   }
 
-  protected forgetDeleted(idBarServices: readonly string[]): void {
+  protected forgetDeleted(idBarServices: readonly (string | null)[]): void {
     this.idSelectedBarServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedBarService) => !idBarServices.includes(String(idSelectedBarService)),
@@ -197,7 +197,7 @@ export class ServicesBar {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idBarServices: readonly string[],
+    idBarServices: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idBarServices);

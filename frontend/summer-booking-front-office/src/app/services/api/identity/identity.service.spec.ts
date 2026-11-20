@@ -68,7 +68,7 @@ describe('IdentityService', () => {
     controller.verify();
   });
 
-  it('should send the edited user with its id, null password included, and read the user', () => {
+  it('should send the edited user with its id, null password included, and the version read, and answer the new version', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -83,9 +83,9 @@ describe('IdentityService', () => {
       role: UserRole.Manager,
     });
 
-    let updated: UserSelectedItem | undefined;
+    let version: string | null | undefined;
 
-    identity.updateUser(request).subscribe((answer) => (updated = answer));
+    identity.updateUser(request, 'v1').subscribe((answer) => (version = answer));
 
     const call = controller.expectOne(`${environment.apiBaseUrl}/identity/update-user`);
     expect(call.request.body).toEqual({
@@ -98,9 +98,9 @@ describe('IdentityService', () => {
       phoneIsContact: true,
       role: UserRole.Manager,
     });
-    const answer = Object.assign(new UserSelectedItem(), { idUser: 'u7', role: UserRole.Manager });
-    call.flush(answer);
-    expect(updated).toEqual(answer);
+    expect(call.request.headers.get('If-Match')).toBe('"v1"');
+    call.flush({ idUser: 'u7', role: UserRole.Manager }, { headers: { ETag: '"v2"' } });
+    expect(version).toBe('v2');
     controller.verify();
   });
 

@@ -65,20 +65,26 @@ describe('MapService', () => {
     controller.verify();
   });
 
-  it('should send the name of the chosen background', () => {
+  it('should send the name of the chosen background with the version of the background', () => {
     const { map, controller } = setup();
+    let version: string | null | undefined;
 
-    map.updateBackground(MapBackgroundImage.BackgroundBoardwalk).subscribe();
+    map
+      .updateBackground(MapBackgroundImage.BackgroundBoardwalk, 'b1')
+      .subscribe((saved) => (version = saved));
 
-    const request = controller.expectOne(
+    const call = controller.expectOne(
       ({ method, url }) =>
         method === 'PUT' && url === `${environment.apiBaseUrl}/catalog/map/update-background`,
-    ).request;
-    expect(request.body).toEqual({ backgroundName: MapBackgroundImage.BackgroundBoardwalk });
+    );
+    expect(call.request.body).toEqual({ backgroundName: MapBackgroundImage.BackgroundBoardwalk });
+    expect(call.request.headers.get('If-Match')).toBe('"b1"');
+    call.flush(null, { status: 204, statusText: 'No Content', headers: { ETag: '"b2"' } });
+    expect(version).toBe('b2');
     controller.verify();
   });
 
-  it('should send every value of the grid, icons included, and nothing else', () => {
+  it('should send every value of the grid, icons included, and nothing else, with the version of the configuration', () => {
     const { map, controller } = setup();
     const grid: MapGrid = {
       ...DEFAULT_MAP_GRID,
@@ -91,13 +97,20 @@ describe('MapService', () => {
       },
     };
 
-    map.updateConfiguration({ ...grid, extraField: 'not sent' } as MapGrid).subscribe();
+    let version: string | null | undefined;
 
-    const request = controller.expectOne(
+    map
+      .updateConfiguration({ ...grid, extraField: 'not sent' } as MapGrid, 'c1')
+      .subscribe((saved) => (version = saved));
+
+    const call = controller.expectOne(
       ({ method, url }) =>
         method === 'PUT' && url === `${environment.apiBaseUrl}/catalog/map/update-configuration`,
-    ).request;
-    expect(request.body).toEqual(grid);
+    );
+    expect(call.request.body).toEqual(grid);
+    expect(call.request.headers.get('If-Match')).toBe('"c1"');
+    call.flush(null, { status: 204, statusText: 'No Content', headers: { ETag: '"c2"' } });
+    expect(version).toBe('c2');
     controller.verify();
   });
 

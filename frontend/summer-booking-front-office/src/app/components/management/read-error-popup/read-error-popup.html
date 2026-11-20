@@ -1,0 +1,10 @@
+<app-table-error-popup
+  [pathIcon]="pathIcon()"
+  [title]="'table.load_error.title' | translate"
+  [text]="message() ?? ''"
+  [texts]="'table.load_error' | translate"
+  [isRetryButtonHidden]="isGone()"
+  [open]="problem() !== null"
+  (openChange)="closed($event)"
+  (retry)="retry.emit()"
+/>

@@ -35,6 +35,7 @@ import {
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
@@ -72,6 +73,8 @@ import {
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface PackageFormTexts {
   tabs: {
@@ -93,10 +96,12 @@ enum PanelTab {
     PackageGeneralInfoTab,
     PackageReducedPrice,
     PriceListTab,
+    ReadErrorPopup,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './package-edit-item-panel.html',
   styleUrl: './package-edit-item-panel.scss',
@@ -108,6 +113,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly priceLists = inject(PriceListService);
@@ -202,6 +208,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isLoading() || this.draftForm().invalid() || this.reducedSeasonalPriceIndex() !== null,
   );
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private version: string | null = null;
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -257,13 +266,22 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.priceLists.updatePackage(idPackage, this.toRequest()));
+        await firstValueFrom(
+          this.priceLists.updatePackage(idPackage, this.toRequest(), this.version),
+        );
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reset();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -305,6 +323,10 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     this.isEditing.set(false);
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
   private reset(): void {
     this.loading?.unsubscribe();
     this.isLoading.set(false);
@@ -322,6 +344,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     this.periods.set([]);
     this.hiddenSectorPrices.set([]);
     this.hiddenPeriodPrices.set([]);
+    this.version = null;
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.load();
   }
@@ -344,7 +367,12 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
           this.setLoaded(item, sectors, periods);
           this.isLoaded.set(true);
         },
-        error: (error: unknown) => this.error.set(toApiProblem(error)),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.failed.emit(problem);
+          this.readError.set(problem);
+          this.open.set(false);
+        },
       });
   }
 
@@ -440,6 +468,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     );
     this.sectors.set(sectors);
     this.periods.set(periods);
+    this.version = item.version;
     this.draft.set(draft);
     this.pristine.set(structuredClone(draft));
     this.draftForm().reset();

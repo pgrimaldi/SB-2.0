@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
@@ -8,6 +8,7 @@ import { MapGrid } from '../../../entities/settings/map-configuration/map-grid';
 import { MapLayout } from '../../../entities/settings/map-configuration/map-layout';
 import { MapSettings } from '../../../entities/settings/map-configuration/map-settings';
 import { onlyFieldsOf } from '../only-fields-of';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class MapService {
@@ -27,13 +28,36 @@ export class MapService {
   readonly removeBackground = (): Observable<MapSettings> =>
     this.httpClient.delete<MapSettings>(`${this.endpoint}/background`);
 
-  /** One of the frontend's backgrounds: it replaces the uploaded one. Answers 204 with no body. */
-  readonly updateBackground = (backgroundName: MapBackgroundImage): Observable<void> =>
-    this.httpClient.put<void>(`${this.endpoint}/update-background`, { backgroundName });
+  /**
+   * One of the frontend's backgrounds, with `backgroundVersion`: it replaces the uploaded one.
+   * Answers 204 with no body and the new `backgroundVersion`.
+   */
+  readonly updateBackground = (
+    backgroundName: MapBackgroundImage,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .put<void>(
+        `${this.endpoint}/update-background`,
+        { backgroundName },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
-  /** Every value of Imposta reticolo, icons included. Answers 204 with no body. */
-  readonly updateConfiguration = (grid: MapGrid): Observable<void> =>
-    this.httpClient.put<void>(`${this.endpoint}/update-configuration`, onlyFieldsOf(MapGrid, grid));
+  /**
+   * Every value of Imposta reticolo, icons included, with `configurationVersion`. Answers 204 with no
+   * body and the new `configurationVersion`.
+   */
+  readonly updateConfiguration = (
+    grid: MapGrid,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .put<void>(`${this.endpoint}/update-configuration`, onlyFieldsOf(MapGrid, grid), {
+        headers: ifMatch(version),
+        observe: 'response',
+      })
+      .pipe(map(versionOf));
 
   /** Deletes the spots on the map and empties the grid (0 × 0); background, icons and tilt stay. */
   readonly reset = (): Observable<MapLayout> =>

@@ -8,4 +8,5 @@ export class UserSelectedItem {
   phone: string | null = null;
   phoneIsContact = false;
   role: UserRole | null = null;
+  version: string | null = null;
 }

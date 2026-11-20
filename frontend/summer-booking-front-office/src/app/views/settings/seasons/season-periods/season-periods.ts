@@ -306,9 +306,9 @@ export class SeasonPeriods {
   }
 
   /**
-   * An answer that says the list on screen is old (a period or an interval gone, a name or days taken
-   * meanwhile, a period outside the season): the list is read again, and the season dates too when a
-   * period went outside them.
+   * An answer that says the list on screen is old (a period changed or gone, an interval gone, a name
+   * or days taken meanwhile, a period outside the season): the list is read again, and the season
+   * dates too when a period went outside them.
    */
   protected reloadIfStale(problem: ApiProblem): void {
     if (STALE_STATUSES.includes(problem.status)) {

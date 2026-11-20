@@ -230,3 +230,5 @@
     </div>
   </div>
 </ng-template>
+<app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
+<app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />

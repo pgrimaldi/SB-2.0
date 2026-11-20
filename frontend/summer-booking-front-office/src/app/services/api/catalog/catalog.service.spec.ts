@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
@@ -37,7 +38,11 @@ import { TableServiceUpdateAvailabilityBookingsRequest } from '../../../entities
 import { TableServiceUpdateGeneralRequest } from '../../../entities/settings/services/table-service-update-general-request';
 import { Language } from '../../../entities/shared/language';
 import { Country } from '../../../entities/shared/country';
+import { etag, ifMatchOf } from '../versions/version-headers';
 import { CatalogService } from './catalog.service';
+
+const READ_VERSION = 'v1';
+const SAVED_VERSION = 'v2';
 
 describe('CatalogService', () => {
   const setup = () => {
@@ -225,7 +230,7 @@ describe('CatalogService', () => {
       unexpectedFlag: 'extra-field',
     });
 
-    catalog.saveBathhouseConfigurationGeneral(information).subscribe();
+    catalog.saveBathhouseConfigurationGeneral(information, null).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -250,7 +255,7 @@ describe('CatalogService', () => {
     });
 
     const notOffered = Object.assign(new BathhouseServiceItem(), { idService: 7, name: 'Wifi' });
-    catalog.saveBathhouseConfigurationServices([service, notOffered]).subscribe();
+    catalog.saveBathhouseConfigurationServices([service, notOffered], null).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -276,7 +281,7 @@ describe('CatalogService', () => {
       mainPhotoUrl: 'https://cdn.example.com/main.webp',
     });
 
-    catalog.saveBathhouseConfigurationMedia(media).subscribe();
+    catalog.saveBathhouseConfigurationMedia(media, null).subscribe();
 
     const request = controller.expectOne(
       ({ method, url }) =>
@@ -356,6 +361,7 @@ describe('CatalogService', () => {
         Object.assign(new BarServiceUpdateGeneralRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -385,6 +391,7 @@ describe('CatalogService', () => {
         Object.assign(new BarServiceUpdatePricesRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -422,6 +429,7 @@ describe('CatalogService', () => {
         Object.assign(new BarServiceUpdateBookingRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -542,6 +550,7 @@ describe('CatalogService', () => {
         Object.assign(new StandardServiceUpdateGeneralRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -571,6 +580,7 @@ describe('CatalogService', () => {
         Object.assign(new StandardServiceUpdatePricesRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -609,6 +619,7 @@ describe('CatalogService', () => {
         Object.assign(new StandardServiceUpdateBookingRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -762,6 +773,7 @@ describe('CatalogService', () => {
         Object.assign(new HourlyServiceUpdateGeneralRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -792,6 +804,7 @@ describe('CatalogService', () => {
           periodAvailabilities: [{ idPeriod: 1, availabilityOptions: [option.sent] }],
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -821,6 +834,7 @@ describe('CatalogService', () => {
           bookingOptions: [{ ...bookingOption, availabilityOption: option.sent }],
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -988,6 +1002,7 @@ describe('CatalogService', () => {
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -1035,6 +1050,7 @@ describe('CatalogService', () => {
           ],
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -1143,6 +1159,7 @@ describe('CatalogService', () => {
           translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -1193,6 +1210,7 @@ describe('CatalogService', () => {
           ],
           unexpectedFlag: 'extra-field',
         }),
+        null,
       )
       .subscribe();
 
@@ -1202,6 +1220,122 @@ describe('CatalogService', () => {
         url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`,
     ).request.body;
     expect(body).toEqual({ ...request });
+    controller.verify();
+  });
+
+  it('should send the version read in If-Match with every save and answer the new one of the ETag', () => {
+    const { catalog, controller } = setup();
+    const saves: [string, () => Observable<string | null>][] = [
+      [
+        'property-info/save-bathhouse-configuration-general',
+        () =>
+          catalog.saveBathhouseConfigurationGeneral(
+            new BathhouseGeneralInformation(),
+            READ_VERSION,
+          ),
+      ],
+      [
+        'property-info/save-bathhouse-configuration-services',
+        () =>
+          catalog.saveBathhouseConfigurationServices([new BathhouseServiceItem()], READ_VERSION),
+      ],
+      [
+        'property-info/save-bathhouse-configuration-media',
+        () => catalog.saveBathhouseConfigurationMedia(new BathhouseMediaRequest(), READ_VERSION),
+      ],
+      [
+        'update-bar-service-general',
+        () => catalog.updateBarServiceGeneral(new BarServiceUpdateGeneralRequest(), READ_VERSION),
+      ],
+      [
+        'update-bar-service-prices',
+        () => catalog.updateBarServicePrices(new BarServiceUpdatePricesRequest(), READ_VERSION),
+      ],
+      [
+        'update-bar-service-booking',
+        () => catalog.updateBarServiceBooking(new BarServiceUpdateBookingRequest(), READ_VERSION),
+      ],
+      [
+        'update-standard-service-general',
+        () =>
+          catalog.updateStandardServiceGeneral(
+            new StandardServiceUpdateGeneralRequest(),
+            READ_VERSION,
+          ),
+      ],
+      [
+        'update-standard-service-prices',
+        () =>
+          catalog.updateStandardServicePrices(
+            new StandardServiceUpdatePricesRequest(),
+            READ_VERSION,
+          ),
+      ],
+      [
+        'update-standard-service-booking',
+        () =>
+          catalog.updateStandardServiceBooking(
+            new StandardServiceUpdateBookingRequest(),
+            READ_VERSION,
+          ),
+      ],
+      [
+        'update-hourly-service-general',
+        () =>
+          catalog.updateHourlyServiceGeneral(new HourlyServiceUpdateGeneralRequest(), READ_VERSION),
+      ],
+      [
+        'update-hourly-service-prices',
+        () =>
+          catalog.updateHourlyServicePrices(new HourlyServiceUpdatePricesRequest(), READ_VERSION),
+      ],
+      [
+        'update-hourly-service-booking',
+        () =>
+          catalog.updateHourlyServiceBooking(new HourlyServiceUpdateBookingRequest(), READ_VERSION),
+      ],
+      [
+        'update-automatic-price-general',
+        () =>
+          catalog.updateAutomaticPriceGeneral(
+            new AutomaticPriceUpdateGeneralRequest(),
+            READ_VERSION,
+          ),
+      ],
+      [
+        'update-automatic-price-prices-validity',
+        () =>
+          catalog.updateAutomaticPricePricesValidity(
+            new AutomaticPriceUpdatePricesValidityRequest(),
+            READ_VERSION,
+          ),
+      ],
+      [
+        'update-table-service-general',
+        () =>
+          catalog.updateTableServiceGeneral(new TableServiceUpdateGeneralRequest(), READ_VERSION),
+      ],
+      [
+        'update-table-service-availability-bookings',
+        () =>
+          catalog.updateTableServiceAvailabilityBookings(
+            new TableServiceUpdateAvailabilityBookingsRequest(),
+            READ_VERSION,
+          ),
+      ],
+    ];
+
+    for (const [path, save] of saves) {
+      let saved: string | null | undefined;
+      save().subscribe((version) => (saved = version));
+      const call = controller.expectOne(
+        ({ method, url }) =>
+          method === 'POST' && url === `${environment.apiBaseUrl}/catalog/${path}`,
+      );
+      expect(ifMatchOf(call.request.headers)).toBe(READ_VERSION);
+      call.flush(null, { headers: etag(SAVED_VERSION) });
+      expect(saved).toBe(SAVED_VERSION);
+    }
     controller.verify();
   });
 });

@@ -24,12 +24,12 @@
       />
       <app-filled-number-field
         [label]="'management.settings.warehouse.form.threshold' | translate"
-        [formField]="draftForm.thresholdQuantity"
-        [error]="thresholdQuantityError()"
+        [formField]="draftForm.lowStockThreshold"
+        [error]="lowStockThresholdError()"
       />
       <app-toggle
-        [formField]="draftForm.isThresholdWarningActive"
-        [error]="isThresholdWarningActiveError()"
+        [formField]="draftForm.lowStockAlertEnabled"
+        [error]="lowStockAlertEnabledError()"
       >
         {{ 'management.settings.warehouse.form.threshold_alert' | translate }}
       </app-toggle>

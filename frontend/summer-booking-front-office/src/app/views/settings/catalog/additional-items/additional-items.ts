@@ -129,7 +129,7 @@ export class AdditionalItems {
     }
   }
 
-  protected forgetDeleted(idAdditionalItems: readonly string[]): void {
+  protected forgetDeleted(idAdditionalItems: readonly (string | null)[]): void {
     this.idSelectedAdditionalItems.update((idSelected) =>
       idSelected.filter(
         (idSelectedAdditionalItem) => !idAdditionalItems.includes(String(idSelectedAdditionalItem)),
@@ -140,7 +140,7 @@ export class AdditionalItems {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idAdditionalItems: readonly string[],
+    idAdditionalItems: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idAdditionalItems);

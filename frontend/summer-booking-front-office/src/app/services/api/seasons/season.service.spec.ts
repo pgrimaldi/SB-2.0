@@ -8,7 +8,7 @@ import { SeasonPeriodItem } from '../../../entities/settings/seasons/season-peri
 import { SeasonService } from './season.service';
 
 describe('SeasonService', () => {
-  it('should read the season days of the token as days at midnight UTC', () => {
+  it('should read the season days of the token as days at midnight UTC, with their version', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -25,12 +25,14 @@ describe('SeasonService', () => {
       endsOn: '2026-09-30',
       nextStartsOn: null,
       nextEndsOn: null,
+      version: 'v1',
     });
     expect(dates).toEqual({
       startsOn: '2026-05-01T00:00:00.000Z',
       endsOn: '2026-09-30T00:00:00.000Z',
       nextStartsOn: null,
       nextEndsOn: null,
+      version: 'v1',
     });
     controller.verify();
   });
@@ -52,7 +54,7 @@ describe('SeasonService', () => {
     controller.verify();
   });
 
-  it('should send all the season days, nothing else, and read the days as saved', () => {
+  it('should send all the season days, nothing else, with the version read and read the days as saved with the new one', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -63,12 +65,13 @@ describe('SeasonService', () => {
       endsOn: '2026-09-30T00:00:00.000Z',
       nextStartsOn: null,
       nextEndsOn: null,
+      version: 'v1',
       extra: true,
     };
 
     let saved: SeasonDates | undefined;
 
-    seasons.saveSeasonDates(dates).subscribe((answer) => (saved = answer));
+    seasons.saveSeasonDates(dates, dates.version).subscribe((answer) => (saved = answer));
 
     const call = controller.expectOne(`${environment.apiBaseUrl}/catalog/season`);
     expect(call.request.method).toBe('PUT');
@@ -78,22 +81,27 @@ describe('SeasonService', () => {
       nextStartsOn: null,
       nextEndsOn: null,
     });
-    call.flush({
-      startsOn: '2026-05-01',
-      endsOn: '2026-09-30',
-      nextStartsOn: null,
-      nextEndsOn: null,
-    });
+    expect(call.request.headers.get('If-Match')).toBe('"v1"');
+    call.flush(
+      {
+        startsOn: '2026-05-01',
+        endsOn: '2026-09-30',
+        nextStartsOn: null,
+        nextEndsOn: null,
+      },
+      { headers: { ETag: '"v2"' } },
+    );
     expect(saved).toEqual({
       startsOn: '2026-05-01T00:00:00.000Z',
       endsOn: '2026-09-30T00:00:00.000Z',
       nextStartsOn: null,
       nextEndsOn: null,
+      version: 'v2',
     });
     controller.verify();
   });
 
-  it('should read the periods of the current season as days at midnight UTC, nothing else', () => {
+  it('should read the periods of the current season as days at midnight UTC with their version, nothing else', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -110,6 +118,7 @@ describe('SeasonService', () => {
         key: 0,
         name: 'Bassa stagione',
         ranges: [{ startsOn: '2026-05-01', endsOn: '2026-06-15', extra: 1 }],
+        version: 'v1',
         extra: true,
       },
     ]);
@@ -118,6 +127,7 @@ describe('SeasonService', () => {
         key: 0,
         name: 'Bassa stagione',
         ranges: [{ startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z' }],
+        version: 'v1',
       },
     ]);
     controller.verify();
@@ -198,7 +208,7 @@ describe('SeasonService', () => {
     controller.verify();
   });
 
-  it('should save the name and all the date ranges of the period as days, nothing else', () => {
+  it('should save the name and all the date ranges of the period as days, nothing else, with the version read', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -213,9 +223,9 @@ describe('SeasonService', () => {
       ],
       extra: true,
     };
-    let saved: SeasonPeriodItem | undefined;
+    let version: string | null | undefined;
 
-    seasons.updatePeriod(false, 0, period).subscribe((answer) => (saved = answer));
+    seasons.updatePeriod(false, 0, period, 'v1').subscribe((answer) => (version = answer));
 
     const call = controller.expectOne(`${environment.apiBaseUrl}/catalog/tariff-periods/0`);
     expect(call.request.method).toBe('PUT');
@@ -226,22 +236,19 @@ describe('SeasonService', () => {
         { startsOn: '2026-09-01', endsOn: '2026-09-30' },
       ],
     });
-    call.flush({
-      key: 0,
-      name: 'Pre stagione',
-      ranges: [
-        { startsOn: '2026-05-01', endsOn: '2026-06-15' },
-        { startsOn: '2026-09-01', endsOn: '2026-09-30' },
-      ],
-    });
-    expect(saved).toEqual({
-      key: 0,
-      name: 'Pre stagione',
-      ranges: [
-        { startsOn: '2026-05-01T00:00:00.000Z', endsOn: '2026-06-15T00:00:00.000Z' },
-        { startsOn: '2026-09-01T00:00:00.000Z', endsOn: '2026-09-30T00:00:00.000Z' },
-      ],
-    });
+    expect(call.request.headers.get('If-Match')).toBe('"v1"');
+    call.flush(
+      {
+        key: 0,
+        name: 'Pre stagione',
+        ranges: [
+          { startsOn: '2026-05-01', endsOn: '2026-06-15' },
+          { startsOn: '2026-09-01', endsOn: '2026-09-30' },
+        ],
+      },
+      { headers: { ETag: '"v2"' } },
+    );
+    expect(version).toBe('v2');
     controller.verify();
   });
 

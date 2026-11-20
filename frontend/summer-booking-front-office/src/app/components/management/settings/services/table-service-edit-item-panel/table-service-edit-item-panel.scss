@@ -9,3 +9,11 @@
 .table__service__edit__item__panel__edit {
   grid-column: 1 / -1;
 }
+
+// A tab whose read failed after the opening: the error and Riprova instead of its fields.
+.table__service__edit__item__panel__tab__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}

@@ -28,6 +28,7 @@ import {
 } from '../../../entities/shared/image-upload-types';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 const MAX_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
 const SECTOR_AREAS: (ComboboxItem & { propertyId: number })[] = [
@@ -51,11 +52,12 @@ function article(
   return { variant, icons: { free: icon(free), occupied: icon(occupied) } };
 }
 
-let settings: MapSettings = {
-  ...new MapSettings(),
+/** The settings as the backend keeps them: the versions are worked out for every answer. */
+let settings: Omit<MapSettings, 'backgroundVersion' | 'configurationVersion'> = {
   rows: 6,
   columns: 16,
   tiltDegrees: 8,
+  backgroundColor: null,
   background: {
     iconId: null,
     name: MapBackgroundImage.BackgroundBeach,
@@ -73,10 +75,27 @@ let settings: MapSettings = {
       ...Array.from({ length: MAP_CUSTOM_ARTICLE_QUANTITY - 2 }, (_, index) => article(index + 3)),
     ],
   },
+  resetDeletesBookings: false,
 };
 
-function noContent(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(300));
+/** What `update-background` writes (also the upload and the deletion): `backgroundVersion` covers it. */
+function backgroundData(): MapSettings['background'] {
+  return settings.background;
+}
+
+/** What `update-configuration` writes (also the reset): `configurationVersion` covers it. */
+function configurationData(): Pick<MapSettings, 'rows' | 'columns' | 'tiltDegrees' | 'icons'> {
+  const { rows, columns, tiltDegrees, icons } = settings;
+  return { rows, columns, tiltDegrees, icons };
+}
+
+/** Every answer with the settings has the two versions. */
+function settingsAnswer(): MapSettings {
+  return {
+    ...structuredClone(settings),
+    backgroundVersion: versionOf(backgroundData()),
+    configurationVersion: versionOf(configurationData()),
+  };
 }
 
 /** `null` (no icon) or one of the names, without the spaces at the sides. */
@@ -94,14 +113,14 @@ function rangeError(field: string, value: unknown, from: number, to: number): Mo
 }
 
 function answer(request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(settings) }),
-  ).pipe(delay(300));
+  return of(new HttpResponse({ status: 200, url: request.url, body: settingsAnswer() })).pipe(
+    delay(300),
+  );
 }
 
 /**
  * `GET /api/catalog/map/settings`: everything the page shows, icons and backgrounds as names of the
- * frontend. 401 without a valid access token.
+ * frontend, with `backgroundVersion` and `configurationVersion`. 401 without a valid access token.
  */
 export const mapSettingsMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
   isAuthorized(request) ? answer(request) : unauthorized(request);
@@ -147,8 +166,10 @@ export const removeMapBackgroundMock = (
 
 /**
  * `PUT /api/catalog/map/update-background` with `backgroundName`, one of the frontend's backgrounds:
- * it replaces the uploaded one. 204; 400 validation.required without a name, validation.invalid for
- * another name; 401 without a valid access token.
+ * it replaces the uploaded one. 204 with the new `backgroundVersion` in `ETag`; 400
+ * validation.required without a name, validation.invalid for another name; 409
+ * `resource.version_conflict` when `If-Match` is not `backgroundVersion`; 401 without a valid access
+ * token.
  */
 export const updateMapBackgroundMock = (
   request: HttpRequest<unknown>,
@@ -169,11 +190,15 @@ export const updateMapBackgroundMock = (
       ],
     });
   }
+  const conflict = versionConflict(request, backgroundData());
+  if (conflict) {
+    return conflict;
+  }
   settings = {
     ...settings,
     background: { iconId: null, name: name.trim(), url: null, isCustom: false },
   };
-  return noContent(request);
+  return savedWithVersion(request, backgroundData());
 };
 
 /**
@@ -190,16 +215,17 @@ export const resetMapMock = (request: HttpRequest<unknown>): Observable<HttpEven
     new HttpResponse({
       status: 200,
       url: request.url,
-      body: { settings: structuredClone(settings), spots: [], sectors: [], beachElements: [] },
+      body: { settings: settingsAnswer(), spots: [], sectors: [], beachElements: [] },
     }),
   ).pipe(delay(300));
 };
 
 /**
  * `PUT /api/catalog/map/update-configuration` with every value of Imposta reticolo (MapGrid): rows,
- * items per row, tilt and the icons of the umbrella and of the 8 custom articles. 204; 400 with
- * validation.required / validation.out_of_range on a number or validation.invalid on an unknown
- * icon name; 401 without a valid access token.
+ * items per row, tilt and the icons of the umbrella and of the 8 custom articles. 204 with the new
+ * `configurationVersion` in `ETag`; 400 with validation.required / validation.out_of_range on a
+ * number or validation.invalid on an unknown icon name; 409 `resource.version_conflict` when
+ * `If-Match` is not `configurationVersion`; 401 without a valid access token.
  */
 export const updateMapConfigurationMock = (
   request: HttpRequest<unknown>,
@@ -241,6 +267,10 @@ export const updateMapConfigurationMock = (
       errors,
     });
   }
+  const conflict = versionConflict(request, configurationData());
+  if (conflict) {
+    return conflict;
+  }
   settings = {
     ...settings,
     rows: grid.rowQuantity,
@@ -256,7 +286,7 @@ export const updateMapConfigurationMock = (
       ),
     },
   };
-  return noContent(request);
+  return savedWithVersion(request, configurationData());
 };
 
 /**

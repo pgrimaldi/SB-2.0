@@ -15,7 +15,8 @@ Rotta `/settings/rows-and-sectors` · vista `views/settings/rows-and-sectors/` (
   naturale (Fila 2 prima di Fila 10, chiesto al backend nella sezione 1 del documento delle richieste; il mock fa lo
   stesso), azioni di riga elimina, duplica e modifica.
 - Si carica con `SectorService.sectorList` (`POST /api/catalog/sectors-list`, richiesta e risposta standard delle
-  tabelle, righe `SectorItem` { idSector, sectorName }).
+  tabelle, righe `SectorItem` { idSector, sectorName, version }: `version` è la versione del settore, che il popup
+  Modifica rimanda con il Salva).
 - È un'API nuova, chiesta al backend in
   `shared documentation/Modifiche per il backend/impostazioni/Settori e file - Frontend requests.md` (sezione 1); in
   locale rispondono i mock (`services/mocks/catalog/sectors.mock.ts`), per tutte le API della pagina.
@@ -63,9 +64,15 @@ Rotta `/settings/rows-and-sectors` · vista `views/settings/rows-and-sectors/` (
   con la riga senza chiamate (`Sector` con `id` e `name` della riga); testi
   `management.settings.rows_and_sectors.edit_popup.*`.
 - Il nome si confronta con quello della riga senza spazi ai lati (`sameText`), sia per la domanda su Annulla e la X sia
-  per Salva: con il nome invariato Salva chiude senza chiamate; altrimenti chiama `SectorService.updateSector(idSector, name)`
-  (`PUT /api/catalog/sectors/{id}` con l'`idSector` della riga nell'indirizzo e `{ name }`, 200 con il settore
-  salvato `Sector`).
+  per Salva: con il nome invariato Salva chiude senza chiamate; altrimenti chiama
+  `SectorService.updateSector(idSector, name, version)` (`PUT /api/catalog/sectors/{id}` con l'`idSector` della riga
+  nell'indirizzo, `{ name }` e la `version` della riga nell'header `If-Match`; 200 con il settore salvato `Sector` e
+  la nuova versione nell'`ETag`).
 - Spinner, errori e domanda su Annulla come nel popup di aggiunta; 404 `catalog.sector_not_found` (settore eliminato
   nel frattempo) sopra i bottoni, con il popup aperto: il popup passa ogni errore alla pagina con `(failed)` e la pagina
   ricarica la tabella e toglie la riga dalla selezione (`reloadIfGone`).
+- Controllo di versione: con 409 `resource.version_conflict` (un altro utente ha cambiato il settore dopo la lettura
+  della tabella) niente va sopra i bottoni. Non c'è una lettura del singolo settore, quindi la nuova lettura è quella
+  della tabella: il popup si chiude, compare `app-version-conflict-popup` e la pagina ricarica la tabella
+  (`reloadIfChanged`, con `(failed)`), con le righe come sono ora e le loro nuove versioni; l'utente riapre la matita e
+  rifà la modifica.

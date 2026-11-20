@@ -14,13 +14,14 @@ import {
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'message'] as const;
 const SMTP_SECURITIES: readonly SmtpSecurity[] = ['None', 'Ssl', 'Tls'];
 const REQUIRED_EMAIL_FIELDS = ['senderMailAddress', 'smtpServerAddress', 'smtpUsername'] as const;
 
 /** Invented values: never a real mail server or real credentials. */
-const EMAIL_CONFIGURATION: Omit<EmailConfigurationData, 'hasSmtpPassword'> = {
+const EMAIL_CONFIGURATION: Omit<EmailConfigurationData, 'hasSmtpPassword' | 'version'> = {
   senderMailAddress: 'prenotazioni@lido-demo.example',
   senderName: 'Lido Demo',
   smtpServerAddress: 'smtp.lido-demo.example',
@@ -32,8 +33,8 @@ const EMAIL_CONFIGURATION: Omit<EmailConfigurationData, 'hasSmtpPassword'> = {
 let smtpPassword: string | null = 'password-di-esempio';
 
 /**
- * `GET /api/system/email-configuration`: the mail settings of the property. 401 without a valid
- * access token.
+ * `GET /api/system/email-configuration`: the mail settings of the property and their version. 401
+ * without a valid access token.
  */
 export const emailConfigurationMock = (
   request: HttpRequest<unknown>,
@@ -45,7 +46,11 @@ export const emailConfigurationMock = (
     new HttpResponse({
       status: 200,
       url: request.url,
-      body: { ...EMAIL_CONFIGURATION, hasSmtpPassword: smtpPassword !== null },
+      body: {
+        ...EMAIL_CONFIGURATION,
+        hasSmtpPassword: smtpPassword !== null,
+        version: versionOf(emailConfigurationData()),
+      },
     }),
   ).pipe(delay(150));
 };
@@ -87,7 +92,7 @@ export const sendTestEmailMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const errors = emailConfigurationErrors(request.body);
+  const errors = [...emailConfigurationErrors(request.body), ...smtpPasswordErrors(request.body)];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
@@ -97,9 +102,12 @@ export const sendTestEmailMock = (
 };
 
 /**
- * `POST /api/system/save-email-configuration` with `EmailConfigurationRequest`: same checks as the
- * test email; the mock keeps the values until the page is reloaded, so the GET (and Reset) answers
- * them. 204 without a body; 401 without a valid access token; 400 with one error per wrong field.
+ * `POST /api/system/save-email-configuration` with `EmailConfigurationRequest` and the version read
+ * in `If-Match`: same checks as the test email; the mock keeps the values until the page is
+ * reloaded, so the GET (and Reset) answers them. 204 without a body, the new version in `ETag`; 401
+ * without a valid access token; 400 with one error per wrong field; 409 `resource.version_conflict`
+ * when the configuration changed after the read, checked before the password, which is compared
+ * with the saved configuration.
  */
 export const saveEmailConfigurationMock = (
   request: HttpRequest<unknown>,
@@ -113,6 +121,16 @@ export const saveEmailConfigurationMock = (
       errors,
     });
   }
+  const conflict = versionConflict(request, emailConfigurationData());
+  if (conflict) {
+    return conflict;
+  }
+  const passwordErrors = smtpPasswordErrors(request.body);
+  if (passwordErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors: passwordErrors,
+    });
+  }
   const body = request.body as EmailConfigurationRequest;
   Object.assign(EMAIL_CONFIGURATION, {
     senderMailAddress: body.senderMailAddress as string,
@@ -123,14 +141,15 @@ export const saveEmailConfigurationMock = (
     smtpSecurity: body.smtpSecurity as SmtpSecurity,
   });
   smtpPassword = body.smtpPassword ?? smtpPassword;
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, emailConfigurationData());
 };
 
-/**
- * Sender, server and username filled, port from 1 to 65535, a known security; the password a new
- * non-empty text, or `null` (keep the saved one) only for the same server, port, user and security:
- * the saved password is never sent anywhere else.
- */
+/** What the version covers: what the read gives back, not the password (never read). */
+function emailConfigurationData(): Omit<EmailConfigurationData, 'version'> {
+  return { ...EMAIL_CONFIGURATION, hasSmtpPassword: smtpPassword !== null };
+}
+
+/** Sender, server and username filled, port from 1 to 65535, a known security. */
 function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   const body = (requestBody ?? {}) as Partial<Record<keyof EmailConfigurationRequest, unknown>>;
   const errors: MockFieldError[] = [];
@@ -147,17 +166,23 @@ function emailConfigurationErrors(requestBody: unknown): MockFieldError[] {
   if (!SMTP_SECURITIES.includes(body.smtpSecurity as SmtpSecurity)) {
     errors.push({ field: 'smtpSecurity', code: ApiErrorCode.ValidationInvalid });
   }
+  return errors;
+}
+
+/**
+ * The password a new non-empty text, or `null` (keep the saved one) only for the same server, port,
+ * user and security: the saved password is never sent anywhere else.
+ */
+function smtpPasswordErrors(requestBody: unknown): MockFieldError[] {
+  const body = (requestBody ?? {}) as Partial<Record<keyof EmailConfigurationRequest, unknown>>;
   const otherConnection = SMTP_CONNECTION_FIELDS.some(
     (field) => comparableJson(body[field]) !== comparableJson(EMAIL_CONFIGURATION[field]),
   );
-  if (
+  const isWrong =
     body.smtpPassword === null
       ? smtpPassword !== null && otherConnection
-      : typeof body.smtpPassword !== 'string' || !body.smtpPassword
-  ) {
-    errors.push({ field: 'smtpPassword', code: ApiErrorCode.ValidationInvalid });
-  }
-  return errors;
+      : typeof body.smtpPassword !== 'string' || !body.smtpPassword;
+  return isWrong ? [{ field: 'smtpPassword', code: ApiErrorCode.ValidationInvalid }] : [];
 }
 
 /**

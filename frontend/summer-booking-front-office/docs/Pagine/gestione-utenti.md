@@ -77,8 +77,9 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 
 - La matita apre `app-user-edit-item-popup` (copia del popup di aggiunta, input `idUser`).
 - All'apertura legge l'utente e riempie il form, con i campi bloccati durante la chiamata. Se la lettura fallisce
-  l'errore va sopra Salva (es. 404 `account.not_found`, 422 `account.cannot_modify_self` per l'utente collegato, 403
-  `account.role_not_assignable` per un ruolo che non si gestisce dal pannello) e Salva resta spento. Ogni errore della
+  (es. 404 `account.not_found`, 422 `account.cannot_modify_self` per l'utente collegato, 403
+  `account.role_not_assignable` per un ruolo che non si gestisce dal pannello) il popup si chiude e compare
+  `app-read-error-popup` con il messaggio del `code`, Chiudi e Riprova (per un 404 solo Chiudi). Ogni errore della
   lettura e del salvataggio passa alla pagina con `(failed)`: dopo un 404 la tabella si ricarica.
 - Il prefisso è quello letto; se l'utente ha il cellulare ma non il prefisso, la tendina mostra l'Italia e Salva manda
   `39`, cioè quello che l'utente vede.
@@ -87,6 +88,10 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   cambiarla"); se scritta vale `passwordRules`.
 - Salva è spento finché la lettura non è riuscita, finché il form non è valido e durante la chiamata. Manda tutti i
   campi del popup, cambiati o no; se riesce chiude il popup e ricarica la tabella.
+- Controllo di versione: la lettura porta `version` (in `UserSelectedItem`) e il Salva la rimanda nell'header
+  `If-Match`. Con 409 `resource.version_conflict` (un altro utente ha cambiato l'utente dopo la lettura) compare
+  `app-version-conflict-popup`, il popup si chiude e la pagina ricarica la tabella (`reloadIfChanged`): si perdono le
+  modifiche, anche la password scritta, e per rifarle l'utente riapre la matita, che legge l'utente com'è ora.
 - Come nell'aggiunta, la password non resta in memoria dopo la chiusura.
 - Chiede prima di perdere le modifiche (confronto con i dati caricati).
 
@@ -140,8 +145,9 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
   lingue ma non sono nel filtro: i codici sono chiesti al backend (sezione 9 del documento di richieste della pagina).
 - L'elenco scorre, è largo quanto il nome più lungo e mai meno del campo, con ogni nome su una riga sola in ogni lingua
   (`isPanelSizedToOptions` di `app-filled-multi-select`).
-- Gli utenti arrivano da `user-combobox` a ogni apertura (`DropdownList`). Se la lettura fallisce, sotto il campo Utente
-  compare il messaggio del `code`, la tendina non mostra la sua dicitura e aprirla (`(openRequest)`) rilegge la lista.
+- Gli utenti arrivano da `user-combobox` a ogni apertura (`DropdownList`), con la tendina vuota finché arriva la
+  risposta. Se la lettura fallisce, sotto il campo Utente compare il messaggio del `code`, la tendina non mostra la sua
+  dicitura e aprirla (`(openRequest)`) rilegge la lista.
 - Azioni e utenti sono in ordine alfabetico nella lingua corrente, qualunque sia l'ordine della risposta.
 - Le scelte (`AuditLogFilters`) vanno in `filters` come `actionCode` e `idUser` (`FilterField`, un oggetto per campo,
   valori alternativi), compaiono come chip sotto la ricerca ("Azione: …", "Utente: …", "Più opzioni" con più scelte, X
@@ -168,9 +174,12 @@ Rotta `/settings/user-management`, vista `views/settings/user-management/` (`Use
 - `POST /api/identity/users-list` (`usersList`): corpo standard delle tabelle, risposta `Page<UserItem>`.
 - `POST /api/identity/create-user` (`createUser`): corpo `CreateUserRequest`; risposta 201 con l'utente creato
   (`UserSelectedItem`), che il popup non usa.
-- `GET /api/identity/get-selected-user?idUser=…` (`selectedUser`): risposta `UserSelectedItem`, mai la password.
-- `POST /api/identity/update-user` (`updateUser`): corpo `UpdateUserRequest`, sempre con tutti i campi del popup;
-  risposta 200 con l'utente aggiornato (`UserSelectedItem`), che il popup non usa.
+- `GET /api/identity/get-selected-user?idUser=…` (`selectedUser`): risposta `UserSelectedItem` con `version`, mai la
+  password.
+- `POST /api/identity/update-user` (`updateUser(request, version)`): corpo `UpdateUserRequest`, sempre con tutti i
+  campi del popup, e header `If-Match` con la versione letta; risposta 200 con l'utente aggiornato, che il popup non
+  usa, e l'header `ETag` della nuova versione (`updateUser` restituisce la versione); 409
+  `resource.version_conflict`.
 - `DELETE /api/identity/property-users/{id}` (`deleteUser(idUser)`): API del backend così com'è, id nell'indirizzo,
   risposta 204.
 - `POST /api/identity/user-combobox` (`userCombobox`): POST senza corpo, risposta `ComboboxItem[]` (`{ id, value }`):

@@ -33,6 +33,7 @@
   [idAdditionalItem]="idAdditionalItemToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
+  (failed)="reloadIfGone($event, table, [idAdditionalItemToEdit()])"
 />
 
 <app-delete-items-popup

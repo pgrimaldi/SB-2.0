@@ -21,9 +21,10 @@ import { auditUsers } from '../audit/audit.mock';
 import { MOCK_SIGNED_IN_USER, isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
-type UserRow = UserItem & UserSelectedItem & { propertyId: number };
+type UserRow = UserItem & Omit<UserSelectedItem, 'version'> & { propertyId: number };
 type CreateUserBody = Partial<CreateUserRequest>;
 type UpdateUserBody = Partial<UpdateUserRequest>;
 
@@ -128,8 +129,8 @@ export const userComboboxMock = (request: HttpRequest<unknown>): Observable<Http
  * with the checks of the backend (see `userErrors`; the list of too common passwords is only in the
  * backend). The password is not kept. In this order: 400 with one error per wrong field; 422
  * `account.role_not_assignable` for a role not given from the panel; 409 `account.email_taken` for an
- * email already used by any account; 201 with the new user (`UserSelectedItem`). 401 without a valid
- * access token.
+ * email already used by any account; 201 with the new user (`userData`). 401 without a valid access
+ * token.
  */
 export const createUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -159,8 +160,9 @@ export const createUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
     role: body.role ?? null,
   };
   USERS.push(user);
-  const answer = onlyFieldsOf(UserSelectedItem, user);
-  return of(new HttpResponse({ status: 201, url: request.url, body: answer })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: userData(user) })).pipe(
+    delay(600),
+  );
 };
 
 /**
@@ -181,8 +183,8 @@ export const deleteUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
 
 /**
  * `GET /api/identity/get-selected-user?idUser=…`: the user of the property of the token with every
- * field of the edit popup, never the password. 200 with `UserSelectedItem`; 401 without a valid access
- * token; then the checks of `manageableUser`.
+ * field of the edit popup and its version, never the password. 200 with `UserSelectedItem`; 401
+ * without a valid access token; then the checks of `manageableUser`.
  */
 export const selectedUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -192,17 +194,19 @@ export const selectedUserMock = (request: HttpRequest<unknown>): Observable<Http
   if (user instanceof Observable) {
     return user;
   }
-  const answer = onlyFieldsOf(UserSelectedItem, user);
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+  return of(new HttpResponse({ status: 200, url: request.url, body: selectedOf(user) })).pipe(
+    delay(300),
+  );
 };
 
 /**
  * `POST /api/identity/update-user` with `UpdateUserRequest`: the user `idUser` of the property of the
  * token takes the new values; the password is optional: null keeps the saved one, and the mock never
  * keeps it. In this order: 400 with one error per wrong field (see `userErrors`); the checks of
- * `manageableUser`; 409 `account.email_taken` for an email of another account; 422
- * `account.role_not_assignable` for a role not given from the panel; 200 with the user
- * (`UserSelectedItem`). 401 without a valid access token.
+ * `manageableUser`; 409 `resource.version_conflict` when `If-Match` is not the version of the user;
+ * 409 `account.email_taken` for an email of another account; 422 `account.role_not_assignable` for a
+ * role not given from the panel; 200 with the user (`userData`) and its new version in `ETag`. 401
+ * without a valid access token.
  */
 export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -216,6 +220,10 @@ export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
   const user = manageableUser(request, body.idUser);
   if (user instanceof Observable) {
     return user;
+  }
+  const conflict = versionConflict(request, userData(user));
+  if (conflict) {
+    return conflict;
   }
   const email = (body.email ?? '').trim();
   if (USERS.some((row) => row !== user && sameTextIgnoringCase(row.email, email))) {
@@ -233,9 +241,26 @@ export const updateUserMock = (request: HttpRequest<unknown>): Observable<HttpEv
     emailIsContact: body.emailIsContact === true,
     phoneIsContact: body.phoneIsContact === true,
   });
-  const answer = onlyFieldsOf(UserSelectedItem, user);
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(600));
+  return savedWithVersion(request, userData(user), userData(user));
 };
+
+function selectedOf(user: UserRow): UserSelectedItem {
+  const data = userData(user);
+  return { ...data, version: versionOf(data) };
+}
+
+/** What `get-selected-user` answers besides the version: the version covers it. */
+function userData(user: UserRow): Omit<UserSelectedItem, 'version'> {
+  return {
+    idUser: user.idUser,
+    email: user.email,
+    emailIsContact: user.emailIsContact,
+    phoneCountryCode: user.phoneCountryCode,
+    phone: user.phone,
+    phoneIsContact: user.phoneIsContact,
+    role: user.role,
+  };
+}
 
 /**
  * The user the panel may read, change or delete, as `StaffService.GetManageableAsync`: 404

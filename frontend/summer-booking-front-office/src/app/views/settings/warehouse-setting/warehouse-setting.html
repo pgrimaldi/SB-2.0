@@ -36,6 +36,9 @@
   [item]="editedItem()"
   [(open)]="editing"
   (saved)="table.reload()"
+  (failed)="
+    reloadIfGone($event, table, [editedItem()?.idArticle ?? null]); reloadIfChanged($event, table)
+  "
 />
 <app-delete-items-popup
   [idItems]="idItemsToDelete()"

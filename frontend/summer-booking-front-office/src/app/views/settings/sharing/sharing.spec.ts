@@ -1,22 +1,27 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SharingGeneralInformation } from '../../../entities/settings/sharing/sharing-general-information';
+import { SharingSaveInformationRequest } from '../../../entities/settings/sharing/sharing-save-information-request';
 import { SharingService } from '../../../services/api/sharing/sharing.service';
 import { Sharing } from './sharing';
 
 describe('Sharing', () => {
   const setup = async (information = new SharingGeneralInformation()) => {
+    const generalInformation = vi.fn(() => of(information));
+    const saveInformation = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         {
           provide: SharingService,
-          useValue: { generalInformation: () => of(information), saveInformation: vi.fn() },
+          useValue: { generalInformation, saveInformation },
         },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
@@ -30,7 +35,13 @@ describe('Sharing', () => {
       toggle(index).click();
       await fixture.whenStable();
     };
-    return { fixture, element, click };
+    // submit() of Signal Forms awaits the answer in a promise that Angular does not wait for.
+    const save = async () => {
+      element.querySelector<HTMLButtonElement>('.sharing__actions button')!.click();
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+    return { fixture, element, click, save, generalInformation, saveInformation };
   };
 
   it('should not count as a change a toggle turned on and off again', async () => {
@@ -53,5 +64,32 @@ describe('Sharing', () => {
     await click(1);
     await click(1);
     expect(daysError()).not.toBeNull();
+  });
+
+  it('should read the settings again and say why when someone changed them after the read', async () => {
+    const information = Object.assign(new SharingGeneralInformation(), { version: 'v1' });
+    const { fixture, element, click, save, generalInformation, saveInformation } =
+      await setup(information);
+    saveInformation.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+    await click(0);
+
+    await save();
+    expect(saveInformation).toHaveBeenCalledWith(
+      { ...new SharingSaveInformationRequest(), isSharingEnabled: true },
+      'v1',
+    );
+    expect(generalInformation).toHaveBeenCalledTimes(2);
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    expect(document.querySelector('.table__error__popup')).not.toBeNull();
+    expect(element.querySelector('.sharing__error')).toBeNull();
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 });

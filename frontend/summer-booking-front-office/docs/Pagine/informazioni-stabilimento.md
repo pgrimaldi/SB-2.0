@@ -29,7 +29,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 ## Tab 1 – Informazioni Generali
 
 - Componente `BathhouseGeneralSettings`, modello `BathhouseGeneralInformation` in
-  `entities/settings/bathhouse-configuration/`, lo stesso per la lettura e per il salvataggio.
+  `entities/settings/bathhouse-configuration/` per il form e il salvataggio; la lettura è
+  `BathhouseSelectedGeneralInformation`, lo stesso modello con `version`.
 - Campi `filled` con l'etichetta sopra, su righe:
   - Nome stabilimento 35% (obbligatorio, `requiredText`, con l'asterisco), Indirizzo 45%, Cap 20%;
   - Città, Provincia, Regione e Nazione un quarto ciascuno;
@@ -84,7 +85,8 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 
 ## Tab 2 – Servizi
 
-- Componente `BathhouseServicesSettings`, modello `BathhouseServiceItem`. Mostra i servizi del backend come caselle di
+- Componente `BathhouseServicesSettings`, modello `BathhouseServiceItem`; la lettura è `BathhouseSelectedServices`
+  (`services` e `version`). Mostra i servizi del backend come caselle di
   spunta (`app-checkbox`, con l'icona `iconUrl`, solo se è un indirizzo https o dell'app, e il nome) in quattro sezioni
   fisse con `app-section-title`, sempre in
   quest'ordine: Accessibilità e Comfort, Sport e attività, Ristorazione e extra, Spiaggia (enum
@@ -99,9 +101,10 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 
 ## Tab 3 – Media
 
-- Componente `BathhouseMediaSettings`, modelli `BathhouseMedia` (lettura, con `BathhousePhoto`) e
-  `BathhouseMediaRequest` (salvataggio). Ha quattro sezioni, ognuna con il suo titolo: Posizione (la mappa), Immagini
-  (immagine principale e galleria di al massimo 30 foto), Link Tour virtuale e Documenti PDF (Listino Prezzi e Menù).
+- Componente `BathhouseMediaSettings`, modelli `BathhouseSelectedMedia` (lettura: `BathhouseMedia`, con
+  `BathhousePhoto`, e `version`) e `BathhouseMediaRequest` (salvataggio). Ha quattro sezioni, ognuna con il suo
+  titolo: Posizione (la mappa), Immagini (immagine principale e galleria di al massimo 30 foto), Link Tour virtuale e
+  Documenti PDF (Listino Prezzi e Menù).
 - Mappa: `app-location-map` (Google Maps, caricato da `GoogleMapsBehaviour`), segnaposto su `latitude` / `longitude`
   della GET con zoom 15; senza posizione l'Italia con zoom 5. Senza chiave di Google Maps o se lo script non si carica,
   al posto della mappa compare "Impossibile caricare la mappa" (`media.position.map_error`).
@@ -148,7 +151,10 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Le risposte valgono per un valore di `DATA_RELOAD` (la lingua): quando cambia, la cache le scarta e la tab aperta
   rilegge, come le altre pagine.
 - Dopo un salvataggio, e dopo ogni caricamento o cancellazione di foto e PDF, la cache prende i dati salvati
-  (`keepGeneralInformation`, `keepServices`, `keepMedia`): tornando sulla tab si vedono senza richiamare la GET.
+  (`keepGeneralInformation`, `keepServices`, `keepMedia`) con la versione della tab: quella nuova dopo un salvataggio,
+  quella di prima dopo foto e PDF. Tornando sulla tab si vedono senza richiamare la GET.
+- Dopo un 409 `resource.version_conflict` la cache scarta la risposta della tab (`forgetGeneralInformation`,
+  `forgetServices`, `forgetMedia`) e la tab rilegge dal backend.
 - La cache tiene i dati del server, non quelli scritti e non salvati: cambiando tab con modifiche in sospeso compare il
   popup delle modifiche non salvate.
 
@@ -157,25 +163,29 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 Tutte in `CatalogService`. Nessuna manda lo stabilimento, che il backend prende dal token: le tab aspettano solo
 l'utente autenticato.
 
-- `GET /api/catalog/property-info/bathhouse-configuration-general`: i campi della tab 1 (`BathhouseGeneralInformation`).
+- `GET /api/catalog/property-info/bathhouse-configuration-general`: i campi della tab 1 e `version`
+  (`BathhouseSelectedGeneralInformation`).
 - `GET /api/catalog/lookups/countries`: le voci di Nazione, API del backend usata così com'è (aperta anche senza
   accesso). Risponde `Country` (`entities/shared/country.ts`): `code`, codice ISO 3166-1 alpha-2 (es. `DE`), e `name`,
   già tradotto dal backend nella lingua di `Accept-Language`; solo le nazioni attive, nell'ordine del backend
   (`catalog.countries.sort_order`, poi il codice).
 - `POST /api/catalog/property-info/save-bathhouse-configuration-general`: Salva della tab 1, con tutti i campi.
-- `GET /api/catalog/property-info/bathhouse-configuration-services`: i servizi della tab 2 (`BathhouseServiceItem[]`).
+- `GET /api/catalog/property-info/bathhouse-configuration-services`: `{ services, version }`, i servizi della tab 2
+  (`BathhouseSelectedServices`).
 - `POST /api/catalog/property-info/save-bathhouse-configuration-services`: Salva della tab 2, `{ services }` con tutti i
   servizi letti, ognuno con `isSelected`.
-- `GET /api/catalog/property-info/bathhouse-configuration-media`: i media della tab 3 (`BathhouseMedia`).
+- `GET /api/catalog/property-info/bathhouse-configuration-media`: i media della tab 3 e `version`
+  (`BathhouseSelectedMedia`).
 - `POST /api/catalog/property-info/save-bathhouse-configuration-media`: Salva della tab 3 (`BathhouseMediaRequest`).
 - `POST` / `DELETE /api/catalog/property-info/main-photo`: immagine principale.
 - `POST /api/catalog/property-info/photos`, `DELETE /api/catalog/property-info/photos/{id}` (`id` = `idPhoto`): foto
   della galleria.
 - `POST` / `DELETE /api/catalog/property-info/documents/{price-list|menu}` (enum `BathhouseDocument`): PDF del listino
   e del menù.
-- I tre salvataggi rispondono 204 senza corpo. I caricamenti mandano il file in `multipart/form-data`, campo `file`; le
-  API di foto e PDF rispondono 200 con la scheda.
-- Le sei API `bathhouse-configuration-*` sono richieste al backend in
+- I tre salvataggi mandano la versione letta nell'header `If-Match` e rispondono 204 senza corpo, con la nuova
+  versione nell'header `ETag`; 409 `resource.version_conflict` se nel frattempo i dati sono cambiati. I caricamenti
+  mandano il file in `multipart/form-data`, campo `file`; le API di foto e PDF rispondono 200 con la scheda.
+- Le sei API `bathhouse-configuration-*` e il loro controllo di versione sono richiesti al backend in
   `shared documentation/Modifiche per il backend/impostazioni/Informazioni stabilimento - Frontend requests.md`, con
   le API esistenti che la pagina usa così come sono. In locale rispondono i mock di
   `services/mocks/catalog/catalog.mock.ts`.
@@ -188,6 +198,13 @@ l'utente autenticato.
   in `edit()`): se la lettura fallisce non si può salvare una tab vuota sopra i dati veri.
 - Durante il salvataggio Salva mostra lo spinner, Annulla è spento e i campi sono bloccati; se riesce, la tab torna in
   sola lettura con i valori salvati.
+- Controllo di versione, una versione per tab: la GET della tab porta `version`, la tab la tiene e il suo Salva la
+  rimanda nell'header `If-Match`; dopo un salvataggio riuscito tiene la nuova versione dell'`ETag` per il Salva
+  successivo. Ogni versione copre solo quello che scrive il Salva della sua tab: salvare una tab non cambia le altre,
+  e foto e PDF non cambiano la versione della tab Media.
+- Con 409 `resource.version_conflict` (un altro utente ha cambiato i dati della tab dopo la lettura) compare
+  `app-version-conflict-popup` e la tab torna in sola lettura e rilegge i suoi dati: l'utente rifà le modifiche. Il
+  messaggio in fondo alla tab non compare; se la rilettura fallisce vale la regola delle letture qui sopra.
 - Gli errori generali (es. 403 `catalog.property_required`, 404 `catalog.property_not_found`, 403 `auth.forbidden`)
   compaiono in fondo alla tab; quelli di foto e PDF sotto la loro sezione.
 - Ogni tab chiede prima di perdere i dati scritti (`UnsavedChangesBehaviour`): uscendo dalla pagina, cambiando tab e

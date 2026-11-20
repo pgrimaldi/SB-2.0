@@ -109,7 +109,7 @@
     <app-button
       [size]="ButtonSize.Small"
       [isFullWidth]="true"
-      [disabled]="!settings()"
+      [disabled]="!isLoaded()"
       (clicked)="edit()"
     >
       {{ 'management.settings.map_configuration.edit' | translate }}
@@ -127,3 +127,4 @@
   (openChange)="closeDeletion($event)"
   (confirmed)="confirmDeletion()"
 />
+<app-version-conflict-popup [pathIcon]="popupIcons" [(open)]="isConflictShown" />

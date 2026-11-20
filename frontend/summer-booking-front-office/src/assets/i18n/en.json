@@ -106,7 +106,8 @@
       "password_too_common": "This password is too common: choose a safer one."
     },
     "resource": {
-      "not_found": "This item no longer exists."
+      "not_found": "This item no longer exists.",
+      "version_conflict": "Another user changed this data in the meantime: it has been reloaded. Please make your changes again."
     },
     "account": {
       "email_taken": "An account with this email already exists.",
@@ -148,9 +149,9 @@
       "period_overlap": "The dates overlap the period {{periodName}}: choose days that are not already in another period."
     },
     "inventory": {
-      "item_not_found": "The article is no longer there: it may already have been deleted.",
-      "name_taken": "Another article already has this name.",
-      "item_in_use": "The article {{articleName}} is used in the price lists {{usedIn}} and cannot be deleted: first remove it from these price lists."
+      "item_not_found": "The item is no longer there: it may already have been deleted.",
+      "name_taken": "Another item already has this name.",
+      "item_in_use": "The item {{articleName}} is used in the price lists {{usedIn}} and cannot be deleted: first remove it from these price lists."
     }
   },
   "alert": {
@@ -514,7 +515,7 @@
           "add": "Add",
           "save": "Save",
           "field_names": {
-            "total": "total"
+            "quantity": "quantity"
           }
         },
         "delete": {

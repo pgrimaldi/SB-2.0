@@ -20,9 +20,11 @@ registro, `/settings/user-management/logs`.
 | 6 | POST | `/api/identity/user-combobox` | La tendina degli utenti (qui: filtro del registro) |
 | 7 | POST | `/api/audit/print-log` | File Excel (`xlsx`) da stampare con le voci del registro filtrate |
 | 8 | POST | `/api/audit/export-log` | File Excel con le voci del registro filtrate |
+| 10 | GET + POST | `/api/identity/get-selected-user` e `/api/identity/update-user` | Controllo di versione: `version` nella lettura, `If-Match` ed `ETag` nel salvataggio, 409 `resource.version_conflict` |
 
 Oltre alle API, la sezione 9 chiede i codici di azione del registro per i moduli che oggi non hanno API (prenotazioni,
-pagamenti, cassa, ordini, database, prenotazioni dei tavoli).
+pagamenti, cassa, ordini, database, prenotazioni dei tavoli). La sezione 10 aggiunge il controllo di versione alle API
+3 e 4.
 
 ## Regole comuni
 
@@ -196,7 +198,7 @@ Lo stabilimento lo prende dal token.
 ### Risposta
 
 201 Created con l'utente creato, solo con questi campi (gli stessi che il frontend legge quando apre la modifica di un
-utente; mai la password). `phoneCountryCode` segue le regole comuni.
+utente, senza `version`; mai la password). `phoneCountryCode` segue le regole comuni.
 
 ```json
 {
@@ -288,7 +290,8 @@ GET /api/identity/get-selected-user?idUser=3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03
 
 ### Risposta
 
-200 con l'utente, con gli stessi campi della risposta di `create-user` (mai la password):
+200 con l'utente, con gli stessi campi della risposta di `create-user` più `version`, la versione che il Salva rimanda
+(sezione 10); mai la password:
 
 ```json
 {
@@ -298,7 +301,8 @@ GET /api/identity/get-selected-user?idUser=3b8f1c2d-5e6a-4b7c-9d0e-1f2a3b4c5d03
   "phoneCountryCode": "39",
   "phone": "340 1112203",
   "phoneIsContact": true,
-  "role": "manager"
+  "role": "manager",
+  "version": "a3f09c41"
 }
 ```
 
@@ -323,7 +327,8 @@ Ordine dei controlli, come `StaffService.GetManageableAsync`: stabilimento del t
 `account.property_required`), account dell'utente collegato (401), utente nello stabilimento (404), se stesso (422),
 ruolo gestibile dal pannello (403 `account.role_not_assignable`).
 
-Il frontend mostra ogni errore nel messaggio in fondo al popup, con "Salva" spento.
+Con ogni errore il popup si chiude e compare l'avviso di errore con il testo del `code`, Chiudi e Riprova (per un 404
+solo Chiudi); la pagina riceve l'errore e con un 404 ricarica la tabella.
 
 ## 4. POST /api/identity/update-user
 
@@ -335,6 +340,7 @@ sessioni di questa sezione.
 ### Richiesta
 
 Tutti i campi del popup, cambiati o no; l'utente da modificare è `idUser`. Lo stabilimento lo prende dal token.
+L'header `If-Match` porta la `version` letta con `get-selected-user` (sezione 10): `If-Match: "a3f09c41"`.
 
 ```json
 {
@@ -397,6 +403,8 @@ sempre il ruolo, ogni Salva chiuderebbe le sessioni dell'utente anche quando cam
 }
 ```
 
+Con la risposta, l'header `ETag` porta la nuova versione dell'utente (sezione 10).
+
 Come oggi `StaffService.UpdateAsync`, ogni Salva riuscito scrive nel registro `identity.user_updated`.
 
 ### Errori
@@ -409,6 +417,7 @@ Come `PATCH /api/identity/property-users/{userId}`:
 | 422 | `account.role_not_assignable` | Il nuovo ruolo non si assegna dal pannello. |
 | 409 | `account.email_taken` | L'email è già di un altro account non eliminato. |
 | 404 | `account.not_found` | `idUser` non è un utente dello stabilimento. |
+| 409 | `resource.version_conflict` | La versione in `If-Match` non è più quella dell'utente, o manca `If-Match` (sezione 10). Niente cambia. |
 | 403 | `account.role_not_assignable` | L'utente da modificare ha un ruolo che non si gestisce dal pannello (il titolare `superadmin` o `websiteadmin`). |
 | 422 | `account.cannot_modify_self` | L'utente collegato prova a modificare se stesso. |
 | 403 | `auth.forbidden` | Utente senza il permesso `StaffManage`. |
@@ -416,12 +425,14 @@ Come `PATCH /api/identity/property-users/{userId}`:
 | 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
 | 401 | `auth.session_expired` | L'account dell'utente collegato è stato cancellato nel frattempo (`CurrentAccount.GetAsync`, come oggi in `StaffService`). |
 
-Ordine dei controlli, come `StaffService.UpdateAsync`: corpo (400), poi i controlli di `get-selected-user` sull'utente
-da modificare (sezione 3), poi email già usata (409), poi ruolo nuovo (422).
+Ordine dei controlli: corpo (400), poi i controlli di `get-selected-user` sull'utente da modificare (sezione 3), poi
+la versione (409 `resource.version_conflict`, sezione 10), poi email già usata (409), poi ruolo nuovo (422). A parte la
+versione, è l'ordine di `StaffService.UpdateAsync`.
 
 Il frontend mostra gli errori di `errors[]` sotto i campi con lo stesso nome; 409 `account.email_taken` sotto Email e
 422 `account.role_not_assignable` sotto Tipo di account (arrivano senza `errors[]` ma riguardano un campo solo); tutti
 gli altri nel messaggio in fondo al popup. Il 403 `account.role_not_assignable` (ruolo dell'utente da modificare) resta nel messaggio in fondo.
+Il 409 `resource.version_conflict` non va nel messaggio: il popup mostra l'avviso e rilegge l'utente (sezione 10).
 
 ## 5. POST /api/audit/entries-list
 
@@ -818,6 +829,59 @@ backend ne vuole un'altra, va deciso insieme: il frontend allinea il suo elenco.
 Per ognuna, `bookingNumber` e `spotLabel` della voce sono valorizzati quando l'azione riguarda una prenotazione o una
 postazione, come per le altre voci (sezione 5).
 
+## 10. Controllo di versione sui salvataggi di modifica
+
+Oggi, se due utenti del pannello modificano lo stesso utente, vince chi salva per ultimo: il popup "Modifica utente"
+rimanda tutti i campi letti all'apertura (sezione 4) e cancella, senza che nessuno se ne accorga, quello che un altro
+utente ha cambiato nel frattempo (per esempio con `PATCH /api/identity/property-users/{userId}` o con un altro popup
+aperto sullo stesso utente). Il backend non ha un controllo di concorrenza sugli aggiornamenti: nessun token di
+concorrenza in `AccountConfiguration` (`identity.access_users`), nessun `If-Match`. Il frontend chiede lo schema di
+**concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
+(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
+unico per tutte le API**: `resource.version_conflict`, anche qui al posto di un codice dell'area `account.*`.
+
+### Cosa ci serve
+
+- **Versione nella lettura**: `get-selected-user` (sezione 3) restituisce, insieme ai dati, il campo `version` (stringa
+  opaca). Cambia ogni volta che cambiano i dati che `update-user` scrive (tabella sotto), anche quando li cambia
+  un'altra API (per esempio `PATCH /api/identity/property-users/{userId}` o `PUT /api/identity/me` per prefisso e
+  cellulare), e solo allora.
+- **La password non conta**: il popup non la legge mai e la manda solo se l'utente ne scrive una nuova, quindi un
+  cambio di password (per esempio `POST /api/identity/me/password`) non cambia la versione e non fa fallire il Salva
+  di un amministratore che sta modificando l'utente.
+- **Non cambia** per i dati che `update-user` non scrive: per esempio `last_login_at`, che `Account.RecordLogin`
+  aggiorna a ogni accesso dell'utente (`AuthService`), o `username`, `first_name`, `last_name`, `language` di
+  `identity.access_users`. Per questo un token di tutta la riga (come `xmin` di `identity.access_users`) non va bene da
+  solo: darebbe un conflitto ogni volta che l'utente modificato accede, e non vedrebbe le caselle "Abilita", che oggi
+  `StaffService` non salva in quella tabella (le pubblica con l'evento `StaffContactChannelsChanged`; sezione 2,
+  "Caselle Abilita").
+- **`If-Match` nel salvataggio**: il frontend manda la versione letta nell'header `If-Match: "<version>"`. Se non è più
+  quella attuale, il backend non salva niente (nemmeno la password, e non chiude sessioni) e risponde
+  **409 `resource.version_conflict`**, senza `errors[]`. Senza `If-Match` risponde allo stesso modo: il frontend lo
+  manda sempre.
+- **`ETag` nella risposta**: ogni `update-user` riuscito restituisce la nuova versione nell'header `ETag: "<version>"`;
+  il corpo resta quello della sezione 4.
+- Il 409 `resource.version_conflict` si controlla dopo i controlli sull'utente da modificare (404, 422, 403 della
+  sezione 3) e prima degli altri 409 (`account.email_taken`) e del 422 sul ruolo nuovo.
+- **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti dalla versione, un contatore
+  aggiornato da ogni API che li cambia...), nei limiti dei due punti sopra: l'agente glielo chiede prima di scrivere
+  codice. Il frontend tratta la versione come una stringa opaca e non la confronta mai.
+
+### API coinvolte
+
+| Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
+|---|---|---|
+| `GET /api/identity/get-selected-user` (sezione 3) | `POST /api/identity/update-user` (sezione 4) | I dati dell'utente che il popup legge e rimanda: email, caselle "Abilita" (`emailIsContact`, `phoneIsContact`), prefisso, cellulare e ruolo; non la password |
+
+Le altre API di questo documento non ne hanno bisogno: `create-user` crea un utente nuovo, le tabelle, la tendina, la
+stampa e l'esportazione leggono soltanto, e `DELETE /api/identity/property-users/{id}` non rimanda dati letti.
+
+### Cosa fa il frontend
+
+Con 409 `resource.version_conflict` il popup "Modifica utente" si chiude, compare l'avviso "Nel frattempo un altro
+utente ha modificato questi dati: li abbiamo ricaricati. Rifai le tue modifiche." e la tabella si ricarica; le modifiche
+scritte, password compresa, si perdono. Riaprendo la matita il popup rilegge l'utente con `get-selected-user`.
+
 ## API esistenti usate così come sono
 
 Questa API del backend la usa già il frontend e **non va cambiata**: è qui solo perché chi lavora sulla pagina sappia
@@ -863,6 +927,13 @@ Il frontend si aspetta 204 senza corpo e questi errori, che mostra nel popup "Op
   `identity.user_updated`; su un account con `username`, `first_name`, `last_name`, `language`,
   `is_resource_scope_restricted` e `resource_scopes` già valorizzati, dopo `update-user` queste colonne di
   `identity.access_users` hanno gli stessi valori di prima.
+- Controllo di versione (sezione 10): `get-selected-user` risponde con `version` (per esempio `v1`); `update-user` con
+  `If-Match: "v1"` risponde 200 con l'header `ETag` di una versione nuova, diversa da `v1`, e una nuova
+  `get-selected-user` risponde con quella versione. Lo stesso `update-user` con `If-Match: "v1"` dopo il primo, o senza
+  `If-Match`, risponde 409 `resource.version_conflict` senza `errors[]` e l'utente non cambia (nemmeno la password, e
+  le sue sessioni restano). Dopo un `PATCH /api/identity/property-users/{userId}` che cambia il cellulare,
+  `update-user` con la versione letta prima risponde 409 `resource.version_conflict`. Dopo un accesso dell'utente
+  (`last_login_at` cambia) la versione resta la stessa e `update-user` con quella versione riesce.
 - Sessioni: dopo `update-user` con lo stesso ruolo e `password` `null` (cambia solo il cellulare), i refresh token
   dell'utente modificato in `identity.access_refresh_tokens` restano con `revoked_at` `null` e `POST
   /api/identity/auth/refresh` continua a funzionare per lui; con un ruolo diverso si revocano con `revoked_reason`

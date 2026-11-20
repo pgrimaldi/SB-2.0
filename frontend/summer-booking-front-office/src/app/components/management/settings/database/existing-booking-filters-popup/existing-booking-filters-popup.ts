@@ -143,6 +143,7 @@ export class ExistingBookingFiltersPopup extends BasePopup implements UnsavedCha
     this.idAffiliatedHotels.set(filters.affiliatedHotels.map((hotel) => hotel.id));
     this.paymentStatuses.set(filters.paymentStatuses);
     this.pristineChoices = this.choices();
+    this.affiliatedHotels.clear();
   }
 
   private choices(): string {

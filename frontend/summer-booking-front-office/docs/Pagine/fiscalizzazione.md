@@ -85,6 +85,8 @@ Rotta `/settings/taxation`, vista `views/settings/taxation/` (`Taxation`).
   (`GeneralIcon_EyeClose.svg`, `GeneralIcon_EyeStart.svg`, `autocomplete="new-password"`).
 - Tutti obbligatori (`requiredText`, asterisco, "Campo obbligatorio" sotto il campo, Salva spento finché ne manca uno);
   PIN e Password solo finché il server non ne ha uno salvato.
+- Non c'è ancora una lettura dell'account: il form parte vuoto e Salva scrive senza controllo di versione. Lettura e
+  versione sono chieste al backend (`Fiscalizzazione - Frontend requests.md`, sezione 1); il punto è in `docs/TODO.md`.
 - "Salva" in basso a destra, con lo spinner sul bottone e i campi bloccati. Se riesce:
   - sulla riga del titolo, al centro del riquadro, compare l'etichetta "Account configurato con successo" con la spunta
     (`management.settings.taxation.receipt.account.saved`, icona `Taxation_AccountSaved.svg`; sotto i 1280px va sotto il

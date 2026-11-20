@@ -72,6 +72,8 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface UserRoleTexts {
   admin: string;
@@ -111,8 +113,10 @@ const ASSIGNABLE_USER_ROLES: readonly { role: UserRole; key: keyof UserRoleTexts
     FormField,
     IconButton,
     InfoPopup,
+    ReadErrorPopup,
     SectionTitle,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './user-edit-item-popup.html',
   styleUrl: './user-edit-item-popup.scss',
@@ -149,6 +153,7 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   protected readonly isFetching = signal(false);
   private readonly draft = signal(new UpdateUserRequest());
   private readonly loaded = signal<UpdateUserRequest | null>(null);
+  private version: string | null = null;
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.email);
     emailAddress(path.email);
@@ -174,6 +179,8 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
   protected readonly roleError = this.validationText.message(this.draftForm.role);
   protected readonly canSave = computed(() => this.loaded() !== null && this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -228,13 +235,19 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.identity.updateUser(this.sent()));
+        await firstValueFrom(this.identity.updateUser(this.sent(), this.version));
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.isLoading.set(false);
+          this.close();
+          return undefined;
+        }
         return this.errorsOf(problem);
       } finally {
         this.isLoading.set(false);
@@ -273,8 +286,13 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
     };
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
   private reset(): void {
     this.loaded.set(null);
+    this.version = null;
     this.draft.set(new UpdateUserRequest());
     this.draftForm().reset();
     this.error.set(null);
@@ -289,13 +307,15 @@ export class UserEditItemPopup extends BasePopup implements UnsavedChanges, OnDe
         next: (item) => {
           const request = this.toUpdateRequest(item);
           this.loaded.set(structuredClone(request));
+          this.version = item.version;
           this.draft.set(request);
           this.draftForm().reset();
         },
         error: (error: unknown) => {
           const problem = toApiProblem(error);
-          this.error.set(problem);
           this.failed.emit(problem);
+          this.readError.set(problem);
+          this.close();
         },
       });
   }

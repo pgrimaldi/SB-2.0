@@ -35,7 +35,7 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
   - Tipologia prenotazioni (Giornaliera, Più giorni, 7 giorni, 14 giorni, Mensile, Stagionale);
   - Prenotazioni con convenzioni (Sì, No);
   - Strutture convenzionate, dall'API `affiliated-hotel-combobox`, chiesta a ogni apertura del popup annullando la
-    richiesta precedente;
+    richiesta precedente, con la tendina vuota finché arriva la risposta;
   - Stato pagamento (In attesa di pagamento, Pagato totalmente, Pagato parzialmente).
 - Gli enum delle tendine fisse stanno in `entities/database/existing-booking-filters.ts`; il backend li controllerà.
 - Applica manda in `filters`, insieme al periodo, un oggetto per ogni tendina con almeno una scelta, con i valori in un

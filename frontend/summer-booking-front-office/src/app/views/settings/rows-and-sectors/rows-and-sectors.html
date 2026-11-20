@@ -32,7 +32,9 @@
   [sector]="sectorToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table, [sectorToEdit()?.idSector ?? null])"
+  (failed)="
+    reloadIfGone($event, table, [sectorToEdit()?.idSector ?? null]); reloadIfChanged($event, table)
+  "
 />
 
 <app-delete-items-popup

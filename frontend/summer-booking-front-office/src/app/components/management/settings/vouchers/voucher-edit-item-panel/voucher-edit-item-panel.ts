@@ -36,6 +36,7 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { DiscountScope } from '../../../../../entities/enums/discount-scope';
 import { DiscountType } from '../../../../../entities/enums/discount-type';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { VoucherSelectedItem } from '../../../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherTimeSlot } from '../../../../../entities/settings/vouchers/voucher-time-slot';
@@ -61,6 +62,8 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 
@@ -84,9 +87,11 @@ interface OptionsTexts {
     FormRow,
     FormRowLabel,
     IconButton,
+    ReadErrorPopup,
     SectionTitle,
     Toggle,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './voucher-edit-item-panel.html',
   styleUrl: './voucher-edit-item-panel.scss',
@@ -97,6 +102,7 @@ interface OptionsTexts {
 export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly idVoucher = input<string | null>(null);
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly vouchers = inject(VoucherService);
   private readonly auth = inject(AuthBehaviour);
@@ -110,6 +116,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
 
   private readonly draft = signal(new VoucherUpdateItemRequest());
   private readonly loaded = signal<VoucherUpdateItemRequest | null>(null);
+  private version: string | null = null;
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.voucherName);
     minItems(path.validityPeriods, 1);
@@ -149,6 +156,8 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   protected readonly isFetching = signal(false);
   protected readonly isLoaded = computed(() => this.loaded() !== null);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -250,7 +259,7 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   }
 
   protected save(): void {
-    if (this.isLoading() || !this.auth.user()?.propertyId) {
+    if (this.isLoading() || !this.isLoaded() || !this.auth.user()?.propertyId) {
       return;
     }
 
@@ -258,13 +267,21 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.vouchers.updateVoucherItem(this.draft()));
+        await firstValueFrom(this.vouchers.updateVoucherItem(this.draft(), this.version));
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.isLoading.set(false);
+          this.close();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);
@@ -297,8 +314,13 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     };
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
   private reset(): void {
     this.loaded.set(null);
+    this.version = null;
     this.draft.set(new VoucherUpdateItemRequest());
     this.draftForm().reset();
     this.error.set(null);
@@ -313,10 +335,16 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
         next: (item) => {
           const request = this.toUpdateRequest(item);
           this.loaded.set(structuredClone(request));
+          this.version = item.version;
           this.draft.set(request);
           this.draftForm().reset();
         },
-        error: (error: unknown) => this.error.set(toApiProblem(error)),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.failed.emit(problem);
+          this.readError.set(problem);
+          this.close();
+        },
       });
   }
 

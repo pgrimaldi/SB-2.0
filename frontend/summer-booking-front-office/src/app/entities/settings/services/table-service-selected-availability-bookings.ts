@@ -16,4 +16,5 @@ export class TableServiceSelectedAvailabilityBookings {
   depositMode: TableServiceDepositMode | null = null;
   depositPercentage: number | null = null;
   isOnlineBookingEnabled: boolean | null = null;
+  version: string | null = null;
 }

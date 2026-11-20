@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { Sector } from '../../../entities/settings/rows-and-sectors/sector';
 import { SectorItem } from '../../../entities/settings/rows-and-sectors/sector-item';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class SectorService {
@@ -23,11 +24,22 @@ export class SectorService {
   readonly addSector = (name: string): Observable<Sector> =>
     this.httpClient.post<Sector>(`${this.endpoint}/sectors`, { name });
 
-  /** The new name of the sector. Answers 200 with the sector saved. */
-  readonly updateSector = (idSector: string, name: string): Observable<Sector> =>
-    this.httpClient.put<Sector>(`${this.endpoint}/sectors/${encodeURIComponent(idSector)}`, {
-      name,
-    });
+  /**
+   * The new name of the sector, with the version of its row. Answers 200 with the sector saved and
+   * the new version.
+   */
+  readonly updateSector = (
+    idSector: string,
+    name: string,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .put<Sector>(
+        `${this.endpoint}/sectors/${encodeURIComponent(idSector)}`,
+        { name },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   /**
    * One sector (the trash of a row) or more (the selection), all or nothing: one id that cannot be

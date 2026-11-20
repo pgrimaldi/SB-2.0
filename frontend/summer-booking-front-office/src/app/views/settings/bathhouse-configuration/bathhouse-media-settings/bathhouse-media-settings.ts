@@ -23,7 +23,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, firstValueFrom, of, switchMap } from 'rxjs';
 import { fileLinkOf } from '../../../../behaviours/files/file-link';
 import { isUploadable } from '../../../../behaviours/files/uploadable-file';
 import { UploadContentType } from '../../../../entities/enums/upload-content-type';
@@ -76,6 +76,7 @@ import { CatalogService } from '../../../../services/api/catalog/catalog.service
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { comparableJson } from '../../../../components/shared/forms/text-comparison';
+import { VersionConflictPopup } from '../../../../components/management/version-conflict-popup/version-conflict-popup';
 
 const CENTER_OF_ITALY: MapPosition = { latitude: 41.87194, longitude: 12.56738 };
 const ITALY_ZOOM = 5;
@@ -116,6 +117,7 @@ type MediaCall = () => Observable<BathhouseMedia>;
     PageSpinner,
     SectionTitle,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './bathhouse-media-settings.html',
   styleUrl: './bathhouse-media-settings.scss',
@@ -159,6 +161,8 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   protected readonly isMapReady = signal(false);
   protected readonly isMapFailed = signal(false);
   private loaded = new BathhouseMediaRequest();
+  /** The version of the link and of the position read: Salva sends it back. */
+  private version: string | null = null;
   private readonly request = signal(new BathhouseMediaRequest());
   protected readonly mediaForm = form(this.request, (path) => {
     webLink(path.virtualTourUrl);
@@ -234,6 +238,8 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   protected readonly imagesErrorMessage = this.messageOf(this.imagesError);
   private readonly documentsError = signal<ApiProblem | null>(null);
   protected readonly documentsErrorMessage = this.messageOf(this.documentsError);
+  protected readonly isConflictShown = signal(false);
+  private reloading?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
@@ -247,24 +253,8 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
         return;
       }
       const subscription = untracked(() => {
-        this.isLoading.set(true);
-        this.error.set(null);
-        this.isLoaded.set(false);
-        return this.cache.media().subscribe({
-          next: (answer) => {
-            const media = mediaOf(answer);
-            this.media.set(media);
-            this.loaded = onlyFieldsOf(BathhouseMediaRequest, media);
-            this.request.set(this.loaded);
-            this.mediaForm().reset();
-            this.isLoaded.set(true);
-            this.isLoading.set(false);
-          },
-          error: (error: unknown) => {
-            this.error.set(toApiProblem(error));
-            this.isLoading.set(false);
-          },
-        });
+        this.reloading?.unsubscribe();
+        return this.fetch();
       });
       onCleanup(() => subscription.unsubscribe());
     });
@@ -308,15 +298,24 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
           ...this.request(),
           virtualTourUrl: this.request().virtualTourUrl?.trim() || null,
         };
-        await firstValueFrom(this.catalog.saveBathhouseConfigurationMedia(sent));
+        const version = await firstValueFrom(
+          this.catalog.saveBathhouseConfigurationMedia(sent, this.version),
+        );
         this.loaded = sent;
+        this.version = version;
         this.request.set(sent);
         this.media.update((media) => ({ ...media, ...sent }));
-        this.cache.keepMedia(this.media());
+        this.cache.keepMedia({ ...this.media(), version });
         this.mediaForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.mediaForm, (general) =>
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reload();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.mediaForm, (general) =>
           this.error.set(general),
         );
       } finally {
@@ -401,6 +400,7 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.reloading?.unsubscribe();
     this.unsaved.unwatch(this);
   }
 
@@ -436,11 +436,44 @@ export class BathhouseMediaSettings implements UnsavedChanges, OnDestroy {
     }
   }
 
-  /** The answer holds all the media as saved, link of the virtual tour and position too. */
+  /**
+   * The answer holds all the media as saved, link of the virtual tour and position too. Photos and
+   * PDFs do not change the version of Salva.
+   */
   private keep(answer: BathhouseMedia): void {
     const media = mediaOf(answer);
     this.media.set(media);
-    this.cache.keepMedia(media);
+    this.cache.keepMedia({ ...media, version: this.version });
+  }
+
+  private reload(): void {
+    this.reloading?.unsubscribe();
+    this.cancel();
+    this.cache.forgetMedia();
+    this.reloading = this.fetch();
+  }
+
+  /** Modifica and Salva stay off until the media are read. */
+  private fetch(): Subscription {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.isLoaded.set(false);
+    return this.cache.media().subscribe({
+      next: (answer) => {
+        const media = mediaOf(answer);
+        this.version = answer.version;
+        this.media.set(media);
+        this.loaded = onlyFieldsOf(BathhouseMediaRequest, media);
+        this.request.set(this.loaded);
+        this.mediaForm().reset();
+        this.isLoaded.set(true);
+        this.isLoading.set(false);
+      },
+      error: (error: unknown) => {
+        this.error.set(toApiProblem(error));
+        this.isLoading.set(false);
+      },
+    });
   }
 
   private messageOf(problem: Signal<ApiProblem | null>): Signal<string | null> {

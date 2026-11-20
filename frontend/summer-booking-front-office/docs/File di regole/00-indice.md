@@ -17,7 +17,10 @@ descrizioni delle pagine in `docs/Pagine/`.
   al backend).
 - Form: Signal Forms, errori sotto i campi, Salva spento finché il form non è valido, spinner e campi bloccati durante
   ogni chiamata, avviso prima di perdere le modifiche. Mai salvare sopra dati che non sono stati letti: Modifica e
-  Salva restano spenti finché la lettura dal server non è riuscita.
+  Salva restano spenti finché la lettura dal server non è riuscita, e un popup o pannello di modifica la cui lettura
+  fallisce si chiude e mostra `app-read-error-popup` (mai un form vuoto). Ogni salvataggio di dati letti manda la
+  versione letta (`If-Match`): con 409 `resource.version_conflict` avviso; i popup sempre modificabili e quelli senza
+  una lettura loro si chiudono, gli altri form rileggono i dati.
 - Tabelle: `app-table` si carica da sola con la richiesta standard delle tabelle.
 - Ogni cancellazione chiede **sempre** conferma prima di chiamare l'API (popup rosso: `app-confirm-popup` o
   `app-delete-items-popup` per le tabelle): righe di tabella, file e immagini caricati, sfondi, qualunque dato salvato.

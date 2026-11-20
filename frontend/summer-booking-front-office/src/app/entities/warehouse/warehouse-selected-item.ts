@@ -6,4 +6,5 @@ export class WarehouseSelectedItem {
   lowStockThreshold: number | null = null;
   lowStockAlertEnabled = false;
   mapPlaceable = false;
+  version: string | null = null;
 }

@@ -35,7 +35,7 @@
   [idUser]="idUserToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table)"
+  (failed)="reloadIfGone($event, table); reloadIfChanged($event, table)"
 />
 <app-delete-items-popup
   [idItems]="idUsersToDelete()"

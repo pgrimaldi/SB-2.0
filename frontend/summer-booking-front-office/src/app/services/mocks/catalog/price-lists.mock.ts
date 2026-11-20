@@ -31,6 +31,7 @@ import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { activeArticleIdNamed, activeArticleName } from '../warehouse/warehouse.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 type PackageRow = PackageItem & { propertyId: number };
 
@@ -453,8 +454,9 @@ function packageOf(idPackage: string): PackageRow | null {
 
 /**
  * `GET /api/catalog/packages/{idPackage}`, the property from the access token: everything the
- * package has, as the panels send it; a package never saved has only its name in Italian. 200;
- * 401 without a valid access token; 404 `resource.not_found` for a package that is not one of its.
+ * package has, as the panels send it, and its version; a package never saved has only its name in
+ * Italian. 200; 401 without a valid access token; 404 `resource.not_found` for a package that is not
+ * one of its.
  */
 export const selectedPackageMock = (
   request: HttpRequest<unknown>,
@@ -466,20 +468,27 @@ export const selectedPackageMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  const data = packageData(row);
+  const answer: PackageSelectedItem = { ...data, version: versionOf(data) };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+};
+
+/** What `GET /api/catalog/packages/{idPackage}` answers besides the version: the version covers it. */
+function packageData(row: PackageRow): Omit<PackageSelectedItem, 'version'> {
   const detail =
     PACKAGE_DETAILS.get(row.idPackage ?? '') ??
     Object.assign(new PackageAddItemRequest(), {
       translations: [{ language: 'it', packageName: row.packageName }],
     });
-  const answer: PackageSelectedItem = { ...structuredClone(detail), idPackage: row.idPackage };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
-};
+  return { ...structuredClone(detail), idPackage: row.idPackage };
+}
 
 /**
  * `POST /api/catalog/packages/update-package` with `PackageAddItemRequest` and `idPackage`, the
  * property from the access token: the package takes all the values sent, its `name` as in
- * `createPackageMock`. 204 without a body; 401 without a valid access token;
- * 404 `resource.not_found` for a package that is not one of its; 400 as `createPackageMock`.
+ * `createPackageMock`. 204 without a body, with the new version in `ETag`; 401 without a valid access
+ * token; 404 `resource.not_found` for a package that is not one of its; 400 as `createPackageMock`;
+ * 409 `resource.version_conflict` when `If-Match` is not the version of the package.
  */
 export const updatePackageMock = (
   request: HttpRequest<unknown>,
@@ -499,12 +508,16 @@ export const updatePackageMock = (
       errors,
     });
   }
+  const conflict = versionConflict(request, packageData(row));
+  if (conflict) {
+    return conflict;
+  }
   row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
   PACKAGE_DETAILS.set(
     row.idPackage ?? '',
     structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
   );
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, packageData(row));
 };
 
 type AdditionalItemRow = AdditionalItem & { propertyId: number };
@@ -833,9 +846,9 @@ function additionalItemName(propertyId: number, body: CreateAdditionalItemBody):
 
 /**
  * `GET /api/catalog/get-additional-services-article-item?idAdditionalItem=…`, the property of the
- * access token: everything the item has, as the panels send it; an item never saved has only the
- * article with its name. 200; 401 without a valid access token; 404 `resource.not_found` for an item
- * that is not one of its.
+ * access token: everything the item has, as the panels send it, and its version; an item never saved
+ * has only the article with its name. 200; 401 without a valid access token; 404
+ * `resource.not_found` for an item that is not one of its.
  */
 export const selectedAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -850,23 +863,30 @@ export const selectedAdditionalItemMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  const data = additionalItemData(row);
+  const answer: AdditionalItemSelectedItem = { ...data, version: versionOf(data) };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+};
+
+/**
+ * What `GET /api/catalog/get-additional-services-article-item` answers besides the version: the
+ * version covers it.
+ */
+function additionalItemData(row: AdditionalItemRow): Omit<AdditionalItemSelectedItem, 'version'> {
   const detail =
     ADDITIONAL_ITEM_DETAILS.get(row.idAdditionalItem ?? '') ??
     Object.assign(new AdditionalItemAddItemRequest(), {
       idArticle: activeArticleIdNamed(row.propertyId, row.additionalItemName),
     });
-  const answer: AdditionalItemSelectedItem = {
-    ...structuredClone(detail),
-    idAdditionalItem: row.idAdditionalItem,
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
-};
+  return { ...structuredClone(detail), idAdditionalItem: row.idAdditionalItem };
+}
 
 /**
  * `POST /api/catalog/update-additional-services-article-item` with `AdditionalItemAddItemRequest`,
  * `idAdditionalItem`: the item takes all the values sent and the name of its article. 204 without a
- * body; 401 / 404 / 400 as `createAdditionalItemMock`, 404 also for an item that is not one of the
- * property.
+ * body, with the new version in `ETag`; 401 / 404 / 400 as `createAdditionalItemMock`, 404 also for
+ * an item that is not one of the property; 409 `resource.version_conflict` when `If-Match` is not the
+ * version of the item.
  */
 export const updateAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -889,6 +909,10 @@ export const updateAdditionalItemMock = (
       errors,
     });
   }
+  const conflict = versionConflict(request, additionalItemData(row));
+  if (conflict) {
+    return conflict;
+  }
   row.additionalItemName = name;
   ADDITIONAL_ITEM_DETAILS.set(
     row.idAdditionalItem ?? '',
@@ -896,7 +920,7 @@ export const updateAdditionalItemMock = (
       onlyFieldsOf(AdditionalItemAddItemRequest, body as AdditionalItemAddItemRequest),
     ),
   );
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, additionalItemData(row));
 };
 
 function isWholeNumberIn(value: number, from: number, to: number): boolean {

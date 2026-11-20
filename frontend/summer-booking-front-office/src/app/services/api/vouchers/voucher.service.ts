@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
@@ -10,6 +10,7 @@ import { VoucherTimeSlot } from '../../../entities/settings/vouchers/voucher-tim
 import { VoucherUpdateItemRequest } from '../../../entities/settings/vouchers/voucher-update-item-request';
 import { VoucherValidityPeriod } from '../../../entities/settings/vouchers/voucher-validity-period';
 import { onlyFieldsOf } from '../only-fields-of';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class VoucherService {
@@ -38,16 +39,25 @@ export class VoucherService {
       })),
     });
 
-  /** Answers 204 with no body. */
-  readonly updateVoucherItem = (request: VoucherUpdateItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-voucher-item`, {
-      ...onlyFieldsOf(VoucherUpdateItemRequest, request),
-      maxUseQuantity: request.maxUseQuantity ?? 1,
-      validityPeriods: request.validityPeriods.map((period) => ({
-        ...onlyFieldsOf(VoucherValidityPeriod, period),
-        timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
-      })),
-    });
+  /** Sends the version read; answers 204 with no body and the new version. */
+  readonly updateVoucherItem = (
+    request: VoucherUpdateItemRequest,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/update-voucher-item`,
+        {
+          ...onlyFieldsOf(VoucherUpdateItemRequest, request),
+          maxUseQuantity: request.maxUseQuantity ?? 1,
+          validityPeriods: request.validityPeriods.map((period) => ({
+            ...onlyFieldsOf(VoucherValidityPeriod, period),
+            timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
+          })),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   readonly selectedItem = (idVoucher: string): Observable<VoucherSelectedItem> =>
     this.httpClient.get<VoucherSelectedItem>(`${this.endpoint}/get-selected-item`, {

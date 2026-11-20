@@ -153,7 +153,7 @@ export class ServicesGeneral {
     }
   }
 
-  protected forgetDeleted(idStandardServices: readonly string[]): void {
+  protected forgetDeleted(idStandardServices: readonly (string | null)[]): void {
     this.idSelectedStandardServices.update((idSelected) =>
       idSelected.filter(
         (idSelectedStandardService) =>
@@ -165,7 +165,7 @@ export class ServicesGeneral {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idStandardServices: readonly string[],
+    idStandardServices: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idStandardServices);

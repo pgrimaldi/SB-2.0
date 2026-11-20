@@ -19,6 +19,7 @@ import {
 } from '../../../components/shared/ui/tables/table/table';
 import { PageTitle } from '../../../components/shared/ui/titles/page-title/page-title';
 import { UserRole } from '../../../entities/enums/user-role';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import { AuditLogUserState } from '../../../entities/settings/user-management/audit-log-user-state';
 import { IdentityService } from '../../../services/api/identity/identity.service';
@@ -209,6 +210,12 @@ export class UserManagement {
   /** A user deleted meanwhile by someone else: the table shows it is gone. */
   protected reloadIfGone(problem: ApiProblem, table: { reload(): void }): void {
     if (problem.status === HttpStatusCode.NotFound) {
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
       table.reload();
     }
   }

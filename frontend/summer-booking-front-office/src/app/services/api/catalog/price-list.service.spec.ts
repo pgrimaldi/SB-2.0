@@ -155,7 +155,7 @@ describe('PriceListService', () => {
     controller.verify();
   });
 
-  it('should update the additional item sending the whole form, its id, without the property', () => {
+  it('should update the additional item sending the whole form, its id and the version read, without the property', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -170,12 +170,18 @@ describe('PriceListService', () => {
       },
     );
 
+    let version: string | null | undefined;
+
     priceLists
-      .updateAdditionalItem('a1', {
-        ...request,
-        extra: 'not sent',
-      } as AdditionalItemAddItemRequest)
-      .subscribe();
+      .updateAdditionalItem(
+        'a1',
+        {
+          ...request,
+          extra: 'not sent',
+        } as AdditionalItemAddItemRequest,
+        'v1',
+      )
+      .subscribe((saved) => (version = saved));
 
     const call = controller.expectOne(
       ({ method, url }) =>
@@ -183,6 +189,9 @@ describe('PriceListService', () => {
         url === `${environment.apiBaseUrl}/catalog/update-additional-services-article-item`,
     );
     expect(call.request.body).toEqual({ ...request, idAdditionalItem: 'a1' });
+    expect(call.request.headers.get('If-Match')).toBe('"v1"');
+    call.flush(null, { status: 204, statusText: 'No Content', headers: { ETag: '"v2"' } });
+    expect(version).toBe('v2');
     controller.verify();
   });
 
@@ -321,7 +330,7 @@ describe('PriceListService', () => {
     controller.verify();
   });
 
-  it('should update the package sending the whole form with its id', () => {
+  it('should update the package sending the whole form with its id and the version read', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -351,13 +360,18 @@ describe('PriceListService', () => {
       extra: 'not sent',
     });
 
-    priceLists.updatePackage('k1', sent).subscribe();
+    let version: string | null | undefined;
+
+    priceLists.updatePackage('k1', sent, 'v1').subscribe((saved) => (version = saved));
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages/update-package`,
     );
     expect(call.request.body).toEqual({ ...request, idPackage: 'k1' });
+    expect(call.request.headers.get('If-Match')).toBe('"v1"');
+    call.flush(null, { status: 204, statusText: 'No Content', headers: { ETag: '"v2"' } });
+    expect(version).toBe('v2');
     controller.verify();
   });
 });

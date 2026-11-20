@@ -1,7 +1,8 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { WarehouseItemAddRequest } from '../../../entities/warehouse/warehouse-item-add-request';
 import { WarehouseSelectedItem } from '../../../entities/warehouse/warehouse-selected-item';
@@ -20,7 +21,7 @@ describe('WarehouseService', () => {
       pageSize: 10,
       search: 'lett',
       filters: [],
-      sortField: 'thresholdQuantity',
+      sortField: 'lowStockThreshold',
       sortDirection: 'Descending',
     };
     const page: Page<WarehouseSettingItem> = {
@@ -30,7 +31,7 @@ describe('WarehouseService', () => {
           idArticle: 'a11',
           name: 'Lettino',
           totalQuantity: 120,
-          thresholdQuantity: null,
+          lowStockThreshold: null,
         },
       ],
     };
@@ -69,8 +70,8 @@ describe('WarehouseService', () => {
     expect(call.request.body).toEqual({
       idArticle: 'a1',
       totalQuantity: 10,
-      thresholdQuantity: null,
-      isThresholdWarningActive: null,
+      lowStockThreshold: null,
+      lowStockAlertEnabled: null,
     });
     controller.verify();
   });
@@ -92,10 +93,14 @@ describe('WarehouseService', () => {
       lowStockThreshold: 5,
       lowStockAlertEnabled: true,
       mapPlaceable: true,
+      version: 'v1',
     });
+    let version: string | null | undefined;
 
     warehouse.selectedArticle('a/1').subscribe();
-    warehouse.updateArticle('a/1', { ...article, totalQuantity: 100 }).subscribe();
+    warehouse
+      .updateArticle('a/1', { ...article, totalQuantity: 100 }, article.version)
+      .subscribe((saved) => (version = saved));
 
     expect(
       controller.expectOne(
@@ -112,6 +117,9 @@ describe('WarehouseService', () => {
       lowStockThreshold: 5,
       lowStockAlertEnabled: true,
     });
+    expect(put.request.headers.get('If-Match')).toBe('"v1"');
+    put.flush(null, { headers: { ETag: '"v2"' } });
+    expect(version).toBe('v2');
     controller.verify();
   });
 
@@ -133,6 +141,50 @@ describe('WarehouseService', () => {
       { idItems: ['a1'] },
       { idItems: ['a1', 'a2'] },
     ]);
+    controller.verify();
+  });
+
+  it('should give the price lists of an article in use as one usedIn list', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const warehouse = TestBed.inject(WarehouseService);
+    const controller = TestBed.inject(HttpTestingController);
+    const errors: unknown[] = [];
+
+    warehouse.deleteArticles(['a1']).subscribe({ error: (error: unknown) => errors.push(error) });
+    warehouse.deleteArticles(['a2']).subscribe({ error: (error: unknown) => errors.push(error) });
+    const [inUse, notFound] = controller.match(
+      `${environment.apiBaseUrl}/catalog/delete-warehouse-item`,
+    );
+    inUse.flush(
+      {
+        code: ApiErrorCode.InventoryItemInUse,
+        args: {
+          articleName: 'Lettino',
+          priceLists: ['Estate'],
+          agreementPriceLists: ['Hotel Mare'],
+        },
+      },
+      { status: 409, statusText: 'Conflict' },
+    );
+    notFound.flush(
+      { code: ApiErrorCode.InventoryItemNotFound },
+      { status: 404, statusText: 'Not Found' },
+    );
+
+    const [inUseError, notFoundError] = errors as HttpErrorResponse[];
+    expect(inUseError.status).toBe(409);
+    expect(inUseError.error).toEqual({
+      code: ApiErrorCode.InventoryItemInUse,
+      args: {
+        articleName: 'Lettino',
+        priceLists: ['Estate'],
+        agreementPriceLists: ['Hotel Mare'],
+        usedIn: ['Estate', 'Hotel Mare'],
+      },
+    });
+    expect(notFoundError.error).toEqual({ code: ApiErrorCode.InventoryItemNotFound });
     controller.verify();
   });
 

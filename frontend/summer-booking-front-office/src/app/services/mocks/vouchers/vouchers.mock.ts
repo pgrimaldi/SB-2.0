@@ -12,8 +12,9 @@ import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
-type VoucherRow = VoucherItem & VoucherSelectedItem & { propertyId: number };
+type VoucherRow = VoucherItem & Omit<VoucherSelectedItem, 'version'> & { propertyId: number };
 type AddVoucherBody = Partial<VoucherAddItemRequest>;
 type UpdateVoucherBody = Partial<VoucherUpdateItemRequest>;
 
@@ -179,9 +180,10 @@ export const addVoucherItemMock = (
 
 /**
  * `POST /api/vouchers/update-voucher-item` with `VoucherUpdateItemRequest`: the voucher `idVoucher`
- * takes the new values, after the same checks as the add (see `voucherErrors`). 204 without a body;
- * 401 without a valid access token; 404 `resource.not_found` for an id that is not one of its
- * vouchers; 400 with one error per wrong field.
+ * takes the new values, after the same checks as the add (see `voucherErrors`). 204 without a body,
+ * with the new version in `ETag`; 401 without a valid access token; 404 `resource.not_found` for an
+ * id that is not one of its vouchers; 400 with one error per wrong field; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the voucher.
  */
 export const updateVoucherItemMock = (
   request: HttpRequest<unknown>,
@@ -203,14 +205,18 @@ export const updateVoucherItemMock = (
       errors,
     });
   }
+  const conflict = versionConflict(request, voucherData(voucher));
+  if (conflict) {
+    return conflict;
+  }
   Object.assign(voucher, savedFields(body));
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, voucherData(voucher));
 };
 
 /**
- * `GET /api/vouchers/get-selected-item?idVoucher=…`: the voucher with every field of its form, for
- * the edit popup. 200 with `VoucherSelectedItem`; 401 without a valid access token; 404
- * `resource.not_found` for an unknown id.
+ * `GET /api/vouchers/get-selected-item?idVoucher=…`: the voucher with every field of its form and
+ * its version, for the edit popup. 200 with `VoucherSelectedItem`; 401 without a valid access token;
+ * 404 `resource.not_found` for an unknown id.
  */
 export const selectedVoucherItemMock = (
   request: HttpRequest<unknown>,
@@ -223,9 +229,29 @@ export const selectedVoucherItemMock = (
   if (!voucher) {
     return resourceNotFound(request);
   }
-  const answer = structuredClone(onlyFieldsOf(VoucherSelectedItem, voucher));
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
+  return of(new HttpResponse({ status: 200, url: request.url, body: selectedOf(voucher) })).pipe(
+    delay(300),
+  );
 };
+
+function selectedOf(voucher: VoucherRow): VoucherSelectedItem {
+  const data = voucherData(voucher);
+  return structuredClone({ ...data, version: versionOf(data) });
+}
+
+/** What `get-selected-item` answers besides the version: the version covers it. */
+function voucherData(voucher: VoucherRow): Omit<VoucherSelectedItem, 'version'> {
+  return {
+    idVoucher: voucher.idVoucher,
+    voucherName: voucher.voucherName,
+    validityPeriods: voucher.validityPeriods,
+    discountType: voucher.discountType,
+    discountValue: voucher.discountValue,
+    discountScope: voucher.discountScope,
+    maxUseQuantity: voucher.maxUseQuantity,
+    isEnabled: voucher.isEnabled,
+  };
+}
 
 /**
  * As the backend checks it: a name, at least one period, and in each period both days (the last not

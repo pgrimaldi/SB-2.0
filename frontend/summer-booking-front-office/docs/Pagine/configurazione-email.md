@@ -55,6 +55,12 @@ Rotta `/settings/email-configuration`, vista `views/settings/email-configuration
 - "Salva" manda gli stessi valori, con lo stesso corpo, con lo spinner. Se riesce compare `app-message-popup`
   "Configurazione salvata" e tutti i campi tornano in sola lettura con "Sì" di nuovo attivo, come dopo Reset. Se fallisce
   i campi restano modificabili, per correggere.
+- Controllo di versione: la lettura porta `version`, che "Salva" rimanda nell'header `If-Match`; dopo un salvataggio
+  riuscito la pagina tiene la versione nuova dell'`ETag`. La versione copre la configurazione letta (anche se una
+  password è salvata), non la password, che non arriva mai al browser. Con 409 `resource.version_conflict` (un altro utente ha cambiato la configurazione dopo
+  la lettura) compare `app-version-conflict-popup`, nessun errore sotto il riquadro, e la pagina rilegge la configurazione
+  come con Reset (sola lettura, "Sì" di nuovo premibile): l'utente rifà le modifiche. "Invia email test" non salva e non
+  manda la versione.
 - Mentre uno dei tre bottoni lavora, gli altri due sono spenti.
 
 ## Validazioni ed errori
@@ -72,10 +78,12 @@ Rotta `/settings/email-configuration`, vista `views/settings/email-configuration
 
 In `SystemService` (lo stabilimento lo prende il backend dal token):
 
-- `GET /api/system/email-configuration` (`emailConfiguration`), senza parametri: all'apertura, a Reset e quando cambia
-  la lingua (le modifiche non salvate si perdono).
+- `GET /api/system/email-configuration` (`emailConfiguration`), senza parametri: all'apertura, a Reset, quando cambia
+  la lingua e dopo un conflitto di versione (le modifiche non salvate si perdono).
   Risposta `EmailConfigurationData`: `senderMailAddress`, `senderName`, `smtpServerAddress`, `smtpPort` (numero),
-  `smtpUsername`, `hasSmtpPassword`, `smtpSecurity` (`None`, `Ssl`, `Tls`).
+  `smtpUsername`, `hasSmtpPassword`, `smtpSecurity` (`None`, `Ssl`, `Tls`), `version`.
 - `POST /api/system/send-test-email` (`sendTestEmail`): corpo `EmailConfigurationRequest`, cioè gli stessi campi della
   GET, ma con `smtpPassword` invece di `hasSmtpPassword`, e la porta come numero.
-- `POST /api/system/save-email-configuration` (`saveEmailConfiguration`): stesso corpo.
+- `POST /api/system/save-email-configuration` (`saveEmailConfiguration(request, version)`): stesso corpo e header
+  `If-Match` con la versione letta; risposta 204 con l'header `ETag` della nuova versione; 409
+  `resource.version_conflict`.

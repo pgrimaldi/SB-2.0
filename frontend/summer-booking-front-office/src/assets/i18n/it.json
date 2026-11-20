@@ -106,7 +106,8 @@
       "password_too_common": "Questa password è troppo comune: scegline una più sicura."
     },
     "resource": {
-      "not_found": "Questo elemento non esiste più."
+      "not_found": "Questo elemento non esiste più.",
+      "version_conflict": "Nel frattempo un altro utente ha modificato questi dati: li abbiamo ricaricati. Rifai le tue modifiche."
     },
     "account": {
       "email_taken": "Esiste già un account con questa email.",
@@ -514,7 +515,7 @@
           "add": "Aggiungi",
           "save": "Salva",
           "field_names": {
-            "total": "totale"
+            "quantity": "della quantità"
           }
         },
         "delete": {

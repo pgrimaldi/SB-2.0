@@ -25,7 +25,8 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   quando la riga è stretta.
 - Lettura: `GET /api/catalog/season` (`SeasonService.seasonDates`), all'apertura e al cambio lingua. `SeasonDates` ha i
   nomi del backend `startsOn`, `endsOn`, `nextStartsOn`, `nextEndsOn` e date senza ora (`2026-05-01`), che
-  `SeasonService` converte a mezzanotte UTC per la pagina.
+  `SeasonService` converte a mezzanotte UTC per la pagina, più `version`, la versione delle quattro date (vedi
+  "Controllo di versione").
   - 204 = stagione non impostata: nessuna data dal backend (i primi giorni li sceglie la pagina, vedi sotto); la
     prossima stagione può essere null.
   - I confini della stagione sono quelli della tabella `catalog.pricing_seasons` del backend.
@@ -44,10 +45,15 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   corrente.").
 - Tutte e quattro le date sono obbligatorie, anche quelle della prossima stagione: Salva spento finché ne manca una,
   errori sotto i campi.
-- Salva: `PUT /api/catalog/season` (`SeasonService.saveSeasonDates`) con le quattro date con gli stessi nomi e senza
-  ora; risponde 200 con le date salvate, che il riquadro mostra e tiene come date caricate.
+- Salva: `PUT /api/catalog/season` (`SeasonService.saveSeasonDates(dates, version)`) con le quattro date con gli stessi
+  nomi e senza ora e l'header `If-Match` con la versione letta (nessuno dopo il 204: la stagione non ha ancora una
+  versione); risponde 200 con le date salvate e l'header `ETag` della nuova versione: il service restituisce le date
+  con quella versione, che il riquadro mostra e tiene come date caricate, pronte per il prossimo Salva.
 - Errori del salvataggio: quelli del backend su una data (`errors[]`, es. `validation.end_before_start` su `endsOn`)
   sotto il suo campo, gli altri sotto le due righe, sopra i bottoni; le date restano modificabili.
+- Con 409 `resource.version_conflict` (un altro utente ha salvato le date dopo la lettura) nessun errore sotto le
+  righe: compare `app-version-conflict-popup` e il riquadro rimette le date lette, esce da Modifica e le rilegge
+  (`SeasonDatesBehaviour.reload()`); l'utente rifà le modifiche.
 
 ### Periodi fuori dalle nuove date
 
@@ -87,9 +93,10 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   - Se la lettura fallisce, il messaggio del `code` compare sotto il titolo "Periodi".
 - Ogni sottosezione si apre e si chiude per conto suo: se ne possono tenere aperte più insieme ("Mostra tutti" le
   apre tutte).
-- `SeasonPeriodItem` ha i nomi del backend: `key` (numero, da 0, distinto per stagione), `name` e `ranges`
-  (`SeasonPeriodInterval`: `startsOn`, `endsOn`). Il backend manda i giorni senza ora (`2026-05-01`), che
-  `SeasonService` converte a mezzanotte UTC per la pagina e riconverte quando li manda. Gli intervalli non hanno un id.
+- `SeasonPeriodItem` ha i nomi del backend: `key` (numero, da 0, distinto per stagione), `name`, `ranges`
+  (`SeasonPeriodInterval`: `startsOn`, `endsOn`) e `version`, la versione del periodo (nome e intervalli: vedi
+  "Controllo di versione"). Il backend manda i giorni senza ora (`2026-05-01`), che `SeasonService` converte a
+  mezzanotte UTC per la pagina e riconverte quando li manda. Gli intervalli non hanno un id.
 
 ### Righe degli intervalli
 
@@ -176,9 +183,11 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
     `ranges[i]`, `pricing.period_outside_season` e `pricing.period_overlap` sotto il calendario; gli altri (es.
     `pricing.season_required`, `catalog.property_required`) sopra i bottoni.
 - Gli altri tre popup salvano tutti il periodo intero con l'API del backend
-  `PUT /api/catalog/tariff-periods/{key}` (o `/api/catalog/next-season/tariff-periods/{key}`), corpo
-  `SeasonPeriodUpdateRequest` (`name` e tutti i `ranges`, anche quelli che non cambiano, come giorni); risponde 200
-  con il periodo salvato e la tab ricarica i periodi:
+  `PUT /api/catalog/tariff-periods/{key}` (o `/api/catalog/next-season/tariff-periods/{key}`,
+  `SeasonService.updatePeriod(isNextSeason, key, request, version)`), corpo `SeasonPeriodUpdateRequest` (`name` e tutti
+  i `ranges`, anche quelli che non cambiano, come giorni) e l'header `If-Match` con la `version` del periodo letta con
+  la lista; risponde 200 con il periodo salvato e l'header `ETag` della nuova versione (il service restituisce solo la
+  versione, che i popup non usano: si chiudono) e la tab ricarica i periodi:
   - "Modifica Periodo" (`app-season-period-edit-popup`, dalla matita del periodo): il solo campo "Nome del periodo",
     obbligatorio (al massimo 80 caratteri, come in Imposta periodo) e già riempito, Annulla e Salva; manda il nuovo
     nome con gli intervalli che il periodo ha.
@@ -196,6 +205,10 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   `pricing.period_overlap`, nome o giorni presi intanto da un altro periodo) il popup mostra l'errore come sempre e
   dietro la tab ricarica i periodi (`reloadIfStale`), così i controlli del popup lavorano sulla lista nuova. Con
   `pricing.period_outside_season` la tab fa rileggere anche le date della stagione (`SeasonDatesBehaviour.reload()`).
+- Con 409 `resource.version_conflict` (un altro utente ha cambiato il periodo dopo la lettura della lista, anche
+  togliendogli intervalli) i tre popup di modifica non mostrano l'errore: si chiudono, compare
+  `app-version-conflict-popup` e la tab ricarica i periodi (`reloadIfStale`); l'utente riapre il popup sul periodo
+  aggiornato e rifà le modifiche.
 - Due periodi della stessa stagione non hanno lo stesso nome, senza distinguere maiuscole e minuscole e gli spazi ai
   lati, come nel backend. "Imposta periodo" e "Modifica Periodo" ricevono i periodi della tab (`[periods]`) e lo
   controllano subito (`isTextTaken` di `validators.ts`, la modifica esclude il proprio periodo): sotto il nome
@@ -206,6 +219,23 @@ Rotta `/settings/seasons` · vista `views/settings/seasons/` (`Seasons`, `app-se
   periodo" lo scrive sotto il calendario e gli altri tre popup sopra i bottoni, con
   `invalidate.seasons.ranges.invalid`: "Intervalli non validi: un periodo può averne al massimo 20 e non possono avere
   giorni in comune."
+
+## Controllo di versione
+
+- Ogni salvataggio di dati letti manda la versione letta nell'header `If-Match` (`ifMatch` di
+  `services/api/versions/version-headers.ts`) e riceve la nuova nell'`ETag` (`versionOf`):
+  - date delle stagioni: una versione per le quattro date, da `GET /api/catalog/season`, mandata da
+    `PUT /api/catalog/season`;
+  - periodi: una versione per ogni periodo della lista (`GET /api/catalog/[next-season/]tariff-periods`), mandata da
+    `PUT /api/catalog/[next-season/]tariff-periods/{key}` dei popup Modifica Periodo, Aggiungi intervallo e Modifica
+    Intervallo. Cambia anche quando la cancellazione degli intervalli toglie intervalli a quel periodo.
+- Non la usano la creazione di un periodo e le cancellazioni (periodo e intervalli), che non rimandano dati letti.
+- Con 409 `resource.version_conflict` compare `app-version-conflict-popup` e la pagina rilegge i dati (vedi le date
+  delle stagioni e i popup); le modifiche dell'utente si perdono e le rifà.
+- I mock calcolano la versione come hash dei dati coperti (`versionOf`, `versionConflict`, `savedWithVersion` di
+  `services/mocks/versions/versions.mock.ts`, in `seasons.mock.ts`).
+- È chiesto al backend nella sezione 6 di
+  `shared documentation/Modifiche per il backend/impostazioni/Stagioni e periodi - Frontend requests.md`.
 
 ## Intervalli senza sovrapposizioni
 

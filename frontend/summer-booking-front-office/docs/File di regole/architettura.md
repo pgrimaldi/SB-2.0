@@ -67,19 +67,17 @@ classi e commenti.
 - Una sola classe Angular per file (es. `carousel-slide.ts` separato da `carousel.ts`).
 - La cartella di un componente ha lo stesso nome del suo file (`dialogs/alert-popup/alert-popup.ts`).
 - Il nome di un wrapper descrive il componente, non la zona dell'app dove si usa (`app-card`, non `app-card-hub`).
-- Un campo o una variabile che contiene un id comincia con `id` (`idArticle`, `idPeriod`, `idItems`); una quantità
-  (totale, disponibili, soglia…) finisce con `Quantity` (`totalQuantity`, `availableQuantity`, `thresholdQuantity`).
-  Vale anche per i campi delle API.
-- Fanno eccezione i nomi delle colonne del database copiati nei mock (`publicId`, `propertyId`, `lowStockThreshold`),
-  `total` di `Page`, che conta le righe, e `key` dei periodi tariffari (`SeasonPeriodItem`, `SeasonPeriodIntervalItem`),
-  un numero che parte da 0, come nel backend; le entità che lo riferiscono (prezzi e disponibilità per periodo) lo
-  chiamano `idPeriod`.
+- Un campo o una variabile che contiene un id comincia con `id` (`idArticle`, `idPeriod`, `idItems`). Vale anche per i
+  campi delle API.
+- Fanno eccezione i nomi delle colonne del database copiati nei mock (`publicId`, `propertyId`) e `key` dei periodi
+  tariffari (`SeasonPeriodItem`, `SeasonPeriodIntervalItem`), un numero che parte da 0, come nel backend; le entità che
+  lo riferiscono (prezzi e disponibilità per periodo) lo chiamano `idPeriod`.
 - La landing dell'hub sta in `src/app/views/hub/home/` con `home.ts`, `home.html` e `home.scss`: questo naming resta.
 
 ## Commenti
 
 - Niente commenti che ripetono quello che si capisce leggendo la riga (es. `/** Soglia dell'articolo; vuota è null. */`
-  sopra `threshold`): si usa un nome esplicativo (`thresholdQuantity`, `idArticle`).
+  sopra `threshold`): si usa un nome esplicativo (`lowStockThreshold`, `idArticle`).
 - Un commento si scrive solo per spiegare qualcosa di poco chiaro: il perché di una scelta, un workaround o un
   comportamento di Material, motivi di sicurezza, dettagli del contratto con il backend, l'ordine delle icone di un
   wrapper. Esempio: il commento di `services/api/time-zone.interceptor.ts`, che spiega perché l'header va solo alle
@@ -160,17 +158,19 @@ classi e commenti.
 - Una lista riceve `Page<Item>` (`total` e `rows`): ogni riga è l'entità dell'oggetto con tutte le proprietà che manda
   il backend (es. `WarehouseItem`).
 - Caso 1: se aggiunta e modifica hanno gli stessi campi della lista, il form usa quell'entità. In modifica la lista
-  passa la riga al popup, in aggiunta il popup parte da `new Item()` (es. Aggiungi e Modifica del magazzino con
-  `WarehouseItem`).
+  passa la riga al popup, in aggiunta il popup parte da `new Item()` (es. il popup di modifica di un periodo di
+  Stagioni e periodi con `SeasonPeriodItem`).
 - Caso 2: se l'oggetto da creare nel form, da mandare alle API o da ricevere è sostanzialmente diverso da uno esistente
-  (più campi, o un campo con un altro significato), si crea un'entità per quell'uso (es. un futuro
-  `CustomerItemUpdate`).
+  (più campi, o un campo con un altro significato), si crea un'entità per quell'uso (es. `WarehouseItemAddRequest` e
+  `WarehouseItemUpdateRequest` delle Impostazioni magazzino). Anche il form ha la sua entità quando i suoi campi non
+  coincidono con quelli mandati alle API (es. `WarehouseItemAddStock` del popup "Aggiungi articolo": l'interruttore
+  dell'avviso vuole un `boolean`, mentre `WarehouseItemAddRequest` lo manda `null` senza soglia).
 - Le entità dei form sono classi con i valori di partenza: tutti i campi, testi e numeri, partono da `null` (es.
   `number | null`) e un campo svuotato torna `null`. Se il campo è obbligatorio ci pensano le validazioni.
 - I campi che possono essere vuoti sono dichiarati `| null` nella classe in `entities`.
 - Niente tipi derivati per i form (`Omit`, `Pick`, mapped type con un elenco di nomi di campo): il form usa l'entità
   stessa. Anche le copie locali dei valori restano nel componente con l'entità (es. `opened` del popup di modifica del
-  magazzino è un `WarehouseItem`).
+  magazzino è un `WarehouseItemStock`).
 - Esempio: a ogni apertura il popup di accesso parte da `new LoginRequest()` e alla chiusura lo svuota, così la password
   scritta non resta in memoria.
 - Gli id (`idArticle`, `idPeriod`…) stanno nelle entità ma non si mostrano mai nei form, salvo richiesta.

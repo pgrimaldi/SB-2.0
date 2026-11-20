@@ -33,6 +33,12 @@ Modifiche a quello che c'è già:
 | 8 | `BathhouseConfiguration`, proprietà `PetsPolicy` | "Ammessi" scelto al primo salvataggio non deve diventare "Non ammessi" |
 | 9 | `Storage:PublicBaseUrls` di ogni ambiente e file con origine `external` | Link di foto, PDF e icone sempre completi e https |
 
+Su tutte e sei le API nuove:
+
+| # | Dove | Cosa cambia |
+|---|---|---|
+| 10 | API 1-6 | Controllo di versione, una versione per tab: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
+
 Foto e PDF si caricano e si tolgono con le API che il backend ha già, senza modifiche (sezione "API esistenti usate
 così come sono").
 
@@ -68,13 +74,15 @@ Valgono per le sei API nuove.
   - `categoryCode` dei servizi (API 3) non è un enum .NET del contratto: è un codice snake_case (es.
     `accessibility_comfort`), da mandare così.
   - Gli orari sono testi `HH:mm` (es. `"08:30"`), senza secondi.
-- **Salvataggi**: rispondono 204 senza corpo e salvano **solo i campi della loro tab**; il resto della scheda resta
-  com'è. Non vanno fatti richiamando `PUT /property-info`, che riscrive tutta la scheda (anche posizione e tour
-  virtuale).
+- **Salvataggi**: rispondono 204 senza corpo, con la nuova versione nell'header `ETag` (sezione 10), e salvano **solo
+  i campi della loro tab**; il resto della scheda resta com'è. Non vanno fatti richiamando `PUT /property-info`, che
+  riscrive tutta la scheda (anche posizione e tour virtuale).
 - **Ordine dei controlli**, uguale per tutte: 1) token e permesso (401, 403 `auth.forbidden`); 2) corpo JSON leggibile
-  (altrimenti 400: il frontend manda sempre JSON valido, quindi `code` ed `errors[]` di questo 400 non contano); 3) validazione del corpo (400 `validation.failed`); 4) stabilimento dal token (403 `catalog.property_required`, 404
+  (altrimenti 400: il frontend manda sempre JSON valido, quindi `code` ed `errors[]` di questo 400 non contano); 3)
+  validazione del corpo (400 `validation.failed`); 4) stabilimento dal token (403 `catalog.property_required`, 404
   `catalog.property_not_found`); 5) i controlli sui dati della singola API (422 della API 2, 404 della API 4); 6)
-  salvataggio. Se un controllo fallisce non si salva nulla.
+  versione in `If-Match` dei salvataggi (409 `resource.version_conflict`, sezione 10); 7) salvataggio. Se un controllo
+  fallisce non si salva nulla.
 - **Errori** nel formato Problem Details del backend (`Boot/Web/ProblemDetailsWriter.cs`), con `code` e `traceId`, più
   `args` ed `errors[]` quando ci sono. Gli errori di validazione sono 400 `validation.failed` con `errors[]`: un
   elemento per ogni regola non rispettata (`ValidatorExtensions.EnsureValid`), con `field` = nome del campo **nel corpo
@@ -110,9 +118,10 @@ Tab Informazioni Generali: il frontend la chiama la prima volta che si apre la t
 Restituisce **solo i campi della tab**, con i nomi e i valori del frontend.
 
 - Nessun parametro.
-- Risposta 200 con i 20 campi qui sotto, sempre tutti. Uno stabilimento senza scheda risponde con tutti i campi `null`,
-  tranne `isFreeCancellation` = `false` e `petPolicy` = `OnRequest`: sono i valori di `Bathhouse.Create` e quelli che
-  dà oggi `GET /property-info` senza scheda (`PropertyInfoService.ToDtoAsync`, lì scritto `on_request`).
+- Risposta 200 con i 20 campi qui sotto, sempre tutti, e `version` (sezione 10). Uno stabilimento senza scheda
+  risponde con tutti i campi `null`, tranne `isFreeCancellation` = `false` e `petPolicy` = `OnRequest`: sono i valori di
+  `Bathhouse.Create` e quelli che dà oggi `GET /property-info` senza scheda (`PropertyInfoService.ToDtoAsync`, lì
+  scritto `on_request`).
 
 ```json
 {
@@ -135,7 +144,8 @@ Restituisce **solo i campi della tab**, con i nomi e i valori del frontend.
   "isFreeCancellation": true,
   "cancellationNoticeHours": 48,
   "petPolicy": "Allowed",
-  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>"
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>",
+  "version": "5f1c2a9e"
 }
 ```
 
@@ -153,6 +163,7 @@ Tipi e provenienza, rispetto a `PropertyInfoDto` (cioè all'entità `Bathhouse`)
 | `isFreeCancellation` | boolean, mai `null` | `isFreeCancellation` | |
 | `cancellationNoticeHours` | integer o `null` | `cancellationNoticeHours` | La tendina del frontend sceglie `true` con 48 o 24 ore, oppure `false` con `null`. Una combinazione diversa (es. `true` con 72) lascia la tendina vuota e il salvataggio la rimanda così com'è. |
 | `petPolicy` | string, mai `null` | `petsPolicy` | `bathhouse.PetsPolicy.ToString()`: `Allowed`, `NotAllowed`, `OnRequest`. |
+| `version` | string, mai `null` | — | La versione dei 20 campi (sezione 10). Il frontend la rimanda nell'header `If-Match` della API 2, non nel corpo. |
 
 HTML di `description` e `regulation`: l'editor (TipTap) produce solo `<p>`, `<br>`, `<strong>`, `<em>`, `<u>`, `<ul>`,
 `<ol>`, `<li>` (con il testo dentro un `<p>`) e `<a>`. Attributi: `<a>` ha `href` (un link o vuoto, mai
@@ -254,37 +265,45 @@ Bottone "Salva" della tab Informazioni Generali.
   codice (confronto in maiuscolo, `PropertyInfoRepository.FindCountryIdAsync`; `is_active` non conta) risponde 422
   `catalog.country_not_found`, senza `errors[]`, e non si salva nulla. Il frontend lo mostra sotto Nazione.
 - Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`, 400 `validation.failed` (tabella sopra), 403
-  `catalog.property_required`, 404 `catalog.property_not_found`, 422 `catalog.country_not_found`, in quest'ordine.
+  `catalog.property_required`, 404 `catalog.property_not_found`, 422 `catalog.country_not_found`, 409
+  `resource.version_conflict` (sezione 10), in quest'ordine.
 
 ## 3. GET /api/catalog/property-info/bathhouse-configuration-services
 
 Tab Servizi: il frontend la chiama la prima volta che si apre la tab e mostra una casella per servizio. Restituisce
-**una sola lista** con i servizi della pagina, ognuno con il suo stato per lo stabilimento.
+un oggetto con **una sola lista**, `services`, con i servizi della pagina, ognuno con il suo stato per lo stabilimento,
+e `version` (sezione 10).
 
 - Nessun parametro. I nomi sono nella lingua dell'header `Accept-Language`, che il frontend manda sempre con la lingua
   scelta nell'app.
-- Risposta 200: i servizi attivi del catalogo che hanno una sezione (sezione 7), **nell'ordine della pagina**: per
-  `settings_sort_order`, a parità per `id`. Uno stabilimento senza scheda riceve la stessa lista con `isSelected` =
-  `false`.
+- Risposta 200: in `services` i servizi attivi del catalogo che hanno una sezione (sezione 7), **nell'ordine della
+  pagina**: per `settings_sort_order`, a parità per `id`. Uno stabilimento senza scheda riceve la stessa lista con
+  `isSelected` = `false`.
 
 ```json
-[
-  {
-    "idService": 14,
-    "name": "Accesso disabili",
-    "categoryCode": "accessibility_comfort",
-    "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
-    "isSelected": true
-  },
-  {
-    "idService": 38,
-    "name": "Wifi",
-    "categoryCode": "accessibility_comfort",
-    "iconUrl": null,
-    "isSelected": false
-  }
-]
+{
+  "services": [
+    {
+      "idService": 14,
+      "name": "Accesso disabili",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
+      "isSelected": true
+    },
+    {
+      "idService": 38,
+      "name": "Wifi",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": null,
+      "isSelected": false
+    }
+  ],
+  "version": "9b04d7e1"
+}
 ```
+
+`version` (string, mai `null`) è la versione della selezione (sezione 10): non cambia con la lingua della richiesta.
+Ogni elemento di `services`:
 
 | Campo | Tipo | Da dove viene |
 |---|---|---|
@@ -355,10 +374,12 @@ Bottone "Salva" della tab Servizi.
 | 400 | `validation.failed` con `errors[]` = `[{ "field": "services[i].isSelected", "code": "validation.required", "args": {} }]` | `isSelected` mancante o non boolean nell'elemento `i`, non `null`. I tre 400 arrivano insieme in `errors[]`, prima di ogni 404. |
 | 403, 404 | `catalog.property_required`, `catalog.property_not_found` | Regole comuni. |
 | 404 | `resource.not_found`, senza `errors[]` | Un elemento `null` o senza `idService`, o con un `idService` che la API 3 non restituirebbe (non esiste, è cancellato, non è attivo o non ha sezione). |
+| 409 | `resource.version_conflict`, senza `errors[]` | La versione in `If-Match` non è più quella della selezione (sezione 10). Niente cambia. |
 
 Per gli id sbagliati vale 404 `resource.not_found`, non il 422 `catalog.amenity_not_found` di
 `PUT /property-info/amenities`, che oggi non guarda `is_active` (`PropertyInfoRepository.FindAmenityIdsAsync`). Il
-frontend mostra tutti gli errori di questa API nel messaggio della tab.
+frontend mostra tutti gli errori di questa API nel messaggio della tab, tranne il 409 `resource.version_conflict`
+(sezione 10).
 
 ## 5. GET /api/catalog/property-info/bathhouse-configuration-media
 
@@ -366,8 +387,8 @@ Tab Media: il frontend la chiama la prima volta che si apre la tab e mostra la p
 del tour virtuale e i due PDF.
 
 - Nessun parametro.
-- Risposta 200 con i 9 campi qui sotto, sempre tutti. Uno stabilimento senza scheda risponde con `photos` = `[]` e gli
-  altri 8 campi `null`.
+- Risposta 200 con i 9 campi qui sotto, sempre tutti, e `version` (sezione 10). Uno stabilimento senza scheda risponde
+  con `photos` = `[]` e gli altri 8 campi `null`.
 
 ```json
 {
@@ -382,7 +403,8 @@ del tour virtuale e i due PDF.
   "priceListPdfUrl": "https://media.example.com/lido-demo/listino-prezzi.pdf",
   "priceListPdfFileName": "listino-prezzi.pdf",
   "menuPdfUrl": "https://media.example.com/lido-demo/menu.pdf",
-  "menuPdfFileName": "menu.pdf"
+  "menuPdfFileName": "menu.pdf",
+  "version": "c27e0b43"
 }
 ```
 
@@ -394,6 +416,7 @@ del tour virtuale e i due PDF.
 | `latitude`, `longitude` | number o `null` | `latitude`, `longitude` | Colonne `numeric(9,6)`. `null` tutti e due se la posizione non è stata scelta. |
 | `priceListPdfUrl`, `menuPdfUrl` | string o `null` | `priceListPdf.url`, `menuPdf.url` | Link del PDF (sezione 9); `null` se non c'è il file. |
 | `priceListPdfFileName`, `menuPdfFileName` | string o `null` | `priceListPdf.fileName`, `menuPdf.fileName` | Il nome del file, che la tab mostra; `null` se non c'è il file. Viene dal percorso salvato (`Path.GetFileName`): il nome caricato con i caratteri diversi da lettere, cifre, `.`, `-` e `_` cambiati in `_` (`S3ObjectStorage.SaveAsync`, `BuildingBlocks.Infrastructure/Storage/ObjectStorage.cs`); `file.pdf` se il file non si trova in `catalog.media_assets`. |
+| `version` | string, mai `null` | — | La versione di `virtualTourUrl`, `latitude` e `longitude` (sezione 10): foto e PDF non la cambiano. Il frontend la rimanda nell'header `If-Match` della API 6. |
 
 Non ci sono: i campi delle altre tab e `slug`.
 
@@ -436,8 +459,9 @@ clicca sulla mappa per mettere il segnaposto). Foto e PDF non passano da qui.
 | `longitude` | `validation.required` | | `null` con `latitude` non `null`. |
 
 - Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`, 400 `validation.failed` (tabella sopra), 403
-  `catalog.property_required`, 404 `catalog.property_not_found`, in quest'ordine. Il frontend mostra gli errori di
-  `latitude` e `longitude` sotto la mappa e quelli di `virtualTourUrl` sotto il campo.
+  `catalog.property_required`, 404 `catalog.property_not_found`, 409 `resource.version_conflict` (sezione 10), in
+  quest'ordine. Il frontend mostra gli errori di `latitude` e `longitude` sotto la mappa e quelli di `virtualTourUrl`
+  sotto il campo.
 
 ## 7. Sezione e ordine dei servizi
 
@@ -602,6 +626,57 @@ Richiesta, in **ogni ambiente, sviluppo compreso**:
 2. I file con origine `external` hanno come percorso un link `https://`.
 3. Un file che esiste ha sempre il suo link: mai `null`.
 
+## 10. Controllo di versione sui salvataggi delle tre tab
+
+Oggi, se due utenti modificano la stessa tab, vince chi salva per ultimo: ogni Salva rimanda tutto il modello letto
+(sezioni 2, 4 e 6) e cancella, senza che nessuno se ne accorga, quello che un altro utente ha cambiato nel frattempo.
+Il frontend chiede lo schema di **concorrenza ottimistica** che il backend ha già progettato per le prenotazioni offline
+(`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un **codice di errore
+unico per tutte le API**: `resource.version_conflict`.
+
+### Cosa ci serve
+
+- **Una versione per tab**: ogni lettura della tabella sotto restituisce, insieme ai dati, il campo `version` (stringa
+  opaca, mai `null`). Copre **solo i dati che scrive il salvataggio della sua tab**: cambia ogni volta che cambiano
+  quei dati, anche quando li cambia un'altra API (per esempio `PUT /property-info` o `PUT /property-info/amenities`),
+  e solo allora. Così il Salva di una tab non fa mai fallire quello di un'altra.
+- Per questo non basta una versione della riga di `catalog.bathhouses` (per esempio il token `xmin`): sulla stessa riga
+  (`Domain/Entities/Bathhouse.cs`) scrivono le API 2 e 6, i caricamenti dell'immagine principale e dei PDF
+  (`PropertyInfoService`, `SetMainPhoto`, `SetMenuPdf`, `SetPriceListPdf`) e i "mi piace"
+  (`IdentityEventHandlers`, `Bathhouse.ChangeLikes`); le dotazioni della API 4 stanno invece in
+  `catalog.bathhouse_amenities`.
+- **`If-Match` nei salvataggi**: il frontend manda la versione letta nell'header `If-Match: "<version>"`, mai nel
+  corpo. Se non è più quella attuale, il backend non salva niente e risponde **409 `resource.version_conflict`**, senza
+  `errors[]`. Senza `If-Match` risponde allo stesso modo: il frontend lo manda sempre.
+- **`ETag` nelle risposte**: ogni salvataggio riuscito risponde 204 senza corpo con la nuova versione nell'header
+  `ETag: "<version>"`. Il frontend la tiene per il Salva successivo della stessa tab, senza rileggere.
+- Il 409 si controlla dopo i controlli sui dati della singola API (422 `catalog.country_not_found` della API 2, 404
+  `resource.not_found` della API 4) e subito prima del salvataggio (regole comuni, "Ordine dei controlli").
+- **Stabilimento senza scheda**: le letture restituiscono comunque una `version`, quella dei valori di partenza, e il
+  primo salvataggio con quella versione riesce e crea la scheda. Una scheda creata nel frattempo da un'altra API senza
+  cambiare i dati della tab (per esempio dal caricamento di una foto) non cambia la versione.
+- La API 3 risponde un oggetto `{ "services": [...], "version": "..." }` e non più la sola lista (sezione 3): una
+  lista non può portare la versione.
+- **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti, un contatore per tab...): l'agente
+  glielo chiede prima di scrivere codice. Il frontend tratta la versione come una stringa opaca e non la confronta mai.
+
+### API coinvolte
+
+| Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
+|---|---|---|
+| API 1 `GET /api/catalog/property-info/bathhouse-configuration-general` | API 2 `POST /api/catalog/property-info/save-bathhouse-configuration-general` | I 20 campi della API 1 |
+| API 3 `GET /api/catalog/property-info/bathhouse-configuration-services` | API 4 `POST /api/catalog/property-info/save-bathhouse-configuration-services` | Quali servizi della API 3 sono dotazioni della scheda (`isSelected`); non nomi, icone e sezioni |
+| API 5 `GET /api/catalog/property-info/bathhouse-configuration-media` | API 6 `POST /api/catalog/property-info/save-bathhouse-configuration-media` | `virtualTourUrl`, `latitude` e `longitude`; non foto e PDF |
+
+Le API di foto e PDF ("API esistenti usate così come sono") restano come sono e non mandano `If-Match`: caricano e
+tolgono un file subito, e non cambiano la versione della API 5.
+
+### Cosa fa il frontend
+
+Con 409 `resource.version_conflict` la tab mostra l'avviso "Nel frattempo un altro utente ha modificato questi dati:
+li abbiamo ricaricati. Rifai le tue modifiche.", torna in sola lettura e rilegge i suoi dati con la sua lettura (API 1,
+3 o 5); il messaggio in fondo alla tab non compare.
+
 ## API esistenti usate così come sono
 
 La tab Informazioni Generali legge le voci della tendina Nazione da `GET /api/catalog/lookups/countries`, così com'è
@@ -675,3 +750,20 @@ Con uno stabilimento di prova e un token con `catalog.read` e `catalog.settings`
    403 `catalog.property_required`; stabilimento del token che non esiste 404 `catalog.property_not_found`.
 10. **Una scheda**: tutte le API lavorano sulla stessa scheda di `GET /property-info` (la prima per id tra le non
     cancellate).
+
+Controllo di versione (sezione 10), con lo stesso stabilimento e lo stesso token:
+
+11. La API 1 risponde con `version` (per esempio `v1`); la API 2 con `If-Match: "v1"` risponde 204 con l'header `ETag`
+    di una versione nuova, diversa da `v1`; una nuova API 1 risponde con quella versione.
+12. La stessa API 2 con `If-Match: "v1"` dopo la prima: 409 `resource.version_conflict` senza `errors[]`, e la API 1
+    restituisce i valori di prima. La API 2 senza `If-Match`: 409 `resource.version_conflict`.
+13. Lette le versioni delle API 1, 3 e 5: dopo un salvataggio riuscito della API 4 le versioni delle API 1 e 5 non
+    cambiano; dopo uno della API 6 non cambiano quelle delle API 1 e 3; dopo uno della API 2 non cambiano quelle delle
+    API 3 e 5.
+14. Letta la versione della API 5, un caricamento e una cancellazione dell'immagine principale, di una foto e di un PDF
+    non la cambiano: la API 6 con quella versione risponde 204.
+15. Letta la API 3 (versione `v1`), `PUT /api/catalog/property-info/amenities` cambia le dotazioni; la API 4 con
+    `If-Match: "v1"` risponde 409 `resource.version_conflict` e le dotazioni restano quelle della `PUT`. Lo stesso per
+    la API 2 e la API 6 dopo una `PUT /api/catalog/property-info` che cambia i loro dati.
+16. La API 3 con `Accept-Language: it` e con `Accept-Language: en` restituisce la stessa `version`.
+17. Su uno stabilimento senza scheda la API 2 con la `version` della API 1 risponde 204 e crea la scheda.

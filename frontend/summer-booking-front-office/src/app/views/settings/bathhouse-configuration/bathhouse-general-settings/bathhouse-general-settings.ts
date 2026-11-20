@@ -20,7 +20,7 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import { Observable, Subscription, firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../behaviours/errors/error-text.behaviour';
 import { DropdownList } from '../../../../behaviours/forms/dropdown-list';
@@ -66,6 +66,7 @@ import {
 } from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { Country } from '../../../../entities/shared/country';
 import { MAX_EMAIL_LENGTH } from '../../../../entities/shared/email-address';
+import { VersionConflictPopup } from '../../../../components/management/version-conflict-popup/version-conflict-popup';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
 import { toApiProblem } from '../../../../services/api/errors/to-api-problem';
@@ -92,6 +93,7 @@ const NOTICE_HOURS: Readonly<Record<CancellationPolicy, number | null>> = {
     FormField,
     RichTextField,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './bathhouse-general-settings.html',
   styleUrl: './bathhouse-general-settings.scss',
@@ -115,6 +117,8 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
   protected readonly isSaving = signal(false);
   private readonly information = signal(new BathhouseGeneralInformation());
   private loaded = new BathhouseGeneralInformation();
+  /** The version of the information read: Salva sends it back. */
+  private version: string | null = null;
   protected readonly informationForm = form(this.information, (path) => {
     requiredText(path.bathhouseName);
     for (const text of [
@@ -194,6 +198,8 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     '/assets/images/GeneralIcon_OrderedList.svg',
     '/assets/images/GeneralIcon_TextLink.svg',
   ] as const;
+  /** [X]. */
+  protected readonly popupIcons = ['/assets/images/GeneralIcon_Close.svg'] as const;
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -201,6 +207,8 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     ),
     { initialValue: null },
   );
+  protected readonly isConflictShown = signal(false);
+  private reloading?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
@@ -210,25 +218,8 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
         return;
       }
       const subscription = untracked(() => {
-        this.isLoading.set(true);
-        this.error.set(null);
-        this.isLoaded.set(false);
-        const information = this.cache.generalInformation().subscribe({
-          next: (information) => {
-            this.loaded = withFirstCountry(
-              onlyFieldsOf(BathhouseGeneralInformation, information),
-              this.countries.items(),
-            );
-            this.information.set(this.loaded);
-            this.informationForm().reset();
-            this.isLoaded.set(true);
-            this.isLoading.set(false);
-          },
-          error: (error: unknown) => {
-            this.error.set(toApiProblem(error));
-            this.isLoading.set(false);
-          },
-        });
+        this.reloading?.unsubscribe();
+        const information = this.fetch();
         this.countries.load();
         return information;
       });
@@ -280,15 +271,23 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const sent = this.information();
-        await firstValueFrom(this.catalog.saveBathhouseConfigurationGeneral(sent));
+        const version = await firstValueFrom(
+          this.catalog.saveBathhouseConfigurationGeneral(sent, this.version),
+        );
         const saved = savedAs(sent);
         this.loaded = saved;
+        this.version = version;
         this.information.set(saved);
-        this.cache.keepGeneralInformation(saved);
+        this.cache.keepGeneralInformation({ ...saved, version });
         this.informationForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
         const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reload();
+          return undefined;
+        }
         if (problem.code === ApiErrorCode.CatalogCountryNotFound) {
           return apiFieldError(this.informationForm.country, problem.code, problem.args);
         }
@@ -310,7 +309,39 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     this.information.update((information) => ({ ...information, country: this.loaded.country }));
   }
 
+  private reload(): void {
+    this.reloading?.unsubscribe();
+    this.cancel();
+    this.cache.forgetGeneralInformation();
+    this.reloading = this.fetch();
+  }
+
+  /** Modifica and Salva stay off until the information is read. */
+  private fetch(): Subscription {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.isLoaded.set(false);
+    return this.cache.generalInformation().subscribe({
+      next: (information) => {
+        this.version = information.version;
+        this.loaded = withFirstCountry(
+          onlyFieldsOf(BathhouseGeneralInformation, information),
+          this.countries.items(),
+        );
+        this.information.set(this.loaded);
+        this.informationForm().reset();
+        this.isLoaded.set(true);
+        this.isLoading.set(false);
+      },
+      error: (error: unknown) => {
+        this.error.set(toApiProblem(error));
+        this.isLoading.set(false);
+      },
+    });
+  }
+
   ngOnDestroy(): void {
+    this.reloading?.unsubscribe();
     this.countries.destroy();
     this.unsaved.unwatch(this);
   }

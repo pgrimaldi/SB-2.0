@@ -14,9 +14,11 @@ ordinamento per nome e pagine, e i comandi per aggiungere, rinominare, duplicare
 | 1 | POST | `/api/catalog/sectors-list` | Elenco dei settori per la tabella, a pagine |
 | 2 | POST | `/api/catalog/sectors/bulk-delete` | Elimina uno o più settori, tutto o niente |
 | 3 | POST | `/api/catalog/sectors/bulk-duplicate` | Duplica uno o più settori, tutto o niente |
+| 4 | POST + PUT | `/api/catalog/sectors-list` e `/api/catalog/sectors/{id}` | Controllo di versione: `version` nelle righe della tabella, `If-Match` ed `ETag` nella `PUT`, 409 `resource.version_conflict` |
 
-Aggiungi e Modifica di una riga usano le API che ci sono già, così come sono: `POST /api/catalog/sectors` e
-`PUT /api/catalog/sectors/{id}`. Per eliminare, anche una riga sola, il frontend usa solo l'API 2.
+Aggiungi e Modifica di una riga usano le API che ci sono già: `POST /api/catalog/sectors` così com'è,
+`PUT /api/catalog/sectors/{id}` con in più il controllo di versione (sezione 4). Per eliminare, anche una riga sola,
+il frontend usa solo l'API 2.
 
 ## Regole comuni
 
@@ -25,7 +27,7 @@ Aggiungi e Modifica di una riga usano le API che ci sono già, così come sono: 
 - **Le API esistenti non cambiano**: `GET`, `POST`, `PUT` e `DELETE /api/catalog/sectors` restano come sono (il
   frontend non usa la `DELETE`: per eliminare usa solo la sezione 2): stesse rotte, richieste, risposte e
   comportamento, salvo la risposta ai salvataggi contemporanei dello stesso nome (vedi "Due salvataggi dello stesso
-  nome nello stesso momento").
+  nome nello stesso momento") e il controllo di versione della `PUT` (sezione 4).
 - **Permesso**: per l'API 1 `CatalogRead`, come `GET /api/catalog/sectors`; per le API 2 e 3 `CatalogSettings`, come
   `POST`, `PUT` e `DELETE /api/catalog/sectors`. Senza permesso 403 `auth.forbidden`; senza token valido 401
   `auth.unauthenticated`.
@@ -104,19 +106,20 @@ pagina richiesta (al massimo `pageSize` righe).
 {
   "total": 3,
   "rows": [
-    { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "sectorName": "Fila 1" },
-    { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "sectorName": "Fila 2" },
-    { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03", "sectorName": "Fila 3" }
+    { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "sectorName": "Fila 1", "version": "7d2e90a4" },
+    { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "sectorName": "Fila 2", "version": "c3b81f05" },
+    { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03", "sectorName": "Fila 3", "version": "19ae4d7c" }
   ]
 }
 ```
 
-Solo questi due campi per riga:
+Solo questi tre campi per riga:
 
 | Campo | In `SectorDto` | Tipo | Note |
 |---|---|---|---|
 | `idSector` | `id` | string (UUID) | Il `public_id` del settore. Non si mostra: serve alle azioni della riga. |
 | `sectorName` | `name` | string | Colonna "Nome". |
+| `version` | Non c'è | string | La versione del settore (sezione 4), stringa opaca. Non si mostra: il popup della matita la rimanda nell'header `If-Match` della `PUT`. |
 
 Una `page` oltre l'ultima risponde 200 con `rows` vuoto e il `total` vero: il frontend passa da solo all'ultima pagina
 che c'è.
@@ -264,14 +267,75 @@ Nell'ordine in cui si controllano:
 
 Il frontend mostra ogni errore di questa API nell'avviso "Operazione non riuscita", con il testo del suo `code`.
 
+## 4. Controllo di versione sul salvataggio della matita
+
+Oggi, se due utenti rinominano lo stesso settore, vince chi salva per ultimo: il popup della matita parte dal nome
+della riga letta con la tabella (sezione 1) e lo sostituisce, senza che nessuno se ne accorga, anche se un altro
+utente l'ha cambiato nel frattempo. Il backend non ha un controllo di concorrenza sugli aggiornamenti: nessun token
+di concorrenza in `MapSectorConfiguration`, nessun `If-Match` (`SectorService.UpdateAsync`,
+`Application/Services/SectorService.cs:51-61`). Il frontend chiede lo schema di **concorrenza ottimistica** che il
+backend ha già progettato per le prenotazioni offline (`shared documentation/backend/progettazione/19-frontend-offline.md`,
+sezioni 4.4 e 5.8), con un **codice di errore unico per tutte le API**: `resource.version_conflict`. Lo stesso schema
+e lo stesso codice sono chiesti in `Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì sono già fatti,
+qui si aggiungono solo le API della tabella sotto.
+
+### Cosa ci serve
+
+- **Versione nelle righe della tabella**: il popup della matita non fa una lettura sua, parte dalla riga della
+  tabella. Per questo ogni riga di `sectors-list` (sezione 1) ha il campo `version` (stringa opaca), la versione di
+  quel settore. Cambia ogni volta che cambia il nome del settore, l'unico dato che la `PUT` scrive, anche quando lo
+  cambia un'altra chiamata (per esempio la `PUT` di un altro utente), e solo allora.
+- **`If-Match` nella `PUT`**: il frontend manda la `version` della riga nell'header `If-Match: "<version>"`. Se non è
+  più quella attuale, il backend non salva niente e risponde **409 `resource.version_conflict`**, senza `errors[]`.
+  Senza `If-Match` risponde allo stesso modo: il frontend lo manda sempre.
+- **`ETag` nella risposta**: la `PUT` riuscita restituisce la nuova versione nell'header `ETag: "<version>"`, oltre al
+  `SectorDto` di oggi.
+- Il 409 `resource.version_conflict` si controlla dopo il 404 `catalog.sector_not_found` (`LoadAsync`) e prima del
+  409 `catalog.sector_name_taken` (`EnsureNameFreeAsync`).
+- **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
+  dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
+  la versione come una stringa opaca e non la confronta mai.
+
+### API coinvolte
+
+| Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
+|---|---|---|
+| `POST /api/catalog/sectors-list` (sezione 1), una `version` per riga | `PUT /api/catalog/sectors/{id}` | Il nome del settore |
+
+Le altre API di questo documento e `POST /api/catalog/sectors` non ne hanno bisogno: l'aggiunta non rimanda dati
+letti, eliminazione e duplicazione (sezioni 2 e 3) lavorano solo con gli id.
+
+### Errori della `PUT`
+
+Nell'ordine in cui si controllano:
+
+| Status | `code` | Quando |
+|---|---|---|
+| 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 403 | `auth.forbidden` | Utente senza il permesso `CatalogSettings`. |
+| 400 | `validation.failed` | `name` vuoto o di più di 100 caratteri, con `errors[]`. |
+| 403 | `catalog.property_required` | Token senza stabilimento. |
+| 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 404 | `catalog.sector_not_found` | `{id}` non è un settore dello stabilimento (anche perché eliminato). |
+| 409 | `resource.version_conflict` | `If-Match` manca o non è più la versione del settore. Niente cambia. |
+| 409 | `catalog.sector_name_taken` | Un altro settore dello stabilimento ha già questo nome. |
+
+### Cosa fa il frontend
+
+Con 409 `resource.version_conflict` il popup della matita si chiude, compare l'avviso "Nel frattempo un altro utente
+ha modificato questi dati: li abbiamo ricaricati. Rifai le tue modifiche." e la pagina ricarica la tabella con
+`sectors-list`: è la nuova lettura, perché non c'è una lettura del singolo settore. L'utente riapre la matita, che
+parte dal nome e dalla versione nuovi.
+
 ## API esistenti usate così come sono
 
-Il frontend le chiama senza modifiche; qui solo come le usa e dove mostra le risposte.
+Il frontend le chiama senza modifiche, salvo l'header `If-Match` della `PUT` (sezione 4); qui solo come le usa e dove
+mostra le risposte.
 
 | Azione | API | Corpo | Risposta | Errori e dove li mostra il frontend |
 |---|---|---|---|---|
 | Salva del popup "Aggiungi settore/fila" | `POST /api/catalog/sectors` | `{ "name": "Fila 9" }` (`SaveSectorRequest`) | 201 con `SectorDto`: il frontend non la legge e ricarica la tabella | `validation.failed` su `name` e 409 `catalog.sector_name_taken` sotto il campo del nome; gli altri sopra i bottoni del popup. |
-| Salva del popup della matita | `PUT /api/catalog/sectors/{id}`, con l'`idSector` della riga | `{ "name": "Fila 2 lato mare" }` | 200 con `SectorDto`: il frontend non la legge e ricarica la tabella | Come l'aggiunta; 404 `catalog.sector_not_found` sopra i bottoni. |
+| Salva del popup della matita | `PUT /api/catalog/sectors/{id}`, con l'`idSector` della riga e l'header `If-Match` con la `version` della riga (sezione 4) | `{ "name": "Fila 2 lato mare" }` | 200 con `SectorDto` e l'header `ETag` (sezione 4): il frontend non li legge e ricarica la tabella | Come l'aggiunta; 404 `catalog.sector_not_found` sopra i bottoni; 409 `resource.version_conflict` come nella sezione 4 ("Cosa fa il frontend"). |
 
 ### Due salvataggi dello stesso nome nello stesso momento
 
@@ -293,8 +357,8 @@ sviluppatore backend: l'agente glielo chiede prima di scrivere codice. Il resto 
 API 1, con uno stabilimento di prova con 12 settori e un token con `catalog.read`:
 
 1. Con `page` 1, `pageSize` 10, `search` `""`, `sortField` `""`: `total` 12, 10 righe nell'ordine di
-   `GET /api/catalog/sectors`, ognuna con solo `idSector` e `sectorName` (gli `id` e i `name` di quella lista); `page` 2
-   dà le ultime 2; `page` 3 dà `rows` vuoto e `total` 12.
+   `GET /api/catalog/sectors`, ognuna con solo `idSector`, `sectorName` (gli `id` e i `name` di quella lista) e
+   `version` (sezione 4); `page` 2 dà le ultime 2; `page` 3 dà `rows` vuoto e `total` 12.
 2. `sortField` `sectorName` con settori "Fila 1", "Fila 2", "Fila 9", "Fila 10", "Fila 11", "fila 3": righe in
    ordine naturale, Fila 1, Fila 2, fila 3, Fila 9, Fila 10, Fila 11; con `Descending` l'ordine opposto; "Fila 10" non
    viene mai prima di "Fila 2".
@@ -331,3 +395,15 @@ Salvataggi contemporanei:
    mandati insieme: uno risponde 201, l'altro 409 `catalog.sector_name_taken`, mai 500; nello stabilimento c'è un solo
    settore con quel nome.
 2. Lo stesso con un `PUT /api/catalog/sectors/{id}` che rinomina un settore mentre un `POST` crea lo stesso nome.
+
+API 4, con un token con `catalog.settings`:
+
+1. Una riga di `sectors-list` con `version` `v1`; `PUT /api/catalog/sectors/{id}` con un nome nuovo e
+   `If-Match: "v1"`: 200 con `SectorDto` e l'header `ETag` di una versione nuova, diversa da `v1`; in `sectors-list` la
+   riga ha il nome nuovo e quella versione.
+2. La stessa `PUT` con `If-Match: "v1"` dopo la prima: 409 `resource.version_conflict` senza `errors[]`; il nome non
+   cambia.
+3. `PUT` senza `If-Match`: 409 `resource.version_conflict`.
+4. Rinominare un settore non cambia la `version` degli altri settori in `sectors-list`.
+5. `PUT` su un settore eliminato, con qualsiasi `If-Match`: 404 `catalog.sector_not_found`. `PUT` con un nome già
+   usato da un altro settore e una versione vecchia: 409 `resource.version_conflict`, non `catalog.sector_name_taken`.

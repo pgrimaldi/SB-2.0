@@ -14,6 +14,7 @@ import {
 } from '../../../entities/pagination/page';
 import { WarehouseItem } from '../../../entities/warehouse/warehouse-item';
 import { WarehouseItemAddRequest } from '../../../entities/warehouse/warehouse-item-add-request';
+import { MAX_WAREHOUSE_QUANTITY } from '../../../entities/warehouse/warehouse-limits';
 import { WarehouseItemUpdateRequest } from '../../../entities/warehouse/warehouse-item-update-request';
 import { WarehouseSelectedItem } from '../../../entities/warehouse/warehouse-selected-item';
 import { WarehouseSettingItem } from '../../../entities/warehouse/warehouse-setting-item';
@@ -21,12 +22,12 @@ import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { sameText, sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 /**
  * Rows of `catalog.inventory_items`: same structure as the sample DB, invented values (no data of
  * real properties). Each article belongs to one property (`propertyId` → `MOCK_PROPERTIES.id`):
- * a request only ever sees the articles of its own property. `isThresholdWarningActive` (the threshold
- * alert) is not a column of the sample DB yet: it is the field the frontend asks for.
+ * a request only ever sees the articles of its own property.
  */
 const INVENTORY_ITEMS: InventoryRow[] = [
   {
@@ -42,8 +43,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     },
     totalQuantity: 60,
     lowStockThreshold: 3,
-    isThresholdWarningActive: true,
-    isActive: true,
+    lowStockAlertEnabled: true,
     deletedAt: null,
   },
   {
@@ -59,8 +59,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     },
     totalQuantity: 120,
     lowStockThreshold: 5,
-    isThresholdWarningActive: true,
-    isActive: true,
+    lowStockAlertEnabled: true,
     deletedAt: null,
   },
   {
@@ -72,8 +71,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 80,
     lowStockThreshold: 4,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -85,8 +83,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: true,
     totalQuantity: 24,
     lowStockThreshold: 2,
-    isThresholdWarningActive: true,
-    isActive: true,
+    lowStockAlertEnabled: true,
     deletedAt: null,
   },
   {
@@ -98,8 +95,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 8,
     lowStockThreshold: null,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -111,8 +107,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 4,
     lowStockThreshold: 1,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -124,8 +119,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: true,
     totalQuantity: 35,
     lowStockThreshold: null,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -137,8 +131,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: true,
     totalQuantity: 16,
     lowStockThreshold: 2,
-    isThresholdWarningActive: true,
-    isActive: true,
+    lowStockAlertEnabled: true,
     deletedAt: null,
   },
   {
@@ -150,8 +143,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 30,
     lowStockThreshold: 3,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -163,8 +155,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 12,
     lowStockThreshold: 1,
-    isThresholdWarningActive: true,
-    isActive: true,
+    lowStockAlertEnabled: true,
     deletedAt: null,
   },
   {
@@ -176,8 +167,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: true,
     totalQuantity: 10,
     lowStockThreshold: 1,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -189,8 +179,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 25,
     lowStockThreshold: null,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -202,8 +191,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: true,
     totalQuantity: 5,
     lowStockThreshold: 1,
-    isThresholdWarningActive: false,
-    isActive: false,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
   {
@@ -215,8 +203,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 6,
     lowStockThreshold: 1,
-    isThresholdWarningActive: true,
-    isActive: true,
+    lowStockAlertEnabled: true,
     deletedAt: null,
   },
   {
@@ -228,8 +215,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     mapPlaceable: false,
     totalQuantity: 4,
     lowStockThreshold: 1,
-    isThresholdWarningActive: false,
-    isActive: true,
+    lowStockAlertEnabled: false,
     deletedAt: null,
   },
 ];
@@ -261,7 +247,7 @@ export const articleComboboxMock = (
   }
   const property = DEMO_PROPERTY;
   const items: ComboboxItem[] = INVENTORY_ITEMS.filter(
-    (item) => item.propertyId === property.id && item.isActive && item.deletedAt === null,
+    (item) => item.propertyId === property.id && item.deletedAt === null,
   )
     .sort(
       (first, second) =>
@@ -274,21 +260,24 @@ export const articleComboboxMock = (
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };
 
-/** The largest total of an article: `total_quantity` is a 32-bit integer. */
-const MAX_TOTAL_QUANTITY = 2_147_483_647;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * `POST /api/catalog/add-warehouse-item`: adds `totalQuantity` pieces to the total of an article that
  * exists already; a null threshold or alert stays as it is (until the page is reloaded). 204 without
- * a body. 401 without a valid access token; 400 with one error per wrong field (see `addErrors`),
- * also a new total over the limit or a threshold over it; 404 `inventory.item_not_found` for an
- * article that is not an active one of the property.
+ * a body. 401 without a valid access token; 400 without `errors[]` for an `idArticle` that is not a
+ * UUID (the backend cannot read it); 400 with one error per wrong field (see `addErrors`), also a new
+ * total over the limit or a threshold over it; 404 `inventory.item_not_found` for an article that is
+ * not an active one of the property.
  */
 export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<WarehouseItemAddRequest>;
+  if (typeof body.idArticle === 'string' && body.idArticle && !UUID.test(body.idArticle)) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed);
+  }
   const errors = addErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
@@ -298,13 +287,13 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
     return problem(request, 404, ApiErrorCode.InventoryItemNotFound);
   }
   const total = item.totalQuantity + (body.totalQuantity as number);
-  const threshold = body.thresholdQuantity ?? null;
+  const threshold = body.lowStockThreshold ?? null;
   const totalErrors: MockFieldError[] = [
-    ...(total > MAX_TOTAL_QUANTITY
+    ...(total > MAX_WAREHOUSE_QUANTITY
       ? [{ field: 'totalQuantity', code: ApiErrorCode.ValidationOutOfRange }]
       : []),
     ...(threshold !== null && threshold > total
-      ? [{ field: 'thresholdQuantity', code: ApiErrorCode.ValidationOutOfRange }]
+      ? [{ field: 'lowStockThreshold', code: ApiErrorCode.ValidationOutOfRange }]
       : []),
   ];
   if (totalErrors.length) {
@@ -315,19 +304,19 @@ export const warehouseAddMock = (request: HttpRequest<unknown>): Observable<Http
   if (threshold !== null) {
     item.lowStockThreshold = threshold;
   }
-  if (typeof body.isThresholdWarningActive === 'boolean') {
-    item.isThresholdWarningActive = body.isThresholdWarningActive;
+  if (typeof body.lowStockAlertEnabled === 'boolean') {
+    item.lowStockAlertEnabled = body.lowStockAlertEnabled;
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /** The rules of the body alone, one error per wrong field, as the backend answers them. */
 function addErrors(body: Partial<WarehouseItemAddRequest>): MockFieldError[] {
-  const { totalQuantity, isThresholdWarningActive } = body;
-  const threshold = body.thresholdQuantity ?? null;
+  const { totalQuantity, lowStockAlertEnabled } = body;
+  const threshold = body.lowStockThreshold ?? null;
   const errors: MockFieldError[] = [];
   if (typeof body.idArticle !== 'string' || !body.idArticle) {
-    errors.push({ field: 'idArticle', code: ApiErrorCode.ValidationInvalid });
+    errors.push({ field: 'idArticle', code: ApiErrorCode.ValidationRequired });
   }
   if (totalQuantity === undefined || totalQuantity === null) {
     errors.push({ field: 'totalQuantity', code: ApiErrorCode.ValidationRequired });
@@ -335,15 +324,15 @@ function addErrors(body: Partial<WarehouseItemAddRequest>): MockFieldError[] {
     errors.push({ field: 'totalQuantity', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (threshold !== null && !wholeNumber(threshold)) {
-    errors.push({ field: 'thresholdQuantity', code: ApiErrorCode.ValidationOutOfRange });
+    errors.push({ field: 'lowStockThreshold', code: ApiErrorCode.ValidationOutOfRange });
   }
   if (
-    (isThresholdWarningActive !== undefined &&
-      isThresholdWarningActive !== null &&
-      typeof isThresholdWarningActive !== 'boolean') ||
-    (isThresholdWarningActive === true && !(threshold !== null && threshold > 0))
+    (lowStockAlertEnabled !== undefined &&
+      lowStockAlertEnabled !== null &&
+      typeof lowStockAlertEnabled !== 'boolean') ||
+    (lowStockAlertEnabled === true && !(threshold !== null && threshold > 0))
   ) {
-    errors.push({ field: 'isThresholdWarningActive', code: ApiErrorCode.ValidationInvalid });
+    errors.push({ field: 'lowStockAlertEnabled', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
 }
@@ -394,6 +383,10 @@ export const updateArticleMock = (
   if (!item) {
     return problem(request, 404, ApiErrorCode.InventoryItemNotFound);
   }
+  const conflict = versionConflict(request, articleData(item));
+  if (conflict) {
+    return conflict;
+  }
   const name = String(body.name).trim();
   const isNameTaken = INVENTORY_ITEMS.some(
     (row) =>
@@ -410,25 +403,32 @@ export const updateArticleMock = (
   item.name = name;
   item.totalQuantity = body.totalQuantity as number;
   item.lowStockThreshold = body.lowStockThreshold ?? null;
-  item.isThresholdWarningActive = body.lowStockAlertEnabled as boolean;
-  return of(new HttpResponse({ status: 200, url: request.url, body: selectedOf(item) })).pipe(
-    delay(600),
-  );
+  item.lowStockAlertEnabled = body.lowStockAlertEnabled as boolean;
+  return savedWithVersion(request, articleData(item), selectedOf(item));
 };
 
 function selectedOf(item: InventoryRow): WarehouseSelectedItem {
+  const article = articleData(item);
+  return { ...article, version: versionOf(article) };
+}
+
+/** What `GET /inventory-items/{id}` answers besides the version: the version covers it. */
+function articleData(item: InventoryRow): Omit<WarehouseSelectedItem, 'version'> {
   return {
     id: item.publicId,
     articleCode: item.articleCode,
     name: item.name,
     totalQuantity: item.totalQuantity,
     lowStockThreshold: item.lowStockThreshold,
-    lowStockAlertEnabled: item.isThresholdWarningActive,
+    lowStockAlertEnabled: item.lowStockAlertEnabled,
     mapPlaceable: item.mapPlaceable,
   };
 }
 
-/** The rules of `SaveInventoryItemRequestValidator`, one error per wrong field. */
+/**
+ * The rules of `SaveInventoryItemRequestValidator` with the alert rule asked to the backend (on only
+ * with a threshold above 0), one error per wrong field.
+ */
 function updateErrors(body: Partial<WarehouseItemUpdateRequest>): MockFieldError[] {
   const { articleCode, name, totalQuantity, lowStockAlertEnabled } = body;
   const threshold = body.lowStockThreshold ?? null;
@@ -454,7 +454,10 @@ function updateErrors(body: Partial<WarehouseItemUpdateRequest>): MockFieldError
   ) {
     errors.push({ field: 'lowStockThreshold', code: ApiErrorCode.ValidationOutOfRange });
   }
-  if (typeof lowStockAlertEnabled !== 'boolean') {
+  if (
+    typeof lowStockAlertEnabled !== 'boolean' ||
+    (lowStockAlertEnabled && !(threshold !== null && threshold > 0))
+  ) {
     errors.push({ field: 'lowStockAlertEnabled', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
@@ -531,8 +534,7 @@ export const warehouseDuplicateMock = (
       mapPlaceable: item.mapPlaceable,
       totalQuantity: item.totalQuantity,
       lowStockThreshold: item.lowStockThreshold,
-      isThresholdWarningActive: item.isThresholdWarningActive,
-      isActive: item.isActive,
+      lowStockAlertEnabled: item.lowStockAlertEnabled,
       deletedAt: null,
     });
   }
@@ -547,7 +549,6 @@ export function activeArticleIdNamed(propertyId: number, name: string | null): s
         name !== null &&
         sameText(row.name, name) &&
         row.propertyId === propertyId &&
-        row.isActive &&
         row.deletedAt === null,
     )?.publicId ?? null
   );
@@ -560,11 +561,7 @@ export function activeArticleName(propertyId: number, idArticle: unknown): strin
 
 function articleOf(propertyId: number, idArticle: unknown): InventoryRow | undefined {
   return INVENTORY_ITEMS.find(
-    (row) =>
-      row.publicId === idArticle &&
-      row.propertyId === propertyId &&
-      row.isActive &&
-      row.deletedAt === null,
+    (row) => row.publicId === idArticle && row.propertyId === propertyId && row.deletedAt === null,
   );
 }
 
@@ -623,7 +620,7 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
   const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
 
   const items: WarehouseItem[] = INVENTORY_ITEMS.filter(
-    (item) => item.propertyId === property.id && item.isActive && item.deletedAt === null,
+    (item) => item.propertyId === property.id && item.deletedAt === null,
   ).map((item) => {
     const consumedQuantity = TODAY_CONSUMPTIONS.filter(
       (consumption) => consumption.resourceId === item.publicId && consumption.state !== 'released',
@@ -635,7 +632,7 @@ export const warehouseMock = (request: HttpRequest<unknown>): Observable<HttpEve
       totalQuantity: item.totalQuantity,
       availableQuantity: item.totalQuantity - consumedQuantity,
       thresholdQuantity: item.lowStockThreshold,
-      isThresholdWarningActive: item.isThresholdWarningActive,
+      isThresholdWarningActive: item.lowStockAlertEnabled,
     };
   });
 
@@ -683,7 +680,6 @@ export const inventoryItemsListMock = (
   const found = INVENTORY_ITEMS.filter(
     (item) =>
       item.propertyId === DEMO_PROPERTY.id &&
-      item.isActive &&
       item.deletedAt === null &&
       (!search || item.name.trim().toLowerCase().includes(search)),
   ).sort((first, second) => inventoryOrder(first, second, body.sortField, sign));
@@ -693,13 +689,13 @@ export const inventoryItemsListMock = (
       idArticle: item.publicId,
       name: item.name,
       totalQuantity: item.totalQuantity,
-      thresholdQuantity: item.lowStockThreshold,
+      lowStockThreshold: item.lowStockThreshold,
     })),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
 };
 
-const INVENTORY_LIST_SORT_FIELDS = ['name', 'totalQuantity', 'thresholdQuantity'] as const;
+const INVENTORY_LIST_SORT_FIELDS = ['name', 'totalQuantity', 'lowStockThreshold'] as const;
 const SORT_DIRECTIONS: readonly SortDirection[] = ['Ascending', 'Descending'];
 
 function inventoryOrder(
@@ -712,7 +708,7 @@ function inventoryOrder(
   if (sortField === 'totalQuantity') {
     return sign * (first.totalQuantity - second.totalQuantity) || byName;
   }
-  if (sortField === 'thresholdQuantity') {
+  if (sortField === 'lowStockThreshold') {
     if (first.lowStockThreshold === null || second.lowStockThreshold === null) {
       if (first.lowStockThreshold === second.lowStockThreshold) {
         return byName;
@@ -767,8 +763,7 @@ interface InventoryRow {
   usage?: { priceLists: string[]; agreementPriceLists: string[] };
   totalQuantity: number;
   lowStockThreshold: number | null;
-  isThresholdWarningActive: boolean;
-  isActive: boolean;
+  lowStockAlertEnabled: boolean;
   deletedAt: string | null;
 }
 

@@ -29,6 +29,8 @@ import {
   MAX_VIRTUAL_TOUR_URL_LENGTH,
 } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
 import { BathhouseMediaRequest } from '../../../entities/settings/bathhouse-configuration/bathhouse-media-request';
+import { BathhouseSelectedMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-media';
+import { BathhouseSelectedServices } from '../../../entities/settings/bathhouse-configuration/bathhouse-selected-services';
 import { PropertyInfoDocument } from '../../../entities/settings/bathhouse-configuration/property-info-document';
 import { PropertyInfoMedia } from '../../../entities/settings/bathhouse-configuration/property-info-media';
 import { BathhouseServiceItem } from '../../../entities/settings/bathhouse-configuration/bathhouse-service-item';
@@ -39,12 +41,14 @@ import { AutomaticPriceSelectedPricesValidity } from '../../../entities/settings
 import { AutomaticPriceServices } from '../../../entities/settings/services/automatic-price-services';
 import { BarServiceAddItemRequest } from '../../../entities/settings/services/bar-service-add-item-request';
 import { BarServiceItem } from '../../../entities/settings/services/bar-service-item';
+import { BarServiceSelectedBookingOptions } from '../../../entities/settings/services/bar-service-selected-booking-options';
 import { BarServiceSelectedGeneralInfo } from '../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../entities/settings/services/bar-service-selected-prices';
 import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { HourlyServiceAddItemRequest } from '../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceBookingOption } from '../../../entities/settings/services/hourly-service-booking-option';
 import { HourlyServiceItem } from '../../../entities/settings/services/hourly-service-item';
+import { HourlyServiceSelectedBookingOptions } from '../../../entities/settings/services/hourly-service-selected-booking-options';
 import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
 import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
@@ -53,6 +57,7 @@ import { ServicePeriodPrice } from '../../../entities/settings/services/service-
 import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
+import { StandardServiceSelectedBookingOptions } from '../../../entities/settings/services/standard-service-selected-booking-options';
 import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
 import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
 import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
@@ -77,6 +82,7 @@ import {
   resourceNotFound,
 } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
 const COUNTRY_CODES = ['IT', 'FR', 'DE', 'CN'] as const;
@@ -708,10 +714,11 @@ let generalInformation = new BathhouseGeneralInformation();
 let idOfferedServices = new Set<number>();
 
 /**
- * `GET /api/catalog/property-info/bathhouse-configuration-general`: the general information of the property of
- * the token, for the tab "Informazioni generali"; all empty until saved, a form to fill in, except
- * `isFreeCancellation` false and `petPolicy` OnRequest, as the backend for a bathhouse without a card. 401 without a
- * valid access token.
+ * `GET /api/catalog/property-info/bathhouse-configuration-general`: the general information of the
+ * property of the token, for the tab "Informazioni generali"; all empty until saved, a form to fill
+ * in, except `isFreeCancellation` false and `petPolicy` OnRequest, as the backend for a bathhouse
+ * without a card. 401 without a valid access token. The version covers all of it, what the save of
+ * the tab writes.
  */
 export const bathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -719,16 +726,15 @@ export const bathhouseConfigurationGeneralMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: { ...generalInformation } }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, generalInformation);
 };
 
 /**
- * `GET /api/catalog/property-info/bathhouse-configuration-services`: the services of the catalogue the page shows, in the order
- * of the categories and then of the services, with the name in the language of `Accept-Language`;
- * offered by the property of the token as last saved, none at the start. 401 without a valid access
- * token.
+ * `GET /api/catalog/property-info/bathhouse-configuration-services`: the services of the catalogue
+ * the page shows, in the order of the categories and then of the services, with the name in the
+ * language of `Accept-Language`; offered by the property of the token as last saved, none at the
+ * start; the version covers only which services are offered (`offeredServices`), not the names. 401
+ * without a valid access token.
  */
 export const bathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -748,8 +754,17 @@ export const bathhouseConfigurationServicesMock = (
       isSelected: idOfferedServices.has(idService),
     }),
   );
-  return of(new HttpResponse({ status: 200, url: request.url, body: services })).pipe(delay(300));
+  const answer: BathhouseSelectedServices = { services, version: versionOf(offeredServices()) };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
+
+/** What the save of the services writes: whether the property offers each service of the page. */
+function offeredServices(): Pick<BathhouseServiceItem, 'idService' | 'isSelected'>[] {
+  return SERVICES.map(({ idService }) => ({
+    idService,
+    isSelected: idOfferedServices.has(idService),
+  }));
+}
 
 /** The backend's limits of the texts of the general information (Descrizione and Regolamento on their HTML). */
 const GENERAL_TEXT_LIMITS: Partial<Record<keyof BathhouseGeneralInformation, number>> = {
@@ -768,14 +783,16 @@ const GENERAL_TEXT_LIMITS: Partial<Record<keyof BathhouseGeneralInformation, num
 };
 
 /**
- * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the tab, for the
- * property of the token: keeps them (until the page is reloaded). 204 without a body; 400 with an
- * error per field, as the backend: no name, a text over its limit (`GENERAL_TEXT_LIMITS`), an email
- * that is not one, a phone or WhatsApp number that is not digits and spaces up to 32 characters (see
- * `phoneErrors`), a country code not of 2 letters, a time not `HH:mm`, no `isFreeCancellation`,
- * notice hours with `isFreeCancellation` false and out of 1-720 (two errors when both), no
- * `petPolicy` of `PetPolicy`, a `closingTime` not after the `openingTime`; 422
- * catalog.country_not_found for a country not in the list; 401 without a valid access token.
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-general` with every field of the
+ * tab, for the property of the token: keeps them (until the page is reloaded). 204 without a body,
+ * with the new version in its `ETag`; 400 with an error per field, as the backend: no name, a text
+ * over its limit (`GENERAL_TEXT_LIMITS`), an email that is not one, a phone or WhatsApp number that
+ * is not digits and spaces up to 32 characters (see `phoneErrors`), a country code not of 2
+ * letters, a time not `HH:mm`, no `isFreeCancellation`, notice hours with `isFreeCancellation`
+ * false and out of 1-720 (two errors when both), no `petPolicy` of `PetPolicy`, a `closingTime` not
+ * after the `openingTime`; 422 catalog.country_not_found for a country not in the list; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the information; 401 without a
+ * valid access token.
  */
 export const saveBathhouseConfigurationGeneralMock = (
   request: HttpRequest<unknown>,
@@ -853,11 +870,15 @@ export const saveBathhouseConfigurationGeneralMock = (
   if (country && !COUNTRY_CODES.some((code) => code === country)) {
     return problem(request, 422, ApiErrorCode.CatalogCountryNotFound);
   }
+  const conflict = versionConflict(request, generalInformation);
+  if (conflict) {
+    return conflict;
+  }
   generalInformation = onlyFieldsOf(BathhouseGeneralInformation, {
     ...generalInformation,
     ...body,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, generalInformation);
 };
 
 /** `HH:mm` on 24 hours, as the backend wants the opening hours. */
@@ -889,11 +910,13 @@ function phoneErrors(field: string, value: unknown): MockFieldError[] {
 
 /**
  * `POST /api/catalog/property-info/save-bathhouse-configuration-services` with `services`, every
- * service the tab read, each with `isSelected`: a service is offered or not as its `isSelected` says,
- * a service not in the list stays as it was (until the page is reloaded). 204 without a body; first
- * 400 without `services` (never read as `[]`), with more than 200 or a repeated `idService`, with an
- * `isSelected` that is not true or false in an element; then 404 for a null element, one without
- * `idService` or with a service that does not exist; 401 without a valid access token.
+ * service the tab read, each with `isSelected`: a service is offered or not as its `isSelected`
+ * says, a service not in the list stays as it was (until the page is reloaded). 204 without a body,
+ * with the new version in its `ETag`; first 400 without `services` (never read as `[]`), with more
+ * than 200 or a repeated `idService`, with an `isSelected` that is not true or false in an element;
+ * then 404 for a null element, one without `idService` or with a service that does not exist; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the services offered; 401
+ * without a valid access token.
  */
 export const saveBathhouseConfigurationServicesMock = (
   request: HttpRequest<unknown>,
@@ -932,6 +955,10 @@ export const saveBathhouseConfigurationServicesMock = (
   if (!services.every((service) => isServiceId(service?.idService))) {
     return resourceNotFound(request);
   }
+  const conflict = versionConflict(request, offeredServices());
+  if (conflict) {
+    return conflict;
+  }
   const offered = new Set(idOfferedServices);
   for (const { idService, isSelected } of services as BathhouseServiceItem[]) {
     if (isSelected) {
@@ -941,7 +968,7 @@ export const saveBathhouseConfigurationServicesMock = (
     }
   }
   idOfferedServices = offered;
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, offeredServices());
 };
 
 function isServiceId(value: unknown): value is number {
@@ -949,11 +976,12 @@ function isServiceId(value: unknown): value is number {
 }
 
 /**
- * `POST /api/catalog/property-info/save-bathhouse-configuration-media` with `virtualTourUrl` (null or empty removes
- * it), `latitude` and `longitude` (both or neither) of the property of the token: keeps them (until
- * the page is reloaded). 204 without a body; 400 with an error per field for a link that is not http
- * or https or longer than 500 characters, a coordinate out of range or only one of the two; 401
- * without a valid access token.
+ * `POST /api/catalog/property-info/save-bathhouse-configuration-media` with `virtualTourUrl` (null
+ * or empty removes it), `latitude` and `longitude` (both or neither) of the property of the token:
+ * keeps them (until the page is reloaded). 204 without a body, with the new version in its `ETag`;
+ * 400 with an error per field for a link that is not http or https or longer than 500 characters, a
+ * coordinate out of range or only one of the two; 409 `resource.version_conflict` when `If-Match`
+ * is not the version of these three fields; 401 without a valid access token.
  */
 export const saveBathhouseConfigurationMediaMock = (
   request: HttpRequest<unknown>,
@@ -985,9 +1013,19 @@ export const saveBathhouseConfigurationMediaMock = (
       errors,
     });
   }
+  const conflict = versionConflict(request, mediaFields());
+  if (conflict) {
+    return conflict;
+  }
   bathhouseMedia = { ...bathhouseMedia, virtualTourUrl: link, latitude, longitude };
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, mediaFields());
 };
+
+/** What the save of the Media tab writes: photos and PDFs have their own calls. */
+function mediaFields(): BathhouseMediaRequest {
+  const { virtualTourUrl, latitude, longitude } = bathhouseMedia;
+  return { virtualTourUrl, latitude, longitude };
+}
 
 const MAX_LATITUDE = 90;
 const MAX_LONGITUDE = 180;
@@ -1045,9 +1083,10 @@ const MAX_PHOTO_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
 const MAX_PDF_BYTES = MAX_BATHHOUSE_PDF_MEGABYTES * MEGABYTE;
 
 /**
- * `GET /api/catalog/property-info/bathhouse-configuration-media`: links of the main photo, of the gallery (in
- * order), of the virtual tour and of the two PDF documents of the property of the token. 401 without
- * a valid access token.
+ * `GET /api/catalog/property-info/bathhouse-configuration-media`: links of the main photo, of the
+ * gallery (in order), of the virtual tour and of the two PDF documents of the property of the
+ * token, with the version of what the save of the tab writes (`mediaFields`): uploads do not change
+ * it. 401 without a valid access token.
  */
 export const bathhouseConfigurationMediaMock = (
   request: HttpRequest<unknown>,
@@ -1055,9 +1094,11 @@ export const bathhouseConfigurationMediaMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(bathhouseMedia) }),
-  ).pipe(delay(300));
+  const answer: BathhouseSelectedMedia = {
+    ...structuredClone(bathhouseMedia),
+    version: versionOf(mediaFields()),
+  };
+  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
 
 /**
@@ -1231,6 +1272,22 @@ function propertyInfoAnswer(request: HttpRequest<unknown>): Observable<HttpEvent
   return of(new HttpResponse({ status: 200, url: request.url, body })).pipe(delay(600));
 }
 
+/**
+ * 200 with the data of a tab and their version: the save of the tab sends it back in `If-Match`.
+ */
+function versionedAnswer<T extends object>(
+  request: HttpRequest<unknown>,
+  data: T,
+): Observable<HttpEvent<unknown>> {
+  return of(
+    new HttpResponse({
+      status: 200,
+      url: request.url,
+      body: { ...structuredClone(data), version: versionOf(data) },
+    }),
+  ).pipe(delay(300));
+}
+
 type BarServiceRow = BarServiceItem & { propertyId: number };
 
 const BAR_SERVICES: BarServiceRow[] = (
@@ -1322,8 +1379,8 @@ function requestedBarService(request: HttpRequest<unknown>): BarServiceRow | und
 
 /**
  * `GET /api/catalog/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
- * panel. 200 with `BarServiceSelectedGeneralInfo`, only the languages written; 401 without a valid
- * access token; 404 `resource.not_found` for an unknown id.
+ * panel. 200 with `BarServiceSelectedGeneralInfo` and the version of the tab, only the languages
+ * written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const barServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -1335,8 +1392,16 @@ export const barServiceGeneralInfoMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, barGeneralInfoOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-bar-service-general-info` answers besides the version: the version
+ * covers it.
+ */
+function barGeneralInfoOf(row: BarServiceRow): Omit<BarServiceSelectedGeneralInfo, 'version'> {
   const details = detailsOf(row);
-  const answer: BarServiceSelectedGeneralInfo = {
+  return {
     idBarService: row.idBarService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
@@ -1345,15 +1410,12 @@ export const barServiceGeneralInfoMock = (
     icon: details.icon,
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
- * `GET /api/catalog/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200 with
- * `BarServiceSelectedPrices`, a price only for the periods that have one; 401 without a valid access
- * token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200
+ * with `BarServiceSelectedPrices` and the version of the tab, a price only for the periods that
+ * have one; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const barServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1365,8 +1427,16 @@ export const barServicePricesMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, barPricesOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-bar-service-prices` answers besides the version: the version covers
+ * it.
+ */
+function barPricesOf(row: BarServiceRow): Omit<BarServiceSelectedPrices, 'version'> {
   const details = detailsOf(row);
-  const answer: BarServiceSelectedPrices = {
+  return {
     price: details.price,
     vatRate: details.vatRate,
     variants: details.variants,
@@ -1375,15 +1445,13 @@ export const barServicePricesMock = (
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
- * edit panel, the array of the booking options (empty when there are none). 401 without a valid
- * access token; 404 `resource.not_found` for an unknown id.
+ * edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
+ * none) and the version of the tab. 401 without a valid access token; 404 `resource.not_found` for
+ * an unknown id.
  */
 export const barServiceBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -1395,14 +1463,18 @@ export const barServiceBookingOptionsMock = (
   if (!row) {
     return resourceNotFound(request);
   }
-  return of(
-    new HttpResponse({
-      status: 200,
-      url: request.url,
-      body: structuredClone(detailsOf(row).bookingOptions),
-    }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, barBookingOptionsOf(row));
 };
+
+/**
+ * What `GET /api/catalog/get-bar-service-booking-options` answers besides the version: the version
+ * covers it.
+ */
+function barBookingOptionsOf(
+  row: BarServiceRow,
+): Omit<BarServiceSelectedBookingOptions, 'version'> {
+  return { bookingOptions: detailsOf(row).bookingOptions };
+}
 
 const MAX_PAGE_SIZE = 100;
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
@@ -1518,11 +1590,13 @@ type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
  * `resource.not_found` for an `idBarService` that is not one of its bar services; 400 with one
- * error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
- * without a body.
+ * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
+ * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body, with their new version in its `ETag`.
  */
 function updateBarService(
   request: HttpRequest<unknown>,
+  dataOf: (row: BarServiceRow) => unknown,
   errorsOf: (body: UpdateBarServiceBody) => MockFieldError[],
   apply: (
     details: BarServiceAddItemRequest,
@@ -1547,10 +1621,14 @@ function updateBarService(
       errors,
     });
   }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
+  }
   const details = structuredClone(detailsOf(row));
   apply(details, structuredClone(body), row);
   BAR_SERVICE_DETAILS.set(row.idBarService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
@@ -1564,6 +1642,7 @@ export const updateBarServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateBarService(
     request,
+    barGeneralInfoOf,
     (body) => generalErrors(body, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
@@ -1584,7 +1663,7 @@ export const updateBarServiceGeneralMock = (
 export const updateBarServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateBarService(request, priceErrors, (details, body, row) => {
+  updateBarService(request, barPricesOf, priceErrors, (details, body, row) => {
     details.price = body.price ?? null;
     details.vatRate = body.vatRate ?? null;
     details.variants = body.variants ?? [];
@@ -1604,6 +1683,7 @@ export const updateBarServiceBookingMock = (
 ): Observable<HttpEvent<unknown>> =>
   updateBarService(
     request,
+    barBookingOptionsOf,
     () => [],
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
@@ -1806,9 +1886,10 @@ function requestedStandardService(request: HttpRequest<unknown>): StandardServic
 }
 
 /**
- * `GET /api/catalog/get-standard-service-general-info?idStandardService=…`: the Info Generali tab of
- * the edit panel. 200 with `StandardServiceSelectedGeneralInfo`, only the languages written; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/get-standard-service-general-info?idStandardService=…`: the Info Generali tab
+ * of the edit panel. 200 with `StandardServiceSelectedGeneralInfo` and the version of the tab, only
+ * the languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown
+ * id.
  */
 export const standardServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -1820,8 +1901,18 @@ export const standardServiceGeneralInfoMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, standardGeneralInfoOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-standard-service-general-info` answers besides the version: the
+ * version covers it.
+ */
+function standardGeneralInfoOf(
+  row: StandardServiceRow,
+): Omit<StandardServiceSelectedGeneralInfo, 'version'> {
   const details = standardDetailsOf(row);
-  const answer: StandardServiceSelectedGeneralInfo = {
+  return {
     idStandardService: row.idStandardService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
@@ -1829,15 +1920,13 @@ export const standardServiceGeneralInfoMock = (
     icon: details.icon,
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
- * panel. 200 with `StandardServiceSelectedPrices`, a price only for the periods that have one; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * panel. 200 with `StandardServiceSelectedPrices` and the version of the tab, a price only for the
+ * periods that have one; 401 without a valid access token; 404 `resource.not_found` for an unknown
+ * id.
  */
 export const standardServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1849,8 +1938,16 @@ export const standardServicePricesMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, standardPricesOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-standard-service-prices` answers besides the version: the version
+ * covers it.
+ */
+function standardPricesOf(row: StandardServiceRow): Omit<StandardServiceSelectedPrices, 'version'> {
   const details = standardDetailsOf(row);
-  const answer: StandardServiceSelectedPrices = {
+  return {
     price: details.price,
     vatRate: details.vatRate,
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
@@ -1858,15 +1955,13 @@ export const standardServicePricesMock = (
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
- * of the edit panel, the array of the booking options (empty when there are none). 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * of the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there
+ * are none) and the version of the tab. 401 without a valid access token; 404 `resource.not_found`
+ * for an unknown id.
  */
 export const standardServiceBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -1878,14 +1973,18 @@ export const standardServiceBookingOptionsMock = (
   if (!row) {
     return resourceNotFound(request);
   }
-  return of(
-    new HttpResponse({
-      status: 200,
-      url: request.url,
-      body: structuredClone(standardDetailsOf(row).bookingOptions),
-    }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, standardBookingOptionsOf(row));
 };
+
+/**
+ * What `GET /api/catalog/get-standard-service-booking-options` answers besides the version: the
+ * version covers it.
+ */
+function standardBookingOptionsOf(
+  row: StandardServiceRow,
+): Omit<StandardServiceSelectedBookingOptions, 'version'> {
+  return { bookingOptions: standardDetailsOf(row).bookingOptions };
+}
 
 type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest>;
 
@@ -1958,11 +2057,13 @@ type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
  * `resource.not_found` for an `idStandardService` that is not one of its services; 400 with one
- * error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
- * without a body.
+ * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
+ * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body, with their new version in its `ETag`.
  */
 function updateStandardService(
   request: HttpRequest<unknown>,
+  dataOf: (row: StandardServiceRow) => unknown,
   errorsOf: (body: UpdateStandardServiceBody) => MockFieldError[],
   apply: (
     details: StandardServiceAddItemRequest,
@@ -1987,10 +2088,14 @@ function updateStandardService(
       errors,
     });
   }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
+  }
   const details = structuredClone(standardDetailsOf(row));
   apply(details, structuredClone(body), row);
   STANDARD_SERVICE_DETAILS.set(row.idStandardService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
@@ -2004,6 +2109,7 @@ export const updateStandardServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateStandardService(
     request,
+    standardGeneralInfoOf,
     (body) => standardGeneralErrors(body, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
@@ -2022,7 +2128,7 @@ export const updateStandardServiceGeneralMock = (
 export const updateStandardServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateStandardService(request, priceErrors, (details, body, row) => {
+  updateStandardService(request, standardPricesOf, priceErrors, (details, body, row) => {
     details.price = body.price ?? null;
     details.vatRate = body.vatRate ?? null;
     details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
@@ -2041,6 +2147,7 @@ export const updateStandardServiceBookingMock = (
 ): Observable<HttpEvent<unknown>> =>
   updateStandardService(
     request,
+    standardBookingOptionsOf,
     () => [],
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
@@ -2213,9 +2320,9 @@ function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow
 }
 
 /**
- * `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of the
- * edit panel. 200 with `HourlyServiceSelectedGeneralInfo`, only the languages written; 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of
+ * the edit panel. 200 with `HourlyServiceSelectedGeneralInfo` and the version of the tab, only the
+ * languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const hourlyServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -2227,8 +2334,18 @@ export const hourlyServiceGeneralInfoMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, hourlyGeneralInfoOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-hourly-service-general-info` answers besides the version: the version
+ * covers it.
+ */
+function hourlyGeneralInfoOf(
+  row: HourlyServiceRow,
+): Omit<HourlyServiceSelectedGeneralInfo, 'version'> {
   const details = hourlyDetailsOf(row);
-  const answer: HourlyServiceSelectedGeneralInfo = {
+  return {
     idHourlyService: row.idHourlyService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
@@ -2236,15 +2353,13 @@ export const hourlyServiceGeneralInfoMock = (
     icon: details.icon,
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
- * 200 with `HourlyServiceSelectedPrices`, the availability only of the periods that have it; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * 200 with `HourlyServiceSelectedPrices` and the version of the tab, the availability only of the
+ * periods that have it; 401 without a valid access token; 404 `resource.not_found` for an unknown
+ * id.
  */
 export const hourlyServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -2256,8 +2371,16 @@ export const hourlyServicePricesMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, hourlyPricesOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-hourly-service-prices` answers besides the version: the version covers
+ * it.
+ */
+function hourlyPricesOf(row: HourlyServiceRow): Omit<HourlyServiceSelectedPrices, 'version'> {
   const details = hourlyDetailsOf(row);
-  const answer: HourlyServiceSelectedPrices = {
+  return {
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
     periodAvailabilities: details.periodAvailabilities.filter(
       ({ availabilityOptions }) => availabilityOptions.length > 0,
@@ -2265,15 +2388,13 @@ export const hourlyServicePricesMock = (
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
- * the edit panel, the array of the booking options (empty when there are none). 401 without a valid
- * access token; 404 `resource.not_found` for an unknown id.
+ * the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
+ * none) and the version of the tab. 401 without a valid access token; 404 `resource.not_found` for
+ * an unknown id.
  */
 export const hourlyServiceBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -2285,14 +2406,18 @@ export const hourlyServiceBookingOptionsMock = (
   if (!row) {
     return resourceNotFound(request);
   }
-  return of(
-    new HttpResponse({
-      status: 200,
-      url: request.url,
-      body: structuredClone(hourlyDetailsOf(row).bookingOptions),
-    }),
-  ).pipe(delay(300));
+  return versionedAnswer(request, hourlyBookingOptionsOf(row));
 };
+
+/**
+ * What `GET /api/catalog/get-hourly-service-booking-options` answers besides the version: the
+ * version covers it.
+ */
+function hourlyBookingOptionsOf(
+  row: HourlyServiceRow,
+): Omit<HourlyServiceSelectedBookingOptions, 'version'> {
+  return { bookingOptions: hourlyDetailsOf(row).bookingOptions };
+}
 
 type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest>;
 
@@ -2368,11 +2493,13 @@ type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unk
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
  * `resource.not_found` for an `idHourlyService` that is not one of its hourly services; 400 with
- * one error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
- * without a body.
+ * one error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of
+ * the data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is
+ * 204 without a body, with their new version in its `ETag`.
  */
 function updateHourlyService(
   request: HttpRequest<unknown>,
+  dataOf: (row: HourlyServiceRow) => unknown,
   errorsOf: (body: UpdateHourlyServiceBody) => MockFieldError[],
   apply: (
     details: HourlyServiceAddItemRequest,
@@ -2397,10 +2524,14 @@ function updateHourlyService(
       errors,
     });
   }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
+  }
   const details = structuredClone(hourlyDetailsOf(row));
   apply(details, structuredClone(body), row);
   HOURLY_SERVICE_DETAILS.set(row.idHourlyService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
@@ -2414,6 +2545,7 @@ export const updateHourlyServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateHourlyService(
     request,
+    hourlyGeneralInfoOf,
     (body) => standardGeneralErrors(body, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
@@ -2434,6 +2566,7 @@ export const updateHourlyServicePricesMock = (
 ): Observable<HttpEvent<unknown>> =>
   updateHourlyService(
     request,
+    hourlyPricesOf,
     (body) => hourlyPriceErrors({ periodAvailabilities: body.periodAvailabilities }),
     (details, body) => {
       details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
@@ -2452,6 +2585,7 @@ export const updateHourlyServiceBookingMock = (
 ): Observable<HttpEvent<unknown>> =>
   updateHourlyService(
     request,
+    hourlyBookingOptionsOf,
     (body) => hourlyPriceErrors({ bookingOptions: body.bookingOptions }),
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
@@ -2639,9 +2773,9 @@ function requestedAutomaticPrice(request: HttpRequest<unknown>): AutomaticPriceR
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of the
- * edit panel. 200 with `AutomaticPriceSelectedGeneralInfo`, only the languages written; 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of
+ * the edit panel. 200 with `AutomaticPriceSelectedGeneralInfo` and the version of the tab, only the
+ * languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const automaticPriceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -2653,23 +2787,30 @@ export const automaticPriceGeneralInfoMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, automaticGeneralInfoOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-automatic-price-general-info` answers besides the version: the version
+ * covers it.
+ */
+function automaticGeneralInfoOf(
+  row: AutomaticPriceRow,
+): Omit<AutomaticPriceSelectedGeneralInfo, 'version'> {
   const details = automaticDetailsOf(row);
-  const answer: AutomaticPriceSelectedGeneralInfo = {
+  return {
     idAutomaticPrice: row.idAutomaticPrice,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
     ),
     icon: details.icon,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
- * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity`; 401 without a valid access
- * token; 404 `resource.not_found` for an unknown id.
+ * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity` and the version of the
+ * tab; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const automaticPricePricesValidityMock = (
   request: HttpRequest<unknown>,
@@ -2681,8 +2822,18 @@ export const automaticPricePricesValidityMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, automaticPricesValidityOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-automatic-price-prices-validity` answers besides the version: the
+ * version covers it.
+ */
+function automaticPricesValidityOf(
+  row: AutomaticPriceRow,
+): Omit<AutomaticPriceSelectedPricesValidity, 'version'> {
   const details = automaticDetailsOf(row);
-  const answer: AutomaticPriceSelectedPricesValidity = {
+  return {
     price: details.price,
     vatRate: details.vatRate,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
@@ -2693,21 +2844,21 @@ export const automaticPricePricesValidityMock = (
     isPricePerServiceEnabled: details.isPricePerServiceEnabled,
     idSectors: details.idSectors,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: unknown };
 
 /**
  * The common part of the two updates of the edit panel: 401 without a valid access token; 404
  * `resource.not_found` for an `idAutomaticPrice` that is not one of its automatic prices (or for a
- * service that is not one of the property); 400 with one error per wrong field; otherwise `apply`
- * changes the data of its tab and the answer is 204 without a body.
+ * service that is not one of the property); 400 with one error per wrong field; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their
+ * new version in its `ETag`.
  */
 function updateAutomaticPrice(
   request: HttpRequest<unknown>,
+  dataOf: (row: AutomaticPriceRow) => unknown,
   errorsOf: (body: UpdateAutomaticPriceBody, propertyId: number) => MockFieldError[] | null,
   apply: (
     details: AutomaticPriceAddItemRequest,
@@ -2732,10 +2883,14 @@ function updateAutomaticPrice(
       errors,
     });
   }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
+  }
   const details = structuredClone(automaticDetailsOf(row));
   apply(details, structuredClone(body), row);
   AUTOMATIC_PRICE_DETAILS.set(row.idAutomaticPrice, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
@@ -2749,6 +2904,7 @@ export const updateAutomaticPriceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateAutomaticPrice(
     request,
+    automaticGeneralInfoOf,
     (body) => [
       ...standardGeneralErrors({ translations: body.translations }, language),
       ...automaticIconErrors(body.icon ?? null),
@@ -2772,6 +2928,7 @@ export const updateAutomaticPricePricesValidityMock = (
 ): Observable<HttpEvent<unknown>> =>
   updateAutomaticPrice(
     request,
+    automaticPricesValidityOf,
     (body, propertyId) => (areAutomaticServicesOf(body, propertyId) ? priceErrors(body) : null),
     (details, body, row) => {
       details.price = body.price ?? null;
@@ -3301,8 +3458,8 @@ function requestedTableService(request: HttpRequest<unknown>): TableServiceRow |
 
 /**
  * `GET /api/catalog/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
- * edit panel. 200 with `TableServiceSelectedGeneralInfo`, only the languages written; 401 without a
- * valid access token; 404 `resource.not_found` for an unknown id.
+ * edit panel. 200 with `TableServiceSelectedGeneralInfo` and the version of the tab, only the
+ * languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const tableServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -3314,23 +3471,30 @@ export const tableServiceGeneralInfoMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, tableGeneralInfoOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-table-service-general-info` answers besides the version: the version
+ * covers it.
+ */
+function tableGeneralInfoOf(
+  row: TableServiceRow,
+): Omit<TableServiceSelectedGeneralInfo, 'version'> {
   const details = tableDetailsOf(row);
-  const answer: TableServiceSelectedGeneralInfo = {
+  return {
     idTableService: row.idTableService,
     translations: details.translations.filter(
       ({ serviceName, description }) => serviceName || description,
     ),
     isHighlighted: details.isHighlighted,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 /**
  * `GET /api/catalog/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
- * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings`; 401
- * without a valid access token; 404 `resource.not_found` for an unknown id.
+ * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings` and the
+ * version of the tab; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
  */
 export const tableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,
@@ -3342,8 +3506,18 @@ export const tableServiceAvailabilityBookingsMock = (
   if (!row) {
     return resourceNotFound(request);
   }
+  return versionedAnswer(request, tableAvailabilityBookingsOf(row));
+};
+
+/**
+ * What `GET /api/catalog/get-table-service-availability-bookings` answers besides the version: the
+ * version covers it.
+ */
+function tableAvailabilityBookingsOf(
+  row: TableServiceRow,
+): Omit<TableServiceSelectedAvailabilityBookings, 'version'> {
   const details = tableDetailsOf(row);
-  const answer: TableServiceSelectedAvailabilityBookings = {
+  return {
     availabilities: details.availabilities,
     availabilityMode: details.availabilityMode,
     tableGroups: details.tableGroups,
@@ -3355,21 +3529,20 @@ export const tableServiceAvailabilityBookingsMock = (
     depositPercentage: details.depositPercentage,
     isOnlineBookingEnabled: details.isOnlineBookingEnabled,
   };
-  return of(
-    new HttpResponse({ status: 200, url: request.url, body: structuredClone(answer) }),
-  ).pipe(delay(300));
-};
+}
 
 type UpdateTableServiceBody = CreateTableServiceBody & { idTableService?: unknown };
 
 /**
  * The common part of the two updates of the edit panel: 401 without a valid access token; 404
  * `resource.not_found` for an `idTableService` that is not one of its table services; 400 with one
- * error per wrong field; otherwise `apply` changes the data of its tab and the answer is 204
- * without a body.
+ * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
+ * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
+ * without a body, with their new version in its `ETag`.
  */
 function updateTableService(
   request: HttpRequest<unknown>,
+  dataOf: (row: TableServiceRow) => unknown,
   errorsOf: (body: UpdateTableServiceBody) => MockFieldError[],
   apply: (
     details: TableServiceAddItemRequest,
@@ -3394,10 +3567,14 @@ function updateTableService(
       errors,
     });
   }
+  const conflict = versionConflict(request, dataOf(row));
+  if (conflict) {
+    return conflict;
+  }
   const details = structuredClone(tableDetailsOf(row));
   apply(details, structuredClone(body), row);
   TABLE_SERVICE_DETAILS.set(row.idTableService, details);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return savedWithVersion(request, dataOf(row));
 }
 
 /**
@@ -3411,6 +3588,7 @@ export const updateTableServiceGeneralMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   return updateTableService(
     request,
+    tableGeneralInfoOf,
     (body) => standardGeneralErrors({ translations: body.translations }, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
@@ -3429,7 +3607,7 @@ export const updateTableServiceGeneralMock = (
 export const updateTableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateTableService(request, tableServiceErrors, (details, body) => {
+  updateTableService(request, tableAvailabilityBookingsOf, tableServiceErrors, (details, body) => {
     details.availabilities = body.availabilities ?? [];
     details.availabilityMode = body.availabilityMode ?? TableServiceAvailabilityMode.Tables;
     details.tableGroups = body.tableGroups ?? [];

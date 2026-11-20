@@ -53,7 +53,7 @@ describe('VoucherService', () => {
     controller.verify();
   });
 
-  it('should send the edited voucher with its id, like a new one, to update-voucher-item', () => {
+  it('should send the edited voucher with its id, like a new one, and the version read to update-voucher-item, and answer the new version', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -75,11 +75,12 @@ describe('VoucherService', () => {
       ],
     });
 
-    vouchers.updateVoucherItem(request).subscribe();
+    let version: string | null | undefined;
 
-    const body = controller.expectOne(`${environment.apiBaseUrl}/vouchers/update-voucher-item`)
-      .request.body;
-    expect(body).toEqual({
+    vouchers.updateVoucherItem(request, 'version-1').subscribe((answer) => (version = answer));
+
+    const call = controller.expectOne(`${environment.apiBaseUrl}/vouchers/update-voucher-item`);
+    expect(call.request.body).toEqual({
       idVoucher: 'v1',
       voucherName: 'Estate',
       validityPeriods: [
@@ -96,6 +97,9 @@ describe('VoucherService', () => {
       maxUseQuantity: 1,
       isEnabled: true,
     });
+    expect(call.request.headers.get('If-Match')).toBe('"version-1"');
+    call.flush(null, { status: 204, statusText: 'No Content', headers: { ETag: '"version-2"' } });
+    expect(version).toBe('version-2');
     controller.verify();
   });
 

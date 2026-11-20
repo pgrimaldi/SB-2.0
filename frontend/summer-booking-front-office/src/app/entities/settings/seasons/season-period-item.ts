@@ -7,4 +7,5 @@ export class SeasonPeriodItem {
   key: number | null = null;
   name: string | null = null;
   ranges: SeasonPeriodInterval[] = [];
+  version: string | null = null;
 }

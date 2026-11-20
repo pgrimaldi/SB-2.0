@@ -44,10 +44,20 @@ import { AlertPopup } from '../../../../shared/ui/dialogs/alert-popup/alert-popu
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 @Component({
   selector: 'app-season-dates-panel',
-  imports: [AlertPopup, Button, FilledDateField, FormField, FormRow, SectionTitle, TranslatePipe],
+  imports: [
+    AlertPopup,
+    Button,
+    FilledDateField,
+    FormField,
+    FormRow,
+    SectionTitle,
+    TranslatePipe,
+    VersionConflictPopup,
+  ],
   templateUrl: './season-dates-panel.html',
   styleUrl: './season-dates-panel.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,7 +85,10 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
     '/assets/images/GeneralIcon_Close.svg',
     '/assets/images/GeneralIcon_Warning.svg',
   ] as const;
+  /** [X]. */
+  protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly isPeriodsOutsideShown = signal(false);
+  protected readonly isConflictShown = signal(false);
   private loaded = new SeasonDates();
   private readonly dates = signal(new SeasonDates());
   protected readonly datesForm = form(this.dates, (path) => {
@@ -172,14 +185,20 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
           this.isPeriodsOutsideShown.set(true);
           return;
         }
-        const saved = await firstValueFrom(this.seasons.saveSeasonDates(sent));
+        const saved = await firstValueFrom(this.seasons.saveSeasonDates(sent, this.loaded.version));
         this.loaded = saved;
         this.dates.set(saved);
         this.seasonDates.dates.set(saved);
         this.datesForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.datesForm, (general) =>
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reload();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.datesForm, (general) =>
           this.error.set(general),
         ).map((fieldError): ValidationError.WithFieldTree =>
           fieldError.fieldTree === this.datesForm.nextStartsOn &&
@@ -191,6 +210,11 @@ export class SeasonDatesPanel implements UnsavedChanges, OnDestroy {
         this.isSaving.set(false);
       }
     });
+  }
+
+  private reload(): void {
+    this.cancel();
+    this.seasonDates.reload();
   }
 
   /**

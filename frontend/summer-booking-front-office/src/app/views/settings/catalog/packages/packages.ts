@@ -125,7 +125,7 @@ export class Packages {
     }
   }
 
-  protected forgetDeleted(idPackages: readonly string[]): void {
+  protected forgetDeleted(idPackages: readonly (string | null)[]): void {
     this.idSelectedPackages.update((idSelected) =>
       idSelected.filter((idSelectedPackage) => !idPackages.includes(String(idSelectedPackage))),
     );
@@ -134,7 +134,7 @@ export class Packages {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idPackages: readonly string[],
+    idPackages: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idPackages);

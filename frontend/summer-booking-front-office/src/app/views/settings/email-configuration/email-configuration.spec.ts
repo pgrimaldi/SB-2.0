@@ -19,7 +19,7 @@ describe('EmailConfiguration', () => {
     smtpSecurity: 'Tls' as const,
   };
   /** The server never sends the SMTP password: only that one is saved. */
-  const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true };
+  const CONFIGURATION = { ...FIELDS, hasSmtpPassword: true, version: 'v1' };
   /** Without a new password typed, the saved one is kept (null). */
   const SENT = { ...FIELDS, smtpPassword: null };
 
@@ -213,10 +213,13 @@ describe('EmailConfiguration', () => {
 
     buttons()[2].click();
     await fixture.whenStable();
-    expect(saveEmailConfiguration).toHaveBeenCalledWith({
-      ...SENT,
-      senderName: 'Lido Nuovo',
-    });
+    expect(saveEmailConfiguration).toHaveBeenCalledWith(
+      {
+        ...SENT,
+        senderName: 'Lido Nuovo',
+      },
+      'v1',
+    );
     expect(buttons()[0].disabled).toBe(true);
     expect(buttons()[1].disabled).toBe(true);
 
@@ -248,10 +251,13 @@ describe('EmailConfiguration', () => {
     buttons()[2].click();
     await settle();
 
-    expect(saveEmailConfiguration).toHaveBeenCalledWith({
-      ...SENT,
-      smtpPassword: 'nuova-password',
-    });
+    expect(saveEmailConfiguration).toHaveBeenCalledWith(
+      {
+        ...SENT,
+        smtpPassword: 'nuova-password',
+      },
+      'v1',
+    );
     expect(password().value).toBe(''); // saved: the field never holds it again
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
@@ -270,6 +276,39 @@ describe('EmailConfiguration', () => {
     answer.error(new HttpErrorResponse({ status: 500 }));
     await settle();
     expect(inputs().some((input) => input.readOnly)).toBe(false);
+    document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
+  });
+
+  it('should read the configuration again and say why when someone changed it after the read', async () => {
+    const {
+      element,
+      inputs,
+      buttons,
+      type,
+      settle,
+      allowChanges,
+      emailConfiguration,
+      saveEmailConfiguration,
+    } = await setup();
+    saveEmailConfiguration.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+    await allowChanges();
+    await type(1, 'Lido Nuovo');
+
+    buttons()[2].click();
+    await settle();
+    expect(emailConfiguration).toHaveBeenCalledTimes(2);
+    expect(inputs()[1].value).toBe('Lido Demo');
+    expect(inputs().every((input) => input.readOnly)).toBe(true);
+    expect(document.querySelector('.table__error__popup')).not.toBeNull();
+    expect(element.querySelector('.email__configuration__error')).toBeNull();
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove());
   });
 

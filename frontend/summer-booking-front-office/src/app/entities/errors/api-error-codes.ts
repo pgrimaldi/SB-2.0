@@ -15,6 +15,7 @@ export enum ApiErrorCode {
   ValidationEndBeforeStart = 'validation.end_before_start',
   ValidationInvalid = 'validation.invalid',
   ResourceNotFound = 'resource.not_found',
+  ResourceVersionConflict = 'resource.version_conflict',
   AuthForbidden = 'auth.forbidden',
   ServerUnexpected = 'server.unexpected',
   ValidationRequired = 'validation.required',

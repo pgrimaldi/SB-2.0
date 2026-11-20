@@ -153,7 +153,7 @@ export class AutomaticPrices {
     }
   }
 
-  protected forgetDeleted(idAutomaticPrices: readonly string[]): void {
+  protected forgetDeleted(idAutomaticPrices: readonly (string | null)[]): void {
     this.idSelectedAutomaticPrices.update((idSelected) =>
       idSelected.filter(
         (idSelectedAutomaticPrice) => !idAutomaticPrices.includes(String(idSelectedAutomaticPrice)),
@@ -164,7 +164,7 @@ export class AutomaticPrices {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idAutomaticPrices: readonly string[],
+    idAutomaticPrices: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idAutomaticPrices);

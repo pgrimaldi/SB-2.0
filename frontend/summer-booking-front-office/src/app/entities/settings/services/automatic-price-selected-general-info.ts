@@ -6,4 +6,5 @@ export class AutomaticPriceSelectedGeneralInfo {
   idAutomaticPrice: string | null = null;
   translations: ServiceTranslation[] = [];
   icon: BarServiceIcon | StandardServiceIcon | null = null;
+  version: string | null = null;
 }

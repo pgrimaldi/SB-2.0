@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { AdditionalItem } from '../../../entities/settings/catalog/additional-item';
@@ -16,6 +16,7 @@ import { PackageSectorPrice } from '../../../entities/settings/catalog/package-s
 import { PackageTranslation } from '../../../entities/settings/catalog/package-translation';
 import { Page, PageRequest } from '../../../entities/pagination/page';
 import { onlyFieldsOf } from '../only-fields-of';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class PriceListService {
@@ -77,15 +78,22 @@ export class PriceListService {
       { params: { idAdditionalItem } },
     );
 
-  /** The whole form, as in `createAdditionalItem`, with its id. Answers 204 with no body. */
+  /**
+   * The whole form, as in `createAdditionalItem`, with its id and the version read. Answers 204 with
+   * no body and the new version.
+   */
   readonly updateAdditionalItem = (
     idAdditionalItem: string,
     request: AdditionalItemAddItemRequest,
-  ): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/update-additional-services-article-item`, {
-      ...additionalItemBody(request),
-      idAdditionalItem,
-    });
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/update-additional-services-article-item`,
+        { ...additionalItemBody(request), idAdditionalItem },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   /** Everything the edit panel shows; the property comes from the access token. */
   readonly selectedPackage = (idPackage: string): Observable<PackageSelectedItem> =>
@@ -93,12 +101,22 @@ export class PriceListService {
       `${this.endpoint}/packages/${encodeURIComponent(idPackage)}`,
     );
 
-  /** The whole package, as in `createPackage`, with its id. Answers 204 with no body. */
-  readonly updatePackage = (idPackage: string, request: PackageAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/packages/update-package`, {
-      ...packageBody(request),
-      idPackage,
-    });
+  /**
+   * The whole package, as in `createPackage`, with its id and the version read. Answers 204 with no
+   * body and the new version.
+   */
+  readonly updatePackage = (
+    idPackage: string,
+    request: PackageAddItemRequest,
+    version: string | null,
+  ): Observable<string | null> =>
+    this.httpClient
+      .post<void>(
+        `${this.endpoint}/packages/update-package`,
+        { ...packageBody(request), idPackage },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 }
 
 /** Only the fields of the package, also inside its lists. */

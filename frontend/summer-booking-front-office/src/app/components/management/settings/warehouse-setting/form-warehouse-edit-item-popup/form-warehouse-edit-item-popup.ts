@@ -12,7 +12,16 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  disabled,
+  form,
+  max,
+  min,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subscription, finalize, firstValueFrom, of, switchMap } from 'rxjs';
@@ -24,24 +33,36 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { WarehouseItemStock } from '../../../../../entities/warehouse/warehouse-item-stock';
+import { MAX_WAREHOUSE_QUANTITY } from '../../../../../entities/warehouse/warehouse-limits';
 import { WarehouseSelectedItem } from '../../../../../entities/warehouse/warehouse-selected-item';
 import { WarehouseSettingItem } from '../../../../../entities/warehouse/warehouse-setting-item';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { WarehouseService } from '../../../../../services/api/warehouse/warehouse.service';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
-import { greaterThan } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 @Component({
   selector: 'app-form-warehouse-edit-item-popup',
-  imports: [Button, FilledNumberField, FilledSelect, FormField, Toggle, TranslatePipe],
+  imports: [
+    Button,
+    FilledNumberField,
+    FilledSelect,
+    FormField,
+    ReadErrorPopup,
+    Toggle,
+    TranslatePipe,
+    VersionConflictPopup,
+  ],
   templateUrl: './form-warehouse-edit-item-popup.html',
   styleUrl: './form-warehouse-edit-item-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +72,7 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChanges, OnDestroy {
   readonly item = input<WarehouseSettingItem | null>(null);
   readonly saved = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly warehouse = inject(WarehouseService);
   private readonly auth = inject(AuthBehaviour);
@@ -71,17 +93,17 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   private opened: WarehouseItemStock | null = null;
   protected readonly draft = signal(new WarehouseItemStock());
   protected readonly draftForm = form(this.draft, (path) => {
-    greaterThan(path.totalQuantity, 0);
+    required(path.totalQuantity);
+    min(path.totalQuantity, ({ valueOf }) => valueOf(path.lowStockThreshold) ?? 0);
+    max(path.totalQuantity, MAX_WAREHOUSE_QUANTITY);
+    max(path.lowStockThreshold, ({ valueOf }) => valueOf(path.totalQuantity) ?? undefined);
     disabled(path, () => this.isFetching());
     disabled(
       path.lowStockAlertEnabled,
       ({ valueOf }) => (valueOf(path.lowStockThreshold) ?? 0) <= 0,
     );
   });
-  protected readonly totalQuantityError = this.validationText.message(
-    this.draftForm.totalQuantity,
-    'management.settings.warehouse.form.field_names.total',
-  );
+  protected readonly totalQuantityError = this.validationText.message(this.draftForm.totalQuantity);
   protected readonly lowStockThresholdError = this.validationText.message(
     this.draftForm.lowStockThreshold,
   );
@@ -90,6 +112,8 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
   );
   protected readonly canSave = computed(() => this.loaded() !== null && this.draftForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -136,18 +160,30 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
       this.error.set(null);
       try {
         await firstValueFrom(
-          this.warehouse.updateArticle(idArticle, {
-            articleCode: loaded.articleCode,
-            name: loaded.name,
-            ...this.draft(),
-          }),
+          this.warehouse.updateArticle(
+            idArticle,
+            {
+              articleCode: loaded.articleCode,
+              name: loaded.name,
+              ...this.draft(),
+            },
+            loaded.version,
+          ),
         );
         this.isLoading.set(false);
         this.close();
         this.saved.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.isLoading.set(false);
+          this.close();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isLoading.set(false);
@@ -179,6 +215,10 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     };
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
   private reset(): void {
     this.loaded.set(null);
     this.opened = null;
@@ -187,7 +227,6 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
     this.error.set(null);
   }
 
-  /** Salva stays off until the article is read: what goes back is what the backend has. */
   private fetch(idArticle: string): Subscription {
     this.isFetching.set(true);
     return this.warehouse
@@ -206,7 +245,12 @@ export class FormWarehouseEditItemPopup extends BasePopup implements UnsavedChan
           this.draft.set(stock);
           this.draftForm().reset();
         },
-        error: (error: unknown) => this.error.set(toApiProblem(error)),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.failed.emit(problem);
+          this.readError.set(problem);
+          this.close();
+        },
       });
   }
 

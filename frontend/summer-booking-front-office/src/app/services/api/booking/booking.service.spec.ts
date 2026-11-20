@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { SupplementType } from '../../../entities/enums/supplement-type';
 import { OnlineBookingServicesOptions } from '../../../entities/settings/online-booking-configuration/online-booking-services-options';
+import { OnlineBookingServicesOptionsUpdateRequest } from '../../../entities/settings/online-booking-configuration/online-booking-services-options-update-request';
 import { BookingService } from './booking.service';
 
 describe('BookingService', () => {
@@ -32,26 +33,33 @@ describe('BookingService', () => {
     controller.verify();
   });
 
-  it('should save every option without the property', () => {
+  it('should save every option read without the property, with its version in If-Match, and give back the new one', () => {
     const { booking, controller } = setup();
     const options = Object.assign(new OnlineBookingServicesOptions(), {
       supplementType: SupplementType.Fixed,
       supplementValue: 2.5,
+      version: 'v1',
       unexpectedFlag: 'extra-field',
     });
+    let version: string | null | undefined;
 
-    booking.updateOnlineServicesOptions(options).subscribe();
+    booking
+      .updateOnlineServicesOptions(options, options.version)
+      .subscribe((saved) => (version = saved));
 
-    const request = controller.expectOne(
+    const post = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
         url === `${environment.apiBaseUrl}/booking/update-online-services-options`,
-    ).request;
-    expect(request.body).toEqual({
-      ...new OnlineBookingServicesOptions(),
+    );
+    expect(post.request.body).toEqual({
+      ...new OnlineBookingServicesOptionsUpdateRequest(),
       supplementType: SupplementType.Fixed,
       supplementValue: 2.5,
     });
+    expect(post.request.headers.get('If-Match')).toBe('"v1"');
+    post.flush(null, { status: 204, statusText: 'No Content', headers: { ETag: '"v2"' } });
+    expect(version).toBe('v2');
     controller.verify();
   });
 });

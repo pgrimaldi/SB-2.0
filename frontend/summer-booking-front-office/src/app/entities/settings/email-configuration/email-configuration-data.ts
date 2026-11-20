@@ -13,4 +13,5 @@ export interface EmailConfigurationData {
    */
   hasSmtpPassword: boolean;
   smtpSecurity: SmtpSecurity;
+  version: string | null;
 }

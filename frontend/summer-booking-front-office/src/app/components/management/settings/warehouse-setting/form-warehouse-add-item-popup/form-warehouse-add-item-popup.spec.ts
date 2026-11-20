@@ -213,8 +213,8 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(addWarehouseItem).toHaveBeenCalledWith({
       idArticle: 'a2',
       totalQuantity: 7,
-      thresholdQuantity: 2,
-      isThresholdWarningActive: true,
+      lowStockThreshold: 2,
+      lowStockAlertEnabled: true,
     });
     expect(popup()!.querySelector('mat-progress-spinner')).not.toBeNull();
     expect(
@@ -230,7 +230,7 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(host.added).toBe(1);
   });
 
-  it('should leave threshold and alert as they are when the user does not fill them in', async () => {
+  it('should leave threshold and alert as they are without a threshold, else send the alert shown', async () => {
     const { fixture, popup, openSelect, addWarehouseItem } = await setup();
     addWarehouseItem.mockReturnValue(of(undefined));
     const [quantity] = popup()!.querySelectorAll<HTMLInputElement>('app-filled-number-field input');
@@ -252,11 +252,11 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(addWarehouseItem).toHaveBeenLastCalledWith({
       idArticle: 'a1',
       totalQuantity: 4,
-      thresholdQuantity: null,
-      isThresholdWarningActive: null,
+      lowStockThreshold: null,
+      lowStockAlertEnabled: null,
     });
 
-    // A threshold written, the alert untouched: only the threshold changes.
+    // A threshold of 0: the alert is off and goes off, never left on with no threshold.
     fixture.componentInstance.open.set(true);
     await fixture.whenStable();
     const [quantityAgain, thresholdAgain] = popup()!.querySelectorAll<HTMLInputElement>(
@@ -265,14 +265,14 @@ describe('FormWarehouseAddItemPopup', () => {
     (await openSelect())[0].click();
     await fixture.whenStable();
     await type(quantityAgain, '4');
-    await type(thresholdAgain, '3');
+    await type(thresholdAgain, '0');
     add().click();
     await fixture.whenStable();
     expect(addWarehouseItem).toHaveBeenLastCalledWith({
       idArticle: 'a1',
       totalQuantity: 4,
-      thresholdQuantity: 3,
-      isThresholdWarningActive: null,
+      lowStockThreshold: 0,
+      lowStockAlertEnabled: false,
     });
   });
 
@@ -302,15 +302,26 @@ describe('FormWarehouseAddItemPopup', () => {
     expect(trigger().textContent?.trim()).toBe('Ombrellone');
   });
 
-  it('should keep Aggiungi off with a quantity of 0', async () => {
+  it('should keep Aggiungi off with a quantity of 0 or over the backend limit, or a threshold over it', async () => {
     const context = await setup();
     const { fixture, popup } = context;
     const add = await fill(context);
-    const quantity = popup()!.querySelector<HTMLInputElement>('app-filled-number-field input')!;
+    const [quantity, threshold] = popup()!.querySelectorAll<HTMLInputElement>(
+      'app-filled-number-field input',
+    );
+    const type = async (input: HTMLInputElement, text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
 
-    quantity.value = '0';
-    quantity.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
+    await type(quantity, '0');
+    expect(add().disabled).toBe(true);
+    await type(quantity, '2147483648');
+    expect(add().disabled).toBe(true);
+    await type(quantity, '2147483647');
+    expect(add().disabled).toBe(false);
+    await type(threshold, '2147483648');
     expect(add().disabled).toBe(true);
   });
 

@@ -33,6 +33,7 @@ import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/ap
 import { TableServiceAvailabilityMode } from '../../../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../../../entities/enums/table-service-deposit-mode';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
 import { TableServiceAddItemRequest } from '../../../../../entities/settings/services/table-service-add-item-request';
@@ -55,6 +56,8 @@ import { SERVICE_LANGUAGES } from '../shared/services-translations/services-tran
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
 import { TableServiceGeneralInfoTab } from '../table-service-general-info-tab/table-service-general-info-tab';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServiceFormTexts {
   tabs: {
@@ -90,12 +93,14 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof TableServiceAddItemR
   selector: 'app-table-service-edit-item-panel',
   imports: [
     Button,
+    ReadErrorPopup,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TableServiceAvailabilityBookingsTab,
     TableServiceGeneralInfoTab,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './table-service-edit-item-panel.html',
   styleUrl: './table-service-edit-item-panel.scss',
@@ -107,6 +112,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly catalog = inject(CatalogService);
@@ -180,6 +186,8 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
   private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The version of each tab read: its save sends it back. */
+  private readonly versions = new Map<PanelTab, string | null>();
   protected readonly isEditDisabled = computed(() => {
     const tab = this.selectedTab() as PanelTab;
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
@@ -191,6 +199,15 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.draftForm().invalid(),
   );
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
+  protected readonly tabErrorMessage = toSignal(
+    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -282,8 +299,15 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         this.open.set(false);
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reloadTab(tab);
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -331,25 +355,47 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
   }
 
-  /** The tab is read again the next time it is opened. */
+  /**
+   * At the opening (no tab read yet) the panel closes for the read-error popup; later the error stays
+   * in the tab, with Riprova.
+   */
   private loadFailed(tab: PanelTab, error: unknown): void {
     this.loadedTabs.update((tabs) => {
       const next = new Set(tabs);
       next.delete(tab);
       return next;
     });
-    this.error.set(toApiProblem(error));
+    const problem = toApiProblem(error);
+    this.failed.emit(problem);
+    if (this.loadedTabs().size === 0) {
+      this.readError.set(problem);
+      this.open.set(false);
+      return;
+    }
+    this.tabErrors.update((errors) => new Map(errors).set(tab, problem));
   }
 
-  /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idTableService: string): Observable<void> {
+  private reloadTab(tab: PanelTab): void {
+    this.cancelEdit();
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
+  /** The update API of the tab, with the fields of that tab only, and the version read. */
+  private update(tab: PanelTab, idTableService: string): Observable<string | null> {
     const draft = this.draft();
+    const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateTableServiceGeneral(
         Object.assign(new TableServiceUpdateGeneralRequest(), {
           idTableService,
           ...pick(draft, tab),
         }),
+        version,
       );
     }
     return this.catalog.updateTableServiceAvailabilityBookings(
@@ -357,12 +403,29 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         idTableService,
         ...pick(draft, tab),
       }),
+      version,
     );
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  protected retryTab(): void {
+    const tab = this.selectedTab() as PanelTab;
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
   private reset(): void {
+    this.tabErrors.set(new Map());
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+    this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
     this.error.set(null);
@@ -378,6 +441,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: TableServiceSelectedGeneralInfo): void {
+    this.versions.set(PanelTab.GeneralInfo, info.version);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -393,6 +457,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Every availability with its seven days, also those the API leaves out (unticked). */
   private setAvailabilityBookings(values: TableServiceSelectedAvailabilityBookings): void {
+    this.versions.set(PanelTab.AvailabilityBookings, values.version);
     this.applyLoaded({
       availabilities: values.availabilities.map((availability) =>
         Object.assign(new TableServiceAvailability(), availability, {

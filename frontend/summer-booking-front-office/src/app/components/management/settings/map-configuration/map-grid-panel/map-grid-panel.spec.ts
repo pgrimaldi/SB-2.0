@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideTranslateService } from '@ngx-translate/core';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { UnsavedChangesBehaviour } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { MapMixedSpotIcon } from '../../../../../entities/enums/map-mixed-spot-icon';
 import { MapUmbrellaIcon } from '../../../../../entities/enums/map-umbrella-icon';
@@ -19,16 +19,18 @@ describe('MapGridPanel', () => {
     read.tiltDegrees = 8;
     read.icons.umbrella.free.name = MapUmbrellaIcon.Umbrella3;
     read.icons.umbrella.occupied.name = MapMixedSpotIcon.MixedSpot4;
+    read.configurationVersion = 'c1';
     return read;
   };
 
   const setup = async () => {
     const updateConfiguration = vi.fn();
+    const readSettings = vi.fn(() => of(settings()));
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: MapService, useValue: { updateConfiguration } },
+        { provide: MapService, useValue: { updateConfiguration, settings: readSettings } },
       ],
     });
     const fixture = TestBed.createComponent(MapGridPanel);
@@ -44,7 +46,7 @@ describe('MapGridPanel', () => {
       await new Promise((resolve) => setTimeout(resolve));
       await fixture.whenStable();
     };
-    return { fixture, element, button, settle, updateConfiguration };
+    return { fixture, element, button, settle, updateConfiguration, readSettings };
   };
 
   it('should drop an error of the backend on a field the user did not change once Annulla restores the saved grid', async () => {
@@ -87,6 +89,52 @@ describe('MapGridPanel', () => {
     await settle();
     expect(iconsError()).toBeNull();
     expect(button('save')!.disabled).toBe(false);
+  });
+
+  it('should read the grid again and say why when someone changed it after the read', async () => {
+    const { fixture, element, button, settle, updateConfiguration, readSettings } = await setup();
+    readSettings.mockReturnValue(of({ ...settings(), rows: 9, configurationVersion: 'c2' }));
+    updateConfiguration.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+    const rows = () => element.querySelector<HTMLInputElement>('input')!;
+    const type = async (text: string) => {
+      rows().value = text;
+      rows().dispatchEvent(new Event('input'));
+      await settle();
+    };
+
+    button('edit')!.click();
+    await settle();
+    await type('7');
+    button('save')!.click();
+    await settle();
+    expect(updateConfiguration).toHaveBeenLastCalledWith(
+      expect.objectContaining({ rowQuantity: 7 }),
+      'c1',
+    );
+    expect(readSettings).toHaveBeenCalledTimes(1);
+    expect(rows().value).toBe('9');
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    expect(document.querySelector('.table__error__popup')).not.toBeNull();
+    expect(element.querySelector('.map__grid__panel__error')).toBeNull();
+
+    updateConfiguration.mockReturnValue(of('c3'));
+    button('edit')!.click();
+    await settle();
+    await type('8');
+    button('save')!.click();
+    await settle();
+    expect(updateConfiguration).toHaveBeenLastCalledWith(
+      expect.objectContaining({ rowQuantity: 8 }),
+      'c2',
+    );
   });
 
   it('should neither ask nor call when every value is back to the saved one', async () => {

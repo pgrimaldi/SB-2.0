@@ -30,6 +30,7 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { MapMixedSpotIcon } from '../../../../../entities/enums/map-mixed-spot-icon';
 import { MapUmbrellaIcon } from '../../../../../entities/enums/map-umbrella-icon';
@@ -59,6 +60,7 @@ import {
 } from '../../../../shared/ui/dialogs/icon-picker-popup/icon-picker-popup';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 const CUSTOM_ARTICLE_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
@@ -99,6 +101,7 @@ function iconsOf<K extends string>(icons: readonly K[]): IconPickerPopupIcon<K>[
     NgTemplateOutlet,
     SectionTitle,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './map-grid-panel.html',
   styleUrl: './map-grid-panel.scss',
@@ -129,7 +132,15 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   protected readonly isEditing = signal(false);
   protected readonly isSaving = signal(false);
   readonly isCallRunning = this.isSaving.asReadonly();
+  protected readonly isConflictShown = signal(false);
+  /** The read after a version conflict failed: Modifica stays off. */
+  private readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isLoaded = computed(
+    () => this.settings() !== null && this.readError() === null,
+  );
   private saved: MapGrid = { ...DEFAULT_MAP_GRID };
+  /** `configurationVersion` of the grid shown, sent back with Salva. */
+  private version: string | null = null;
   private readonly grid = signal<MapGrid>({ ...DEFAULT_MAP_GRID });
   protected readonly gridForm = form(this.grid, (path) => {
     required(path.rowQuantity);
@@ -165,7 +176,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
-    toObservable(computed(() => this.error() ?? this.loadError())).pipe(
+    toObservable(computed(() => this.error() ?? this.readError() ?? this.loadError())).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
     ),
     { initialValue: null },
@@ -199,10 +210,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       const settings = this.settings();
       if (settings) {
-        untracked(() => {
-          this.saved = this.gridOf(settings);
-          this.cancel();
-        });
+        untracked(() => this.show(settings));
       }
     });
   }
@@ -212,7 +220,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    if (this.settings()) {
+    if (this.isLoaded()) {
       this.isEditing.set(true);
     }
   }
@@ -280,7 +288,7 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
 
   /** Nothing changed: no call. Through submit(): an error of the backend on a field goes under it. */
   protected save(): void {
-    if (!this.canSave() || !this.settings()) {
+    if (!this.canSave() || !this.isLoaded()) {
       return;
     }
     this.error.set(null);
@@ -292,18 +300,42 @@ export class MapGridPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       try {
         const sent = this.grid();
-        await firstValueFrom(this.mapService.updateConfiguration(sent));
+        this.version = await firstValueFrom(
+          this.mapService.updateConfiguration(sent, this.version),
+        );
         this.saved = sent;
         this.gridForm().reset();
         this.isEditing.set(false);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.gridForm, (general) =>
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          await this.reload();
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.gridForm, (general) =>
           this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
       }
     });
+  }
+
+  private async reload(): Promise<void> {
+    try {
+      this.show(await firstValueFrom(this.mapService.settings()));
+    } catch (error: unknown) {
+      this.cancel();
+      this.readError.set(toApiProblem(error));
+    }
+  }
+
+  private show(settings: MapSettings): void {
+    this.saved = this.gridOf(settings);
+    this.version = settings.configurationVersion;
+    this.readError.set(null);
+    this.cancel();
   }
 
   /** Names as they arrive: a name this page does not know stays, shown as unknown. */

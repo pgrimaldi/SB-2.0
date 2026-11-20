@@ -15,16 +15,19 @@ ombrellone e articoli personalizzati), ognuno con Modifica, Annulla e Salva, e i
 | 1 | PUT | `/api/catalog/map/update-background` | Salva lo sfondo scelto fra quelli del frontend |
 | 2 | PUT | `/api/catalog/map/update-configuration` | Salva tutto il reticolo, icone comprese, in una chiamata |
 | 3 | GET | `/api/catalog/map/settings` | API esistente: aggiungere il nome di sfondo e icone alla risposta |
+| 4 | GET + PUT | `/api/catalog/map/settings`, `/api/catalog/map/update-background` e `/api/catalog/map/update-configuration` | Controllo di versione: due versioni nella lettura, `If-Match` ed `ETag` nei due salvataggi, 409 `resource.version_conflict` |
 
 Caricamento ed eliminazione dello sfondo personalizzato e "Reimposta mappa" usano le API che ci sono già, così come sono
-(sotto, "API esistenti usate così come sono"), salvo il campo `name` della sezione 3 nelle loro risposte.
+(sotto, "API esistenti usate così come sono"), salvo il campo `name` della sezione 3 e le due versioni della sezione 4
+nelle loro risposte.
 
 ## Regole comuni
 
 - **Modulo**: le API stanno in Catalog (`Module.Catalog`), accanto alle altre della mappa (`Endpoints/MapEndpoints.cs`,
   `Application/Services/MapSettingsService.cs`), con i dati di `MapLayout` (`catalog.map_layouts`) e
   `MapLayoutSpecialIcon` (`catalog.map_layout_special_icons`).
-- **Le API esistenti non cambiano**, salvo il campo `name` nelle risposte con `MapSettingsDto` (sezione 3):
+- **Le API esistenti non cambiano**, salvo il campo `name` (sezione 3) e le due versioni (sezione 4) nelle risposte
+  con `MapSettingsDto`:
   `PUT /api/catalog/map/settings`, `PUT /api/catalog/map/icons/umbrella` e
   `PUT /api/catalog/map/icons/custom-articles/{variant}` restano come sono. Il frontend non le usa: le sostituiscono,
   per lui, le API 1 e 2.
@@ -94,6 +97,9 @@ sfondo caricato dal gestore non passa da qui: si carica e si toglie subito con `
 |---|---|---|
 | `backgroundName` | string | Obbligatorio: assente, `null` o vuoto dà `validation.required`. Uno dei nomi degli sfondi (`BackgroundBeach`, `BackgroundBoardwalk`); un altro valore dà `validation.invalid`. |
 
+Header `If-Match: "<backgroundVersion>"`, con la `backgroundVersion` letta o restituita dall'ultimo salvataggio dello
+sfondo (sezione 4).
+
 ### Cosa fa
 
 1. Lo sfondo della mappa diventa quello con quel nome, **non** caricato dal gestore (`isCustom` falso): lo sfondo
@@ -105,7 +111,8 @@ sfondo caricato dal gestore non passa da qui: si carica e si toglie subito con `
 
 ### Risposta
 
-204 senza corpo. Il frontend tiene la casella scelta e chiude la Modifica, senza rileggere.
+204 senza corpo, con la nuova `backgroundVersion` nell'header `ETag` (sezione 4). Il frontend tiene la casella scelta,
+la versione per il Salva successivo e chiude la Modifica, senza rileggere.
 
 ### Errori
 
@@ -118,6 +125,7 @@ Nell'ordine in cui si controllano:
 | 400 | `validation.failed` | `backgroundName` assente, vuoto o non nell'elenco, con `errors[]` (sopra, "Richiesta"). |
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 409 | `resource.version_conflict` | `If-Match` manca o non è più la `backgroundVersion` della mappa (sezione 4), senza `errors[]`. Niente cambia. |
 
 ```json
 {
@@ -134,6 +142,7 @@ Nell'ordine in cui si controllano:
 
 Il frontend manda solo i due nomi, quindi il 400 arriva solo da richieste fatte a mano. Ogni errore di questa API
 compare sopra i bottoni del riquadro "Imposta sfondo", con il testo del suo `code`; il riquadro resta in Modifica.
+Il 409 `resource.version_conflict` no: lo gestisce come dice la sezione 4.
 
 ## 2. PUT /api/catalog/map/update-configuration
 
@@ -176,6 +185,9 @@ cambiate: le icone di tutti gli 8 articoli, comprese quelle vuote (`null`).
 
 `null` vuol dire "nessuna icona scelta": il frontend mostra il bottone vuoto.
 
+Header `If-Match: "<configurationVersion>"`, con la `configurationVersion` letta o restituita dall'ultimo salvataggio
+del reticolo (sezione 4).
+
 Errori di validazione, ognuno sul suo campo: i tre numeri con `validation.required` o `validation.out_of_range`;
 `umbrellaIcons` con `validation.invalid` (oggetto assente o un nome non ammesso per quella colonna);
 `customArticleIcons` con `validation.invalid` (non 8 voci, un `variant` fuori da 1-8 o ripetuto, un nome non
@@ -195,19 +207,22 @@ In una sola transazione, tutto o niente:
 
 1. Validazione: se non va, 400 e nient'altro.
 2. Stabilimento dal token: 403 `catalog.property_required` / 404 `catalog.property_not_found`.
-3. Come oggi `SaveSettingsAsync`: se una postazione già sulla mappa resterebbe fuori dal nuovo reticolo, 409
+3. Controllo di versione (sezione 4): se `If-Match` manca o non è più la `configurationVersion` della mappa, 409
+   `resource.version_conflict` e nient'altro.
+4. Come oggi `SaveSettingsAsync`: se una postazione già sulla mappa resterebbe fuori dal nuovo reticolo, 409
    `map.spots_outside_grid` con `args.rows` e `args.columns`, le misure minime che servono. Ridurre il reticolo non
    elimina postazioni.
-4. Reticolo: file = `rowQuantity`, colonne = `maxRowItemQuantity`, inclinazione = `tiltDegrees`.
-5. Icone: Libero e Occupato dell'ombrellone e, per ogni `variant`, Libero e Occupato dell'articolo personalizzato,
+5. Reticolo: file = `rowQuantity`, colonne = `maxRowItemQuantity`, inclinazione = `tiltDegrees`.
+6. Icone: Libero e Occupato dell'ombrellone e, per ogni `variant`, Libero e Occupato dell'articolo personalizzato,
    salvati come nomi (vedi "Sfondi e icone sono nomi del frontend"); `null` toglie l'icona scelta.
-6. Sfondo, colore di sfondo e `resetDeletesBookings` non cambiano.
-7. Nel registro, come le tre API che sostituisce: `catalog.map_settings_updated` con `rows`, `columns` e
+7. Sfondo, colore di sfondo e `resetDeletesBookings` non cambiano.
+8. Nel registro, come le tre API che sostituisce: `catalog.map_settings_updated` con `rows`, `columns` e
    `tiltDegrees`, e `catalog.map_icons_updated`.
 
 ### Risposta
 
-204 senza corpo. Il frontend tiene i valori salvati e chiude la Modifica, senza rileggere.
+204 senza corpo, con la nuova `configurationVersion` nell'header `ETag` (sezione 4). Il frontend tiene i valori
+salvati, la versione per il Salva successivo e chiude la Modifica, senza rileggere.
 
 ### Errori
 
@@ -220,6 +235,7 @@ Nell'ordine in cui si controllano:
 | 400 | `validation.failed` | Corpo non valido (sopra, "Richiesta"), con `errors[]`. |
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 409 | `resource.version_conflict` | `If-Match` manca o non è più la `configurationVersion` della mappa (sezione 4), senza `errors[]`. Niente cambia. |
 | 409 | `map.spots_outside_grid` | Postazioni fuori dal nuovo reticolo, con `args.rows` e `args.columns`. Niente cambia. |
 
 ```json
@@ -236,8 +252,9 @@ Nell'ordine in cui si controllano:
 Dove li mostra il frontend: un errore su `rowQuantity`, `maxRowItemQuantity` o `tiltDegrees` sotto quel campo; su
 `umbrellaIcons` sotto la riga Ombrellone; su `customArticleIcons` sotto le righe degli articoli personalizzati; gli
 altri, `map.spots_outside_grid` compreso ("Ci sono postazioni fuori da queste misure: servono almeno {{rows}} file e
-{{columns}} articoli per fila."), sopra i bottoni del riquadro, che resta in Modifica. Il frontend controlla da sé
-numeri e nomi prima di mandarli, quindi i 400 arrivano solo da richieste fatte a mano.
+{{columns}} articoli per fila."), sopra i bottoni del riquadro, che resta in Modifica; il 409
+`resource.version_conflict` come dice la sezione 4. Il frontend controlla da sé numeri e nomi prima di mandarli, quindi
+i 400 arrivano solo da richieste fatte a mano.
 
 ## 3. GET /api/catalog/map/settings: il nome di sfondo e icone
 
@@ -272,7 +289,8 @@ scelte. Serve un campo **`name`** nello sfondo e in ogni icona:
     l'utente non ha visto.
 - Il resto della risposta non cambia: `iconId`, `url`, `isDefault`, `isCustom`, `rows`, `columns`, `tiltDegrees`,
   `backgroundColor`, `resetDeletesBookings`, e `customArticles` sempre con 8 voci, una per `variant` da 1 a 8. Dello
-  sfondo caricato il frontend usa `url` per l'anteprima, come oggi.
+  sfondo caricato il frontend usa `url` per l'anteprima, come oggi. In più ci sono `backgroundVersion` e
+  `configurationVersion` della sezione 4 (nell'esempio sotto, in fondo).
 - Vale per ogni risposta che contiene `MapSettingsDto`: `GET /api/catalog/map/settings`, `POST` e
   `DELETE /api/catalog/map/background`, `settings` di `POST /api/catalog/map/reset` e di `GET /api/catalog/map`. Il
   frontend usa le prime quattro.
@@ -306,7 +324,9 @@ scelte. Serve un campo **`name`** nello sfondo e in ogni icona:
       }
     ]
   },
-  "resetDeletesBookings": false
+  "resetDeletesBookings": false,
+  "backgroundVersion": "5b7e21c0",
+  "configurationVersion": "e08d4a93"
 }
 ```
 
@@ -337,16 +357,81 @@ gestore:
    sceglie nessuna casella; un'icona senza nome compare come "Icona non esistente" e l'utente ne sceglie un'altra o la
    svuota prima di salvare.
 
+## 4. Controllo di versione sui salvataggi
+
+Oggi, se due utenti cambiano la stessa mappa, vince chi salva per ultimo: i due riquadri rimandano tutto quello che
+hanno letto all'apertura della pagina (sezioni 1 e 2) e cancellano, senza che nessuno se ne accorga, quello che un
+altro utente ha cambiato nel frattempo (per esempio file e colonne aggiunte nell'editor della mappa, che "Imposta
+reticolo" riporterebbe alle misure lette). Il backend non ha un controllo di concorrenza sugli aggiornamenti della
+mappa: nessun token di concorrenza in `MapLayoutConfiguration` e `MapLayoutSpecialIconConfiguration`, nessun
+`If-Match`. Il frontend chiede lo schema di **concorrenza ottimistica** che il backend ha già progettato per le
+prenotazioni offline (`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un
+**codice di errore unico per tutte le API**: `resource.version_conflict`. Lo stesso schema e lo stesso codice sono
+chiesti in `Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì sono già fatti, qui si aggiungono solo
+le API della tabella sotto.
+
+### Cosa ci serve
+
+- **Due versioni nella lettura**: una sola lettura (`GET /api/catalog/map/settings`, sezione 3) riempie due riquadri
+  che si salvano ognuno per conto suo e scrivono dati diversi. Per questo la risposta (`MapSettingsDto`) ha **una
+  versione per salvataggio**, due campi stringa opachi:
+  - `backgroundVersion`: lo sfondo della mappa, cioè quello che scrive `update-background` (sezione 1). Cambia anche
+    con `POST` e `DELETE /api/catalog/map/background` e con `PUT /api/catalog/map/settings` quando cambia lo sfondo
+    (`SetBackground` in `MapSettingsService`, righe 70, 97 e 106).
+  - `configurationVersion`: file, colonne, inclinazione e le icone di ombrellone e articoli personalizzati, cioè
+    quello che scrive `update-configuration` (sezione 2). Cambia anche con `POST /api/catalog/map/reset`
+    (`MapLayout.ClearGrid`), con l'aggiunta e l'eliminazione di file e colonne dell'editor (`/api/catalog/map/rows` e
+    `/api/catalog/map/columns`, `MapEditorService.InsertLineAsync` e `DeleteLineAsync`), con
+    `PUT /api/catalog/map/settings` e con `PUT /api/catalog/map/icons/umbrella` e
+    `PUT /api/catalog/map/icons/custom-articles/{variant}`.
+  - Ognuna cambia ogni volta che cambiano i suoi dati, e solo allora: salvare lo sfondo non cambia
+    `configurationVersion` e salvare il reticolo non cambia `backgroundVersion`, altrimenti un riquadro farebbe
+    fallire il Salva dell'altro.
+- **In ogni risposta con `MapSettingsDto`**: `GET /api/catalog/map/settings`, `POST` e
+  `DELETE /api/catalog/map/background`, `settings` di `POST /api/catalog/map/reset` e di `GET /api/catalog/map`.
+  Dopo il caricamento o l'eliminazione dello sfondo personalizzato il frontend prende da lì la nuova
+  `backgroundVersion`; dopo "Reimposta mappa" prende tutte e due le versioni da `settings`.
+- **`If-Match` nei salvataggi**: `update-background` riceve `If-Match: "<backgroundVersion>"`,
+  `update-configuration` riceve `If-Match: "<configurationVersion>"`. Se non è più la versione attuale di quei dati, il
+  backend non salva niente e risponde **409 `resource.version_conflict`**, senza `errors[]`. Senza `If-Match` risponde
+  allo stesso modo: il frontend lo manda sempre.
+- **`ETag` nelle risposte**: ogni salvataggio riuscito restituisce la nuova versione dei suoi dati nell'header
+  `ETag: "<version>"`, anche se risponde 204 senza corpo.
+- Il 409 `resource.version_conflict` si controlla dopo validazione e stabilimento e prima di
+  `map.spots_outside_grid`.
+- **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti da ogni versione, due contatori...):
+  l'agente glielo chiede prima di scrivere codice. Un solo token di riga su `catalog.map_layouts` (come `xmin` nel
+  documento offline) non basta: cambierebbe con tutti e due i salvataggi, e le icone degli articoli personalizzati
+  stanno in un'altra tabella (`catalog.map_layout_special_icons`). Il frontend tratta le versioni come stringhe opache
+  e non le confronta mai.
+
+### API coinvolte
+
+| Lettura (restituisce la versione) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
+|---|---|---|
+| `GET /api/catalog/map/settings`, campo `backgroundVersion` | `PUT /api/catalog/map/update-background` (sezione 1) | Lo sfondo: scelto fra quelli del frontend o caricato dal gestore |
+| `GET /api/catalog/map/settings`, campo `configurationVersion` | `PUT /api/catalog/map/update-configuration` (sezione 2) | File, colonne, inclinazione e icone di ombrellone e articoli personalizzati |
+
+`POST` e `DELETE /api/catalog/map/background` e `POST /api/catalog/map/reset` non ricevono `If-Match`: non
+rimandano dati letti.
+
+### Cosa fa il frontend
+
+Ogni riquadro tiene la sua versione e la rimanda con il suo Salva. Con 409 `resource.version_conflict` il riquadro
+mostra l'avviso "Nel frattempo un altro utente ha modificato questi dati: li abbiamo ricaricati. Rifai le tue
+modifiche." e rilegge con `GET /api/catalog/map/settings`, prendendo solo la sua parte: l'altro riquadro resta com'è,
+con le sue modifiche non salvate.
+
 ## API esistenti usate così come sono
 
 Il frontend le chiama senza modifiche; qui solo come le usa e dove mostra le risposte. Le loro risposte con
-`MapSettingsDto` hanno il campo `name` della sezione 3.
+`MapSettingsDto` hanno il campo `name` della sezione 3 e le due versioni della sezione 4.
 
 | Azione | API | Corpo | Risposta | Errori e dove li mostra il frontend |
 |---|---|---|---|---|
-| Immagine scelta o trascinata in "Sfondo personalizzato", in Modifica, subito, senza Salva | `POST /api/catalog/map/background` | multipart con il campo `file` (png, jpeg o webp, al massimo 5 MB: il frontend non manda altro) | 200 con `MapSettingsDto`: il frontend non la legge, tiene l'anteprima dell'immagine già nel browser e chiude la Modifica | Nel riquadro "Imposta sfondo", con il testo del `code` (es. 422 `map.invalid_image`, con `args.maxBytes` e `args.contentTypes`); il riquadro resta in Modifica con l'anteprima di prima. |
-| Cestino sopra l'anteprima dello sfondo caricato, subito, senza conferma | `DELETE /api/catalog/map/background` | Nessuno | 200 con `MapSettingsDto`: il frontend non la legge, toglie l'anteprima e chiude la Modifica | Nel riquadro "Imposta sfondo", con il testo del `code`. |
-| "Procedi ed elimina la mappa configurata" del popup "Reimposta mappa" | `POST /api/catalog/map/reset` | Nessuno | 200 con `{ settings, spots, sectors, beachElements }`: il frontend legge solo `settings` e ricompone i due riquadri senza un'altra `GET`. Il reticolo torna a 0 × 0 (`MapLayout.ClearGrid`), che il frontend mostra come campi vuoti da riempire; sfondo, icone e inclinazione restano, come dice il testo del popup | Nel popup, con il testo del `code`; il popup resta aperto. |
+| Immagine scelta o trascinata in "Sfondo personalizzato", in Modifica, subito, senza Salva | `POST /api/catalog/map/background` | multipart con il campo `file` (png, jpeg o webp, al massimo 5 MB: il frontend non manda altro) | 200 con `MapSettingsDto`: il frontend ne legge solo `backgroundVersion` (sezione 4), tiene l'anteprima dell'immagine già nel browser e chiude la Modifica | Nel riquadro "Imposta sfondo", con il testo del `code` (es. 422 `map.invalid_image`, con `args.maxBytes` e `args.contentTypes`); il riquadro resta in Modifica con l'anteprima di prima. |
+| Cestino sopra l'anteprima dello sfondo caricato, in Modifica, dopo la conferma, senza Salva | `DELETE /api/catalog/map/background` | Nessuno | 200 con `MapSettingsDto`: il frontend ne legge solo `backgroundVersion` (sezione 4), toglie l'anteprima e chiude la Modifica | Nel riquadro "Imposta sfondo", con il testo del `code`. |
+| "Procedi ed elimina la mappa configurata" del popup "Reimposta mappa" | `POST /api/catalog/map/reset` | Nessuno | 200 con `{ settings, spots, sectors, beachElements }`: il frontend legge solo `settings` (con le due versioni della sezione 4) e ricompone i due riquadri senza un'altra `GET`. Il reticolo torna a 0 × 0 (`MapLayout.ClearGrid`), che il frontend mostra come campi vuoti da riempire; sfondo, icone e inclinazione restano, come dice il testo del popup | Nel popup, con il testo del `code`; il popup resta aperto. |
 
 ## Verifica
 
@@ -385,3 +470,21 @@ API 3, con un token con `catalog.read` e `catalog.settings`:
    `null` e `isDefault` falso.
 6. `POST /api/catalog/map/reset`: in `settings` gli stessi nomi di prima (il reset non tocca sfondo e icone).
 7. Ogni `name` restituito è uno dei nomi degli elenchi, identico a quello salvato.
+
+API 4, con un token con `catalog.read` e `catalog.settings`:
+
+1. `GET /api/catalog/map/settings` risponde con `backgroundVersion` (per esempio `b1`) e `configurationVersion`
+   (`c1`). `update-background` con `If-Match: "b1"`: 204 con l'header `ETag` di una versione nuova; una nuova `GET` ha
+   quella `backgroundVersion` e ancora `configurationVersion` `c1`.
+2. `update-configuration` con `If-Match: "c1"`: 204 con l'header `ETag` di una versione nuova; una nuova `GET` ha
+   quella `configurationVersion` e la `backgroundVersion` di prima.
+3. Lo stesso `update-background` con la versione di prima: 409 `resource.version_conflict` senza `errors[]`; lo
+   sfondo non cambia. Lo stesso per `update-configuration`: reticolo e icone non cambiano.
+4. `GET` (versioni `b1` e `c1`), poi `POST /api/catalog/map/rows` (una fila in più), poi `update-configuration` con
+   `If-Match: "c1"`: 409 `resource.version_conflict`; la fila aggiunta resta. Poi `update-background` con
+   `If-Match: "b1"`: 204.
+5. `POST /api/catalog/map/background` con un'immagine: la risposta ha una `backgroundVersion` nuova e la
+   `configurationVersion` di prima; `update-background` con la `backgroundVersion` della risposta: 204; con quella di
+   prima del caricamento: 409.
+6. `POST /api/catalog/map/reset`: `settings` ha una `configurationVersion` nuova e la `backgroundVersion` di prima.
+7. `update-background` o `update-configuration` senza `If-Match`: 409 `resource.version_conflict`.

@@ -214,7 +214,8 @@ Stato: 201 Created (l'utente creato).
   "phoneCountryCode": "39",
   "phone": "3401112299",
   "phoneIsContact": false,
-  "role": "waiter"
+  "role": "waiter",
+  "version": "a36e06e9"
 }
 ```
 
@@ -227,6 +228,7 @@ Stato: 201 Created (l'utente creato).
 | `phone` | string \| null | `3401112299` |
 | `phoneIsContact` | boolean | `false` |
 | `role` | string (enum UserRole) | `waiter` |
+| `version` | string | `a36e06e9` |
 
 ### GET `/api/identity/get-selected-user?idUser={idUser}`
 
@@ -256,7 +258,8 @@ Stato: 200 OK.
   "phoneCountryCode": "39",
   "phone": "3401112203",
   "phoneIsContact": true,
-  "role": "manager"
+  "role": "manager",
+  "version": "4a685fa7"
 }
 ```
 
@@ -269,6 +272,7 @@ Stato: 200 OK.
 | `phone` | string \| null | `3401112203` |
 | `phoneIsContact` | boolean | `true` |
 | `role` | string (enum UserRole) | `manager` |
+| `version` | string | `4a685fa7` |
 
 ### POST `/api/identity/update-user`
 
@@ -312,7 +316,8 @@ Stato: 200 OK (l'utente aggiornato).
   "phoneCountryCode": "41",
   "phone": "79 123 45 67",
   "phoneIsContact": false,
-  "role": "manager"
+  "role": "manager",
+  "version": "d433d493"
 }
 ```
 
@@ -325,6 +330,7 @@ Stato: 200 OK (l'utente aggiornato).
 | `phone` | string \| null | `79 123 45 67` |
 | `phoneIsContact` | boolean | `false` |
 | `role` | string (enum UserRole) | `manager` |
+| `version` | string | `d433d493` |
 
 ### DELETE `/api/identity/property-users/{id}`
 
@@ -1290,7 +1296,8 @@ Stato: 200 OK.
   "isAutomaticVoucherEnabled": true,
   "voucherCreditValue": 5.5,
   "isPrepaidCardTopUpEnabled": false,
-  "prepaidCardCreditValue": 10
+  "prepaidCardCreditValue": 10,
+  "version": "106cb2d0"
 }
 ```
 
@@ -1309,6 +1316,7 @@ Stato: 200 OK.
 | `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
 | `isPrepaidCardTopUpEnabled` | boolean | `false` |
 | `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
+| `version` | string | `106cb2d0` |
 
 ### POST `/api/sharing/save-information`
 
@@ -1683,7 +1691,8 @@ Stato: 200 OK.
   "discountValue": 5,
   "discountScope": "Services",
   "maxUseQuantity": 50,
-  "isEnabled": false
+  "isEnabled": false,
+  "version": "bf1aac8c"
 }
 ```
 
@@ -1703,6 +1712,7 @@ Stato: 200 OK.
 | `discountScope` | string (enum DiscountScope) \| null | `Services` |
 | `maxUseQuantity` | number (intero) \| null | `50` |
 | `isEnabled` | boolean \| null | `false` |
+| `version` | string | `bf1aac8c` |
 
 ## /catalog
 
@@ -1723,7 +1733,8 @@ Stato: 200 OK (204 senza corpo se la stagione non è impostata).
   "startsOn": "2026-05-01",
   "endsOn": "2026-09-30",
   "nextStartsOn": "2027-05-01",
-  "nextEndsOn": "2027-09-30"
+  "nextEndsOn": "2027-09-30",
+  "version": "a085cb5d"
 }
 ```
 
@@ -1733,6 +1744,7 @@ Stato: 200 OK (204 senza corpo se la stagione non è impostata).
 | `endsOn` | string (data, AAAA-MM-GG) | `2026-09-30` |
 | `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
 | `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
+| `version` | string | `a085cb5d` |
 
 ### PUT `/api/catalog/season`
 
@@ -1765,7 +1777,8 @@ Stato: 200 OK (le date salvate).
   "startsOn": "2026-05-01",
   "endsOn": "2026-09-25",
   "nextStartsOn": "2027-05-01",
-  "nextEndsOn": "2027-09-30"
+  "nextEndsOn": "2027-09-30",
+  "version": "688c1fbf"
 }
 ```
 
@@ -1775,6 +1788,7 @@ Stato: 200 OK (le date salvate).
 | `endsOn` | string (data, AAAA-MM-GG) | `2026-09-25` |
 | `nextStartsOn` | string (data, AAAA-MM-GG) \| null | `2027-05-01` |
 | `nextEndsOn` | string (data, AAAA-MM-GG) \| null | `2027-09-30` |
+| `version` | string | `688c1fbf` |
 
 ### GET `/api/catalog/tariff-periods`
 
@@ -1802,7 +1816,8 @@ Stato: 200 OK.
         "startsOn": "2026-09-01",
         "endsOn": "2026-09-30"
       }
-    ]
+    ],
+    "version": "2fe8da16"
   },
   {
     "key": 1,
@@ -1816,7 +1831,8 @@ Stato: 200 OK.
         "startsOn": "2026-08-21",
         "endsOn": "2026-08-31"
       }
-    ]
+    ],
+    "version": "ceafe904"
   },
   {
     "key": 2,
@@ -1826,7 +1842,8 @@ Stato: 200 OK.
         "startsOn": "2026-07-16",
         "endsOn": "2026-08-10"
       }
-    ]
+    ],
+    "version": "6e7e623f"
   }
 ]
 ```
@@ -1838,6 +1855,7 @@ Stato: 200 OK.
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-15"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-15` |
+| `version` | string | `2fe8da16` |
 
 ### GET `/api/catalog/next-season/tariff-periods`
 
@@ -1865,7 +1883,8 @@ Stato: 200 OK.
         "startsOn": "2027-09-01",
         "endsOn": "2027-09-30"
       }
-    ]
+    ],
+    "version": "b6d31f03"
   },
   {
     "key": 1,
@@ -1875,7 +1894,8 @@ Stato: 200 OK.
         "startsOn": "2027-07-01",
         "endsOn": "2027-08-31"
       }
-    ]
+    ],
+    "version": "e8e5bd86"
   }
 ]
 ```
@@ -1887,6 +1907,7 @@ Stato: 200 OK.
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-05-01", "endsOn": "2027-06-15"}, {"startsOn": "2027-09-01", "endsOn": "2027-09-30"}]` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-05-01` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-15` |
+| `version` | string | `b6d31f03` |
 
 ### POST `/api/catalog/tariff-periods`
 
@@ -1926,7 +1947,8 @@ Stato: 201 Created (il periodo creato).
       "startsOn": "2026-08-11",
       "endsOn": "2026-08-20"
     }
-  ]
+  ],
+  "version": "173b451d"
 }
 ```
 
@@ -1937,6 +1959,7 @@ Stato: 201 Created (il periodo creato).
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-08-11", "endsOn": "2026-08-20"}]` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-08-11` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-08-20` |
+| `version` | string | `173b451d` |
 
 ### POST `/api/catalog/next-season/tariff-periods`
 
@@ -1976,7 +1999,8 @@ Stato: 201 Created (il periodo creato).
       "startsOn": "2027-06-16",
       "endsOn": "2027-06-30"
     }
-  ]
+  ],
+  "version": "32c918db"
 }
 ```
 
@@ -1987,6 +2011,7 @@ Stato: 201 Created (il periodo creato).
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-06-16", "endsOn": "2027-06-30"}]` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-06-16` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-06-30` |
+| `version` | string | `32c918db` |
 
 ### DELETE `/api/catalog/tariff-periods/{key}`
 
@@ -2062,7 +2087,8 @@ Stato: 200 OK (il periodo salvato).
       "startsOn": "2026-09-01",
       "endsOn": "2026-09-30"
     }
-  ]
+  ],
+  "version": "894f2dc4"
 }
 ```
 
@@ -2073,6 +2099,7 @@ Stato: 200 OK (il periodo salvato).
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2026-05-01", "endsOn": "2026-06-10"}, {"startsOn": "2026-09-01", "endsOn": "2026-09-30"}]` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2026-05-01` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2026-06-10` |
+| `version` | string | `894f2dc4` |
 
 ### PUT `/api/catalog/next-season/tariff-periods/{key}`
 
@@ -2112,7 +2139,8 @@ Stato: 200 OK (il periodo salvato).
       "startsOn": "2027-07-01",
       "endsOn": "2027-08-31"
     }
-  ]
+  ],
+  "version": "b869e94f"
 }
 ```
 
@@ -2123,6 +2151,7 @@ Stato: 200 OK (il periodo salvato).
 | `ranges[]` | SeasonPeriodInterval[] (array di oggetti) | `[{"startsOn": "2027-07-01", "endsOn": "2027-08-31"}]` |
 | `ranges[].startsOn` | string (data, AAAA-MM-GG) | `2027-07-01` |
 | `ranges[].endsOn` | string (data, AAAA-MM-GG) | `2027-08-31` |
+| `version` | string | `b869e94f` |
 
 ### POST `/api/catalog/tariff-periods/bulk-delete-ranges`
 
@@ -2229,13 +2258,13 @@ Stato: 200 OK.
       "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
       "name": "Lettino",
       "totalQuantity": 120,
-      "thresholdQuantity": 5
+      "lowStockThreshold": 5
     },
     {
       "idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b",
       "name": "Lettino XL",
       "totalQuantity": 16,
-      "thresholdQuantity": null
+      "lowStockThreshold": null
     }
   ]
 }
@@ -2244,15 +2273,15 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | WarehouseSettingItem[] (array di oggetti) | `[{"idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "name": "Lettino", "totalQuantity": 120, "thresholdQuantity": 5}, {"idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b", "name": "Lettino XL", "totalQuantity": 16, "thresholdQuantity": null}]` |
+| `rows[]` | WarehouseSettingItem[] (array di oggetti) | `[{"idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c", "name": "Lettino", "totalQuantity": 120, "lowStockThreshold": 5}, {"idArticle": "2f7d9b3e-1a4c-4e6f-8b2d-5c6a7e8f9a0b", "name": "Lettino XL", "totalQuantity": 16, "lowStockThreshold": null}]` |
 | `rows[].idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `rows[].name` | string | `Lettino` |
 | `rows[].totalQuantity` | number (intero) | `120` |
-| `rows[].thresholdQuantity` | number (intero) \| null | `5` |
+| `rows[].lowStockThreshold` | number (intero) \| null | `5` |
 
 ### POST `/api/catalog/article-combobox`
 
-Magazzino: articoli per la tendina.
+Impostazioni magazzino: articoli per la tendina.
 
 #### Payload
 
@@ -2290,7 +2319,7 @@ Stato: 200 OK.
 
 ### POST `/api/catalog/add-warehouse-item`
 
-Magazzino: aggiunta di pezzi a un articolo.
+Impostazioni magazzino: aggiunta di pezzi a un articolo.
 
 #### Payload
 
@@ -2298,8 +2327,8 @@ Magazzino: aggiunta di pezzi a un articolo.
 {
   "idArticle": "8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c",
   "totalQuantity": 10,
-  "thresholdQuantity": null,
-  "isThresholdWarningActive": null
+  "lowStockThreshold": null,
+  "lowStockAlertEnabled": null
 }
 ```
 
@@ -2307,8 +2336,8 @@ Magazzino: aggiunta di pezzi a un articolo.
 |---|---|---|
 | `idArticle` | string (UUID) | `8c2e4a1b-6f3d-4b7e-a9c5-1d2e3f4a5b6c` |
 | `totalQuantity` | number (intero > 0) | `10` |
-| `thresholdQuantity` | number (intero ≥ 0) \| null | `null` |
-| `isThresholdWarningActive` | boolean \| null | `null` |
+| `lowStockThreshold` | number (intero ≥ 0) \| null | `null` |
+| `lowStockAlertEnabled` | boolean \| null | `null` |
 
 #### Response
 
@@ -2318,7 +2347,7 @@ Nessun corpo.
 
 ### GET `/api/catalog/inventory-items/{id}`
 
-Magazzino: articolo da modificare.
+Impostazioni magazzino: articolo da modificare.
 
 #### Payload
 
@@ -2336,7 +2365,8 @@ Stato: 200 OK.
   "totalQuantity": 120,
   "lowStockThreshold": 5,
   "lowStockAlertEnabled": true,
-  "mapPlaceable": true
+  "mapPlaceable": true,
+  "version": "4f1c9a27"
 }
 ```
 
@@ -2349,10 +2379,11 @@ Stato: 200 OK.
 | `lowStockThreshold` | number (intero) \| null | `5` |
 | `lowStockAlertEnabled` | boolean | `true` |
 | `mapPlaceable` | boolean | `true` |
+| `version` | string | `4f1c9a27` |
 
 ### PUT `/api/catalog/edit-warehouse-item/{id}`
 
-Magazzino: modifica di un articolo.
+Impostazioni magazzino: modifica di un articolo.
 
 #### Payload
 
@@ -2370,7 +2401,7 @@ Magazzino: modifica di un articolo.
 |---|---|---|
 | `articleCode` | string \| null | `sunbed` |
 | `name` | string | `Lettino` |
-| `totalQuantity` | number (intero > 0) | `110` |
+| `totalQuantity` | number (intero ≥ 0) | `110` |
 | `lowStockThreshold` | number (intero ≥ 0) \| null | `8` |
 | `lowStockAlertEnabled` | boolean | `true` |
 
@@ -2386,7 +2417,8 @@ Stato: 200 OK (l'articolo salvato).
   "totalQuantity": 110,
   "lowStockThreshold": 8,
   "lowStockAlertEnabled": true,
-  "mapPlaceable": true
+  "mapPlaceable": true,
+  "version": "9b03e6d1"
 }
 ```
 
@@ -2399,10 +2431,11 @@ Stato: 200 OK (l'articolo salvato).
 | `lowStockThreshold` | number (intero) \| null | `8` |
 | `lowStockAlertEnabled` | boolean | `true` |
 | `mapPlaceable` | boolean | `true` |
+| `version` | string | `9b03e6d1` |
 
 ### POST `/api/catalog/delete-warehouse-item`
 
-Magazzino: eliminazione di articoli.
+Impostazioni magazzino: eliminazione di articoli.
 
 #### Payload
 
@@ -2427,7 +2460,7 @@ Nessun corpo.
 
 ### POST `/api/catalog/duplicate-warehouse-item`
 
-Magazzino: duplicazione di articoli.
+Impostazioni magazzino: duplicazione di articoli.
 
 #### Payload
 
@@ -2521,7 +2554,8 @@ Stato: 200 OK.
   "isFreeCancellation": true,
   "cancellationNoticeHours": 48,
   "petPolicy": "Allowed",
-  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>"
+  "regulation": "<p>Vietato <strong>fumare</strong> in spiaggia.</p>",
+  "version": "64c2b8d4"
 }
 ```
 
@@ -2547,6 +2581,7 @@ Stato: 200 OK.
 | `cancellationNoticeHours` | number (intero) \| null | `48` |
 | `petPolicy` | string (enum PetPolicy) | `Allowed` |
 | `regulation` | string (HTML) \| null | `<p>Vietato <strong>fumare</strong> in spiaggia.</p>` |
+| `version` | string | `64c2b8d4` |
 
 ### POST `/api/catalog/property-info/save-bathhouse-configuration-general`
 
@@ -2621,38 +2656,43 @@ Nessun corpo né parametri: lo stabilimento viene dal token.
 Stato: 200 OK.
 
 ```json
-[
-  {
-    "idService": 14,
-    "name": "Accesso disabili",
-    "categoryCode": "accessibility_comfort",
-    "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
-    "isSelected": true
-  },
-  {
-    "idService": 31,
-    "name": "Doccia",
-    "categoryCode": "accessibility_comfort",
-    "iconUrl": "https://media.example.com/icons/doccia.svg",
-    "isSelected": true
-  },
-  {
-    "idService": 38,
-    "name": "Wifi",
-    "categoryCode": "accessibility_comfort",
-    "iconUrl": null,
-    "isSelected": false
-  }
-]
+{
+  "services": [
+    {
+      "idService": 14,
+      "name": "Accesso disabili",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "https://media.example.com/icons/accesso-disabili.svg",
+      "isSelected": true
+    },
+    {
+      "idService": 31,
+      "name": "Doccia",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": "https://media.example.com/icons/doccia.svg",
+      "isSelected": true
+    },
+    {
+      "idService": 38,
+      "name": "Wifi",
+      "categoryCode": "accessibility_comfort",
+      "iconUrl": null,
+      "isSelected": false
+    }
+  ],
+  "version": "d17e7ba6"
+}
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `idService` | number (intero) | `14` |
-| `name` | string | `Accesso disabili` |
-| `categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
-| `iconUrl` | string \| null | `https://media.example.com/icons/accesso-disabili.svg` |
-| `isSelected` | boolean | `true` |
+| `services[]` | BathhouseServiceItem[] (array di oggetti) | `[{"idService": 14, "name": "Accesso disabili", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/accesso-disabili.svg", "isSelected": true}, {"idService": 31, "name": "Doccia", "categoryCode": "accessibility_comfort", "iconUrl": "https://media.example.com/icons/doccia.svg", "isSelected": true}, {"idService": 38, "name": "Wifi", "categoryCode": "accessibility_comfort", "iconUrl": null, "isSelected": false}]` |
+| `services[].idService` | number (intero) | `14` |
+| `services[].name` | string | `Accesso disabili` |
+| `services[].categoryCode` | string (enum BathhouseServiceGroup) | `accessibility_comfort` |
+| `services[].iconUrl` | string \| null | `https://media.example.com/icons/accesso-disabili.svg` |
+| `services[].isSelected` | boolean | `true` |
+| `version` | string | `d17e7ba6` |
 
 ### POST `/api/catalog/property-info/save-bathhouse-configuration-services`
 
@@ -2727,7 +2767,8 @@ Stato: 200 OK.
   "priceListPdfUrl": "https://media.example.com/lido-demo/listino-prezzi.pdf",
   "priceListPdfFileName": "listino-prezzi.pdf",
   "menuPdfUrl": "https://media.example.com/lido-demo/menu.pdf",
-  "menuPdfFileName": "menu.pdf"
+  "menuPdfFileName": "menu.pdf",
+  "version": "0dae65a2"
 }
 ```
 
@@ -2744,6 +2785,7 @@ Stato: 200 OK.
 | `priceListPdfFileName` | string \| null | `listino-prezzi.pdf` |
 | `menuPdfUrl` | string \| null | `https://media.example.com/lido-demo/menu.pdf` |
 | `menuPdfFileName` | string \| null | `menu.pdf` |
+| `version` | string | `0dae65a2` |
 
 ### POST `/api/catalog/property-info/save-bathhouse-configuration-media`
 
@@ -3005,7 +3047,8 @@ Stato: 200 OK.
   ],
   "category": "Cafeteria",
   "icon": "Coffee",
-  "isHighlighted": true
+  "isHighlighted": true,
+  "version": "feac3ca6"
 }
 ```
 
@@ -3019,6 +3062,7 @@ Stato: 200 OK.
 | `category` | string (enum BarServiceCategory) \| null | `Cafeteria` |
 | `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
 | `isHighlighted` | boolean | `true` |
+| `version` | string | `feac3ca6` |
 
 ### GET `/api/catalog/get-bar-service-prices?idBarService={idBarService}`
 
@@ -3060,7 +3104,8 @@ Stato: 200 OK.
   "idSectors": [
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
-  "isOnlinePurchaseEnabled": true
+  "isOnlinePurchaseEnabled": true,
+  "version": "37b6a44c"
 }
 ```
 
@@ -3077,6 +3122,7 @@ Stato: 200 OK.
 | `periodPrices[].price` | number (decimale, €) \| null | `1.2` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
+| `version` | string | `37b6a44c` |
 
 ### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
 
@@ -3099,36 +3145,41 @@ Nessun corpo: è una GET, l'id del servizio bar va nella query string.
 Stato: 200 OK.
 
 ```json
-[
-  {
-    "dateFrom": "2026-07-01T00:00:00.000Z",
-    "dateTo": "2026-07-31T00:00:00.000Z",
-    "managementStartTime": "08:00",
-    "managementEndTime": "12:00",
-    "onlineStartTime": "08:30",
-    "onlineEndTime": "11:30",
-    "maxBookingPerHourQuantity": 20,
-    "maxBookingPerDayQuantity": 80,
-    "timeInterval": "ThirtyMinutes",
-    "minItemPerBookingQuantity": 1,
-    "maxItemPerBookingQuantity": 4
-  }
-]
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-07-01T00:00:00.000Z",
+      "dateTo": "2026-07-31T00:00:00.000Z",
+      "managementStartTime": "08:00",
+      "managementEndTime": "12:00",
+      "onlineStartTime": "08:30",
+      "onlineEndTime": "11:30",
+      "maxBookingPerHourQuantity": 20,
+      "maxBookingPerDayQuantity": 80,
+      "timeInterval": "ThirtyMinutes",
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 4
+    }
+  ],
+  "version": "96f5de5b"
+}
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
-| `dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
-| `managementStartTime` | string (HH:mm) \| null | `08:00` |
-| `managementEndTime` | string (HH:mm) \| null | `12:00` |
-| `onlineStartTime` | string (HH:mm) \| null | `08:30` |
-| `onlineEndTime` | string (HH:mm) \| null | `11:30` |
-| `maxBookingPerHourQuantity` | number (intero) \| null | `20` |
-| `maxBookingPerDayQuantity` | number (intero) \| null | `80` |
-| `timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
-| `minItemPerBookingQuantity` | number (intero) \| null | `1` |
-| `maxItemPerBookingQuantity` | number (intero) \| null | `4` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "08:00", "managementEndTime": "12:00", "onlineStartTime": "08:30", "onlineEndTime": "11:30", "maxBookingPerHourQuantity": 20, "maxBookingPerDayQuantity": 80, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 4}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `08:00` |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `12:00` |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `08:30` |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `11:30` |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `20` |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `80` |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `4` |
+| `version` | string | `96f5de5b` |
 
 ### POST `/api/catalog/update-bar-service-general`
 
@@ -3566,7 +3617,8 @@ Stato: 200 OK.
     }
   ],
   "icon": "Shower",
-  "isHighlighted": true
+  "isHighlighted": true,
+  "version": "339ffdae"
 }
 ```
 
@@ -3579,6 +3631,7 @@ Stato: 200 OK.
 | `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
 | `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
 | `isHighlighted` | boolean | `true` |
+| `version` | string | `339ffdae` |
 
 ### GET `/api/catalog/get-standard-service-prices?idStandardService={idStandardService}`
 
@@ -3614,7 +3667,8 @@ Stato: 200 OK.
   "idSectors": [
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
-  "isOnlinePurchaseEnabled": true
+  "isOnlinePurchaseEnabled": true,
+  "version": "52f0d596"
 }
 ```
 
@@ -3628,6 +3682,7 @@ Stato: 200 OK.
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
+| `version` | string | `52f0d596` |
 
 ### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
 
@@ -3650,36 +3705,41 @@ Nessun corpo: è una GET, l'id del servizio va nella query string.
 Stato: 200 OK.
 
 ```json
-[
-  {
-    "dateFrom": "2026-06-15T00:00:00.000Z",
-    "dateTo": "2026-09-15T00:00:00.000Z",
-    "managementStartTime": "09:00",
-    "managementEndTime": "19:00",
-    "onlineStartTime": "09:00",
-    "onlineEndTime": "18:00",
-    "maxBookingPerHourQuantity": 6,
-    "maxBookingPerDayQuantity": 50,
-    "timeInterval": "FifteenMinutes",
-    "minItemPerBookingQuantity": 1,
-    "maxItemPerBookingQuantity": 2
-  }
-]
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-15T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "managementStartTime": "09:00",
+      "managementEndTime": "19:00",
+      "onlineStartTime": "09:00",
+      "onlineEndTime": "18:00",
+      "maxBookingPerHourQuantity": 6,
+      "maxBookingPerDayQuantity": 50,
+      "timeInterval": "FifteenMinutes",
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 2
+    }
+  ],
+  "version": "f71a86f3"
+}
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
-| `dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
-| `managementStartTime` | string (HH:mm) \| null | `09:00` |
-| `managementEndTime` | string (HH:mm) \| null | `19:00` |
-| `onlineStartTime` | string (HH:mm) \| null | `09:00` |
-| `onlineEndTime` | string (HH:mm) \| null | `18:00` |
-| `maxBookingPerHourQuantity` | number (intero) \| null | `6` |
-| `maxBookingPerDayQuantity` | number (intero) \| null | `50` |
-| `timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
-| `minItemPerBookingQuantity` | number (intero) \| null | `1` |
-| `maxItemPerBookingQuantity` | number (intero) \| null | `2` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `18:00` |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `6` |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `50` |
+| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
+| `version` | string | `f71a86f3` |
 
 ### POST `/api/catalog/update-standard-service-general`
 
@@ -4277,7 +4337,8 @@ Stato: 200 OK.
     }
   ],
   "icon": "Surfing",
-  "isHighlighted": false
+  "isHighlighted": false,
+  "version": "c293ede7"
 }
 ```
 
@@ -4290,6 +4351,7 @@ Stato: 200 OK.
 | `translations[].description` | string \| null | `Tavola da stand up paddle con pagaia, a noleggio a ore.` |
 | `icon` | string (enum StandardServiceIcon) \| null | `Surfing` |
 | `isHighlighted` | boolean | `false` |
+| `version` | string | `c293ede7` |
 
 ### GET `/api/catalog/get-hourly-service-prices?idHourlyService={idHourlyService}`
 
@@ -4385,7 +4447,8 @@ Stato: 200 OK.
   "idSectors": [
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
   ],
-  "isOnlinePurchaseEnabled": true
+  "isOnlinePurchaseEnabled": true,
+  "version": "afabd0e9"
 }
 ```
 
@@ -4410,6 +4473,7 @@ Stato: 200 OK.
 | `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
+| `version` | string | `afabd0e9` |
 
 ### GET `/api/catalog/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
 
@@ -4432,93 +4496,98 @@ Nessun corpo: è una GET, l'id del servizio orario va nella query string.
 Stato: 200 OK.
 
 ```json
-[
-  {
-    "dateFrom": "2026-06-01T00:00:00.000Z",
-    "dateTo": "2026-09-15T00:00:00.000Z",
-    "availabilityOption": {
-      "startTime": "09:00",
-      "endTime": "19:00",
-      "daysOfWeek": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
-      "timeSlotPrices": [
-        {
-          "timeSlot": "TenMinutes",
-          "isEnabled": true,
-          "price": 3
-        },
-        {
-          "timeSlot": "FifteenMinutes",
-          "isEnabled": false,
-          "price": null
-        },
-        {
-          "timeSlot": "ThirtyMinutes",
-          "isEnabled": true,
-          "price": 8
-        },
-        {
-          "timeSlot": "FortyFiveMinutes",
-          "isEnabled": false,
-          "price": null
-        },
-        {
-          "timeSlot": "OneHour",
-          "isEnabled": true,
-          "price": 15
-        },
-        {
-          "timeSlot": "OneHourThirtyMinutes",
-          "isEnabled": false,
-          "price": null
-        },
-        {
-          "timeSlot": "TwoHours",
-          "isEnabled": true,
-          "price": 25
-        },
-        {
-          "timeSlot": "ThreeHours",
-          "isEnabled": false,
-          "price": null
-        }
-      ],
-      "isCustomTimeSlotEnabled": true,
-      "customTimeSlotMinuteQuantity": 20,
-      "customTimeSlotPrice": 6,
-      "vatRate": 22,
-      "maxBookingPerTimeSlotQuantity": 4,
-      "hasFixedTimeSlots": false
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "availabilityOption": {
+        "startTime": "09:00",
+        "endTime": "19:00",
+        "daysOfWeek": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "timeSlotPrices": [
+          {
+            "timeSlot": "TenMinutes",
+            "isEnabled": true,
+            "price": 3
+          },
+          {
+            "timeSlot": "FifteenMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "ThirtyMinutes",
+            "isEnabled": true,
+            "price": 8
+          },
+          {
+            "timeSlot": "FortyFiveMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "OneHour",
+            "isEnabled": true,
+            "price": 15
+          },
+          {
+            "timeSlot": "OneHourThirtyMinutes",
+            "isEnabled": false,
+            "price": null
+          },
+          {
+            "timeSlot": "TwoHours",
+            "isEnabled": true,
+            "price": 25
+          },
+          {
+            "timeSlot": "ThreeHours",
+            "isEnabled": false,
+            "price": null
+          }
+        ],
+        "isCustomTimeSlotEnabled": true,
+        "customTimeSlotMinuteQuantity": 20,
+        "customTimeSlotPrice": 6,
+        "vatRate": 22,
+        "maxBookingPerTimeSlotQuantity": 4,
+        "hasFixedTimeSlots": false
+      }
     }
-  }
-]
+  ],
+  "version": "dec5d66e"
+}
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
-| `dateTo` | string (ISO 8601, UTC) \| null | `2026-09-15T00:00:00.000Z` |
-| `availabilityOption` | ServiceAvailabilityOption (oggetto) | `{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}` |
-| `availabilityOption.startTime` | string (HH:mm) \| null | `09:00` |
-| `availabilityOption.endTime` | string (HH:mm) \| null | `19:00` |
-| `availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
-| `availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
-| `availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
-| `availabilityOption.timeSlotPrices[].isEnabled` | boolean | `true` |
-| `availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
-| `availabilityOption.isCustomTimeSlotEnabled` | boolean | `true` |
-| `availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
-| `availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null | `6` |
-| `availabilityOption.vatRate` | number (decimale, %) \| null | `22` |
-| `availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
-| `availabilityOption.hasFixedTimeSlots` | boolean | `false` |
+| `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
+| `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
+| `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) | `{"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}` |
+| `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null | `09:00` |
+| `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null | `19:00` |
+| `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) | `[{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}]` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) | `TenMinutes` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].isEnabled` | boolean | `true` |
+| `bookingOptions[].availabilityOption.timeSlotPrices[].price` | number (decimale, €) \| null | `3` |
+| `bookingOptions[].availabilityOption.isCustomTimeSlotEnabled` | boolean | `true` |
+| `bookingOptions[].availabilityOption.customTimeSlotMinuteQuantity` | number (intero, minuti) \| null | `20` |
+| `bookingOptions[].availabilityOption.customTimeSlotPrice` | number (decimale, €) \| null | `6` |
+| `bookingOptions[].availabilityOption.vatRate` | number (decimale, %) \| null | `22` |
+| `bookingOptions[].availabilityOption.maxBookingPerTimeSlotQuantity` | number (intero) \| null | `4` |
+| `bookingOptions[].availabilityOption.hasFixedTimeSlots` | boolean | `false` |
+| `version` | string | `dec5d66e` |
 
 ### POST `/api/catalog/update-hourly-service-general`
 
@@ -5069,7 +5138,8 @@ Stato: 200 OK.
       "description": "Cover charge per person for the bar services."
     }
   ],
-  "icon": "Cutlery"
+  "icon": "Cutlery",
+  "version": "390a8384"
 }
 ```
 
@@ -5081,6 +5151,7 @@ Stato: 200 OK.
 | `translations[].serviceName` | string \| null | `Coperto` |
 | `translations[].description` | string \| null | `Coperto a persona per i servizi del bar.` |
 | `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null | `Cutlery` |
+| `version` | string | `390a8384` |
 
 ### GET `/api/catalog/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
 
@@ -5145,7 +5216,8 @@ Stato: 200 OK.
   "isPricePerServiceEnabled": true,
   "idSectors": [
     "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
-  ]
+  ],
+  "version": "5221df56"
 }
 ```
 
@@ -5166,6 +5238,7 @@ Stato: 200 OK.
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
 | `isPricePerServiceEnabled` | boolean | `true` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
+| `version` | string | `5221df56` |
 
 ### POST `/api/catalog/update-automatic-price-general`
 
@@ -5658,7 +5731,8 @@ Stato: 200 OK.
       "description": "Restaurant tables for lunch."
     }
   ],
-  "isHighlighted": true
+  "isHighlighted": true,
+  "version": "05be1153"
 }
 ```
 
@@ -5670,6 +5744,7 @@ Stato: 200 OK.
 | `translations[].serviceName` | string \| null | `Pranzo` |
 | `translations[].description` | string \| null | `Tavoli del ristorante per il pranzo.` |
 | `isHighlighted` | boolean | `true` |
+| `version` | string | `05be1153` |
 
 ### GET `/api/catalog/get-table-service-availability-bookings?idTableService={idTableService}`
 
@@ -5767,7 +5842,8 @@ Stato: 200 OK.
   "bookingPayment": "Deposit",
   "depositMode": "Total",
   "depositPercentage": 20,
-  "isOnlineBookingEnabled": true
+  "isOnlineBookingEnabled": true,
+  "version": "75208201"
 }
 ```
 
@@ -5795,6 +5871,7 @@ Stato: 200 OK.
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) | `Total` |
 | `depositPercentage` | number (decimale, %) \| null | `20` |
 | `isOnlineBookingEnabled` | boolean | `true` |
+| `version` | string | `75208201` |
 
 ### POST `/api/catalog/update-table-service-general`
 
@@ -6056,7 +6133,9 @@ Stato: 200 OK.
       }
     ]
   },
-  "resetDeletesBookings": false
+  "resetDeletesBookings": false,
+  "backgroundVersion": "953d1375",
+  "configurationVersion": "74bc5be3"
 }
 ```
 
@@ -6097,6 +6176,8 @@ Stato: 200 OK.
 | `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
 | `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `resetDeletesBookings` | boolean | `false` |
+| `backgroundVersion` | string | `953d1375` |
+| `configurationVersion` | string | `74bc5be3` |
 
 ### PUT `/api/catalog/map/update-background`
 
@@ -6253,7 +6334,9 @@ Stato: 200 OK.
       }
     ]
   },
-  "resetDeletesBookings": false
+  "resetDeletesBookings": false,
+  "backgroundVersion": "b0a7f6ba",
+  "configurationVersion": "74bc5be3"
 }
 ```
 
@@ -6294,6 +6377,8 @@ Stato: 200 OK.
 | `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
 | `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `resetDeletesBookings` | boolean | `false` |
+| `backgroundVersion` | string | `b0a7f6ba` |
+| `configurationVersion` | string | `74bc5be3` |
 
 ### DELETE `/api/catalog/map/background`
 
@@ -6366,7 +6451,9 @@ Stato: 200 OK.
       }
     ]
   },
-  "resetDeletesBookings": false
+  "resetDeletesBookings": false,
+  "backgroundVersion": "3828b8cd",
+  "configurationVersion": "74bc5be3"
 }
 ```
 
@@ -6403,6 +6490,8 @@ Stato: 200 OK.
 | `icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
 | `icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `resetDeletesBookings` | boolean | `false` |
+| `backgroundVersion` | string | `3828b8cd` |
+| `configurationVersion` | string | `74bc5be3` |
 
 ### POST `/api/catalog/map/reset`
 
@@ -6481,7 +6570,9 @@ Stato: 200 OK.
         }
       ]
     },
-    "resetDeletesBookings": false
+    "resetDeletesBookings": false,
+    "backgroundVersion": "953d1375",
+    "configurationVersion": "76b811ec"
   },
   "spots": [],
   "sectors": [
@@ -6497,7 +6588,7 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `settings` | MapSettings | `{"rows": 1, "columns": 1, "tiltDegrees": 0, "backgroundColor": "#F0D8CC", "background": {"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}, "icons": {"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}, "resetDeletesBookings": false}` |
+| `settings` | MapSettings | `{"rows": 1, "columns": 1, "tiltDegrees": 0, "backgroundColor": "#F0D8CC", "background": {"iconId": null, "name": "BackgroundBeach", "url": null, "isCustom": false}, "icons": {"umbrella": {"free": {"iconId": null, "name": "Umbrella3", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot4", "url": null, "isDefault": false}}, "customArticles": [{"variant": 1, "icons": {"free": {"iconId": null, "name": "MixedSpot1", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": "MixedSpot13", "url": null, "isDefault": false}}}, {"variant": 2, "icons": {"free": {"iconId": null, "name": "MixedSpot8", "url": null, "isDefault": false}, "occupied": {"iconId": null, "name": null, "url": null, "isDefault": true}}}]}, "resetDeletesBookings": false, "backgroundVersion": "953d1375", "configurationVersion": "76b811ec"}` |
 | `settings.rows` | number (intero) | `1` |
 | `settings.columns` | number (intero) | `1` |
 | `settings.tiltDegrees` | number (intero) | `0` |
@@ -6533,6 +6624,8 @@ Stato: 200 OK.
 | `settings.icons.customArticles[].icons.occupied.url` | string (URL) \| null | `null` |
 | `settings.icons.customArticles[].icons.occupied.isDefault` | boolean | `false` |
 | `settings.resetDeletesBookings` | boolean | `false` |
+| `settings.backgroundVersion` | string | `953d1375` |
+| `settings.configurationVersion` | string | `76b811ec` |
 | `spots` | array di oggetti | `[]` |
 | `sectors` | array di oggetti | `[{"id": "3f6b2a1c-8d4e-4c7a-9b5f-2e1d0c9a8b71", "name": "Fila A", "sortOrder": 1}]` |
 | `beachElements` | array di oggetti | `[]` |
@@ -6573,15 +6666,18 @@ Stato: 200 OK.
   "rows": [
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01",
-      "sectorName": "Fila 1"
+      "sectorName": "Fila 1",
+      "version": "1ababee5"
     },
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02",
-      "sectorName": "Fila 2"
+      "sectorName": "Fila 2",
+      "version": "ba89f270"
     },
     {
       "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03",
-      "sectorName": "Fila 3"
+      "sectorName": "Fila 3",
+      "version": "785a83d1"
     }
   ]
 }
@@ -6590,9 +6686,10 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `3` |
-| `rows[]` | SectorItem[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "sectorName": "Fila 1"}, {"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "sectorName": "Fila 2"}, {"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03", "sectorName": "Fila 3"}]` |
+| `rows[]` | SectorItem[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "sectorName": "Fila 1", "version": "1ababee5"}, {"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "sectorName": "Fila 2", "version": "ba89f270"}, {"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a03", "sectorName": "Fila 3", "version": "785a83d1"}]` |
 | `rows[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `rows[].sectorName` | string \| null | `Fila 1` |
+| `rows[].version` | string | `1ababee5` |
 
 ### POST `/api/catalog/sectors`
 
@@ -7181,7 +7278,8 @@ Stato: 200 OK.
       "dayQuantity": 2,
       "price": 35
     }
-  ]
+  ],
+  "version": "57e34fdc"
 }
 ```
 
@@ -7243,6 +7341,7 @@ Stato: 200 OK.
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
+| `version` | string | `57e34fdc` |
 
 ### POST `/api/catalog/packages/update-package`
 
@@ -7726,7 +7825,8 @@ Stato: 200 OK.
       "dayQuantity": 2,
       "price": 35
     }
-  ]
+  ],
+  "version": "9864e3d5"
 }
 ```
 
@@ -7767,6 +7867,7 @@ Stato: 200 OK.
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
 | `intermediatePrices[].dayQuantity` | number (intero) | `2` |
 | `intermediatePrices[].price` | number | `35` |
+| `version` | string | `9864e3d5` |
 
 ### POST `/api/catalog/update-additional-services-article-item`
 
@@ -8230,7 +8331,8 @@ Stato: 200 OK.
   "isDepositAccepted": false,
   "isPrepaidCardAccepted": true,
   "bookingPanelTitle": "<p>Prenota i tuoi servizi.</p>",
-  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>"
+  "usefulInformation": "<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>",
+  "version": "0fb5c88e"
 }
 ```
 
@@ -8247,6 +8349,7 @@ Stato: 200 OK.
 | `isPrepaidCardAccepted` | boolean | `true` |
 | `bookingPanelTitle` | string (HTML) \| null | `<p>Prenota i tuoi servizi.</p>` |
 | `usefulInformation` | string (HTML) \| null | `<p>Il <strong>parcheggio</strong> è gratuito per i clienti.</p>` |
+| `version` | string | `0fb5c88e` |
 
 ### POST `/api/booking/update-online-services-options`
 
@@ -8312,7 +8415,8 @@ Stato: 200 OK.
   "smtpPort": 587,
   "smtpUsername": "prenotazioni@lido-demo.example",
   "hasSmtpPassword": true,
-  "smtpSecurity": "Tls"
+  "smtpSecurity": "Tls",
+  "version": "9e40274f"
 }
 ```
 
@@ -8325,6 +8429,7 @@ Stato: 200 OK.
 | `smtpUsername` | string | `prenotazioni@lido-demo.example` |
 | `hasSmtpPassword` | boolean | `true` |
 | `smtpSecurity` | string (enum SmtpSecurity) | `Tls` |
+| `version` | string | `9e40274f` |
 
 ### POST `/api/system/send-test-email`
 

@@ -208,7 +208,7 @@ export class Vouchers {
     }
   }
 
-  protected forgetDeleted(idVouchers: readonly string[]): void {
+  protected forgetDeleted(idVouchers: readonly (string | null)[]): void {
     this.idSelectedVouchers.update((idSelected) =>
       idSelected.filter((idSelectedVoucher) => !idVouchers.includes(String(idSelectedVoucher))),
     );
@@ -217,10 +217,16 @@ export class Vouchers {
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idVouchers: readonly string[],
+    idVouchers: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.ResourceNotFound) {
       this.forgetDeleted(idVouchers);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
       table.reload();
     }
   }

@@ -35,4 +35,6 @@ export class MapSettings {
   background: MapBackground | null = null;
   icons = new MapIcons();
   resetDeletesBookings = false;
+  backgroundVersion: string | null = null;
+  configurationVersion: string | null = null;
 }

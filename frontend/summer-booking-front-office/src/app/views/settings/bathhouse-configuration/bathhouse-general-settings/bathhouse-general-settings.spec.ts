@@ -1,23 +1,30 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../behaviours/auth/auth.behaviour';
 import { BathhouseConfigurationCacheBehaviour } from '../../../../behaviours/settings/bathhouse-configuration-cache.behaviour';
-import { BathhouseGeneralInformation } from '../../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
+import { ApiErrorCode } from '../../../../entities/errors/api-error-codes';
+import { BathhouseSelectedGeneralInformation } from '../../../../entities/settings/bathhouse-configuration/bathhouse-selected-general-information';
 import { Country } from '../../../../entities/shared/country';
 import { CatalogService } from '../../../../services/api/catalog/catalog.service';
 import { BathhouseGeneralSettings } from './bathhouse-general-settings';
 
 describe('BathhouseGeneralSettings', () => {
-  it('should count as a change only a value different from the one read, spaces at the sides aside', async () => {
-    const information = new BathhouseGeneralInformation();
+  const setup = async (
+    saveBathhouseConfigurationGeneral = vi.fn((): Observable<string | null> => of('v2')),
+  ) => {
+    const information = new BathhouseSelectedGeneralInformation();
     information.bathhouseName = 'Lido Demo';
     information.country = 'IT';
+    information.version = 'v1';
     const country = new Country();
     country.code = 'IT';
     country.name = 'Italia';
+    const generalInformation = vi.fn(() => of(information));
+    const forgetGeneralInformation = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -26,12 +33,13 @@ describe('BathhouseGeneralSettings', () => {
         {
           provide: BathhouseConfigurationCacheBehaviour,
           useValue: {
-            generalInformation: () => of(information),
+            generalInformation,
             countries: () => of([country]),
             keepGeneralInformation: vi.fn(),
+            forgetGeneralInformation,
           },
         },
-        { provide: CatalogService, useValue: { saveBathhouseConfigurationGeneral: vi.fn() } },
+        { provide: CatalogService, useValue: { saveBathhouseConfigurationGeneral } },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
@@ -56,20 +64,73 @@ describe('BathhouseGeneralSettings', () => {
     const fixture = TestBed.createComponent(BathhouseGeneralSettings);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
-    element
-      .querySelector<HTMLButtonElement>('.bathhouse__general__settings__actions button')!
-      .click();
+    const actions = () => [
+      ...element.querySelectorAll<HTMLButtonElement>(
+        '.bathhouse__general__settings__actions button',
+      ),
+    ];
+    actions()[0].click();
     await fixture.whenStable();
-    const bathhouseName = element.querySelector('input')!;
+    const bathhouseName = () => element.querySelector('input')!;
     const type = async (text: string) => {
-      bathhouseName.value = text;
-      bathhouseName.dispatchEvent(new Event('input'));
+      bathhouseName().value = text;
+      bathhouseName().dispatchEvent(new Event('input'));
       await fixture.whenStable();
     };
+    return {
+      fixture,
+      element,
+      actions,
+      bathhouseName,
+      type,
+      generalInformation,
+      forgetGeneralInformation,
+      saveBathhouseConfigurationGeneral,
+    };
+  };
+
+  afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
+
+  it('should count as a change only a value different from the one read, spaces at the sides aside', async () => {
+    const { fixture, type } = await setup();
 
     await type('Lido Nuovo');
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
     await type(' Lido Demo ');
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('should read the information again and say why when someone changed it after the read', async () => {
+    const save = vi.fn((): Observable<string | null> =>
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+    const {
+      fixture,
+      element,
+      actions,
+      bathhouseName,
+      type,
+      generalInformation,
+      forgetGeneralInformation,
+    } = await setup(save);
+    await type('Lido Nuovo');
+
+    actions()[1].click();
+    await fixture.whenStable();
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({ bathhouseName: 'Lido Nuovo' }),
+      'v1',
+    );
+    expect(forgetGeneralInformation).toHaveBeenCalled();
+    expect(generalInformation).toHaveBeenCalledTimes(2);
+    expect(bathhouseName().value).toBe('Lido Demo');
+    expect(document.querySelector('.table__error__popup')).not.toBeNull();
+    expect(element.querySelector('.bathhouse__general__settings__error')).toBeNull();
   });
 });

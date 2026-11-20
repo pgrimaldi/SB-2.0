@@ -24,7 +24,7 @@ describe('SectorService', () => {
     };
     const page: Page<SectorItem> = {
       total: 11,
-      rows: [{ idSector: 's11', sectorName: 'Fila 11' }],
+      rows: [{ idSector: 's11', sectorName: 'Fila 11', version: 'v1' }],
     };
     let answer: Page<SectorItem> | undefined;
 
@@ -80,24 +80,25 @@ describe('SectorService', () => {
     controller.verify();
   });
 
-  it('should rename a sector with its id in the address and the new name', () => {
+  it('should rename a sector with its id in the address, the new name and the version of its row', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     const sectors = TestBed.inject(SectorService);
     const controller = TestBed.inject(HttpTestingController);
     const sector: Sector = { id: 's1', name: 'Fila A', sortOrder: 0 };
-    let answer: Sector | undefined;
+    let version: string | null | undefined;
 
-    sectors.updateSector('s1', 'Fila A').subscribe((saved) => (answer = saved));
+    sectors.updateSector('s1', 'Fila A', 'v1').subscribe((saved) => (version = saved));
 
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'PUT' && url === `${environment.apiBaseUrl}/catalog/sectors/s1`,
     );
     expect(call.request.body).toEqual({ name: 'Fila A' });
-    call.flush(sector);
-    expect(answer).toEqual(sector);
+    expect(call.request.headers.get('If-Match')).toBe('"v1"');
+    call.flush(sector, { headers: { ETag: '"v2"' } });
+    expect(version).toBe('v2');
     controller.verify();
   });
 
@@ -109,7 +110,7 @@ describe('SectorService', () => {
     const controller = TestBed.inject(HttpTestingController);
     const encoded = `${environment.apiBaseUrl}/catalog/sectors/..%2Fsettings%3Fx%3D1`;
 
-    sectors.updateSector('../settings?x=1', 'Fila A').subscribe();
+    sectors.updateSector('../settings?x=1', 'Fila A', null).subscribe();
 
     controller.expectOne(({ method, url }) => method === 'PUT' && url === encoded);
     controller.verify();

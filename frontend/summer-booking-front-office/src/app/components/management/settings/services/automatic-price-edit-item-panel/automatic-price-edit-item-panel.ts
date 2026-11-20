@@ -30,6 +30,7 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
@@ -53,6 +54,8 @@ import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-ta
 import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-validity-tab/automatic-price-prices-validity-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServiceFormTexts {
   tabs: {
@@ -89,10 +92,12 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof AutomaticPriceAddIte
     AutomaticPriceGeneralInfoTab,
     AutomaticPricePricesValidityTab,
     Button,
+    ReadErrorPopup,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './automatic-price-edit-item-panel.html',
   styleUrl: './automatic-price-edit-item-panel.scss',
@@ -104,6 +109,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly catalog = inject(CatalogService);
@@ -167,6 +173,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
   private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The version of each tab read: its save sends it back. */
+  private readonly versions = new Map<PanelTab, string | null>();
   protected readonly isEditDisabled = computed(() => {
     const tab = this.selectedTab() as PanelTab;
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
@@ -181,6 +189,15 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
+  protected readonly tabErrorMessage = toSignal(
+    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -288,8 +305,15 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         this.open.set(false);
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reloadTab(tab);
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -339,25 +363,47 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
   }
 
-  /** The tab is read again the next time it is opened. */
+  /**
+   * At the opening (no tab read yet) the panel closes for the read-error popup; later the error stays
+   * in the tab, with Riprova.
+   */
   private loadFailed(tab: PanelTab, error: unknown): void {
     this.loadedTabs.update((tabs) => {
       const next = new Set(tabs);
       next.delete(tab);
       return next;
     });
-    this.error.set(toApiProblem(error));
+    const problem = toApiProblem(error);
+    this.failed.emit(problem);
+    if (this.loadedTabs().size === 0) {
+      this.readError.set(problem);
+      this.open.set(false);
+      return;
+    }
+    this.tabErrors.update((errors) => new Map(errors).set(tab, problem));
   }
 
-  /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idAutomaticPrice: string): Observable<void> {
+  private reloadTab(tab: PanelTab): void {
+    this.cancelEdit();
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
+  /** The update API of the tab, with the fields of that tab only, and the version read. */
+  private update(tab: PanelTab, idAutomaticPrice: string): Observable<string | null> {
     const draft = this.draft();
+    const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateAutomaticPriceGeneral(
         Object.assign(new AutomaticPriceUpdateGeneralRequest(), {
           idAutomaticPrice,
           ...pick(draft, tab),
         }),
+        version,
       );
     }
     return this.catalog.updateAutomaticPricePricesValidity(
@@ -365,12 +411,29 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         idAutomaticPrice,
         ...pick(draft, tab),
       }),
+      version,
     );
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  protected retryTab(): void {
+    const tab = this.selectedTab() as PanelTab;
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
   private reset(): void {
+    this.tabErrors.set(new Map());
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+    this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
     this.error.set(null);
@@ -388,6 +451,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: AutomaticPriceSelectedGeneralInfo): void {
+    this.versions.set(PanelTab.GeneralInfo, info.version);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -405,6 +469,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     values: AutomaticPriceSelectedPricesValidity,
     services: AutomaticPriceServices,
   ): void {
+    this.versions.set(PanelTab.PricesValidity, values.version);
     this.services.set(services);
     this.applyLoaded({
       price: values.price,

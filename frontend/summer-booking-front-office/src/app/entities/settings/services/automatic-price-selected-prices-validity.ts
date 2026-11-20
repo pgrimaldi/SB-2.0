@@ -10,4 +10,5 @@ export class AutomaticPriceSelectedPricesValidity {
   idHourlyServices: string[] = [];
   isPricePerServiceEnabled: boolean | null = null;
   idSectors: string[] = [];
+  version: string | null = null;
 }

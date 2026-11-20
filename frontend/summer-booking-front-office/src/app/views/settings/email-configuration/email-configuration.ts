@@ -35,6 +35,7 @@ import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
+import { VersionConflictPopup } from '../../../components/management/version-conflict-popup/version-conflict-popup';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { FormRow } from '../../../components/shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../components/shared/ui/forms/form-row/form-row-label';
@@ -43,6 +44,7 @@ import { FilledTextField } from '../../../components/shared/ui/inputs/filled-tex
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { FilledSelect } from '../../../components/shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../components/shared/ui/selects/select/select';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import {
   EMAIL_CONFIGURATION_MASKED_FIELDS,
@@ -73,6 +75,7 @@ interface SecurityTexts {
     I18nText,
     MessagePopup,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './email-configuration.html',
   styleUrl: './email-configuration.scss',
@@ -110,6 +113,8 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
    * the password.
    */
   private readonly savedConnection = signal<EmailConfigurationRequest | null>(null);
+  /** The version of the configuration shown, sent back with Salva. */
+  private version: string | null = null;
   /** Goes up with every save that succeeds: a reading started before it answers older values. */
   private savesDone = 0;
   /**
@@ -161,6 +166,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected readonly testSent = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly saved = signal(false);
+  protected readonly isConflictShown = signal(false);
   protected readonly canOverride = computed(
     () => !this.editable() && this.loaded() && !this.isReloading(),
   );
@@ -205,8 +211,9 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
             if (savesAtStart !== this.savesDone) {
               return; // the values just saved are newer than this answer
             }
-            const { hasSmtpPassword, ...fields } = data;
+            const { hasSmtpPassword, version, ...fields } = data;
             const configuration = { ...fields, smtpPassword: null };
+            this.version = version;
             this.configuration.set(configuration);
             this.passwordSaved.set(hasSmtpPassword);
             this.savedConnection.set(configuration);
@@ -246,12 +253,13 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
   protected save(): void {
     this.submitWith(
       this.isSaving,
-      (request) => this.system.saveEmailConfiguration(request),
-      (sent) => {
+      (request) => this.system.saveEmailConfiguration(request, this.version),
+      (sent, version) => {
         // From what was sent, not from the form: a reading may have changed it meanwhile. The
         // password, now saved, leaves the page: the field is empty again.
         const savedValues = { ...sent, smtpPassword: null };
         this.savesDone++;
+        this.version = version;
         this.passwordSaved.update((saved) => saved || sent.smtpPassword !== null);
         this.savedConnection.set(savedValues);
         this.configuration.set(savedValues);
@@ -266,10 +274,10 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
    * Through Signal Forms `submit()`: nothing is sent while a field is wrong (every field becomes
    * touched, so each shows its error), and an error of the backend on a field goes under that field.
    */
-  private submitWith(
+  private submitWith<T>(
     isRunning: WritableSignal<boolean>,
-    call: (request: EmailConfigurationRequest) => Observable<void>,
-    done: (sent: EmailConfigurationRequest) => void,
+    call: (request: EmailConfigurationRequest) => Observable<T>,
+    done: (sent: EmailConfigurationRequest, answer: T) => void,
   ): void {
     if (this.isBusy() || !this.loaded() || !this.auth.user()?.propertyId) {
       return;
@@ -279,8 +287,7 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const request = { ...this.configuration() };
-        await firstValueFrom(call(request));
-        done(request);
+        done(request, await firstValueFrom(call(request)));
       } catch (error: unknown) {
         return this.failed(toApiProblem(error));
       } finally {
@@ -291,9 +298,15 @@ export class EmailConfiguration implements UnsavedChanges, OnDestroy {
 
   /**
    * The errors on a field go under it; any other error under the panel. Read-only fields show no
-   * error (Signal Forms does not validate them): then the message goes under the panel too.
+   * error (Signal Forms does not validate them): then the message goes under the panel too. After a
+   * version conflict the configuration is read again, as with Reset.
    */
   private failed(problem: ApiProblem): TreeValidationResult {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      this.isConflictShown.set(true);
+      this.reset();
+      return undefined;
+    }
     const errors = apiFieldErrorsOrGeneral(problem, this.configurationForm, (general) =>
       this.error.set(general),
     );

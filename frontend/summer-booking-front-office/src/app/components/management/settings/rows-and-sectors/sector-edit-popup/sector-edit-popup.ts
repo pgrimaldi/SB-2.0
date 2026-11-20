@@ -49,20 +49,21 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { sameText } from '../../../../shared/forms/text-comparison';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 @Component({
   selector: 'app-sector-edit-popup',
-  imports: [Button, FilledTextField, FormField, TranslatePipe],
+  imports: [Button, FilledTextField, FormField, TranslatePipe, VersionConflictPopup],
   templateUrl: './sector-edit-popup.html',
   styleUrl: './sector-edit-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
 export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDestroy {
-  /** The row of the pencil, with the name it has now. */
+  /** The row of the pencil, with the name and the version it has now. */
   readonly sector = input<SectorItem | null>(null);
   readonly updated = output<void>();
-  /** Every error of the save, e.g. for the page to reload the table on a 404. */
+  /** Every error of the save, e.g. for the page to reload the table on a 404 or a version conflict. */
   readonly failed = output<ApiProblem>();
 
   private readonly sectors = inject(SectorService);
@@ -83,6 +84,7 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
   protected readonly nameError = this.validationText.message(this.sectorForm.name);
   protected readonly canSave = computed(() => this.sectorForm().valid());
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -116,13 +118,25 @@ export class SectorEditPopup extends BasePopup implements UnsavedChanges, OnDest
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.sectors.updateSector(idSector, this.draft().name ?? ''));
+        await firstValueFrom(
+          this.sectors.updateSector(
+            idSector,
+            this.draft().name ?? '',
+            this.sector()?.version ?? null,
+          ),
+        );
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.isLoading.set(false);
+          this.close();
+          return undefined;
+        }
         if (problem.code === ApiErrorCode.CatalogSectorNameTaken) {
           return apiFieldError(this.sectorForm.name, problem.code);
         }

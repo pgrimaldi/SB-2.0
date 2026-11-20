@@ -3,4 +3,5 @@ export class SeasonDates {
   endsOn: string | null = null;
   nextStartsOn: string | null = null;
   nextEndsOn: string | null = null;
+  version: string | null = null;
 }

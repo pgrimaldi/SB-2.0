@@ -141,4 +141,14 @@ export class RowsAndSectors {
       table.reload();
     }
   }
+
+  /**
+   * A sector changed meanwhile by someone else: there is no read of one sector, so the table is read
+   * again, with the rows as they are now and their new versions.
+   */
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
+  }
 }

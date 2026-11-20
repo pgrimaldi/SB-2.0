@@ -25,10 +25,7 @@ import {
 import { MapBackgroundImage } from '../../../../../entities/enums/map-background-image';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import {
-  MapBackground,
-  MapSettings,
-} from '../../../../../entities/settings/map-configuration/map-settings';
+import { MapSettings } from '../../../../../entities/settings/map-configuration/map-settings';
 import {
   IMAGE_UPLOAD_TYPES,
   MAX_IMAGE_UPLOAD_MEGABYTES,
@@ -42,6 +39,7 @@ import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confir
 import { Spinner } from '../../../../shared/ui/spinners/spinner/spinner';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { FileDropZone } from '../../../../shared/ui/uploads/file-drop-zone/file-drop-zone';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 const BACKGROUND_SLOTS = [
   MapBackgroundImage.BackgroundBeach,
@@ -76,6 +74,7 @@ const PREVIEW_POSITIONS: ConnectedPosition[] = [
     SectionTitle,
     Spinner,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './map-background-panel.html',
   styleUrl: './map-background-panel.scss',
@@ -115,6 +114,12 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected readonly hasCustomImage = signal(false);
   protected readonly isDeletionAsked = signal(false);
   protected readonly isImageTooLarge = signal(false);
+  protected readonly isConflictShown = signal(false);
+  /** The read after a version conflict failed: Modifica stays off. */
+  private readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isLoaded = computed(
+    () => this.settings() !== null && this.readError() === null,
+  );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -124,7 +129,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   );
   private readonly saveError = signal<ApiProblem | null>(null);
   protected readonly saveErrorMessage = toSignal(
-    toObservable(computed(() => this.saveError() ?? this.loadError())).pipe(
+    toObservable(computed(() => this.saveError() ?? this.readError() ?? this.loadError())).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
     ),
     { initialValue: null },
@@ -132,6 +137,8 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   private savedSlot: number | null = null;
   private savedPreviewUrl: string | null = null;
   private savedHasCustomImage = false;
+  /** `backgroundVersion` of the background shown, sent back with Salva. */
+  private version: string | null = null;
   /** Address made in the browser for the last uploaded image: freed when it is replaced. */
   private localUrl: string | null = null;
   /** Address of the image still travelling: freed with its answer, or when the page closes first. */
@@ -143,7 +150,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       const settings = this.settings();
       if (settings) {
-        untracked(() => this.show(settings.background));
+        untracked(() => this.show(settings));
       }
     });
   }
@@ -158,7 +165,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected edit(): void {
-    if (this.settings()) {
+    if (this.isLoaded()) {
       this.isEditing.set(true);
     }
   }
@@ -200,8 +207,9 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.hasCustomImage.set(true);
     this.isBusy.set(true);
     this.request = this.mapService.uploadBackground(image).subscribe({
-      next: () => {
+      next: ({ backgroundVersion }) => {
         this.uploadingUrl = null;
+        this.version = backgroundVersion;
         this.keepLocalUrl(url);
         this.saved(null, url, true);
       },
@@ -238,7 +246,8 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     this.clearErrors();
     this.isBusy.set(true);
     this.request = this.mapService.removeBackground().subscribe({
-      next: () => {
+      next: ({ backgroundVersion }) => {
+        this.version = backgroundVersion;
         this.keepLocalUrl(null);
         this.saved(null, null, false);
       },
@@ -267,7 +276,7 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
   protected save(): void {
     const slot = this.chosenSlot();
     const name = slot === null ? null : BACKGROUND_SLOTS[slot];
-    if (this.isBusy() || !this.settings()) {
+    if (this.isBusy() || !this.isLoaded()) {
       return;
     }
     this.clearErrors();
@@ -277,22 +286,43 @@ export class MapBackgroundPanel implements UnsavedChanges, OnDestroy {
     }
     this.isBusy.set(true);
     this.isSaving.set(true);
-    this.request = this.mapService.updateBackground(name).subscribe({
-      next: () => {
+    this.request = this.mapService.updateBackground(name, this.version).subscribe({
+      next: (version) => {
+        this.version = version;
         this.keepLocalUrl(null);
         this.saved(slot, null, false);
       },
       error: (error: unknown) => {
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reload();
+          return;
+        }
         this.isBusy.set(false);
         this.isSaving.set(false);
-        this.saveError.set(toApiProblem(error));
+        this.saveError.set(problem);
+      },
+    });
+  }
+
+  private reload(): void {
+    this.request = this.mapService.settings().subscribe({
+      next: (settings) => this.show(settings),
+      error: (error: unknown) => {
+        this.cancel();
+        this.isBusy.set(false);
+        this.isSaving.set(false);
+        this.readError.set(toApiProblem(error));
       },
     });
   }
 
   /** A name this page does not know chooses no slot. */
-  private show(background: MapBackground | null): void {
+  private show({ background, backgroundVersion }: MapSettings): void {
     const slot = BACKGROUND_SLOTS.findIndex((name) => name !== null && name === background?.name);
+    this.version = backgroundVersion;
+    this.readError.set(null);
     this.keepLocalUrl(null);
     this.clearErrors();
     const isCustom = background?.isCustom ?? false;

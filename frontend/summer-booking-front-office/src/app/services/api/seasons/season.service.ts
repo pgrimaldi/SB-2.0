@@ -9,6 +9,7 @@ import { SeasonPeriodIntervalItem } from '../../../entities/settings/seasons/sea
 import { SeasonPeriodItem } from '../../../entities/settings/seasons/season-period-item';
 import { SeasonPeriodUpdateRequest } from '../../../entities/settings/seasons/season-period-update-request';
 import { onlyFieldsOf } from '../only-fields-of';
+import { ifMatch, versionOf } from '../versions/version-headers';
 
 @Injectable({ providedIn: 'root' })
 export class SeasonService {
@@ -20,11 +21,20 @@ export class SeasonService {
       .get<SeasonDates | null>(`${environment.apiBaseUrl}/catalog/season`)
       .pipe(map((answer) => seasonDatesOf(answer)));
 
-  /** All four days, for the property of the token. Answers 200 with the days as saved. */
-  readonly saveSeasonDates = (dates: SeasonDates): Observable<SeasonDates> =>
+  /**
+   * All four days, for the property of the token, with the version read. Answers 200 with the days as
+   * saved, which keep the new version.
+   */
+  readonly saveSeasonDates = (
+    dates: SeasonDates,
+    version: string | null,
+  ): Observable<SeasonDates> =>
     this.httpClient
-      .put<SeasonDates>(`${environment.apiBaseUrl}/catalog/season`, daysOf(dates))
-      .pipe(map((answer) => seasonDatesOf(answer)));
+      .put<SeasonDates>(`${environment.apiBaseUrl}/catalog/season`, daysOf(dates), {
+        headers: ifMatch(version),
+        observe: 'response',
+      })
+      .pipe(map((response) => ({ ...seasonDatesOf(response.body), version: versionOf(response) })));
 
   /** The tariff periods of the current season, or of the next one, of the property of the token. */
   readonly periodList = (isNextSeason: boolean): Observable<SeasonPeriodItem[]> =>
@@ -48,18 +58,26 @@ export class SeasonService {
   readonly deletePeriod = (isNextSeason: boolean, key: number): Observable<void> =>
     this.httpClient.delete<void>(`${periodsEndpoint(isNextSeason)}/${key}`);
 
-  /** Name and all the date intervals of the period, the ones it keeps too. Answers 200 with the period saved. */
+  /**
+   * Name and all the date intervals of the period, the ones it keeps too, with the version of the
+   * period read. Answers the new version.
+   */
   readonly updatePeriod = (
     isNextSeason: boolean,
     key: number,
     request: SeasonPeriodUpdateRequest,
-  ): Observable<SeasonPeriodItem> =>
+    version: string | null,
+  ): Observable<string | null> =>
     this.httpClient
-      .put<SeasonPeriodItem>(`${periodsEndpoint(isNextSeason)}/${key}`, {
-        ...onlyFieldsOf(SeasonPeriodUpdateRequest, request),
-        ranges: request.ranges.map(rangeDaysOf),
-      })
-      .pipe(map(periodOf));
+      .put<SeasonPeriodItem>(
+        `${periodsEndpoint(isNextSeason)}/${key}`,
+        {
+          ...onlyFieldsOf(SeasonPeriodUpdateRequest, request),
+          ranges: request.ranges.map(rangeDaysOf),
+        },
+        { headers: ifMatch(version), observe: 'response' },
+      )
+      .pipe(map(versionOf));
 
   /** Date intervals of one or more periods of the season, all or none. Answers 204 with no body. */
   readonly deleteRanges = (
@@ -82,6 +100,7 @@ function seasonDatesOf(answer: SeasonDates | null): SeasonDates {
     endsOn: midnightOf(days.endsOn),
     nextStartsOn: midnightOf(days.nextStartsOn),
     nextEndsOn: midnightOf(days.nextEndsOn),
+    version: days.version,
   };
 }
 
@@ -105,7 +124,7 @@ function rangeDaysOf(range: SeasonPeriodInterval): SeasonPeriodInterval {
   return { startsOn: dayOf(range.startsOn), endsOn: dayOf(range.endsOn) };
 }
 
-function daysOf(dates: SeasonDates): SeasonDates {
+function daysOf(dates: SeasonDates): Omit<SeasonDates, 'version'> {
   return {
     startsOn: dayOf(dates.startsOn),
     endsOn: dayOf(dates.endsOn),

@@ -30,12 +30,14 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { ServiceTimeSlot } from '../../../../../entities/enums/service-time-slot';
 import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceBookingOption } from '../../../../../entities/settings/services/hourly-service-booking-option';
+import { HourlyServiceSelectedBookingOptions } from '../../../../../entities/settings/services/hourly-service-selected-booking-options';
 import { HourlyServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedPrices } from '../../../../../entities/settings/services/hourly-service-selected-prices';
 import { HourlyServiceUpdateBookingRequest } from '../../../../../entities/settings/services/hourly-service-update-booking-request';
@@ -58,6 +60,8 @@ import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/
 import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface ServiceFormTexts {
   tabs: {
@@ -93,10 +97,12 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof HourlyServiceAddItem
     HourlyServiceBookingsTab,
     HourlyServiceGeneralInfoTab,
     HourlyServicePricesTab,
+    ReadErrorPopup,
     SidePanel,
     SidePanelButtons,
     TabGroup,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './hourly-service-edit-item-panel.html',
   styleUrl: './hourly-service-edit-item-panel.scss',
@@ -108,6 +114,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Icons as image paths: [X]. */
   readonly pathIcon = input<readonly string[] | null>();
   readonly updated = output<void>();
+  readonly failed = output<ApiProblem>();
 
   private readonly auth = inject(AuthBehaviour);
   private readonly catalog = inject(CatalogService);
@@ -182,6 +189,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
   private readonly loadingTabs = signal<ReadonlySet<PanelTab>>(new Set());
+  /** The version of each tab read: its save sends it back. */
+  private readonly versions = new Map<PanelTab, string | null>();
   protected readonly isEditDisabled = computed(() => {
     const tab = this.selectedTab() as PanelTab;
     return this.loadingTabs().has(tab) || !this.loadedTabs().has(tab);
@@ -196,6 +205,15 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly readError = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
+  private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
+  protected readonly tabErrorMessage = toSignal(
+    toObservable(computed(() => this.tabErrors().get(this.selectedTab() as PanelTab) ?? null)).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -303,8 +321,15 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         this.open.set(false);
         this.updated.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reloadTab(tab);
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -358,32 +383,54 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           .hourlyServiceBookingOptions(idHourlyService)
           .pipe(finalize(() => this.setLoading(tab, false)))
           .subscribe({
-            next: (options) => this.setBookingOptions(options),
+            next: (answer) => this.setBookingOptions(answer),
             error: (error: unknown) => this.loadFailed(tab, error),
           }),
       );
     }
   }
 
-  /** The tab is read again the next time it is opened. */
+  /**
+   * At the opening (no tab read yet) the panel closes for the read-error popup; later the error stays
+   * in the tab, with Riprova.
+   */
   private loadFailed(tab: PanelTab, error: unknown): void {
     this.loadedTabs.update((tabs) => {
       const next = new Set(tabs);
       next.delete(tab);
       return next;
     });
-    this.error.set(toApiProblem(error));
+    const problem = toApiProblem(error);
+    this.failed.emit(problem);
+    if (this.loadedTabs().size === 0) {
+      this.readError.set(problem);
+      this.open.set(false);
+      return;
+    }
+    this.tabErrors.update((errors) => new Map(errors).set(tab, problem));
   }
 
-  /** The update API of the tab, with the fields of that tab only. */
-  private update(tab: PanelTab, idHourlyService: string): Observable<void> {
+  private reloadTab(tab: PanelTab): void {
+    this.cancelEdit();
+    this.loadedTabs.update((tabs) => {
+      const next = new Set(tabs);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
+  /** The update API of the tab, with the fields of that tab only, and the version read. */
+  private update(tab: PanelTab, idHourlyService: string): Observable<string | null> {
     const draft = this.draft();
+    const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateHourlyServiceGeneral(
         Object.assign(new HourlyServiceUpdateGeneralRequest(), {
           idHourlyService,
           ...pick(draft, tab),
         }),
+        version,
       );
     }
     if (tab === PanelTab.Prices) {
@@ -396,6 +443,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
             ...this.hiddenPeriodAvailabilities(),
           ],
         }),
+        version,
       );
     }
     return this.catalog.updateHourlyServiceBooking(
@@ -403,12 +451,29 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         idHourlyService,
         ...pick(draft, tab),
       }),
+      version,
     );
   }
 
+  protected retryRead(): void {
+    this.open.set(true);
+  }
+
+  protected retryTab(): void {
+    const tab = this.selectedTab() as PanelTab;
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
+    this.loadTab(tab);
+  }
+
   private reset(): void {
+    this.tabErrors.set(new Map());
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+    this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
     this.error.set(null);
@@ -427,6 +492,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: HourlyServiceSelectedGeneralInfo): void {
+    this.versions.set(PanelTab.GeneralInfo, info.version);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -449,6 +515,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     prices: HourlyServiceSelectedPrices,
     periods: readonly SeasonPeriodItem[],
   ): void {
+    this.versions.set(PanelTab.Prices, prices.version);
     this.periods.set(periods);
     this.hiddenPeriodAvailabilities.set(hiddenOf(prices.periodAvailabilities, periods));
     this.applyLoaded({
@@ -467,9 +534,10 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
-  private setBookingOptions(options: readonly HourlyServiceBookingOption[]): void {
+  private setBookingOptions(answer: HourlyServiceSelectedBookingOptions): void {
+    this.versions.set(PanelTab.Bookings, answer.version);
     this.applyLoaded({
-      bookingOptions: options.map((option) =>
+      bookingOptions: answer.bookingOptions.map((option) =>
         Object.assign(new HourlyServiceBookingOption(), option, {
           availabilityOption: availabilityOf(option.availabilityOption),
         }),

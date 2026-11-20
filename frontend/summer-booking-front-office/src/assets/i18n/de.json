@@ -106,7 +106,8 @@
       "password_too_common": "Dieses Passwort ist zu häufig: Wähle ein sichereres."
     },
     "resource": {
-      "not_found": "Dieser Eintrag existiert nicht mehr."
+      "not_found": "Dieser Eintrag existiert nicht mehr.",
+      "version_conflict": "Ein anderer Benutzer hat diese Daten inzwischen geändert: Sie wurden neu geladen. Bitte nehmen Sie Ihre Änderungen erneut vor."
     },
     "account": {
       "email_taken": "Es gibt bereits ein Konto mit dieser E-Mail.",
@@ -514,7 +515,7 @@
           "add": "Hinzufügen",
           "save": "Speichern",
           "field_names": {
-            "total": "Gesamt"
+            "quantity": "der Menge"
           }
         },
         "delete": {

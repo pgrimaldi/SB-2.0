@@ -304,6 +304,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   private reset(): void {
     this.draft.set(new OnlineBookingOptions());
     this.draftForm().reset();
+    this.sectors.clear();
   }
 
   ngOnDestroy(): void {

@@ -14,17 +14,17 @@ import {
   SeasonPeriodItem,
 } from '../../../entities/settings/seasons/season-period-item';
 import { SeasonPeriodUpdateRequest } from '../../../entities/settings/seasons/season-period-update-request';
-import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { servicesUsingPeriod } from '../catalog/catalog.mock';
 import { priceListsUsingPeriod } from '../catalog/price-lists.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
-type SeasonDatesRow = SeasonDates & { propertyId: number };
+type SeasonDatesRow = Omit<SeasonDates, 'version'> & { propertyId: number };
 /** The days of its date ranges as the backend keeps them (`2026-05-01`). */
-type PeriodRow = SeasonPeriodItem & { propertyId: number; isNextSeason: boolean };
+type PeriodRow = Omit<SeasonPeriodItem, 'version'> & { propertyId: number; isNextSeason: boolean };
 
 /** What a missing day becomes in the backend's DTOs (`DateOnly` default). */
 const MISSING_DAY = '0001-01-01';
@@ -95,8 +95,8 @@ const NEXT_KEYS = new Map<boolean, number>(
 
 /**
  * `GET /api/catalog/season`: first and last day of the current season and of the next one (the next
- * ones may be null) of the property of the token, as days (`2026-05-01`). 204 without a body while
- * the season is not set; 401 without a valid access token.
+ * ones may be null) of the property of the token, as days (`2026-05-01`), with their version. 204
+ * without a body while the season is not set; 401 without a valid access token.
  */
 export const seasonDatesMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
@@ -106,13 +106,9 @@ export const seasonDatesMock = (request: HttpRequest<unknown>): Observable<HttpE
   if (!row) {
     return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(300));
   }
-  const days: SeasonDates = {
-    startsOn: dayOf(row.startsOn),
-    endsOn: dayOf(row.endsOn),
-    nextStartsOn: dayOf(row.nextStartsOn),
-    nextEndsOn: dayOf(row.nextEndsOn),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: days })).pipe(delay(300));
+  return of(new HttpResponse({ status: 200, url: request.url, body: seasonDatesOf(row) })).pipe(
+    delay(300),
+  );
 };
 
 /**
@@ -122,7 +118,9 @@ export const seasonDatesMock = (request: HttpRequest<unknown>): Observable<HttpE
  * not a day (a missing one is `0001-01-01`); 400 with one error per rule: no end before its start
  * (`validation.end_before_start`), the next season with both days or none (`validation.required` on
  * the missing one) and starting after the current one ends (`validation.out_of_range` on
- * `nextStartsOn`). 200 with the days as saved; 401 without a valid access token.
+ * `nextStartsOn`). 409 `resource.version_conflict` when `If-Match` is not the version of the saved
+ * season (a season not set yet takes none). 200 with the days as saved and the new version in `ETag`;
+ * 401 without a valid access token.
  */
 export const saveSeasonDatesMock = (
   request: HttpRequest<unknown>,
@@ -170,6 +168,11 @@ export const saveSeasonDatesMock = (
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
   }
+  const current = SEASON_DATES.find((row) => row.propertyId === property.id);
+  const conflict = current ? versionConflict(request, seasonDaysOf(current)) : null;
+  if (conflict) {
+    return conflict;
+  }
   const dates: SeasonDatesRow = {
     propertyId: property.id,
     startsOn: midnightOf(startsOn as string),
@@ -186,20 +189,14 @@ export const saveSeasonDatesMock = (
   } else {
     SEASON_DATES[index] = dates;
   }
-  const days: SeasonDates = {
-    startsOn: dayOf(dates.startsOn),
-    endsOn: dayOf(dates.endsOn),
-    nextStartsOn: dayOf(dates.nextStartsOn),
-    nextEndsOn: dayOf(dates.nextEndsOn),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: days })).pipe(delay(600));
+  return savedWithVersion(request, seasonDaysOf(dates), seasonDatesOf(dates));
 };
 
 /**
  * `GET /api/catalog/tariff-periods` (current season) and `GET /api/catalog/next-season/tariff-periods`
  * (next season): the periods of the property of the token, each with its date ranges as days
- * (`2026-05-01`), in the order of their first day; `[]` while the season is not set. 401 without a
- * valid access token.
+ * (`2026-05-01`) and its version, in the order of their first day; `[]` while the season is not set.
+ * 401 without a valid access token.
  */
 export const seasonPeriodListMock = (
   request: HttpRequest<unknown>,
@@ -209,11 +206,7 @@ export const seasonPeriodListMock = (
     return unauthorized(request);
   }
   const isSeasonSet = SEASON_DATES.some((row) => row.propertyId === DEMO_PROPERTY.id);
-  const periods = isSeasonSet
-    ? periodsOf(DEMO_PROPERTY.id, isNextSeason).map((row) =>
-        structuredClone(onlyFieldsOf(SeasonPeriodItem, row)),
-      )
-    : [];
+  const periods = isSeasonSet ? periodsOf(DEMO_PROPERTY.id, isNextSeason).map(periodItemOf) : [];
   return of(new HttpResponse({ status: 200, url: request.url, body: periods })).pipe(delay(300));
 };
 
@@ -221,7 +214,7 @@ export const seasonPeriodListMock = (
  * `POST /api/catalog/tariff-periods` (current season) and `POST /api/catalog/next-season/tariff-periods`
  * (next season) with the name and the date ranges as days: a new period of that season (until the page
  * is reloaded), with the next free key of the season, checked as the backend does. 201 with the period
- * created; 401 without a valid access token; 400 with one error per wrong field; 422
+ * created and its version; 401 without a valid access token; 400 with one error per wrong field; 422
  * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 409
  * `pricing.period_name_taken` for the name of another period of the season; 422
  * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
@@ -270,7 +263,7 @@ export const createSeasonPeriodMock = (
     ranges: sorted(ranges),
   };
   PERIODS.push(period);
-  const created = structuredClone(onlyFieldsOf(SeasonPeriodItem, period));
+  const created = periodItemOf(period);
   return of(
     new HttpResponse({
       status: 201,
@@ -324,10 +317,11 @@ export const deleteSeasonPeriodMock = (
 /**
  * `PUT /api/catalog/tariff-periods/{key}` and `PUT /api/catalog/next-season/tariff-periods/{key}`
  * with the name and all the date ranges of the period, as days: the period gets them (until the page
- * is reloaded), checked as the backend does. 200 with the period saved; 401 without a valid access
- * token; 400 with one error per wrong field; 422 `pricing.season_required` /
- * `pricing.next_season_required` while the season has no dates; 404 `pricing.period_not_found`; 409
- * `pricing.period_name_taken` for the name of another period of the season; 422
+ * is reloaded), checked as the backend does. 200 with the period saved and its new version in
+ * `ETag`; 401 without a valid access token; 400 with one error per wrong field; 422
+ * `pricing.season_required` / `pricing.next_season_required` while the season has no dates; 404
+ * `pricing.period_not_found`; 409 `resource.version_conflict` when `If-Match` is not the version of
+ * the period; 409 `pricing.period_name_taken` for the name of another period of the season; 422
  * `pricing.period_outside_season` for a day outside the season; 409 `pricing.period_overlap` with
  * `periodName` for a day already in another period of the season.
  */
@@ -357,6 +351,10 @@ export const updateSeasonPeriodMock = (
   if (!period) {
     return problem(request, 404, ApiErrorCode.PricingPeriodNotFound);
   }
+  const conflict = versionConflict(request, periodDataOf(period));
+  if (conflict) {
+    return conflict;
+  }
   const name = (body.name as string).trim();
   const isNameTaken = periods.some((row) => row !== period && sameTextIgnoringCase(row.name, name));
   if (isNameTaken) {
@@ -374,8 +372,7 @@ export const updateSeasonPeriodMock = (
   }
   period.name = name;
   period.ranges = sorted(ranges);
-  const saved = structuredClone(onlyFieldsOf(SeasonPeriodItem, period));
-  return of(new HttpResponse({ status: 200, url: request.url, body: saved })).pipe(delay(600));
+  return savedWithVersion(request, periodDataOf(period), periodItemOf(period));
 };
 
 /**
@@ -497,6 +494,31 @@ function deleteRangesErrors(ranges: unknown[]): MockFieldError[] {
         code: ApiErrorCode.ValidationRequired,
       }));
   });
+}
+
+function seasonDatesOf(row: SeasonDatesRow): SeasonDates {
+  const days = seasonDaysOf(row);
+  return { ...days, version: versionOf(days) };
+}
+
+/** What `GET /season` answers besides the version: the version covers it. */
+function seasonDaysOf(row: SeasonDatesRow): Omit<SeasonDates, 'version'> {
+  return {
+    startsOn: dayOf(row.startsOn),
+    endsOn: dayOf(row.endsOn),
+    nextStartsOn: dayOf(row.nextStartsOn),
+    nextEndsOn: dayOf(row.nextEndsOn),
+  };
+}
+
+function periodItemOf(row: PeriodRow): SeasonPeriodItem {
+  const period = periodDataOf(row);
+  return { ...period, version: versionOf(period) };
+}
+
+/** What the list answers for a period besides the version: the version covers it. */
+function periodDataOf(row: PeriodRow): Omit<SeasonPeriodItem, 'version'> {
+  return structuredClone({ key: row.key, name: row.name, ranges: row.ranges });
 }
 
 /** A day of the new ranges is already in another period of the season. */

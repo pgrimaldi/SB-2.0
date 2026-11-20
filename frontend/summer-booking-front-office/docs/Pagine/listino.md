@@ -21,8 +21,9 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Duplica di riga e "duplica selezionati": `app-duplicate-items-popup`, poi
   `POST /api/catalog/duplicate-package-item` (stesso corpo, tutto o niente, 204; i nomi delle copie li sceglie
   il backend).
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
-  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
+  (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
+  `failed` dei popup e del pannello di modifica).
 - "Aggiungi pacchetto" apre `app-package-add-item-panel`, la matita `app-package-edit-item-panel`.
 
 ## Pannelli dei pacchetti
@@ -48,12 +49,19 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   prezzi salvati o vuote.
 - I prezzi salvati di settori o periodi che il pannello non mostra (es. di un'altra stagione) restano da parte e
   ripartono invariati con "Salva".
-- Se la lettura fallisce il messaggio compare sopra i bottoni e "Modifica" resta spento.
+- Se la lettura fallisce il pannello si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e
+  Riprova, che riapre il pannello e rilegge; per un 404 solo Chiudi).
 - "Modifica" sblocca tutte e due le tab (un solo salvataggio); "Annulla" riporta i valori letti, chiedendo prima se
   ci sono modifiche.
 - "Salva" (spento, come "Crea pacchetto", finché manca il nome o è aperto il riquadro di un prezzo stagionale
   ridotto) manda tutto il modulo e `idPackage` a `POST /api/catalog/packages/update-package`
   (`PriceListService.updatePackage`, 204).
+- Controllo di versione: la lettura porta `version` (in `PackageSelectedItem`), che il pannello tiene da parte e
+  "Salva" rimanda nell'header `If-Match` (`updatePackage(idPackage, request, version)`; la risposta ha la nuova
+  versione nell'`ETag`). Con 409 `resource.version_conflict` (un altro utente ha cambiato il pacchetto dopo la
+  lettura) niente va sopra i bottoni: compare `app-version-conflict-popup` e il pannello rilegge pacchetto, settori e
+  periodi come all'apertura, in sola lettura; l'utente rifà le modifiche. Se la nuova lettura fallisce vale la regola
+  della lettura (pannello chiuso e `app-read-error-popup`).
 - In sola lettura: modulo `readonly`, caselle e scelte multiple `disabled`, tendine delle quantità secondo lo stato
   dei loro campi; nei prezzi stagionali ridotti spenti bottone, matite e cestini (griglie in sola lettura);
   "Modifica prezzi intermedi" spento.
@@ -203,8 +211,9 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Cestino ed "elimina selezionati": `POST /api/catalog/delete-additional-services-article-item`.
 - Duplica e "duplica selezionati": `POST /api/catalog/duplicate-additional-services-article-item`.
 - Corpo `{ idAdditionalItems }`, tutto o niente, 204.
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
-  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
+  (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
+  `failed` dei popup e del pannello di modifica).
 
 ### Pannello Aggiungi (`app-additional-item-add-item-panel`)
 
@@ -229,9 +238,14 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   "Modifica articolo/servizio aggiuntivo".
 - A ogni apertura legge l'articolo aggiuntivo con
   `GET /api/catalog/get-additional-services-article-item?idAdditionalItem=` (`PriceListService.selectedAdditionalItem`,
-  risposta `AdditionalItemSelectedItem`), le due tendine, i settori e i periodi; si apre in sola lettura.
+  risposta `AdditionalItemSelectedItem`), le due tendine, i settori e i periodi; si apre in sola lettura. Se la lettura
+  fallisce il pannello si chiude e compare `app-read-error-popup`, come per i pacchetti.
 - "Modifica" sblocca i campi; "Annulla" riporta i valori letti, chiedendo prima se ci sono modifiche.
 - "Salva" manda tutto il modulo con `idAdditionalItem` a
   `POST /api/catalog/update-additional-services-article-item` (`PriceListService.updateAdditionalItem`, 204),
   compresi i prezzi letti di settori o periodi che il pannello non mostra; se riesce il pannello si chiude e la
   tabella si ricarica.
+- Controllo di versione come per i pacchetti: `version` in `AdditionalItemSelectedItem`, rimandata nell'header
+  `If-Match` (`updateAdditionalItem(idAdditionalItem, request, version)`); con 409 `resource.version_conflict`
+  `app-version-conflict-popup` e una nuova lettura dell'articolo aggiuntivo, delle tendine, dei settori e dei
+  periodi, come all'apertura.

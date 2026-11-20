@@ -134,6 +134,7 @@ export class AuditLogFiltersPopup extends BasePopup implements UnsavedChanges, O
     this.actionCodes.set(filters.actionCodes);
     this.idUsers.set(filters.users.map((user) => user.id));
     this.pristineChoices = this.choices();
+    this.users.clear();
   }
 
   private choices(): string {

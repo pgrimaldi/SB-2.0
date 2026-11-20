@@ -29,6 +29,7 @@ periodo, festivi, prezzi intermedi).
 | 13 | POST | `/api/catalog/create-additional-services-article-item` | Crea un articolo aggiuntivo |
 | 14 | GET | `/api/catalog/get-additional-services-article-item` | Legge un articolo aggiuntivo per il pannello di modifica |
 | 15 | POST | `/api/catalog/update-additional-services-article-item` | Salva un articolo aggiuntivo modificato |
+| 16 | GET + POST | Le API 6, 7, 14 e 15 | Controllo di versione: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
 
 Sono tutte **nuove**. Per il frontend sostituiscono le API di `/api/catalog/price-lists`, che lavorano con
 `SavePriceListRequest` e `PriceListDto`: ogni sezione dice campo per campo cosa cambia rispetto a quelle.
@@ -46,6 +47,8 @@ Sono tutte **nuove**. Per il frontend sostituiscono le API di `/api/catalog/pric
   `zh`, `ar`).
 - **Errori** nel formato Problem Details del backend, con `code`; gli errori di un campo in `errors[]` con i nomi del
   corpo di questo documento (es. `translations[0].packageName`). Senza token valido: 401 `auth.unauthenticated`.
+- **Controllo di versione**: le letture dei pannelli di modifica (sezioni 6 e 14) restituiscono `version` e i loro
+  salvataggi (sezioni 7 e 15) la ricevono in `If-Match` e rispondono con `ETag` (sezione 16).
 
 ## 1. POST /api/catalog/packages-list
 
@@ -375,10 +378,12 @@ pacchetto in una sola chiamata e ci riempie il modulo delle due tab. Per il fron
   "isPublicHolidaysIncluded": false,
   "publicHolidayDates": [],
   "isIntermediatePricesIncluded": false,
-  "intermediatePrices": []
+  "intermediatePrices": [],
+  "version": "3f9c1a7e"
 }
 ```
 
+- `version`: la versione del pacchetto (stringa opaca, sezione 16), che il frontend rimanda con `update-package`.
 - `translations`: solo le lingue con un nome. Il frontend aggiunge le altre vuote.
 - `idSectors`: quelli salvati con `create-package` o `update-package`, non i settori che hanno una riga di prezzo.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
@@ -416,7 +421,8 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
 
 (nell'esempio solo alcuni campi: arrivano sempre tutti, come nella creazione)
 
-- Risposta: 204 senza corpo.
+- Header `If-Match: "<version>"` con la `version` letta con `GET /api/catalog/packages/{idPackage}` (sezione 16).
+- Risposta: 204 senza corpo, con la nuova versione nell'header `ETag` (sezione 16).
 - Righe di settori o periodi che non esistono più: non devono far fallire il salvataggio. Oggi `ApplyAsync` risponde
   404 `catalog.sector_not_found` per un settore eliminato e 422 `pricing.period_not_found` per una `key` che non è un
   periodo della stagione corrente. Il backend tiene come arrivano le righe dei periodi di un'altra stagione e scarta in
@@ -424,7 +430,9 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
   risponde 204 e la riga di Fila 9 non si salva. Le righe tenute restano legate al loro periodo: se la loro `key` viene
   riusata da un periodo nuovo, non devono finire su quello.
 - Errori: come `POST /api/catalog/packages/create-package`, più 404 `resource.not_found` per un `idPackage` che non è
-  dello stabilimento.
+  dello stabilimento e 409 `resource.version_conflict`, senza `errors[]`, quando `If-Match` manca o non è più la
+  versione del pacchetto (sezione 16): niente cambia. Il frontend non lo mostra sopra i bottoni: avvisa e rilegge il
+  pacchetto.
 
 ## 8. POST /api/catalog/additional-services-articles-list
 
@@ -536,7 +544,7 @@ Tendina obbligatoria "Seleziona articolo" dei pannelli "Aggiungi nuovo articolo/
 articolo/servizio aggiuntivo" (pagina Listino), riletta a ogni apertura del pannello. È la stessa API della tendina
 "Articolo" del popup "Aggiungi articolo" delle Impostazioni magazzino: **si fa una volta sola**, come la descrive la
 sezione 2 di `Impostazioni magazzino - Frontend requests.md` (rotta, risposta `[{ id, value }]`, ordine, permesso
-`CatalogRead` o `InventoryRead`, errori e verifica).
+`CatalogRead`, errori e verifica).
 
 Per il Listino conta in più: l'`id` scelto è l'`idArticle` che il frontend manda in
 `create-additional-services-article-item` e `update-additional-services-article-item` e che legge in
@@ -618,10 +626,13 @@ con gli stessi nomi e valori, che il frontend manda a `POST /api/catalog/create-
   "isPublicHolidaysIncluded": false,
   "publicHolidayDates": [],
   "isIntermediatePricesIncluded": false,
-  "intermediatePrices": []
+  "intermediatePrices": [],
+  "version": "a41e09d2"
 }
 ```
 
+- `version`: la versione dell'articolo aggiuntivo (stringa opaca, sezione 16), che il frontend rimanda con
+  `update-additional-services-article-item`.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
   `catalog/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
   mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le
@@ -649,7 +660,8 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
 
 (nell'esempio solo alcuni campi: arrivano sempre tutti, come nella creazione)
 
-- Risposta: 204 senza corpo.
+- Header `If-Match: "<version>"` con la `version` letta con `get-additional-services-article-item` (sezione 16).
+- Risposta: 204 senza corpo, con la nuova versione nell'header `ETag` (sezione 16).
 - Righe di settori o periodi che non esistono più: non devono far fallire il salvataggio. Oggi `ApplyAsync` risponde
   404 `catalog.sector_not_found` per un settore eliminato e 422 `pricing.period_not_found` per una `key` che non è un
   periodo della stagione corrente. Il backend tiene come arrivano le righe dei periodi di un'altra stagione e scarta in
@@ -657,7 +669,54 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
   risponde 204 e la riga di Fila 9 non si salva. Le righe tenute restano legate al loro periodo: se la loro `key` viene
   riusata da un periodo nuovo, non devono finire su quello.
 - Errori: come `POST /api/catalog/create-additional-services-article-item`, più 404 `resource.not_found` per un
-  `idAdditionalItem` che non è dello stabilimento.
+  `idAdditionalItem` che non è dello stabilimento e 409 `resource.version_conflict`, senza `errors[]`, quando
+  `If-Match` manca o non è più la versione dell'articolo aggiuntivo (sezione 16): niente cambia. Il frontend non lo
+  mostra sopra i bottoni: avvisa e rilegge l'articolo aggiuntivo.
+
+## 16. Controllo di versione sui salvataggi di modifica
+
+Senza un controllo, se due utenti modificano lo stesso pacchetto o lo stesso articolo aggiuntivo vince chi salva per
+ultimo: i pannelli di modifica rimandano tutto quello che hanno letto all'apertura (sezioni 7 e 15) e cancellano,
+senza che nessuno se ne accorga, quello che un altro utente ha cambiato nel frattempo. Il backend non ha un controllo
+di concorrenza sugli aggiornamenti dei listini: nessun token di concorrenza in `PriceListConfiguration`, nessun
+`If-Match`. Il frontend chiede lo schema di **concorrenza ottimistica** che il backend ha già progettato per le
+prenotazioni offline (`shared documentation/backend/progettazione/19-frontend-offline.md`, sezioni 4.4 e 5.8), con un
+**codice di errore unico per tutte le API**: `resource.version_conflict`. Lo stesso schema e lo stesso codice sono
+chiesti in `Impostazioni magazzino - Frontend requests.md` (sezione 7): se lì sono già fatti, qui si aggiungono solo
+le API della tabella sotto.
+
+### Cosa ci serve
+
+- **Versione nelle letture**: ogni lettura della tabella sotto restituisce, insieme ai dati, il campo `version`
+  (stringa opaca). Cambia ogni volta che cambiano i dati che il salvataggio corrispondente scrive, anche quando li
+  cambia un'altra API (per esempio `PUT /api/catalog/price-lists/{id}`), e solo allora.
+- **`If-Match` nei salvataggi**: il frontend manda la versione letta nell'header `If-Match: "<version>"`. Se non è più
+  quella attuale, il backend non salva niente e risponde **409 `resource.version_conflict`**, senza `errors[]`. Senza
+  `If-Match` risponde allo stesso modo: il frontend lo manda sempre.
+- **`ETag` nelle risposte**: ogni salvataggio riuscito restituisce la nuova versione nell'header `ETag: "<version>"`,
+  anche se risponde 204 senza corpo.
+- Il 409 `resource.version_conflict` si controlla dopo il 404 `resource.not_found` dell'elemento e prima degli altri
+  409.
+- **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
+  dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
+  la versione come una stringa opaca e non la confronta mai.
+
+### API coinvolte
+
+| Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
+|---|---|---|
+| `GET /api/catalog/packages/{idPackage}` (sezione 6) | `POST /api/catalog/packages/update-package` (sezione 7) | Tutto il pacchetto: tutti i campi della risposta della sezione 6, nomi, prezzi e giorni festivi compresi |
+| `GET /api/catalog/get-additional-services-article-item` (sezione 14) | `POST /api/catalog/update-additional-services-article-item` (sezione 15) | Tutto l'articolo aggiuntivo: tutti i campi della risposta della sezione 14, prezzi e giorni festivi compresi |
+
+Le altre API di questo documento non ne hanno bisogno: le creazioni (sezioni 5 e 13) non rimandano dati letti,
+cancellazione e duplicazione (sezioni 2, 3, 9 e 10) lavorano solo con gli id.
+
+### Cosa fa il frontend
+
+Con 409 `resource.version_conflict` i pannelli "Modifica pacchetto" e "Modifica articolo/servizio aggiuntivo" mostrano
+l'avviso "Nel frattempo un altro utente ha modificato questi dati: li abbiamo ricaricati. Rifai le tue modifiche." e
+rileggono i dati come all'apertura (sezione 6 o 14, con settori e periodi). Dopo un salvataggio riuscito il pannello
+si chiude, quindi la versione dell'`ETag` non la usa.
 
 ## API esistenti usate così come sono
 
@@ -676,3 +735,16 @@ prezzi per periodo e dei prezzi intermedi. **Non va cambiata.**
   di un'altra stagione, rispondono 204: la prima non si salva, la seconda resta com'era.
 - I salvataggi rispondono 204 senza corpo; cancella e duplica fanno tutti o nessuno.
 - Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.
+
+API 16, con un pacchetto e un articolo aggiuntivo di prova:
+
+1. `GET /api/catalog/packages/{idPackage}` risponde con `version` (per esempio `v1`); `update-package` con
+   `If-Match: "v1"`: 204 con l'header `ETag` di una versione nuova, diversa da `v1`; una nuova `GET` risponde con
+   quella versione.
+2. Lo stesso `update-package` con `If-Match: "v1"` dopo il primo: 409 `resource.version_conflict` senza `errors[]`; il
+   pacchetto non cambia.
+3. `GET` (versione `v1`), poi `PUT /api/catalog/price-lists/{id}` sullo stesso pacchetto, poi `update-package` con
+   `If-Match: "v1"`: 409 `resource.version_conflict`; resta quello che ha salvato la `PUT`.
+4. `update-package` senza `If-Match`: 409 `resource.version_conflict`; con un `idPackage` di un altro stabilimento:
+   404 `resource.not_found`, anche con un `If-Match` sbagliato.
+5. Gli stessi casi con `get-additional-services-article-item` e `update-additional-services-article-item`.

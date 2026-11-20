@@ -21,6 +21,8 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
 - All'apertura la pagina fa una sola chiamata, `MapService.settings` (`GET /api/catalog/map/settings`, in un effetto
   con `DATA_RELOAD`), e passa la risposta (`MapSettings`) ai due riquadri con `[settings]` e l'eventuale errore con
   `[loadError]`.
+- La risposta porta una versione per ognuno dei due salvataggi: `backgroundVersion` per Imposta sfondo e
+  `configurationVersion` per Imposta reticolo (vedi "Controllo di versione").
 - Finché la risposta manca Modifica è spento. Se la chiamata fallisce Modifica resta spento e il messaggio compare
   sopra i bottoni di entrambi i riquadri.
 - Imposta sfondo sceglie la casella che ha il nome `background.name` (con un nome sconosciuto nessuna casella) o,
@@ -130,6 +132,22 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
   `variant`, che lega ogni icona alla sua riga anche nella GET).
 - Passa da `submit()`: errori del backend sotto i campi, gli altri sopra i bottoni. Con i valori uguali a quelli
   salvati (`comparableJson`, anche dopo averli cambiati e rimessi) chiude la Modifica senza chiamate. Spinner sul bottone e campi bloccati durante la chiamata.
+
+## Controllo di versione
+
+- Ogni riquadro tiene la sua versione, presa da `[settings]` (anche dopo "Reimposta mappa", che passa le nuove
+  `settings`), e la rimanda con Salva nell'header `If-Match`: `updateBackground(name, version)` con
+  `backgroundVersion`, `updateConfiguration(grid, version)` con `configurationVersion`. La risposta (204) ha la nuova
+  versione nell'`ETag`, che il riquadro tiene per il Salva successivo, perché la pagina non rilegge.
+- Imposta sfondo prende la nuova `backgroundVersion` anche dalle risposte di caricamento e cancellazione dello sfondo
+  personalizzato (`MapSettings`), che cambiano lo sfondo senza Salva.
+- Con 409 `resource.version_conflict` (un altro utente ha cambiato quei dati dopo la lettura) niente va sopra i
+  bottoni: compare `app-version-conflict-popup` e il riquadro rilegge da solo con `MapService.settings`, la stessa
+  lettura della pagina, e prende solo la sua parte; l'altro riquadro non cambia e tiene le sue modifiche. Durante la
+  lettura Salva tiene lo spinner e il riquadro resta bloccato; poi il riquadro torna in sola lettura con i dati nuovi e
+  l'utente rifà le modifiche.
+- Se quella lettura fallisce il riquadro torna ai valori letti prima, Modifica resta spento e il messaggio del `code`
+  compare sopra i bottoni, come quando fallisce la lettura della pagina.
 
 ## Reimposta mappa
 

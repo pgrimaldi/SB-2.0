@@ -12,11 +12,11 @@ import {
   MAX_SECTOR_NAME_LENGTH,
   SectorItem,
 } from '../../../entities/settings/rows-and-sectors/sector-item';
-import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
+import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 interface SectorUsage {
   mapSpots: number;
@@ -25,7 +25,11 @@ interface SectorUsage {
   discounts: number;
 }
 
-type SectorRow = SectorItem & { propertyId: number; sortOrder: number; usage?: SectorUsage };
+type SectorRow = Omit<SectorItem, 'version'> & {
+  propertyId: number;
+  sortOrder: number;
+  usage?: SectorUsage;
+};
 
 const SECTOR_NAMES = [
   'Fila 1',
@@ -55,7 +59,7 @@ const SORT_DIRECTIONS: readonly SortDirection[] = ['Ascending', 'Descending'];
 
 /**
  * `POST /api/catalog/sectors-list`: one page of the sectors (rows) of the property of the token, in
- * their own order unless sorted. 400 `validation.invalid` on `page`, `pageSize`, `sortField`,
+ * their own order unless sorted, each with its version. 400 `validation.invalid` on `page`, `pageSize`, `sortField`,
  * `sortDirection` or `filters` out of the table's rules and `validation.max_length` on a `search`
  * over 100 characters; 401 without a valid access token.
  */
@@ -77,7 +81,7 @@ export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEv
       (!search || row.sectorName?.trim().toLowerCase().includes(search)),
   )
     .sort((first, second) => first.sortOrder - second.sortOrder)
-    .map((row) => onlyFieldsOf(SectorItem, row));
+    .map(listRowOf);
   const field = SORT_FIELDS.find((name) => name === body.sortField);
   if (field) {
     const sign = body.sortDirection === 'Descending' ? -1 : 1;
@@ -147,8 +151,9 @@ export const addSectorMock = (request: HttpRequest<unknown>): Observable<HttpEve
 /**
  * `PUT /api/catalog/sectors/{id}` with `name`: the sector is renamed. The name is checked first (the
  * same errors as the add, the sector's own name does not count as taken), then 404
- * `catalog.sector_not_found` for an id that is not a sector of the property. 200 with the sector;
- * 401 without a valid access token.
+ * `catalog.sector_not_found` for an id that is not a sector of the property, then 409
+ * `resource.version_conflict` when `If-Match` is not the version of its row. 200 with the sector and
+ * the new version in `ETag`; 401 without a valid access token.
  */
 export const updateSectorMock = (
   request: HttpRequest<unknown>,
@@ -167,14 +172,16 @@ export const updateSectorMock = (
   if (!sector) {
     return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
   }
+  const conflict = versionConflict(request, sectorData(sector));
+  if (conflict) {
+    return conflict;
+  }
   const sectorName = String(name).trim();
   if (isNameTaken(property.id, sectorName, sector)) {
     return problem(request, 409, ApiErrorCode.CatalogSectorNameTaken);
   }
   sector.sectorName = sectorName;
-  return of(new HttpResponse({ status: 200, url: request.url, body: sectorOf(sector) })).pipe(
-    delay(600),
-  );
+  return savedWithVersion(request, sectorData(sector), sectorOf(sector));
 };
 
 /**
@@ -272,6 +279,16 @@ function sectorNameError(request: HttpRequest<unknown>, name: unknown): Observab
         : { field: 'name', code: ApiErrorCode.ValidationRequired },
     ],
   });
+}
+
+function listRowOf(row: SectorRow): SectorItem {
+  const data = sectorData(row);
+  return { ...data, version: versionOf(data) };
+}
+
+/** A row of `sectors-list` besides the version: the version covers it. */
+function sectorData(row: SectorRow): Omit<SectorItem, 'version'> {
+  return { idSector: row.idSector, sectorName: row.sectorName };
 }
 
 function sectorOf(row: SectorRow): Sector {

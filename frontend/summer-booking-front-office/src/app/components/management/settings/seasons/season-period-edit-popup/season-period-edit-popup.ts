@@ -52,12 +52,13 @@ import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 const NAME_FIELD = 'name' satisfies keyof SeasonPeriodItem;
 
 @Component({
   selector: 'app-season-period-edit-popup',
-  imports: [Button, FilledTextField, FormField, FormRow, TranslatePipe],
+  imports: [Button, FilledTextField, FormField, FormRow, TranslatePipe, VersionConflictPopup],
   templateUrl: './season-period-edit-popup.html',
   styleUrl: './season-period-edit-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,6 +95,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   protected readonly nameError = this.validationText.message(this.draftForm.name);
   protected readonly rangesError = this.validationText.message(this.draftForm);
   protected readonly canSave = computed(() => this.draftForm().valid());
+  protected readonly isConflictShown = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -116,7 +118,7 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
   }
 
   protected save(): void {
-    const key = this.draft().key;
+    const { key, version } = this.draft();
     if (this.isLoading() || !this.auth.user()?.propertyId || !this.canSave() || key === null) {
       return;
     }
@@ -125,13 +127,20 @@ export class SeasonPeriodEditPopup extends BasePopup implements UnsavedChanges, 
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.seasons.updatePeriod(this.isNextSeason(), key, this.draft()));
+        await firstValueFrom(
+          this.seasons.updatePeriod(this.isNextSeason(), key, this.draft(), version),
+        );
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.close();
+          return undefined;
+        }
         if (problem.code === ApiErrorCode.PricingPeriodNameTaken) {
           return apiFieldError(this.draftForm.name, problem.code);
         }

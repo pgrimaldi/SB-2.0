@@ -22,8 +22,9 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   `.duplicate`; il nome per una riga, il numero per la selezione).
 - Dopo la conferma: spinner a pagina intera, tabella ricaricata, errore in "Operazione non riuscita" (icona
   `GeneralIcon_Warning.svg`).
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
-  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
+  (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
+  `failed` dei popup e del pannello di modifica).
 
 ## Popup "Aggiungi nuovo sconto/voucher"
 
@@ -51,12 +52,17 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   gli passa l'`idVoucher` della riga.
 - All'apertura (effect su `open`, perché il componente nasce con la pagina e `ngOnInit` scatta una volta sola) legge lo
   sconto e riempie il form campo per campo. Durante il caricamento i campi sono bloccati e Salva è spento; se fallisce
-  l'errore compare sopra i bottoni.
+  il popup si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e Riprova, che riapre il popup e
+  rilegge; per un 404 solo Chiudi).
 - Le modifiche non salvate si confrontano con i dati caricati.
 - Per il resto è una copia identica del popup di aggiunta (codice duplicato voluto, accorpamento nel TODO), con tutti i
   campi modificabili.
 - Salva chiama l'aggiornamento con l'`idVoucher` della risposta della GET (non quello della riga), poi chiude il popup e
   ricarica la tabella.
+- Controllo di versione: la lettura porta `version` (in `VoucherSelectedItem`) e il Salva la rimanda nell'header
+  `If-Match`. Con 409 `resource.version_conflict` (un altro utente ha cambiato lo sconto dopo la lettura) compare
+  `app-version-conflict-popup`, il pannello si chiude e la pagina ricarica la tabella (`reloadIfChanged`): per rifare
+  le modifiche l'utente riapre la matita, che legge lo sconto com'è ora.
 
 ## Icone
 
@@ -72,6 +78,11 @@ In `VoucherService` (lo stabilimento lo prende il backend dal token):
 - `POST /api/vouchers/delete-voucher-item` (`deleteVoucherItems`): corpo `{ idVouchers }`, risposta 204.
 - `POST /api/vouchers/duplicate-voucher-item` (`duplicateVoucherItems`): corpo `{ idVouchers }`, risposta 204.
 - `POST /api/vouchers/add-voucher-item` (`addVoucherItem`): corpo = form, utilizzi vuoti mandati come 1, risposta 204.
-- `GET /api/vouchers/get-selected-item?idVoucher=…` (`selectedItem`): risposta `VoucherSelectedItem`.
-- `POST /api/vouchers/update-voucher-item` (`updateVoucherItem`): corpo = form `VoucherUpdateItemRequest`, utilizzi
-  vuoti mandati come 1, risposta 204.
+- `GET /api/vouchers/get-selected-item?idVoucher=…` (`selectedItem`): risposta `VoucherSelectedItem` con `version`.
+- `POST /api/vouchers/update-voucher-item` (`updateVoucherItem(request, version)`): corpo = form
+  `VoucherUpdateItemRequest`, utilizzi vuoti mandati come 1, e header `If-Match` con la versione letta; risposta 204
+  con l'header `ETag` della nuova versione (`updateVoucherItem` restituisce la versione); 409
+  `resource.version_conflict`.
+
+Il controllo di versione è chiesto al backend in
+`shared documentation/Modifiche per il backend/impostazioni/Sconti e voucher - Frontend requests.md`.

@@ -2,8 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WarehouseService } from '../../../services/api/warehouse/warehouse.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
 import {
@@ -96,7 +95,7 @@ export class WarehouseSetting {
       sortable: true,
     },
     {
-      field: 'thresholdQuantity',
+      field: 'lowStockThreshold',
       header: this.headers().threshold,
       align: TableColumnAlign.Center,
       sortable: true,
@@ -108,10 +107,7 @@ export class WarehouseSetting {
     edit: (item) => this.editItem(item),
   });
 
-  protected readonly deleteItems = (idItems: string[]) =>
-    this.warehouse
-      .deleteArticles(idItems)
-      .pipe(catchError((error: unknown) => throwError(() => withUsedIn(error))));
+  protected readonly deleteItems = (idItems: string[]) => this.warehouse.deleteArticles(idItems);
   protected readonly duplicateItems = (idItems: string[]) =>
     this.warehouse.duplicateWarehouseItems(idItems);
 
@@ -134,24 +130,30 @@ export class WarehouseSetting {
     }
   }
 
-  protected forgetDeleted(idItems: readonly string[]): void {
+  protected forgetDeleted(idItems: readonly (string | null)[]): void {
     this.idSelectedItems.update((idSelected) =>
       idSelected.filter((idSelectedItem) => !idItems.includes(String(idSelectedItem))),
     );
   }
 
   /**
-   * An article deleted meanwhile by someone else (delete or duplicate): the table shows it is gone
-   * and the ids of the action leave the selection (all of them after an action on the selection,
-   * where nothing was done).
+   * An article deleted meanwhile by someone else (delete, duplicate or edit): the table shows it is
+   * gone and the ids of the action leave the selection (all of them after an action on the
+   * selection, where nothing was done).
    */
   protected reloadIfGone(
     problem: ApiProblem,
     table: { reload(): void },
-    idItems: readonly string[],
+    idItems: readonly (string | null)[],
   ): void {
     if (problem.code === ApiErrorCode.InventoryItemNotFound) {
       this.forgetDeleted(idItems);
+      table.reload();
+    }
+  }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
       table.reload();
     }
   }
@@ -160,34 +162,4 @@ export class WarehouseSetting {
     this.editedItem.set(item);
     this.editing.set(true);
   }
-}
-
-/** `inventory.item_in_use` with `usedIn`: the price lists and the agreement price lists together. */
-function withUsedIn(error: unknown): unknown {
-  if (!(error instanceof HttpErrorResponse)) {
-    return error;
-  }
-  const body: unknown = error.error;
-  if (
-    typeof body !== 'object' ||
-    body === null ||
-    !('code' in body) ||
-    body.code !== ApiErrorCode.InventoryItemInUse
-  ) {
-    return error;
-  }
-  const args: Record<string, unknown> =
-    'args' in body && typeof body.args === 'object' && body.args !== null
-      ? { ...(body.args as Record<string, unknown>) }
-      : {};
-  const usedIn = [args['priceLists'], args['agreementPriceLists']].flatMap((names) =>
-    Array.isArray(names) ? names : [],
-  );
-  return new HttpErrorResponse({
-    error: { ...body, args: { ...args, usedIn } },
-    headers: error.headers,
-    status: error.status,
-    statusText: error.statusText,
-    url: error.url ?? undefined,
-  });
 }

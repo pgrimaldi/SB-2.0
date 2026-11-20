@@ -9,4 +9,5 @@ export class BarServiceSelectedPrices {
   periodPrices: ServicePeriodPrice[] = [];
   idSectors: string[] = [];
   isOnlinePurchaseEnabled: boolean | null = null;
+  version: string | null = null;
 }

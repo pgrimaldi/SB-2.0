@@ -8,4 +8,5 @@ export class BarServiceSelectedGeneralInfo {
   category: BarServiceCategory | null = null;
   icon: BarServiceIcon | null = null;
   isHighlighted: boolean | null = null;
+  version: string | null = null;
 }

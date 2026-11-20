@@ -31,6 +31,7 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { SeasonPeriodInterval } from '../../../../../entities/settings/seasons/season-period-interval';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
@@ -42,10 +43,11 @@ import { BasePopup } from '../../../../shared/ui/dialogs/base-popup/base-popup';
 import { periodOverlapError, rangesErrors, withoutRangesErrors } from '../season-ranges-errors';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 @Component({
   selector: 'app-season-interval-edit-popup',
-  imports: [Button, FilledDateField, FormField, TranslatePipe],
+  imports: [Button, FilledDateField, FormField, TranslatePipe, VersionConflictPopup],
   templateUrl: './season-interval-edit-popup.html',
   styleUrl: './season-interval-edit-popup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,6 +101,7 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
     lastFreeDay(this.draft().startsOn, this.otherIntervals(), this.season()?.endsOn ?? null),
   );
   protected readonly canSave = computed(() => this.draftForm().valid());
+  protected readonly isConflictShown = signal(false);
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
@@ -143,7 +146,12 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
       this.error.set(null);
       try {
         await firstValueFrom(
-          this.seasons.updatePeriod(this.isNextSeason(), key, { ...period, ranges }),
+          this.seasons.updatePeriod(
+            this.isNextSeason(),
+            key,
+            { ...period, ranges },
+            period.version,
+          ),
         );
         this.isLoading.set(false);
         this.close();
@@ -151,6 +159,11 @@ export class SeasonIntervalEditPopup extends BasePopup implements UnsavedChanges
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.close();
+          return undefined;
+        }
         const overlap = periodOverlapError(problem, this.draftForm);
         if (overlap) {
           return overlap;

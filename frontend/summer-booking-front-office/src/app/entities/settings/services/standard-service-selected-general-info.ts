@@ -6,4 +6,5 @@ export class StandardServiceSelectedGeneralInfo {
   translations: ServiceTranslation[] = [];
   icon: StandardServiceIcon | null = null;
   isHighlighted: boolean | null = null;
+  version: string | null = null;
 }

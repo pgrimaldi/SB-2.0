@@ -22,6 +22,7 @@ import {
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { I18nText } from '../../../components/i18n/i18n-text/i18n-text';
+import { VersionConflictPopup } from '../../../components/management/version-conflict-popup/version-conflict-popup';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { Checkbox } from '../../../components/shared/ui/checkboxes/checkbox/checkbox';
 import { comparableJson } from '../../../components/shared/forms/text-comparison';
@@ -31,9 +32,11 @@ import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popu
 import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-number-field/filled-number-field';
 import { Toggle } from '../../../components/shared/ui/toggles/toggle/toggle';
+import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { SharingGeneralInformation } from '../../../entities/settings/sharing/sharing-general-information';
+import { SharingSaveInformationRequest } from '../../../entities/settings/sharing/sharing-save-information-request';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
+import { onlyFieldsOf } from '../../../services/api/only-fields-of';
 import { SharingService } from '../../../services/api/sharing/sharing.service';
 
 @Component({
@@ -48,6 +51,7 @@ import { SharingService } from '../../../services/api/sharing/sharing.service';
     SectionTitle,
     Toggle,
     TranslatePipe,
+    VersionConflictPopup,
   ],
   templateUrl: './sharing.html',
   styleUrl: './sharing.scss',
@@ -64,9 +68,12 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   protected readonly ButtonSize = ButtonSize;
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
 
-  private readonly information = signal(new SharingGeneralInformation());
-  private savedInformation = new SharingGeneralInformation();
+  private readonly information = signal(new SharingSaveInformationRequest());
+  private savedInformation = new SharingSaveInformationRequest();
+  private version: string | null = null;
   private readonly loaded = signal(false);
+  /** Asked again after a version conflict: the effect that loads the settings reads it. */
+  private readonly reloads = signal(0);
   protected readonly isSaving = signal(false);
   protected readonly saved = signal(false);
   protected readonly informationForm = form(this.information, (path) => {
@@ -78,7 +85,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
     greaterThan(path.minimumBookingDayQuantity, 0);
   });
   protected readonly fieldErrors = Object.fromEntries(
-    (Object.keys(this.information()) as (keyof SharingGeneralInformation)[]).map((name) => [
+    (Object.keys(this.information()) as (keyof SharingSaveInformationRequest)[]).map((name) => [
       name,
       this.validationText.message(
         this.informationForm[name],
@@ -87,9 +94,10 @@ export class Sharing implements UnsavedChanges, OnDestroy {
           : undefined,
       ),
     ]),
-  ) as Readonly<Record<keyof SharingGeneralInformation, Signal<string | null>>>;
+  ) as Readonly<Record<keyof SharingSaveInformationRequest, Signal<string | null>>>;
   protected readonly canSave = computed(() => this.loaded() && !this.isSaving());
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly isConflictShown = signal(false);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -107,16 +115,20 @@ export class Sharing implements UnsavedChanges, OnDestroy {
       }
     });
     effect((onCleanup) => {
+      this.reloads();
       this.dataReload?.();
       if (!this.auth.user()?.propertyId) {
         return;
       }
       const subscription = untracked(() => {
         this.error.set(null);
+        this.loaded.set(false);
         return this.sharing.generalInformation().subscribe({
           next: (information) => {
-            this.savedInformation = information;
-            this.information.set(information);
+            const read = onlyFieldsOf(SharingSaveInformationRequest, information);
+            this.version = information.version;
+            this.savedInformation = read;
+            this.information.set(read);
             this.informationForm().reset();
             this.loaded.set(true);
           },
@@ -143,12 +155,20 @@ export class Sharing implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         const sent = this.information();
-        await firstValueFrom(this.sharing.saveInformation(sent));
+        this.version = await firstValueFrom(this.sharing.saveInformation(sent, this.version));
+        // The new version goes with what was sent, even if a reading changed the form meanwhile.
         this.savedInformation = sent;
+        this.information.set(sent);
         this.informationForm().reset();
         this.saved.set(true);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.informationForm, (general) =>
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+          this.isConflictShown.set(true);
+          this.reloads.update((reloads) => reloads + 1);
+          return undefined;
+        }
+        return apiFieldErrorsOrGeneral(problem, this.informationForm, (general) =>
           this.error.set(general),
         );
       } finally {

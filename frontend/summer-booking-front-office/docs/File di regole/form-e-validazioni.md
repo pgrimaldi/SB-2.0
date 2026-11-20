@@ -54,7 +54,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 
 - Il testo lo dà `ValidationTextBehaviour` (`behaviours/validation/`): `message(field, chiaveNomeCampo)` restituisce il
   testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
-  `management.settings.warehouse.form.field_names.total` = "totale").
+  `management.settings.warehouse.form.field_names.quantity` = "della quantità").
 - Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua.
 - Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con
   `text(field, chiaveNomeCampo)`.
@@ -105,6 +105,28 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   di partenza al posto di quelli veri.
 - Vale per ogni form di modifica, pagine, tab, pannelli e popup, anche futuri. Prima di consegnare un form di creazione
   o modifica si controlla che cosa parte quando la lettura fallisce.
+- Un popup o pannello di modifica non mostra mai il form vuoto: se la lettura all'apertura fallisce si chiude e
+  compare `app-read-error-popup` (`components/management/read-error-popup/`: "Errore", il messaggio del `code`,
+  Chiudi e Riprova, che riapre la modifica e rilegge; per un 404, quando l'elemento non c'è più, solo Chiudi). Il
+  componente ha `readError` (passato a `[(problem)]`) e `retryRead()`, che riapre il popup. Nei pannelli che leggono
+  una tab alla volta (Servizi) questo vale per la lettura all'apertura; una tab letta dopo che fallisce mostra al
+  posto dei campi il messaggio e Riprova (`retryTab()`), senza chiudere il pannello.
+- Controllo di versione (contro due utenti che salvano la stessa cosa): ogni lettura che un form poi risalva porta
+  `version`, una per ogni salvataggio (per esempio una per tab); il salvataggio la manda nell'header `If-Match`
+  (`ifMatch(version)` di `services/api/versions/version-headers.ts`) e restituisce la nuova versione letta
+  dall'`ETag` (`versionOf`), che il form tiene se resta aperto per altri salvataggi. Con 409
+  `resource.version_conflict` compare `app-version-conflict-popup` (`components/management/version-conflict-popup/`,
+  testo `error.resource.version_conflict`) e le modifiche dell'utente si perdono:
+  - un popup o pannello sempre modificabile si chiude e i dati nuovi si vedono riaprendolo; se è aperto da una tabella,
+    la pagina la ricarica (`reloadIfChanged` sull'uscita `failed`);
+  - un form con il bottone Modifica rilegge i dati e torna in sola lettura, così Salva non si preme per sbaglio;
+  - un popup senza una lettura sua (Settori e file, periodi e intervalli di Stagioni e periodi) si chiude e la lista si
+    ricarica;
+  - una pagina sempre modificabile (Sharing) rilegge i dati.
+
+  Nei mock la versione è un hash dei dati coperti (`versionOf`, `versionConflict`, `savedWithVersion` di
+  `services/mocks/versions/versions.mock.ts`). La richiesta al backend va nel documento delle richieste di ogni pagina
+  (modello: sezione 7 di `Impostazioni magazzino - Frontend requests.md`).
 - Vale anche per le API di salvataggio chieste al backend: cambiano solo i dati che la pagina ha letto e mostrato, mai
   quelli che l'utente non ha visto.
 - Salva rimanda **sempre tutto il modello letto** dal backend: i campi e le voci che l'utente ha cambiato con il nuovo

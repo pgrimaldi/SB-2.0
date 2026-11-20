@@ -60,8 +60,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `duplicate`), spinner a pagina intera, poi la tabella si ricarica.
 - Corpo con la sola lista degli id (es. `{ idBarServices }`), tutto o niente, 204. Le righe eliminate escono dalla
   selezione; dopo "duplica selezionati" la selezione si svuota.
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina e su Duplica, gli id escono
-  dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup).
+- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
+  (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
+  `failed` dei popup e del pannello di modifica).
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `delete-bar-service-item`, `duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `delete-standard-service-item`, `duplicate-standard-service-item` (`idStandardServices`);
@@ -163,9 +164,20 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Si aprono dalla matita della riga, in sola lettura con il solo bottone **Modifica** (bottoni propri nello spazio
   `appSidePanelButtons` di `app-side-panel`), come Informazioni stabilimento.
 - Una GET per tab, con l'id nella query string, chiamata la prima volta che la tab si apre e non più finché il
-  pannello resta aperto. Durante una GET i campi della sua tab sono bloccati e Modifica è spento; se fallisce il
-  messaggio va sopra i bottoni e la tab si rilegge alla prossima apertura.
+  pannello resta aperto. Durante una GET i campi della sua tab sono bloccati e Modifica è spento. Se fallisce la
+  lettura all'apertura il pannello si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e
+  Riprova, che riapre il pannello; per un 404 solo Chiudi); se fallisce una tab letta dopo, al posto dei suoi campi
+  compaiono il messaggio e Riprova (`retryTab()`), e il pannello resta aperto.
 - I dati letti sono il confronto per le modifiche non salvate (`pristine`, aggiornato tab per tab).
+- Controllo di versione, una versione per tab: ogni GET di tab porta `version`, che il pannello tiene per quella tab
+  (`versions`) e che il Salva della tab rimanda nell'header `If-Match`; salvare una tab non cambia la versione delle
+  altre. Il Salva risponde con la nuova versione nell'`ETag`, che il pannello non usa perché si chiude.
+- Con 409 `resource.version_conflict` (un altro utente ha cambiato i dati della tab dopo la lettura) compare
+  `app-version-conflict-popup`, la tab torna in sola lettura e si rilegge con la sua GET come all'apertura
+  (`reloadTab`): l'utente rifà le modifiche. Il messaggio sopra i bottoni non compare. Se la rilettura fallisce valgono
+  le regole delle letture qui sopra.
+- La richiesta al backend è in
+  `shared documentation/Modifiche per il backend/impostazioni/Servizi - Frontend requests.md`.
 - **Modifica** rende modificabile la tab aperta e mostra **Annulla** (rimette i valori letti e torna in sola
   lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
 - Spinner su Salva e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(updated)`); se
@@ -235,7 +247,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     le lingue mancanti restano vuote);
   - Prezzi: `GET /api/catalog/get-bar-service-prices` insieme a `catalog/tariff-periods` (`BarServiceSelectedPrices`,
     i prezzi sui periodi della stagione corrente);
-  - Prenotazioni: `GET /api/catalog/get-bar-service-booking-options` (array `ServiceBookingOption[]`).
+  - Prenotazioni: `GET /api/catalog/get-bar-service-booking-options` (`BarServiceSelectedBookingOptions`:
+    `bookingOptions`, l'elenco `ServiceBookingOption[]`, e `version`).
+- Ogni risposta delle GET ha in più `version` (vedi "Pannelli di modifica").
 - Salvataggi (`POST /api/catalog/…`): `update-bar-service-general` (`BarServiceUpdateGeneralRequest`),
   `update-bar-service-prices` (`BarServiceUpdatePricesRequest`), `update-bar-service-booking`
   (`BarServiceUpdateBookingRequest`, l'elenco intero delle opzioni).
@@ -273,7 +287,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `standard_services.edit_title`.
 - GET: `get-standard-service-general-info`, `get-standard-service-prices` insieme a `catalog/tariff-periods`,
   `get-standard-service-booking-options` (`GET /api/catalog/…`; risposte `StandardServiceSelectedGeneralInfo`,
-  `StandardServiceSelectedPrices` e l'array delle opzioni).
+  `StandardServiceSelectedPrices` e `StandardServiceSelectedBookingOptions`, tutte con `version`).
 - Salvataggi: `update-standard-service-general`, `update-standard-service-prices`, `update-standard-service-booking`
   (`POST /api/catalog/…`; corpi `StandardServiceUpdateGeneralRequest`, `StandardServiceUpdatePricesRequest`,
   `StandardServiceUpdateBookingRequest` con `idStandardService`).
@@ -319,7 +333,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - GET (`idHourlyService` nella query string): `get-hourly-service-general-info`, `get-hourly-service-prices`
   insieme a `catalog/tariff-periods`, `get-hourly-service-booking-options`.
 - Salvataggi: `update-hourly-service-general`, `update-hourly-service-prices`, `update-hourly-service-booking`;
-  entità `HourlyServiceSelectedGeneralInfo`, `HourlyServiceSelectedPrices`, `HourlyServiceUpdate*Request`.
+  entità `HourlyServiceSelectedGeneralInfo`, `HourlyServiceSelectedPrices`, `HourlyServiceSelectedBookingOptions`
+  (tutte con `version`), `HourlyServiceUpdate*Request`.
 - Il form si blocca con `disabled(path, …)` (caselle e interruttori non hanno `readonly`); le tab Prezzi e
   Prenotazioni ricevono `isReadonly` per spegnere "Aggiungi" e le X.
 - Le opzioni lette si completano con tutte le otto fasce (`availabilityOf`) e i periodi senza opzioni ne ricevono
@@ -361,7 +376,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - GET (`idAutomaticPrice` nella query string): `get-automatic-price-general-info`;
   `get-automatic-price-prices-validity` insieme a `get-automatic-price-services`.
 - Salvataggi: `update-automatic-price-general`, `update-automatic-price-prices-validity`; entità
-  `AutomaticPriceSelectedGeneralInfo`, `AutomaticPriceSelectedPricesValidity`, `AutomaticPriceUpdate*Request`.
+  `AutomaticPriceSelectedGeneralInfo`, `AutomaticPriceSelectedPricesValidity` (tutte e due con `version`),
+  `AutomaticPriceUpdate*Request`.
 - Il form si blocca con `disabled(path, …)`; la tab Prezzi e Validità riceve `isReadonly` per spegnere "Aggiungi
   periodo validità", le X, "Aggiungi fascia oraria" e i cestini. Il bottone secondario spento di `app-button`
   lascia l'icona blu piena: è il comportamento del wrapper.
@@ -428,7 +444,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Automatici.
 - GET (`?idTableService=`): `GET /api/catalog/get-table-service-general-info` e
   `GET /api/catalog/get-table-service-availability-bookings` (`TableServiceSelectedGeneralInfo`,
-  `TableServiceSelectedAvailabilityBookings`); le disponibilità lette si completano con tutti e sette i giorni.
+  `TableServiceSelectedAvailabilityBookings`, tutte e due con `version`); le disponibilità lette si completano con
+  tutti e sette i giorni.
 - Salvataggi: `POST /api/catalog/update-table-service-general` e
   `POST /api/catalog/update-table-service-availability-bookings` (`TableServiceUpdate*Request` con
   `idTableService`).

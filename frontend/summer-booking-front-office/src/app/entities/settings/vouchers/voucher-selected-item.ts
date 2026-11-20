@@ -11,4 +11,5 @@ export class VoucherSelectedItem {
   discountScope: DiscountScope | null = null;
   maxUseQuantity: number | null = null;
   isEnabled: boolean | null = null;
+  version: string | null = null;
 }

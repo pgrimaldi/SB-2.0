@@ -87,12 +87,14 @@ azioni di riga, errore di caricamento, misure e campi di ricerca.
   selezionati" la selezione si svuota. Dopo l'interruttore, riuscito o no, la tabella rilegge le righe e mostra lo
   stato del server.
 - L'errore di un'azione compare in un popup, non nella tabella: vedi "Errori delle azioni" in `api-e-mock.md`.
-- Se l'eliminazione o la duplicazione fallisce perché un elemento non c'è più (il 404 "non trovato" della sua API,
-  es. `inventory.item_not_found` o `catalog.sector_not_found`: eliminato nel frattempo da un altro utente), la pagina
+- Se l'eliminazione, la duplicazione o la modifica di una riga (la lettura all'apertura del popup o pannello di modifica
+  e il suo Salva) fallisce perché un elemento non c'è più (il 404 "non trovato" della sua API, es.
+  `inventory.item_not_found` o `catalog.sector_not_found`: eliminato nel frattempo da un altro utente), la pagina
   **deve sempre** ricaricare la tabella e togliere dalla selezione gli id dell'azione (tutti, dopo un'azione sulle
-  righe scelte, dove non è stato fatto nulla). `app-delete-items-popup` / `app-duplicate-items-popup` mostrano l'errore
-  come sempre e lo passano alla pagina con `(failed)`: ogni pagina ascolta `(failed)` di tutti e due i popup (es.
-  `reloadIfGone` di Impostazioni magazzino e Settori e file; Stagioni e periodi ricarica i periodi).
+  righe scelte, dove non è stato fatto nulla). `app-delete-items-popup` / `app-duplicate-items-popup` e il popup o
+  pannello di modifica mostrano l'errore come sempre e lo passano alla pagina con `(failed)`: ogni pagina ascolta
+  `(failed)` di tutti e tre (es. `reloadIfGone` di Impostazioni magazzino e Settori e file; Stagioni e periodi ricarica
+  i periodi).
 
 ## Errore di caricamento
 
