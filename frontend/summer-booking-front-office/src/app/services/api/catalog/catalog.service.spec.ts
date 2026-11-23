@@ -11,7 +11,6 @@ import { StandardServiceIcon } from '../../../entities/enums/standard-service-ic
 import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
-import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { BathhouseDocument } from '../../../entities/enums/bathhouse-document';
 import { BathhouseGeneralInformation } from '../../../entities/settings/bathhouse-configuration/bathhouse-general-information';
 import { BathhouseMedia } from '../../../entities/settings/bathhouse-configuration/bathhouse-media';
@@ -1169,13 +1168,17 @@ describe('CatalogService', () => {
   it('should create the table service with only the contract fields, without the property', () => {
     const { catalog, controller } = setup();
     const translation = { language: Language.It, serviceName: 'Pranzo', description: 'Ai tavoli' };
-    const day = { dayOfWeek: 1, isEnabled: true, startTime: '12:00', endTime: '15:00' };
+    const otherTimeSlot = { startTime: '19:00', endTime: '22:00' };
+    const day = {
+      dayOfWeek: 1,
+      isEnabled: true,
+      startTime: '12:00',
+      endTime: '15:00',
+      otherTimeSlots: [otherTimeSlot],
+    };
     const availability = {
       dateFrom: '2026-07-01T00:00:00.000Z',
       dateTo: '2026-07-31T00:00:00.000Z',
-      isSameTimeForAllDays: true,
-      startTime: '12:00',
-      endTime: '15:00',
       days: [day],
     };
     const tableGroup = { tableQuantity: 10, seatPerTableQuantity: 2 };
@@ -1186,11 +1189,14 @@ describe('CatalogService', () => {
       availabilityMode: TableServiceAvailabilityMode.Tables,
       tableGroups: [tableGroup],
       totalSeatQuantity: null,
-      averageMealDuration: TableServiceMealDuration.OneHourThirtyMinutes,
+      averageMealMinutes: 90,
       maxBookingPerTimeSlotQuantity: 8,
+      minSeatPerBookingQuantity: 2,
+      maxSeatPerBookingQuantity: null,
       bookingPayment: TableServiceBookingPayment.Deposit,
       depositMode: TableServiceDepositMode.PerPerson,
       depositPercentage: 20,
+      depositAmount: null,
       isOnlineBookingEnabled: true,
     };
 
@@ -1202,7 +1208,16 @@ describe('CatalogService', () => {
           availabilities: [
             {
               ...availability,
-              days: [{ ...day, unexpectedFlag: 'extra-field' }],
+              isSameTimeForAllDays: true,
+              startTime: '12:00',
+              endTime: '15:00',
+              days: [
+                {
+                  ...day,
+                  otherTimeSlots: [{ ...otherTimeSlot, unexpectedFlag: 'extra-field' }],
+                  unexpectedFlag: 'extra-field',
+                },
+              ],
               unexpectedFlag: 'extra-field',
             },
           ],
@@ -1214,7 +1229,8 @@ describe('CatalogService', () => {
 
     const body = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-table-service`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/table-services/create-table-service`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -1228,7 +1244,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-table-service-general-info` &&
+        url === `${environment.apiBaseUrl}/catalog/table-services/get-table-service-general-info` &&
         params.get('idTableService') === 't1',
     ).request;
     expect(request.body).toBeNull();
@@ -1243,7 +1259,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-table-service-availability-bookings` &&
+        url ===
+          `${environment.apiBaseUrl}/catalog/table-services/get-table-service-availability-bookings` &&
         params.get('idTableService') === 't1',
     ).request;
     expect(request.body).toBeNull();
@@ -1269,7 +1286,7 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-table-service-general`,
+        url === `${environment.apiBaseUrl}/catalog/table-services/update-table-service-general`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -1277,13 +1294,16 @@ describe('CatalogService', () => {
 
   it('should save the Disponibilità e Prenotazioni of the table service with only its fields', () => {
     const { catalog, controller } = setup();
-    const day = { dayOfWeek: 6, isEnabled: true, startTime: '19:00', endTime: '23:00' };
+    const day = {
+      dayOfWeek: 6,
+      isEnabled: true,
+      startTime: '19:00',
+      endTime: '23:00',
+      otherTimeSlots: [],
+    };
     const availability = {
       dateFrom: '2026-07-01T00:00:00.000Z',
       dateTo: '2026-07-31T00:00:00.000Z',
-      isSameTimeForAllDays: false,
-      startTime: null,
-      endTime: null,
       days: [day],
     };
     const request = {
@@ -1292,11 +1312,14 @@ describe('CatalogService', () => {
       availabilityMode: TableServiceAvailabilityMode.Seats,
       tableGroups: [],
       totalSeatQuantity: 40,
-      averageMealDuration: TableServiceMealDuration.TwoHours,
+      averageMealMinutes: 100,
       maxBookingPerTimeSlotQuantity: 10,
+      minSeatPerBookingQuantity: null,
+      maxSeatPerBookingQuantity: 6,
       bookingPayment: TableServiceBookingPayment.None,
       depositMode: TableServiceDepositMode.Total,
       depositPercentage: null,
+      depositAmount: null,
       isOnlineBookingEnabled: false,
     };
 
@@ -1307,6 +1330,9 @@ describe('CatalogService', () => {
           availabilities: [
             {
               ...availability,
+              isSameTimeForAllDays: false,
+              startTime: null,
+              endTime: null,
               days: [{ ...day, unexpectedFlag: 'extra-field' }],
               unexpectedFlag: 'extra-field',
             },
@@ -1320,7 +1346,8 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/table-services/update-table-service-availability-bookings`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -1414,12 +1441,12 @@ describe('CatalogService', () => {
           ),
       ],
       [
-        'update-table-service-general',
+        'table-services/update-table-service-general',
         () =>
           catalog.updateTableServiceGeneral(new TableServiceUpdateGeneralRequest(), READ_VERSION),
       ],
       [
-        'update-table-service-availability-bookings',
+        'table-services/update-table-service-availability-bookings',
         () =>
           catalog.updateTableServiceAvailabilityBookings(
             new TableServiceUpdateAvailabilityBookingsRequest(),

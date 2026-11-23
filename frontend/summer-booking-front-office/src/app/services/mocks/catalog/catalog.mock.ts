@@ -10,7 +10,6 @@ import { StandardServiceIcon } from '../../../entities/enums/standard-service-ic
 import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
-import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import {
   BathhouseGeneralInformation,
@@ -66,9 +65,15 @@ import { StandardServiceSelectedBookingOptions } from '../../../entities/setting
 import { StandardServiceSelectedGeneralInfo } from '../../../entities/settings/services/standard-service-selected-general-info';
 import { StandardServiceSelectedPrices } from '../../../entities/settings/services/standard-service-selected-prices';
 import { TableServiceAddItemRequest } from '../../../entities/settings/services/table-service-add-item-request';
+import { TableServiceAvailabilityDay } from '../../../entities/settings/services/table-service-availability-day';
 import { TableServiceItem } from '../../../entities/settings/services/table-service-item';
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
+import {
+  MAX_SEAT_PER_TABLE_QUANTITY,
+  MAX_TABLE_QUANTITY,
+  MAX_TOTAL_SEAT_QUANTITY,
+} from '../../../entities/settings/services/table-service-table-group';
 import { MAX_EMAIL_LENGTH } from '../../../entities/shared/email-address';
 import {
   IMAGE_UPLOAD_TYPES,
@@ -3371,15 +3376,14 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
         {
           dateFrom: '2026-06-01T00:00:00.000Z',
           dateTo: '2026-09-30T00:00:00.000Z',
-          isSameTimeForAllDays: true,
-          startTime: '12:00',
-          endTime: '15:00',
-          days: [1, 2, 3, 4, 5, 6, 7].map((dayOfWeek) => ({
-            dayOfWeek,
-            isEnabled: dayOfWeek !== 1,
-            startTime: '12:00',
-            endTime: '15:00',
-          })),
+          days: [2, 3, 4, 5, 6, 7].map((dayOfWeek) =>
+            Object.assign(new TableServiceAvailabilityDay(), {
+              dayOfWeek,
+              isEnabled: true,
+              startTime: '12:00',
+              endTime: '15:00',
+            }),
+          ),
         },
       ],
       availabilityMode: TableServiceAvailabilityMode.Tables,
@@ -3388,7 +3392,7 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
         { tableQuantity: 8, seatPerTableQuantity: 4 },
         { tableQuantity: 6, seatPerTableQuantity: 5 },
       ],
-      averageMealDuration: TableServiceMealDuration.OneHourThirtyMinutes,
+      averageMealMinutes: 90,
       maxBookingPerTimeSlotQuantity: 8,
       bookingPayment: TableServiceBookingPayment.Deposit,
       depositMode: TableServiceDepositMode.Total,
@@ -3406,7 +3410,7 @@ const TABLE_SERVICE_TABLE = {
   notFoundCode: ApiErrorCode.ServiceTableServiceNotFound,
 };
 
-/** `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) (see `serviceListAnswer`). */
+/** `POST /api/catalog/table-services/table-service-list`: one page of the table services (e.g. lunch, dinner) (see `serviceListAnswer`). */
 export const tableServiceListMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
@@ -3448,13 +3452,13 @@ export const duplicateAutomaticPriceItemsMock = (
 ): Observable<HttpEvent<unknown>> =>
   duplicateServicesAnswer(request, AUTOMATIC_PRICE_TABLE, 'idAutomaticPrices');
 
-/** `POST /api/catalog/delete-table-service-item` with `{ idTableServices }` (see `deleteServicesAnswer`). */
+/** `POST /api/catalog/table-services/delete-table-service-item` with `{ idTableServices }` (see `deleteServicesAnswer`). */
 export const deleteTableServiceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   deleteServicesAnswer(request, TABLE_SERVICE_TABLE, 'idTableServices');
 
-/** `POST /api/catalog/duplicate-table-service-item` with `{ idTableServices }` (see `duplicateServicesAnswer`). */
+/** `POST /api/catalog/table-services/duplicate-table-service-item` with `{ idTableServices }` (see `duplicateServicesAnswer`). */
 export const duplicateTableServiceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
@@ -3463,11 +3467,9 @@ export const duplicateTableServiceItemsMock = (
 type CreateTableServiceBody = Partial<TableServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-table-service` with `TableServiceAddItemRequest`: the new table service
- * goes into the list, with the name in the language of `Accept-Language`. 204 without a body; 401
- * without a valid access token; 400 with one error per wrong field (name and description in the
- * language of the request, choices among the values of their enums, quantities whole and above 0,
- * deposit from 0 to 100).
+ * `POST /api/catalog/table-services/create-table-service` with `TableServiceAddItemRequest`: the new table service
+ * goes into the list. 204 without a body; 401 without a valid access token; 400 with one error per
+ * wrong field (see `standardGeneralErrors`, `missingNameErrors` and `tableServiceErrors`).
  */
 export const createTableServiceMock = (
   request: HttpRequest<unknown>,
@@ -3480,6 +3482,7 @@ export const createTableServiceMock = (
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [
     ...standardGeneralErrors({ translations: body.translations }, language),
+    ...missingNameErrors(body.translations ?? []),
     ...tableServiceErrors(body),
   ];
   if (errors.length) {
@@ -3487,7 +3490,6 @@ export const createTableServiceMock = (
       errors,
     });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
   const idTableService = crypto.randomUUID();
   TABLE_SERVICE_DETAILS.set(
     idTableService,
@@ -3496,7 +3498,7 @@ export const createTableServiceMock = (
   TABLE_SERVICES.push({
     propertyId: property.id,
     idTableService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
   });
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
@@ -3513,6 +3515,7 @@ function tableDetailsOf(row: TableServiceRow): TableServiceAddItemRequest {
           description: 'Servizio tavoli dello stabilimento.',
         },
       ],
+      tableGroups: [{ tableQuantity: 5, seatPerTableQuantity: 4 }],
     })
   );
 }
@@ -3524,7 +3527,7 @@ function requestedTableService(request: HttpRequest<unknown>): TableServiceRow |
 }
 
 /**
- * `GET /api/catalog/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
+ * `GET /api/catalog/table-services/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
  * edit panel. 200 with `TableServiceSelectedGeneralInfo` and the version of the tab, only the
  * languages written; 401 without a valid access token; 404 `service.table_service_not_found` for an unknown id.
  */
@@ -3542,7 +3545,7 @@ export const tableServiceGeneralInfoMock = (
 };
 
 /**
- * What `GET /api/catalog/get-table-service-general-info` answers besides the version: the version
+ * What `GET /api/catalog/table-services/get-table-service-general-info` answers besides the version: the version
  * covers it.
  */
 function tableGeneralInfoOf(
@@ -3559,7 +3562,7 @@ function tableGeneralInfoOf(
 }
 
 /**
- * `GET /api/catalog/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
+ * `GET /api/catalog/table-services/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
  * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings` and the
  * version of the tab; 401 without a valid access token; 404 `service.table_service_not_found` for an unknown id.
  */
@@ -3577,7 +3580,7 @@ export const tableServiceAvailabilityBookingsMock = (
 };
 
 /**
- * What `GET /api/catalog/get-table-service-availability-bookings` answers besides the version: the
+ * What `GET /api/catalog/table-services/get-table-service-availability-bookings` answers besides the version: the
  * version covers it.
  */
 function tableAvailabilityBookingsOf(
@@ -3589,11 +3592,14 @@ function tableAvailabilityBookingsOf(
     availabilityMode: details.availabilityMode,
     tableGroups: details.tableGroups,
     totalSeatQuantity: details.totalSeatQuantity,
-    averageMealDuration: details.averageMealDuration,
+    averageMealMinutes: details.averageMealMinutes,
     maxBookingPerTimeSlotQuantity: details.maxBookingPerTimeSlotQuantity,
+    minSeatPerBookingQuantity: details.minSeatPerBookingQuantity,
+    maxSeatPerBookingQuantity: details.maxSeatPerBookingQuantity,
     bookingPayment: details.bookingPayment,
     depositMode: details.depositMode,
     depositPercentage: details.depositPercentage,
+    depositAmount: details.depositAmount,
     isOnlineBookingEnabled: details.isOnlineBookingEnabled,
   };
 }
@@ -3645,7 +3651,7 @@ function updateTableService(
 }
 
 /**
- * `POST /api/catalog/update-table-service-general` with `TableServiceUpdateGeneralRequest`: names,
+ * `POST /api/catalog/table-services/update-table-service-general` with `TableServiceUpdateGeneralRequest`: names,
  * descriptions and Metti in evidenza; the list shows the new name (language of `Accept-Language`).
  * Errors as the creation.
  */
@@ -3656,18 +3662,20 @@ export const updateTableServiceGeneralMock = (
   return updateTableService(
     request,
     tableGeneralInfoOf,
-    (body) => standardGeneralErrors({ translations: body.translations }, language),
+    (body) => [
+      ...standardGeneralErrors({ translations: body.translations }, language),
+      ...missingNameErrors(body.translations ?? []),
+    ],
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
     },
   );
 };
 
 /**
- * `POST /api/catalog/update-table-service-availability-bookings` with
+ * `POST /api/catalog/table-services/update-table-service-availability-bookings` with
  * `TableServiceUpdateAvailabilityBookingsRequest`: the Disponibilità e Prenotazioni tab. Errors as
  * the creation (see `tableServiceErrors`).
  */
@@ -3679,61 +3687,105 @@ export const updateTableServiceAvailabilityBookingsMock = (
     details.availabilityMode = body.availabilityMode ?? TableServiceAvailabilityMode.Tables;
     details.tableGroups = body.tableGroups ?? [];
     details.totalSeatQuantity = body.totalSeatQuantity ?? null;
-    details.averageMealDuration = body.averageMealDuration ?? null;
+    details.averageMealMinutes = body.averageMealMinutes ?? null;
     details.maxBookingPerTimeSlotQuantity = body.maxBookingPerTimeSlotQuantity ?? null;
+    details.minSeatPerBookingQuantity = body.minSeatPerBookingQuantity ?? null;
+    details.maxSeatPerBookingQuantity = body.maxSeatPerBookingQuantity ?? null;
     details.bookingPayment = body.bookingPayment ?? TableServiceBookingPayment.None;
     details.depositMode = body.depositMode ?? TableServiceDepositMode.Total;
     details.depositPercentage = body.depositPercentage ?? null;
+    details.depositAmount = body.depositAmount ?? null;
     details.isOnlineBookingEnabled = body.isOnlineBookingEnabled === true;
   });
 
+/**
+ * The choices among the values of their enums; the tables or the seats, as chosen; the quantities in
+ * their limits; with a deposit, its percentage or its amount; the availabilities with their days.
+ */
 function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
   const errors: MockFieldError[] = [];
-  const invalid = (field: string): void => {
-    errors.push({ field, code: ApiErrorCode.ValidationInvalid });
+  const add = (field: string, code: ApiErrorCode): void => {
+    errors.push({ field, code });
+  };
+  const checkRange = (field: string, value: unknown, from: number, to: number): void => {
+    if (value != null && !isBetween(value, from, to)) {
+      errors.push({ field, code: ApiErrorCode.ValidationOutOfRange, args: { from, to } });
+    }
   };
   if (!isValueOf(TableServiceAvailabilityMode, body.availabilityMode)) {
-    invalid('availabilityMode');
+    add('availabilityMode', ApiErrorCode.ValidationInvalid);
   }
   if (!isValueOf(TableServiceBookingPayment, body.bookingPayment)) {
-    invalid('bookingPayment');
+    add('bookingPayment', ApiErrorCode.ValidationInvalid);
   }
   if (!isValueOf(TableServiceDepositMode, body.depositMode)) {
-    invalid('depositMode');
+    add('depositMode', ApiErrorCode.ValidationInvalid);
   }
-  if (
-    body.averageMealDuration != null &&
-    !isValueOf(TableServiceMealDuration, body.averageMealDuration)
-  ) {
-    invalid('averageMealDuration');
-  }
-  const tableGroups = Array.isArray(body.tableGroups) ? body.tableGroups : [];
-  tableGroups.forEach((tableGroup, index) => {
-    if (!isQuantity(tableGroup.tableQuantity)) {
-      invalid(`tableGroups[${index}].tableQuantity`);
+  const tableGroups = body.tableGroups ?? [];
+  if (body.availabilityMode === TableServiceAvailabilityMode.Tables) {
+    const seats = tableGroups.map(({ seatPerTableQuantity }) => seatPerTableQuantity);
+    if (!tableGroups.length) {
+      add('tableGroups', ApiErrorCode.ValidationRequired);
+    } else if (
+      new Set(seats).size !== seats.length ||
+      !tableGroups.every(
+        ({ tableQuantity, seatPerTableQuantity }) =>
+          isBetween(tableQuantity, 1, MAX_TABLE_QUANTITY) &&
+          isBetween(seatPerTableQuantity, 1, MAX_SEAT_PER_TABLE_QUANTITY),
+      )
+    ) {
+      add('tableGroups', ApiErrorCode.ValidationInvalid);
     }
-    if (!isQuantity(tableGroup.seatPerTableQuantity)) {
-      invalid(`tableGroups[${index}].seatPerTableQuantity`);
+  } else if (body.totalSeatQuantity == null) {
+    add('totalSeatQuantity', ApiErrorCode.ValidationRequired);
+  }
+  checkRange('totalSeatQuantity', body.totalSeatQuantity, 1, MAX_TOTAL_SEAT_QUANTITY);
+  checkRange('averageMealMinutes', body.averageMealMinutes, 10, 600);
+  checkRange(
+    'maxBookingPerTimeSlotQuantity',
+    body.maxBookingPerTimeSlotQuantity,
+    1,
+    MAX_SERVICE_BOOKING_QUANTITY,
+  );
+  if (body.bookingPayment === TableServiceBookingPayment.Deposit) {
+    const deposit = body.depositPercentage;
+    if (deposit == null && body.depositAmount == null) {
+      add('depositPercentage', ApiErrorCode.ValidationRequired);
+    } else if (deposit != null && !(deposit > 0 && deposit <= 100)) {
+      errors.push({
+        field: 'depositPercentage',
+        code: ApiErrorCode.ValidationOutOfRange,
+        args: { from: 0, to: 100 },
+      });
+    }
+  }
+  (body.availabilities ?? []).forEach(({ dateFrom, dateTo, days }, index) => {
+    const at = `availabilities[${index}]`;
+    if (!dateFrom) {
+      add(`${at}.dateFrom`, ApiErrorCode.ValidationRequired);
+    }
+    if (!dateTo) {
+      add(`${at}.dateTo`, ApiErrorCode.ValidationRequired);
+    } else if (dateFrom && dateTo < dateFrom) {
+      add(`${at}.dateTo`, ApiErrorCode.ValidationEndBeforeStart);
+    }
+    const enabled = days.filter(({ isEnabled }) => isEnabled);
+    if (!enabled.length) {
+      add(`${at}.days`, ApiErrorCode.ValidationRequired);
+    } else if (
+      !enabled.every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
+    ) {
+      add(`${at}.days`, ApiErrorCode.ValidationInvalid);
     }
   });
-  if (!isQuantity(body.totalSeatQuantity)) {
-    invalid('totalSeatQuantity');
-  }
-  if (!isQuantity(body.maxBookingPerTimeSlotQuantity)) {
-    invalid('maxBookingPerTimeSlotQuantity');
-  }
-  const deposit = body.depositPercentage;
-  if (deposit != null && !(typeof deposit === 'number' && deposit >= 0 && deposit <= 100)) {
-    invalid('depositPercentage');
-  }
   return errors;
+}
+
+/** A whole number from `from` to `to`. */
+function isBetween(value: unknown, from: number, to: number): boolean {
+  return Number.isInteger(value) && (value as number) >= from && (value as number) <= to;
 }
 
 function isValueOf(choices: Record<string, string>, value: unknown): boolean {
   return Object.values(choices).some((choice) => choice === value);
-}
-
-/** Empty, or a whole number above 0. */
-function isQuantity(value: unknown): boolean {
-  return value == null || (Number.isInteger(value) && (value as number) > 0);
 }

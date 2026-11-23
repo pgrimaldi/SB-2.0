@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  metadata,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -35,9 +37,14 @@ import { TableServiceBookingPayment } from '../../../../../entities/enums/table-
 import { TableServiceDepositMode } from '../../../../../entities/enums/table-service-deposit-mode';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { TableServiceAddItemRequest } from '../../../../../entities/settings/services/table-service-add-item-request';
 import { TableServiceAvailability } from '../../../../../entities/settings/services/table-service-availability';
+import { TableServiceAvailabilityDraft } from '../../../../../entities/settings/services/table-service-availability-draft';
 import { TableServiceAvailabilityDay } from '../../../../../entities/settings/services/table-service-availability-day';
 import { TableServiceSelectedAvailabilityBookings } from '../../../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/table-service-selected-general-info';
@@ -47,11 +54,12 @@ import { TableServiceUpdateGeneralRequest } from '../../../../../entities/settin
 import { DAYS_OF_WEEK } from '../../../../../entities/shared/days-of-week';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
-import { requiredText, timeRange } from '../../../../shared/forms/validators';
+import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
+import { otherTranslationRules, tableServiceRules } from '../service-form-rules';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
 import { TableServiceGeneralInfoTab } from '../table-service-general-info-tab/table-service-general-info-tab';
@@ -80,11 +88,14 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof TableServiceAddItemR
     'availabilityMode',
     'tableGroups',
     'totalSeatQuantity',
-    'averageMealDuration',
+    'averageMealMinutes',
     'maxBookingPerTimeSlotQuantity',
+    'minSeatPerBookingQuantity',
+    'maxSeatPerBookingQuantity',
     'bookingPayment',
     'depositMode',
     'depositPercentage',
+    'depositAmount',
     'isOnlineBookingEnabled',
   ],
 };
@@ -146,6 +157,8 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly draftForm = form(this.draft, (path) => {
     disabled(path, () => this.isLocked());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) =>
@@ -155,6 +168,13 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.serviceName);
           requiredText(main.description);
         },
+      );
+      applyWhen(
+        translation,
+        ({ valueOf }) =>
+          this.selectedTab() === PanelTab.GeneralInfo &&
+          valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
       );
     });
     applyEach(path.availabilities, (availability) => {
@@ -168,17 +188,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         disabled(day.endTime, ({ valueOf }) => valueOf(availability.isSameTimeForAllDays));
       });
     });
-    applyWhen(
-      path.availabilities,
-      () => this.selectedTab() === PanelTab.AvailabilityBookings,
-      (availabilities) =>
-        applyEach(availabilities, (availability) => {
-          timeRange(availability.startTime, availability.endTime);
-          applyEach(availability.days, (day) => {
-            timeRange(day.startTime, day.endTime);
-          });
-        }),
-    );
+    applyWhen(path, () => this.selectedTab() === PanelTab.AvailabilityBookings, tableServiceRules);
   });
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
   private readonly pristine = signal(newDraft());
@@ -455,31 +465,23 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
-  /** Every availability with its seven days, also those the API leaves out (unticked). */
   private setAvailabilityBookings(values: TableServiceSelectedAvailabilityBookings): void {
     this.versions.set(PanelTab.AvailabilityBookings, values.version);
     this.applyLoaded({
-      availabilities: values.availabilities.map((availability) =>
-        Object.assign(new TableServiceAvailability(), availability, {
-          days: DAYS_OF_WEEK.map(({ number }) =>
-            Object.assign(
-              new TableServiceAvailabilityDay(),
-              availability.days.find((day) => day.dayOfWeek === number),
-              { dayOfWeek: number },
-            ),
-          ),
-        }),
-      ),
+      availabilities: values.availabilities.map(availabilityDraftOf),
       availabilityMode: values.availabilityMode ?? TableServiceAvailabilityMode.Tables,
       tableGroups: values.tableGroups.map((tableGroup) =>
         Object.assign(new TableServiceTableGroup(), tableGroup),
       ),
       totalSeatQuantity: values.totalSeatQuantity,
-      averageMealDuration: values.averageMealDuration,
+      averageMealMinutes: values.averageMealMinutes,
       maxBookingPerTimeSlotQuantity: values.maxBookingPerTimeSlotQuantity,
+      minSeatPerBookingQuantity: values.minSeatPerBookingQuantity,
+      maxSeatPerBookingQuantity: values.maxSeatPerBookingQuantity,
       bookingPayment: values.bookingPayment ?? TableServiceBookingPayment.None,
       depositMode: values.depositMode ?? TableServiceDepositMode.Total,
       depositPercentage: values.depositPercentage,
+      depositAmount: values.depositAmount,
       isOnlineBookingEnabled: values.isOnlineBookingEnabled ?? false,
     });
   }
@@ -514,6 +516,33 @@ function newDraft(): TableServiceAddItemRequest {
     translations: SERVICE_LANGUAGES.map((language) =>
       Object.assign(new ServiceTranslation(), { language }),
     ),
+  });
+}
+
+/**
+ * A saved availability with its seven days, also those the API leaves out (unticked). When two days
+ * or more are ticked, all with the same hours, these are the hours for all the days.
+ */
+function availabilityDraftOf(saved: TableServiceAvailability): TableServiceAvailabilityDraft {
+  const days = DAYS_OF_WEEK.map(({ number }) =>
+    Object.assign(
+      new TableServiceAvailabilityDay(),
+      saved.days.find((day) => day.dayOfWeek === number),
+      { dayOfWeek: number },
+    ),
+  );
+  const [first, ...others] = days.filter(({ isEnabled }) => isEnabled);
+  const isSameTimeForAllDays =
+    others.length > 0 &&
+    others.every(
+      ({ startTime, endTime }) => startTime === first.startTime && endTime === first.endTime,
+    );
+  const times = isSameTimeForAllDays
+    ? { startTime: first.startTime, endTime: first.endTime }
+    : { startTime: null, endTime: null };
+  return Object.assign(new TableServiceAvailabilityDraft(), saved, times, {
+    isSameTimeForAllDays,
+    days: isSameTimeForAllDays ? days.map((day) => ({ ...day, ...times })) : days,
   });
 }
 

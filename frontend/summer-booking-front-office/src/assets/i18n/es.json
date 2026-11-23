@@ -1631,7 +1631,10 @@
             },
             "deposit_amount": "Importe del depósito",
             "deposit_info": "**1. Total**\nEl depósito de confirmación de la reserva del servicio de mesas se aplica una sola vez por el total de personas/plazas reservadas.\n\n**2. Por persona**\nEl depósito de confirmación de la reserva del servicio de mesas se aplica por cada persona/plaza reservada.",
-            "online_booking": "Activar reserva online"
+            "online_booking": "Activar reserva online",
+            "field_names": {
+              "table": "mesa"
+            }
           }
         }
       },
@@ -2074,6 +2077,9 @@
     "services": {
       "translation": {
         "name_missing": "Escribe también el nombre en este idioma"
+      },
+      "tables": {
+        "seats_taken": "Plazas ya usadas"
       }
     }
   },

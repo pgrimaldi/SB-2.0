@@ -21,15 +21,33 @@ import {
   ServiceBookingOption,
 } from '../../../../entities/settings/services/service-booking-option';
 import { MAX_SERVICE_PRICE } from '../../../../entities/settings/services/service-price';
+import { TableServiceAvailabilityMode } from '../../../../entities/enums/table-service-availability-mode';
+import { TableServiceBookingPayment } from '../../../../entities/enums/table-service-booking-payment';
+import { TableServiceAddItemRequest } from '../../../../entities/settings/services/table-service-add-item-request';
+import {
+  MAX_SEAT_PER_TABLE_QUANTITY,
+  MAX_TABLE_QUANTITY,
+  MAX_TOTAL_SEAT_QUANTITY,
+} from '../../../../entities/settings/services/table-service-table-group';
 import { ServiceTranslation } from '../../../../entities/settings/services/service-translation';
 import {
   MAX_SERVICE_VARIANT_NAME_LENGTH,
   ServiceVariant,
 } from '../../../../entities/settings/services/service-variant';
-import { MinItemsError, minItems, requiredText, timeRange } from '../../../shared/forms/validators';
+import {
+  MinItemsError,
+  greaterThan,
+  minItems,
+  requiredText,
+  timeRange,
+} from '../../../shared/forms/validators';
 
 export interface MissingTranslatedNameError extends ValidationError {
   readonly kind: 'services.translation.name_missing';
+}
+
+export interface SeatsTakenError extends ValidationError {
+  readonly kind: 'services.tables.seats_taken';
 }
 
 /** Another language as the backend wants it: where there is a description there is the name too. */
@@ -173,4 +191,79 @@ export function withAvailabilitiesInForce(
   return values.isPeriodPricingEnabled
     ? { ...values, availabilityOptions: [] }
     : { ...values, periodAvailabilities: [] };
+}
+
+const MAX_PERCENTAGE = 100;
+
+/**
+ * A table service as the backend wants it: the days of every availability with their hours, the
+ * tables or the seats, the deposit.
+ */
+export function tableServiceRules(path: SchemaPathTree<TableServiceAddItemRequest>): void {
+  applyEach(path.availabilities, (availability) => {
+    required(availability.dateFrom);
+    required(availability.dateTo);
+    required(availability.startTime);
+    required(availability.endTime);
+    timeRange(availability.startTime, availability.endTime);
+    validate(availability.days, ({ value }): MinItemsError | undefined =>
+      value().some(({ isEnabled }) => isEnabled) ? undefined : { kind: 'min_items', count: 1 },
+    );
+    applyEach(availability.days, (day) => {
+      required(day.startTime, { when: ({ valueOf }) => valueOf(day.isEnabled) });
+      required(day.endTime, { when: ({ valueOf }) => valueOf(day.isEnabled) });
+      timeRange(day.startTime, day.endTime);
+    });
+  });
+  applyWhen(
+    path,
+    ({ valueOf }) => valueOf(path.availabilityMode) === TableServiceAvailabilityMode.Tables,
+    (tables) => {
+      minItems(tables.tableGroups, 1);
+      applyEach(tables.tableGroups, (tableGroup) => {
+        required(tableGroup.tableQuantity);
+        min(tableGroup.tableQuantity, 1);
+        max(tableGroup.tableQuantity, MAX_TABLE_QUANTITY);
+        required(tableGroup.seatPerTableQuantity);
+        min(tableGroup.seatPerTableQuantity, 1);
+        max(tableGroup.seatPerTableQuantity, MAX_SEAT_PER_TABLE_QUANTITY);
+        validate(
+          tableGroup.seatPerTableQuantity,
+          ({ value, valueOf }): SeatsTakenError | undefined =>
+            value() !== null &&
+            valueOf(tables.tableGroups).filter(
+              ({ seatPerTableQuantity }) => seatPerTableQuantity === value(),
+            ).length > 1
+              ? { kind: 'services.tables.seats_taken' }
+              : undefined,
+        );
+      });
+    },
+  );
+  applyWhen(
+    path,
+    ({ valueOf }) => valueOf(path.availabilityMode) === TableServiceAvailabilityMode.Seats,
+    (seats) => {
+      required(seats.totalSeatQuantity);
+      min(seats.totalSeatQuantity, 1);
+      max(seats.totalSeatQuantity, MAX_TOTAL_SEAT_QUANTITY);
+    },
+  );
+  min(path.maxBookingPerTimeSlotQuantity, 1);
+  max(path.maxBookingPerTimeSlotQuantity, MAX_SERVICE_BOOKING_QUANTITY);
+  applyWhen(
+    path,
+    ({ valueOf }) => valueOf(path.bookingPayment) === TableServiceBookingPayment.Deposit,
+    (deposit) => {
+      required(deposit.depositPercentage, {
+        when: ({ valueOf }) => valueOf(deposit.depositAmount) === null,
+      });
+      max(deposit.depositPercentage, MAX_PERCENTAGE);
+      applyWhen(
+        deposit,
+        ({ valueOf }) => valueOf(deposit.depositPercentage) !== null,
+        (written) => greaterThan(written.depositPercentage, 0),
+      );
+    },
+  );
 }

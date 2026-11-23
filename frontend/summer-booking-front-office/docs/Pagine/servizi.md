@@ -45,7 +45,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   "Aggiungi prezzo automatico", colonne Servizio, Prezzo; righe da
   `POST /api/catalog/automatic-prices/automatic-price-list` (`CatalogService.automaticPriceList`, `Page<AutomaticPriceItem>`).
 - Prenotazione tavoli: titolo "Prenotazione servizio tavoli" con il tavolo (`Services_TableBookingTitle.png`),
-  bottone "Aggiungi servizio tavoli", sola colonna Nome servizio; righe da `POST /api/catalog/table-service-list`
+  bottone "Aggiungi servizio tavoli", sola colonna Nome servizio; righe da
+  `POST /api/catalog/table-services/table-service-list`
   (`CatalogService.tableServiceList`, `Page<TableServiceItem>`).
 - Servizi orari e Prenotazione tavoli mostrano le righe così come arrivano (`[load]="catalog.hourlyServiceList"`,
   `[load]="catalog.tableServiceList"`).
@@ -71,7 +72,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     (`idHourlyServices`);
   - Prezzi automatici: `automatic-prices/delete-automatic-price-item`,
     `automatic-prices/duplicate-automatic-price-item` (`idAutomaticPrices`);
-  - Prenotazione tavoli: `delete-table-service-item`, `duplicate-table-service-item` (`idTableServices`).
+  - Prenotazione tavoli: `table-services/delete-table-service-item`, `table-services/duplicate-table-service-item`
+    (`idTableServices`).
 
 ## Parti comuni dei pannelli (`services/shared/`)
 
@@ -457,8 +459,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   obbligatori nella lingua dell'utente, e "Metti in evidenza" con la sua (i) (`app-services-highlighted`); niente
   immagine servizio.
 - Disponibilità e Prenotazioni (`app-table-service-availability-bookings-tab`): le tre sezioni sotto.
-- Validazioni come negli altri pannelli: nome e descrizione e le coppie Dalle / alle (`timeRange`).
-- Salva si accende con il form valido e chiama `POST /api/catalog/create-table-service`
+- Validazioni: nome, descrizione e nome nelle lingue con una descrizione come negli altri pannelli; per l'altra tab
+  `tableServiceRules`, come nel backend (sotto, sezione per sezione).
+- Salva si accende con il form valido e chiama `POST /api/catalog/table-services/create-table-service`
   (`CatalogService.createTableService`, `TableServiceAddItemRequest`).
 
 #### Disponibilità (`app-table-service-availabilities`)
@@ -468,13 +471,18 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   casella e Dalle/alle.
 - Con la casella spuntata gli orari comuni si copiano in tutti i giorni e quelli dei giorni si spengono; senza la
   spunta sono spenti gli orari comuni (regole `disabled` nel form del pannello).
+- La casella e gli orari comuni non si mandano (`TableServiceAvailabilityDraft`): in lettura la casella è accesa quando
+  almeno due giorni scelti hanno gli stessi orari (`availabilityDraftOf`).
+- Date obbligatorie, almeno un giorno scelto, le due ore per ogni giorno scelto. Le altre fasce dello stesso giorno
+  (`otherTimeSlots`) non si mostrano e tornano come lette.
 
 #### Disponibilità tavoli e posti (`app-table-service-capacity`)
 
 - "Gestisci la disponibilità per" con `app-radio-group` sull'enum `TableServiceAvailabilityMode` (`Tables`,
   `Seats`).
-- Con Numero tavoli: righe "N° tavoli … da … posti" con il cestino e "Aggiungi tavoli". Con Numero posti: solo il
-  campo dei posti totali.
+- Con Numero tavoli: righe "N° tavoli … da … posti" con il cestino e "Aggiungi tavoli"; almeno una riga, 1-500 tavoli da
+  1-100 posti, mai due righe con gli stessi posti (`invalidate.services.tables.seats_taken`). Con Numero posti: solo il
+  campo dei posti totali, obbligatorio, 1-10.000.
 - Cambiando scelta i valori scritti (righe dei tavoli e posti totali) spariscono. Se ce ne sono, prima chiede
   conferma con `app-confirm-popup` ("Attenzione", "Cambiare il modo in cui viene gestita la disponibilità
   cancellerà le impostazioni attuali.", Annulla / Cambia rosso, testi in `form.tables.mode_change`).
@@ -482,12 +490,16 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 
 #### Opzioni di prenotazione (`app-table-service-booking-options`)
 
-- "Durata media del pasto": `app-filled-select` sull'enum `TableServiceMealDuration`, da 30 minuti a 3 ore.
-- "Numero massimo di prenotazioni per fascia oraria".
+- "Durata media del pasto", facoltativa: `app-filled-select` sull'enum `TableServiceMealDuration`, da 30 minuti a 3 ore. Si
+  mandano i minuti (`averageMealMinutes`); altri minuti già salvati restano finché non se ne sceglie una.
+- "Numero massimo di prenotazioni per fascia oraria", 1-32.767. I posti minimi e massimi per prenotazione non si mostrano
+  e tornano come letti.
 - "Consenti prenotazione": `app-radio-group` sull'enum `TableServiceBookingPayment` (`None`, `Deposit`).
 - Solo con "Con caparra confirmatoria", sotto una riga: "Gestione caparra" con la sua (i) e la tendina sull'enum
   `TableServiceDepositMode` (`Total`, `PerPerson`, Totale di default) e "Importo caparra" in %.
   - La (i): Totale, una sola volta per il totale delle persone/posti; A persona, per ogni persona/posto.
+  - La percentuale è obbligatoria, maggiore di 0 e fino a 100. Un importo fisso già salvato (`depositAmount`) torna com'è
+    finché non si scrive la percentuale.
 - Passando a "Senza alcun pagamento" con dati scritti nella caparra (importo, o "A persona") chiede conferma con
   `app-confirm-popup` ("Attenzione", testi in `form.tables.payment_change`): Cambia rimette Totale e svuota
   l'importo; Annulla, X o Esc tornano alla caparra con i suoi dati. Da "Senza alcun pagamento" alla caparra
@@ -497,22 +509,25 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 #### Entità
 
 - `TableServiceAddItemRequest`: `translations`, `isHighlighted`, `availabilities`, `availabilityMode`,
-  `tableGroups`, `totalSeatQuantity`, `averageMealDuration`, `maxBookingPerTimeSlotQuantity`, `bookingPayment`,
-  `depositMode`, `depositPercentage`, `isOnlineBookingEnabled`.
-- `TableServiceAvailability`: `dateFrom`, `dateTo`, `isSameTimeForAllDays`, `startTime`, `endTime`, `days`.
-- `TableServiceAvailabilityDay`: `dayOfWeek`, `isEnabled`, `startTime`, `endTime`.
+  `tableGroups`, `totalSeatQuantity`, `averageMealMinutes`, `maxBookingPerTimeSlotQuantity`,
+  `minSeatPerBookingQuantity`, `maxSeatPerBookingQuantity`, `bookingPayment`, `depositMode`, `depositPercentage`,
+  `depositAmount`, `isOnlineBookingEnabled`.
+- `TableServiceAvailability`: `dateFrom`, `dateTo`, `days`; nel form `TableServiceAvailabilityDraft`, con in più
+  `isSameTimeForAllDays`, `startTime`, `endTime`.
+- `TableServiceAvailabilityDay`: `dayOfWeek`, `isEnabled`, `startTime`, `endTime`, `otherTimeSlots`
+  (`TableServiceTimeSlot`).
 - `TableServiceTableGroup`: `tableQuantity`, `seatPerTableQuantity`.
 
 ### Modifica ("Modifica servizio tavoli")
 
 - `app-table-service-edit-item-panel` (titolo `table_booking.edit_title`), come il pannello di modifica dei Prezzi
   Automatici.
-- GET (`?idTableService=`): `GET /api/catalog/get-table-service-general-info` e
-  `GET /api/catalog/get-table-service-availability-bookings` (`TableServiceSelectedGeneralInfo`,
+- GET (`?idTableService=`): `GET /api/catalog/table-services/get-table-service-general-info` e
+  `GET /api/catalog/table-services/get-table-service-availability-bookings` (`TableServiceSelectedGeneralInfo`,
   `TableServiceSelectedAvailabilityBookings`, tutte e due con `version`); le disponibilità lette si completano con
   tutti e sette i giorni.
-- Salvataggi: `POST /api/catalog/update-table-service-general` e
-  `POST /api/catalog/update-table-service-availability-bookings` (`TableServiceUpdate*Request` con
+- Salvataggi: `POST /api/catalog/table-services/update-table-service-general` e
+  `POST /api/catalog/table-services/update-table-service-availability-bookings` (`TableServiceUpdate*Request` con
   `idTableService`).
 - Il form si blocca con `disabled(path, …)`; la tab Disponibilità e Prenotazioni riceve `isReadonly` per spegnere
   "Aggiungi disponibilità", le X, "Aggiungi tavoli" e i cestini (la (i) resta attiva).

@@ -1631,7 +1631,10 @@
             },
             "deposit_amount": "Deposit amount",
             "deposit_info": "**1. Total**\nThe confirmation deposit for the table service booking is applied only once for all the people/seats booked.\n\n**2. Per person**\nThe confirmation deposit for the table service booking is applied for each person/seat booked.",
-            "online_booking": "Enable online booking"
+            "online_booking": "Enable online booking",
+            "field_names": {
+              "table": "table"
+            }
           }
         }
       },
@@ -2074,6 +2077,9 @@
     "services": {
       "translation": {
         "name_missing": "Write the name in this language too"
+      },
+      "tables": {
+        "seats_taken": "Seats already used"
       }
     }
   },

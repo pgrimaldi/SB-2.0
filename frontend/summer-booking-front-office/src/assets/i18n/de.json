@@ -1631,7 +1631,10 @@
             },
             "deposit_amount": "Anzahlungsbetrag",
             "deposit_info": "**1. Gesamt**\nDie Anzahlung für die Tischservice-Reservierung wird nur einmal für alle gebuchten Personen/Plätze berechnet.\n\n**2. Pro Person**\nDie Anzahlung für die Tischservice-Reservierung wird für jede gebuchte Person bzw. jeden gebuchten Platz berechnet.",
-            "online_booking": "Online-Buchung aktivieren"
+            "online_booking": "Online-Buchung aktivieren",
+            "field_names": {
+              "table": "Tisch"
+            }
           }
         }
       },
@@ -2074,6 +2077,9 @@
     "services": {
       "translation": {
         "name_missing": "Gib auch den Namen in dieser Sprache ein"
+      },
+      "tables": {
+        "seats_taken": "Plätze schon verwendet"
       }
     }
   },

@@ -1631,7 +1631,10 @@
             },
             "deposit_amount": "Importo caparra",
             "deposit_info": "**1. Totale**\nLa caparra confirmatoria per la prenotazione del servizio tavoli verrà applicata una sola volta per il totale delle persone/posti prenotati.\n\n**2. A persona**\nLa caparra confirmatoria per la prenotazione del servizio tavoli verrà applicata per ogni persona/posto prenotato.",
-            "online_booking": "Abilita prenotazione online"
+            "online_booking": "Abilita prenotazione online",
+            "field_names": {
+              "table": "tavolo"
+            }
           }
         }
       },
@@ -2074,6 +2077,9 @@
     "services": {
       "translation": {
         "name_missing": "Scrivi anche il nome in questa lingua"
+      },
+      "tables": {
+        "seats_taken": "Posti già usati"
       }
     }
   },

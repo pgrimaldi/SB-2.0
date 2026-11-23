@@ -74,6 +74,14 @@ $gap: 0.5rem;
 }
 
 // Each day with its hours on one line, the hours lined up in columns.
+.table__service__availabilities__error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 .table__service__availabilities__days {
   container-type: inline-size;
   display: grid;

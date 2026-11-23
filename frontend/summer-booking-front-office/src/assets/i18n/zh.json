@@ -1631,7 +1631,10 @@
             },
             "deposit_amount": "定金金额",
             "deposit_info": "**1. 总计**\n餐桌服务预订的确认定金仅按所有预订人数/座位总计收取一次。\n\n**2. 按人**\n餐桌服务预订的确认定金按每位预订人/每个座位收取。",
-            "online_booking": "启用在线预订"
+            "online_booking": "启用在线预订",
+            "field_names": {
+              "table": "餐桌"
+            }
           }
         }
       },
@@ -2074,6 +2077,9 @@
     "services": {
       "translation": {
         "name_missing": "请同时填写该语言的名称"
+      },
+      "tables": {
+        "seats_taken": "座位数重复"
       }
     }
   },

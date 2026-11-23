@@ -9,8 +9,11 @@
       class="table__service__booking__options__value"
       [placeholder]="'management.settings.services.form.choose' | translate"
       [options]="mealDurations()"
-      [formField]="averageMealDuration()"
-      [error]="validationText.text(averageMealDuration())"
+      [value]="mealDuration()"
+      [disabled]="averageMealMinutes()().disabled()"
+      [error]="validationText.text(averageMealMinutes())"
+      (valueChange)="chooseMealDuration($event)"
+      (touch)="averageMealMinutes()().markAsTouched()"
     />
   </app-form-row>
 
@@ -62,7 +65,13 @@
           class="table__service__booking__options__amount"
           [isDecimal]="true"
           [formField]="depositPercentage()"
-          [error]="validationText.text(depositPercentage())"
+          [error]="
+            validationText.text(
+              depositPercentage(),
+              'management.settings.services.form.tables.deposit_amount'
+            )
+          "
+          (valueChange)="changeDepositPercentage($event)"
         />
         <span class="table__service__booking__options__unit">%</span>
       </div>

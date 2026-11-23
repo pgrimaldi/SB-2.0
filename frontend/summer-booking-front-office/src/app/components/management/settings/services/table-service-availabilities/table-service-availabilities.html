@@ -92,6 +92,7 @@
               <app-checkbox
                 class="table__service__availabilities__check"
                 [formField]="day.isEnabled"
+                (checkedChange)="touchDay(availability, day)"
               >
                 {{ dayName(day.dayOfWeek().value()) }}
               </app-checkbox>
@@ -119,8 +120,20 @@
               </div>
             </div>
           }
+          @if (
+            validationText.text(
+              availability.days,
+              'management.settings.services.form.availability.field_names.day_of_week'
+            );
+            as error
+          ) {
+            <p class="table__service__availabilities__error">{{ error }}</p>
+          }
         </div>
       </app-form-row>
     </div>
+  }
+  @if (validationText.text(form()); as error) {
+    <p class="table__service__availabilities__error">{{ error }}</p>
   }
 </section>

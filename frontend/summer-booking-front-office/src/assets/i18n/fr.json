@@ -1631,7 +1631,10 @@
             },
             "deposit_amount": "Montant de l'acompte",
             "deposit_info": "**1. Total**\nL'acompte de confirmation pour la réservation du service à table est appliqué une seule fois pour l'ensemble des personnes/places réservées.\n\n**2. Par personne**\nL'acompte de confirmation pour la réservation du service à table est appliqué pour chaque personne/place réservée.",
-            "online_booking": "Activer la réservation en ligne"
+            "online_booking": "Activer la réservation en ligne",
+            "field_names": {
+              "table": "table"
+            }
           }
         }
       },
@@ -2074,6 +2077,9 @@
     "services": {
       "translation": {
         "name_missing": "Saisissez aussi le nom dans cette langue"
+      },
+      "tables": {
+        "seats_taken": "Places déjà utilisées"
       }
     }
   },

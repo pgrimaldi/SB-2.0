@@ -45,6 +45,13 @@ $gap: 0.5rem;
   line-height: 1rem;
 }
 
+.table__service__capacity__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 // Tables, seats and the bin of a group on one line, the bin at the end.
 .table__service__capacity__group {
   display: flex;

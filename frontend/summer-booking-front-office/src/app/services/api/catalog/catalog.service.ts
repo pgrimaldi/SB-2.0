@@ -61,6 +61,7 @@ import { TableServiceItem } from '../../../entities/settings/services/table-serv
 import { TableServiceSelectedAvailabilityBookings } from '../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../entities/settings/services/table-service-selected-general-info';
 import { TableServiceTableGroup } from '../../../entities/settings/services/table-service-table-group';
+import { TableServiceTimeSlot } from '../../../entities/settings/services/table-service-time-slot';
 import { TableServiceUpdateAvailabilityBookingsRequest } from '../../../entities/settings/services/table-service-update-availability-bookings-request';
 import { TableServiceUpdateGeneralRequest } from '../../../entities/settings/services/table-service-update-general-request';
 import { onlyFieldsOf } from '../only-fields-of';
@@ -686,21 +687,26 @@ export class CatalogService {
    * passed around on its own.
    */
   readonly tableServiceList = (request: PageRequest): Observable<Page<TableServiceItem>> =>
-    this.httpClient.post<Page<TableServiceItem>>(`${this.endpoint}/table-service-list`, request);
+    this.httpClient.post<Page<TableServiceItem>>(
+      `${this.endpoint}/table-services/table-service-list`,
+      request,
+    );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteTableServiceItems = (idTableServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-table-service-item`, { idTableServices });
+    this.httpClient.post<void>(`${this.endpoint}/table-services/delete-table-service-item`, {
+      idTableServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicateTableServiceItems = (idTableServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-table-service-item`, {
+    this.httpClient.post<void>(`${this.endpoint}/table-services/duplicate-table-service-item`, {
       idTableServices,
     });
 
   /** The data of the two tabs of the add panel. Answers 204 with no body. */
   readonly createTableService = (request: TableServiceAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-table-service`, {
+    this.httpClient.post<void>(`${this.endpoint}/table-services/create-table-service`, {
       ...onlyFieldsOf(TableServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
@@ -716,7 +722,7 @@ export class CatalogService {
     idTableService: string,
   ): Observable<TableServiceSelectedGeneralInfo> =>
     this.httpClient.get<TableServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-table-service-general-info`,
+      `${this.endpoint}/table-services/get-table-service-general-info`,
       { params: { idTableService } },
     );
 
@@ -725,7 +731,7 @@ export class CatalogService {
     idTableService: string,
   ): Observable<TableServiceSelectedAvailabilityBookings> =>
     this.httpClient.get<TableServiceSelectedAvailabilityBookings>(
-      `${this.endpoint}/get-table-service-availability-bookings`,
+      `${this.endpoint}/table-services/get-table-service-availability-bookings`,
       { params: { idTableService } },
     );
 
@@ -739,7 +745,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-table-service-general`,
+        `${this.endpoint}/table-services/update-table-service-general`,
         {
           ...onlyFieldsOf(TableServiceUpdateGeneralRequest, request),
           translations: request.translations.map((translation) =>
@@ -760,7 +766,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-table-service-availability-bookings`,
+        `${this.endpoint}/table-services/update-table-service-availability-bookings`,
         {
           ...onlyFieldsOf(TableServiceUpdateAvailabilityBookingsRequest, request),
           availabilities: request.availabilities.map(tableAvailabilityFields),
@@ -815,7 +821,12 @@ function hourlyBookingOptionFields(
 function tableAvailabilityFields(availability: TableServiceAvailability): TableServiceAvailability {
   return {
     ...onlyFieldsOf(TableServiceAvailability, availability),
-    days: availability.days.map((day) => onlyFieldsOf(TableServiceAvailabilityDay, day)),
+    days: availability.days.map((day) => ({
+      ...onlyFieldsOf(TableServiceAvailabilityDay, day),
+      otherTimeSlots: day.otherTimeSlots.map((timeSlot) =>
+        onlyFieldsOf(TableServiceTimeSlot, timeSlot),
+      ),
+    })),
   };
 }
 

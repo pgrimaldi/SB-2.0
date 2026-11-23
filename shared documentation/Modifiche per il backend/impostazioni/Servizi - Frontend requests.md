@@ -16,10 +16,11 @@ Le API della pagina (`/api/catalog/services/bar-service-list`, `/api/catalog/ser
 che va aggiunto a quei contratti e, una sezione alla volta, le API che il backend deve creare (sezioni 2-6, le tabelle
 delle cinque tab; sezioni 7-11, le eliminazioni; sezioni 12-16, le duplicazioni; sezioni 17-24, i pannelli di Servizi
 Bar; sezione 25, la tendina dei settori, che serve anche a Listino e Prenotazioni online; sezioni 26-32, i pannelli di
-Servizi; sezioni 33-39, i pannelli di Servizi Orari; sezioni 40-46, i pannelli di Prezzi Automatici).
+Servizi; sezioni 33-39, i pannelli di Servizi Orari; sezioni 40-46, i pannelli di Prezzi Automatici;
+sezioni 47-51, i pannelli di Prenotazione tavoli).
 
 Le rotte nuove stanno sempre **sotto la radice che il backend ha già per quei dati**: `/api/catalog/services`,
-`/api/catalog/automatic-prices`, `/api/catalog/sectors`.
+`/api/catalog/automatic-prices`, `/api/catalog/table-services`, `/api/catalog/sectors`.
 
 ## Riepilogo
 
@@ -30,17 +31,17 @@ Le rotte nuove stanno sempre **sotto la radice che il backend ha già per quei d
 | 3 | POST | `/api/catalog/services/standard-service-list` | Tabella della tab Servizi, a pagine |
 | 4 | POST | `/api/catalog/services/hourly-service-list` | Tabella della tab Servizi Orari, a pagine |
 | 5 | POST | `/api/catalog/automatic-prices/automatic-price-list` | Tabella della tab Prezzi Automatici, a pagine |
-| 6 | POST | `/api/catalog/table-service-list` | Tabella della tab Prenotazione tavoli, a pagine |
+| 6 | POST | `/api/catalog/table-services/table-service-list` | Tabella della tab Prenotazione tavoli, a pagine |
 | 7 | POST | `/api/catalog/services/delete-bar-service-item` | Elimina uno o più servizi bar, tutto o niente |
 | 8 | POST | `/api/catalog/services/delete-standard-service-item` | Elimina uno o più servizi, tutto o niente |
 | 9 | POST | `/api/catalog/services/delete-hourly-service-item` | Elimina uno o più servizi orari, tutto o niente |
 | 10 | POST | `/api/catalog/automatic-prices/delete-automatic-price-item` | Elimina uno o più prezzi automatici, tutto o niente |
-| 11 | POST | `/api/catalog/delete-table-service-item` | Elimina uno o più servizi tavoli, tutto o niente |
+| 11 | POST | `/api/catalog/table-services/delete-table-service-item` | Elimina uno o più servizi tavoli, tutto o niente |
 | 12 | POST | `/api/catalog/services/duplicate-bar-service-item` | Duplica uno o più servizi bar, tutto o niente |
 | 13 | POST | `/api/catalog/services/duplicate-standard-service-item` | Duplica uno o più servizi, tutto o niente |
 | 14 | POST | `/api/catalog/services/duplicate-hourly-service-item` | Duplica uno o più servizi orari, tutto o niente |
 | 15 | POST | `/api/catalog/automatic-prices/duplicate-automatic-price-item` | Duplica uno o più prezzi automatici, tutto o niente |
-| 16 | POST | `/api/catalog/duplicate-table-service-item` | Duplica uno o più servizi tavoli, tutto o niente |
+| 16 | POST | `/api/catalog/table-services/duplicate-table-service-item` | Duplica uno o più servizi tavoli, tutto o niente |
 | 17 | POST | `/api/catalog/services/create-bar-service` | Crea un servizio bar con i dati delle tre tab e risponde con il suo id |
 | 18 | GET | `/api/catalog/services/get-bar-service-general-info` | Legge la tab Info Generali di un servizio bar |
 | 19 | GET | `/api/catalog/services/get-bar-service-prices` | Legge la tab Prezzi di un servizio bar |
@@ -71,6 +72,11 @@ Le rotte nuove stanno sempre **sotto la radice che il backend ha già per quei d
 | 44 | POST | `/api/catalog/automatic-prices/update-automatic-price-general` | Salva la tab Info Generali di un prezzo automatico |
 | 45 | POST | `/api/catalog/automatic-prices/update-automatic-price-prices-validity` | Salva la tab Prezzi e Validità di un prezzo automatico |
 | 46 | POST + DELETE | `/api/catalog/automatic-prices/{id}/image` | POST: c'è già e resta com'è. DELETE: nuova, toglie l'immagine |
+| 47 | POST | `/api/catalog/table-services/create-table-service` | Crea un servizio tavoli con i dati delle due tab |
+| 48 | GET | `/api/catalog/table-services/get-table-service-general-info` | Legge la tab Info Generali di un servizio tavoli |
+| 49 | GET | `/api/catalog/table-services/get-table-service-availability-bookings` | Legge la tab Disponibilità e Prenotazioni di un servizio tavoli |
+| 50 | POST | `/api/catalog/table-services/update-table-service-general` | Salva la tab Info Generali di un servizio tavoli |
+| 51 | POST | `/api/catalog/table-services/update-table-service-availability-bookings` | Salva la tab Disponibilità e Prenotazioni di un servizio tavoli |
 
 ## 1. Controllo di versione sui salvataggi dei pannelli di modifica
 
@@ -163,8 +169,8 @@ del salvataggio, tranne l'id.
 | Servizio orario, Prenotazioni | `GET /api/catalog/services/get-hourly-service-booking-options?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-booking` | `bookingOptions` |
 | Prezzo automatico, Info Generali | `GET /api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-general` | `translations`, `icon` |
 | Prezzo automatico, Prezzi e Validità | `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-prices-validity` | `price`, `vatRate`, `isOnlinePurchaseEnabled`, `validityPeriods`, `isAllServicesEnabled`, `idBarServices`, `idStandardServices`, `idHourlyServices`, `isPricePerServiceEnabled`, `idSectors` |
-| Servizio tavoli, Info Generali | `GET /api/catalog/get-table-service-general-info?idTableService=…` | `POST /api/catalog/update-table-service-general` | `translations`, `isHighlighted` |
-| Servizio tavoli, Disponibilità e Prenotazioni | `GET /api/catalog/get-table-service-availability-bookings?idTableService=…` | `POST /api/catalog/update-table-service-availability-bookings` | `availabilities`, `availabilityMode`, `tableGroups`, `totalSeatQuantity`, `averageMealDuration`, `maxBookingPerTimeSlotQuantity`, `bookingPayment`, `depositMode`, `depositPercentage`, `isOnlineBookingEnabled` |
+| Servizio tavoli, Info Generali | `GET /api/catalog/table-services/get-table-service-general-info?idTableService=…` | `POST /api/catalog/table-services/update-table-service-general` | `translations`, `isHighlighted` |
+| Servizio tavoli, Disponibilità e Prenotazioni | `GET /api/catalog/table-services/get-table-service-availability-bookings?idTableService=…` | `POST /api/catalog/table-services/update-table-service-availability-bookings` | `availabilities`, `availabilityMode`, `tableGroups`, `totalSeatQuantity`, `averageMealMinutes`, `maxBookingPerTimeSlotQuantity`, `minSeatPerBookingQuantity`, `maxSeatPerBookingQuantity`, `bookingPayment`, `depositMode`, `depositPercentage`, `depositAmount`, `isOnlineBookingEnabled` |
 
 Le altre API della pagina non ne hanno bisogno: elenchi, aggiunta, eliminazione e duplicazione non rimandano dati letti,
 e `get-automatic-price-services` e `catalog/tariff-periods` servono solo a riempire le tab.
@@ -400,7 +406,7 @@ con tutti i dati di `AutomaticPriceDto`.
 | `serviceName` | `name` o traduzione | string | Colonna "Servizio": il nome del prezzo automatico; vedi "Nome nella lingua dell'utente". |
 | `price` | `price` | number | Colonna "Prezzo", in euro. |
 
-## 6. POST /api/catalog/table-service-list
+## 6. POST /api/catalog/table-services/table-service-list
 
 Tabella della tab Prenotazione tavoli (`/settings/services/5`). Per il frontend sostituisce
 `GET /api/catalog/table-services`, che oggi restituisce tutti i servizi tavoli insieme, senza pagine né ricerca, con
@@ -561,7 +567,7 @@ Cestino e "Elimina selezione" della tab Prezzi Automatici.
   (`CatalogErrors.AutomaticPriceNotFound`).
 - Registro: una voce `catalog.automatic_price_deleted` per prezzo automatico.
 
-## 11. POST /api/catalog/delete-table-service-item
+## 11. POST /api/catalog/table-services/delete-table-service-item
 
 Cestino e "Elimina selezione" della tab Prenotazione tavoli.
 
@@ -700,7 +706,7 @@ Bottone "Duplica" e "Duplica selezione" della tab Prezzi Automatici.
 - Un id che non è un prezzo automatico dello stabilimento: 404 `service.automatic_price_not_found`.
 - Registro: una voce `catalog.automatic_price_duplicated` per copia.
 
-## 16. POST /api/catalog/duplicate-table-service-item
+## 16. POST /api/catalog/table-services/duplicate-table-service-item
 
 Bottone "Duplica" e "Duplica selezione" della tab Prenotazione tavoli.
 
@@ -1856,6 +1862,179 @@ Come la DELETE dei servizi (sezione 24, `ServiceItemsService.RemoveImageAsync`),
   `catalog.property_not_found`, 404 `service.automatic_price_not_found`. Il frontend li mostra sotto l'immagine; con
   `service.automatic_price_not_found` ricarica anche la tabella.
 
+## Regole comuni dei pannelli di Prenotazione tavoli (sezioni 47-51)
+
+I pannelli "Aggiungi nuovo servizio tavoli" e "Modifica servizio tavoli" hanno due tab: Info Generali e Disponibilità e
+Prenotazioni. **Valgono le regole comuni dei pannelli di Servizi Bar** (una tab non tocca l'altra, quello che il form non
+mostra torna com'era, controllo di versione, permessi, JSON, nome e descrizione nelle lingue), con queste differenze:
+
+- **API nuove sotto `/api/catalog/table-services`**, la radice che il backend ha già (`Endpoints/ServiceEndpoints.cs:142`).
+  `GET` e `POST /api/catalog/table-services`, `GET` e `PUT /api/catalog/table-services/{id}` restano come sono: il frontend
+  non le usa.
+- **Solo servizi tavoli dello stabilimento** (`catalog.table_services`, con `table_service_availabilities`,
+  `table_service_slots`, `table_service_table_types` e `table_service_translations`): ogni altro id risponde 404
+  `service.table_service_not_found` (`CatalogErrors.TableServiceNotFound`).
+- **Info Generali** ha solo `translations` e `isHighlighted`: niente categoria, icona e immagine.
+- **Registro**: `catalog.table_service_created` per la creazione, `catalog.table_service_updated` per ogni salvataggio, come
+  oggi.
+- **Id**: `idTableService`, il `public_id` del servizio tavoli.
+
+### Disponibilità
+
+Ogni elemento di `availabilities` è una riga di `catalog.table_service_availabilities` con le sue fasce
+(`catalog.table_service_slots`):
+
+```json
+{
+  "dateFrom": "2026-06-01T00:00:00.000Z",
+  "dateTo": "2026-09-30T00:00:00.000Z",
+  "days": [
+    { "dayOfWeek": 1, "isEnabled": false, "startTime": null, "endTime": null, "otherTimeSlots": [] },
+    { "dayOfWeek": 2, "isEnabled": true, "startTime": "12:00", "endTime": "15:00", "otherTimeSlots": [] }
+  ]
+}
+```
+
+| Campo | Tipo | Corrisponde a |
+|---|---|---|
+| `dateFrom`, `dateTo` | string (giorno UTC) | `starts_on`, `ends_on`. Obbligatori; i periodi tornano in ordine di `starts_on`, come oggi. |
+| `days` | array | Nella richiesta sempre i sette giorni; nella risposta bastano quelli con almeno una fascia. |
+| `days[].dayOfWeek` | number (ISO: 1 lunedì … 7 domenica) | `weekday` |
+| `days[].isEnabled` | boolean | Vero = il giorno ha almeno una fascia. Falso = non ne ha: le sue ore e `otherTimeSlots` non si salvano. |
+| `days[].startTime`, `days[].endTime` | string `"HH:mm"` o `null` | `time_from`, `time_to` della **prima** fascia del giorno (per ora di inizio). |
+| `days[].otherTimeSlots` | array di `{ startTime, endTime }` | Le altre fasce dello stesso giorno. Il pannello ne mostra una sola: le altre le rimanda come le ha lette. |
+
+- Una fascia senza giorno (`weekday` `null`, "stessa fascia per tutti i giorni") si legge come la stessa fascia in tutti e
+  sette i giorni.
+- La casella "Applica stessi orari per tutti i giorni" **non viaggia**: il frontend la mostra accesa quando almeno due giorni
+  scelti hanno gli stessi orari, e nel salvataggio manda gli orari di ogni giorno. Niente da aggiungere al database.
+
+### Tavoli, posti e caparra
+
+- `availabilityMode`: `Tables` o `Seats` (nomi .NET di `TableCapacityMode`, `capacity_mode`). Con `Tables` vale `tableGroups`
+  (`catalog.table_service_table_types`: `tableQuantity` = `count`, `seatPerTableQuantity` = `seats`) e `totalSeatQuantity` è
+  `null`; con `Seats` vale `totalSeatQuantity` (`total_seats`) e `tableGroups` è `[]`.
+- `bookingPayment` `None` = `deposit_mode` `none`, senza tipo e valore; `depositMode` (sempre presente) non conta. `Deposit` =
+  `deposit_mode` `total` o `per_person`, secondo `depositMode` (`Total` o `PerPerson`). La lettura con `None` dà `depositMode`
+  `Total`.
+- La caparra è una **percentuale** (`depositPercentage`, `deposit_type` `percentage`) oppure un **importo** in euro
+  (`depositAmount`, `deposit_type` `amount`), mai tutti e due: il pannello fa scrivere solo la percentuale. Un importo già
+  salvato torna uguale in `depositAmount` finché l'utente non scrive la percentuale; allora `depositAmount` è `null`.
+
+### Durata media del pasto: serve una modifica al backend
+
+`averageMealMinutes` (`average_meal_minutes`, in minuti) **può essere `null`**: nel frontend è facoltativa e fa scegliere 30,
+45, 60, 75, 90, 105, 120, 150 o 180 minuti. Oggi invece il backend la vuole sempre (colonna `NOT NULL`,
+`SaveTableServiceRequestValidator`). Va tolto l'obbligo e aggiunta la migration della colonna. Un valore diverso da quei nove
+già salvato torna uguale finché l'utente non ne sceglie uno.
+
+### Da chiedere allo sviluppatore prima di scrivere codice
+
+1. **Senza durata media**: cosa vale per liberare il tavolo alla fascia successiva, quando `averageMealMinutes` è `null`?
+
+### Errori
+
+Nell'ordine in cui si controllano: 401 `auth.unauthenticated`, 403 `auth.forbidden`, 400 `validation.failed`, 403
+`catalog.property_required`, 404 `catalog.property_not_found`, 404 `service.table_service_not_found`, 409
+`resource.version_conflict` (gli ultimi due dove la sezione lo dice). Errori di campo del 400, con `field` uguale al nome nel
+corpo:
+
+| Campo | `code` | Quando |
+|---|---|---|
+| `translations…` | come Servizi Bar | Come Servizi Bar. |
+| `availabilityMode`, `bookingPayment`, `depositMode` | `validation.invalid` | Valore fuori dal suo enum. |
+| `tableGroups` | `validation.required` o `validation.invalid` | Con `Tables`: vuoto; oppure tavoli fuori da 1-500, posti fuori da 1-100, o due righe con gli stessi posti (`uq_catalog_table_service_table_types_seats`). |
+| `totalSeatQuantity` | `validation.required` o `validation.out_of_range` | Con `Seats`: assente, o fuori da 1-10.000. |
+| `averageMealMinutes` | `validation.out_of_range` | Fuori da 10-600. |
+| `maxBookingPerTimeSlotQuantity` | `validation.out_of_range` | Fuori da 1-32.767 (`smallint`). |
+| `minSeatPerBookingQuantity`, `maxSeatPerBookingQuantity` | `validation.out_of_range` | Non maggiore di 0, o il massimo minore del minimo. |
+| `depositPercentage` | `validation.required` o `validation.out_of_range` | Con `Deposit`: assente senza `depositAmount`; oppure non maggiore di 0 o oltre 100. |
+| `depositAmount` | `validation.out_of_range` o `validation.invalid` | Non maggiore di 0, o insieme a `depositPercentage`. |
+| `availabilities` | `validation.invalid` | Più di 20. |
+| `availabilities[i].dateFrom`, `availabilities[i].dateTo` | `validation.required` | Assente. |
+| `availabilities[i].dateTo` | `validation.end_before_start` | Prima di `dateFrom`. |
+| `availabilities[i].days` | `validation.required` o `validation.invalid` | Nessun giorno scelto; oppure un giorno scelto senza le due ore, una fine non dopo l'inizio (nemmeno la stessa ora: `ck_catalog_table_service_slots_range`), un giorno ripetuto o fuori da 1-7, o più di 50 fasce. |
+
+Il frontend controlla già tutto tranne i numeri massimi di elementi e i campi che non mostra. Mostra sotto il campo gli
+errori dei campi di primo
+livello, sopra i bottoni tutti gli altri con il testo del loro `code`. Con `service.table_service_not_found` ricarica la
+tabella.
+
+## 47. POST /api/catalog/table-services/create-table-service
+
+Salva del pannello "Aggiungi nuovo servizio tavoli".
+
+```json
+{
+  "translations": [
+    { "language": "it", "serviceName": "Pranzo", "description": "Tavoli del ristorante per il pranzo" },
+    { "language": "en", "serviceName": "Lunch", "description": "Restaurant tables for lunch" },
+    { "language": "fr", "serviceName": null, "description": null },
+    { "language": "de", "serviceName": null, "description": null },
+    { "language": "es", "serviceName": null, "description": null },
+    { "language": "ar", "serviceName": null, "description": null },
+    { "language": "zh", "serviceName": null, "description": null }
+  ],
+  "isHighlighted": true,
+  "availabilities": ["…una o più disponibilità, anche nessuna…"],
+  "availabilityMode": "Tables",
+  "tableGroups": [
+    { "tableQuantity": 10, "seatPerTableQuantity": 2 },
+    { "tableQuantity": 8, "seatPerTableQuantity": 4 }
+  ],
+  "totalSeatQuantity": null,
+  "averageMealMinutes": 90,
+  "maxBookingPerTimeSlotQuantity": 8,
+  "minSeatPerBookingQuantity": null,
+  "maxSeatPerBookingQuantity": null,
+  "bookingPayment": "Deposit",
+  "depositMode": "PerPerson",
+  "depositPercentage": 20,
+  "depositAmount": null,
+  "isOnlineBookingEnabled": true
+}
+```
+
+| Campo | Tipo | Corrisponde a | Note |
+|---|---|---|---|
+| `translations` | array | `name`, `description` e `catalog.table_service_translations` | Come Servizi Bar. |
+| `isHighlighted` | boolean | `is_highlighted` | |
+| `availabilities` | array | `catalog.table_service_availabilities` | "Disponibilità"; `[]` se nessuna. |
+| `availabilityMode`, `tableGroups`, `totalSeatQuantity` | string, array, number o `null` | `capacity_mode`, `catalog.table_service_table_types`, `total_seats` | "Tavoli, posti e caparra". |
+| `averageMealMinutes` | number (intero) o `null` | `average_meal_minutes` | "Durata media del pasto". |
+| `maxBookingPerTimeSlotQuantity` | number (intero) o `null` | `max_bookings_per_slot` | |
+| `minSeatPerBookingQuantity`, `maxSeatPerBookingQuantity` | number (intero) o `null` | `min_seats_per_booking`, `max_seats_per_booking` | Il pannello non li mostra: li rimanda come letti, `null` per un servizio nuovo. |
+| `bookingPayment`, `depositMode`, `depositPercentage`, `depositAmount` | string, string, number o `null`, number o `null` | `deposit_mode`, `deposit_type`, `deposit_value` | "Tavoli, posti e caparra". |
+| `isOnlineBookingEnabled` | boolean | `is_online_bookable` | |
+
+Risposta: **204 senza corpo** (qui l'id non serve: non c'è un'immagine da caricare).
+
+## 48. GET /api/catalog/table-services/get-table-service-general-info
+
+Tab Info Generali del pannello "Modifica servizio tavoli", letta all'apertura, con `idTableService` nella query string.
+Risposta 200: `idTableService`, `translations` (solo le lingue con almeno un testo), `isHighlighted` e `version`, come la
+sezione 18 senza `category`, `icon` e `imageUrl`. Errori: 404 `service.table_service_not_found` e gli altri comuni.
+
+## 49. GET /api/catalog/table-services/get-table-service-availability-bookings
+
+Tab Disponibilità e Prenotazioni, letta la prima volta che si apre, con `idTableService` nella query string. Risposta 200: i
+campi della sezione 47 da `availabilities` a `isOnlineBookingEnabled`, più `version`. Le righe di `tableGroups` arrivano in
+ordine di posti, come oggi. Errori: 404 `service.table_service_not_found` e gli altri comuni.
+
+## 50. POST /api/catalog/table-services/update-table-service-general
+
+Salva della tab Info Generali, con l'header `If-Match` della versione letta (sezione 48). Corpo: `idTableService`,
+`translations` (tutte e 7 le lingue) e `isHighlighted`; scrive solo questi. Risposta: **204 senza corpo**, con l'header `ETag`.
+Errori: 404 `service.table_service_not_found`, 409 `resource.version_conflict` e gli altri comuni.
+
+## 51. POST /api/catalog/table-services/update-table-service-availability-bookings
+
+Salva della tab Disponibilità e Prenotazioni, con l'header `If-Match` della versione letta (sezione 49). Corpo:
+`idTableService` e i campi della sezione 47 da `availabilities` a `isOnlineBookingEnabled`; gli elenchi arrivano interi e
+prendono il posto di quelli salvati (i tipi di tavolo sono unici per posti: vedi `TableServicesService.UpdateAsync`).
+Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.table_service_not_found`, 409
+`resource.version_conflict` e gli altri comuni.
+
 ## Icone da controllare con lo sviluppatore
 
 Il frontend ha i suoi elenchi fissi di icone. Il catalogo del backend (`catalog.service_type_icons`, letto da
@@ -2078,3 +2257,24 @@ API 40-46, con un token con `CatalogRead` e `CatalogSettings`:
     servizio: 400 `validation.invalid`. Vero con gli elenchi vuoti: 204, e un servizio creato dopo prende il prezzo
     automatico (preventivo). Poi falso con un servizio: 204, e la lettura dà solo quello.
 75. Un periodo salvato senza giorni: la lettura dà `daysOfWeek` `[]` e il periodo vale tutti i giorni.
+
+API 47-51, con un token con `CatalogRead` e `CatalogSettings`:
+
+76. `create-table-service` con due disponibilità e due righe di tavoli: 204; il servizio compare in `table-service-list` e le
+    due letture restituiscono gli stessi dati. Nel registro una voce `catalog.table_service_created`.
+77. `update-table-service-general` non cambia disponibilità, tavoli e caparra; `update-table-service-availability-bookings` non
+    cambia nomi e "Metti in evidenza". Nel registro una voce `catalog.table_service_updated` per salvataggio.
+78. Con `Tables`: nessuna riga → 400 `validation.required` su `tableGroups`; due righe con gli stessi posti, 501 tavoli o 101
+    posti → 400 `validation.invalid`. Con `Seats`: `totalSeatQuantity` `null` → 400 `validation.required`; 10.001 → 400
+    `validation.out_of_range`. Mai un 500 per un vincolo del database.
+79. Una disponibilità senza `dateTo`, senza giorni scelti, o con un giorno senza `endTime` o con le due ore uguali: 400 con gli
+    errori della tabella.
+80. Una fascia salvata senza giorno: la lettura dà gli stessi orari in tutti e sette i giorni. Un giorno con due fasce: la
+    prima in `startTime` ed `endTime`, l'altra in `otherTimeSlots`; rimandate uguali restano tutte e due.
+81. `averageMealMinutes` `null`: 204, e la lettura dà `null`; 5 → 400 `validation.out_of_range`; 100 resta 100.
+82. `Deposit` senza percentuale né importo: 400 `validation.required` su `depositPercentage`; 0 o 101 → 400
+    `validation.out_of_range`. Un importo di 15 già salvato: la lettura dà `depositAmount` 15 e `depositPercentage` `null`;
+    rimandato uguale resta. `None`: 204, e tipo e valore non ci sono più.
+83. Posti minimi e massimi già salvati: un salvataggio con gli stessi valori letti non li cambia.
+84. Le letture e i salvataggi con un id di un altro stabilimento: 404 `service.table_service_not_found`. Due salvataggi con la
+    stessa `If-Match`: il secondo 409 `resource.version_conflict`.

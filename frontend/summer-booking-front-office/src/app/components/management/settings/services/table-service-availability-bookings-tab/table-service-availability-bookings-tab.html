@@ -8,11 +8,12 @@
 />
 
 <app-table-service-booking-options
-  [averageMealDuration]="form().averageMealDuration"
+  [averageMealMinutes]="form().averageMealMinutes"
   [maxBookingPerTimeSlotQuantity]="form().maxBookingPerTimeSlotQuantity"
   [bookingPayment]="form().bookingPayment"
   [depositMode]="form().depositMode"
   [depositPercentage]="form().depositPercentage"
+  [depositAmount]="form().depositAmount"
 />
 
 <app-toggle [formField]="form().isOnlineBookingEnabled">

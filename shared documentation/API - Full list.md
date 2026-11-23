@@ -6453,7 +6453,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/table-service-list`
+### POST `/api/catalog/table-services/table-service-list`
 
 **Payload JSON**
 
@@ -6509,7 +6509,7 @@ Nessun corpo (204).
 | `rows[].idTableService` | string (UUID) |
 | `rows[].serviceName` | string \| null |
 
-### POST `/api/catalog/delete-table-service-item`
+### POST `/api/catalog/table-services/delete-table-service-item`
 
 **Payload JSON**
 
@@ -6533,7 +6533,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-table-service-item`
+### POST `/api/catalog/table-services/duplicate-table-service-item`
 
 **Payload JSON**
 
@@ -6557,7 +6557,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/create-table-service`
+### POST `/api/catalog/table-services/create-table-service`
 
 **Payload JSON**
 
@@ -6573,17 +6573,20 @@ Nessun corpo (204).
   "isHighlighted": "boolean",
   "availabilities": [
     {
-      "dateFrom": "string (ISO 8601, UTC) | null",
-      "dateTo": "string (ISO 8601, UTC) | null",
-      "isSameTimeForAllDays": "boolean",
-      "startTime": "string (HH:mm) | null",
-      "endTime": "string (HH:mm) | null",
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)",
       "days": [
         {
           "dayOfWeek": "number (intero ISO 8601: 1 = lunedì … 7 = domenica)",
           "isEnabled": "boolean",
           "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "endTime": "string (HH:mm) | null",
+          "otherTimeSlots": [
+            {
+              "startTime": "string (HH:mm)",
+              "endTime": "string (HH:mm)"
+            }
+          ]
         }
       ]
     }
@@ -6591,16 +6594,19 @@ Nessun corpo (204).
   "availabilityMode": "string (enum TableServiceAvailabilityMode: Tables, Seats)",
   "tableGroups": [
     {
-      "tableQuantity": "number (intero) | null",
-      "seatPerTableQuantity": "number (intero) | null"
+      "tableQuantity": "number (intero)",
+      "seatPerTableQuantity": "number (intero)"
     }
   ],
   "totalSeatQuantity": "number (intero) | null",
-  "averageMealDuration": "string (enum TableServiceMealDuration) | null",
+  "averageMealMinutes": "number (intero, minuti) | null",
   "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+  "minSeatPerBookingQuantity": "number (intero) | null",
+  "maxSeatPerBookingQuantity": "number (intero) | null",
   "bookingPayment": "string (enum TableServiceBookingPayment: None, Deposit)",
   "depositMode": "string (enum TableServiceDepositMode: Total, PerPerson)",
   "depositPercentage": "number (decimale, %) | null",
+  "depositAmount": "number (decimale, €) | null",
   "isOnlineBookingEnabled": "boolean"
 }
 ```
@@ -6619,33 +6625,36 @@ Nessun corpo (204).
 | `translations[].description` | string \| null |
 | `isHighlighted` | boolean |
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
-| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null |
-| `availabilities[].isSameTimeForAllDays` | boolean |
-| `availabilities[].startTime` | string (HH:mm) \| null |
-| `availabilities[].endTime` | string (HH:mm) \| null |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) |
 | `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) |
 | `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) |
 | `availabilities[].days[].isEnabled` | boolean |
 | `availabilities[].days[].startTime` | string (HH:mm) \| null |
 | `availabilities[].days[].endTime` | string (HH:mm) \| null |
+| `availabilities[].days[].otherTimeSlots[]` | TableServiceTimeSlot[] (array di oggetti) |
+| `availabilities[].days[].otherTimeSlots[].startTime` | string (HH:mm) |
+| `availabilities[].days[].otherTimeSlots[].endTime` | string (HH:mm) |
 | `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) |
 | `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) |
-| `tableGroups[].tableQuantity` | number (intero) \| null |
-| `tableGroups[].seatPerTableQuantity` | number (intero) \| null |
+| `tableGroups[].tableQuantity` | number (intero) |
+| `tableGroups[].seatPerTableQuantity` | number (intero) |
 | `totalSeatQuantity` | number (intero) \| null |
-| `averageMealDuration` | string (enum TableServiceMealDuration) \| null |
+| `averageMealMinutes` | number (intero, minuti) \| null |
 | `maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `minSeatPerBookingQuantity` | number (intero) \| null |
+| `maxSeatPerBookingQuantity` | number (intero) \| null |
 | `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) |
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) |
 | `depositPercentage` | number (decimale, %) \| null |
+| `depositAmount` | number (decimale, €) \| null |
 | `isOnlineBookingEnabled` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-table-service-general-info?idTableService={idTableService}`
+### GET `/api/catalog/table-services/get-table-service-general-info?idTableService={idTableService}`
 
 **Payload JSON** (query string)
 
@@ -6690,7 +6699,7 @@ Nessun corpo (204).
 | `isHighlighted` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-table-service-availability-bookings?idTableService={idTableService}`
+### GET `/api/catalog/table-services/get-table-service-availability-bookings?idTableService={idTableService}`
 
 **Payload JSON** (query string)
 
@@ -6706,17 +6715,20 @@ Nessun corpo (204).
 {
   "availabilities": [
     {
-      "dateFrom": "string (ISO 8601, UTC) | null",
-      "dateTo": "string (ISO 8601, UTC) | null",
-      "isSameTimeForAllDays": "boolean",
-      "startTime": "string (HH:mm) | null",
-      "endTime": "string (HH:mm) | null",
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)",
       "days": [
         {
           "dayOfWeek": "number (intero ISO 8601: 1 = lunedì … 7 = domenica)",
           "isEnabled": "boolean",
           "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "endTime": "string (HH:mm) | null",
+          "otherTimeSlots": [
+            {
+              "startTime": "string (HH:mm)",
+              "endTime": "string (HH:mm)"
+            }
+          ]
         }
       ]
     }
@@ -6724,16 +6736,19 @@ Nessun corpo (204).
   "availabilityMode": "string (enum TableServiceAvailabilityMode: Tables, Seats)",
   "tableGroups": [
     {
-      "tableQuantity": "number (intero) | null",
-      "seatPerTableQuantity": "number (intero) | null"
+      "tableQuantity": "number (intero)",
+      "seatPerTableQuantity": "number (intero)"
     }
   ],
   "totalSeatQuantity": "number (intero) | null",
-  "averageMealDuration": "string (enum TableServiceMealDuration) | null",
+  "averageMealMinutes": "number (intero, minuti) | null",
   "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+  "minSeatPerBookingQuantity": "number (intero) | null",
+  "maxSeatPerBookingQuantity": "number (intero) | null",
   "bookingPayment": "string (enum TableServiceBookingPayment: None, Deposit)",
   "depositMode": "string (enum TableServiceDepositMode: Total, PerPerson)",
   "depositPercentage": "number (decimale, %) | null",
+  "depositAmount": "number (decimale, €) | null",
   "isOnlineBookingEnabled": "boolean",
   "version": "string"
 }
@@ -6750,30 +6765,33 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
-| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null |
-| `availabilities[].isSameTimeForAllDays` | boolean |
-| `availabilities[].startTime` | string (HH:mm) \| null |
-| `availabilities[].endTime` | string (HH:mm) \| null |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) |
 | `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) |
 | `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) |
 | `availabilities[].days[].isEnabled` | boolean |
 | `availabilities[].days[].startTime` | string (HH:mm) \| null |
 | `availabilities[].days[].endTime` | string (HH:mm) \| null |
+| `availabilities[].days[].otherTimeSlots[]` | TableServiceTimeSlot[] (array di oggetti) |
+| `availabilities[].days[].otherTimeSlots[].startTime` | string (HH:mm) |
+| `availabilities[].days[].otherTimeSlots[].endTime` | string (HH:mm) |
 | `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) |
 | `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) |
-| `tableGroups[].tableQuantity` | number (intero) \| null |
-| `tableGroups[].seatPerTableQuantity` | number (intero) \| null |
+| `tableGroups[].tableQuantity` | number (intero) |
+| `tableGroups[].seatPerTableQuantity` | number (intero) |
 | `totalSeatQuantity` | number (intero) \| null |
-| `averageMealDuration` | string (enum TableServiceMealDuration) \| null |
+| `averageMealMinutes` | number (intero, minuti) \| null |
 | `maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `minSeatPerBookingQuantity` | number (intero) \| null |
+| `maxSeatPerBookingQuantity` | number (intero) \| null |
 | `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) |
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) |
 | `depositPercentage` | number (decimale, %) \| null |
+| `depositAmount` | number (decimale, €) \| null |
 | `isOnlineBookingEnabled` | boolean |
 | `version` | string |
 
-### POST `/api/catalog/update-table-service-general`
+### POST `/api/catalog/table-services/update-table-service-general`
 
 **Payload JSON**
 
@@ -6810,7 +6828,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-table-service-availability-bookings`
+### POST `/api/catalog/table-services/update-table-service-availability-bookings`
 
 **Payload JSON**
 
@@ -6819,17 +6837,20 @@ Nessun corpo (204).
   "idTableService": "string (UUID)",
   "availabilities": [
     {
-      "dateFrom": "string (ISO 8601, UTC) | null",
-      "dateTo": "string (ISO 8601, UTC) | null",
-      "isSameTimeForAllDays": "boolean",
-      "startTime": "string (HH:mm) | null",
-      "endTime": "string (HH:mm) | null",
+      "dateFrom": "string (ISO 8601, UTC)",
+      "dateTo": "string (ISO 8601, UTC)",
       "days": [
         {
           "dayOfWeek": "number (intero ISO 8601: 1 = lunedì … 7 = domenica)",
           "isEnabled": "boolean",
           "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "endTime": "string (HH:mm) | null",
+          "otherTimeSlots": [
+            {
+              "startTime": "string (HH:mm)",
+              "endTime": "string (HH:mm)"
+            }
+          ]
         }
       ]
     }
@@ -6837,16 +6858,19 @@ Nessun corpo (204).
   "availabilityMode": "string (enum TableServiceAvailabilityMode: Tables, Seats)",
   "tableGroups": [
     {
-      "tableQuantity": "number (intero) | null",
-      "seatPerTableQuantity": "number (intero) | null"
+      "tableQuantity": "number (intero)",
+      "seatPerTableQuantity": "number (intero)"
     }
   ],
   "totalSeatQuantity": "number (intero) | null",
-  "averageMealDuration": "string (enum TableServiceMealDuration) | null",
+  "averageMealMinutes": "number (intero, minuti) | null",
   "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+  "minSeatPerBookingQuantity": "number (intero) | null",
+  "maxSeatPerBookingQuantity": "number (intero) | null",
   "bookingPayment": "string (enum TableServiceBookingPayment: None, Deposit)",
   "depositMode": "string (enum TableServiceDepositMode: Total, PerPerson)",
   "depositPercentage": "number (decimale, %) | null",
+  "depositAmount": "number (decimale, €) | null",
   "isOnlineBookingEnabled": "boolean"
 }
 ```
@@ -6861,26 +6885,29 @@ Nessun corpo (204).
 |---|---|
 | `idTableService` | string (UUID) |
 | `availabilities[]` | TableServiceAvailability[] (array di oggetti) |
-| `availabilities[].dateFrom` | string (ISO 8601, UTC) \| null |
-| `availabilities[].dateTo` | string (ISO 8601, UTC) \| null |
-| `availabilities[].isSameTimeForAllDays` | boolean |
-| `availabilities[].startTime` | string (HH:mm) \| null |
-| `availabilities[].endTime` | string (HH:mm) \| null |
+| `availabilities[].dateFrom` | string (ISO 8601, UTC) |
+| `availabilities[].dateTo` | string (ISO 8601, UTC) |
 | `availabilities[].days[]` | TableServiceAvailabilityDay[] (array di 7 oggetti) |
 | `availabilities[].days[].dayOfWeek` | number (intero ISO 8601: 1 = lunedì … 7 = domenica) |
 | `availabilities[].days[].isEnabled` | boolean |
 | `availabilities[].days[].startTime` | string (HH:mm) \| null |
 | `availabilities[].days[].endTime` | string (HH:mm) \| null |
+| `availabilities[].days[].otherTimeSlots[]` | TableServiceTimeSlot[] (array di oggetti) |
+| `availabilities[].days[].otherTimeSlots[].startTime` | string (HH:mm) |
+| `availabilities[].days[].otherTimeSlots[].endTime` | string (HH:mm) |
 | `availabilityMode` | string (enum TableServiceAvailabilityMode: Tables, Seats) |
 | `tableGroups[]` | TableServiceTableGroup[] (array di oggetti) |
-| `tableGroups[].tableQuantity` | number (intero) \| null |
-| `tableGroups[].seatPerTableQuantity` | number (intero) \| null |
+| `tableGroups[].tableQuantity` | number (intero) |
+| `tableGroups[].seatPerTableQuantity` | number (intero) |
 | `totalSeatQuantity` | number (intero) \| null |
-| `averageMealDuration` | string (enum TableServiceMealDuration) \| null |
+| `averageMealMinutes` | number (intero, minuti) \| null |
 | `maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `minSeatPerBookingQuantity` | number (intero) \| null |
+| `maxSeatPerBookingQuantity` | number (intero) \| null |
 | `bookingPayment` | string (enum TableServiceBookingPayment: None, Deposit) |
 | `depositMode` | string (enum TableServiceDepositMode: Total, PerPerson) |
 | `depositPercentage` | number (decimale, %) \| null |
+| `depositAmount` | number (decimale, €) \| null |
 | `isOnlineBookingEnabled` | boolean |
 
 **Response tabella**

@@ -934,56 +934,59 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/table-service-list`
+    request.url === `${environment.apiBaseUrl}/catalog/table-services/table-service-list`
   ) {
     return tableServiceListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-table-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/table-services/delete-table-service-item`
   ) {
     return deleteTableServiceItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-table-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/table-services/duplicate-table-service-item`
   ) {
     return duplicateTableServiceItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/create-table-service`
+    request.url === `${environment.apiBaseUrl}/catalog/table-services/create-table-service`
   ) {
     return createTableServiceMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-table-service-general-info`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/table-services/get-table-service-general-info`
   ) {
     return tableServiceGeneralInfoMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-table-service-availability-bookings`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/table-services/get-table-service-availability-bookings`
   ) {
     return tableServiceAvailabilityBookingsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-table-service-general`
+    request.url === `${environment.apiBaseUrl}/catalog/table-services/update-table-service-general`
   ) {
     return updateTableServiceGeneralMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-table-service-availability-bookings`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/table-services/update-table-service-availability-bookings`
   ) {
     return updateTableServiceAvailabilityBookingsMock(request);
   }
