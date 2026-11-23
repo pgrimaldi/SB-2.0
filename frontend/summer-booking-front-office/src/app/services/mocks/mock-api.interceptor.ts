@@ -504,42 +504,42 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/vouchers/voucher-list`
+    request.url === `${environment.apiBaseUrl}/catalog/discounts/voucher-list`
   ) {
     return voucherListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/vouchers/delete-voucher-item`
+    request.url === `${environment.apiBaseUrl}/catalog/discounts/delete-voucher-item`
   ) {
     return deleteVoucherItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/vouchers/duplicate-voucher-item`
+    request.url === `${environment.apiBaseUrl}/catalog/discounts/duplicate-voucher-item`
   ) {
     return duplicateVoucherItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/vouchers/add-voucher-item`
+    request.url === `${environment.apiBaseUrl}/catalog/discounts/add-voucher-item`
   ) {
     return addVoucherItemMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/vouchers/update-voucher-item`
+    request.url === `${environment.apiBaseUrl}/catalog/discounts/update-voucher-item`
   ) {
     return updateVoucherItemMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/vouchers/get-selected-item`
+    request.url === `${environment.apiBaseUrl}/catalog/discounts/get-selected-item`
   ) {
     return selectedVoucherItemMock(request);
   }

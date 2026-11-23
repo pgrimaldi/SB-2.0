@@ -153,6 +153,9 @@
       "price_list_not_found": "价目表项目已不存在：可能已被删除。",
       "price_list_in_use": "无法删除 {{priceListName}}：附加物品/服务 {{additionalItems}} 将不再关联任何套餐，并会适用于所有套餐。请先将它们关联到其他套餐，或将其删除。",
       "package_not_found": "所选套餐已不存在：可能已被删除。",
+      "discount_not_found": "折扣已不存在：可能已被删除。",
+      "discount_code_taken": "代码 {{code}} 已被其他折扣使用。",
+      "discount_max_uses_below_used": "该折扣已使用 {{usedCount}} 次：最大次数不能更低。",
       "duplicate_vat_rate_not_allowed": "无法复制 {{priceListName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
       "duplicate_period_not_found": "无法复制 {{priceListName}}：其中有已删除时段的价格。请打开并编辑、保存后重试。",
       "duplicate_area_not_found": "无法复制 {{priceListName}}：其中包含已删除的地图区域。请打开并从启用的区域中移除，保存后重试。",
@@ -888,6 +891,7 @@
           "cancel": "取消",
           "save": "保存",
           "name": "折扣名称",
+          "code": "折扣代码",
           "periods": {
             "title": "有效期",
             "add": "添加有效期",
@@ -913,6 +917,8 @@
           },
           "field_names": {
             "validity_period": "有效期",
+            "discount_value": "折扣",
+            "scope_choice": "类别或区域",
             "day_of_week": "日期"
           },
           "options": {
@@ -926,8 +932,13 @@
             "applies_to": "折扣/优惠券适用于",
             "scopes": {
               "all": "全部",
-              "services": "服务"
+              "custom": "仅部分选项",
+              "without_custom": "除部分选项外的全部"
             },
+            "categories": "类别",
+            "sectors": "区域和排",
+            "choose": "请选择",
+            "missing_sector": "排/区域已不可用",
             "max_uses": "最大使用次数",
             "enabled": "启用折扣/优惠券"
           }

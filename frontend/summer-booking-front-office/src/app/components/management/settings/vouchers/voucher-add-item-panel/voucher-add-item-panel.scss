@@ -38,6 +38,13 @@ app-voucher-add-item-panel {
   line-height: 1.25rem;
 }
 
+// The name and the code side by side, one above the other on phones.
+.voucher__add__item__panel__names {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  gap: 1rem 1.25rem;
+}
+
 // Icon buttons without the grey circle.
 .voucher__add__item__panel__period__remove,
 .voucher__add__item__panel__slot__remove {

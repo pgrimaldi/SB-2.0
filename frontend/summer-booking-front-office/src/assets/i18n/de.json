@@ -153,6 +153,9 @@
       "price_list_not_found": "Der Eintrag der Preisliste ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "price_list_in_use": "{{priceListName}} kann nicht gelöscht werden: Die zusätzlichen Artikel/Leistungen {{additionalItems}} hätten dann kein Paket mehr und würden für alle gelten. Verknüpfe sie zuerst mit anderen Paketen oder lösche sie.",
       "package_not_found": "Ein gewähltes Paket ist nicht mehr vorhanden: Es wurde vielleicht schon gelöscht.",
+      "discount_not_found": "Der Rabatt ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "discount_code_taken": "Der Code {{code}} wird schon von einem anderen Rabatt verwendet.",
+      "discount_max_uses_below_used": "Der Rabatt wurde schon {{usedCount}} Mal verwendet: Die maximale Anzahl kann nicht niedriger sein.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} kann nicht dupliziert werden: Die MwSt. ist keiner der zulässigen Sätze ({{rates}}). Ändere sie und versuche es erneut.",
       "duplicate_period_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt Preise für einen gelöschten Zeitraum. Öffne, bearbeite und speichere den Eintrag und versuche es erneut.",
       "duplicate_area_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt einen gelöschten Bereich der Karte. Öffne den Eintrag, entferne den Bereich aus den freigegebenen und speichere, dann versuche es erneut.",
@@ -888,6 +891,7 @@
           "cancel": "Abbrechen",
           "save": "Speichern",
           "name": "Rabattname",
+          "code": "Rabattcode",
           "periods": {
             "title": "Gültigkeitszeiträume",
             "add": "Zeitraum hinzufügen",
@@ -913,6 +917,8 @@
           },
           "field_names": {
             "validity_period": "Gültigkeitszeitraum",
+            "discount_value": "des Rabatts",
+            "scope_choice": "Kategorie oder Sektor",
             "day_of_week": "Tag"
           },
           "options": {
@@ -926,8 +932,13 @@
             "applies_to": "Rabatt/Gutschein anwenden auf",
             "scopes": {
               "all": "Alles",
-              "services": "Leistungen"
+              "custom": "Nur bestimmte Auswahl",
+              "without_custom": "Alles außer bestimmter Auswahl"
             },
+            "categories": "Kategorien",
+            "sectors": "Sektoren und Reihen",
+            "choose": "Auswählen",
+            "missing_sector": "Reihe/Sektor nicht mehr verfügbar",
             "max_uses": "Maximale Anzahl der Nutzungen",
             "enabled": "Rabatt/Gutschein aktivieren"
           }

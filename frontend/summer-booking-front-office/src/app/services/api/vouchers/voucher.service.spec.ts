@@ -3,13 +3,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { DiscountScope } from '../../../entities/enums/discount-scope';
+import { DiscountServiceCategory } from '../../../entities/enums/discount-service-category';
 import { DiscountType } from '../../../entities/enums/discount-type';
 import { VoucherAddItemRequest } from '../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherUpdateItemRequest } from '../../../entities/settings/vouchers/voucher-update-item-request';
 import { VoucherService } from './voucher.service';
 
 describe('VoucherService', () => {
-  it('should send only the fields of the voucher, its periods and time slots, without the property and at least 1 use', () => {
+  it('should send only the fields of the voucher, its periods and time slots, without the property', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
@@ -17,7 +18,11 @@ describe('VoucherService', () => {
     const controller = TestBed.inject(HttpTestingController);
     const request = Object.assign(new VoucherAddItemRequest(), {
       voucherName: 'Estate',
+      voucherCode: 'ESTATE15',
       discountValue: 15,
+      discountScope: DiscountScope.Custom,
+      serviceCategories: [DiscountServiceCategory.Bar],
+      idSectors: ['s1'],
       maxUseQuantity: null,
       validityPeriods: [
         {
@@ -32,10 +37,13 @@ describe('VoucherService', () => {
 
     vouchers.addVoucherItem(request).subscribe();
 
-    const body = controller.expectOne(`${environment.apiBaseUrl}/vouchers/add-voucher-item`).request
-      .body;
+    const body = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/discounts/add-voucher-item`,
+    ).request.body;
     expect(body).toEqual({
       voucherName: 'Estate',
+      voucherCode: 'ESTATE15',
+      isCodeRequired: true,
       validityPeriods: [
         {
           validFrom: '2026-08-01T00:00:00.000Z',
@@ -46,8 +54,10 @@ describe('VoucherService', () => {
       ],
       discountType: DiscountType.Percentage,
       discountValue: 15,
-      discountScope: DiscountScope.All,
-      maxUseQuantity: 1,
+      discountScope: DiscountScope.Custom,
+      serviceCategories: [DiscountServiceCategory.Bar],
+      idSectors: ['s1'],
+      maxUseQuantity: null,
       isEnabled: true,
     });
     controller.verify();
@@ -62,6 +72,8 @@ describe('VoucherService', () => {
     const request = Object.assign(new VoucherUpdateItemRequest(), {
       idVoucher: 'v1',
       voucherName: 'Estate',
+      voucherCode: 'ESTATE15',
+      isCodeRequired: false,
       discountType: DiscountType.Fixed,
       discountValue: 7.5,
       maxUseQuantity: null,
@@ -79,10 +91,14 @@ describe('VoucherService', () => {
 
     vouchers.updateVoucherItem(request, 'version-1').subscribe((answer) => (version = answer));
 
-    const call = controller.expectOne(`${environment.apiBaseUrl}/vouchers/update-voucher-item`);
+    const call = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/discounts/update-voucher-item`,
+    );
     expect(call.request.body).toEqual({
       idVoucher: 'v1',
       voucherName: 'Estate',
+      voucherCode: 'ESTATE15',
+      isCodeRequired: false,
       validityPeriods: [
         {
           validFrom: '2026-08-01T00:00:00.000Z',
@@ -94,7 +110,9 @@ describe('VoucherService', () => {
       discountType: DiscountType.Fixed,
       discountValue: 7.5,
       discountScope: DiscountScope.All,
-      maxUseQuantity: 1,
+      serviceCategories: [],
+      idSectors: [],
+      maxUseQuantity: null,
       isEnabled: true,
     });
     expect(call.request.headers.get('If-Match')).toBe('"version-1"');
@@ -115,7 +133,7 @@ describe('VoucherService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/vouchers/get-selected-item` &&
+        url === `${environment.apiBaseUrl}/catalog/discounts/get-selected-item` &&
         params.get('idVoucher') === 'v1',
     ).request;
     expect(request.body).toBeNull();

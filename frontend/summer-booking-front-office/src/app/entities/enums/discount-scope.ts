@@ -1,4 +1,5 @@
 export enum DiscountScope {
   All = 'All',
-  Services = 'Services',
+  Custom = 'Custom',
+  WithoutCustom = 'WithoutCustom',
 }

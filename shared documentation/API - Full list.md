@@ -3824,7 +3824,7 @@ Nessun payload.
 
 ## Sconti e voucher
 
-### POST `/api/vouchers/voucher-list`
+### POST `/api/catalog/discounts/voucher-list`
 
 **Payload JSON**
 
@@ -3852,7 +3852,7 @@ Nessun payload.
   "rows": [
     {
       "idVoucher": "string (UUID)",
-      "voucherName": "string | null",
+      "voucherName": "string",
       "validFrom": "string (data ISO 8601 UTC) | null",
       "validTo": "string (data ISO 8601 UTC) | null",
       "discountType": "string (enum DiscountType) | null",
@@ -3882,19 +3882,21 @@ Nessun payload.
 | `total` | number (intero) |
 | `rows[]` | VoucherItem[] (array di oggetti) |
 | `rows[].idVoucher` | string (UUID) |
-| `rows[].voucherName` | string \| null |
+| `rows[].voucherName` | string |
 | `rows[].validFrom` | string (data ISO 8601 UTC) \| null |
 | `rows[].validTo` | string (data ISO 8601 UTC) \| null |
 | `rows[].discountType` | string (enum DiscountType) \| null |
 | `rows[].discountValue` | number (decimale) \| null |
 
-### POST `/api/vouchers/add-voucher-item`
+### POST `/api/catalog/discounts/add-voucher-item`
 
 **Payload JSON**
 
 ```json
 {
   "voucherName": "string",
+  "voucherCode": "string",
+  "isCodeRequired": "boolean",
   "validityPeriods": [
     {
       "validFrom": "string (data ISO 8601 UTC)",
@@ -3911,7 +3913,9 @@ Nessun payload.
   "discountType": "string (enum DiscountType)",
   "discountValue": "number (decimale)",
   "discountScope": "string (enum DiscountScope)",
-  "maxUseQuantity": "number (intero ≥ 1)",
+  "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
+  "idSectors": "string[] (UUID, anche vuoto)",
+  "maxUseQuantity": "number (intero ≥ 1) | null",
   "isEnabled": "boolean"
 }
 ```
@@ -3925,24 +3929,28 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `voucherName` | string |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) |
+| `voucherCode` | string |
+| `isCodeRequired` | boolean |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, al massimo 50) |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
 | `discountType` | string (enum DiscountType) |
 | `discountValue` | number (decimale) |
 | `discountScope` | string (enum DiscountScope) |
-| `maxUseQuantity` | number (intero ≥ 1) |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
+| `idSectors` | string[] (UUID, anche vuoto) |
+| `maxUseQuantity` | number (intero ≥ 1) \| null |
 | `isEnabled` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### GET `/api/vouchers/get-selected-item?idVoucher={idVoucher}`
+### GET `/api/catalog/discounts/get-selected-item?idVoucher={idVoucher}`
 
 **Payload JSON** (query string)
 
@@ -3958,6 +3966,8 @@ Nessun corpo (204).
 {
   "idVoucher": "string (UUID)",
   "voucherName": "string | null",
+  "voucherCode": "string",
+  "isCodeRequired": "boolean",
   "validityPeriods": [
     {
       "validFrom": "string (data ISO 8601 UTC)",
@@ -3971,11 +3981,13 @@ Nessun corpo (204).
       ]
     }
   ],
-  "discountType": "string (enum DiscountType) | null",
-  "discountValue": "number (decimale) | null",
-  "discountScope": "string (enum DiscountScope) | null",
+  "discountType": "string (enum DiscountType)",
+  "discountValue": "number (decimale)",
+  "discountScope": "string (enum DiscountScope)",
+  "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
+  "idSectors": "string[] (UUID, anche vuoto)",
   "maxUseQuantity": "number (intero) | null",
-  "isEnabled": "boolean | null",
+  "isEnabled": "boolean",
   "version": "string"
 }
 ```
@@ -3992,21 +4004,25 @@ Nessun corpo (204).
 |---|---|
 | `idVoucher` | string (UUID) |
 | `voucherName` | string \| null |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti) |
+| `voucherCode` | string |
+| `isCodeRequired` | boolean |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, anche vuoto) |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
-| `discountType` | string (enum DiscountType) \| null |
-| `discountValue` | number (decimale) \| null |
-| `discountScope` | string (enum DiscountScope) \| null |
+| `discountType` | string (enum DiscountType) |
+| `discountValue` | number (decimale) |
+| `discountScope` | string (enum DiscountScope) |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
+| `idSectors` | string[] (UUID, anche vuoto) |
 | `maxUseQuantity` | number (intero) \| null |
-| `isEnabled` | boolean \| null |
+| `isEnabled` | boolean |
 | `version` | string |
 
-### POST `/api/vouchers/update-voucher-item`
+### POST `/api/catalog/discounts/update-voucher-item`
 
 **Payload JSON**
 
@@ -4014,6 +4030,8 @@ Nessun corpo (204).
 {
   "idVoucher": "string (UUID)",
   "voucherName": "string",
+  "voucherCode": "string",
+  "isCodeRequired": "boolean",
   "validityPeriods": [
     {
       "validFrom": "string (data ISO 8601 UTC)",
@@ -4030,7 +4048,9 @@ Nessun corpo (204).
   "discountType": "string (enum DiscountType)",
   "discountValue": "number (decimale)",
   "discountScope": "string (enum DiscountScope)",
-  "maxUseQuantity": "number (intero ≥ 1)",
+  "serviceCategories": "string[] (enum DiscountServiceCategory, anche vuoto)",
+  "idSectors": "string[] (UUID, anche vuoto)",
+  "maxUseQuantity": "number (intero ≥ 1) | null",
   "isEnabled": "boolean"
 }
 ```
@@ -4045,24 +4065,28 @@ Nessun corpo (204).
 |---|---|
 | `idVoucher` | string (UUID) |
 | `voucherName` | string |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) |
+| `voucherCode` | string |
+| `isCodeRequired` | boolean |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, al massimo 50) |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) |
 | `discountType` | string (enum DiscountType) |
 | `discountValue` | number (decimale) |
 | `discountScope` | string (enum DiscountScope) |
-| `maxUseQuantity` | number (intero ≥ 1) |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) |
+| `idSectors` | string[] (UUID, anche vuoto) |
+| `maxUseQuantity` | number (intero ≥ 1) \| null |
 | `isEnabled` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/vouchers/delete-voucher-item`
+### POST `/api/catalog/discounts/delete-voucher-item`
 
 **Payload JSON**
 
@@ -4086,7 +4110,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/vouchers/duplicate-voucher-item`
+### POST `/api/catalog/discounts/duplicate-voucher-item`
 
 **Payload JSON**
 

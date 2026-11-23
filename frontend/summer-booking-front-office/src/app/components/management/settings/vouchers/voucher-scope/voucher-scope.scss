@@ -1,0 +1,9 @@
+// The rows stay among those of the section of the popup.
+:host {
+  display: contents;
+}
+
+.voucher__scope__field {
+  flex: var(--form-row-fill) 1 17.375rem;
+  min-width: 0;
+}

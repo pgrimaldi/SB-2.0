@@ -219,7 +219,7 @@ export class Vouchers {
     table: { reload(): void },
     idVouchers: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.PricingDiscountNotFound) {
       this.forgetDeleted(idVouchers);
       table.reload();
     }

@@ -17,6 +17,7 @@ import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
+import { voucherQuantityOfSector } from '../vouchers/vouchers.mock';
 import { sectorLimits } from './catalog.mock';
 import { priceListQuantityOfSector } from './price-lists.mock';
 import { SECTOR_AREAS, SECTORS, SectorRow, SectorUsage } from './sectors-data.mock';
@@ -208,8 +209,8 @@ function usageOf(sector: SectorRow): SectorUsage {
   return {
     mapSpots: 0,
     stayLimits: 0,
-    discounts: 0,
     ...sector.usage,
+    discounts: voucherQuantityOfSector(sector.idSector),
     priceLists: priceListQuantityOfSector(sector.idSector) || (sector.usage?.priceLists ?? 0),
     ...sectorLimits(sector.idSector ?? ''),
   };

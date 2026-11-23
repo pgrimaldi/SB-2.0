@@ -1366,7 +1366,7 @@ Nessun corpo.
 
 ## /vouchers
 
-### POST `/api/vouchers/voucher-list`
+### POST `/api/catalog/discounts/voucher-list`
 
 Sconti e voucher: elenco.
 
@@ -1377,15 +1377,7 @@ Sconti e voucher: elenco.
   "page": 1,
   "pageSize": 10,
   "search": "g",
-  "filters": [
-    {
-      "field": "discountType",
-      "value": [
-        "Percentage",
-        "Fixed"
-      ]
-    }
-  ],
+  "filters": [],
   "sortField": "validFrom",
   "sortDirection": "Ascending"
 }
@@ -1396,9 +1388,7 @@ Sconti e voucher: elenco.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `g` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "discountType", "value": ["Percentage", "Fixed"]}]` |
-| `filters[].field` | string | `discountType` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Percentage", "Fixed"]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
 | `sortField` | string | `validFrom` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -1416,15 +1406,15 @@ Stato: 200 OK.
       "validFrom": "2026-06-01T00:00:00.000Z",
       "validTo": "2026-06-30T00:00:00.000Z",
       "discountType": "Percentage",
-      "discountValue": 10
+      "discountValue": 12.5
     },
     {
-      "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
-      "voucherName": "Ferragosto",
-      "validFrom": "2026-08-12T00:00:00.000Z",
-      "validTo": "2026-08-16T00:00:00.000Z",
+      "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f04",
+      "voucherName": "Clienti abituali",
+      "validFrom": null,
+      "validTo": null,
       "discountType": "Fixed",
-      "discountValue": 5
+      "discountValue": 15
     }
   ]
 }
@@ -1433,15 +1423,15 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `total` | number (intero) | `2` |
-| `rows[]` | VoucherItem[] (array di oggetti) | `[{"idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01", "voucherName": "Giugno", "validFrom": "2026-06-01T00:00:00.000Z", "validTo": "2026-06-30T00:00:00.000Z", "discountType": "Percentage", "discountValue": 10}, {"idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02", "voucherName": "Ferragosto", "validFrom": "2026-08-12T00:00:00.000Z", "validTo": "2026-08-16T00:00:00.000Z", "discountType": "Fixed", "discountValue": 5}]` |
+| `rows[]` | VoucherItem[] (array di oggetti) | `[{"idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01", "voucherName": "Giugno", "validFrom": "2026-06-01T00:00:00.000Z", "validTo": "2026-06-30T00:00:00.000Z", "discountType": "Percentage", "discountValue": 12.5}, {"idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f04", "voucherName": "Clienti abituali", "validFrom": null, "validTo": null, "discountType": "Fixed", "discountValue": 15}]` |
 | `rows[].idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f01` |
-| `rows[].voucherName` | string \| null | `Giugno` |
+| `rows[].voucherName` | string | `Giugno` |
 | `rows[].validFrom` | string (data ISO 8601 UTC) \| null | `2026-06-01T00:00:00.000Z` |
 | `rows[].validTo` | string (data ISO 8601 UTC) \| null | `2026-06-30T00:00:00.000Z` |
 | `rows[].discountType` | string (enum DiscountType) \| null | `Percentage` |
-| `rows[].discountValue` | number (decimale) \| null | `10` |
+| `rows[].discountValue` | number (decimale) \| null | `12.5` |
 
-### POST `/api/vouchers/delete-voucher-item`
+### POST `/api/catalog/discounts/delete-voucher-item`
 
 Sconti e voucher: eliminazione.
 
@@ -1466,7 +1456,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/vouchers/duplicate-voucher-item`
+### POST `/api/catalog/discounts/duplicate-voucher-item`
 
 Sconti e voucher: duplicazione.
 
@@ -1490,7 +1480,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/vouchers/add-voucher-item`
+### POST `/api/catalog/discounts/add-voucher-item`
 
 Sconti e voucher: aggiunta.
 
@@ -1499,6 +1489,8 @@ Sconti e voucher: aggiunta.
 ```json
 {
   "voucherName": "Estate",
+  "voucherCode": "ESTATE15",
+  "isCodeRequired": true,
   "validityPeriods": [
     {
       "validFrom": "2026-08-01T00:00:00.000Z",
@@ -1526,17 +1518,19 @@ Sconti e voucher: aggiunta.
         6,
         7
       ],
-      "timeSlots": [
-        {
-          "from": "10:00",
-          "to": "18:00"
-        }
-      ]
+      "timeSlots": []
     }
   ],
   "discountType": "Percentage",
-  "discountValue": 15,
-  "discountScope": "All",
+  "discountValue": 12.5,
+  "discountScope": "Custom",
+  "serviceCategories": [
+    "Bar",
+    "Normal"
+  ],
+  "idSectors": [
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
+  ],
   "maxUseQuantity": 1,
   "isEnabled": true
 }
@@ -1545,17 +1539,21 @@ Sconti e voucher: aggiunta.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `voucherName` | string | `Estate` |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
+| `voucherCode` | string | `ESTATE15` |
+| `isCodeRequired` | boolean | `true` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, al massimo 50) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": []}]` |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-01T00:00:00.000Z` |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-31T00:00:00.000Z` |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3]` |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `12:00` |
 | `discountType` | string (enum DiscountType) | `Percentage` |
-| `discountValue` | number (decimale) | `15` |
-| `discountScope` | string (enum DiscountScope) | `All` |
-| `maxUseQuantity` | number (intero ≥ 1) | `1` |
+| `discountValue` | number (decimale) | `12.5` |
+| `discountScope` | string (enum DiscountScope) | `Custom` |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) | `["Bar", "Normal"]` |
+| `idSectors` | string[] (UUID, anche vuoto) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
+| `maxUseQuantity` | number (intero ≥ 1) \| null | `1` |
 | `isEnabled` | boolean | `true` |
 
 #### Response
@@ -1564,7 +1562,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/vouchers/update-voucher-item`
+### POST `/api/catalog/discounts/update-voucher-item`
 
 Sconti e voucher: modifica.
 
@@ -1574,6 +1572,8 @@ Sconti e voucher: modifica.
 {
   "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
   "voucherName": "Estate 2026",
+  "voucherCode": "ESTATE20",
+  "isCodeRequired": true,
   "validityPeriods": [
     {
       "validFrom": "2026-08-01T00:00:00.000Z",
@@ -1601,18 +1601,15 @@ Sconti e voucher: modifica.
         6,
         7
       ],
-      "timeSlots": [
-        {
-          "from": "10:00",
-          "to": "18:00"
-        }
-      ]
+      "timeSlots": []
     }
   ],
   "discountType": "Percentage",
   "discountValue": 20,
   "discountScope": "All",
-  "maxUseQuantity": 1,
+  "serviceCategories": [],
+  "idSectors": [],
+  "maxUseQuantity": null,
   "isEnabled": true
 }
 ```
@@ -1621,17 +1618,21 @@ Sconti e voucher: modifica.
 |---|---|---|
 | `idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02` |
 | `voucherName` | string | `Estate 2026` |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, almeno uno) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": [{"from": "10:00", "to": "18:00"}]}]` |
+| `voucherCode` | string | `ESTATE20` |
+| `isCodeRequired` | boolean | `true` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, al massimo 50) | `[{"validFrom": "2026-08-01T00:00:00.000Z", "validTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]}, {"validFrom": "2026-09-01T00:00:00.000Z", "validTo": "2026-09-15T00:00:00.000Z", "daysOfWeek": [6, 7], "timeSlots": []}]` |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-01T00:00:00.000Z` |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-31T00:00:00.000Z` |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3]` |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) | `[{"from": "09:00", "to": "12:00"}, {"from": "15:00", "to": "17:00"}]` |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `12:00` |
 | `discountType` | string (enum DiscountType) | `Percentage` |
 | `discountValue` | number (decimale) | `20` |
 | `discountScope` | string (enum DiscountScope) | `All` |
-| `maxUseQuantity` | number (intero ≥ 1) | `1` |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) | `[]` |
+| `idSectors` | string[] (UUID, anche vuoto) | `[]` |
+| `maxUseQuantity` | number (intero ≥ 1) \| null | `null` |
 | `isEnabled` | boolean | `true` |
 
 #### Response
@@ -1640,7 +1641,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/vouchers/get-selected-item?idVoucher={idVoucher}`
+### GET `/api/catalog/discounts/get-selected-item?idVoucher={idVoucher}`
 
 Sconti e voucher: dati per la modifica.
 
@@ -1649,7 +1650,7 @@ Sconti e voucher: dati per la modifica.
 Nessun corpo: è una GET, l'id dello sconto/voucher va nella query string.
 
 ```text
-/api/vouchers/get-selected-item?idVoucher=6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02
+/api/catalog/discounts/get-selected-item?idVoucher=6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02
 ```
 
 | Property | Tipo | Esempio |
@@ -1664,6 +1665,8 @@ Stato: 200 OK.
 {
   "idVoucher": "6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02",
   "voucherName": "Ferragosto",
+  "voucherCode": "FERRAGOSTO5",
+  "isCodeRequired": true,
   "validityPeriods": [
     {
       "validFrom": "2026-08-12T00:00:00.000Z",
@@ -1689,8 +1692,14 @@ Stato: 200 OK.
   ],
   "discountType": "Fixed",
   "discountValue": 5,
-  "discountScope": "Services",
-  "maxUseQuantity": 50,
+  "discountScope": "WithoutCustom",
+  "serviceCategories": [
+    "Additional"
+  ],
+  "idSectors": [
+    "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"
+  ],
+  "maxUseQuantity": null,
   "isEnabled": false,
   "version": "bf1aac8c"
 }
@@ -1700,18 +1709,22 @@ Stato: 200 OK.
 |---|---|---|
 | `idVoucher` | string (UUID) | `6d1e2f3a-4b5c-4d6e-8f7a-9b0c1d2e3f02` |
 | `voucherName` | string \| null | `Ferragosto` |
-| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti) | `[{"validFrom": "2026-08-12T00:00:00.000Z", "validTo": "2026-08-16T00:00:00.000Z", "daysOfWeek": [1, 2, 3, 4, 5], "timeSlots": [{"from": "09:00", "to": "13:00"}, {"from": "15:00", "to": "19:00"}]}]` |
+| `voucherCode` | string | `FERRAGOSTO5` |
+| `isCodeRequired` | boolean | `true` |
+| `validityPeriods[]` | VoucherValidityPeriod[] (array di oggetti, anche vuoto) | `[{"validFrom": "2026-08-12T00:00:00.000Z", "validTo": "2026-08-16T00:00:00.000Z", "daysOfWeek": [1, 2, 3, 4, 5], "timeSlots": [{"from": "09:00", "to": "13:00"}, {"from": "15:00", "to": "19:00"}]}]` |
 | `validityPeriods[].validFrom` | string (data ISO 8601 UTC) | `2026-08-12T00:00:00.000Z` |
 | `validityPeriods[].validTo` | string (data ISO 8601 UTC) | `2026-08-16T00:00:00.000Z` |
 | `validityPeriods[].daysOfWeek` | number[] (interi da 1 a 7, almeno uno) | `[1, 2, 3, 4, 5]` |
-| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, anche vuoto) | `[{"from": "09:00", "to": "13:00"}, {"from": "15:00", "to": "19:00"}]` |
+| `validityPeriods[].timeSlots[]` | VoucherTimeSlot[] (array di oggetti, al massimo 20, anche vuoto) | `[{"from": "09:00", "to": "13:00"}, {"from": "15:00", "to": "19:00"}]` |
 | `validityPeriods[].timeSlots[].from` | string (HH:mm, 24 ore) | `09:00` |
 | `validityPeriods[].timeSlots[].to` | string (HH:mm, 24 ore) | `13:00` |
-| `discountType` | string (enum DiscountType) \| null | `Fixed` |
-| `discountValue` | number (decimale) \| null | `5` |
-| `discountScope` | string (enum DiscountScope) \| null | `Services` |
-| `maxUseQuantity` | number (intero) \| null | `50` |
-| `isEnabled` | boolean \| null | `false` |
+| `discountType` | string (enum DiscountType) | `Fixed` |
+| `discountValue` | number (decimale) | `5` |
+| `discountScope` | string (enum DiscountScope) | `WithoutCustom` |
+| `serviceCategories` | string[] (enum DiscountServiceCategory, anche vuoto) | `["Additional"]` |
+| `idSectors` | string[] (UUID, anche vuoto) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
+| `maxUseQuantity` | number (intero) \| null | `null` |
+| `isEnabled` | boolean | `false` |
 | `version` | string | `bf1aac8c` |
 
 ## /catalog

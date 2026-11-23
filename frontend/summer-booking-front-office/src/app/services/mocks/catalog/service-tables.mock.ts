@@ -254,12 +254,13 @@ export function copyName(
   name: string,
   language: Language,
   taken: readonly (string | null)[],
+  maxLength = MAX_SERVICE_NAME_LENGTH,
 ): string {
   const suffix = COPY_SUFFIXES[language];
   const base = name.trim().replace(new RegExp(`${suffix}(?: \\d{1,9})?$`, 'i'), '');
   for (let number = 1; ; number++) {
     const end = number === 1 ? suffix : `${suffix} ${number}`;
-    const copy = base.slice(0, MAX_SERVICE_NAME_LENGTH - end.length).trimEnd() + end;
+    const copy = base.slice(0, maxLength - end.length).trimEnd() + end;
     if (!taken.some((other) => sameTextIgnoringCase(other, copy))) {
       return copy;
     }

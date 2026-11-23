@@ -8,6 +8,7 @@ import { ApiErrorCode } from '../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../entities/errors/api-problem';
 import { CatalogService } from '../../services/api/catalog/catalog.service';
 import { PriceListService } from '../../services/api/catalog/price-list.service';
+import { VoucherService } from '../../services/api/vouchers/voucher.service';
 import { AdditionalItems } from './catalog/additional-items/additional-items';
 import { Packages } from './catalog/packages/packages';
 import { AutomaticPrices } from './services/automatic-prices/automatic-prices';
@@ -15,6 +16,7 @@ import { ServicesBar } from './services/services-bar/services-bar';
 import { ServicesGeneral } from './services/services-general/services-general';
 import { ServicesHourly } from './services/services-hourly/services-hourly';
 import { TableBooking } from './services/table-booking/table-booking';
+import { Vouchers } from './vouchers/vouchers';
 
 interface TableView {
   reloadIfGone(problem: ApiProblem, table: { reload(): void }, ids: readonly string[]): void;
@@ -29,6 +31,7 @@ const VIEWS: readonly (readonly [Type<unknown>, string, ApiErrorCode])[] = [
   [TableBooking, 'idSelectedTableServices', ApiErrorCode.ServiceTableServiceNotFound],
   [Packages, 'idSelectedPackages', ApiErrorCode.PricingPriceListNotFound],
   [AdditionalItems, 'idSelectedAdditionalItems', ApiErrorCode.PricingPriceListNotFound],
+  [Vouchers, 'idSelectedVouchers', ApiErrorCode.PricingDiscountNotFound],
 ];
 
 describe('tables of the settings', () => {
@@ -39,6 +42,7 @@ describe('tables of the settings', () => {
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
         { provide: CatalogService, useValue: {} },
         { provide: PriceListService, useValue: {} },
+        { provide: VoucherService, useValue: {} },
         { provide: DateLanguageBehaviour, useValue: { locale: signal('it-IT') } },
       ],
     });

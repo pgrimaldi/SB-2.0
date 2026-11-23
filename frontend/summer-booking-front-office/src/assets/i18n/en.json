@@ -153,6 +153,9 @@
       "price_list_not_found": "The price list item is no longer there: it may already have been deleted.",
       "price_list_in_use": "{{priceListName}} cannot be deleted: the additional items/services {{additionalItems}} would be left with no packages and would apply to all of them. First link them to other packages, or delete them.",
       "package_not_found": "A chosen package is no longer there: it may already have been deleted.",
+      "discount_not_found": "The discount is no longer there: it may already have been deleted.",
+      "discount_code_taken": "The code {{code}} is already used by another discount.",
+      "discount_max_uses_below_used": "The discount has already been used {{usedCount}} times: the maximum number cannot be lower.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} cannot be duplicated: its VAT is not one of the allowed rates ({{rates}}). Change it and try again.",
       "duplicate_period_not_found": "{{priceListName}} cannot be duplicated: it has prices for a deleted period. Open it, edit it and save it, then try again.",
       "duplicate_area_not_found": "{{priceListName}} cannot be duplicated: it has a deleted map area. Open it, take it away from the enabled areas and save it, then try again.",
@@ -888,6 +891,7 @@
           "cancel": "Cancel",
           "save": "Save",
           "name": "Discount name",
+          "code": "Discount code",
           "periods": {
             "title": "Validity periods",
             "add": "Add validity period",
@@ -913,6 +917,8 @@
           },
           "field_names": {
             "validity_period": "validity period",
+            "discount_value": "discount",
+            "scope_choice": "category or sector",
             "day_of_week": "day"
           },
           "options": {
@@ -926,8 +932,13 @@
             "applies_to": "Apply discount/voucher to",
             "scopes": {
               "all": "Everything",
-              "services": "Services"
+              "custom": "Only some choices",
+              "without_custom": "Everything except some choices"
             },
+            "categories": "Categories",
+            "sectors": "Sectors and rows",
+            "choose": "Select",
+            "missing_sector": "Row/sector no longer available",
             "max_uses": "Maximum number of uses",
             "enabled": "Enable discount/voucher"
           }

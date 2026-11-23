@@ -12,8 +12,8 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 ## Tabella
 
 - Righe `VoucherItem` (`entities/settings/vouchers/`; `DiscountType` in `entities/enums/`).
-- Colonne Sconto, Valido dal e al (date UTC mostrate come giorno), Tipo di sconto tradotto, Valore con % o €
-  (`Intl.NumberFormat`).
+- Colonne Sconto (il nome, o il codice se manca), Valido dal e al (date UTC mostrate come giorno, vuote senza periodi),
+  Tipo di sconto tradotto, Valore con % o € (`Intl.NumberFormat`). Senza un ordinamento scelto, per nome.
 
 ## Elimina e duplica
 
@@ -22,7 +22,8 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   `.duplicate`; il nome per una riga, il numero per la selezione).
 - Dopo la conferma: spinner a pagina intera, tabella ricaricata, errore in "Operazione non riuscita" (icona
   `GeneralIcon_Warning.svg`).
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
+- Elimina e duplica sono tutto o niente. Le copie hanno nome e codice con " copia", sono spente e mai usate.
+- Con 404 `pricing.discount_not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
   (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
   `failed` dei popup e del pannello di modifica).
 
@@ -31,17 +32,31 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 - `app-voucher-add-item-panel` (`components/management/settings/vouchers/voucher-add-item-panel/`): un `BasePopup` largo
   `min(42.3125rem, 95vw)` che scorre oltre il 95% dell'altezza.
 - Contenuto:
-  - nome dello sconto;
+  - nome e codice dello sconto, affiancati (uno sotto l'altro se non c'è spazio);
   - riquadro "Periodi di validità" (`app-section-title` con "Aggiungi periodo"). Ogni periodo ha le righe `app-form-row`
     Periodo (Dal/al con `app-filled-date-field`, date UTC), Giorni della settimana (`app-filled-multi-select` con la
     casella "Tutti", giorni ISO 1-7, elenco condiviso `DAYS_OF_WEEK` in `entities/shared/days-of-week.ts`) e Fasce orarie
-    facoltative (Dalle/alle con `app-filled-time-field`, `HH:mm`);
-  - riquadro "Opzioni": tipo, valore con % o €, applica a, numero massimo di utilizzi;
+    facoltative (Dalle/alle con `app-filled-time-field`, `HH:mm`). "Aggiungi periodo" si spegne a 50 periodi, "Aggiungi
+    fascia oraria" a 20 fasce dello stesso periodo;
+  - riquadro "Opzioni": tipo, valore con % o €, applica a (sotto), numero massimo di utilizzi;
   - interruttore "Abilita sconto/voucher".
-- Form `VoucherAddItemRequest` con i Signal Forms: nome obbligatorio; almeno un periodo; per ogni periodo Dal, al e
-  almeno un giorno; in ogni fascia oraria "alle" dopo "dalle" (`timeRange`, errore sotto i due orari); valore
-  obbligatorio (percentuale intera da 1 a 100, importo con 2 decimali); utilizzi almeno 1.
-- Salva chiama l'aggiunta con lo spinner sul bottone, poi chiude il popup e ricarica la tabella.
+- Form `VoucherAddItemRequest` con i Signal Forms: nome (al massimo 120 caratteri) e codice (60) obbligatori; per ogni
+  periodo Dal, al e almeno un giorno; in ogni fascia oraria "alle" dopo "dalle" (`timeRange`, errore sotto i due orari);
+  valore obbligatorio, più di 0 con 2 decimali (fino a 100 la percentuale, fino a 100.000 l'importo); utilizzi almeno 1,
+  vuoto = illimitati (partono da 1).
+- **Codice da digitare o sconto automatico** (`isCodeRequired`): il popup non lo mostra. Uno sconto nuovo ha sempre un
+  codice da digitare; in modifica il valore letto torna uguale. Con il codice i periodi sono facoltativi (senza, vale
+  sempre); per uno sconto automatico ne serve almeno uno.
+- **Applica sconto/voucher a** (`app-voucher-scope`, `components/management/settings/vouchers/voucher-scope/`, nei due
+  popup): Tutto, Solo alcune scelte, Tutto tranne alcune scelte (`DiscountScope`: `All`, `Custom`, `WithoutCustom`). Con
+  le ultime due compaiono le tendine a scelta multipla Categorie (`DiscountServiceCategory`, con i nomi delle tab di
+  Servizi e Listino) e Settori e file (`POST /api/catalog/sectors/sector-combobox`, letta la prima volta che compare in
+  ogni apertura), con almeno una scelta fra le due. Con Tutto si salvano vuote (`withScope`), anche se prima erano
+  scelte. Con 404 `catalog.sector_not_found` il messaggio compare sopra i bottoni e i settori si rileggono: quelli
+  scelti che non ci sono più si vedono come "Settore/fila non più disponibile".
+- Giorni della settimana e fasce orarie sono di ogni periodo. Il canale (gestionale e online) non viaggia.
+- Salva chiama l'aggiunta con lo spinner sul bottone, poi chiude il popup e ricarica la tabella. Il 409
+  `pricing.discount_code_taken` compare sotto il codice.
 - Con dati scritti chiede prima di chiudere (`UnsavedChangesBehaviour`).
 - Dal mockup vengono stile e posizioni, non le misure: bottoni, titoli, etichette e campi hanno quelle standard dei
   wrapper.
@@ -58,7 +73,7 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 - Per il resto è una copia identica del popup di aggiunta (codice duplicato voluto, accorpamento nel TODO), con tutti i
   campi modificabili.
 - Salva chiama l'aggiornamento con l'`idVoucher` della risposta della GET (non quello della riga), poi chiude il popup e
-  ricarica la tabella.
+  ricarica la tabella. Il 422 `pricing.discount_max_uses_below_used` compare sotto il numero massimo di utilizzi.
 - Controllo di versione: la lettura porta `version` (in `VoucherSelectedItem`) e il Salva la rimanda nell'header
   `If-Match`. Con 409 `resource.version_conflict` (un altro utente ha cambiato lo sconto dopo la lettura) compare
   `app-version-conflict-popup`, il pannello si chiude e la pagina ricarica la tabella (`reloadIfChanged`): per rifare
@@ -74,15 +89,15 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
 
 In `VoucherService` (lo stabilimento lo prende il backend dal token):
 
-- `POST /api/vouchers/voucher-list` (`voucherList`): corpo standard `PageRequest`, risposta `Page<VoucherItem>`.
-- `POST /api/vouchers/delete-voucher-item` (`deleteVoucherItems`): corpo `{ idVouchers }`, risposta 204.
-- `POST /api/vouchers/duplicate-voucher-item` (`duplicateVoucherItems`): corpo `{ idVouchers }`, risposta 204.
-- `POST /api/vouchers/add-voucher-item` (`addVoucherItem`): corpo = form, utilizzi vuoti mandati come 1, risposta 204.
-- `GET /api/vouchers/get-selected-item?idVoucher=…` (`selectedItem`): risposta `VoucherSelectedItem` con `version`.
-- `POST /api/vouchers/update-voucher-item` (`updateVoucherItem(request, version)`): corpo = form
-  `VoucherUpdateItemRequest`, utilizzi vuoti mandati come 1, e header `If-Match` con la versione letta; risposta 204
-  con l'header `ETag` della nuova versione (`updateVoucherItem` restituisce la versione); 409
-  `resource.version_conflict`.
+- `POST /api/catalog/discounts/voucher-list` (`voucherList`): corpo standard `PageRequest`, risposta `Page<VoucherItem>`.
+- `POST /api/catalog/discounts/delete-voucher-item` (`deleteVoucherItems`): corpo `{ idVouchers }`, risposta 204.
+- `POST /api/catalog/discounts/duplicate-voucher-item` (`duplicateVoucherItems`): corpo `{ idVouchers }`, risposta 204.
+- `POST /api/catalog/discounts/add-voucher-item` (`addVoucherItem`): corpo = form, risposta 204.
+- `GET /api/catalog/discounts/get-selected-item?idVoucher=…` (`selectedItem`): risposta `VoucherSelectedItem` con
+  `version`.
+- `POST /api/catalog/discounts/update-voucher-item` (`updateVoucherItem(request, version)`): corpo = form
+  `VoucherUpdateItemRequest` e header `If-Match` con la versione letta; risposta 204 con l'header `ETag` della nuova
+  versione (`updateVoucherItem` restituisce la versione); 409 `resource.version_conflict`.
 
-Il controllo di versione è chiesto al backend in
+Tutte e sei sono chieste al backend in
 `shared documentation/Modifiche per il backend/impostazioni/Sconti e voucher - Frontend requests.md`.

@@ -15,7 +15,7 @@ import { ifMatch, versionOf } from '../versions/version-headers';
 @Injectable({ providedIn: 'root' })
 export class VoucherService {
   private readonly httpClient = inject(HttpClient);
-  private readonly endpoint = `${environment.apiBaseUrl}/vouchers`;
+  private readonly endpoint = `${environment.apiBaseUrl}/catalog/discounts`;
 
   readonly voucherList = (request: PageRequest): Observable<Page<VoucherItem>> =>
     this.httpClient.post<Page<VoucherItem>>(`${this.endpoint}/voucher-list`, request);
@@ -32,7 +32,6 @@ export class VoucherService {
   readonly addVoucherItem = (request: VoucherAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/add-voucher-item`, {
       ...onlyFieldsOf(VoucherAddItemRequest, request),
-      maxUseQuantity: request.maxUseQuantity ?? 1,
       validityPeriods: request.validityPeriods.map((period) => ({
         ...onlyFieldsOf(VoucherValidityPeriod, period),
         timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),
@@ -49,7 +48,6 @@ export class VoucherService {
         `${this.endpoint}/update-voucher-item`,
         {
           ...onlyFieldsOf(VoucherUpdateItemRequest, request),
-          maxUseQuantity: request.maxUseQuantity ?? 1,
           validityPeriods: request.validityPeriods.map((period) => ({
             ...onlyFieldsOf(VoucherValidityPeriod, period),
             timeSlots: period.timeSlots.map((timeSlot) => onlyFieldsOf(VoucherTimeSlot, timeSlot)),

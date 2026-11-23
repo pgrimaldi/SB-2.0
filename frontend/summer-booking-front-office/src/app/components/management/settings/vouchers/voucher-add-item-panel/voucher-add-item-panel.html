@@ -5,16 +5,29 @@
     </h2>
 
     <div [attr.inert]="isLoading() ? '' : null">
-      <app-filled-text-field
-        [label]="'management.settings.vouchers.form.name' | translate"
-        [isMandatory]="true"
-        [formField]="draftForm.voucherName"
-        [error]="voucherNameError()"
-      />
+      <div class="voucher__add__item__panel__names">
+        <app-filled-text-field
+          [label]="'management.settings.vouchers.form.name' | translate"
+          [isMandatory]="true"
+          [formField]="draftForm.voucherName"
+          [error]="voucherNameError()"
+        />
+        <app-filled-text-field
+          [label]="'management.settings.vouchers.form.code' | translate"
+          [isMandatory]="true"
+          [formField]="draftForm.voucherCode"
+          [error]="voucherCodeError()"
+        />
+      </div>
 
       <section class="voucher__add__item__panel__section">
         <app-section-title [text]="'management.settings.vouchers.form.periods.title' | translate">
-          <app-button [size]="ButtonSize.Small" [pathIcon]="addPeriodIcon" (clicked)="addPeriod()">
+          <app-button
+            [size]="ButtonSize.Small"
+            [pathIcon]="addPeriodIcon"
+            [disabled]="!canAddPeriod()"
+            (clicked)="addPeriod()"
+          >
             {{ 'management.settings.vouchers.form.periods.add' | translate }}
           </app-button>
         </app-section-title>
@@ -127,6 +140,7 @@
                   [appearance]="ButtonAppearance.Secondary"
                   [size]="ButtonSize.Small"
                   [pathIcon]="addTimeSlotIcon"
+                  [disabled]="!canAddTimeSlot(period)"
                   (clicked)="addTimeSlot(period)"
                 >
                   {{ 'management.settings.vouchers.form.periods.add_time_slot' | translate }}
@@ -162,25 +176,21 @@
             </span>
             <app-filled-number-field
               class="voucher__add__item__panel__value"
-              [isDecimal]="!isPercentage()"
+              [isDecimal]="true"
               [isCurrency]="!isPercentage()"
+              [maxDecimals]="2"
               [formField]="draftForm.discountValue"
               [error]="discountValueError()"
             />
             <span class="voucher__add__item__panel__word">{{ isPercentage() ? '%' : '€' }}</span>
           </app-form-row>
 
-          <app-form-row>
-            <span appFormRowLabel>
-              {{ 'management.settings.vouchers.form.options.applies_to' | translate }}
-            </span>
-            <app-filled-select
-              class="voucher__add__item__panel__option"
-              [options]="scopeOptions()"
-              [formField]="draftForm.discountScope"
-              [error]="discountScopeError()"
-            />
-          </app-form-row>
+          <app-voucher-scope
+            [scope]="draftForm.discountScope"
+            [categories]="draftForm.serviceCategories"
+            [sectors]="draftForm.idSectors"
+            [sectorsVersion]="sectorsVersion()"
+          />
 
           <app-form-row>
             <span appFormRowLabel>

@@ -153,6 +153,9 @@
       "price_list_not_found": "El elemento de la lista de precios ya no existe: puede que ya se haya eliminado.",
       "price_list_in_use": "{{priceListName}} no se puede eliminar: los artículos/servicios adicionales {{additionalItems}} se quedarían sin paquetes y valdrían para todos. Vincúlalos primero a otros paquetes o elimínalos.",
       "package_not_found": "Un paquete elegido ya no existe: puede que ya se haya eliminado.",
+      "discount_not_found": "El descuento ya no existe: puede que ya se haya eliminado.",
+      "discount_code_taken": "El código {{code}} ya lo usa otro descuento.",
+      "discount_max_uses_below_used": "El descuento ya se ha usado {{usedCount}} veces: el número máximo no puede ser menor.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} no se puede duplicar: su IVA no está entre los tipos admitidos ({{rates}}). Cámbialo e inténtalo de nuevo.",
       "duplicate_period_not_found": "{{priceListName}} no se puede duplicar: tiene precios para un periodo eliminado. Ábrelo, modifícalo y guárdalo, e inténtalo de nuevo.",
       "duplicate_area_not_found": "{{priceListName}} no se puede duplicar: tiene un área del mapa eliminada. Ábrelo, quítala de las áreas habilitadas y guárdalo, e inténtalo de nuevo.",
@@ -888,6 +891,7 @@
           "cancel": "Cancelar",
           "save": "Guardar",
           "name": "Nombre del descuento",
+          "code": "Código del descuento",
           "periods": {
             "title": "Periodos de validez",
             "add": "Añadir periodo",
@@ -913,6 +917,8 @@
           },
           "field_names": {
             "validity_period": "periodo de validez",
+            "discount_value": "del descuento",
+            "scope_choice": "categoría o sector",
             "day_of_week": "día"
           },
           "options": {
@@ -926,8 +932,13 @@
             "applies_to": "Aplicar descuento/vale a",
             "scopes": {
               "all": "Todo",
-              "services": "Servicios"
+              "custom": "Solo algunas opciones",
+              "without_custom": "Todo salvo algunas opciones"
             },
+            "categories": "Categorías",
+            "sectors": "Sectores y filas",
+            "choose": "Seleccionar",
+            "missing_sector": "Fila/sector ya no disponible",
             "max_uses": "Número máximo de usos",
             "enabled": "Activar descuento/vale"
           }

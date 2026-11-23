@@ -153,6 +153,9 @@
       "price_list_not_found": "L'élément du tarif n'existe plus : il a peut-être déjà été supprimé.",
       "price_list_in_use": "{{priceListName}} ne peut pas être supprimé : les articles/services supplémentaires {{additionalItems}} resteraient sans forfait et vaudraient pour tous. Associez-les d'abord à d'autres forfaits, ou supprimez-les.",
       "package_not_found": "Un forfait choisi n'existe plus : il a peut-être déjà été supprimé.",
+      "discount_not_found": "La remise n'existe plus : elle a peut-être déjà été supprimée.",
+      "discount_code_taken": "Le code {{code}} est déjà utilisé par une autre remise.",
+      "discount_max_uses_below_used": "La remise a déjà été utilisée {{usedCount}} fois : le nombre maximal ne peut pas être inférieur.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
       "duplicate_period_not_found": "{{priceListName}} ne peut pas être dupliqué : il a des prix pour une période supprimée. Ouvrez-le, modifiez-le et enregistrez-le, puis réessayez.",
       "duplicate_area_not_found": "{{priceListName}} ne peut pas être dupliqué : il a une zone de la carte supprimée. Ouvrez-le, retirez-la des zones activées et enregistrez-le, puis réessayez.",
@@ -888,6 +891,7 @@
           "cancel": "Annuler",
           "save": "Enregistrer",
           "name": "Nom de la remise",
+          "code": "Code de la remise",
           "periods": {
             "title": "Périodes de validité",
             "add": "Ajouter une période",
@@ -913,6 +917,8 @@
           },
           "field_names": {
             "validity_period": "période de validité",
+            "discount_value": "de la remise",
+            "scope_choice": "catégorie ou secteur",
             "day_of_week": "jour"
           },
           "options": {
@@ -926,8 +932,13 @@
             "applies_to": "Appliquer la remise/le bon à",
             "scopes": {
               "all": "Tout",
-              "services": "Services"
+              "custom": "Certains choix seulement",
+              "without_custom": "Tout sauf certains choix"
             },
+            "categories": "Catégories",
+            "sectors": "Secteurs et rangées",
+            "choose": "Sélectionner",
+            "missing_sector": "Rangée/secteur plus disponible",
             "max_uses": "Nombre maximal d'utilisations",
             "enabled": "Activer la remise/le bon"
           }

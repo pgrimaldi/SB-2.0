@@ -1173,7 +1173,7 @@ posto di un'icona.
 
 ## 25. POST /api/catalog/sectors/sector-combobox
 
-Tutti i settori (le file) dello stabilimento, per le tendine. È **una sola API per tre pagine**:
+Tutti i settori (le file) dello stabilimento, per le tendine. È **una sola API per quattro pagine**:
 
 - **Servizi**: tendina a scelta multipla "Servizio acquistabile nelle seguenti file/settori" (sezione Limiti) della tab
   Prezzi dei pannelli di Servizi Bar, Servizi e Servizi Orari e della tab Prezzi e Validità di quelli dei Prezzi
@@ -1181,6 +1181,8 @@ Tutti i settori (le file) dello stabilimento, per le tendine. È **una sola API 
 - **Listino**: tendina "Settori e file" della tab Info Generali dei pannelli dei pacchetti, riletta ogni volta che la tab
   si apre, e righe dei prezzi per settore dei pannelli dei pacchetti e degli articoli aggiuntivi
   (`Listino - Frontend requests.md`);
+- **Sconti e voucher**: tendina a scelta multipla "Settori e file" dei popup, letta la prima volta che compare in ogni apertura
+  (`Sconti e voucher - Frontend requests.md`);
 - **Prenotazioni online**: tendina "Fila/settore" delle regole di "Configurazione limiti di booking", riletta a ogni
   apertura del pannello "Opzioni prenotazioni online".
 

@@ -15,10 +15,13 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FieldTree,
   FormField,
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
+  applyWhen,
   form,
   max,
+  metadata,
   min,
   required,
   submit,
@@ -32,12 +35,22 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { DiscountScope } from '../../../../../entities/enums/discount-scope';
 import { DiscountType } from '../../../../../entities/enums/discount-type';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
+import {
+  MAX_FIXED_DISCOUNT,
+  MAX_VOUCHER_CODE_LENGTH,
+  MAX_VOUCHER_NAME_LENGTH,
+  MAX_VOUCHER_PERIOD_QUANTITY,
+  MAX_VOUCHER_TIME_SLOT_QUANTITY,
+} from '../../../../../entities/settings/vouchers/voucher-add-item-request';
 import { VoucherSelectedItem } from '../../../../../entities/settings/vouchers/voucher-selected-item';
 import { VoucherTimeSlot } from '../../../../../entities/settings/vouchers/voucher-time-slot';
 import { VoucherUpdateItemRequest } from '../../../../../entities/settings/vouchers/voucher-update-item-request';
@@ -45,7 +58,12 @@ import { VoucherValidityPeriod } from '../../../../../entities/settings/vouchers
 import { DAYS_OF_WEEK } from '../../../../../entities/shared/days-of-week';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { VoucherService } from '../../../../../services/api/vouchers/voucher.service';
-import { minItems, requiredText, timeRange } from '../../../../shared/forms/validators';
+import {
+  greaterThan,
+  minItems,
+  requiredText,
+  timeRange,
+} from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
@@ -64,12 +82,13 @@ import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
+import { VoucherScope } from '../voucher-scope/voucher-scope';
+import { withScope } from '../voucher-scope/with-scope';
 
 type DayKey = (typeof DAYS_OF_WEEK)[number]['key'];
 
 interface OptionsTexts {
   types: Record<'percentage' | 'fixed', string>;
-  scopes: Record<'all' | 'services', string>;
 }
 
 @Component({
@@ -92,6 +111,7 @@ interface OptionsTexts {
     Toggle,
     TranslatePipe,
     VersionConflictPopup,
+    VoucherScope,
   ],
   templateUrl: './voucher-edit-item-panel.html',
   styleUrl: './voucher-edit-item-panel.scss',
@@ -119,7 +139,15 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   private version: string | null = null;
   protected readonly draftForm = form(this.draft, (path) => {
     requiredText(path.voucherName);
-    minItems(path.validityPeriods, 1);
+    metadata(path.voucherName, MAX_LENGTH, () => MAX_VOUCHER_NAME_LENGTH);
+    requiredText(path.voucherCode);
+    metadata(path.voucherCode, MAX_LENGTH, () => MAX_VOUCHER_CODE_LENGTH);
+    // An automatic discount, without a code to type, is valid only in its periods.
+    applyWhen(
+      path,
+      ({ value }) => !value().isCodeRequired,
+      (automatic) => minItems(automatic.validityPeriods, 1),
+    );
     applyEach(path.validityPeriods, (period) => {
       required(period.validFrom);
       required(period.validTo);
@@ -130,28 +158,40 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     });
     required(path.discountType);
     required(path.discountValue);
-    min(path.discountValue, 1);
+    greaterThan(path.discountValue, 0);
     max(path.discountValue, ({ valueOf }) =>
-      valueOf(path.discountType) === DiscountType.Percentage ? 100 : undefined,
+      valueOf(path.discountType) === DiscountType.Percentage ? 100 : MAX_FIXED_DISCOUNT,
     );
     required(path.discountScope);
+    applyWhen(
+      path,
+      ({ value }) => value().discountScope !== DiscountScope.All && !value().idSectors.length,
+      (limited) => minItems(limited.serviceCategories, 1),
+    );
     min(path.maxUseQuantity, 1);
   });
   protected readonly isPercentage = computed(
     () => this.draftForm.discountType().value() === DiscountType.Percentage,
   );
   protected readonly discountTypeError = this.validationText.message(this.draftForm.discountType);
-  protected readonly discountValueError = this.validationText.message(this.draftForm.discountValue);
-  protected readonly discountScopeError = this.validationText.message(this.draftForm.discountScope);
+  protected readonly discountValueError = this.validationText.message(
+    this.draftForm.discountValue,
+    'management.settings.vouchers.form.field_names.discount_value',
+  );
   protected readonly maxUseQuantityError = this.validationText.message(
     this.draftForm.maxUseQuantity,
   );
   protected readonly isEnabledError = this.validationText.message(this.draftForm.isEnabled);
   protected readonly voucherNameError = this.validationText.message(this.draftForm.voucherName);
+  protected readonly voucherCodeError = this.validationText.message(this.draftForm.voucherCode);
+  protected readonly canAddPeriod = computed(
+    () => this.draftForm.validityPeriods().value().length < MAX_VOUCHER_PERIOD_QUANTITY,
+  );
   protected readonly validityPeriodsError = this.validationText.message(
     this.draftForm.validityPeriods,
     'management.settings.vouchers.form.field_names.validity_period',
   );
+  protected readonly sectorsVersion = signal(0);
   protected readonly isLoading = signal(false);
   protected readonly isFetching = signal(false);
   protected readonly isLoaded = computed(() => this.loaded() !== null);
@@ -186,10 +226,6 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     { value: DiscountType.Percentage, label: this.optionsTexts()?.types.percentage ?? '' },
     { value: DiscountType.Fixed, label: this.optionsTexts()?.types.fixed ?? '' },
   ]);
-  protected readonly scopeOptions = computed<readonly SelectOption<DiscountScope>[]>(() => [
-    { value: DiscountScope.All, label: this.optionsTexts()?.scopes.all ?? '' },
-    { value: DiscountScope.Services, label: this.optionsTexts()?.scopes.services ?? '' },
-  ]);
   protected readonly dayOptions = computed<readonly SelectOption[]>(() =>
     DAYS_OF_WEEK.map(({ number, key }) => ({
       value: String(number),
@@ -216,7 +252,9 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
   hasUnsavedChanges(): boolean {
     const loaded = this.loaded();
     return (
-      this.open() && loaded !== null && comparableJson(this.draft()) !== comparableJson(loaded)
+      this.open() &&
+      loaded !== null &&
+      comparableJson(withScope(this.draft())) !== comparableJson(loaded)
     );
   }
 
@@ -248,6 +286,10 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     period.daysOfWeek().value.set(isAll ? DAYS_OF_WEEK.map(({ number }) => number) : []);
   }
 
+  protected canAddTimeSlot(period: FieldTree<VoucherValidityPeriod>): boolean {
+    return period.timeSlots().value().length < MAX_VOUCHER_TIME_SLOT_QUANTITY;
+  }
+
   protected addTimeSlot(period: FieldTree<VoucherValidityPeriod>): void {
     period.timeSlots().value.update((timeSlots) => [...timeSlots, new VoucherTimeSlot()]);
   }
@@ -267,7 +309,9 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
       this.isLoading.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.vouchers.updateVoucherItem(this.draft(), this.version));
+        await firstValueFrom(
+          this.vouchers.updateVoucherItem(withScope(this.draft()), this.version),
+        );
         this.isLoading.set(false);
         this.close();
         this.updated.emit();
@@ -279,6 +323,15 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
           this.isLoading.set(false);
           this.close();
           return undefined;
+        }
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingDiscountCodeTaken) {
+          return apiFieldError(this.draftForm.voucherCode, problem.code, problem.args);
+        }
+        if (problem.code === ApiErrorCode.PricingDiscountMaxUsesBelowUsed) {
+          return apiFieldError(this.draftForm.maxUseQuantity, problem.code, problem.args);
         }
         return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
           this.error.set(general),
@@ -353,6 +406,8 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
     return {
       idVoucher: item.idVoucher,
       voucherName: item.voucherName,
+      voucherCode: item.voucherCode,
+      isCodeRequired: item.isCodeRequired ?? start.isCodeRequired,
       validityPeriods: item.validityPeriods.map((period): VoucherValidityPeriod => ({
         validFrom: period.validFrom,
         validTo: period.validTo,
@@ -365,6 +420,8 @@ export class VoucherEditItemPanel extends BasePopup implements UnsavedChanges, O
       discountType: item.discountType ?? start.discountType,
       discountValue: item.discountValue,
       discountScope: item.discountScope ?? start.discountScope,
+      serviceCategories: [...item.serviceCategories],
+      idSectors: [...item.idSectors],
       maxUseQuantity: item.maxUseQuantity,
       isEnabled: item.isEnabled ?? start.isEnabled,
     };
