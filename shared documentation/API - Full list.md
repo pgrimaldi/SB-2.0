@@ -2652,7 +2652,7 @@ Nessun corpo (204).
 
 ## Listino
 
-### POST `/api/catalog/packages-list`
+### POST `/api/catalog/price-lists/packages-list`
 
 **Payload JSON**
 
@@ -2708,7 +2708,7 @@ Nessun corpo (204).
 | `rows[].idPackage` | string (UUID) |
 | `rows[].packageName` | string \| null |
 
-### POST `/api/catalog/delete-package-item`
+### POST `/api/catalog/price-lists/delete-package-item`
 
 **Payload JSON**
 
@@ -2732,7 +2732,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-package-item`
+### POST `/api/catalog/price-lists/duplicate-package-item`
 
 **Payload JSON**
 
@@ -3225,7 +3225,7 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### POST `/api/catalog/packages/create-package`
+### POST `/api/catalog/price-lists/create-package`
 
 **Payload JSON**
 
@@ -3239,12 +3239,12 @@ Nessun payload.
   ],
   "maxAdditionalItemQuantity": "number (intero) | null",
   "maxPeopleQuantity": "number (intero) | null",
-  "umbrellaQuantity": "number (intero) | null",
-  "sunbedQuantity": "number (intero) | null",
-  "deckchairQuantity": "number (intero) | null",
-  "directorChairQuantity": "number (intero) | null",
-  "cabinQuantity": "number (intero) | null",
-  "tentQuantity": "number (intero) | null",
+  "items": [
+    {
+      "idInventoryItem": "string (UUID)",
+      "quantity": "number (intero)"
+    }
+  ],
   "includedServices": "string | null",
   "idSectorAreas": "string[] (UUID)",
   "idSectors": "string[] (UUID)",
@@ -3289,6 +3289,7 @@ Nessun payload.
       "monthlyPrice": "number (decimale, €) | null"
     }
   ],
+  "vatRate": "number | null",
   "calculationMethod": "string (enum PriceCalculationMethod) | null",
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
@@ -3320,12 +3321,9 @@ Nessun corpo (204).
 | `translations[].packageName` | string \| null |
 | `maxAdditionalItemQuantity` | number (intero) \| null |
 | `maxPeopleQuantity` | number (intero) \| null |
-| `umbrellaQuantity` | number (intero) \| null |
-| `sunbedQuantity` | number (intero) \| null |
-| `deckchairQuantity` | number (intero) \| null |
-| `directorChairQuantity` | number (intero) \| null |
-| `cabinQuantity` | number (intero) \| null |
-| `tentQuantity` | number (intero) \| null |
+| `items[]` | PackageItemQuantity[] (array di oggetti) |
+| `items[].idInventoryItem` | string (UUID) |
+| `items[].quantity` | number (intero) |
 | `includedServices` | string \| null |
 | `idSectorAreas` | string[] (UUID) |
 | `idSectors` | string[] (UUID) |
@@ -3358,6 +3356,7 @@ Nessun corpo (204).
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null |
 | `isCumulative` | boolean |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
@@ -3375,11 +3374,52 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/packages/{idPackage}`
+### GET `/api/catalog/price-lists/get-package-articles`
 
 **Payload JSON**
 
 Nessun payload.
+
+**Response JSON**
+
+```json
+[
+  {
+    "article": "string (enum InventoryArticle)",
+    "items": [
+      {
+        "idInventoryItem": "string (UUID)",
+        "itemName": "string",
+        "totalQuantity": "number (intero)"
+      }
+    ]
+  }
+]
+```
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+| Campo | Tipo |
+|---|---|
+| `[].article` | string (enum InventoryArticle) |
+| `[].items[]` | PackageArticleItem[] (array di oggetti) |
+| `[].items[].idInventoryItem` | string (UUID) |
+| `[].items[].itemName` | string |
+| `[].items[].totalQuantity` | number (intero) |
+
+### GET `/api/catalog/price-lists/get-package?idPackage={idPackage}`
+
+**Payload JSON** (query string)
+
+```json
+{
+  "idPackage": "string (UUID)"
+}
+```
 
 **Response JSON**
 
@@ -3394,12 +3434,12 @@ Nessun payload.
   ],
   "maxAdditionalItemQuantity": "number (intero) | null",
   "maxPeopleQuantity": "number (intero) | null",
-  "umbrellaQuantity": "number (intero) | null",
-  "sunbedQuantity": "number (intero) | null",
-  "deckchairQuantity": "number (intero) | null",
-  "directorChairQuantity": "number (intero) | null",
-  "cabinQuantity": "number (intero) | null",
-  "tentQuantity": "number (intero) | null",
+  "items": [
+    {
+      "idInventoryItem": "string (UUID)",
+      "quantity": "number (intero)"
+    }
+  ],
   "includedServices": "string | null",
   "idSectorAreas": "string[] (UUID)",
   "idSectors": "string[] (UUID)",
@@ -3444,6 +3484,7 @@ Nessun payload.
       "monthlyPrice": "number (decimale, €) | null"
     }
   ],
+  "vatRate": "number | null",
   "calculationMethod": "string (enum PriceCalculationMethod) | null",
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
@@ -3463,9 +3504,11 @@ Nessun payload.
 }
 ```
 
-**Payload tabella**
+**Payload tabella** (query string)
 
-Nessun payload.
+| Campo | Tipo |
+|---|---|
+| `idPackage` | string (UUID) |
 
 **Response tabella**
 
@@ -3477,12 +3520,9 @@ Nessun payload.
 | `translations[].packageName` | string \| null |
 | `maxAdditionalItemQuantity` | number (intero) \| null |
 | `maxPeopleQuantity` | number (intero) \| null |
-| `umbrellaQuantity` | number (intero) \| null |
-| `sunbedQuantity` | number (intero) \| null |
-| `deckchairQuantity` | number (intero) \| null |
-| `directorChairQuantity` | number (intero) \| null |
-| `cabinQuantity` | number (intero) \| null |
-| `tentQuantity` | number (intero) \| null |
+| `items[]` | PackageItemQuantity[] (array di oggetti) |
+| `items[].idInventoryItem` | string (UUID) |
+| `items[].quantity` | number (intero) |
 | `includedServices` | string \| null |
 | `idSectorAreas` | string[] (UUID) |
 | `idSectors` | string[] (UUID) |
@@ -3515,6 +3555,7 @@ Nessun payload.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null |
 | `isCumulative` | boolean |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
@@ -3529,7 +3570,7 @@ Nessun payload.
 | `intermediatePrices[].price` | number |
 | `version` | string |
 
-### POST `/api/catalog/packages/update-package`
+### POST `/api/catalog/price-lists/update-package`
 
 **Payload JSON**
 
@@ -3544,12 +3585,12 @@ Nessun payload.
   ],
   "maxAdditionalItemQuantity": "number (intero) | null",
   "maxPeopleQuantity": "number (intero) | null",
-  "umbrellaQuantity": "number (intero) | null",
-  "sunbedQuantity": "number (intero) | null",
-  "deckchairQuantity": "number (intero) | null",
-  "directorChairQuantity": "number (intero) | null",
-  "cabinQuantity": "number (intero) | null",
-  "tentQuantity": "number (intero) | null",
+  "items": [
+    {
+      "idInventoryItem": "string (UUID)",
+      "quantity": "number (intero)"
+    }
+  ],
   "includedServices": "string | null",
   "idSectorAreas": "string[] (UUID)",
   "idSectors": "string[] (UUID)",
@@ -3594,6 +3635,7 @@ Nessun payload.
       "monthlyPrice": "number (decimale, €) | null"
     }
   ],
+  "vatRate": "number | null",
   "calculationMethod": "string (enum PriceCalculationMethod) | null",
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
@@ -3626,12 +3668,9 @@ Nessun corpo (204).
 | `translations[].packageName` | string \| null |
 | `maxAdditionalItemQuantity` | number (intero) \| null |
 | `maxPeopleQuantity` | number (intero) \| null |
-| `umbrellaQuantity` | number (intero) \| null |
-| `sunbedQuantity` | number (intero) \| null |
-| `deckchairQuantity` | number (intero) \| null |
-| `directorChairQuantity` | number (intero) \| null |
-| `cabinQuantity` | number (intero) \| null |
-| `tentQuantity` | number (intero) \| null |
+| `items[]` | PackageItemQuantity[] (array di oggetti) |
+| `items[].idInventoryItem` | string (UUID) |
+| `items[].quantity` | number (intero) |
 | `includedServices` | string \| null |
 | `idSectorAreas` | string[] (UUID) |
 | `idSectors` | string[] (UUID) |
@@ -3664,6 +3703,7 @@ Nessun corpo (204).
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null |
 | `isCumulative` | boolean |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
@@ -3709,7 +3749,7 @@ Nessun payload.
 | `[].id` | string (UUID) |
 | `[].value` | string |
 
-### POST `/api/catalog/map/sector-area-combobox`
+### POST `/api/catalog/sectors/sector-area-combobox`
 
 **Payload JSON**
 

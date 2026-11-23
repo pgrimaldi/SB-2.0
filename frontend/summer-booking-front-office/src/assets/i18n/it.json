@@ -121,6 +121,7 @@
       "export_too_large": "Le voci da esportare sono {total, number, integer}, ma se ne possono esportare al massimo {max, number, integer}: restringi il periodo o i filtri e riprova."
     },
     "map": {
+      "spot_not_found": "L'area della mappa non c'è più: forse è già stata eliminata.",
       "spots_outside_grid": "Ci sono postazioni fuori da queste misure: servono almeno {{rows}} file e {{columns}} articoli per fila.",
       "invalid_image": "L'immagine deve essere PNG, JPEG o WebP e non superare i 5 MB."
     },
@@ -147,7 +148,14 @@
       "period_ranges_required": "Un periodo deve avere almeno un intervallo. Per eliminarlo del tutto usa il cestino accanto al suo nome.",
       "period_in_use": "Il periodo ha dei prezzi nei listini {{priceLists}}: togli prima i suoi prezzi da questi listini, poi eliminalo.",
       "period_in_use_by_services": "Il periodo è usato dai servizi {{services}}: togli prima i suoi prezzi da questi servizi, poi eliminalo.",
-      "period_overlap": "Le date si sovrappongono al periodo {{periodName}}: scegli giorni che non sono già in un altro periodo."
+      "period_overlap": "Le date si sovrappongono al periodo {{periodName}}: scegli giorni che non sono già in un altro periodo.",
+      "calculation_method_not_found": "Questo calcolo del prezzo non è più disponibile: scegline un altro.",
+      "price_list_not_found": "La voce del listino non c'è più: forse è già stata eliminata.",
+      "price_list_in_use": "{{priceListName}} non si può eliminare: gli articoli/servizi aggiuntivi {{additionalItems}} resterebbero senza pacchetti e varrebbero per tutti. Collegali prima ad altri pacchetti, o eliminali.",
+      "duplicate_vat_rate_not_allowed": "{{priceListName}} non si può duplicare: la sua IVA non è tra le aliquote ammesse ({{rates}}). Modificala e riprova.",
+      "duplicate_period_not_found": "{{priceListName}} non si può duplicare: ha dei prezzi per un periodo eliminato. Aprilo, modificalo e salvalo, poi riprova.",
+      "duplicate_area_not_found": "{{priceListName}} non si può duplicare: ha un'area della mappa eliminata. Aprilo, toglila dalle aree abilitate e salvalo, poi riprova.",
+      "duplicate_sector_not_found": "{{priceListName}} non si può duplicare: ha dei dati di una fila o un settore eliminato. Aprilo, modificalo e salvalo, poi riprova."
     },
     "inventory": {
       "item_not_found": "L'articolo non c'è più: forse è già stato eliminato.",
@@ -160,8 +168,9 @@
       "table_service_not_found": "Il servizio tavoli non c'è più: forse è già stato eliminato.",
       "icon_not_found": "L'icona scelta non è più disponibile: scegline un'altra.",
       "duplicate_vat_rate_not_allowed": "{{serviceName}} non si può duplicare: la sua IVA non è tra le aliquote ammesse ({{rates}}). Modificala e riprova.",
-      "duplicate_period_not_found": "{{serviceName}} non si può duplicare: ha dei prezzi per un periodo che non è più nella stagione corrente.",
-      "duplicate_icon_not_found": "{{serviceName}} non si può duplicare: la sua icona non è più disponibile. Scegline un'altra e riprova."
+      "duplicate_period_not_found": "{{serviceName}} non si può duplicare: ha dei prezzi per un periodo eliminato. Modifica e salva la sua tab Prezzi, poi riprova.",
+      "duplicate_icon_not_found": "{{serviceName}} non si può duplicare: la sua icona non è più disponibile. Scegline un'altra e riprova.",
+      "duplicate_sector_not_found": "{{serviceName}} non si può duplicare: è limitato a una fila o un settore eliminato. Controlla le sue file e i suoi settori, salva e riprova."
     }
   },
   "alert": {
@@ -1786,17 +1795,35 @@
             "max_people": "Numero max di persone",
             "articles": {
               "title": "Articoli che compongono il pacchetto",
-              "umbrella": "Ombrellone",
-              "sunbed": "Lettino",
-              "deckchair": "Sdraio",
-              "director_chair": "Sedia regista",
-              "cabin": "Cabina",
-              "tent": "Tenda"
+              "none": "Nessuno",
+              "unavailable": "Non in magazzino",
+              "unavailable_note": "Gli articoli in grigio non hanno elementi in magazzino.",
+              "names": {
+                "umbrella": "Ombrellone",
+                "sunbed": "Lettino",
+                "sunbed_xl": "Lettino XL",
+                "sunbed_maxi": "Lettino maxi",
+                "deckchair": "Sdraio",
+                "directors_chair": "Sedia regista",
+                "tent": "Tenda",
+                "gazebo": "Gazebo",
+                "cabin": "Cabina",
+                "custom_cabin": "Cabina personalizzata",
+                "parking": "Parcheggio",
+                "ticket": "Biglietto",
+                "sunbed_area": "Area lettini",
+                "umbrella_area": "Area ombrelloni",
+                "parking_area": "Area parcheggio",
+                "cabin_area": "Area cabine",
+                "custom_article": "Articolo personalizzato {{number}}"
+              }
             },
             "included_services": "Servizi inclusi (opzionale)",
             "enabled_areas": "Aree abilitate",
             "sectors": "Settori e file",
             "all_sectors": "Tutti i settori e file",
+            "missing_sector": "Settore/fila non più disponibile",
+            "missing_area": "Area non più disponibile",
             "is_default": "Imposta come pacchetto di default",
             "is_default_online": "Imposta come pacchetto di default online",
             "online_enabled": "Abilita anche per prenotazioni online",
@@ -1884,6 +1911,7 @@
           "monthly": "Prezzo mensile",
           "no_sectors": "Non ci sono settori o file: aggiungili nella pagina Settori e file.",
           "no_periods": "Per i prezzi per periodo servono almeno un settore o una fila e un periodo della stagione in corso.",
+          "vat": "IVA (%)",
           "calculation_method": "Calcolo del prezzo",
           "calculation_methods": {
             "proportional": "Prezzo proporzionale",
@@ -1896,7 +1924,8 @@
           "cumulative_info": "Il Prezzo Cumulativo è una modalità di calcolo che permette di ottenere un prezzo finale più preciso quando una prenotazione copre più periodi.\n## Come funziona\nQuando attivato, il sistema calcola il totale usando una media ponderata dei prezzi delle diverse stagioni, basata sul numero di giorni che ricadono in ciascuna di esse.\n## Quando si applica\n- **Prenotazione in una sola stagione**: viene usato il prezzo della tabella della stagione corrispondente, senza calcoli aggiuntivi.\n- **Prenotazione su più stagioni**: il sistema combina i prezzi delle tabelle stagionali in proporzione ai giorni in bassa e alta stagione.\n- **Prenotazioni multiple**: invece di sommare i prezzi dei singoli periodi, il sistema ricalcola il totale usando il numero complessivo di giorni.",
           "monthly_setting": "Impostazione del mensile",
           "monthly_settings": {
-            "effective_month_duration": "Durata effettiva del mese",
+            "effective_month_duration": "Durata effettiva del mese (31 giorni)",
+            "actual_month_duration": "Giorni reali del mese",
             "thirty_days": "30 giorni"
           },
           "weekend_setting": "Impostazione del weekend",

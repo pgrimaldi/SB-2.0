@@ -250,7 +250,11 @@ function translatedNames<Row extends ServiceRow, Details extends TranslatedDetai
 }
 
 /** As `CopyNames.Next` of the backend: a copy of a copy starts again from the first name. */
-function copyName(name: string, language: Language, taken: readonly (string | null)[]): string {
+export function copyName(
+  name: string,
+  language: Language,
+  taken: readonly (string | null)[],
+): string {
   const suffix = COPY_SUFFIXES[language];
   const base = name.trim().replace(new RegExp(`${suffix}(?: \\d{1,9})?$`, 'i'), '');
   for (let number = 1; ; number++) {
@@ -289,7 +293,7 @@ export function naturalOrder(first: string | null, second: string | null): numbe
     .localeCompare((second ?? '').trim(), 'it', { sensitivity: 'base', numeric: true });
 }
 
-function tableRequestErrors(
+export function tableRequestErrors(
   body: Partial<PageRequest>,
   sortFields: readonly string[],
 ): MockFieldError[] {

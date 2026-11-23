@@ -35,7 +35,7 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages-list`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/price-lists/packages-list`,
     );
     expect(call.request.body).toEqual(request);
     call.flush(page);
@@ -54,7 +54,8 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/delete-package-item`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/price-lists/delete-package-item`,
     );
     expect(call.request.body).toEqual({ idPackages: ['k1', 'k2'] });
     controller.verify();
@@ -71,7 +72,8 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/price-lists/duplicate-package-item`,
     );
     expect(call.request.body).toEqual({ idPackages: ['k1', 'k2'] });
     controller.verify();
@@ -280,7 +282,8 @@ describe('PriceListService', () => {
     const request: PackageAddItemRequest = Object.assign(new PackageAddItemRequest(), {
       translations: [{ language: Language.It, packageName: 'Ombrellone e 2 lettini' }],
       maxPeopleQuantity: 4,
-      umbrellaQuantity: 1,
+      items: [{ idInventoryItem: 'i1', quantity: 1 }],
+      vatRate: 22,
       idSectors: ['s1'],
       sectorPrices: [{ idSector: 's1', seasonalHalfDayPrice: 500, seasonalPrice: 900 }],
       isPublicHolidaysIncluded: true,
@@ -300,7 +303,7 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages/create-package`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/price-lists/create-package`,
     );
     expect(call.request.body).toEqual({
       ...request,
@@ -323,10 +326,39 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'GET' && url === `${environment.apiBaseUrl}/catalog/packages/k1`,
+        method === 'GET' && url === `${environment.apiBaseUrl}/catalog/price-lists/get-package`,
     );
+    expect(call.request.params.get('idPackage')).toBe('k1');
     call.flush({ idPackage: 'k1', maxPeopleQuantity: 4 });
     expect(answer).toEqual({ idPackage: 'k1', maxPeopleQuantity: 4 });
+    controller.verify();
+  });
+
+  it('should ask the articles of the packages', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+    const articles = [
+      {
+        article: 'Umbrella',
+        items: [{ idInventoryItem: 'i1', itemName: 'Ombrellone', totalQuantity: 60 }],
+      },
+      { article: 'SunbedMaxi', items: [] },
+    ];
+    let answer: unknown;
+
+    priceLists.packageArticles().subscribe((read) => (answer = read));
+
+    controller
+      .expectOne(
+        ({ method, url }) =>
+          method === 'GET' &&
+          url === `${environment.apiBaseUrl}/catalog/price-lists/get-package-articles`,
+      )
+      .flush(articles);
+    expect(answer).toEqual(articles);
     controller.verify();
   });
 
@@ -344,7 +376,7 @@ describe('PriceListService', () => {
     };
     const request: PackageAddItemRequest = Object.assign(new PackageAddItemRequest(), {
       translations: [{ language: Language.It, packageName: 'Ombrellone e 3 lettini' }],
-      sunbedQuantity: 3,
+      items: [{ idInventoryItem: 'i2', quantity: 3 }],
       reducedSeasonalPrices: [reducedSeasonalPrice],
       publicHolidayDates: ['2026-08-15T00:00:00.000Z'],
     });
@@ -366,7 +398,7 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/packages/update-package`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/price-lists/update-package`,
     );
     expect(call.request.body).toEqual({ ...request, idPackage: 'k1' });
     expect(call.request.headers.get('If-Match')).toBe('"v1"');

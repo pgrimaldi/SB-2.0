@@ -121,6 +121,7 @@
       "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
     },
     "map": {
+      "spot_not_found": "La zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
       "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo."
     },
@@ -147,7 +148,14 @@
       "period_ranges_required": "Une période doit avoir au moins une plage de dates. Pour la supprimer entièrement, utilisez la corbeille à côté de son nom.",
       "period_in_use": "La période a des prix dans les tarifs {{priceLists}} : retirez d'abord ses prix de ces tarifs, puis supprimez-la.",
       "period_in_use_by_services": "La période est utilisée par les services {{services}} : retirez d'abord ses prix de ces services, puis supprimez-la.",
-      "period_overlap": "Les dates chevauchent la période {{periodName}} : choisissez des jours qui ne sont pas déjà dans une autre période."
+      "period_overlap": "Les dates chevauchent la période {{periodName}} : choisissez des jours qui ne sont pas déjà dans une autre période.",
+      "calculation_method_not_found": "Ce calcul du prix n'est plus disponible : choisissez-en un autre.",
+      "price_list_not_found": "L'élément du tarif n'existe plus : il a peut-être déjà été supprimé.",
+      "price_list_in_use": "{{priceListName}} ne peut pas être supprimé : les articles/services supplémentaires {{additionalItems}} resteraient sans forfait et vaudraient pour tous. Associez-les d'abord à d'autres forfaits, ou supprimez-les.",
+      "duplicate_vat_rate_not_allowed": "{{priceListName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
+      "duplicate_period_not_found": "{{priceListName}} ne peut pas être dupliqué : il a des prix pour une période supprimée. Ouvrez-le, modifiez-le et enregistrez-le, puis réessayez.",
+      "duplicate_area_not_found": "{{priceListName}} ne peut pas être dupliqué : il a une zone de la carte supprimée. Ouvrez-le, retirez-la des zones activées et enregistrez-le, puis réessayez.",
+      "duplicate_sector_not_found": "{{priceListName}} ne peut pas être dupliqué : il a des données d'une rangée ou d'un secteur supprimé. Ouvrez-le, modifiez-le et enregistrez-le, puis réessayez."
     },
     "inventory": {
       "item_not_found": "L'article n'existe plus : il a peut-être déjà été supprimé.",
@@ -160,8 +168,9 @@
       "table_service_not_found": "Le service à table n'existe plus : il a peut-être déjà été supprimé.",
       "icon_not_found": "L'icône choisie n'est plus disponible : choisissez-en une autre.",
       "duplicate_vat_rate_not_allowed": "{{serviceName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
-      "duplicate_period_not_found": "{{serviceName}} ne peut pas être dupliqué : il a des prix pour une période qui n'est plus dans la saison en cours.",
-      "duplicate_icon_not_found": "{{serviceName}} ne peut pas être dupliqué : son icône n'est plus disponible. Choisissez-en une autre et réessayez."
+      "duplicate_period_not_found": "{{serviceName}} ne peut pas être dupliqué : il a des prix pour une période supprimée. Modifiez et enregistrez son onglet Prix, puis réessayez.",
+      "duplicate_icon_not_found": "{{serviceName}} ne peut pas être dupliqué : son icône n'est plus disponible. Choisissez-en une autre et réessayez.",
+      "duplicate_sector_not_found": "{{serviceName}} ne peut pas être dupliqué : il est limité à une rangée ou un secteur supprimé. Vérifiez ses rangées et ses secteurs, enregistrez et réessayez."
     }
   },
   "alert": {
@@ -1786,17 +1795,35 @@
             "max_people": "Nombre max de personnes",
             "articles": {
               "title": "Articles du forfait",
-              "umbrella": "Parasol",
-              "sunbed": "Bain de soleil",
-              "deckchair": "Transat",
-              "director_chair": "Fauteuil réalisateur",
-              "cabin": "Cabine",
-              "tent": "Tente"
+              "none": "Aucun",
+              "unavailable": "Pas en stock",
+              "unavailable_note": "Les articles en gris n'ont aucun élément en stock.",
+              "names": {
+                "umbrella": "Parasol",
+                "sunbed": "Bain de soleil",
+                "sunbed_xl": "Bain de soleil XL",
+                "sunbed_maxi": "Bain de soleil maxi",
+                "deckchair": "Transat",
+                "directors_chair": "Fauteuil réalisateur",
+                "tent": "Tente",
+                "gazebo": "Gazebo",
+                "cabin": "Cabine",
+                "custom_cabin": "Cabine personnalisée",
+                "parking": "Parking",
+                "ticket": "Billet",
+                "sunbed_area": "Zone bains de soleil",
+                "umbrella_area": "Zone parasols",
+                "parking_area": "Zone parking",
+                "cabin_area": "Zone cabines",
+                "custom_article": "Article personnalisé {{number}}"
+              }
             },
             "included_services": "Services inclus (facultatif)",
             "enabled_areas": "Zones activées",
             "sectors": "Secteurs et rangées",
             "all_sectors": "Tous les secteurs et rangées",
+            "missing_sector": "Rangée/secteur plus disponible",
+            "missing_area": "Zone plus disponible",
             "is_default": "Définir comme forfait par défaut",
             "is_default_online": "Définir comme forfait par défaut en ligne",
             "online_enabled": "Activer aussi pour les réservations en ligne",
@@ -1884,6 +1911,7 @@
           "monthly": "Prix mensuel",
           "no_sectors": "Aucun secteur ni rangée : ajoutez-les dans la page Secteurs et rangées.",
           "no_periods": "Les prix par période demandent au moins un secteur ou une rangée et une période de la saison en cours.",
+          "vat": "TVA (%)",
           "calculation_method": "Calcul du prix",
           "calculation_methods": {
             "proportional": "Prix proportionnel",
@@ -1896,7 +1924,8 @@
           "cumulative_info": "Le Prix cumulé est un mode de calcul qui donne un prix final plus précis quand une réservation couvre plusieurs périodes.\n## Comment ça marche\nLorsqu'il est activé, le système calcule le total avec une moyenne pondérée des prix des différentes saisons, selon le nombre de jours qui tombent dans chacune d'elles.\n## Quand il s'applique\n- **Réservation sur une seule saison** : le prix du tableau de cette saison est utilisé, sans calcul supplémentaire.\n- **Réservation sur plusieurs saisons** : le système combine les prix des tableaux saisonniers en proportion des jours en basse et en haute saison.\n- **Réservations multiples** : au lieu d'additionner les prix des différentes périodes, le système recalcule le total avec le nombre total de jours.",
           "monthly_setting": "Réglage du mois",
           "monthly_settings": {
-            "effective_month_duration": "Durée réelle du mois",
+            "effective_month_duration": "Durée réelle du mois (31 jours)",
+            "actual_month_duration": "Jours réels du mois",
             "thirty_days": "30 jours"
           },
           "weekend_setting": "Réglage du week-end",

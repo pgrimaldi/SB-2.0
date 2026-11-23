@@ -18,7 +18,8 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 import { sectorLimits } from './catalog.mock';
-import { SECTORS, SectorRow, SectorUsage } from './sectors-data.mock';
+import { SECTOR_AREAS, SECTORS, SectorRow, SectorUsage } from './sectors-data.mock';
+import { naturalOrder } from './service-tables.mock';
 
 const SORT_FIELDS = ['sectorName'] as const;
 const SORT_DIRECTIONS: readonly SortDirection[] = ['Ascending', 'Descending'];
@@ -74,6 +75,24 @@ export const sectorComboboxMock = (
   const items: ComboboxItem[] = SECTORS.filter((row) => row.propertyId === property.id)
     .sort((first, second) => first.sortOrder - second.sortOrder)
     .map((row) => ({ id: row.idSector ?? '', value: row.sectorName ?? '' }));
+  return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
+};
+
+/**
+ * `POST /api/catalog/sectors/sector-area-combobox` without a body: every area of the property's map,
+ * in the natural order of its name, as `{ id, value }`. 401 without a valid access token.
+ */
+export const sectorAreaComboboxMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const items: ComboboxItem[] = SECTOR_AREAS.filter(
+    ({ propertyId }) => propertyId === DEMO_PROPERTY.id,
+  )
+    .map(({ id, value }) => ({ id, value }))
+    .sort((first, second) => naturalOrder(first.value, second.value));
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };
 

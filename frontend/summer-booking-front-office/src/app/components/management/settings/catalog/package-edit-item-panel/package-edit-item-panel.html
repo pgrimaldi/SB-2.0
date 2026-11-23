@@ -12,6 +12,8 @@
         [attr.inert]="isLoading() ? '' : null"
         [form]="draftForm"
         [mainLanguage]="mainLanguage()"
+        [sectorsVersion]="sectorsVersion()"
+        [articles]="articles()"
       />
     } @else if (selectedTab() === PanelTab.PriceList) {
       <app-price-list-tab

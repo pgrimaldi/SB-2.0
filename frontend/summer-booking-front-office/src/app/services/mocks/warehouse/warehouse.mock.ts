@@ -559,6 +559,25 @@ export function activeArticleName(propertyId: number, idArticle: unknown): strin
   return articleOf(propertyId, idArticle)?.name ?? null;
 }
 
+/** The active articles of the property with this code of the fixed list, by name. */
+export function activeArticlesOfCode(
+  propertyId: number,
+  articleCode: string,
+): { idInventoryItem: string; itemName: string; totalQuantity: number }[] {
+  return INVENTORY_ITEMS.filter(
+    (row) =>
+      row.propertyId === propertyId && row.deletedAt === null && row.articleCode === articleCode,
+  )
+    .map(({ publicId, name, totalQuantity }) => ({
+      idInventoryItem: publicId,
+      itemName: name,
+      totalQuantity,
+    }))
+    .sort((first, second) =>
+      first.itemName.localeCompare(second.itemName, 'it', { sensitivity: 'base', numeric: true }),
+    );
+}
+
 function articleOf(propertyId: number, idArticle: unknown): InventoryRow | undefined {
   return INVENTORY_ITEMS.find(
     (row) => row.publicId === idArticle && row.propertyId === propertyId && row.deletedAt === null,

@@ -32,7 +32,7 @@
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.max_additional_items' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
-  [options]="additionalItemOptions"
+  [options]="additionalItemOptions()"
   [value]="optionOf(form().maxAdditionalItemQuantity().value())"
   [readonly]="form().maxAdditionalItemQuantity().readonly()"
   [error]="validationText.text(form().maxAdditionalItemQuantity)"
@@ -41,7 +41,7 @@
 <app-filled-select
   [label]="'management.settings.catalog.packages.form.max_people' | translate"
   [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
-  [options]="peopleOptions"
+  [options]="peopleOptions()"
   [value]="optionOf(form().maxPeopleQuantity().value())"
   [readonly]="form().maxPeopleQuantity().readonly()"
   [error]="validationText.text(form().maxPeopleQuantity)"
@@ -51,19 +51,37 @@
 <app-section-title
   [text]="'management.settings.catalog.packages.form.articles.title' | translate"
 />
+@if (hasUnavailableArticles()) {
+  <p class="package__general__info__tab__note">
+    {{ 'management.settings.catalog.packages.form.articles.unavailable_note' | translate }}
+  </p>
+}
 <div class="package__general__info__tab__articles">
-  @for (article of articles; track article.field) {
+  @for (row of articleRows(); track $index) {
     <app-filled-select
-      [label]="article.label | translate"
-      [placeholder]="'management.settings.catalog.packages.form.choose' | translate"
-      [options]="articleOptions"
-      [value]="optionOf(form()[article.field]().value())"
-      [readonly]="form()[article.field]().readonly()"
-      [error]="validationText.text(form()[article.field])"
-      (valueChange)="setQuantity(form()[article.field], $event)"
+      [label]="articleLabel(row, row.labelKey | translate: row.labelParams)"
+      [placeholder]="
+        (row.isAvailable
+          ? 'management.settings.catalog.packages.form.choose'
+          : 'management.settings.catalog.packages.form.articles.unavailable'
+        ) | translate
+      "
+      [options]="articleOptions(row)"
+      [value]="optionOf(articleQuantity(row))"
+      [disabled]="!row.isAvailable && articleQuantity(row) === null"
+      [readonly]="form().items().readonly()"
+      [error]="
+        !row.isAvailable && articleQuantity(row) !== null
+          ? ('management.settings.catalog.packages.form.articles.unavailable' | translate)
+          : null
+      "
+      (valueChange)="setArticleQuantity(row, $event)"
     />
   }
 </div>
+@if (validationText.text(form().items); as error) {
+  <p class="package__general__info__tab__error">{{ error }}</p>
+}
 
 <app-filled-text-field
   [label]="'management.settings.catalog.packages.form.included_services' | translate"

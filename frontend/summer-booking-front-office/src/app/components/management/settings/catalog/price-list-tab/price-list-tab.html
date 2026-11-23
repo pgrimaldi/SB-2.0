@@ -91,6 +91,14 @@
   <p class="price__list__tab__error">{{ error }}</p>
 }
 
+@if (form().vatRate; as vatRate) {
+  <app-filled-number-field
+    [label]="'management.settings.catalog.price_list.vat' | translate"
+    [isDecimal]="true"
+    [formField]="vatRate"
+    [error]="validationText.text(vatRate)"
+  />
+}
 <div class="price__list__tab__field">
   <div class="price__list__tab__heading">
     <span class="price__list__tab__label">

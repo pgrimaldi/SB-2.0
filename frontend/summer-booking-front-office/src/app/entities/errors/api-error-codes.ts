@@ -39,6 +39,7 @@ export enum ApiErrorCode {
   AuditPropertyRequired = 'audit.property_required',
   AuditExportTooLarge = 'audit.export_too_large',
   MapSpotsOutsideGrid = 'map.spots_outside_grid',
+  MapSpotNotFound = 'map.spot_not_found',
   MapInvalidImage = 'map.invalid_image',
   CatalogSectorInUse = 'catalog.sector_in_use',
   CatalogSectorNameTaken = 'catalog.sector_name_taken',
@@ -61,6 +62,13 @@ export enum ApiErrorCode {
   PricingPeriodInUse = 'pricing.period_in_use',
   PricingPeriodInUseByServices = 'pricing.period_in_use_by_services',
   PricingPeriodOverlap = 'pricing.period_overlap',
+  PricingCalculationMethodNotFound = 'pricing.calculation_method_not_found',
+  PricingPriceListNotFound = 'pricing.price_list_not_found',
+  PricingPriceListInUse = 'pricing.price_list_in_use',
+  PricingDuplicateVatRateNotAllowed = 'pricing.duplicate_vat_rate_not_allowed',
+  PricingDuplicatePeriodNotFound = 'pricing.duplicate_period_not_found',
+  PricingDuplicateAreaNotFound = 'pricing.duplicate_area_not_found',
+  PricingDuplicateSectorNotFound = 'pricing.duplicate_sector_not_found',
   InventoryItemNotFound = 'inventory.item_not_found',
   InventoryNameTaken = 'inventory.name_taken',
   InventoryItemInUse = 'inventory.item_in_use',
@@ -71,6 +79,7 @@ export enum ApiErrorCode {
   ServiceDuplicateVatRateNotAllowed = 'service.duplicate_vat_rate_not_allowed',
   ServiceDuplicatePeriodNotFound = 'service.duplicate_period_not_found',
   ServiceDuplicateIconNotFound = 'service.duplicate_icon_not_found',
+  ServiceDuplicateSectorNotFound = 'service.duplicate_sector_not_found',
 }
 
 export const API_ERROR_CODES: readonly ApiErrorCode[] = Object.values(ApiErrorCode);

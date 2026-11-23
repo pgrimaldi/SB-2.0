@@ -235,7 +235,7 @@ Il corpo è la richiesta standard delle tabelle del frontend, uguale per tutte l
 `serviceName` è il nome nella lingua dell'header `Accept-Language`, che il frontend manda sempre con la lingua
 dell'utente (`it`, `en`, `fr`, `es`, `de`, `zh`, `ar`): per `it` la colonna `name`, per le altre lingue il `name` della
 riga di traduzione in quella lingua; se la traduzione non c'è, la colonna `name`. La ricerca e l'ordinamento per
-`serviceName` lavorano su questo nome, come `packageName` di `POST /api/catalog/packages-list`
+`serviceName` lavorano su questo nome, come `packageName` di `POST /api/catalog/price-lists/packages-list`
 (`Listino - Frontend requests.md`, sezione 1). Esempio: servizio "Caffè" con la traduzione inglese "Coffee" → con
 `Accept-Language: en` la riga ha "Coffee" e la ricerca "coff" la trova; con `Accept-Language: fr`, senza traduzione
 francese, ha "Caffè".
@@ -462,9 +462,8 @@ Elimina **uno o più elementi in una sola chiamata, tutto o niente**, come `POST
   deve essere dello stabilimento, si elimina con il soft delete di sempre e nel registro va una voce per elemento. Per
   i servizi bar, i servizi e i servizi orari vale anche quello che `RemoveAsync` fa già: il servizio esce dai prezzi
   automatici che lo comprendono (`ServiceItemsService.cs:199-204`).
-- **Elementi in uso**: oggi nessuna `DELETE` controlla se l'elemento è usato (per esempio da prenotazioni o ordini).
-  L'agente chiede allo sviluppatore se servono controlli; se ne nasce un errore nuovo (per esempio un 409 come
-  `inventory.item_in_use` del magazzino), va scritto qui con status, `code` e `args`, perché il frontend lo mostri.
+- **Nessun altro controllo**, come le `DELETE` di oggi: un elemento usato da prenotazioni o ordini si può eliminare, con il
+  soft delete.
 - **Come farlo lo sceglie lo sviluppatore del backend** (metodi nuovi nei servizi, controlli su più elementi insieme,
   transazione...), purché il risultato sia questo.
 - **Permesso**: `CatalogSettings`, come le `DELETE` e i `bulk-delete` di oggi (`ServiceEndpoints.cs:17`).
@@ -628,8 +627,8 @@ in una sola chiamata, tutto o niente**, come `POST /api/catalog/duplicate-wareho
     automatico si applica agli stessi servizi del prezzo di partenza; come oggi;
   - nel registro una voce per ogni copia.
 - **Nomi in contemporanea**: i nomi non hanno un indice unico, quindi due duplicazioni dello stesso elemento nello
-  stesso momento possono dare due copie con lo stesso nome (non un 500, come succedeva nel magazzino). L'agente chiede
-  allo sviluppatore se va evitato.
+  stesso momento possono dare due copie con lo stesso nome (non un 500, come succedeva nel magazzino). Va bene così:
+  l'utente può rinominarle.
 - Se lo stesso id compare più volte, si fa una copia sola.
 - **Come farlo lo sceglie lo sviluppatore del backend** (metodi nuovi nei servizi, transazione...), purché il
   risultato sia questo.
@@ -656,14 +655,21 @@ in una sola chiamata, tutto o niente**, come `POST /api/catalog/duplicate-wareho
   | Status | `code` | Quando | `args` |
   |---|---|---|---|
   | 422 | `service.duplicate_vat_rate_not_allowed` | L'IVA dell'elemento, o di una disponibilità di un servizio orario, non è più tra le aliquote ammesse (`VatPolicy.ResolveAsync`). | `serviceName`, `rates` |
-  | 422 | `service.duplicate_period_not_found` | Un servizio ha prezzi o disponibilità per un periodo che non è più nella stagione corrente. | `serviceName` |
+  | 422 | `service.duplicate_period_not_found` | Un servizio ha prezzi o disponibilità per un periodo eliminato. | `serviceName` |
   | 422 | `service.duplicate_icon_not_found` | L'icona dell'elemento non è più nel catalogo. | `serviceName` |
+  | 422 | `service.duplicate_sector_not_found` | L'elemento è limitato anche a un settore eliminato. | `serviceName` |
 
-  `serviceName` è il nome nella lingua di `Accept-Language`, come nelle tabelle. I settori non fanno fallire la copia: quelli
-  eliminati non ci sono già oggi (`ToDtoAsync`). I servizi tavoli (sezione 16) non hanno controlli da rifare.
-- **Da chiedere allo sviluppatore prima di scrivere codice**: i prezzi di un periodo che non è più nella stagione non si
-  vedono nel pannello, quindi l'utente non può toglierli e quel servizio non si potrebbe più duplicare. La copia può
-  tenerli come sono, o farne a meno, invece di rispondere `service.duplicate_period_not_found`?
+  `serviceName` è il nome nella lingua di `Accept-Language`, come nelle tabelle. I servizi tavoli (sezione 16) non hanno
+  controlli da rifare.
+- **Un settore eliminato fa sempre fallire la copia**, anche se ce ne sono altri validi. Oggi invece si perde in silenzio
+  (`ToDtoAsync` di `ServiceItemsService` e di `AutomaticPricesService` lo esclude) e la copia è diversa dall'originale.
+  L'utente risolve togliendo quel settore nel pannello, che lo mostra come "Settore/fila non più disponibile" ("Settori
+  eliminati" nelle regole comuni dei pannelli di Servizi Bar).
+- **Un periodo eliminato fa fallire la copia**, come un settore: eliminato = tutte le sue righe di
+  `catalog.pricing_tariff_periods` sono eliminate. I prezzi e le disponibilità di un periodo di un'altra stagione, non
+  eliminato, invece **si copiano come sono**, come li tiene il salvataggio: oggi `ApplyAsync` li rifiuta con 422
+  `pricing.period_not_found`. L'utente risolve salvando la tab Prezzi: le letture non danno i prezzi dei periodi eliminati
+  (sezioni 19, 28 e 35), quindi il salvataggio li toglie.
 - Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con il 404 della
   sezione toglie gli id dalla selezione e ricarica la tabella.
 
@@ -759,6 +765,12 @@ salvataggio.
 - **Quello che il form non mostra torna com'era**: le letture danno anche i dati che il pannello non fa vedere (i giorni
   `weekdays`, il massimo per fascia `maxPerSlot`, un intervallo diverso da quelli della tendina, un'icona fuori dalle 22
   del frontend) e il pannello li rimanda uguali, finché l'utente non sceglie un altro valore. Un Salva non li toglie mai.
+- **Settori eliminati**: `idSectors` dà tutti i settori a cui l'elemento è limitato, **anche quelli eliminati** (oggi `ToDtoAsync`
+  li esclude): il pannello li mostra come "Settore/fila non più disponibile" e li rimanda finché l'utente non li toglie. Un
+  salvataggio che ne contiene uno risponde 404 `catalog.sector_not_found`. Così un limite non diventa mai "tutti i settori"
+  (`[]`) senza che l'utente lo scelga, nemmeno se i suoi settori sono tutti eliminati. Riguarda i dati di prima: da ora
+  l'eliminazione di un settore usato è bloccata (`Settori e file - Frontend requests.md`, sezione 2). Vale per le letture
+  delle sezioni 19, 28, 35 e 43 e i loro salvataggi.
 - **Solo servizi bar**: le letture e i salvataggi accettano solo servizi con `kind` `bar` dello stabilimento; ogni altro
   id risponde 404 `service.not_found`.
 - **Permesso**: `CatalogRead` per le letture, `CatalogSettings` per creazione e salvataggi, come oggi
@@ -788,12 +800,9 @@ salvataggio.
   frontend non la manda.
 - Nome al massimo 255 caratteri (`ServiceSaleItem.NameMaxLength`), descrizione al massimo 10.000.
 
-### Da chiedere allo sviluppatore prima di scrivere codice
+### Valori che il modello di oggi non può salvare
 
-Il corpo può contenere valori che il modello di oggi non può salvare. Il frontend li manda e si aspetta di rileggerli
-uguali: come salvarli lo decide lo sviluppatore. Se per uno di questi la risposta è che il dato è obbligatorio, l'API
-risponde 400 `validation.failed` con `validation.required` su quel campo e la scelta si scrive qui, perché il frontend
-si adegui.
+Il frontend li manda e si aspetta di rileggerli uguali: il risultato è questo, come salvarli lo decide lo sviluppatore.
 
 1. **Italiano non scritto**: il nome italiano **non è obbligatorio**, come per i pacchetti (`Listino - Frontend
    requests.md`, sezione 5). Un utente inglese che scrive solo "Coffee" salva: la colonna `name` contiene "Coffee", ma
@@ -805,10 +814,6 @@ si adegui.
    sviluppatore", in fondo). Per un servizio con un'icona fuori da questi 22 la lettura dà un nome che identifica quella
    riga (per esempio il suo `name`), diverso dai 22, e `update-bar-service-general` lo riceve uguale e lascia l'icona
    com'è.
-3. **Servizi e prezzi automatici già limitati solo a settori eliminati** (`is_sector_restricted` vero): la lettura darebbe
-   `idSectors` `[]`, che vuol dire "tutti i settori", e il primo Salva toglierebbe il limite. Da ora l'eliminazione di un
-   settore usato è bloccata (`Settori e file - Frontend requests.md`, sezione 2); come sistemare i dati di prima lo decide
-   lo sviluppatore. Vale per le sezioni 19, 28, 35 e 43.
 
 ### Errori
 
@@ -1004,8 +1009,8 @@ Risposta 200:
 ```
 
 I campi sono quelli della sezione 17, più `version`. `periodPrices` ha solo i periodi con un prezzo, **anche quelli che
-non sono più nella stagione corrente**: il frontend non li mostra ma li rimanda con il salvataggio, per non perderli.
-`idSectors` è `[]` quando `is_sector_restricted` è falso. Errori: 404 `service.not_found` e gli altri comuni.
+non sono più nella stagione corrente** (non quelli eliminati): il frontend non li mostra ma li rimanda con il salvataggio,
+per non perderli. `idSectors` è `[]` quando `is_sector_restricted` è falso. Errori: 404 `service.not_found` e gli altri comuni.
 
 ## 20. GET /api/catalog/services/get-bar-service-booking-options
 
@@ -1340,7 +1345,7 @@ Risposta 200:
 ```
 
 Come la sezione 19, senza `variants`: `periodPrices` ha solo i periodi con un prezzo, anche quelli che non sono più nella
-stagione corrente; `idSectors` è `[]` quando `is_sector_restricted` è falso. Errori: 404 `service.not_found` e gli altri
+stagione corrente (non quelli eliminati); `idSectors` è `[]` quando `is_sector_restricted` è falso. Errori: 404 `service.not_found` e gli altri
 comuni.
 
 ## 29. GET /api/catalog/services/get-standard-service-booking-options
@@ -1531,11 +1536,12 @@ solo `dateFrom`, `dateTo` e `availabilityOption`: gli altri campi li rimanda com
 `null` (`weekdays` `[]`). `availabilityOption` è `null` per un'opzione che non l'ha, in lettura e nel salvataggio: il
 pannello ne mostra una vuota e la manda solo se l'utente ci scrive qualcosa.
 
-### Da chiedere allo sviluppatore prima di scrivere codice
+### Le fasce che restano tengono il loro id
 
-1. **Fasce ricreate**: oggi ogni salvataggio ricrea le fasce (`ServiceSaleItem.ReplaceHourly`), quindi cambia il loro id, che
-   preventivi e prenotazioni usano come `timeSlotId` (`QuoteServiceRequest`, `BookingServiceTimeSlot`,
-   `ResourceConsumption`). Le fasce già prenotate devono tenere il loro id?
+Oggi ogni salvataggio ricrea le fasce (`ServiceSaleItem.ReplaceHourly`), quindi cambia il loro id, che preventivi e prenotazioni
+usano come `timeSlotId` (`QuoteServiceRequest`, `BookingServiceTimeSlot`, `ResourceConsumption`). Con queste API una fascia già
+salvata che resta (stessa disponibilità, stessa durata) **tiene il suo id**, anche se cambiano il prezzo o gli orari: un
+salvataggio non deve toccare le fasce già prenotate. Come farlo lo sceglie lo sviluppatore.
 
 ### Errori
 
@@ -1652,7 +1658,7 @@ Tab Prezzi, letta la prima volta che si apre, con `idHourlyService` nella query 
 ```
 
 `periodAvailabilities` ha solo i periodi con almeno una disponibilità, **anche quelli che non sono più nella stagione
-corrente**: il frontend non li mostra ma li rimanda con il salvataggio. Errori: 404 `service.not_found` e gli altri comuni.
+corrente** (non quelli eliminati): il frontend non li mostra ma li rimanda con il salvataggio. Errori: 404 `service.not_found` e gli altri comuni.
 
 ## 36. GET /api/catalog/services/get-hourly-service-booking-options
 
@@ -1979,9 +1985,8 @@ La durata facoltativa riguarda tutto il modello, non solo le API nuove: `TableSe
 senza durata, e la duplicazione (sezione 16), che passa da quei due DTO (`TableServicesService.ToRequest`), ne fa una copia
 senza durata. Il vincolo `ck_catalog_table_services_meal` (`average_meal_minutes > 0`) può restare: con `NULL` non blocca.
 
-### Da chiedere allo sviluppatore prima di scrivere codice
-
-1. **Senza durata media**: cosa vale per liberare il tavolo alla fascia successiva, quando `averageMealMinutes` è `null`?
+Oggi nessun calcolo del backend usa la durata (solo `TableService`, i suoi DTO e il validatore la leggono): un servizio senza
+durata si salva e si legge, e non cambia altro.
 
 ### Errori
 
@@ -2196,8 +2201,11 @@ prezzo e un'immagine caricata:
     `catalog.table_service_duplicated`).
 32. Un servizio con un'IVA che non è più tra le aliquote ammesse, da solo o insieme a uno valido: 422
     `service.duplicate_vat_rate_not_allowed` con `serviceName` e `rates`, e nessuna copia. Lo stesso con un prezzo automatico,
-    con una disponibilità di un servizio orario, e con un'icona tolta dal catalogo (`service.duplicate_icon_not_found`). Un
-    servizio con il nome in tutte e 7 le lingue: la copia ha in ogni lingua il suffisso della sua lingua (" copia",
+    con una disponibilità di un servizio orario, con un'icona tolta dal catalogo (`service.duplicate_icon_not_found`) e con un
+    settore eliminato fra quelli a cui l'elemento è limitato (`service.duplicate_sector_not_found`; salvati i suoi settori
+    senza quello, la duplicazione riesce). Con prezzi per un periodo eliminato `service.duplicate_period_not_found`; salvata
+    la tab Prezzi la duplicazione riesce. Con prezzi per un periodo di un'altra stagione, non eliminato: 204, e la copia li
+    ha. Un servizio con il nome in tutte e 7 le lingue: la copia ha in ogni lingua il suffisso della sua lingua (" copia",
     " copy", " copie", " copia", " Kopie", " 副本", " نسخة") e le stesse descrizioni. Se in inglese "Coffee copy" esiste
     già ma in italiano "Caffè copia" no, la copia è "Caffè copia" e "Coffee copy 2".
 
@@ -2218,7 +2226,9 @@ API 17-24, con un token con `CatalogRead` e `CatalogSettings`:
 36. `vatRate` `null`: 204 e la lettura restituisce `null`. `vatRate` 7 in Italia: 422 `catalog.vat_rate_not_allowed` con
     le aliquote ammesse in `args.rates`; `vatRate` 0 o 100: 400 con `validation.invalid` su `vatRate`. Niente cambia.
 37. `idSectors` `[]`: il servizio non è limitato e la lettura restituisce `[]`; con un id sconosciuto 404
-    `catalog.sector_not_found` e niente cambia.
+    `catalog.sector_not_found` e niente cambia. Un servizio limitato solo a un settore poi eliminato (dati di prima): la
+    lettura lo restituisce ancora in `idSectors`; rimandarlo risponde 404 `catalog.sector_not_found`, mandare `[]` o un altro
+    settore 204.
 38. Più di 500 id in `idSectors`: 400 con `validation.invalid` su `idSectors`. Un `idPeriod` che non esiste: 422
     `pricing.period_not_found`. Un `idPeriod` già salvato sul servizio ma non più nella
     stagione corrente, rimandato da `update-bar-service-prices`: 204 e resta salvato.

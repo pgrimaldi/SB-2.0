@@ -15,14 +15,24 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - Titolo "Pacchetti" (`app-page-title` senza icona) e `app-table` come Settori e file: ricerca, selezione,
   bottone "Aggiungi pacchetto", una colonna Nome (`packageName`), azioni di riga cancella, duplica e modifica.
-- Righe da `POST /api/catalog/packages-list` (`PriceListService.packageList`).
-- Cestino di riga ed "elimina selezionati": `app-delete-items-popup`, poi `POST /api/catalog/delete-package-item`
+- Righe da `POST /api/catalog/price-lists/packages-list` (`PriceListService.packageList`): il nome è nella lingua
+  dell'utente, e ricerca e ordine (naturale, per nome anche senza un ordinamento scelto) lavorano su quello.
+- Cestino di riga ed "elimina selezionati": `app-delete-items-popup`, poi
+  `POST /api/catalog/price-lists/delete-package-item`
   (`{ idPackages }`, tutto o niente, 204).
 - Duplica di riga e "duplica selezionati": `app-duplicate-items-popup`, poi
-  `POST /api/catalog/duplicate-package-item` (stesso corpo, tutto o niente, 204; i nomi delle copie li sceglie
-  il backend).
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
-  (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
+  `POST /api/catalog/price-lists/duplicate-package-item` (stesso corpo, tutto o niente, 204; i nomi delle copie li sceglie
+  il backend: "Ombrellone copia", poi "Ombrellone copia 2", in ogni lingua con il suo suffisso).
+- Un pacchetto che è l'ultimo di un articolo aggiuntivo (senza, varrebbe per tutti i pacchetti) non si elimina: 409
+  `pricing.price_list_in_use`, con il nome del pacchetto (`priceListName`) e gli articoli aggiuntivi (`additionalItems`) nel
+  messaggio del popup. Nei mock: "Ombrellone famiglia e 4 lettini" (con "Sedia regista").
+- Un pacchetto che non si può duplicare (IVA non più ammessa, prezzi per un periodo eliminato, dati di una fila o un settore
+  eliminato, un'area eliminata): 422 `pricing.duplicate_vat_rate_not_allowed`, `pricing.duplicate_period_not_found`,
+  `pricing.duplicate_area_not_found` o `pricing.duplicate_sector_not_found`, con il nome del pacchetto (`priceListName`) nel messaggio del popup. Nei mock: "Tenda e 2
+  sdraio" (IVA 20%), "Gazebo e 4 lettini" (area), "Prima fila e 2 lettini" (periodo; salvandolo quel prezzo si toglie e si può duplicare) e "Lettino singolo" (settore; si salva e
+  si duplica dopo averlo tolto da "Settori e file").
+- Con 404 `pricing.price_list_not_found` (pacchetto già eliminato da un altro utente), su Elimina, su Duplica e su
+  Modifica (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
   `failed` dei popup e del pannello di modifica).
 - "Aggiungi pacchetto" apre `app-package-add-item-panel`, la matita `app-package-edit-item-panel`.
 
@@ -37,14 +47,14 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - Parte vuoto. "Crea pacchetto" è spento finché manca il nome nella lingua dell'utente o è aperto il riquadro del
   prezzo stagionale ridotto (i valori del riquadro entrano nel pacchetto solo con Aggiungi o Salva del riquadro).
-- Manda tutto il modulo a `POST /api/catalog/packages/create-package` (`PriceListService.createPackage`, 204).
+- Manda tutto il modulo a `POST /api/catalog/price-lists/create-package` (`PriceListService.createPackage`, 204).
 
 ### Modifica
 
 - Si apre in sola lettura, come i pannelli dei Servizi, con il pacchetto letto da
-  `GET /api/catalog/packages/{idPackage}` (`PriceListService.selectedPackage`, `PackageSelectedItem` = `idPackage`
-  e i campi del modulo), insieme a `POST /api/catalog/sectors/sector-combobox` e `GET /api/catalog/tariff-periods` (i periodi
-  della stagione corrente; il loro `key` numerico è l'`idPeriod` delle righe dei prezzi).
+  `GET /api/catalog/price-lists/get-package` (`PriceListService.selectedPackage`, `PackageSelectedItem` = `idPackage`
+  e i campi del modulo), insieme a `POST /api/catalog/sectors/sector-combobox`, `GET /api/catalog/price-lists/get-package-articles` (gli articoli, vedi
+  Info Generali) e `GET /api/catalog/tariff-periods` (i periodi della stagione corrente; il loro `key` numerico è l'`idPeriod` delle righe dei prezzi).
 - Le lingue senza nome restano vuote; le righe dei prezzi sono una per settore e una per settore e periodo, con i
   prezzi salvati o vuote.
 - I prezzi salvati di settori o periodi che il pannello non mostra (es. di un'altra stagione) restano da parte e
@@ -54,7 +64,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - "Modifica" sblocca tutte e due le tab (un solo salvataggio); "Annulla" riporta i valori letti, chiedendo prima se
   ci sono modifiche.
 - "Salva" (spento, come "Crea pacchetto", finché manca il nome o è aperto il riquadro di un prezzo stagionale
-  ridotto) manda tutto il modulo e `idPackage` a `POST /api/catalog/packages/update-package`
+  ridotto) manda tutto il modulo e `idPackage` a `POST /api/catalog/price-lists/update-package`
   (`PriceListService.updatePackage`, 204).
 - Controllo di versione: la lettura porta `version` (in `PackageSelectedItem`), che il pannello tiene da parte e
   "Salva" rimanda nell'header `If-Match` (`updatePackage(idPackage, request, version)`; la risposta ha la nuova
@@ -73,6 +83,10 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Se fallisce, il pannello resta aperto con i dati scritti. Ogni campo del modulo ha il suo `[error]`: un errore
   del backend su un campo va sotto quel campo (`translations` sotto il nome, `reducedSeasonalPrices` sotto i
   prezzi ridotti, `sectorPrices` e `periodPrices` sotto la loro sezione).
+- `pricing.calculation_method_not_found` (sotto "Calcolo del prezzo") e `catalog.vat_rate_not_allowed` (sotto IVA, con le
+  aliquote ammesse), senza `errors[]`, aprono la tab Listino.
+- `inventory.item_not_found`: gli articoli si rileggono e quelli che non ci sono più escono dal pacchetto
+  (`withExistingItems` di `package-items.ts`).
 - Errori dentro una lista o un oggetto (es. `translations[0].packageName`, `reducedSeasonalPrices[0].endsOn`),
   di rete o del server: sopra i bottoni.
 
@@ -80,13 +94,29 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - Nome con "Altre lingue" come Servizi. Ogni nome al massimo 255 caratteri (`MAX_PACKAGE_NAME_LENGTH` di
   `PackageTranslation`, come il backend): il campo non lascia scrivere oltre.
-- Tendine "Numero max di articoli aggiuntivi" e "Numero max di persone" da 1 a 15; Ombrellone, Lettino, Sdraio,
-  Sedia regista, Cabina e Tenda da 1 a 10 (costanti `MAX_PACKAGE_*_QUANTITY` di `PackageAddItemRequest`).
-  Le tendine lavorano con testi, il modulo tiene il numero nei campi `*Quantity`.
-- "Servizi inclusi (opzionale)": testo libero (`includedServices`).
-- "Aree abilitate": scelta multipla da `POST /api/catalog/map/sector-area-combobox` (`idSectorAreas`).
+- Tendine "Numero max di articoli aggiuntivi" e "Numero max di persone" da 1 a 15 (costanti `MAX_PACKAGE_*_QUANTITY` di
+  `PackageAddItemRequest`); un valore salvato più alto è una scelta in più. Le tendine lavorano con testi, il modulo tiene il
+  numero.
+- "Articoli che compongono il pacchetto": una riga per ognuno dei 24 articoli del backend (`InventoryArticle`), letti all'apertura
+  del pannello con `GET /api/catalog/price-lists/get-package-articles` (`PriceListService.packageArticles`, `PackageArticle`);
+  con più elementi dello stesso articolo in magazzino una riga ciascuno, con il nome dopo quello dell'articolo.
+  - Tendina "Nessuno", da 1 a 10 e l'eventuale quantità salvata più alta; il modulo tiene `items` (`PackageItemQuantity`:
+    `idInventoryItem`, `quantity`), nell'ordine delle righe (`orderedItems` di `package-items.ts`).
+  - Un articolo senza elementi in magazzino (nessuno, o quantità 0) ha la riga spenta con "Non in magazzino", e sopra le righe
+    "Gli articoli in grigio non hanno elementi in magazzino."; se il pacchetto lo ha già, la riga resta usabile con lo stesso
+    testo come errore.
+  - Gli articoli del pacchetto senza riga (nomi liberi) restano nel modulo e tornano uguali.
+  - Aggiungi: se la lettura fallisce il messaggio va sopra i bottoni e si riprova alla prossima apertura della tab.
+- "Servizi inclusi (opzionale)": testo libero (`includedServices`), al massimo 1.000 caratteri
+  (`MAX_PACKAGE_INCLUDED_SERVICES_LENGTH`).
+- "Aree abilitate": scelta multipla da `POST /api/catalog/sectors/sector-area-combobox`
+  (`SectorService.sectorAreaCombobox`, `idSectorAreas`).
 - "Settori e file": scelta multipla da `POST /api/catalog/sectors/sector-combobox` (`idSectors`; vuota = "Tutti i settori
   e file").
+- Un settore o un'area scelti che non ci sono più restano nella loro scelta come "Settore/fila non più disponibile"
+  (`packages.form.missing_sector`) e "Area non più disponibile" (`missing_area`), per toglierli: finché ci sono, Salva e "Crea
+  pacchetto" rispondono 404 `catalog.sector_not_found` o `map.spot_not_found` e i due elenchi si rileggono
+  (`sectorsVersion`). Nei mock: "Lettino singolo" (settore) e "Gazebo e 4 lettini" (area).
 - Le due scelte multiple si rileggono a ogni apertura della tab. In fondo quattro caselle.
 
 ## Tab "Listino" (`app-price-list-tab`)
@@ -138,7 +168,9 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - "Calcolo del prezzo" (`calculationMethod`, enum `PriceCalculationMethod`: Prezzo proporzionale, giornaliero,
   logaritmico, giornaliero con weekend).
-- "Impostazione del mensile" (`monthlySetting`, `PriceMonthlySetting`: Durata effettiva del mese, 30 giorni).
+- "IVA (%)" (`vatRate`, solo pacchetti, `price_list.vat`), come in Servizi: parte vuota, vuota vuol dire senza aliquota.
+- "Impostazione del mensile" (`monthlySetting`, `PriceMonthlySetting`: Durata effettiva del mese, che per il backend sono 31
+  giorni; Giorni reali del mese; 30 giorni).
 - "Impostazione del weekend" (`weekendSetting`, `PriceWeekendSetting`: sabato e domenica, solo domenica).
 - Testi in `catalog.price_list.calculation_methods`, `catalog.price_list.monthly_settings` e
   `catalog.price_list.weekend_settings`.

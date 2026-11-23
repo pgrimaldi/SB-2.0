@@ -93,14 +93,19 @@ import {
   resourceNotFound,
 } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import { DELETED_SECTOR } from './sectors-data.mock';
 import {
   bookingOptionErrors,
   iconErrors,
   isNotLater,
+  isPeriodOfSeason,
+  isSectorOfProperty,
   missingPeriod,
   missingSector,
   sectorErrors,
   translationErrors,
+  VAT_RATES,
+  vatRateNotAllowed,
 } from './service-checks.mock';
 import {
   MockCopyError,
@@ -1385,6 +1390,19 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
       ],
     }),
   ],
+  [
+    '8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c10',
+    Object.assign(new BarServiceAddItemRequest(), {
+      translations: [
+        { language: Language.It, serviceName: 'Schiacciata', description: 'Farcita al momento.' },
+      ],
+      category: BarServiceCategory.SandwichShop,
+      icon: BarServiceIcon.Sandwich,
+      price: 3,
+      vatRate: 10,
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01', DELETED_SECTOR],
+    }),
+  ],
 ]);
 
 /** The uploaded images, by id of the service or of the automatic price. */
@@ -1489,7 +1507,9 @@ function barPricesOf(row: BarServiceRow): Omit<BarServiceSelectedPrices, 'versio
     vatRate: details.vatRate,
     variants: details.variants,
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
-    periodPrices: details.periodPrices.filter(({ price }) => price !== null),
+    periodPrices: details.periodPrices.filter(
+      ({ idPeriod, price }) => price !== null && isPeriodOfSeason(idPeriod),
+    ),
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
@@ -1531,15 +1551,28 @@ function copyImage(id: string, idCopy: string): void {
   }
 }
 
-const VAT_RATES: readonly number[] = [4, 5, 10, 22];
 /** As `ServiceSaleItem.MaxVariants`. */
 const MAX_VARIANT_QUANTITY = 50;
 
-/** The VAT of the element, or of its availabilities, has to be still allowed. */
-function copyVatError(vatRates: readonly (number | null)[]): MockCopyError | null {
-  return vatRates.every((vatRate) => vatRate === null || VAT_RATES.includes(vatRate))
+/** The VAT of the element, or of its availabilities, still allowed; no period or sector deleted. */
+function copyError(
+  vatRates: readonly (number | null)[],
+  idSectors: readonly string[],
+  idPeriods: readonly (number | null)[] = [],
+): MockCopyError | null {
+  if (!vatRates.every((vatRate) => vatRate === null || VAT_RATES.includes(vatRate))) {
+    return { code: ApiErrorCode.ServiceDuplicateVatRateNotAllowed, args: { rates: VAT_RATES } };
+  }
+  if (!idPeriods.every(isPeriodOfSeason)) {
+    return { code: ApiErrorCode.ServiceDuplicatePeriodNotFound, args: {} };
+  }
+  return idSectors.every(isSectorOfProperty)
     ? null
-    : { code: ApiErrorCode.ServiceDuplicateVatRateNotAllowed, args: { rates: VAT_RATES } };
+    : { code: ApiErrorCode.ServiceDuplicateSectorNotFound, args: {} };
+}
+
+function idPeriodsOf(periodPrices: readonly ServicePeriodPrice[]): (number | null)[] {
+  return periodPrices.filter(({ price }) => price !== null).map(({ idPeriod }) => idPeriod);
 }
 
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
@@ -1552,7 +1585,8 @@ const BAR_SERVICE_TABLE = {
   notFoundCode: ApiErrorCode.ServiceNotFound,
   copyMore: copyImage,
   deleteMore: leaveAutomaticPrices,
-  copyError: ({ vatRate }: BarServiceAddItemRequest) => copyVatError([vatRate]),
+  copyError: ({ vatRate, idSectors, periodPrices }: BarServiceAddItemRequest) =>
+    copyError([vatRate], idSectors, idPeriodsOf(periodPrices)),
 };
 
 /** `POST /api/catalog/services/bar-service-list`: one page of the bar services (see `serviceListAnswer`). */
@@ -1738,16 +1772,6 @@ function variantNameErrors(field: string, name: string | null): MockFieldError[]
 
 function isServicePrice(price: number): boolean {
   return typeof price === 'number' && price >= 0 && price <= MAX_SERVICE_PRICE;
-}
-
-/** The rates of the country of the property (`VatPolicy` of the backend): another one is refused. */
-function vatRateNotAllowed(
-  request: HttpRequest<unknown>,
-  vatRate: number | null | undefined,
-): Observable<never> | null {
-  return vatRate == null || VAT_RATES.includes(vatRate)
-    ? null
-    : problem(request, 422, ApiErrorCode.CatalogVatRateNotAllowed, { args: { rates: VAT_RATES } });
 }
 
 /**
@@ -2017,7 +2041,8 @@ const STANDARD_SERVICE_TABLE = {
   notFoundCode: ApiErrorCode.ServiceNotFound,
   copyMore: copyImage,
   deleteMore: leaveAutomaticPrices,
-  copyError: ({ vatRate }: StandardServiceAddItemRequest) => copyVatError([vatRate]),
+  copyError: ({ vatRate, idSectors, periodPrices }: StandardServiceAddItemRequest) =>
+    copyError([vatRate], idSectors, idPeriodsOf(periodPrices)),
 };
 
 /** The service of the `idStandardService` of the query string, if it exists. */
@@ -2095,7 +2120,9 @@ function standardPricesOf(row: StandardServiceRow): Omit<StandardServiceSelected
     price: details.price,
     vatRate: details.vatRate,
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
-    periodPrices: details.periodPrices.filter(({ price }) => price !== null),
+    periodPrices: details.periodPrices.filter(
+      ({ idPeriod, price }) => price !== null && isPeriodOfSeason(idPeriod),
+    ),
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
   };
@@ -2472,7 +2499,11 @@ const HOURLY_SERVICE_TABLE = {
   copyMore: copyImage,
   deleteMore: leaveAutomaticPrices,
   copyError: (details: HourlyServiceAddItemRequest) =>
-    copyVatError([details.vatRate, ...availabilitiesOf(details).map(({ vatRate }) => vatRate)]),
+    copyError(
+      [details.vatRate, ...availabilitiesOf(details).map(({ vatRate }) => vatRate)],
+      details.idSectors,
+      details.periodAvailabilities.map(({ idPeriod }) => idPeriod),
+    ),
 };
 
 /** The hourly service of the `idHourlyService` of the query string, if it exists. */
@@ -2551,7 +2582,8 @@ function hourlyPricesOf(row: HourlyServiceRow): Omit<HourlyServiceSelectedPrices
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
     availabilityOptions: details.availabilityOptions,
     periodAvailabilities: details.periodAvailabilities.filter(
-      ({ availabilityOptions }) => availabilityOptions.length > 0,
+      ({ idPeriod, availabilityOptions }) =>
+        availabilityOptions.length > 0 && isPeriodOfSeason(idPeriod),
     ),
     idSectors: details.idSectors,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
@@ -3478,7 +3510,8 @@ const AUTOMATIC_PRICE_TABLE = {
   detailsOf: automaticDetailsOf,
   notFoundCode: ApiErrorCode.ServiceAutomaticPriceNotFound,
   copyMore: copyImage,
-  copyError: ({ vatRate }: AutomaticPriceAddItemRequest) => copyVatError([vatRate]),
+  copyError: ({ vatRate, idSectors }: AutomaticPriceAddItemRequest) =>
+    copyError([vatRate], idSectors),
 };
 
 /** `POST /api/catalog/automatic-prices/automatic-price-list`: one page of the automatic prices (see `serviceListAnswer`). */

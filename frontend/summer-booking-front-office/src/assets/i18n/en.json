@@ -121,6 +121,7 @@
       "export_too_large": "There are {total, number, integer} entries to export, but at most {max, number, integer} can be exported: narrow the period or the filters and try again."
     },
     "map": {
+      "spot_not_found": "The map area is no longer there: it may already have been deleted.",
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
       "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB."
     },
@@ -147,7 +148,14 @@
       "period_ranges_required": "A period needs at least one date range. To delete it completely, use the bin next to its name.",
       "period_in_use": "The period has prices in the price lists {{priceLists}}: first remove its prices from these price lists, then delete it.",
       "period_in_use_by_services": "The period is used by the services {{services}}: first remove its prices from these services, then delete it.",
-      "period_overlap": "The dates overlap the period {{periodName}}: choose days that are not already in another period."
+      "period_overlap": "The dates overlap the period {{periodName}}: choose days that are not already in another period.",
+      "calculation_method_not_found": "This price calculation is no longer available: choose another one.",
+      "price_list_not_found": "The price list item is no longer there: it may already have been deleted.",
+      "price_list_in_use": "{{priceListName}} cannot be deleted: the additional items/services {{additionalItems}} would be left with no packages and would apply to all of them. First link them to other packages, or delete them.",
+      "duplicate_vat_rate_not_allowed": "{{priceListName}} cannot be duplicated: its VAT is not one of the allowed rates ({{rates}}). Change it and try again.",
+      "duplicate_period_not_found": "{{priceListName}} cannot be duplicated: it has prices for a deleted period. Open it, edit it and save it, then try again.",
+      "duplicate_area_not_found": "{{priceListName}} cannot be duplicated: it has a deleted map area. Open it, take it away from the enabled areas and save it, then try again.",
+      "duplicate_sector_not_found": "{{priceListName}} cannot be duplicated: it has data for a deleted row or sector. Open it, edit it and save it, then try again."
     },
     "inventory": {
       "item_not_found": "The item is no longer there: it may already have been deleted.",
@@ -160,8 +168,9 @@
       "table_service_not_found": "The table service is no longer there: it may already have been deleted.",
       "icon_not_found": "The selected icon is no longer available: choose another one.",
       "duplicate_vat_rate_not_allowed": "{{serviceName}} cannot be duplicated: its VAT is not one of the allowed rates ({{rates}}). Change it and try again.",
-      "duplicate_period_not_found": "{{serviceName}} cannot be duplicated: it has prices for a period that is no longer in the current season.",
-      "duplicate_icon_not_found": "{{serviceName}} cannot be duplicated: its icon is no longer available. Choose another one and try again."
+      "duplicate_period_not_found": "{{serviceName}} cannot be duplicated: it has prices for a deleted period. Edit and save its Prices tab, then try again.",
+      "duplicate_icon_not_found": "{{serviceName}} cannot be duplicated: its icon is no longer available. Choose another one and try again.",
+      "duplicate_sector_not_found": "{{serviceName}} cannot be duplicated: it is limited to a deleted row or sector. Check its rows and sectors, save and try again."
     }
   },
   "alert": {
@@ -1786,17 +1795,35 @@
             "max_people": "Max number of people",
             "articles": {
               "title": "Items in the package",
-              "umbrella": "Umbrella",
-              "sunbed": "Sunbed",
-              "deckchair": "Deckchair",
-              "director_chair": "Director's chair",
-              "cabin": "Cabin",
-              "tent": "Tent"
+              "none": "None",
+              "unavailable": "Not in stock",
+              "unavailable_note": "The articles in grey have no items in the warehouse.",
+              "names": {
+                "umbrella": "Umbrella",
+                "sunbed": "Sunbed",
+                "sunbed_xl": "Sunbed XL",
+                "sunbed_maxi": "Sunbed maxi",
+                "deckchair": "Deckchair",
+                "directors_chair": "Director's chair",
+                "tent": "Tent",
+                "gazebo": "Gazebo",
+                "cabin": "Cabin",
+                "custom_cabin": "Custom cabin",
+                "parking": "Parking",
+                "ticket": "Ticket",
+                "sunbed_area": "Sunbed area",
+                "umbrella_area": "Umbrella area",
+                "parking_area": "Parking area",
+                "cabin_area": "Cabin area",
+                "custom_article": "Custom item {{number}}"
+              }
             },
             "included_services": "Included services (optional)",
             "enabled_areas": "Enabled areas",
             "sectors": "Sectors and rows",
             "all_sectors": "All sectors and rows",
+            "missing_sector": "Row/sector no longer available",
+            "missing_area": "Area no longer available",
             "is_default": "Set as default package",
             "is_default_online": "Set as default online package",
             "online_enabled": "Also enable for online bookings",
@@ -1884,6 +1911,7 @@
           "monthly": "Monthly price",
           "no_sectors": "There are no sectors or rows: add them in the Sectors and rows page.",
           "no_periods": "Prices per period need at least one sector or row and one period of the current season.",
+          "vat": "VAT (%)",
           "calculation_method": "Price calculation",
           "calculation_methods": {
             "proportional": "Proportional price",
@@ -1896,7 +1924,8 @@
           "cumulative_info": "The Cumulative price is a calculation method that gives a more accurate final price when a booking covers more than one period.\n## How it works\nWhen it is on, the system calculates the total with a weighted average of the prices of the different seasons, based on the number of days that fall in each of them.\n## When it applies\n- **Booking in a single season**: the price of that season's table is used, with no extra calculation.\n- **Booking across several seasons**: the system combines the prices of the seasonal tables in proportion to the days in low and high season.\n- **Multiple bookings**: instead of adding up the prices of the single periods, the system recalculates the total using the overall number of days.",
           "monthly_setting": "Monthly setting",
           "monthly_settings": {
-            "effective_month_duration": "Actual length of the month",
+            "effective_month_duration": "Actual length of the month (31 days)",
+            "actual_month_duration": "Real days of the month",
             "thirty_days": "30 days"
           },
           "weekend_setting": "Weekend setting",

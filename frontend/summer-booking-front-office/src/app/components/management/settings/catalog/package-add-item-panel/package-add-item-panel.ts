@@ -31,10 +31,18 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
+import {
+  MAX_PACKAGE_INCLUDED_SERVICES_LENGTH,
+  PackageAddItemRequest,
+} from '../../../../../entities/settings/catalog/package-add-item-request';
+import { PackageArticle } from '../../../../../entities/settings/catalog/package-article';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import {
   MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH,
@@ -54,6 +62,7 @@ import { noOverlap, requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
+import { orderedItems, withExistingItems } from '../package-items';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
 import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 import {
@@ -131,6 +140,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
         (main) => requiredText(main.packageName),
       );
     });
+    metadata(path.includedServices, MAX_LENGTH, () => MAX_PACKAGE_INCLUDED_SERVICES_LENGTH);
     maxPrices(path.sectorPrices, sectorPricesOf);
     maxPrices(path.periodPrices, periodPricesOf);
     maxPrices(path.intermediatePrices, intermediatePricesOf);
@@ -156,10 +166,15 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   /** The form with nothing typed: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(comparableJson(newDraft()));
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
+  protected readonly sectorsVersion = signal(0);
+  /** The articles of the backend, each with its items in the warehouse. */
+  protected readonly articles = signal<readonly PackageArticle[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** The rows of the price list are read once per opening, the first time its tab is shown. */
   protected readonly isPriceListLoaded = signal(false);
   protected readonly isFetching = signal(false);
+  protected readonly isFetchingArticles = signal(false);
+  private readonly areArticlesLoaded = signal(false);
   /** The name of the package in the main language. */
   protected readonly packageName = computed(
     () =>
@@ -171,7 +186,10 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   /** Also while the reduced seasonal price box is open: its values are not in the package yet. */
   protected readonly isSaveDisabled = computed(
     () =>
-      this.isFetching() || this.draftForm().invalid() || this.reducedSeasonalPriceIndex() !== null,
+      this.isFetching() ||
+      this.isFetchingArticles() ||
+      this.draftForm().invalid() ||
+      this.reducedSeasonalPriceIndex() !== null,
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -181,12 +199,18 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private fetching?: Subscription;
+  private fetchingArticles?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      }
+    });
+    effect(() => {
+      if (this.open() && this.selectedTab() === PanelTab.GeneralInfo && !this.areArticlesLoaded()) {
+        untracked(() => this.refreshArticles());
       }
     });
     effect(() => {
@@ -227,8 +251,26 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
         this.open.set(false);
         this.created.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        if (
+          problem.code === ApiErrorCode.CatalogSectorNotFound ||
+          problem.code === ApiErrorCode.MapSpotNotFound
+        ) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.InventoryItemNotFound) {
+          this.refreshArticles();
+        }
+        if (problem.code === ApiErrorCode.PricingCalculationMethodNotFound) {
+          this.selectedTab.set(PanelTab.PriceList);
+          return apiFieldError(this.draftForm.calculationMethod, problem.code);
+        }
+        if (problem.code === ApiErrorCode.CatalogVatRateNotAllowed) {
+          this.selectedTab.set(PanelTab.PriceList);
+          return apiFieldError(this.draftForm.vatRate, problem.code, problem.args);
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -252,10 +294,34 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.reducedSeasonalPrice.set(new PackageReducedSeasonalPrice());
     this.reducedSeasonalPriceForm().reset();
     this.reducedSeasonalPriceIndex.set(null);
+    this.fetchingArticles?.unsubscribe();
+    this.isFetchingArticles.set(false);
+    this.articles.set([]);
+    this.areArticlesLoaded.set(false);
     this.sectors.set([]);
     this.periods.set([]);
     this.isPriceListLoaded.set(false);
     this.selectedTab.set(PanelTab.GeneralInfo);
+  }
+
+  /** What the warehouse has for the package; a chosen item that is no longer there goes away. */
+  private refreshArticles(): void {
+    if (!this.auth.user()?.propertyId || this.isFetchingArticles()) {
+      return;
+    }
+    this.isFetchingArticles.set(true);
+    this.fetchingArticles = this.priceLists
+      .packageArticles()
+      .pipe(finalize(() => this.isFetchingArticles.set(false)))
+      .subscribe({
+        next: (articles) => {
+          const items = this.draftForm.items().value;
+          items.set(orderedItems(withExistingItems(items(), this.articles(), articles), articles));
+          this.articles.set(articles);
+          this.areArticlesLoaded.set(true);
+        },
+        error: (error: unknown) => this.error.set(toApiProblem(error)),
+      });
   }
 
   /** The sectors and the periods of the current season: one row of prices each. */
@@ -299,6 +365,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
     this.fetching?.unsubscribe();
+    this.fetchingArticles?.unsubscribe();
   }
 }
 

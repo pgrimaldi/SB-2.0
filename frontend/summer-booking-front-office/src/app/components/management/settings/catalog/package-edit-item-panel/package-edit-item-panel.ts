@@ -33,11 +33,18 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
-import { PackageAddItemRequest } from '../../../../../entities/settings/catalog/package-add-item-request';
+import {
+  MAX_PACKAGE_INCLUDED_SERVICES_LENGTH,
+  PackageAddItemRequest,
+} from '../../../../../entities/settings/catalog/package-add-item-request';
+import { PackageArticle } from '../../../../../entities/settings/catalog/package-article';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import {
   MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH,
@@ -61,6 +68,7 @@ import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
+import { orderedItems, withExistingItems } from '../package-items';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
 import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 import {
@@ -163,6 +171,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         (main) => requiredText(main.packageName),
       );
     });
+    metadata(path.includedServices, MAX_LENGTH, () => MAX_PACKAGE_INCLUDED_SERVICES_LENGTH);
     maxPrices(path.sectorPrices, sectorPricesOf);
     maxPrices(path.periodPrices, periodPricesOf);
     maxPrices(path.intermediatePrices, intermediatePricesOf);
@@ -188,6 +197,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The values as the API gave them: the form is compared with them. */
   private readonly pristine = signal(newDraft());
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
+  protected readonly sectorsVersion = signal(0);
+  /** The articles of the backend, each with its items in the warehouse. */
+  protected readonly articles = signal<readonly PackageArticle[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** Saved prices of sectors or periods the panel does not show: sent back as they were. */
   private readonly hiddenSectorPrices = signal<readonly PackageSectorPrice[]>([]);
@@ -280,6 +292,23 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
           this.reset();
           return undefined;
         }
+        if (
+          problem.code === ApiErrorCode.CatalogSectorNotFound ||
+          problem.code === ApiErrorCode.MapSpotNotFound
+        ) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.InventoryItemNotFound) {
+          this.refreshArticles();
+        }
+        if (problem.code === ApiErrorCode.PricingCalculationMethodNotFound) {
+          this.selectedTab.set(PanelTab.PriceList);
+          return apiFieldError(this.draftForm.calculationMethod, problem.code);
+        }
+        if (problem.code === ApiErrorCode.CatalogVatRateNotAllowed) {
+          this.selectedTab.set(PanelTab.PriceList);
+          return apiFieldError(this.draftForm.vatRate, problem.code, problem.args);
+        }
         return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
           this.error.set(general),
         );
@@ -342,11 +371,28 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     this.reducedSeasonalPriceIndex.set(null);
     this.sectors.set([]);
     this.periods.set([]);
+    this.articles.set([]);
     this.hiddenSectorPrices.set([]);
     this.hiddenPeriodPrices.set([]);
     this.version = null;
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.load();
+  }
+
+  /** An item chosen is no longer in the warehouse: the articles are read again, and it goes away. */
+  private refreshArticles(): void {
+    this.isLoading.set(true);
+    this.loading = this.priceLists
+      .packageArticles()
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (articles) => {
+          const items = this.draftForm.items().value;
+          items.set(orderedItems(withExistingItems(items(), this.articles(), articles), articles));
+          this.articles.set(articles);
+        },
+        error: (error: unknown) => this.error.set(toApiProblem(error)),
+      });
   }
 
   /** The package, with the sectors and the periods of the current season for its price rows. */
@@ -360,11 +406,12 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       item: this.priceLists.selectedPackage(idPackage),
       sectors: this.sectorService.sectorCombobox(),
       periods: this.seasons.periodList(false),
+      articles: this.priceLists.packageArticles(),
     })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: ({ item, sectors, periods }) => {
-          this.setLoaded(item, sectors, periods);
+        next: ({ item, sectors, periods, articles }) => {
+          this.setLoaded(item, sectors, periods, articles);
           this.isLoaded.set(true);
         },
         error: (error: unknown) => {
@@ -385,6 +432,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     item: PackageSelectedItem,
     sectors: readonly ComboboxItem[],
     periods: readonly SeasonPeriodItem[],
+    articles: readonly PackageArticle[],
   ): void {
     const draft = Object.assign(newDraft(), {
       translations: SERVICE_LANGUAGES.map((language) =>
@@ -397,12 +445,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       ),
       maxAdditionalItemQuantity: item.maxAdditionalItemQuantity,
       maxPeopleQuantity: item.maxPeopleQuantity,
-      umbrellaQuantity: item.umbrellaQuantity,
-      sunbedQuantity: item.sunbedQuantity,
-      deckchairQuantity: item.deckchairQuantity,
-      directorChairQuantity: item.directorChairQuantity,
-      cabinQuantity: item.cabinQuantity,
-      tentQuantity: item.tentQuantity,
+      items: orderedItems(item.items, articles),
       includedServices: item.includedServices,
       idSectorAreas: [...item.idSectorAreas],
       idSectors: [...item.idSectors],
@@ -444,6 +487,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
           ),
         ),
       ),
+      vatRate: item.vatRate,
       calculationMethod: item.calculationMethod,
       isCumulative: item.isCumulative,
       monthlySetting: item.monthlySetting,
@@ -468,6 +512,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     );
     this.sectors.set(sectors);
     this.periods.set(periods);
+    this.articles.set(articles);
     this.version = item.version;
     this.draft.set(draft);
     this.pristine.set(structuredClone(draft));

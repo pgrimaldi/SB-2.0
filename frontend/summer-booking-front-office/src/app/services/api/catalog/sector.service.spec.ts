@@ -60,6 +60,27 @@ describe('SectorService', () => {
     controller.verify();
   });
 
+  it('should ask the areas of the dropdowns without a body', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const sectors = TestBed.inject(SectorService);
+    const controller = TestBed.inject(HttpTestingController);
+    let answer: unknown;
+
+    sectors.sectorAreaCombobox().subscribe((read) => (answer = read));
+
+    const call = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/sectors/sector-area-combobox`,
+    );
+    expect(call.request.body).toBeNull();
+    call.flush([{ id: 'a1', value: 'Area lettini' }]);
+    expect(answer).toEqual([{ id: 'a1', value: 'Area lettini' }]);
+    controller.verify();
+  });
+
   it('should add a sector sending the name', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],

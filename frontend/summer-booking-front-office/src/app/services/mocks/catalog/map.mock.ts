@@ -1,7 +1,6 @@
 import { HttpEvent, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of } from 'rxjs';
 import { isUploadable } from '../../../behaviours/files/uploadable-file';
-import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
 import { MapMixedSpotIcon } from '../../../entities/enums/map-mixed-spot-icon';
 import { MapUmbrellaIcon } from '../../../entities/enums/map-umbrella-icon';
@@ -27,17 +26,9 @@ import {
   MEGABYTE,
 } from '../../../entities/shared/image-upload-types';
 import { MockFieldError, problem } from '../errors/problem.mock';
-import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 const MAX_BYTES = MAX_IMAGE_UPLOAD_MEGABYTES * MEGABYTE;
-const SECTOR_AREAS: (ComboboxItem & { propertyId: number })[] = [
-  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01', value: 'Area lettini' },
-  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a02', value: 'Area ombrelloni' },
-  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a03', value: 'Area cabine' },
-  { propertyId: 1, id: '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a04', value: 'Parcheggio' },
-];
-
 /** As the backend: a name without the spaces at the sides; none chosen is the default (`name` null). */
 function icon(name: string | null): MapIcon {
   const chosen = name?.trim() || null;
@@ -287,21 +278,4 @@ export const updateMapConfigurationMock = (
     },
   };
   return savedWithVersion(request, configurationData());
-};
-
-/**
- * `POST /api/catalog/map/sector-area-combobox` without a body: every area of the property's map, in
- * its order, as `{ id, value }`. 401 without a valid access token.
- */
-export const sectorAreaComboboxMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const property = DEMO_PROPERTY;
-  const items: ComboboxItem[] = SECTOR_AREAS.filter((area) => area.propertyId === property.id).map(
-    ({ id, value }) => ({ id, value }),
-  );
-  return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };

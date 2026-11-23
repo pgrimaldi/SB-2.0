@@ -65,10 +65,12 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Servizi Orari, `service.automatic_price_not_found` per Prezzi Automatici, `service.table_service_not_found` per
   Prenotazione tavoli. Su Elimina, su Duplica e su Modifica (lettura del pannello e Salva) gli id escono dalla
   selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup e del pannello di modifica).
-- Un elemento che non si può duplicare (IVA non più ammessa, prezzi per un periodo non più nella stagione, icona non più
-  nel catalogo): 422 `service.duplicate_vat_rate_not_allowed`, `service.duplicate_period_not_found` o
-  `service.duplicate_icon_not_found`, con il nome (`serviceName`) nel popup "Operazione non riuscita"; non si duplica niente.
-  Nei mock non si duplica "Cassetta di Sicurezza", che ha un'IVA di una volta (20%).
+- Un elemento che non si può duplicare (IVA non più ammessa, prezzi per un periodo eliminato, icona non più nel catalogo, una
+  fila o un settore eliminato): 422 `service.duplicate_vat_rate_not_allowed`,
+  `service.duplicate_period_not_found`, `service.duplicate_icon_not_found` o `service.duplicate_sector_not_found`, con il
+  nome (`serviceName`) nel popup "Operazione non riuscita"; non si duplica niente. Nei mock non si duplicano "Cassetta di
+  Sicurezza", che ha un'IVA di una volta (20%), e "Schiacciata", limitata anche a un settore eliminato (toltolo dai suoi settori
+  si può duplicare).
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `services/delete-bar-service-item`, `services/duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `services/delete-standard-service-item`, `services/duplicate-standard-service-item` (`idStandardServices`);

@@ -7,8 +7,10 @@ import { AdditionalItem } from '../../../entities/settings/catalog/additional-it
 import { AdditionalItemAddItemRequest } from '../../../entities/settings/catalog/additional-item-add-item-request';
 import { AdditionalItemSelectedItem } from '../../../entities/settings/catalog/additional-item-selected-item';
 import { PackageAddItemRequest } from '../../../entities/settings/catalog/package-add-item-request';
+import { PackageArticle } from '../../../entities/settings/catalog/package-article';
 import { PackageIntermediatePrice } from '../../../entities/settings/catalog/package-intermediate-price';
 import { PackageItem } from '../../../entities/settings/catalog/package-item';
+import { PackageItemQuantity } from '../../../entities/settings/catalog/package-item-quantity';
 import { PackagePeriodPrice } from '../../../entities/settings/catalog/package-period-price';
 import { PackageReducedSeasonalPrice } from '../../../entities/settings/catalog/package-reduced-seasonal-price';
 import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
@@ -24,15 +26,17 @@ export class PriceListService {
   private readonly endpoint = `${environment.apiBaseUrl}/catalog`;
 
   readonly packageList = (request: PageRequest): Observable<Page<PackageItem>> =>
-    this.httpClient.post<Page<PackageItem>>(`${this.endpoint}/packages-list`, request);
+    this.httpClient.post<Page<PackageItem>>(`${this.endpoint}/price-lists/packages-list`, request);
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deletePackageItems = (idPackages: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-package-item`, { idPackages });
+    this.httpClient.post<void>(`${this.endpoint}/price-lists/delete-package-item`, { idPackages });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicatePackageItems = (idPackages: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-package-item`, { idPackages });
+    this.httpClient.post<void>(`${this.endpoint}/price-lists/duplicate-package-item`, {
+      idPackages,
+    });
 
   /** Every package of the property, in its order: `id` is the idPackage, `value` the name. */
   readonly packageCombobox = (): Observable<ComboboxItem[]> =>
@@ -61,7 +65,7 @@ export class PriceListService {
    * with no body.
    */
   readonly createPackage = (request: PackageAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/packages/create-package`, packageBody(request));
+    this.httpClient.post<void>(`${this.endpoint}/price-lists/create-package`, packageBody(request));
 
   /** The whole form of the add panel of the additional items. Answers 204 with no body. */
   readonly createAdditionalItem = (request: AdditionalItemAddItemRequest): Observable<void> =>
@@ -95,11 +99,15 @@ export class PriceListService {
       )
       .pipe(map(versionOf));
 
+  /** The articles of the backend, always all, each with its items in the warehouse, if any. */
+  readonly packageArticles = (): Observable<PackageArticle[]> =>
+    this.httpClient.get<PackageArticle[]>(`${this.endpoint}/price-lists/get-package-articles`);
+
   /** Everything the edit panel shows; the property comes from the access token. */
   readonly selectedPackage = (idPackage: string): Observable<PackageSelectedItem> =>
-    this.httpClient.get<PackageSelectedItem>(
-      `${this.endpoint}/packages/${encodeURIComponent(idPackage)}`,
-    );
+    this.httpClient.get<PackageSelectedItem>(`${this.endpoint}/price-lists/get-package`, {
+      params: { idPackage },
+    });
 
   /**
    * The whole package, as in `createPackage`, with its id and the version read. Answers 204 with no
@@ -112,7 +120,7 @@ export class PriceListService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/packages/update-package`,
+        `${this.endpoint}/price-lists/update-package`,
         { ...packageBody(request), idPackage },
         { headers: ifMatch(version), observe: 'response' },
       )
@@ -126,6 +134,7 @@ function packageBody(request: PackageAddItemRequest): PackageAddItemRequest {
     translations: request.translations.map((translation) =>
       onlyFieldsOf(PackageTranslation, translation),
     ),
+    items: request.items.map((item) => onlyFieldsOf(PackageItemQuantity, item)),
     sectorPrices: request.sectorPrices.map((sectorPrice) =>
       onlyFieldsOf(PackageSectorPrice, sectorPrice),
     ),

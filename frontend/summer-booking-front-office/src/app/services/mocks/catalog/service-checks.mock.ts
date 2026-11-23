@@ -14,8 +14,9 @@ import {
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { PERIODS } from '../seasons/periods-data.mock';
-import { SECTORS } from './sectors-data.mock';
+import { SECTOR_AREAS, SECTORS } from './sectors-data.mock';
 
+export const VAT_RATES: readonly number[] = [4, 5, 10, 22];
 const MAX_SECTOR_QUANTITY = 500;
 const MAX_BOOKING_OPTION_QUANTITY = 20;
 
@@ -58,6 +59,16 @@ export function iconErrors(
     : [{ field: 'icon', code: ApiErrorCode.ValidationInvalid }];
 }
 
+/** The rates of the country of the property (`VatPolicy` of the backend): another one is refused. */
+export function vatRateNotAllowed(
+  request: HttpRequest<unknown>,
+  vatRate: number | null | undefined,
+): Observable<never> | null {
+  return vatRate == null || VAT_RATES.includes(vatRate)
+    ? null
+    : problem(request, 422, ApiErrorCode.CatalogVatRateNotAllowed, { args: { rates: VAT_RATES } });
+}
+
 export function sectorErrors(idSectors: readonly string[] | undefined): MockFieldError[] {
   return (idSectors?.length ?? 0) > MAX_SECTOR_QUANTITY
     ? [{ field: 'idSectors', code: ApiErrorCode.ValidationInvalid }]
@@ -69,13 +80,20 @@ export function missingSector(
   request: HttpRequest<unknown>,
   idSectors: readonly string[] | undefined,
 ): Observable<never> | null {
-  const isMissing = (idSectors ?? []).some(
-    (id) =>
-      !SECTORS.some(
-        ({ propertyId, idSector }) => propertyId === DEMO_PROPERTY.id && idSector === id,
-      ),
-  );
+  const isMissing = (idSectors ?? []).some((idSector) => !isSectorOfProperty(idSector));
   return isMissing ? problem(request, 404, ApiErrorCode.CatalogSectorNotFound) : null;
+}
+
+export function isAreaOfProperty(idSectorArea: string): boolean {
+  return SECTOR_AREAS.some(
+    ({ propertyId, id }) => propertyId === DEMO_PROPERTY.id && id === idSectorArea,
+  );
+}
+
+export function isSectorOfProperty(id: string | null): boolean {
+  return SECTORS.some(
+    ({ propertyId, idSector }) => propertyId === DEMO_PROPERTY.id && idSector === id,
+  );
 }
 
 /** 422 `pricing.period_not_found` for a period neither of the current season nor already saved. */
@@ -85,14 +103,16 @@ export function missingPeriod(
   savedIdPeriods: readonly (number | null)[] = [],
 ): Observable<never> | null {
   const isMissing = idPeriods.some(
-    (idPeriod) =>
-      !savedIdPeriods.includes(idPeriod) &&
-      !PERIODS.some(
-        ({ propertyId, isNextSeason, key }) =>
-          propertyId === DEMO_PROPERTY.id && !isNextSeason && key === idPeriod,
-      ),
+    (idPeriod) => !savedIdPeriods.includes(idPeriod) && !isPeriodOfSeason(idPeriod),
   );
   return isMissing ? problem(request, 422, ApiErrorCode.PricingPeriodNotFound) : null;
+}
+
+export function isPeriodOfSeason(idPeriod: number | null): boolean {
+  return PERIODS.some(
+    ({ propertyId, isNextSeason, key }) =>
+      propertyId === DEMO_PROPERTY.id && !isNextSeason && key === idPeriod,
+  );
 }
 
 /** Days and hours in their order, quantities in their limits and the weekdays of their enum. */

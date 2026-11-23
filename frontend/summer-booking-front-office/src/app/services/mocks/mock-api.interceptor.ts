@@ -73,7 +73,6 @@ import {
   mapSettingsMock,
   removeMapBackgroundMock,
   resetMapMock,
-  sectorAreaComboboxMock,
   updateMapBackgroundMock,
   updateMapConfigurationMock,
   uploadMapBackgroundMock,
@@ -82,6 +81,7 @@ import {
   addSectorMock,
   deleteSectorsMock,
   duplicateSectorsMock,
+  sectorAreaComboboxMock,
   sectorComboboxMock,
   sectorListMock,
   updateSectorMock,
@@ -94,6 +94,7 @@ import {
   deletePackageItemsMock,
   duplicateAdditionalItemsMock,
   duplicatePackageItemsMock,
+  packageArticlesMock,
   packageComboboxMock,
   packageListMock,
   selectedAdditionalItemMock,
@@ -1005,6 +1006,13 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     return sectorComboboxMock(request);
   }
 
+  if (
+    request.method === 'POST' &&
+    request.url === `${environment.apiBaseUrl}/catalog/sectors/sector-area-combobox`
+  ) {
+    return sectorAreaComboboxMock(request);
+  }
+
   const sectors = request.url.startsWith(environment.apiBaseUrl)
     ? SECTORS_URL.exec(request.url.slice(environment.apiBaseUrl.length))
     : null;
@@ -1026,21 +1034,21 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/packages-list`
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/packages-list`
   ) {
     return packageListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-package-item`
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/delete-package-item`
   ) {
     return deletePackageItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-package-item`
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/duplicate-package-item`
   ) {
     return duplicatePackageItemsMock(request);
   }
@@ -1096,21 +1104,28 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/packages/create-package`
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/create-package`
   ) {
     return createPackageMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/packages/update-package`
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/update-package`
   ) {
     return updatePackageMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url.startsWith(`${environment.apiBaseUrl}/catalog/packages/`)
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/get-package-articles`
+  ) {
+    return packageArticlesMock(request);
+  }
+
+  if (
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/get-package`
   ) {
     return selectedPackageMock(request);
   }
@@ -1152,13 +1167,6 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (request.method === 'POST' && request.url === `${environment.apiBaseUrl}/catalog/map/reset`) {
     return resetMapMock(request);
-  }
-
-  if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/map/sector-area-combobox`
-  ) {
-    return sectorAreaComboboxMock(request);
   }
 
   return next(request);

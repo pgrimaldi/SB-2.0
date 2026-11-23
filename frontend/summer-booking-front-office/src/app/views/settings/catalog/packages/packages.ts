@@ -136,7 +136,7 @@ export class Packages {
     table: { reload(): void },
     idPackages: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.PricingPriceListNotFound) {
       this.forgetDeleted(idPackages);
       table.reload();
     }

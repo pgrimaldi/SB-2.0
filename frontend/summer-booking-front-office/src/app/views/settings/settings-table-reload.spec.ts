@@ -27,7 +27,7 @@ const VIEWS: readonly (readonly [Type<unknown>, string, ApiErrorCode])[] = [
   [ServicesHourly, 'idSelectedHourlyServices', ApiErrorCode.ServiceNotFound],
   [AutomaticPrices, 'idSelectedAutomaticPrices', ApiErrorCode.ServiceAutomaticPriceNotFound],
   [TableBooking, 'idSelectedTableServices', ApiErrorCode.ServiceTableServiceNotFound],
-  [Packages, 'idSelectedPackages', ApiErrorCode.ResourceNotFound],
+  [Packages, 'idSelectedPackages', ApiErrorCode.PricingPriceListNotFound],
   [AdditionalItems, 'idSelectedAdditionalItems', ApiErrorCode.ResourceNotFound],
 ];
 

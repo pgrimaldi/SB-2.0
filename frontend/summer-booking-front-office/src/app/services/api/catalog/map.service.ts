@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { MapBackgroundImage } from '../../../entities/enums/map-background-image';
 import { MapGrid } from '../../../entities/settings/map-configuration/map-grid';
 import { MapLayout } from '../../../entities/settings/map-configuration/map-layout';
@@ -62,8 +61,4 @@ export class MapService {
   /** Deletes the spots on the map and empties the grid (0 × 0); background, icons and tilt stay. */
   readonly reset = (): Observable<MapLayout> =>
     this.httpClient.post<MapLayout>(`${this.endpoint}/reset`, null);
-
-  /** Every area of the property's map: `id` is the idSectorArea, `value` the name. */
-  readonly sectorAreaCombobox = (): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sector-area-combobox`, null);
 }

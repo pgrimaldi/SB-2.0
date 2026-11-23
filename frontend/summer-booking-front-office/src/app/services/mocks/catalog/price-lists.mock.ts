@@ -9,7 +9,10 @@ import { AdditionalItemSelectedItem } from '../../../entities/settings/catalog/a
 import { PriceCalculationMethod } from '../../../entities/enums/price-calculation-method';
 import { PriceMonthlySetting } from '../../../entities/enums/price-monthly-setting';
 import { PriceWeekendSetting } from '../../../entities/enums/price-weekend-setting';
+import { InventoryArticle } from '../../../entities/enums/inventory-article';
+import { PackageArticle } from '../../../entities/settings/catalog/package-article';
 import {
+  MAX_PACKAGE_INCLUDED_SERVICES_LENGTH,
   MAX_PRICE_LIST_PRICE,
   PackageAddItemRequest,
 } from '../../../entities/settings/catalog/package-add-item-request';
@@ -26,12 +29,27 @@ import {
   PackageTranslation,
 } from '../../../entities/settings/catalog/package-translation';
 import { PackageSelectedItem } from '../../../entities/settings/catalog/package-selected-item';
+import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
 import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
-import { activeArticleIdNamed, activeArticleName } from '../warehouse/warehouse.mock';
+import {
+  activeArticleIdNamed,
+  activeArticleName,
+  activeArticlesOfCode,
+} from '../warehouse/warehouse.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
+import { DELETED_SECTOR } from './sectors-data.mock';
+import {
+  VAT_RATES,
+  isAreaOfProperty,
+  isPeriodOfSeason,
+  isSectorOfProperty,
+  missingSector,
+  vatRateNotAllowed,
+} from './service-checks.mock';
+import { copyName, languageOf, naturalOrder, tableRequestErrors } from './service-tables.mock';
 
 type PackageRow = PackageItem & { propertyId: number };
 
@@ -39,6 +57,7 @@ type PackageRow = PackageItem & { propertyId: number };
 const PEOPLE_QUANTITY_RANGE = { from: 1, to: 100 };
 const ADDITIONAL_ITEM_QUANTITY_RANGE = { from: 0, to: 100 };
 const MAX_ARTICLE_QUANTITY = 100;
+const MAX_ITEM_QUANTITY = 50;
 const PACKAGE_NAMES = [
   'Ombrellone e 2 lettini',
   'Ombrellone, sdraio e lettino',
@@ -59,6 +78,10 @@ const PACKAGES: PackageRow[] = PACKAGE_NAMES.map((packageName, index) => ({
   packageName,
 }));
 
+const DELETED_PERIOD = 9;
+const DELETED_AREA = '9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6aff';
+const VAT_RATE_NO_LONGER_ALLOWED = 20;
+
 /** What the panels saved, by idPackage; a package never saved has only its name. */
 const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
   [
@@ -70,8 +93,12 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
       ],
       maxAdditionalItemQuantity: 2,
       maxPeopleQuantity: 4,
-      umbrellaQuantity: 1,
-      sunbedQuantity: 2,
+      items: [
+        { idInventoryItem: activeArticleIdNamed(1, 'Ombrellone'), quantity: 1 },
+        { idInventoryItem: activeArticleIdNamed(1, 'Lettino'), quantity: 2 },
+        { idInventoryItem: activeArticleIdNamed(1, 'Tavolino'), quantity: 1 },
+      ],
+      vatRate: 22,
       includedServices: 'Cassetta di sicurezza',
       idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01', '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02'],
       isDefault: true,
@@ -125,6 +152,48 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
       ],
     }),
   ],
+  [
+    PACKAGES[8].idPackage ?? '',
+    Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: 'it', packageName: PACKAGES[8].packageName }],
+      vatRate: VAT_RATE_NO_LONGER_ALLOWED,
+    }),
+  ],
+  [
+    PACKAGES[7].idPackage ?? '',
+    Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: 'it', packageName: PACKAGES[7].packageName }],
+      maxPeopleQuantity: 40,
+      idSectorAreas: ['9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01', DELETED_AREA],
+    }),
+  ],
+  [
+    PACKAGES[9].idPackage ?? '',
+    Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: 'it', packageName: PACKAGES[9].packageName }],
+      periodPrices: [
+        Object.assign(new PackagePeriodPrice(), {
+          idSector: DELETED_SECTOR,
+          idPeriod: 0,
+          dailyPrice: 12,
+        }),
+      ],
+      idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01', DELETED_SECTOR],
+    }),
+  ],
+  [
+    PACKAGES[10].idPackage ?? '',
+    Object.assign(new PackageAddItemRequest(), {
+      translations: [{ language: 'it', packageName: PACKAGES[10].packageName }],
+      periodPrices: [
+        Object.assign(new PackagePeriodPrice(), {
+          idSector: '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01',
+          idPeriod: DELETED_PERIOD,
+          dailyPrice: 40,
+        }),
+      ],
+    }),
+  ],
 ]);
 
 /**
@@ -158,31 +227,29 @@ const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['packageName'] as const;
 
 /**
- * `POST /api/catalog/packages-list`: one page of the packages of the property of the token, in
- * their own order unless sorted, each with its name in the language of `Accept-Language` (see
- * `packageNameIn`), which the search and the sorting use too. 401 without a valid access token.
+ * `POST /api/catalog/price-lists/packages-list`: one page of the packages of the property of the
+ * token, each with its name in the language of `Accept-Language` (see `packageNameIn`), which the
+ * search and the natural order use too. 401 without a valid access token; 400 as `serviceListAnswer`.
  */
 export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
+  const errors = tableRequestErrors(body, SORT_FIELDS);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
+  }
+  const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = body;
   const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const language = request.headers.get('Accept-Language') ?? 'it';
-  const found = PACKAGES.filter((row) => row.propertyId === property.id)
+  const sign = body.sortDirection === 'Descending' ? -1 : 1;
+  const found = packagesOfProperty()
     .map((row) => ({
       ...onlyFieldsOf(PackageItem, row),
-      packageName: packageNameIn(row, language),
+      packageName: packageNameIn(row, languageOf(request)),
     }))
-    .filter(({ packageName }) => !search || packageName?.trim().toLowerCase().includes(search));
-  const field = SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
+    .filter(({ packageName }) => !search || packageName?.trim().toLowerCase().includes(search))
+    .sort((first, second) => sign * naturalOrder(first.packageName, second.packageName));
   const answer: Page<PackageItem> = {
     total: found.length,
     rows: found.slice((page - 1) * pageSize, page * pageSize),
@@ -191,96 +258,214 @@ export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpE
 };
 
 /**
- * `POST /api/catalog/delete-package-item`: deletes the given packages, all or nothing. 204 with no
- * body; 404 when an id is not a package of the property; 401 as the list.
+ * `POST /api/catalog/price-lists/delete-package-item`: deletes the given packages, all or nothing
+ * (see `withPackages`); they leave the additional items they are linked to. 409
+ * `pricing.price_list_in_use` when one of these would be left with no packages, which means all.
  */
 export const deletePackageItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idPackages?: string[] };
-  const property = DEMO_PROPERTY;
-  const packages = packagesOf(property.id, body.idPackages);
-  if (!packages) {
-    return resourceNotFound(request);
-  }
-  for (const item of packages) {
-    PACKAGES.splice(PACKAGES.indexOf(item), 1);
-    PACKAGE_DETAILS.delete(item.idPackage ?? '');
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  withPackages(request, (packages) => {
+    const used = packages
+      .map((item) => ({ item, additionalItems: onlyWith(item, packages) }))
+      .find(({ additionalItems }) => additionalItems.length);
+    if (used) {
+      return problem(request, 409, ApiErrorCode.PricingPriceListInUse, {
+        args: {
+          priceListName: packageNameIn(used.item, languageOf(request)) ?? '',
+          additionalItems: used.additionalItems,
+        },
+      });
+    }
+    for (const { idPackage } of packages) {
+      PACKAGES.splice(
+        PACKAGES.findIndex((row) => row.idPackage === idPackage),
+        1,
+      );
+      PACKAGE_DETAILS.delete(idPackage ?? '');
+      for (const [idAdditionalItem, details] of ADDITIONAL_ITEM_DETAILS) {
+        ADDITIONAL_ITEM_DETAILS.set(idAdditionalItem, {
+          ...details,
+          idPackages: details.idPackages.filter((id) => id !== idPackage),
+        });
+      }
+    }
+    return null;
+  });
 
 /**
- * `POST /api/catalog/duplicate-package-item`: one copy of each given package at the end of the
- * list, all or nothing, named by the backend ("X (copia)", then "X (copia 2)"…). 204 with no body;
- * 404 when an id is not a package of the property; 401 as the list.
+ * `POST /api/catalog/price-lists/duplicate-package-item`: one copy of each given package, all or
+ * nothing (see `withPackages`), with every data of the original, never the default one, and the first
+ * free name in each language ("X copia", then "X copia 2"). 422 `pricing.duplicate_period_not_found`
+ * or `pricing.duplicate_sector_not_found` for a package with prices for a deleted period or data of
+ * a deleted sector.
  */
 export const duplicatePackageItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
+): Observable<HttpEvent<unknown>> =>
+  withPackages(request, (packages) => {
+    for (const item of packages) {
+      const code = copyError(PACKAGE_DETAILS.get(item.idPackage ?? ''));
+      if (code) {
+        return problem(request, 422, code, {
+          args: {
+            priceListName: packageNameIn(item, languageOf(request)) ?? '',
+            rates: VAT_RATES,
+          },
+        });
+      }
+    }
+    for (const item of packages) {
+      const copy: PackageRow = {
+        propertyId: item.propertyId,
+        idPackage: crypto.randomUUID(),
+        packageName: copyName(
+          item.packageName ?? '',
+          Language.It,
+          packagesOfProperty().map(({ packageName }) => packageName),
+        ),
+      };
+      const details = PACKAGE_DETAILS.get(item.idPackage ?? '');
+      if (details) {
+        PACKAGE_DETAILS.set(copy.idPackage ?? '', {
+          ...structuredClone(details),
+          translations: details.translations.map((translation) =>
+            copiedTranslation(translation, copy.packageName),
+          ),
+          isDefault: false,
+          isDefaultOnline: false,
+        });
+      }
+      PACKAGES.push(copy);
+    }
+    return null;
+  });
+
+function copyError(details: PackageAddItemRequest | undefined): ApiErrorCode | null {
+  if (details?.vatRate != null && !VAT_RATES.includes(details.vatRate)) {
+    return ApiErrorCode.PricingDuplicateVatRateNotAllowed;
+  }
+  if (details?.idSectorAreas.some((id) => !isAreaOfProperty(id))) {
+    return ApiErrorCode.PricingDuplicateAreaNotFound;
+  }
+  if (details?.periodPrices.some(({ idPeriod }) => !isPeriodOfSeason(idPeriod))) {
+    return ApiErrorCode.PricingDuplicatePeriodNotFound;
+  }
+  return details && !sectorsOf(details).every(isSectorOfProperty)
+    ? ApiErrorCode.PricingDuplicateSectorNotFound
+    : null;
+}
+
+/** Every sector the package has data of. */
+function sectorsOf(details: PackageAddItemRequest): (string | null)[] {
+  return [
+    ...details.idSectors,
+    ...[
+      ...details.sectorPrices,
+      ...details.periodPrices,
+      ...details.reducedSeasonalPrices.flatMap(({ sectorPrices }) => sectorPrices),
+    ].map(({ idSector }) => idSector),
+  ];
+}
+
+/** As the backend: the rows of a deleted sector or period, or without prices, are not saved. */
+function savedRows(details: PackageAddItemRequest): PackageAddItemRequest {
+  const isKept = (row: PackageSectorPrice | PackagePeriodPrice): boolean =>
+    isSectorOfProperty(row.idSector) &&
+    Object.entries(row).some(
+      ([field, value]) => field !== 'idSector' && field !== 'idPeriod' && value !== null,
+    );
+  return {
+    ...details,
+    sectorPrices: details.sectorPrices.filter(isKept),
+    periodPrices: details.periodPrices.filter(
+      (price) => isKept(price) && isPeriodOfSeason(price.idPeriod),
+    ),
+    reducedSeasonalPrices: details.reducedSeasonalPrices.map((price) => ({
+      ...price,
+      sectorPrices: price.sectorPrices.filter(isKept),
+    })),
+  };
+}
+
+/** The names of the additional items linked to the package and only to those being deleted. */
+function onlyWith({ idPackage }: PackageRow, deleted: readonly PackageRow[]): string[] {
+  return ADDITIONAL_ITEMS.filter(({ propertyId, idAdditionalItem }) => {
+    const links = ADDITIONAL_ITEM_DETAILS.get(idAdditionalItem ?? '')?.idPackages ?? [];
+    return (
+      propertyId === DEMO_PROPERTY.id &&
+      links.some((id) => id === idPackage) &&
+      links.every((id) => deleted.some((row) => row.idPackage === id))
+    );
+  }).map(({ additionalItemName }) => additionalItemName ?? '');
+}
+
+function copiedTranslation(
+  translation: PackageTranslation,
+  italianName: string | null,
+): PackageTranslation {
+  const { language, packageName } = translation;
+  if (!language || !packageName) {
+    return { ...translation };
+  }
+  return {
+    ...translation,
+    packageName:
+      language === Language.It
+        ? italianName
+        : copyName(
+            packageName,
+            language,
+            packagesOfProperty().map((row) => translatedNameOf(row, language)),
+          ),
+  };
+}
+
+/**
+ * All or nothing: 404 `pricing.price_list_not_found` when one of `idPackages` is not a package of the
+ * property, and nothing changes; 400 `validation.required` without ids; repeated ids count once. 204
+ * without a body; 401 without a valid access token.
+ */
+function withPackages(
+  request: HttpRequest<unknown>,
+  change: (packages: PackageRow[]) => Observable<HttpEvent<unknown>> | null,
+): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const body = (request.body ?? {}) as { idPackages?: string[] };
-  const property = DEMO_PROPERTY;
-  const packages = packagesOf(property.id, body.idPackages);
-  if (!packages) {
-    return resourceNotFound(request);
+  const { idPackages } = (request.body ?? {}) as { idPackages?: unknown };
+  const ids = Array.isArray(idPackages) ? [...new Set<unknown>(idPackages)] : [];
+  if (!ids.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors: [{ field: 'idPackages', code: ApiErrorCode.ValidationRequired }],
+    });
   }
-  for (const item of packages) {
-    const copy: PackageRow = {
-      propertyId: item.propertyId,
-      idPackage: crypto.randomUUID(),
-      packageName: copyName(item),
-    };
-    const detail = PACKAGE_DETAILS.get(item.idPackage ?? '');
-    if (detail) {
-      PACKAGE_DETAILS.set(copy.idPackage ?? '', {
-        ...structuredClone(detail),
-        translations: detail.translations.map((translation) =>
-          translation.packageName?.trim() === item.packageName
-            ? { ...translation, packageName: copy.packageName }
-            : { ...translation },
-        ),
-        isDefault: false,
-        isDefaultOnline: false,
-      });
-    }
-    PACKAGES.push(copy);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-function copyName(item: PackageRow): string {
-  const taken = new Set(
-    PACKAGES.filter((row) => row.propertyId === item.propertyId).map((row) =>
-      row.packageName?.trim().toLowerCase(),
-    ),
+  const packages = ids.flatMap((id) =>
+    packagesOfProperty().filter(({ idPackage }) => idPackage === id),
   );
-  let copy = `${item.packageName} (copia)`;
-  for (let number = 2; taken.has(copy.trim().toLowerCase()); number++) {
-    copy = `${item.packageName} (copia ${number})`;
+  if (packages.length !== ids.length) {
+    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
-  return copy;
+  return (
+    change(packages) ?? of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600))
+  );
 }
 
-function packagesOf(propertyId: number, idPackages: unknown): PackageRow[] | null {
-  const ids = Array.isArray(idPackages) ? [...new Set(idPackages)] : [];
-  const packages = ids
-    .map((id) => PACKAGES.find((row) => row.idPackage === id && row.propertyId === propertyId))
-    .filter((item): item is PackageRow => item !== undefined);
-  return ids.length && packages.length === ids.length ? packages : null;
+function packagesOfProperty(): PackageRow[] {
+  return PACKAGES.filter(({ propertyId }) => propertyId === DEMO_PROPERTY.id);
+}
+
+function translatedNameOf(row: PackageRow, language: string): string | null {
+  return (
+    PACKAGE_DETAILS.get(row.idPackage ?? '')
+      ?.translations.find((translation) => translation.language === language)
+      ?.packageName?.trim() || null
+  );
 }
 
 /** The name shown for a package: the one in `language`, otherwise its `name` (`row.packageName`). */
 function packageNameIn(row: PackageRow, language: string): string | null {
-  const translated = PACKAGE_DETAILS.get(row.idPackage ?? '')
-    ?.translations.find((translation) => translation.language === language)
-    ?.packageName?.trim();
-  return translated || row.packageName;
+  return translatedNameOf(row, language) ?? row.packageName;
 }
 
 /** The `name` of a saved package: the Italian name when written, otherwise the one in `language`. */
@@ -307,10 +492,11 @@ function positiveInteger(value: unknown, fallback: number): number {
 type CreatePackageBody = Partial<PackageAddItemRequest>;
 
 /**
- * `POST /api/catalog/packages/create-package` with `PackageAddItemRequest`, the property from the
+ * `POST /api/catalog/price-lists/create-package` with `PackageAddItemRequest`, the property from the
  * access token: the new package goes into the list, its `name` the Italian name or, when missing,
  * the one in the language of `Accept-Language` (`savedPackageName`). 204 without a body; 401 without
- * a valid access token; 400 with one error per wrong field (see `packageErrors`).
+ * a valid access token; 400 with one error per wrong field (see `packageErrors`); 404
+ * `catalog.sector_not_found` for a deleted sector among the enabled ones.
  */
 export const createPackageMock = (
   request: HttpRequest<unknown>,
@@ -326,6 +512,10 @@ export const createPackageMock = (
       errors,
     });
   }
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   const row: PackageRow = {
     propertyId: DEMO_PROPERTY.id,
     idPackage: crypto.randomUUID(),
@@ -334,9 +524,53 @@ export const createPackageMock = (
   PACKAGES.push(row);
   PACKAGE_DETAILS.set(
     row.idPackage ?? '',
-    structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
+    savedRows(structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest))),
   );
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/**
+ * The VAT, the sectors, the areas and the items of the body, in the order of the backend: 422
+ * `catalog.vat_rate_not_allowed`, 404 `catalog.sector_not_found`, `map.spot_not_found` and
+ * `inventory.item_not_found`.
+ */
+function referenceProblem(
+  request: HttpRequest<unknown>,
+  body: CreatePackageBody,
+): Observable<never> | null {
+  const missing =
+    vatRateNotAllowed(request, body.vatRate) ?? missingSector(request, body.idSectors);
+  if (missing) {
+    return missing;
+  }
+  if (!(body.idSectorAreas ?? []).every(isAreaOfProperty)) {
+    return problem(request, 404, ApiErrorCode.MapSpotNotFound);
+  }
+  return (body.items ?? []).every(({ idInventoryItem }) =>
+    activeArticleName(DEMO_PROPERTY.id, idInventoryItem),
+  )
+    ? null
+    : problem(request, 404, ApiErrorCode.InventoryItemNotFound);
+}
+
+/**
+ * `GET /api/catalog/price-lists/get-package-articles`: the articles of the backend, always all, each
+ * with its items in the warehouse, if any. 401 without a valid access token.
+ */
+export const packageArticlesMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const articles = Object.values(InventoryArticle).map((article): PackageArticle => ({
+    article,
+    items: activeArticlesOfCode(
+      DEMO_PROPERTY.id,
+      article.replace(/(?!^)([A-Z])/g, '_$1').toLowerCase(),
+    ),
+  }));
+  return of(new HttpResponse({ status: 200, url: request.url, body: articles })).pipe(delay(300));
 };
 
 /**
@@ -377,19 +611,26 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
       errors.push({ field, code: ApiErrorCode.ValidationOutOfRange, args: { ...range } });
     }
   }
-  const articles = [
-    'umbrellaQuantity',
-    'sunbedQuantity',
-    'deckchairQuantity',
-    'directorChairQuantity',
-    'cabinQuantity',
-    'tentQuantity',
-  ] as const;
-  for (const field of articles) {
-    const quantity = body[field];
-    if (quantity != null && !isWholeNumberIn(quantity, 1, MAX_ARTICLE_QUANTITY)) {
-      errors.push({ field, code: ApiErrorCode.ValidationInvalid });
-    }
+  const items = body.items ?? [];
+  const idItems = items.map(({ idInventoryItem }) => idInventoryItem);
+  if (
+    items.length > MAX_ITEM_QUANTITY ||
+    new Set(idItems).size !== idItems.length ||
+    items.some(
+      ({ quantity }) => quantity === null || !isWholeNumberIn(quantity, 1, MAX_ARTICLE_QUANTITY),
+    )
+  ) {
+    errors.push({ field: 'items', code: ApiErrorCode.ValidationInvalid });
+  }
+  if ((body.includedServices ?? '').trim().length > MAX_PACKAGE_INCLUDED_SERVICES_LENGTH) {
+    errors.push({
+      field: 'includedServices',
+      code: ApiErrorCode.ValidationMaxLength,
+      args: { max: MAX_PACKAGE_INCLUDED_SERVICES_LENGTH },
+    });
+  }
+  if (body.vatRate != null && (body.vatRate <= 0 || body.vatRate >= 100)) {
+    errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
   }
   errors.push(...choiceErrors(body));
   const reducedPrices = Array.isArray(body.reducedSeasonalPrices) ? body.reducedSeasonalPrices : [];
@@ -439,11 +680,6 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
   return errors;
 }
 
-/** The id at the end of `/api/catalog/packages/{idPackage}`. */
-function idPackageOf(request: HttpRequest<unknown>): string {
-  return decodeURIComponent(request.url.slice(request.url.lastIndexOf('/') + 1));
-}
-
 /** The package of the token's property, null when it is not one of them. */
 function packageOf(idPackage: string): PackageRow | null {
   return (
@@ -453,10 +689,10 @@ function packageOf(idPackage: string): PackageRow | null {
 }
 
 /**
- * `GET /api/catalog/packages/{idPackage}`, the property from the access token: everything the
+ * `GET /api/catalog/price-lists/get-package`, the property from the access token: everything the
  * package has, as the panels send it, and its version; a package never saved has only its name in
- * Italian. 200; 401 without a valid access token; 404 `resource.not_found` for a package that is not
- * one of its.
+ * Italian. 200; 401 without a valid access token; 404 `pricing.price_list_not_found` for a package
+ * that is not one of its.
  */
 export const selectedPackageMock = (
   request: HttpRequest<unknown>,
@@ -464,16 +700,16 @@ export const selectedPackageMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const row = packageOf(idPackageOf(request));
+  const row = packageOf(request.params.get('idPackage') ?? '');
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
   const data = packageData(row);
   const answer: PackageSelectedItem = { ...data, version: versionOf(data) };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
 
-/** What `GET /api/catalog/packages/{idPackage}` answers besides the version: the version covers it. */
+/** What `GET /api/catalog/price-lists/get-package` answers besides the version: the version covers it. */
 function packageData(row: PackageRow): Omit<PackageSelectedItem, 'version'> {
   const detail =
     PACKAGE_DETAILS.get(row.idPackage ?? '') ??
@@ -484,11 +720,13 @@ function packageData(row: PackageRow): Omit<PackageSelectedItem, 'version'> {
 }
 
 /**
- * `POST /api/catalog/packages/update-package` with `PackageAddItemRequest` and `idPackage`, the
+ * `POST /api/catalog/price-lists/update-package` with `PackageAddItemRequest` and `idPackage`, the
  * property from the access token: the package takes all the values sent, its `name` as in
  * `createPackageMock`. 204 without a body, with the new version in `ETag`; 401 without a valid access
- * token; 404 `resource.not_found` for a package that is not one of its; 400 as `createPackageMock`;
- * 409 `resource.version_conflict` when `If-Match` is not the version of the package.
+ * token; 404 `pricing.price_list_not_found` for a package that is not one of its; 400 as
+ * `createPackageMock`; 409 `resource.version_conflict` when `If-Match` is not the version of the
+ * package; 404 `catalog.sector_not_found` for a deleted sector among the enabled ones. The rows of
+ * deleted sectors and periods, or without prices, are not saved.
  */
 export const updatePackageMock = (
   request: HttpRequest<unknown>,
@@ -499,7 +737,7 @@ export const updatePackageMock = (
   const body = (request.body ?? {}) as CreatePackageBody & { idPackage?: unknown };
   const row = typeof body.idPackage === 'string' ? packageOf(body.idPackage) : null;
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = packageErrors(body, language);
@@ -512,10 +750,14 @@ export const updatePackageMock = (
   if (conflict) {
     return conflict;
   }
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
   PACKAGE_DETAILS.set(
     row.idPackage ?? '',
-    structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
+    savedRows(structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest))),
   );
   return savedWithVersion(request, packageData(row));
 };
@@ -545,7 +787,18 @@ const ADDITIONAL_ITEMS: AdditionalItemRow[] = ADDITIONAL_ITEM_NAMES.map(
 );
 
 /** What the panels saved, by idAdditionalItem; an item never saved has only its article. */
-const ADDITIONAL_ITEM_DETAILS = new Map<string, AdditionalItemAddItemRequest>();
+const ADDITIONAL_ITEM_DETAILS = new Map<string, AdditionalItemAddItemRequest>([
+  [
+    ADDITIONAL_ITEMS[2].idAdditionalItem ?? '',
+    Object.assign(new AdditionalItemAddItemRequest(), {
+      idArticle: activeArticleIdNamed(
+        ADDITIONAL_ITEMS[2].propertyId,
+        ADDITIONAL_ITEMS[2].additionalItemName,
+      ),
+      idPackages: [PACKAGES[5].idPackage ?? ''],
+    }),
+  ],
+]);
 
 const ADDITIONAL_ITEM_SORT_FIELDS = ['additionalItemName'] as const;
 

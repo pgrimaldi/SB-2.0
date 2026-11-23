@@ -26,6 +26,8 @@ import { PublicHolidays } from '../public-holidays/public-holidays';
 export interface PriceListFields {
   readonly sectorPrices: FieldTree<PackageSectorPrice[]>;
   readonly periodPrices: FieldTree<PackagePeriodPrice[]>;
+  /** Only the packages have it. */
+  readonly vatRate?: FieldTree<number | null>;
   readonly calculationMethod: FieldTree<PriceCalculationMethod | null>;
   readonly isCumulative: FieldTree<boolean>;
   readonly monthlySetting: FieldTree<PriceMonthlySetting | null>;
@@ -57,6 +59,7 @@ interface ChoiceTexts {
   };
   monthly_settings: {
     effective_month_duration: string;
+    actual_month_duration: string;
     thirty_days: string;
   };
   weekend_settings: {
@@ -78,6 +81,7 @@ const MONTHLY_SETTING_KEYS: Readonly<
   Record<PriceMonthlySetting, keyof ChoiceTexts['monthly_settings']>
 > = {
   [PriceMonthlySetting.EffectiveMonthDuration]: 'effective_month_duration',
+  [PriceMonthlySetting.ActualMonthDuration]: 'actual_month_duration',
   [PriceMonthlySetting.Fixed30Days]: 'thirty_days',
 };
 

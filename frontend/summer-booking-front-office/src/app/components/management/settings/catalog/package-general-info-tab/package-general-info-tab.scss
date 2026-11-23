@@ -19,6 +19,18 @@
   min-width: 0;
 }
 
+.package__general__info__tab__note {
+  margin: 0;
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+}
+
+.package__general__info__tab__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+}
+
 // Three articles per row, as many rows as needed; one per row on phones.
 .package__general__info__tab__articles {
   display: grid;

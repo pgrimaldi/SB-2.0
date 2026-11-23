@@ -7048,7 +7048,7 @@ Stato: 200 OK.
 | `id` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
 | `value` | string | `Fila 1` |
 
-### POST `/api/catalog/packages-list`
+### POST `/api/catalog/price-lists/packages-list`
 
 Listino: elenco dei pacchetti.
 
@@ -7101,7 +7101,7 @@ Stato: 200 OK.
 | `rows[].idPackage` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
 | `rows[].packageName` | string \| null | `Ombrellone e 2 lettini` |
 
-### POST `/api/catalog/delete-package-item`
+### POST `/api/catalog/price-lists/delete-package-item`
 
 Listino: eliminazione dei pacchetti.
 
@@ -7126,7 +7126,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/duplicate-package-item`
+### POST `/api/catalog/price-lists/duplicate-package-item`
 
 Listino: duplicazione dei pacchetti.
 
@@ -7150,7 +7150,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/map/sector-area-combobox`
+### POST `/api/catalog/sectors/sector-area-combobox`
 
 Listino: aree della mappa per la tendina.
 
@@ -7165,26 +7165,26 @@ Stato: 200 OK.
 ```json
 [
   {
+    "id": "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a03",
+    "value": "Area cabine"
+  },
+  {
     "id": "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01",
     "value": "Area lettini"
   },
   {
     "id": "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a02",
     "value": "Area ombrelloni"
-  },
-  {
-    "id": "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a03",
-    "value": "Area cabine"
   }
 ]
 ```
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `id` | string (UUID) | `9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01` |
-| `value` | string | `Area lettini` |
+| `id` | string (UUID) | `9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a03` |
+| `value` | string | `Area cabine` |
 
-### POST `/api/catalog/packages/create-package`
+### POST `/api/catalog/price-lists/create-package`
 
 Listino: creazione pacchetto.
 
@@ -7224,12 +7224,16 @@ Listino: creazione pacchetto.
   ],
   "maxAdditionalItemQuantity": 2,
   "maxPeopleQuantity": 4,
-  "umbrellaQuantity": 1,
-  "sunbedQuantity": 2,
-  "deckchairQuantity": null,
-  "directorChairQuantity": null,
-  "cabinQuantity": null,
-  "tentQuantity": null,
+  "items": [
+    {
+      "idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9",
+      "quantity": 1
+    },
+    {
+      "idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb",
+      "quantity": 2
+    }
+  ],
   "includedServices": "Cassetta di sicurezza e doccia calda",
   "idSectorAreas": [
     "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"
@@ -7290,6 +7294,7 @@ Listino: creazione pacchetto.
       "monthlyPrice": 520
     }
   ],
+  "vatRate": 22,
   "calculationMethod": "DailyWithWeekend",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -7318,12 +7323,9 @@ Listino: creazione pacchetto.
 | `translations[].packageName` | string \| null | `Ombrellone e 2 lettini` |
 | `maxAdditionalItemQuantity` | number (intero) \| null | `2` |
 | `maxPeopleQuantity` | number (intero) \| null | `4` |
-| `umbrellaQuantity` | number (intero) \| null | `1` |
-| `sunbedQuantity` | number (intero) \| null | `2` |
-| `deckchairQuantity` | number (intero) \| null | `null` |
-| `directorChairQuantity` | number (intero) \| null | `null` |
-| `cabinQuantity` | number (intero) \| null | `null` |
-| `tentQuantity` | number (intero) \| null | `null` |
+| `items[]` | PackageItemQuantity[] (array di oggetti) | `[{"idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9", "quantity": 1}, {"idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb", "quantity": 2}]` |
+| `items[].idInventoryItem` | string (UUID) | `276a67d2-d0eb-47f5-8223-4804b9a9dcf9` |
+| `items[].quantity` | number (intero) | `1` |
 | `includedServices` | string \| null | `Cassetta di sicurezza e doccia calda` |
 | `idSectorAreas` | string[] (UUID) | `["9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"]` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
@@ -7356,6 +7358,7 @@ Listino: creazione pacchetto.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `280` |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `320` |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `520` |
+| `vatRate` | number \| null | `22` |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null | `DailyWithWeekend` |
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
@@ -7375,13 +7378,70 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/catalog/packages/{idPackage}`
+### GET `/api/catalog/price-lists/get-package-articles`
+
+Listino: articoli dei pacchetti.
+
+#### Payload
+
+Nessun corpo né parametri: lo stabilimento viene dal token.
+
+#### Response
+
+Stato: 200 OK.
+
+```json
+[
+  {
+    "article": "Umbrella",
+    "items": [
+      {
+        "idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9",
+        "itemName": "Ombrellone",
+        "totalQuantity": 60
+      }
+    ]
+  },
+  {
+    "article": "Sunbed",
+    "items": [
+      {
+        "idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb",
+        "itemName": "Lettino",
+        "totalQuantity": 120
+      }
+    ]
+  },
+  {
+    "article": "SunbedMaxi",
+    "items": []
+  }
+]
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `article` | string (enum InventoryArticle) | `Umbrella` |
+| `items[]` | PackageArticleItem[] (array di oggetti) | `[{"idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9", "itemName": "Ombrellone", "totalQuantity": 60}]` |
+| `items[].idInventoryItem` | string (UUID) | `276a67d2-d0eb-47f5-8223-4804b9a9dcf9` |
+| `items[].itemName` | string | `Ombrellone` |
+| `items[].totalQuantity` | number (intero) | `60` |
+
+### GET `/api/catalog/price-lists/get-package?idPackage={idPackage}`
 
 Listino: pacchetto da modificare.
 
 #### Payload
 
-Nessun corpo: l'id del pacchetto va nell'indirizzo e lo stabilimento viene dal token (header Authorization: Bearer <accessToken>, come ogni chiamata).
+Nessun corpo: è una GET, l'id del pacchetto va nella query string.
+
+```text
+/api/catalog/price-lists/get-package?idPackage=8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `idPackage` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
 
 #### Response
 
@@ -7402,12 +7462,16 @@ Stato: 200 OK.
   ],
   "maxAdditionalItemQuantity": 2,
   "maxPeopleQuantity": 4,
-  "umbrellaQuantity": 1,
-  "sunbedQuantity": 2,
-  "deckchairQuantity": null,
-  "directorChairQuantity": null,
-  "cabinQuantity": null,
-  "tentQuantity": null,
+  "items": [
+    {
+      "idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9",
+      "quantity": 1
+    },
+    {
+      "idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb",
+      "quantity": 2
+    }
+  ],
   "includedServices": "Cassetta di sicurezza",
   "idSectorAreas": [
     "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"
@@ -7468,6 +7532,7 @@ Stato: 200 OK.
       "monthlyPrice": 520
     }
   ],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -7497,12 +7562,9 @@ Stato: 200 OK.
 | `translations[].packageName` | string \| null | `Ombrellone e 2 lettini` |
 | `maxAdditionalItemQuantity` | number (intero) \| null | `2` |
 | `maxPeopleQuantity` | number (intero) \| null | `4` |
-| `umbrellaQuantity` | number (intero) \| null | `1` |
-| `sunbedQuantity` | number (intero) \| null | `2` |
-| `deckchairQuantity` | number (intero) \| null | `null` |
-| `directorChairQuantity` | number (intero) \| null | `null` |
-| `cabinQuantity` | number (intero) \| null | `null` |
-| `tentQuantity` | number (intero) \| null | `null` |
+| `items[]` | PackageItemQuantity[] (array di oggetti) | `[{"idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9", "quantity": 1}, {"idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb", "quantity": 2}]` |
+| `items[].idInventoryItem` | string (UUID) | `276a67d2-d0eb-47f5-8223-4804b9a9dcf9` |
+| `items[].quantity` | number (intero) | `1` |
 | `includedServices` | string \| null | `Cassetta di sicurezza` |
 | `idSectorAreas` | string[] (UUID) | `["9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"]` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
@@ -7535,6 +7597,7 @@ Stato: 200 OK.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `280` |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `320` |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `520` |
+| `vatRate` | number \| null | `22` |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
@@ -7549,7 +7612,7 @@ Stato: 200 OK.
 | `intermediatePrices[].price` | number | `35` |
 | `version` | string | `57e34fdc` |
 
-### POST `/api/catalog/packages/update-package`
+### POST `/api/catalog/price-lists/update-package`
 
 Listino: modifica pacchetto.
 
@@ -7590,12 +7653,16 @@ Listino: modifica pacchetto.
   ],
   "maxAdditionalItemQuantity": 2,
   "maxPeopleQuantity": 4,
-  "umbrellaQuantity": 1,
-  "sunbedQuantity": 2,
-  "deckchairQuantity": null,
-  "directorChairQuantity": null,
-  "cabinQuantity": null,
-  "tentQuantity": null,
+  "items": [
+    {
+      "idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9",
+      "quantity": 1
+    },
+    {
+      "idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb",
+      "quantity": 2
+    }
+  ],
   "includedServices": "Cassetta di sicurezza",
   "idSectorAreas": [
     "9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"
@@ -7644,6 +7711,7 @@ Listino: modifica pacchetto.
       "monthlyPrice": 520
     }
   ],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -7672,12 +7740,9 @@ Listino: modifica pacchetto.
 | `translations[].packageName` | string \| null | `Ombrellone e 2 lettini premium` |
 | `maxAdditionalItemQuantity` | number (intero) \| null | `2` |
 | `maxPeopleQuantity` | number (intero) \| null | `4` |
-| `umbrellaQuantity` | number (intero) \| null | `1` |
-| `sunbedQuantity` | number (intero) \| null | `2` |
-| `deckchairQuantity` | number (intero) \| null | `null` |
-| `directorChairQuantity` | number (intero) \| null | `null` |
-| `cabinQuantity` | number (intero) \| null | `null` |
-| `tentQuantity` | number (intero) \| null | `null` |
+| `items[]` | PackageItemQuantity[] (array di oggetti) | `[{"idInventoryItem": "276a67d2-d0eb-47f5-8223-4804b9a9dcf9", "quantity": 1}, {"idInventoryItem": "c87770a7-74b6-4dc4-a5ad-e193e136bacb", "quantity": 2}]` |
+| `items[].idInventoryItem` | string (UUID) | `276a67d2-d0eb-47f5-8223-4804b9a9dcf9` |
+| `items[].quantity` | number (intero) | `1` |
 | `includedServices` | string \| null | `Cassetta di sicurezza` |
 | `idSectorAreas` | string[] (UUID) | `["9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01"]` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
@@ -7710,6 +7775,7 @@ Listino: modifica pacchetto.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `280` |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `320` |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `520` |
+| `vatRate` | number \| null | `22` |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |

@@ -121,6 +121,7 @@
       "export_too_large": "要导出的记录有 {total, number, integer} 条，但最多只能导出 {max, number, integer} 条：请缩小时间范围或筛选条件后重试。"
     },
     "map": {
+      "spot_not_found": "地图区域已不存在：可能已被删除。",
       "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
       "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。"
     },
@@ -147,7 +148,14 @@
       "period_ranges_required": "时段至少需要一个日期区间。如要完全删除，请使用其名称旁的垃圾桶。",
       "period_in_use": "该时段在价目表 {{priceLists}} 中有价格：请先从这些价目表中删除其价格，然后再删除该时段。",
       "period_in_use_by_services": "该时段被服务 {{services}} 使用：请先从这些服务中删除其价格，然后再删除该时段。",
-      "period_overlap": "日期与时段 {{periodName}} 重叠：请选择不在其他时段中的日期。"
+      "period_overlap": "日期与时段 {{periodName}} 重叠：请选择不在其他时段中的日期。",
+      "calculation_method_not_found": "该价格计算方式已不可用：请选择其他方式。",
+      "price_list_not_found": "价目表项目已不存在：可能已被删除。",
+      "price_list_in_use": "无法删除 {{priceListName}}：附加物品/服务 {{additionalItems}} 将不再关联任何套餐，并会适用于所有套餐。请先将它们关联到其他套餐，或将其删除。",
+      "duplicate_vat_rate_not_allowed": "无法复制 {{priceListName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
+      "duplicate_period_not_found": "无法复制 {{priceListName}}：其中有已删除时段的价格。请打开并编辑、保存后重试。",
+      "duplicate_area_not_found": "无法复制 {{priceListName}}：其中包含已删除的地图区域。请打开并从启用的区域中移除，保存后重试。",
+      "duplicate_sector_not_found": "无法复制 {{priceListName}}：其中包含已删除的区域/排的数据。请打开并编辑、保存后重试。"
     },
     "inventory": {
       "item_not_found": "物品已不存在：可能已被删除。",
@@ -160,8 +168,9 @@
       "table_service_not_found": "餐桌服务已不存在：可能已被删除。",
       "icon_not_found": "所选图标已不可用：请选择其他图标。",
       "duplicate_vat_rate_not_allowed": "无法复制 {{serviceName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
-      "duplicate_period_not_found": "无法复制 {{serviceName}}：其中有的价格所属时段已不在当前赛季。",
-      "duplicate_icon_not_found": "无法复制 {{serviceName}}：其图标已不可用。请选择其他图标后重试。"
+      "duplicate_period_not_found": "无法复制 {{serviceName}}：其中有已删除时段的价格。请编辑并保存其“价格”标签页后重试。",
+      "duplicate_icon_not_found": "无法复制 {{serviceName}}：其图标已不可用。请选择其他图标后重试。",
+      "duplicate_sector_not_found": "无法复制 {{serviceName}}：它仅限于已删除的区域/排。请检查其区域/排，保存后重试。"
     }
   },
   "alert": {
@@ -1786,17 +1795,35 @@
             "max_people": "最多人数",
             "articles": {
               "title": "套餐包含的物品",
-              "umbrella": "遮阳伞",
-              "sunbed": "躺椅",
-              "deckchair": "沙滩椅",
-              "director_chair": "导演椅",
-              "cabin": "更衣室",
-              "tent": "帐篷"
+              "none": "无",
+              "unavailable": "库存中没有",
+              "unavailable_note": "灰色的物品在库存中没有。",
+              "names": {
+                "umbrella": "遮阳伞",
+                "sunbed": "躺椅",
+                "sunbed_xl": "加大躺椅",
+                "sunbed_maxi": "特大躺椅",
+                "deckchair": "沙滩椅",
+                "directors_chair": "导演椅",
+                "tent": "帐篷",
+                "gazebo": "凉亭",
+                "cabin": "更衣室",
+                "custom_cabin": "自定义更衣室",
+                "parking": "停车位",
+                "ticket": "门票",
+                "sunbed_area": "躺椅区",
+                "umbrella_area": "遮阳伞区",
+                "parking_area": "停车区",
+                "cabin_area": "更衣室区",
+                "custom_article": "自定义物品 {{number}}"
+              }
             },
             "included_services": "包含的服务（可选）",
             "enabled_areas": "启用的区域",
             "sectors": "区域和排",
             "all_sectors": "所有区域和排",
+            "missing_sector": "排/区域已不可用",
+            "missing_area": "区域已不可用",
             "is_default": "设为默认套餐",
             "is_default_online": "设为在线默认套餐",
             "online_enabled": "也用于在线预订",
@@ -1884,6 +1911,7 @@
           "monthly": "月价",
           "no_sectors": "没有区域或排：请在“区域和排”页面中添加。",
           "no_periods": "按时段定价至少需要一个区域或排，以及本季的一个时段。",
+          "vat": "增值税 (%)",
           "calculation_method": "价格计算",
           "calculation_methods": {
             "proportional": "按比例价",
@@ -1896,7 +1924,8 @@
           "cumulative_info": "累计价格是一种计算方式，当预订跨越多个时段时，可得到更准确的最终价格。\n## 工作方式\n启用后，系统按各季节所占的天数，对不同季节的价格加权平均来计算总价。\n## 适用情况\n- **单一季节内的预订**：直接使用该季节价目表的价格，不做额外计算。\n- **跨多个季节的预订**：系统按淡季和旺季的天数比例，组合各季节价目表的价格。\n- **多个预订**：系统不再将各时段的价格相加，而是按总天数重新计算总价。",
           "monthly_setting": "月份设置",
           "monthly_settings": {
-            "effective_month_duration": "按月份实际天数",
+            "effective_month_duration": "按月份实际天数（31天）",
+            "actual_month_duration": "当月真实天数",
             "thirty_days": "30天"
           },
           "weekend_setting": "周末设置",

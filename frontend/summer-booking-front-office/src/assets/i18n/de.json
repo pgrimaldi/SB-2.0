@@ -121,6 +121,7 @@
       "export_too_large": "Es gibt {total, number, integer} Einträge zum Exportieren, aber höchstens {max, number, integer} können exportiert werden: Schränke den Zeitraum oder die Filter ein und versuche es erneut."
     },
     "map": {
+      "spot_not_found": "Der Bereich der Karte ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
       "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein."
     },
@@ -147,7 +148,14 @@
       "period_ranges_required": "Ein Zeitraum braucht mindestens einen Datumsbereich. Um ihn ganz zu löschen, verwende den Papierkorb neben seinem Namen.",
       "period_in_use": "Der Zeitraum hat Preise in den Preislisten {{priceLists}}: Entferne zuerst seine Preise aus diesen Preislisten und lösche ihn dann.",
       "period_in_use_by_services": "Der Zeitraum wird von den Leistungen {{services}} verwendet: Entferne zuerst seine Preise aus diesen Leistungen und lösche ihn dann.",
-      "period_overlap": "Die Daten überschneiden sich mit dem Zeitraum {{periodName}}: Wähle Tage, die nicht schon in einem anderen Zeitraum liegen."
+      "period_overlap": "Die Daten überschneiden sich mit dem Zeitraum {{periodName}}: Wähle Tage, die nicht schon in einem anderen Zeitraum liegen.",
+      "calculation_method_not_found": "Diese Preisberechnung ist nicht mehr verfügbar: Wähle eine andere.",
+      "price_list_not_found": "Der Eintrag der Preisliste ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "price_list_in_use": "{{priceListName}} kann nicht gelöscht werden: Die zusätzlichen Artikel/Leistungen {{additionalItems}} hätten dann kein Paket mehr und würden für alle gelten. Verknüpfe sie zuerst mit anderen Paketen oder lösche sie.",
+      "duplicate_vat_rate_not_allowed": "{{priceListName}} kann nicht dupliziert werden: Die MwSt. ist keiner der zulässigen Sätze ({{rates}}). Ändere sie und versuche es erneut.",
+      "duplicate_period_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt Preise für einen gelöschten Zeitraum. Öffne, bearbeite und speichere den Eintrag und versuche es erneut.",
+      "duplicate_area_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt einen gelöschten Bereich der Karte. Öffne den Eintrag, entferne den Bereich aus den freigegebenen und speichere, dann versuche es erneut.",
+      "duplicate_sector_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt Daten zu einer gelöschten Reihe oder einem gelöschten Sektor. Öffne, bearbeite und speichere den Eintrag und versuche es erneut."
     },
     "inventory": {
       "item_not_found": "Der Artikel ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
@@ -160,8 +168,9 @@
       "table_service_not_found": "Der Tischservice ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "icon_not_found": "Das gewählte Symbol ist nicht mehr verfügbar: Wähle ein anderes.",
       "duplicate_vat_rate_not_allowed": "{{serviceName}} kann nicht dupliziert werden: Die MwSt. ist keiner der zulässigen Sätze ({{rates}}). Ändere sie und versuche es erneut.",
-      "duplicate_period_not_found": "{{serviceName}} kann nicht dupliziert werden: Es gibt Preise für einen Zeitraum, der nicht mehr in der aktuellen Saison ist.",
-      "duplicate_icon_not_found": "{{serviceName}} kann nicht dupliziert werden: Das Symbol ist nicht mehr verfügbar. Wähle ein anderes und versuche es erneut."
+      "duplicate_period_not_found": "{{serviceName}} kann nicht dupliziert werden: Es gibt Preise für einen gelöschten Zeitraum. Bearbeite und speichere den Tab Preise und versuche es erneut.",
+      "duplicate_icon_not_found": "{{serviceName}} kann nicht dupliziert werden: Das Symbol ist nicht mehr verfügbar. Wähle ein anderes und versuche es erneut.",
+      "duplicate_sector_not_found": "{{serviceName}} kann nicht dupliziert werden: Der Eintrag ist auf eine gelöschte Reihe oder einen gelöschten Sektor beschränkt. Prüfe die Reihen und Sektoren, speichere und versuche es erneut."
     }
   },
   "alert": {
@@ -1786,17 +1795,35 @@
             "max_people": "Max. Anzahl Personen",
             "articles": {
               "title": "Artikel im Paket",
-              "umbrella": "Sonnenschirm",
-              "sunbed": "Liege",
-              "deckchair": "Liegestuhl",
-              "director_chair": "Regiestuhl",
-              "cabin": "Kabine",
-              "tent": "Zelt"
+              "none": "Keine",
+              "unavailable": "Nicht auf Lager",
+              "unavailable_note": "Die grauen Artikel haben keine Elemente im Lager.",
+              "names": {
+                "umbrella": "Sonnenschirm",
+                "sunbed": "Liege",
+                "sunbed_xl": "Liege XL",
+                "sunbed_maxi": "Liege Maxi",
+                "deckchair": "Liegestuhl",
+                "directors_chair": "Regiestuhl",
+                "tent": "Zelt",
+                "gazebo": "Pavillon",
+                "cabin": "Kabine",
+                "custom_cabin": "Eigene Kabine",
+                "parking": "Parkplatz",
+                "ticket": "Ticket",
+                "sunbed_area": "Liegenbereich",
+                "umbrella_area": "Schirmbereich",
+                "parking_area": "Parkbereich",
+                "cabin_area": "Kabinenbereich",
+                "custom_article": "Eigener Artikel {{number}}"
+              }
             },
             "included_services": "Inklusive Leistungen (optional)",
             "enabled_areas": "Freigegebene Bereiche",
             "sectors": "Sektoren und Reihen",
             "all_sectors": "Alle Sektoren und Reihen",
+            "missing_sector": "Reihe/Sektor nicht mehr verfügbar",
+            "missing_area": "Bereich nicht mehr verfügbar",
             "is_default": "Als Standardpaket festlegen",
             "is_default_online": "Als Online-Standardpaket festlegen",
             "online_enabled": "Auch für Online-Buchungen aktivieren",
@@ -1884,6 +1911,7 @@
           "monthly": "Monatspreis",
           "no_sectors": "Keine Sektoren oder Reihen: füge sie auf der Seite Sektoren und Reihen hinzu.",
           "no_periods": "Für Preise pro Zeitraum braucht es mindestens einen Sektor oder eine Reihe und einen Zeitraum der laufenden Saison.",
+          "vat": "MwSt. (%)",
           "calculation_method": "Preisberechnung",
           "calculation_methods": {
             "proportional": "Proportionaler Preis",
@@ -1896,7 +1924,8 @@
           "cumulative_info": "Der Kumulierte Preis ist eine Berechnungsart, die einen genaueren Endpreis ergibt, wenn eine Buchung mehrere Zeiträume umfasst.\n## So funktioniert es\nIst er aktiviert, berechnet das System den Gesamtbetrag mit einem gewichteten Durchschnitt der Preise der verschiedenen Saisons, je nach Anzahl der Tage, die in jede Saison fallen.\n## Wann er gilt\n- **Buchung in einer einzigen Saison**: Es gilt der Preis aus der Tabelle dieser Saison, ohne weitere Berechnung.\n- **Buchung über mehrere Saisons**: Das System kombiniert die Preise der Saisontabellen im Verhältnis zu den Tagen in Neben- und Hauptsaison.\n- **Mehrfachbuchungen**: Statt die Preise der einzelnen Zeiträume zu addieren, berechnet das System den Gesamtbetrag mit der Gesamtzahl der Tage neu.",
           "monthly_setting": "Monatseinstellung",
           "monthly_settings": {
-            "effective_month_duration": "Tatsächliche Monatslänge",
+            "effective_month_duration": "Tatsächliche Monatslänge (31 Tage)",
+            "actual_month_duration": "Echte Tage des Monats",
             "thirty_days": "30 Tage"
           },
           "weekend_setting": "Wochenendeinstellung",
