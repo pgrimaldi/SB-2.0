@@ -93,6 +93,7 @@ import {
 } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import {
+  MockCopyError,
   deleteServicesAnswer,
   duplicateServicesAnswer,
   nameToSave,
@@ -1517,6 +1518,14 @@ function copyImage(id: string, idCopy: string): void {
 }
 
 const VAT_RATES: readonly number[] = [4, 5, 10, 22];
+
+/** The VAT of the element, or of its availabilities, has to be still allowed. */
+function copyVatError(vatRates: readonly (number | null)[]): MockCopyError | null {
+  return vatRates.every((vatRate) => vatRate === null || VAT_RATES.includes(vatRate))
+    ? null
+    : { code: ApiErrorCode.ServiceDuplicateVatRateNotAllowed, args: { rates: VAT_RATES } };
+}
+
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
 const BAR_SERVICE_TABLE = {
@@ -1526,6 +1535,8 @@ const BAR_SERVICE_TABLE = {
   detailsOf,
   notFoundCode: ApiErrorCode.ServiceNotFound,
   copyMore: copyImage,
+  deleteMore: leaveAutomaticPrices,
+  copyError: ({ vatRate }: BarServiceAddItemRequest) => copyVatError([vatRate]),
 };
 
 /** `POST /api/catalog/services/bar-service-list`: one page of the bar services (see `serviceListAnswer`). */
@@ -1885,6 +1896,8 @@ const STANDARD_SERVICES: StandardServiceRow[] = (
   price,
 }));
 
+/** Of "Cassetta di Sicurezza": it cannot be duplicated, and is refused when it is saved. */
+const VAT_RATE_NO_LONGER_ALLOWED = 20;
 const STANDARD_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
 /** `POST /api/catalog/services/standard-service-list`: one page of the services (neither bar nor hourly) (see `serviceListAnswer`). */
@@ -1958,7 +1971,7 @@ function standardDetailsOf(row: StandardServiceRow): StandardServiceAddItemReque
         },
       ],
       price: row.price,
-      vatRate: 22,
+      vatRate: row.idStandardService?.endsWith('02') ? VAT_RATE_NO_LONGER_ALLOWED : 22,
     })
   );
 }
@@ -1970,6 +1983,8 @@ const STANDARD_SERVICE_TABLE = {
   detailsOf: standardDetailsOf,
   notFoundCode: ApiErrorCode.ServiceNotFound,
   copyMore: copyImage,
+  deleteMore: leaveAutomaticPrices,
+  copyError: ({ vatRate }: StandardServiceAddItemRequest) => copyVatError([vatRate]),
 };
 
 /** The service of the `idStandardService` of the query string, if it exists. */
@@ -2428,6 +2443,9 @@ const HOURLY_SERVICE_TABLE = {
   detailsOf: hourlyDetailsOf,
   notFoundCode: ApiErrorCode.ServiceNotFound,
   copyMore: copyImage,
+  deleteMore: leaveAutomaticPrices,
+  copyError: (details: HourlyServiceAddItemRequest) =>
+    copyVatError([details.vatRate, ...availabilitiesOf(details).map(({ vatRate }) => vatRate)]),
 };
 
 /** The hourly service of the `idHourlyService` of the query string, if it exists. */
@@ -2816,7 +2834,9 @@ export const updateHourlyServicePricesMock = (
       ),
     (details, body) => {
       details.price = body.price ?? null;
-      details.vatRate = hourlyVatRate({ ...body, bookingOptions: details.bookingOptions });
+      if (details.vatRate !== null || body.vatRate != null) {
+        details.vatRate = hourlyVatRate({ ...body, bookingOptions: details.bookingOptions });
+      }
       details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
       details.availabilityOptions = body.availabilityOptions ?? [];
       details.periodAvailabilities = body.periodAvailabilities ?? [];
@@ -2901,6 +2921,19 @@ const AUTOMATIC_PRICE_DETAILS = new Map<string, AutomaticPriceAddItemRequest>([
     }),
   ],
 ]);
+
+/** As `ServiceItemsService.RemoveAsync`: a deleted service is not in the automatic prices any more. */
+function leaveAutomaticPrices(idService: string): void {
+  const without = (ids: readonly string[]): string[] => ids.filter((id) => id !== idService);
+  for (const [idAutomaticPrice, details] of AUTOMATIC_PRICE_DETAILS) {
+    AUTOMATIC_PRICE_DETAILS.set(idAutomaticPrice, {
+      ...details,
+      idBarServices: without(details.idBarServices),
+      idStandardServices: without(details.idStandardServices),
+      idHourlyServices: without(details.idHourlyServices),
+    });
+  }
+}
 
 /** The services of a property as `{ id, value }`, with the name. */
 function serviceItemsOf<Row extends { propertyId: number; serviceName: string | null }>(
@@ -3153,10 +3186,9 @@ type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: 
 /**
  * The common part of the two updates of the edit panel: 401 without a valid access token; 404
  * `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of its automatic
- * prices; 400 with one error per wrong field; 422 `catalog.vat_rate_not_allowed`; 404
- * `service.not_found` for a service that is not one of the property; 409
+ * prices; 400 with one error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409
  * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
- * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their
+ * 404 `service.not_found` for a service that is not one of the property; otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their
  * new version in its `ETag`.
  */
 function updateAutomaticPrice(
@@ -3190,12 +3222,12 @@ function updateAutomaticPrice(
   if (vatProblem) {
     return vatProblem;
   }
-  if (!areAutomaticServicesOf(body, property.id)) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
+  }
+  if (!areAutomaticServicesOf(body, property.id)) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   const details = structuredClone(automaticDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -3339,6 +3371,7 @@ const AUTOMATIC_PRICE_TABLE = {
   detailsOf: automaticDetailsOf,
   notFoundCode: ApiErrorCode.ServiceAutomaticPriceNotFound,
   copyMore: copyImage,
+  copyError: ({ vatRate }: AutomaticPriceAddItemRequest) => copyVatError([vatRate]),
 };
 
 /** `POST /api/catalog/automatic-prices/automatic-price-list`: one page of the automatic prices (see `serviceListAnswer`). */

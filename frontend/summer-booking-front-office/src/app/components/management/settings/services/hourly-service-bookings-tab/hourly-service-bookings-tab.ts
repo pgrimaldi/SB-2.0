@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  untracked,
+} from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
@@ -9,7 +16,10 @@ import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
 import { FormRowLabel } from '../../../../shared/ui/forms/form-row/form-row-label';
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { MissingVatError } from '../service-form-rules';
 import { ServicesAvailabilityOption } from '../shared/services-availability-option/services-availability-option';
+
+const VAT_MISSING: MissingVatError['kind'] = 'services.availability.vat_missing';
 
 /** "Opzioni di prenotazione" of an hourly service: a period and its availability in each box. */
 @Component({
@@ -41,6 +51,18 @@ export class HourlyServiceBookingsTab {
   protected readonly addIcon = ['/assets/images/GeneralIcon_Add.svg'] as const;
   protected readonly removeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
+
+  /** The VAT wanted here because the other availabilities have theirs shows at once. */
+  constructor() {
+    effect(() => {
+      for (const option of this.form()) {
+        const vatRate = option.availabilityOption.vatRate();
+        if (vatRate.errors().some(({ kind }) => kind === VAT_MISSING)) {
+          untracked(() => vatRate.markAsTouched());
+        }
+      }
+    });
+  }
 
   protected addOption(): void {
     this.form()().value.update((options) => [...options, new HourlyServiceBookingOptionDraft()]);

@@ -158,7 +158,10 @@
       "not_found": "Il servizio non c'è più: forse è già stato eliminato.",
       "automatic_price_not_found": "Il prezzo automatico non c'è più: forse è già stato eliminato.",
       "table_service_not_found": "Il servizio tavoli non c'è più: forse è già stato eliminato.",
-      "icon_not_found": "L'icona scelta non è più disponibile: scegline un'altra."
+      "icon_not_found": "L'icona scelta non è più disponibile: scegline un'altra.",
+      "duplicate_vat_rate_not_allowed": "{{serviceName}} non si può duplicare: la sua IVA non è tra le aliquote ammesse ({{rates}}). Modificala e riprova.",
+      "duplicate_period_not_found": "{{serviceName}} non si può duplicare: ha dei prezzi per un periodo che non è più nella stagione corrente.",
+      "duplicate_icon_not_found": "{{serviceName}} non si può duplicare: la sua icona non è più disponibile. Scegline un'altra e riprova."
     }
   },
   "alert": {
@@ -1491,7 +1494,8 @@
             "limits": {
               "title": "Limiti",
               "sectors": "Servizio acquistabile nelle seguenti file/settori",
-              "all_sectors": "Tutte le file/settori"
+              "all_sectors": "Tutte le file/settori",
+              "missing_sector": "Settore/fila non più disponibile"
             }
           },
           "bookings": {
@@ -1521,6 +1525,7 @@
           "availability": {
             "title": "Opzioni disponibilità",
             "hours": "Orari disponibilità",
+            "period_info": "Se questa opzione **è abilitata**, ogni periodo della stagione ha le sue disponibilità, con i loro prezzi.\n\nSe questa opzione **non è abilitata**, le disponibilità inserite qui sotto valgono per tutta la stagione.",
             "days_title": "Giorni disponibili",
             "days": {
               "monday": "Lun",
@@ -2078,6 +2083,9 @@
     "services": {
       "translation": {
         "name_missing": "Scrivi anche il nome in questa lingua"
+      },
+      "availability": {
+        "vat_missing": "Scrivi l'IVA di questa disponibilità, oppure quella del servizio nella tab Prezzi"
       },
       "tables": {
         "seats_taken": "Posti già usati"

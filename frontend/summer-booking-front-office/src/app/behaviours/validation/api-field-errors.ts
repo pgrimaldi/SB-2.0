@@ -34,17 +34,15 @@ export function apiFieldErrors<TModel extends object>(
   hiddenFields: readonly string[] = [],
 ): ApiValidationError[] {
   const fields = form as unknown as Readonly<Record<string, FieldTree<unknown>>>;
-  const value = form().value();
   return (problem.errors ?? [])
-    .filter(
-      ({ field }) => Object.hasOwn(value, field) && !isId(field) && !hiddenFields.includes(field),
-    )
+    .filter(({ field }) => hasPlace(field, form, hiddenFields))
     .map(({ field, code, args }) => apiFieldError(fields[field], code, args));
 }
 
 /**
  * The same, for a form with a general message too: an error with no field to go under (an id, a
- * field the form has not or does not show, or none at all) sends the whole problem there.
+ * field the form has not or does not show, or none at all) sends the problem there, with the code of
+ * the first of these errors when it is about a field the user fills (e.g. inside a list).
  */
 export function apiFieldErrorsOrGeneral<TModel extends object>(
   problem: ApiProblem,
@@ -54,7 +52,10 @@ export function apiFieldErrorsOrGeneral<TModel extends object>(
 ): ApiValidationError[] {
   const errors = apiFieldErrors(problem, form, hiddenFields);
   if (!errors.length || errors.length < (problem.errors?.length ?? 0)) {
-    general(problem);
+    const first = problem.errors?.find(
+      ({ field }) => !hasPlace(field, form, hiddenFields) && !field.split('.').some(isId),
+    );
+    general(first ? { ...problem, code: first.code, args: first.args } : problem);
   }
   return errors;
 }
@@ -74,6 +75,14 @@ export function clearApiFieldErrors<TModel extends object>(form: FieldTree<TMode
       field.value.set(value);
     }
   }
+}
+
+function hasPlace<TModel extends object>(
+  field: string,
+  form: FieldTree<TModel>,
+  hiddenFields: readonly string[],
+): boolean {
+  return Object.hasOwn(form().value(), field) && !isId(field) && !hiddenFields.includes(field);
 }
 
 /**

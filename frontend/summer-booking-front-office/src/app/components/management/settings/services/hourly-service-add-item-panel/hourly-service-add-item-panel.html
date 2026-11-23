@@ -14,6 +14,7 @@
         [attr.inert]="isFetching() ? '' : null"
         [form]="draftForm"
         [mainLanguage]="mainLanguage()"
+        [isReadonly]="!open()"
         [imagePreviewUrl]="imagePreviewUrl()"
         (iconChosen)="chooseIcon($event)"
         (imageChosen)="chooseImage($event)"
@@ -24,6 +25,7 @@
         [attr.inert]="isFetching() ? '' : null"
         [form]="draftForm"
         [periods]="periods()"
+        [sectorsVersion]="sectorsVersion()"
       />
     } @else if (selectedTab() === PanelTab.Bookings) {
       <app-hourly-service-bookings-tab

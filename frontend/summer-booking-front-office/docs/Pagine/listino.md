@@ -59,7 +59,8 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Controllo di versione: la lettura porta `version` (in `PackageSelectedItem`), che il pannello tiene da parte e
   "Salva" rimanda nell'header `If-Match` (`updatePackage(idPackage, request, version)`; la risposta ha la nuova
   versione nell'`ETag`). Con 409 `resource.version_conflict` (un altro utente ha cambiato il pacchetto dopo la
-  lettura) niente va sopra i bottoni: compare `app-version-conflict-popup` e il pannello rilegge pacchetto, settori e
+  lettura) niente va sopra i bottoni: compare `app-version-conflict-popup`, la tabella
+  si ricarica (`reloadIfChanged`) e il pannello rilegge pacchetto, settori e
   periodi come all'apertura, in sola lettura; l'utente rifà le modifiche. Se la nuova lettura fallisce vale la regola
   della lettura (pannello chiuso e `app-read-error-popup`).
 - In sola lettura: modulo `readonly`, caselle e scelte multiple `disabled`, tendine delle quantità secondo lo stato
@@ -247,5 +248,5 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   tabella si ricarica.
 - Controllo di versione come per i pacchetti: `version` in `AdditionalItemSelectedItem`, rimandata nell'header
   `If-Match` (`updateAdditionalItem(idAdditionalItem, request, version)`); con 409 `resource.version_conflict`
-  `app-version-conflict-popup` e una nuova lettura dell'articolo aggiuntivo, delle tendine, dei settori e dei
+  `app-version-conflict-popup`, la tabella ricaricata e una nuova lettura dell'articolo aggiuntivo, delle tendine, dei settori e dei
   periodi, come all'apertura.

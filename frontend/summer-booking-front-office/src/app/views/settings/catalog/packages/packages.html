@@ -29,7 +29,7 @@
   [idPackage]="idPackageToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table, [idPackageToEdit()])"
+  (failed)="reloadIfGone($event, table, [idPackageToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup

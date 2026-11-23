@@ -177,7 +177,7 @@ describe('HourlyServiceEditItemPanel', () => {
   });
 
   it('should send back the durations not shown, and every day when none is saved', async () => {
-    const otherDuration = { timeSlot: 'FourHours', isEnabled: true, price: 40 };
+    const otherDuration = { timeSlot: 'FourHours', isEnabled: true, price: null };
     const { fixture, panel, save, updateHourlyServicePrices } = await setup({
       prices: {
         availabilityOptions: [
@@ -240,13 +240,19 @@ describe('HourlyServiceEditItemPanel', () => {
   });
 
   it('should let only a service saved without VAT stay without it', async () => {
-    for (const { vatRate, isSaveDisabled } of [
-      { vatRate: null, isSaveDisabled: false },
-      { vatRate: 22, isSaveDisabled: true },
+    for (const { vatRate, areBookingsRead, isSaveDisabled } of [
+      { vatRate: null, areBookingsRead: true, isSaveDisabled: false },
+      { vatRate: 22, areBookingsRead: true, isSaveDisabled: true },
+      // The booking options not read can have their VAT: only the backend knows.
+      { vatRate: 22, areBookingsRead: false, isSaveDisabled: false },
     ]) {
       TestBed.resetTestingModule();
       const { fixture, panel } = await setup({ prices: { vatRate } });
 
+      if (areBookingsRead) {
+        await panel['requestTab'](BOOKINGS);
+        await fixture.whenStable();
+      }
       await panel['requestTab'](PRICES);
       await fixture.whenStable();
       panel['startEdit']();

@@ -31,6 +31,7 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
@@ -55,12 +56,13 @@ import {
 } from '../service-field-errors';
 import {
   automaticPriceRules,
+  comparableAutomaticPrice,
   otherTranslationRules,
+  withExistingServices,
   withServicesInForce,
 } from '../service-form-rules';
 import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
-import { comparableJson } from '../../../../shared/forms/text-comparison';
 
 interface ServiceFormTexts {
   tabs: {
@@ -143,9 +145,10 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
     automaticPriceRules(path);
   });
   /** The form as it was when the panel opened. */
-  private readonly pristine = comparableJson(newDraft());
+  private readonly pristine = comparableAutomaticPrice(newDraft());
   /** The services of the property for "Validità sui servizi"; null until they are read. */
   protected readonly services = signal<AutomaticPriceServices | null>(null);
+  protected readonly sectorsVersion = signal(0);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
@@ -174,7 +177,10 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && (this.image() !== null || comparableJson(this.draft()) !== this.pristine);
+    return (
+      this.open() &&
+      (this.image() !== null || comparableAutomaticPrice(this.draft()) !== this.pristine)
+    );
   }
 
   protected chooseIcon(icon: BarServiceIcon | StandardServiceIcon): void {
@@ -212,6 +218,12 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.showTabOf(problem);
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.ServiceNotFound) {
+          this.fetchServices();
+        }
         return (
           serviceFieldError(problem, this.draftForm) ??
           apiFieldErrorsOrGeneral(
@@ -268,7 +280,10 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.fetchServices();
   }
 
-  /** The services the automatic price can apply to, in the Prezzi e Validità tab. */
+  /**
+   * The services the automatic price can apply to, in the Prezzi e Validità tab: those chosen that are
+   * no longer there are not chosen any more.
+   */
   private fetchServices(): void {
     this.fetching?.unsubscribe();
     this.error.set(null);
@@ -280,7 +295,10 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
       .automaticPriceServices()
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
-        next: (services) => this.services.set(services),
+        next: (services) => {
+          this.services.set(services);
+          this.draft.update((draft) => withExistingServices(draft, services));
+        },
         error: (error: unknown) => this.error.set(toApiProblem(error)),
       });
   }

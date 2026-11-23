@@ -425,6 +425,29 @@ describe('CatalogService', () => {
     controller.verify();
   });
 
+  it('should send a text made only of spaces as no text', () => {
+    const { catalog, controller } = setup();
+
+    catalog
+      .updateBarServiceGeneral(
+        Object.assign(new BarServiceUpdateGeneralRequest(), {
+          translations: [
+            { language: Language.It, serviceName: 'Pizza', description: 'Al taglio' },
+            { language: Language.En, serviceName: '  ', description: ' ' },
+          ],
+        }),
+        null,
+      )
+      .subscribe();
+
+    const { body } = controller.expectOne(({ method }) => method === 'POST').request;
+    expect(body.translations).toEqual([
+      { language: Language.It, serviceName: 'Pizza', description: 'Al taglio' },
+      { language: Language.En, serviceName: null, description: null },
+    ]);
+    controller.verify();
+  });
+
   it('should save the prices of the bar service without the property', () => {
     const { catalog, controller } = setup();
     const request = {

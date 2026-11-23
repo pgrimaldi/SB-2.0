@@ -34,6 +34,7 @@ import {
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
@@ -162,6 +163,7 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   /** The form as it was when the panel opened, with an empty price for every period. */
   private readonly pristine = signal(comparableJson(newDraft()));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  protected readonly sectorsVersion = signal(0);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
@@ -230,6 +232,12 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.showTabOf(problem);
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingPeriodNotFound) {
+          this.fetchPeriods();
+        }
         return (
           serviceFieldError(problem, this.draftForm) ??
           apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
@@ -301,15 +309,19 @@ export class GeneralServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       });
   }
 
-  /** An empty price for each period of the season: the form without changes. */
+  /** A price for each period of the season: the one written, or empty as in the form without changes. */
   private setPeriods(periods: readonly SeasonPeriodItem[]): void {
+    const written = this.draft().periodPrices;
+    const empty = periods.map(({ key: idPeriod }) =>
+      Object.assign(new ServicePeriodPrice(), { idPeriod }),
+    );
     this.periods.set(periods);
     this.draftForm
       .periodPrices()
       .value.set(
-        periods.map(({ key }) => Object.assign(new ServicePeriodPrice(), { idPeriod: key })),
+        empty.map((row) => written.find(({ idPeriod }) => idPeriod === row.idPeriod) ?? row),
       );
-    this.pristine.set(comparableJson(this.draft()));
+    this.pristine.set(comparableJson({ ...newDraft(), periodPrices: empty }));
   }
 
   private setImage(image: File | null): void {

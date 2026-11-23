@@ -144,4 +144,10 @@ export class TableBooking {
       table.reload();
     }
   }
+
+  protected reloadIfChanged(problem: ApiProblem, table: { reload(): void }): void {
+    if (problem.code === ApiErrorCode.ResourceVersionConflict) {
+      table.reload();
+    }
+  }
 }

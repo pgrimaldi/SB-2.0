@@ -68,6 +68,9 @@ export enum ApiErrorCode {
   ServiceAutomaticPriceNotFound = 'service.automatic_price_not_found',
   ServiceTableServiceNotFound = 'service.table_service_not_found',
   ServiceIconNotFound = 'service.icon_not_found',
+  ServiceDuplicateVatRateNotAllowed = 'service.duplicate_vat_rate_not_allowed',
+  ServiceDuplicatePeriodNotFound = 'service.duplicate_period_not_found',
+  ServiceDuplicateIconNotFound = 'service.duplicate_icon_not_found',
 }
 
 export const API_ERROR_CODES: readonly ApiErrorCode[] = Object.values(ApiErrorCode);

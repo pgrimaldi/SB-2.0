@@ -27,6 +27,8 @@ export class GeneralServicePricesTab {
   readonly form = input.required<FieldTree<StandardServiceAddItemRequest>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
+  /** When it changes the sectors of Limiti are read again. */
+  readonly sectorsVersion = input(0);
 
   protected readonly validationText = inject(ValidationTextBehaviour);
 }

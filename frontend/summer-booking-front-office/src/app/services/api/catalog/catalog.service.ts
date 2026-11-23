@@ -237,9 +237,7 @@ export class CatalogService {
         `${this.endpoint}/services/update-bar-service-general`,
         {
           ...onlyFieldsOf(BarServiceUpdateGeneralRequest, request),
-          translations: request.translations.map((translation) =>
-            onlyFieldsOf(ServiceTranslation, translation),
-          ),
+          translations: request.translations.map(translationFields),
         },
         { headers: ifMatch(version), observe: 'response' },
       )
@@ -292,9 +290,7 @@ export class CatalogService {
   readonly createBarService = (request: BarServiceAddItemRequest): Observable<string> =>
     this.httpClient.post<string>(`${this.endpoint}/services/create-bar-service`, {
       ...onlyFieldsOf(BarServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
       periodPrices: request.periodPrices.map((periodPrice) =>
         onlyFieldsOf(ServicePeriodPrice, periodPrice),
@@ -375,9 +371,7 @@ export class CatalogService {
         `${this.endpoint}/services/update-standard-service-general`,
         {
           ...onlyFieldsOf(StandardServiceUpdateGeneralRequest, request),
-          translations: request.translations.map((translation) =>
-            onlyFieldsOf(ServiceTranslation, translation),
-          ),
+          translations: request.translations.map(translationFields),
         },
         { headers: ifMatch(version), observe: 'response' },
       )
@@ -429,9 +423,7 @@ export class CatalogService {
   readonly createStandardService = (request: StandardServiceAddItemRequest): Observable<string> =>
     this.httpClient.post<string>(`${this.endpoint}/services/create-standard-service`, {
       ...onlyFieldsOf(StandardServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       periodPrices: request.periodPrices.map((periodPrice) =>
         onlyFieldsOf(ServicePeriodPrice, periodPrice),
       ),
@@ -517,9 +509,7 @@ export class CatalogService {
         `${this.endpoint}/services/update-hourly-service-general`,
         {
           ...onlyFieldsOf(HourlyServiceUpdateGeneralRequest, request),
-          translations: request.translations.map((translation) =>
-            onlyFieldsOf(ServiceTranslation, translation),
-          ),
+          translations: request.translations.map(translationFields),
         },
         { headers: ifMatch(version), observe: 'response' },
       )
@@ -568,9 +558,7 @@ export class CatalogService {
   readonly createHourlyService = (request: HourlyServiceAddItemRequest): Observable<string> =>
     this.httpClient.post<string>(`${this.endpoint}/services/create-hourly-service`, {
       ...onlyFieldsOf(HourlyServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       availabilityOptions: request.availabilityOptions.map(availabilityOptionFields),
       periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
       bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
@@ -592,9 +580,7 @@ export class CatalogService {
   readonly createAutomaticPrice = (request: AutomaticPriceAddItemRequest): Observable<string> =>
     this.httpClient.post<string>(`${this.endpoint}/automatic-prices/create-automatic-price`, {
       ...onlyFieldsOf(AutomaticPriceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       validityPeriods: request.validityPeriods.map(validityPeriodFields),
     });
 
@@ -642,9 +628,7 @@ export class CatalogService {
         `${this.endpoint}/automatic-prices/update-automatic-price-general`,
         {
           ...onlyFieldsOf(AutomaticPriceUpdateGeneralRequest, request),
-          translations: request.translations.map((translation) =>
-            onlyFieldsOf(ServiceTranslation, translation),
-          ),
+          translations: request.translations.map(translationFields),
         },
         { headers: ifMatch(version), observe: 'response' },
       )
@@ -708,9 +692,7 @@ export class CatalogService {
   readonly createTableService = (request: TableServiceAddItemRequest): Observable<void> =>
     this.httpClient.post<void>(`${this.endpoint}/table-services/create-table-service`, {
       ...onlyFieldsOf(TableServiceAddItemRequest, request),
-      translations: request.translations.map((translation) =>
-        onlyFieldsOf(ServiceTranslation, translation),
-      ),
+      translations: request.translations.map(translationFields),
       availabilities: request.availabilities.map(tableAvailabilityFields),
       tableGroups: request.tableGroups.map((tableGroup) =>
         onlyFieldsOf(TableServiceTableGroup, tableGroup),
@@ -748,9 +730,7 @@ export class CatalogService {
         `${this.endpoint}/table-services/update-table-service-general`,
         {
           ...onlyFieldsOf(TableServiceUpdateGeneralRequest, request),
-          translations: request.translations.map((translation) =>
-            onlyFieldsOf(ServiceTranslation, translation),
-          ),
+          translations: request.translations.map(translationFields),
         },
         { headers: ifMatch(version), observe: 'response' },
       )
@@ -777,6 +757,15 @@ export class CatalogService {
         { headers: ifMatch(version), observe: 'response' },
       )
       .pipe(map(versionOf));
+}
+
+/** A text made only of spaces is not a text. */
+function translationFields(translation: ServiceTranslation): ServiceTranslation {
+  return {
+    ...onlyFieldsOf(ServiceTranslation, translation),
+    serviceName: translation.serviceName?.trim() ? translation.serviceName : null,
+    description: translation.description?.trim() ? translation.description : null,
+  };
 }
 
 /** Only the fields of the contract, at every level: the time slots inside the option too. */

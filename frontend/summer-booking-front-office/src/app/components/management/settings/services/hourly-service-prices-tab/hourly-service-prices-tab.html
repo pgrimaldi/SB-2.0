@@ -7,6 +7,9 @@
 
 <app-services-period-prices
   [isPeriodPricingEnabled]="form().isPeriodPricingEnabled"
+  [periodContents]="form().periodAvailabilities"
+  infoKey="management.settings.services.form.availability.period_info"
+  fieldNameKey="management.settings.services.form.availability.field_names.day_of_week"
   [periods]="periods()"
 >
   <ng-template appServicesPeriodContent let-period>
@@ -31,7 +34,7 @@
   }
 }
 
-<app-services-limits [form]="form().idSectors" />
+<app-services-limits [form]="form().idSectors" [sectorsVersion]="sectorsVersion()" />
 
 <app-toggle
   [formField]="form().isOnlinePurchaseEnabled"

@@ -36,6 +36,7 @@
         [form]="draftForm"
         [periods]="periods()"
         [isReadonly]="isLocked()"
+        [sectorsVersion]="sectorsVersion()"
       />
     } @else if (selectedTab() === PanelTab.Bookings) {
       <app-service-bookings-tab

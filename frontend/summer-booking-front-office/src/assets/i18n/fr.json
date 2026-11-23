@@ -158,7 +158,10 @@
       "not_found": "Le service n'existe plus : il a peut-être déjà été supprimé.",
       "automatic_price_not_found": "Le prix automatique n'existe plus : il a peut-être déjà été supprimé.",
       "table_service_not_found": "Le service à table n'existe plus : il a peut-être déjà été supprimé.",
-      "icon_not_found": "L'icône choisie n'est plus disponible : choisissez-en une autre."
+      "icon_not_found": "L'icône choisie n'est plus disponible : choisissez-en une autre.",
+      "duplicate_vat_rate_not_allowed": "{{serviceName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
+      "duplicate_period_not_found": "{{serviceName}} ne peut pas être dupliqué : il a des prix pour une période qui n'est plus dans la saison en cours.",
+      "duplicate_icon_not_found": "{{serviceName}} ne peut pas être dupliqué : son icône n'est plus disponible. Choisissez-en une autre et réessayez."
     }
   },
   "alert": {
@@ -1491,7 +1494,8 @@
             "limits": {
               "title": "Limites",
               "sectors": "Service en vente dans ces rangées/secteurs",
-              "all_sectors": "Toutes les rangées/secteurs"
+              "all_sectors": "Toutes les rangées/secteurs",
+              "missing_sector": "Rangée/secteur plus disponible"
             }
           },
           "bookings": {
@@ -1521,6 +1525,7 @@
           "availability": {
             "title": "Options de disponibilité",
             "hours": "Horaires de disponibilité",
+            "period_info": "Si cette option **est activée**, chaque période de la saison a ses propres disponibilités, avec leurs prix.\n\nSi cette option **n'est pas activée**, les disponibilités saisies ci-dessous valent pour toute la saison.",
             "days_title": "Jours disponibles",
             "days": {
               "monday": "Lun",
@@ -2078,6 +2083,9 @@
     "services": {
       "translation": {
         "name_missing": "Saisissez aussi le nom dans cette langue"
+      },
+      "availability": {
+        "vat_missing": "Saisissez la TVA de cette disponibilité, ou celle du service dans l'onglet Prix"
       },
       "tables": {
         "seats_taken": "Places déjà utilisées"

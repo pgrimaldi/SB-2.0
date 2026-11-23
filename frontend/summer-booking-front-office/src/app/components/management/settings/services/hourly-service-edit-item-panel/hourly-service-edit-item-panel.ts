@@ -205,7 +205,15 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     applyWhen(
       path,
       () => this.selectedTab() === PanelTab.Prices,
-      (prices) => hourlyServicePriceRules(prices, () => this.pristine().vatRate === null),
+      (prices) =>
+        hourlyServicePriceRules(prices, () => ({
+          canLackVat: this.pristine().vatRate === null,
+          hiddenAvailabilities: this.hiddenPeriodAvailabilities().flatMap(
+            (period) => period.availabilityOptions,
+          ),
+          areBookingOptionsRead:
+            this.loadedTabs().has(PanelTab.Bookings) && !this.loadingTabs().has(PanelTab.Bookings),
+        })),
     );
     applyWhen(
       path.bookingOptions,
@@ -221,6 +229,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly hiddenPeriodAvailabilities = signal<readonly ServicePeriodAvailabilityDraft[]>(
     [],
   );
+  protected readonly sectorsVersion = signal(0);
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
@@ -272,6 +281,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
   private imageRemoval?: Subscription;
 
   constructor() {
@@ -279,6 +290,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
@@ -287,8 +300,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     return (
       this.open() &&
       (this.image() !== null ||
-        comparableJson(withoutEmptyAvailabilities(this.draft())) !==
-          comparableJson(withoutEmptyAvailabilities(this.pristine())))
+        comparable(withoutEmptyAvailabilities(this.draft())) !==
+          comparable(withoutEmptyAvailabilities(this.pristine())))
     );
   }
 
@@ -348,6 +361,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
@@ -418,9 +433,15 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
+          this.isConflictPending = true;
           this.reloadTab(tab);
           return undefined;
+        }
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingPeriodNotFound) {
+          this.refreshPeriods();
         }
         return (
           // The VAT refused can be of an availability: its message is the general one.
@@ -506,6 +527,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       next.delete(tab);
       return next;
     });
+    this.isConflictPending = false;
     const problem = toApiProblem(error);
     this.failed.emit(problem);
     if (this.loadedTabs().size === 0) {
@@ -590,10 +612,16 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.loadTab(this.selectedTab());
   }
 
-  private reset(): void {
-    this.tabErrors.set(new Map());
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
     this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
@@ -672,6 +700,52 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
+  /**
+   * A period refused is no longer of the season: the periods are read again, with what is written. The
+   * saved availabilities of those no longer there are sent back as read.
+   */
+  private refreshPeriods(): void {
+    this.setLoading(PanelTab.Prices, true);
+    this.loadings.set(
+      PanelTab.Prices,
+      this.seasons
+        .periodList(false)
+        .pipe(finalize(() => this.setLoading(PanelTab.Prices, false)))
+        .subscribe({
+          next: (periods) => {
+            const rowsOf = (
+              rows: readonly ServicePeriodAvailabilityDraft[],
+            ): ServicePeriodAvailabilityDraft[] =>
+              periods.map(
+                ({ key }) =>
+                  rows.find(({ idPeriod }) => idPeriod === key) ??
+                  Object.assign(new ServicePeriodAvailabilityDraft(), {
+                    idPeriod: key,
+                    availabilityOptions: [new ServiceAvailabilityOptionDraft()],
+                  }),
+              );
+            const gone = hiddenOf(this.pristine().periodAvailabilities, periods);
+            this.hiddenPeriodAvailabilities.update((hidden) => [
+              ...hidden,
+              ...gone.filter(({ availabilityOptions }) =>
+                availabilityOptions.some(({ isSaved }) => isSaved),
+              ),
+            ]);
+            this.periods.set(periods);
+            this.draft.update((draft) => ({
+              ...draft,
+              periodAvailabilities: rowsOf(draft.periodAvailabilities),
+            }));
+            this.pristine.update((pristine) => ({
+              ...pristine,
+              periodAvailabilities: rowsOf(pristine.periodAvailabilities),
+            }));
+          },
+          error: (error: unknown) => this.error.set(toApiProblem(error)),
+        }),
+    );
+  }
+
   private setBookingOptions(answer: HourlyServiceSelectedBookingOptions): void {
     this.versions.set(PanelTab.Bookings, answer.version);
     this.applyLoaded({
@@ -689,6 +763,10 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<HourlyServiceDraft>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -714,7 +792,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
     this.imageRemoval?.unsubscribe();
     this.setImage(null);
   }
@@ -766,6 +844,11 @@ function hiddenOf<T extends { idPeriod: number | null }>(
 ): T[] {
   const idPeriods = new Set(periods.map(({ key }) => key));
   return rows.filter(({ idPeriod }) => idPeriod === null || !idPeriods.has(idPeriod));
+}
+
+/** The order of the sectors is not a change. */
+function comparable(values: HourlyServiceAddItemRequest): string {
+  return comparableJson({ ...values, idSectors: [...values.idSectors].sort() });
 }
 
 /** The values of the fields of one tab. */

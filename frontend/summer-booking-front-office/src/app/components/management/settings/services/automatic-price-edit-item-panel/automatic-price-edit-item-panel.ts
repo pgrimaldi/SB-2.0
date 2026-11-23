@@ -66,12 +66,13 @@ import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-valid
 import { HIDDEN_AUTOMATIC_PRICE_FIELDS, serviceFieldError } from '../service-field-errors';
 import {
   automaticPriceRules,
+  comparableAutomaticPrice,
   otherTranslationRules,
+  withExistingServices,
   withServicesInForce,
 } from '../service-form-rules';
 import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
-import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
@@ -200,6 +201,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly pristine = signal(newDraft());
   /** The services of the property for "Validità sui servizi"; null until they are read. */
   protected readonly services = signal<AutomaticPriceServices | null>(null);
+  protected readonly sectorsVersion = signal(0);
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
@@ -251,6 +253,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
   private imageRemoval?: Subscription;
 
   constructor() {
@@ -258,6 +262,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
@@ -265,7 +271,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || comparableJson(this.draft()) !== comparableJson(this.pristine()))
+      (this.image() !== null ||
+        comparableAutomaticPrice(this.draft()) !== comparableAutomaticPrice(this.pristine()))
     );
   }
 
@@ -325,6 +332,8 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
@@ -395,9 +404,15 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
+          this.isConflictPending = true;
           this.reloadTab(tab);
           return undefined;
+        }
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.ServiceNotFound) {
+          this.refreshServices();
         }
         return (
           serviceFieldError(problem, this.draftForm) ??
@@ -471,6 +486,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
       next.delete(tab);
       return next;
     });
+    this.isConflictPending = false;
     const problem = toApiProblem(error);
     this.failed.emit(problem);
     if (this.loadedTabs().size === 0) {
@@ -537,10 +553,16 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.loadTab(this.selectedTab());
   }
 
-  private reset(): void {
-    this.tabErrors.set(new Map());
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
     this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
@@ -581,6 +603,24 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
+  /** A service chosen is no longer there: the services are read again, and it is not chosen any more. */
+  private refreshServices(): void {
+    this.setLoading(PanelTab.PricesValidity, true);
+    this.loadings.set(
+      PanelTab.PricesValidity,
+      this.catalog
+        .automaticPriceServices()
+        .pipe(finalize(() => this.setLoading(PanelTab.PricesValidity, false)))
+        .subscribe({
+          next: (services) => {
+            this.services.set(services);
+            this.draft.update((draft) => withExistingServices(draft, services));
+          },
+          error: (error: unknown) => this.error.set(toApiProblem(error)),
+        }),
+    );
+  }
+
   private setPricesValidity(
     values: AutomaticPriceSelectedPricesValidity,
     services: AutomaticPriceServices,
@@ -615,6 +655,10 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<AutomaticPriceAddItemRequest>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -640,7 +684,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
     this.imageRemoval?.unsubscribe();
     this.setImage(null);
   }

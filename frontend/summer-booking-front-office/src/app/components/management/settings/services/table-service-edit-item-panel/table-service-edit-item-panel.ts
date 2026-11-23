@@ -229,12 +229,16 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
 
   constructor() {
     this.unsaved.watch(this);
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
@@ -253,6 +257,8 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
@@ -317,7 +323,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
+          this.isConflictPending = true;
           this.reloadTab(tab);
           return undefined;
         }
@@ -388,6 +394,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       next.delete(tab);
       return next;
     });
+    this.isConflictPending = false;
     const problem = toApiProblem(error);
     this.failed.emit(problem);
     if (this.loadedTabs().size === 0) {
@@ -438,10 +445,16 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.loadTab(this.selectedTab());
   }
 
-  private reset(): void {
-    this.tabErrors.set(new Map());
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
     this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
@@ -497,6 +510,10 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<TableServiceAddItemRequest>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -513,7 +530,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
   }
 }
 

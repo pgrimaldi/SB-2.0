@@ -7,6 +7,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
+import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { ServiceVariant } from '../../../../../entities/settings/services/service-variant';
 import { Language } from '../../../../../entities/shared/language';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
@@ -104,6 +105,23 @@ describe('BarServiceAddItemPanel', () => {
     form.variants[0].variantName().value.set('Doppio');
     expect(panel['isSaveDisabled']()).toBe(true);
     form.variants[0].price().value.set(1.8);
+    expect(panel['isSaveDisabled']()).toBe(false);
+  });
+
+  it('should not want a minimum of items over the maximum: each has its error', async () => {
+    const { panel, form, fill } = await setup();
+
+    await fill();
+    form.bookingOptions().value.set([new ServiceBookingOption()]);
+    const { minItemPerBookingQuantity: minimum, maxItemPerBookingQuantity: maximum } =
+      form.bookingOptions[0];
+    minimum().value.set(3);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    maximum().value.set(2);
+    expect(panel['isSaveDisabled']()).toBe(true);
+    expect(minimum().errors()).toHaveLength(1);
+    expect(maximum().errors()).toHaveLength(1);
+    minimum().value.set(2);
     expect(panel['isSaveDisabled']()).toBe(false);
   });
 

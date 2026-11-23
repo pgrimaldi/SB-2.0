@@ -158,7 +158,10 @@
       "not_found": "The service is no longer there: it may already have been deleted.",
       "automatic_price_not_found": "The automatic price is no longer there: it may already have been deleted.",
       "table_service_not_found": "The table service is no longer there: it may already have been deleted.",
-      "icon_not_found": "The selected icon is no longer available: choose another one."
+      "icon_not_found": "The selected icon is no longer available: choose another one.",
+      "duplicate_vat_rate_not_allowed": "{{serviceName}} cannot be duplicated: its VAT is not one of the allowed rates ({{rates}}). Change it and try again.",
+      "duplicate_period_not_found": "{{serviceName}} cannot be duplicated: it has prices for a period that is no longer in the current season.",
+      "duplicate_icon_not_found": "{{serviceName}} cannot be duplicated: its icon is no longer available. Choose another one and try again."
     }
   },
   "alert": {
@@ -1491,7 +1494,8 @@
             "limits": {
               "title": "Limits",
               "sectors": "Service on sale in these rows/sectors",
-              "all_sectors": "All rows/sectors"
+              "all_sectors": "All rows/sectors",
+              "missing_sector": "Row/sector no longer available"
             }
           },
           "bookings": {
@@ -1521,6 +1525,7 @@
           "availability": {
             "title": "Availability options",
             "hours": "Availability hours",
+            "period_info": "If this option **is enabled**, each period of the season has its own availability, with its own prices.\n\nIf this option **is not enabled**, the availability entered below applies to the whole season.",
             "days_title": "Available days",
             "days": {
               "monday": "Mon",
@@ -2078,6 +2083,9 @@
     "services": {
       "translation": {
         "name_missing": "Write the name in this language too"
+      },
+      "availability": {
+        "vat_missing": "Enter the VAT of this availability, or the VAT of the service in the Prices tab"
       },
       "tables": {
         "seats_taken": "Seats already used"

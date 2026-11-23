@@ -9,6 +9,9 @@ import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behav
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { AutomaticPriceSelectedGeneralInfo } from '../../../../../entities/settings/services/automatic-price-selected-general-info';
+import { AutomaticPriceSelectedPricesValidity } from '../../../../../entities/settings/services/automatic-price-selected-prices-validity';
+import { AutomaticPriceServices } from '../../../../../entities/settings/services/automatic-price-services';
+import { AutomaticPriceUpdatePricesValidityRequest } from '../../../../../entities/settings/services/automatic-price-update-prices-validity-request';
 import { AutomaticPriceUpdateGeneralRequest } from '../../../../../entities/settings/services/automatic-price-update-general-request';
 import { Language } from '../../../../../entities/shared/language';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
@@ -22,6 +25,7 @@ describe('AutomaticPriceEditItemPanel', () => {
     uploadAutomaticPriceImage = vi.fn((): Observable<void> => of(undefined)),
     deleteAutomaticPriceImage = vi.fn((): Observable<void> => of(undefined)),
     generalInfo = {} as Partial<AutomaticPriceSelectedGeneralInfo>,
+    pricesValidity = {} as Partial<AutomaticPriceSelectedPricesValidity>,
   } = {}) => {
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:image');
     vi.spyOn(URL, 'revokeObjectURL').mockReturnValue();
@@ -40,6 +44,20 @@ describe('AutomaticPriceEditItemPanel', () => {
       (request: AutomaticPriceUpdateGeneralRequest): Observable<string | null> =>
         of(request ? 'v2' : null),
     );
+    const updateAutomaticPricePricesValidity = vi.fn(
+      (request: AutomaticPriceUpdatePricesValidityRequest): Observable<string | null> =>
+        of(request ? 'v2' : null),
+    );
+    const automaticPriceServices = vi.fn((): Observable<AutomaticPriceServices> =>
+      of({
+        barServices: [
+          { id: 'b1', value: 'Caffè' },
+          { id: 'b2', value: 'Pizza' },
+        ],
+        standardServices: [],
+        hourlyServices: [],
+      }),
+    );
     TestBed.configureTestingModule({
       providers: [
         provideNativeDateAdapter(),
@@ -52,6 +70,17 @@ describe('AutomaticPriceEditItemPanel', () => {
             uploadAutomaticPriceImage,
             deleteAutomaticPriceImage,
             updateAutomaticPriceGeneral,
+            updateAutomaticPricePricesValidity,
+            automaticPriceServices,
+            automaticPricePricesValidity: () =>
+              of(
+                Object.assign(new AutomaticPriceSelectedPricesValidity(), {
+                  price: 2,
+                  idBarServices: ['b2', 'b1'],
+                  version: 'v1',
+                  ...pricesValidity,
+                }),
+              ),
             automaticPriceGeneralInfo: () =>
               of(
                 Object.assign(new AutomaticPriceSelectedGeneralInfo(), {
@@ -103,6 +132,8 @@ describe('AutomaticPriceEditItemPanel', () => {
       panel,
       save,
       updateAutomaticPriceGeneral,
+      updateAutomaticPricePricesValidity,
+      automaticPriceServices,
       updated: () => updated,
     };
   };
@@ -110,6 +141,65 @@ describe('AutomaticPriceEditItemPanel', () => {
   afterEach(() =>
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
+
+  it('should take away a chosen service that is no longer there, reading them again', async () => {
+    const { fixture, panel, save, updateAutomaticPricePricesValidity, automaticPriceServices } =
+      await setup();
+    updateAutomaticPricePricesValidity.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 404,
+            error: { status: 404, code: ApiErrorCode.ServiceNotFound },
+          }),
+      ),
+    );
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].price().value.set(3);
+    automaticPriceServices.mockReturnValue(
+      of({
+        barServices: [{ id: 'b1', value: 'Caffè' }],
+        standardServices: [],
+        hourlyServices: [],
+      }),
+    );
+    await save();
+    expect(panel['error']()?.code).toBe(ApiErrorCode.ServiceNotFound);
+    expect(panel['draft']()).toMatchObject({ price: 3, idBarServices: ['b1'] });
+    expect(panel['isSaveDisabled']()).toBe(false);
+  });
+
+  it('should not ask for the order of the services, nor for those out of force', async () => {
+    const { fixture, panel } = await setup({
+      pricesValidity: { isAllServicesEnabled: true, idBarServices: [], idSectors: ['s2', 's1'] },
+    });
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].isAllServicesEnabled().value.set(false);
+    panel['draftForm'].idBarServices().value.set(['b1']);
+    expect(panel.hasUnsavedChanges()).toBe(true);
+    panel['draftForm'].isAllServicesEnabled().value.set(true);
+    panel['draftForm'].idSectors().value.set(['s1', 's2']);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('should show at once, in Modifica, what was read already wrong', async () => {
+    const { fixture, panel } = await setup({ pricesValidity: { idBarServices: [] } });
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    const { touched, errors } = panel['draftForm'].isAllServicesEnabled();
+    expect(touched()).toBe(false);
+    panel['startEdit']();
+    expect(panel['isSaveDisabled']()).toBe(true);
+    expect(touched()).toBe(true);
+    expect(errors()).toHaveLength(1);
+  });
 
   it('should show the image of the automatic price until an icon or another image is chosen', async () => {
     const { panel } = await setup();

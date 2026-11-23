@@ -170,6 +170,7 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   /** What would be sent of the form as it was when the panel opened. */
   private readonly pristine = signal(comparableJson(withoutEmptyAvailabilities(newDraft())));
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
+  protected readonly sectorsVersion = signal(0);
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
@@ -240,6 +241,12 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.showTabOf(problem);
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingPeriodNotFound) {
+          this.fetchPeriods();
+        }
         return (
           serviceFieldError(problem, { icon: this.draftForm.icon }) ??
           apiFieldErrorsOrGeneral(
@@ -318,18 +325,22 @@ export class HourlyServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       });
   }
 
-  /** An empty availability option for each period of the season: the form without changes. */
+  /** The availabilities written of each period of the season, or an empty one. */
   private setPeriods(periods: readonly SeasonPeriodItem[]): void {
-    this.periods.set(periods);
-    this.draftForm.periodAvailabilities().value.set(
-      periods.map(({ key: idPeriod }) =>
-        Object.assign(new ServicePeriodAvailabilityDraft(), {
-          idPeriod,
-          availabilityOptions: [new ServiceAvailabilityOptionDraft()],
-        }),
-      ),
+    const written = this.draft().periodAvailabilities;
+    const empty = periods.map(({ key: idPeriod }) =>
+      Object.assign(new ServicePeriodAvailabilityDraft(), {
+        idPeriod,
+        availabilityOptions: [new ServiceAvailabilityOptionDraft()],
+      }),
     );
-    this.pristine.set(comparableJson(withoutEmptyAvailabilities(this.draft())));
+    this.periods.set(periods);
+    this.draftForm
+      .periodAvailabilities()
+      .value.set(
+        empty.map((row) => written.find(({ idPeriod }) => idPeriod === row.idPeriod) ?? row),
+      );
+    this.pristine.set(comparableJson(withoutEmptyAvailabilities(newDraft())));
   }
 
   private setImage(image: File | null): void {

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  linkedSignal,
+  output,
+} from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ErrorTextBehaviour } from '../../../../../../behaviours/errors/error-text.behaviour';
 import { isUploadable } from '../../../../../../behaviours/files/uploadable-file';
@@ -45,9 +52,16 @@ export class ServicesImages<K extends string = string> {
   protected readonly removeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
   protected readonly maxImageMegabytes = MAX_IMAGE_UPLOAD_MEGABYTES;
-  protected readonly isImageTooLarge = signal(false);
+  /** The errors of a refused image last until something else is chosen or the panel is locked. */
+  protected readonly isImageTooLarge = linkedSignal({
+    source: () => [this.isReadonly(), this.chosenIcon(), this.imagePreviewUrl()],
+    computation: () => false,
+  });
   /** The backend's answer for an image it would refuse for another reason, e.g. an empty file. */
-  protected readonly invalidImageText = signal<string | null>(null);
+  protected readonly invalidImageText = linkedSignal<unknown, string | null>({
+    source: () => [this.isReadonly(), this.chosenIcon(), this.imagePreviewUrl()],
+    computation: () => null,
+  });
   private readonly errorText = inject(ErrorTextBehaviour);
 
   protected chooseImage(files: readonly File[]): void {

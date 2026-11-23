@@ -34,7 +34,7 @@
   [idAutomaticPrice]="idAutomaticPriceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table, [idAutomaticPriceToEdit()])"
+  (failed)="reloadIfGone($event, table, [idAutomaticPriceToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup

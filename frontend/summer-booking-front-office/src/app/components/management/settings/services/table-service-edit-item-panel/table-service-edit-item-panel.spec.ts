@@ -154,10 +154,16 @@ describe('TableServiceEditItemPanel', () => {
       );
 
     panel['startEdit']();
-    for (const field of ['minSeatPerBookingQuantity', 'bookingPayment', 'totalSeatQuantity']) {
+    for (const [field, code] of [
+      ['minSeatPerBookingQuantity', ApiErrorCode.ValidationInvalid],
+      ['bookingPayment', ApiErrorCode.ValidationInvalid],
+      ['totalSeatQuantity', ApiErrorCode.ValidationInvalid],
+      ['availabilities[0].days', ApiErrorCode.ValidationInvalid],
+      ['idTableService', ApiErrorCode.ValidationFailed],
+    ]) {
       refuse(field);
       await save();
-      expect(panel['error']()?.code).toBe(ApiErrorCode.ValidationFailed);
+      expect(panel['error']()?.code).toBe(code);
       expect(panel['isSaveDisabled']()).toBe(false);
     }
     refuse('tableGroups');

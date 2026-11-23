@@ -225,6 +225,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** Prices read for periods the tab does not show (e.g. of no current period): sent back as read. */
   private readonly hiddenPeriodPrices = signal<readonly ServicePeriodPrice[]>([]);
+  protected readonly sectorsVersion = signal(0);
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
@@ -276,6 +277,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  /** Changed by someone else: the user is told once the tab has been read again. */
+  private isConflictPending = false;
   private imageRemoval?: Subscription;
 
   constructor() {
@@ -283,6 +286,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
@@ -290,7 +295,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || comparableJson(this.draft()) !== comparableJson(this.pristine()))
+      (this.image() !== null || comparable(this.draft()) !== comparable(this.pristine()))
     );
   }
 
@@ -350,6 +355,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the tab goes back to the values read, only to look at. */
@@ -420,9 +427,15 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
+          this.isConflictPending = true;
           this.reloadTab(tab);
           return undefined;
+        }
+        if (problem.code === ApiErrorCode.CatalogSectorNotFound) {
+          this.sectorsVersion.update((version) => version + 1);
+        }
+        if (problem.code === ApiErrorCode.PricingPeriodNotFound) {
+          this.refreshPeriods();
         }
         return (
           serviceFieldError(problem, this.draftForm) ??
@@ -502,6 +515,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       next.delete(tab);
       return next;
     });
+    this.isConflictPending = false;
     const problem = toApiProblem(error);
     this.failed.emit(problem);
     if (this.loadedTabs().size === 0) {
@@ -575,10 +589,16 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.loadTab(this.selectedTab());
   }
 
-  private reset(): void {
-    this.tabErrors.set(new Map());
+  /** Closed while a tab is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.forEach((loading) => loading.unsubscribe());
     this.loadings.clear();
+  }
+
+  private reset(): void {
+    this.tabErrors.set(new Map());
+    this.stopLoadings();
+    this.isConflictPending = false;
     this.versions.clear();
     this.loadedTabs.set(new Set());
     this.loadingTabs.set(new Set());
@@ -645,6 +665,42 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
+  /**
+   * A period refused is no longer of the season: the periods are read again, with the prices written.
+   * The saved prices of those no longer there are sent back as read.
+   */
+  private refreshPeriods(): void {
+    this.setLoading(PanelTab.Prices, true);
+    this.loadings.set(
+      PanelTab.Prices,
+      this.seasons
+        .periodList(false)
+        .pipe(finalize(() => this.setLoading(PanelTab.Prices, false)))
+        .subscribe({
+          next: (periods) => {
+            const rowsOf = (rows: readonly ServicePeriodPrice[]): ServicePeriodPrice[] =>
+              periods.map(
+                ({ key }) =>
+                  rows.find(({ idPeriod }) => idPeriod === key) ??
+                  Object.assign(new ServicePeriodPrice(), { idPeriod: key }),
+              );
+            const gone = hiddenOf(this.pristine().periodPrices, periods);
+            this.hiddenPeriodPrices.update((hidden) => [
+              ...hidden,
+              ...gone.filter(({ price }) => price !== null),
+            ]);
+            this.periods.set(periods);
+            this.draft.update((draft) => ({ ...draft, periodPrices: rowsOf(draft.periodPrices) }));
+            this.pristine.update((pristine) => ({
+              ...pristine,
+              periodPrices: rowsOf(pristine.periodPrices),
+            }));
+          },
+          error: (error: unknown) => this.error.set(toApiProblem(error)),
+        }),
+    );
+  }
+
   private setBookingOptions(answer: BarServiceSelectedBookingOptions): void {
     this.versions.set(PanelTab.Bookings, answer.version);
     this.applyLoaded({
@@ -658,6 +714,10 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private applyLoaded(values: Partial<BarServiceAddItemRequest>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
+    if (this.isConflictPending) {
+      this.isConflictPending = false;
+      this.isConflictShown.set(true);
+    }
   }
 
   private setLoading(tab: PanelTab, isLoading: boolean): void {
@@ -683,7 +743,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
-    this.loadings.forEach((loading) => loading.unsubscribe());
+    this.stopLoadings();
     this.imageRemoval?.unsubscribe();
     this.setImage(null);
   }
@@ -705,6 +765,11 @@ function hiddenOf<T extends { idPeriod: number | null }>(
 ): T[] {
   const idPeriods = new Set(periods.map(({ key }) => key));
   return rows.filter(({ idPeriod }) => idPeriod === null || !idPeriods.has(idPeriod));
+}
+
+/** The order of the sectors is not a change. */
+function comparable(values: BarServiceAddItemRequest): string {
+  return comparableJson({ ...values, idSectors: [...values.idSectors].sort() });
 }
 
 /** The values of the fields of one tab. */

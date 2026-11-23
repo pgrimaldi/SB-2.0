@@ -149,6 +149,25 @@ describe('HourlyServiceAddItemPanel', () => {
     expect(panel['isSaveDisabled']()).toBe(false);
   });
 
+  it('should say in Prenotazioni that only a booking option lacks its VAT', async () => {
+    const { fixture, panel, form, fill } = await setup();
+
+    await fill();
+    form.vatRate().value.set(null);
+    form.availabilityOptions[0].vatRate().value.set(22);
+    panel['selectedTab'].set(2);
+    form.bookingOptions().value.set([new HourlyServiceBookingOptionDraft()]);
+    await fixture.whenStable();
+    const { startTime, vatRate } = form.bookingOptions[0].availabilityOption;
+    expect(vatRate().errors()).toHaveLength(0);
+    startTime().value.set('09:00');
+    await fixture.whenStable();
+    expect(vatRate().errors()).toHaveLength(1);
+    expect(vatRate().touched()).toBe(true);
+    form.vatRate().value.set(10);
+    expect(vatRate().errors()).toHaveLength(0);
+  });
+
   it('should want the availabilities as the backend, only those in force', async () => {
     const { panel, form, fill } = await setup();
 

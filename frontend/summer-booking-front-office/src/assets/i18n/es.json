@@ -158,7 +158,10 @@
       "not_found": "El servicio ya no existe: puede que ya se haya eliminado.",
       "automatic_price_not_found": "El precio automático ya no existe: puede que ya se haya eliminado.",
       "table_service_not_found": "El servicio de mesas ya no existe: puede que ya se haya eliminado.",
-      "icon_not_found": "El icono elegido ya no está disponible: elige otro."
+      "icon_not_found": "El icono elegido ya no está disponible: elige otro.",
+      "duplicate_vat_rate_not_allowed": "{{serviceName}} no se puede duplicar: su IVA no está entre los tipos admitidos ({{rates}}). Cámbialo e inténtalo de nuevo.",
+      "duplicate_period_not_found": "{{serviceName}} no se puede duplicar: tiene precios para un periodo que ya no está en la temporada actual.",
+      "duplicate_icon_not_found": "{{serviceName}} no se puede duplicar: su icono ya no está disponible. Elige otro e inténtalo de nuevo."
     }
   },
   "alert": {
@@ -1491,7 +1494,8 @@
             "limits": {
               "title": "Límites",
               "sectors": "Servicio a la venta en estas filas/sectores",
-              "all_sectors": "Todas las filas/sectores"
+              "all_sectors": "Todas las filas/sectores",
+              "missing_sector": "Fila/sector ya no disponible"
             }
           },
           "bookings": {
@@ -1521,6 +1525,7 @@
           "availability": {
             "title": "Opciones de disponibilidad",
             "hours": "Horario de disponibilidad",
+            "period_info": "Si esta opción **está activada**, cada periodo de la temporada tiene sus disponibilidades, con sus precios.\n\nSi esta opción **no está activada**, las disponibilidades introducidas abajo valen para toda la temporada.",
             "days_title": "Días disponibles",
             "days": {
               "monday": "Lun",
@@ -2078,6 +2083,9 @@
     "services": {
       "translation": {
         "name_missing": "Escribe también el nombre en este idioma"
+      },
+      "availability": {
+        "vat_missing": "Escribe el IVA de esta disponibilidad, o el del servicio en la pestaña Precios"
       },
       "tables": {
         "seats_taken": "Plazas ya usadas"

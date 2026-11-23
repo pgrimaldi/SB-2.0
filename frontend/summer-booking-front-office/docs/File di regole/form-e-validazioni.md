@@ -53,7 +53,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 - Il testo lo dà `ValidationTextBehaviour` (`behaviours/validation/`): `message(field, chiaveNomeCampo)` restituisce il
   testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
   `management.settings.warehouse.form.field_names.quantity` = "della quantità").
-- Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua.
+- Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua. Un'eccezione: nei pannelli
+  di modifica di Servizi, premendo Modifica, i campi letti già sbagliati si segnano subito
+  (`draftForm().markAsTouched()` in `startEdit`), perché tengono spento Salva.
 - Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con
   `text(field, chiaveNomeCampo)`.
 - Il wrapper riceve il testo con `[error]`: bordo rosso da 2px, sfondo rosato e messaggio rosso
@@ -73,7 +75,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   Angular lo toglie appena il campo cambia.
 - `submit()` non invia nulla se un campo è sbagliato e segna tutti i campi come toccati, così ogni errore si vede.
 - Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
-  non riguarda un campo (es. rete assente). Vale anche per un campo del form senza un posto per il suo errore (una scelta
+  non riguarda un campo (es. rete assente). Di un errore dentro un elenco (es. `variants[0].price`) il messaggio generale
+  è il testo del suo `code`, non "Richiesta non valida". Vale anche per un campo del form senza un posto per il suo errore (una scelta
   `app-radio-group`, un campo non mostrato): il pannello lo passa come ultimo argomento di `apiFieldErrorsOrGeneral`
   (es. `hiddenTableServiceFields`), così Salva non resta spento senza spiegazione.
 - Un codice del backend che arriva senza `errors[]` ma riguarda un solo campo (es. `pricing.period_name_taken`, nome
@@ -124,7 +127,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   testo `error.resource.version_conflict`) e le modifiche dell'utente si perdono:
   - un popup o pannello sempre modificabile si chiude e i dati nuovi si vedono riaprendolo; se è aperto da una tabella,
     la pagina la ricarica (`reloadIfChanged` sull'uscita `failed`);
-  - un form con il bottone Modifica rilegge i dati e torna in sola lettura, così Salva non si preme per sbaglio;
+  - un form con il bottone Modifica rilegge i dati e torna in sola lettura, così Salva non si preme per sbaglio; se è aperto
+    da una tabella la pagina ricarica anche quella (`reloadIfChanged`). Nei pannelli di Servizi l'avviso compare dopo la
+    rilettura; se la rilettura fallisce compare solo il suo errore;
   - un popup senza una lettura sua (Settori e file, periodi e intervalli di Stagioni e periodi) si chiude e la lista si
     ricarica;
   - una pagina sempre modificabile (Sharing) rilegge i dati.

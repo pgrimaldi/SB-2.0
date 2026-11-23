@@ -65,6 +65,10 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Servizi Orari, `service.automatic_price_not_found` per Prezzi Automatici, `service.table_service_not_found` per
   Prenotazione tavoli. Su Elimina, su Duplica e su Modifica (lettura del pannello e Salva) gli id escono dalla
   selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup e del pannello di modifica).
+- Un elemento che non si può duplicare (IVA non più ammessa, prezzi per un periodo non più nella stagione, icona non più
+  nel catalogo): 422 `service.duplicate_vat_rate_not_allowed`, `service.duplicate_period_not_found` o
+  `service.duplicate_icon_not_found`, con il nome (`serviceName`) nel popup "Operazione non riuscita"; non si duplica niente.
+  Nei mock non si duplica "Cassetta di Sicurezza", che ha un'IVA di una volta (20%).
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `services/delete-bar-service-item`, `services/duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `services/delete-standard-service-item`, `services/duplicate-standard-service-item` (`idStandardServices`);
@@ -94,7 +98,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     l'asterisco sul prezzo;
   - `app-services-period-prices`: "Abilita variazioni di prezzo per periodo" con la sua (i) e un pannello per
     periodo; riceve `isPeriodPricingEnabled`, `periodPrices` e i periodi della stagione;
-  - `app-services-limits`: sezione Limiti, sul campo `idSectors`;
+  - `app-services-limits`: sezione Limiti, sul campo `idSectors`; un settore scelto che non c'è più resta nell'elenco come
+    "Settore/fila non più disponibile", così l'utente può toglierlo;
   - `app-services-booking-option`: tutta la sezione Opzioni di prenotazione (titolo, bottone, riquadri, (i)),
     sull'elenco `bookingOptions` del form;
   - `app-services-availability-options` / `app-services-availability-option`: Opzioni disponibilità dei servizi
@@ -102,6 +107,16 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Varianti e opzioni ricevono un pezzo del form del pannello, che quindi le valida, le salva e le modifica; sotto
   ogni campo mostrano gli errori della validazione, sotto l'elenco un errore che riguarda l'elenco intero (es. troppe
   varianti). Lo stesso per i prezzi per periodo.
+- L'errore di un campo dentro un riquadro chiuso, o spento con il suo interruttore, compare sotto i riquadri con il nome
+  del periodo o della lingua ("Alta stagione: …", "Inglese: …"): `closedNameError` e `closedDescriptionError` di
+  `app-services-translations`, `hiddenErrors` di `app-services-period-prices` (con `periodContents` per le disponibilità
+  dei servizi orari).
+- Con 404 `catalog.sector_not_found` i settori si rileggono (`sectorsVersion` delle tab dei prezzi); con 422
+  `pricing.period_not_found` si rileggono i periodi (`fetchPeriods` nell'aggiunta, `refreshPeriods` nella modifica), tenendo
+  quello che è scritto: i prezzi salvati dei periodi spariti passano fra quelli nascosti.
+- L'ordine dei settori scelti non è una modifica da perdere (`comparable` dei pannelli di modifica).
+- Minimo e massimo di articoli per prenotazione: se il minimo supera il massimo l'errore è su tutti e due e si vede sotto
+  quello cambiato.
 - Regole comuni delle varianti e delle opzioni di prenotazione, uguali a quelle del backend: `service-form-rules.ts`
   (`serviceVariantRules`, `serviceBookingOptionRules`). I limiti sono costanti delle entità
   (`MAX_SERVICE_NAME_LENGTH`, `MAX_SERVICE_DESCRIPTION_LENGTH`, `MAX_SERVICE_PRICE`,
@@ -114,8 +129,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - La lingua scelta per l'app è sempre la principale: Nome e Descrizione in quella lingua; sotto ciascuno "Altre
   lingue" (`app-expansion-panel`, chiuso) con una riga per ognuna delle altre sei lingue.
 - A sinistra "Nome Inglese" o "Descrizione Inglese" (testi `translated_name` e `translated_description` con
-  `{{language}}`, il nome della lingua in quella dell'utente da `Intl.DisplayNames`); a destra il campo su una riga,
-  lungo quanto la riga. Solo la Descrizione principale è su più righe.
+  `{{language}}`, il nome della lingua in quella dell'utente da `Intl.DisplayNames`); a destra il campo, lungo
+  quanto la riga: su una riga per i nomi, su più righe per le descrizioni (`app-filled-textarea`), che così tengono gli a
+  capo. Un testo di soli spazi si manda `null` (`translationFields` di `CatalogService`).
 - Etichette tutte larghe 10.5rem (la più lunga, del tedesco), così i campi sono allineati.
 - Ordine: italiano, inglese, francese, tedesco, spagnolo, arabo, cinese (`SERVICE_LANGUAGES`). Le traduzioni sono
   l'array `translations` con `language`, `serviceName`, `description`.
@@ -127,6 +143,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Senza periodi un testo rimanda a Stagioni e periodi.
 - La (i) dice che con l'opzione abilitata valgono i prezzi dei periodi, altrimenti il prezzo base (parti in
   grassetto fra `**` nella traduzione).
+- Nei servizi orari la (i) ha un testo suo (`infoKey`, `availability.period_info`): le disponibilità di ogni periodo, o quelle
+  di tutta la stagione.
 - Su telefono (sotto 48rem, `PHONE_QUERY` col `matchMedia`) le date hanno il mese abbreviato (`month: 'short'`) e
   le due date di un intervallo stanno sulla stessa riga, allineate, ognuna in un riquadro con bordo nero leggero
   su tutti i lati.
@@ -189,11 +207,13 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   altre. Il Salva risponde con la nuova versione nell'`ETag`, che il pannello non usa perché si chiude.
 - Con 409 `resource.version_conflict` (un altro utente ha cambiato i dati della tab dopo la lettura) compare
   `app-version-conflict-popup`, la tab torna in sola lettura e si rilegge con la sua GET come all'apertura
-  (`reloadTab`): l'utente rifà le modifiche. Il messaggio sopra i bottoni non compare. Se la rilettura fallisce valgono
-  le regole delle letture qui sopra.
+  (`reloadTab`): l'utente rifà le modifiche. Il messaggio sopra i bottoni non compare. L'avviso arriva dopo la rilettura; se
+  questa fallisce non compare e valgono le regole delle letture qui sopra. La tabella si ricarica (`reloadIfChanged`).
+- Chiudendo il pannello durante una lettura, la lettura si ferma (`stopLoadings`): un errore arrivato tardi non apre popup.
 - La richiesta al backend è in
   `shared documentation/Modifiche per il backend/impostazioni/Servizi - Frontend requests.md`.
-- **Modifica** rende modificabile la tab aperta e mostra **Annulla** (rimette i valori letti, toglie gli
+- **Modifica** rende modificabile la tab aperta, segna subito i campi letti già sbagliati (es. un prezzo automatico rimasto
+  senza servizi, il nome che manca nella lingua dell'utente) e mostra **Annulla** (rimette i valori letti, toglie gli
   errori del backend con `clearApiFieldErrors`, perché `reset()` di Angular non li toglie dai campi non cambiati, e torna in
   sola lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
 - Spinner su Salva e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(updated)`); se
@@ -227,6 +247,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 
 #### Immagine
 
+- Il messaggio di un file rifiutato (troppo grande, vuoto) sparisce scegliendo un'icona o un'altra immagine, con Annulla e
+  chiudendo il pannello.
 - L'immagine scelta dal computer parte con Salva, dopo i dati: `POST /api/catalog/services/{id}/image`
   (`CatalogService.uploadServiceImage`, multipart, campo `file`), nell'aggiunta con l'id della risposta, nella modifica
   dopo il Salva di Info Generali. Il Salva manda l'icona com'era: la toglie il caricamento, così se fallisce resta.
@@ -355,7 +377,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Prezzi (`app-hourly-service-prices-tab`), in quest'ordine:
   - Prezzo (obbligatorio, 0-100.000) e IVA (`app-services-price-vat`); l'IVA ha l'asterisco (`isVatMandatory`) finché non
     ce l'hanno tutte le disponibilità che si mandano, in vigore e delle opzioni di prenotazione, almeno una, come nel
-    backend;
+    backend. In Modifica contano anche quelle dei periodi nascosti; finché Prenotazioni non è stata letta, se quelle di
+    Prezzi hanno tutte la loro IVA decide il backend. Quando manca solo a un'opzione di prenotazione, il suo campo IVA lo
+    dice subito (`services.availability.vat_missing`);
   - "Abilita variazioni di prezzo per periodo" con `app-services-period-prices` senza `periodPrices`: acceso, ogni
     periodo ha sotto le date le sue Opzioni disponibilità (`periodAvailabilities`); spento, ce n'è un blocco solo che
     vale per tutta la stagione (`availabilityOptions`);
@@ -393,9 +417,10 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `ServicePeriodAvailabilityDraft` e `ServiceAvailabilityOptionDraft`.
 - Controlli come nel backend (`serviceAvailabilityRules`): fine dopo l'inizio, almeno un giorno, prezzo obbligatorio
   nelle fasce accese (0-100.000), minuti della personalizzata 1-1.440 e obbligatori se è accesa o ha un prezzo, massimo
-  prenotazioni 1-32.767. Accendendo una fascia il campo che manca si segna subito.
-- Durate del backend non integrate (4, 5 e 6 ore): non si mostrano e tornano come sono state lette, in fondo a
-  `timeSlotPrices`.
+  prenotazioni 1-32.767. Accendendo una fascia, o scrivendo il prezzo della personalizzata, il campo che manca si segna
+  subito.
+- Durate del backend non integrate (4, 5 e 6 ore): non si mostrano, non si controllano e tornano come sono state lette, in
+  fondo a `timeSlotPrices`.
 - Quando il riquadro è più stretto di 20rem (telefoni) il prezzo va sotto la sua fascia e i giorni due per riga; la
   tab riduce i margini dei periodi con `--expansion-panel-content-padding`.
 
@@ -412,7 +437,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Prenotazioni ricevono `isReadonly` per spegnere "Aggiungi" e le X.
 - Le opzioni lette si completano con tutte le otto fasce (`availabilityOf`); senza giorni valgono tutti, e dove non ce ne
   sono se ne mostra una vuota, come nell'aggiunta (anche in un'opzione di prenotazione con `availabilityOption` `null`).
-- Un servizio letto senza IVA (esente) può restare senza.
+- Un servizio letto senza IVA (esente) può restare senza: resta esente anche se le disponibilità hanno la loro aliquota.
 
 ## Prezzi Automatici
 
@@ -444,6 +469,11 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - I servizi arrivano all'apertura da `GET /api/catalog/automatic-prices/get-automatic-price-services`, senza parametri
   (`AutomaticPriceServices`, tre elenchi di `ComboboxItem`): durante la lettura le tab sono bloccate e Salva è
   spento; se fallisce compare l'errore e i pannelli restano vuoti.
+- Con 404 `service.not_found` (un servizio scelto è stato eliminato) i servizi si rileggono, quelli che non ci sono più
+  escono dalla scelta (`withExistingServices`) e il messaggio resta sopra i bottoni. Se il servizio era già salvato nel prezzo
+  arriva prima il conflitto di versione, e la tab si rilegge.
+- L'ordine dei servizi, e quelli scelti con "Tutti i servizi" acceso, non sono modifiche da perdere
+  (`comparableAutomaticPrice`).
 - Entità `AutomaticPriceValidityPeriod`, `AutomaticPriceTimeSlot`.
 - Salva: `POST /api/catalog/automatic-prices/create-automatic-price` (`CatalogService.createAutomaticPrice`), ripulito a
   ogni livello con `onlyFieldsOf`; risponde con l'id del prezzo automatico creato, poi parte l'immagine

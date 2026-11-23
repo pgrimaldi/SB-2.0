@@ -34,7 +34,7 @@
   [idBarService]="idBarServiceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table, [idBarServiceToEdit()])"
+  (failed)="reloadIfGone($event, table, [idBarServiceToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup

@@ -145,8 +145,10 @@ unico per tutte le API**: `resource.version_conflict`.
 - **`ETag` nelle risposte**: ogni salvataggio riuscito risponde 204 senza corpo, come nei contratti, con la nuova
   versione nell'header `ETag: "<version>"`.
 - Il 409 si controlla dopo il 404 dell'elemento (`service.not_found`, `service.automatic_price_not_found` o
-  `service.table_service_not_found`, e `service.not_found` dei servizi non dello stabilimento nei Prezzi automatici) e
-  dopo il 400 `validation.failed`, subito prima del salvataggio.
+  `service.table_service_not_found`) e dopo il 400 `validation.failed`, subito prima del salvataggio; nei Prezzi automatici
+  **prima** del 404 `service.not_found` e del 404 `catalog.sector_not_found` dei servizi e dei settori scelti: un servizio
+  eliminato esce dai prezzi automatici (`ServiceItemsService.RemoveAsync`), quindi i loro dati sono cambiati e il pannello
+  deve rileggerli.
 - La copia fatta da Duplica ha le sue versioni: salvarla non cambia quelle del servizio di partenza.
 - **Come farlo lo sceglie lo sviluppatore del backend** (un hash dei dati coperti, un contatore per tab...): l'agente
   glielo chiede prima di scrivere codice. Il frontend tratta la versione come una stringa opaca e non la confronta mai.
@@ -178,8 +180,8 @@ e `get-automatic-price-services` e `catalog/tariff-periods` servono solo a riemp
 ### Cosa fa il frontend
 
 Con 409 `resource.version_conflict` il pannello mostra l'avviso "Nel frattempo un altro utente ha modificato questi
-dati: li abbiamo ricaricati. Rifai le tue modifiche.", la tab torna in sola lettura e si rilegge con la sua GET; il
-messaggio sopra i bottoni non compare. Dopo un salvataggio riuscito il pannello si chiude e alla riapertura rilegge le
+dati: li abbiamo ricaricati. Rifai le tue modifiche.", la tab torna in sola lettura e si rilegge con la sua GET, e la
+tabella si ricarica; il messaggio sopra i bottoni non compare. Dopo un salvataggio riuscito il pannello si chiude e alla riapertura rilegge le
 tab.
 
 ## Regole comuni delle tabelle (sezioni 2-6)
@@ -645,6 +647,23 @@ in una sola chiamata, tutto o niente**, come `POST /api/catalog/duplicate-wareho
   `validation.failed` con `validation.required` sul campo degli id assente o vuoto, 403 `catalog.property_required`, 404
   `catalog.property_not_found`, 404 con il `code` della sezione per un id che non è un elemento dello stabilimento di
   quella tab). Con il 404 della sezione non si duplica niente.
+- **Un elemento che non si può copiare** (sezioni 12-15) risponde con un errore suo, che dice quale elemento e perché, e
+  non si duplica niente. Oggi la copia rifà i controlli del salvataggio (`CopyAsync` chiama `ApplyAsync`) e può rispondere
+  422 `catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found` o 404 `service.icon_not_found`, senza dire di quale
+  elemento: con più righe scelte l'utente non può saperlo. Codici nuovi (`CatalogErrors`), dopo il 404 della sezione, sul
+  primo elemento che non va nell'ordine degli id:
+
+  | Status | `code` | Quando | `args` |
+  |---|---|---|---|
+  | 422 | `service.duplicate_vat_rate_not_allowed` | L'IVA dell'elemento, o di una disponibilità di un servizio orario, non è più tra le aliquote ammesse (`VatPolicy.ResolveAsync`). | `serviceName`, `rates` |
+  | 422 | `service.duplicate_period_not_found` | Un servizio ha prezzi o disponibilità per un periodo che non è più nella stagione corrente. | `serviceName` |
+  | 422 | `service.duplicate_icon_not_found` | L'icona dell'elemento non è più nel catalogo. | `serviceName` |
+
+  `serviceName` è il nome nella lingua di `Accept-Language`, come nelle tabelle. I settori non fanno fallire la copia: quelli
+  eliminati non ci sono già oggi (`ToDtoAsync`). I servizi tavoli (sezione 16) non hanno controlli da rifare.
+- **Da chiedere allo sviluppatore prima di scrivere codice**: i prezzi di un periodo che non è più nella stagione non si
+  vedono nel pannello, quindi l'utente non può toglierli e quel servizio non si potrebbe più duplicare. La copia può
+  tenerli come sono, o farne a meno, invece di rispondere `service.duplicate_period_not_found`?
 - Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con il 404 della
   sezione toglie gli id dalla selezione e ricarica la tabella.
 
@@ -1428,8 +1447,10 @@ nelle lingue, ordine degli errori), con queste differenze:
 - **`price`** obbligatorio, come Servizi.
 - **`vatRate`** del servizio: può essere `null` solo se **tutte** le disponibilità (quelle in vigore e quelle delle opzioni
   di prenotazione, almeno una) hanno la loro, come vuole già `SaveServiceRequestValidator`; il servizio prende allora
-  l'aliquota della prima, come fa già `ServiceItemsService.ApplyAsync`. Un servizio che ha già una natura dell'IVA la
-  mantiene se `vatRate` è ancora `null`.
+  l'aliquota della prima, come fa già `ServiceItemsService.ApplyAsync`. **Un servizio che ha già una natura dell'IVA
+  (esente) resta esente** se `vatRate` è ancora `null`, anche quando le disponibilità hanno la loro aliquota: nel `PUT` di
+  oggi la natura arriva insieme e vince (`ApplyAsync`), e il preventivo di un servizio esente non guarda le aliquote delle
+  disponibilità (`QuoteService.PriceServicesAsync`). Smette di esserlo solo quando arriva un `vatRate`.
 - **Id**: `idHourlyService`, il `public_id` del servizio.
 
 ### Disponibilità
@@ -1481,19 +1502,20 @@ letta, finché l'utente non la toglie.
 | Campo | Tipo | Corrisponde a |
 |---|---|---|
 | `startTime`, `endTime` | string `"HH:mm"` o `null` | `time_from`, `time_to` |
-| `daysOfWeek` | array di number (ISO: 1 lunedì … 7 domenica) | `weekdays`. Il frontend ne manda sempre almeno uno; `[]` in lettura vuol dire tutti i giorni, come nel backend, e il pannello li mostra tutti scelti. |
+| `daysOfWeek` | array di number (ISO: 1 lunedì … 7 domenica) | `weekdays`. `[]` vuol dire tutti i giorni, come nel backend, e il pannello li mostra tutti scelti. Il frontend ne manda almeno uno per le disponibilità che mostra; quelle dei periodi che non mostra tornano come sono state lette, anche con `[]`. |
 | `timeSlotPrices` | array, sempre tutte e otto nell'ordine qui sopra, poi quelle di "Durate non integrate" | Le fasce con `is_custom` falso: `timeSlot` = `duration_minutes` (`TenMinutes` 10, `FifteenMinutes` 15, `ThirtyMinutes` 30, `FortyFiveMinutes` 45, `OneHour` 60, `OneHourThirtyMinutes` 90, `TwoHours` 120, `ThreeHours` 180), `isEnabled` = `is_active`, `price` = `price` (number o `null`) |
 | `isCustomTimeSlotEnabled`, `customTimeSlotMinuteQuantity`, `customTimeSlotPrice` | boolean, number o `null`, number o `null` | La fascia con `is_custom` vero: `is_active`, `duration_minutes`, `price`. Con i minuti `null` la fascia non c'è. |
 | `vatRate` | number o `null` | `vat_rate`; `null` = quella del servizio |
 | `maxBookingPerTimeSlotQuantity` | number (intero) o `null` | `max_per_slot` |
-| `hasFixedTimeSlots` | boolean | `has_fixed_time_slots` |
+| `hasFixedTimeSlots` | boolean | `has_fixed_time_slots`. Quello del servizio (`ServiceSaleItem.HasFixedTimeSlots`) è vero se lo è una disponibilità qualsiasi (`ReplaceHourly`): il salvataggio di una tab lo ricalcola su **tutte**, quelle dei prezzi e quelle delle opzioni di prenotazione, non solo sulle sue. |
 
 ### Durate non integrate
 
 Il backend ha 11 durate (`ContentRules.HourlyDurations`), il frontend per ora solo le 8 dell'esempio: **240, 300 e 360 minuti
 non sono state integrate**. Il pannello non le mostra e non le fa scegliere. Se una disponibilità le ha già, la lettura le dà
 in `timeSlotPrices` dopo le otto, come `FourHours`, `FiveHours` e `SixHours`, e il frontend le rimanda uguali: un Salva non le
-toglie.
+toglie. Il frontend non le controlla: una di queste accesa ma senza prezzo, già salvata così (la colonna `price` lo
+permette), si accetta com'è, perché l'utente non può correggerla.
 
 ### Opzioni di prenotazione
 
@@ -1525,10 +1547,11 @@ Quelli comuni dei pannelli di Servizi Bar, nello stesso ordine (401, 403 `auth.f
 | `periodAvailabilities` | `validation.invalid` | Più di 50 periodi, lo stesso `idPeriod` due volte, più di 20 disponibilità in un periodo, o non vuoto con `isPeriodPricingEnabled` falso. |
 | `bookingOptions` | `validation.invalid` | Più di 20 (`ServiceSaleItem.MaxBookingOptions`). |
 | `bookingOptions[i].dateTo` | `validation.end_before_start` | Prima di `dateFrom`. |
+| `bookingOptions[i].managementEndTime`, `.onlineEndTime`, `.weekdays`, `.maxBookingPerHourQuantity`, `.maxBookingPerDayQuantity`, `.maxPerSlot`, `.intervalMinutes`, `.minItemPerBookingQuantity`, `.maxItemPerBookingQuantity` | `validation.invalid` | Come Servizi Bar. Il pannello non li mostra: li rimanda come li ha letti. |
 | `<disponibilità>.endTime` | `validation.invalid` | Non dopo `startTime`: nemmeno la stessa ora (`ContentRules.TimeRange`, `ck_catalog_service_hourly_options_hours`). |
 | `<disponibilità>.daysOfWeek` | `validation.invalid` | Un valore fuori da 1-7. |
 | `<disponibilità>.timeSlotPrices` | `validation.invalid` | Una fascia sconosciuta o ripetuta. |
-| `<disponibilità>.timeSlotPrices[j].price`, `<disponibilità>.customTimeSlotPrice` | `validation.required` o `validation.out_of_range` | Assente con la fascia accesa, o fuori da 0-100.000. |
+| `<disponibilità>.timeSlotPrices[j].price`, `<disponibilità>.customTimeSlotPrice` | `validation.required` o `validation.out_of_range` | Assente con la fascia accesa (non per le "Durate non integrate", qui sopra), o fuori da 0-100.000. |
 | `<disponibilità>.customTimeSlotMinuteQuantity` | `validation.required` o `validation.out_of_range` | Assente con la fascia accesa o con il suo prezzo scritto, o fuori da 1-1.440. |
 | `<disponibilità>.vatRate` | `validation.out_of_range` | Non maggiore di 0 e minore di 100. |
 | `<disponibilità>.maxBookingPerTimeSlotQuantity` | `validation.out_of_range` | Fuori da 1-32.767 (`smallint`). |
@@ -1692,9 +1715,9 @@ dove la sezione lo dice.
 | 404 | `service.automatic_price_not_found` | `idAutomaticPrice` non è un prezzo automatico dello stabilimento. Niente cambia. |
 | 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args.rates` come oggi (`VatPolicy.ResolveAsync`). Niente cambia. |
 | 404 | `service.icon_not_found` | `icon` non ha un'icona corrispondente nel catalogo (`CatalogErrors.ServiceIconNotFound`). Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
 | 404 | `service.not_found` | Un id dei tre elenchi non è un servizio dello stabilimento di quel tipo (`CatalogErrors.ServiceNotFound`). Niente cambia. |
 | 404 | `catalog.sector_not_found` | Un id di `idSectors` non è un settore dello stabilimento (`ContentMapping.SectorIdsAsync`). Niente cambia. |
-| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
 
 Errori di campo del 400, con `field` uguale al nome nel corpo:
 
@@ -1712,7 +1735,8 @@ Errori di campo del 400, con `field` uguale al nome nel corpo:
 
 Il frontend controlla già nomi, limiti dei testi, prezzo, servizi, giorni, ore e date. Mostra sotto il campo gli errori dei campi di primo
 livello, `catalog.vat_rate_not_allowed` (sotto IVA, con le aliquote di `rates`) e `service.icon_not_found` (sotto le icone),
-sopra i bottoni tutti gli altri con il testo del loro `code`. Con `service.automatic_price_not_found` ricarica la tabella.
+sopra i bottoni tutti gli altri con il testo del loro `code`. Con `service.automatic_price_not_found` ricarica la tabella;
+con `service.not_found` rilegge i servizi (sezione 41) e toglie dalla scelta quelli che non ci sono più.
 
 ## 40. POST /api/catalog/automatic-prices/create-automatic-price
 
@@ -1753,7 +1777,7 @@ Salva del pannello "Aggiungi nuovo prezzo automatico".
 | Campo | Tipo | Corrisponde a | Note |
 |---|---|---|---|
 | `translations` | array | `name`, `description` e `catalog.automatic_price_translations` | Come Servizi Bar. |
-| `icon` | string o `null` | `icon_id` | Una delle 22 di Servizi Bar (sezione 17, righe del catalogo con `type` `bar`) o delle 21 di Servizi (sezione 26, righe con `type` `normal`); i nomi non si ripetono. |
+| `icon` | string o `null` | `icon_id` | Una delle 22 di Servizi Bar (sezione 17, righe del catalogo con `type` `bar`) o delle 21 di Servizi (sezione 26, righe con `type` `normal`); i nomi non si ripetono. Un prezzo automatico che ha già un'icona di una riga `hourly` (stessi nomi di `normal`) la mantiene se `icon` è il nome letto. |
 | `price` | number | `price` | In euro, da 0 a 100.000. Obbligatorio. |
 | `vatRate` | number o `null` | `vat_rate` | Come Servizi Bar: `null` = senza aliquota, con la natura predefinita (`VatPolicy.ResolveAsync`); un prezzo che ha già una natura la mantiene se `vatRate` è ancora `null`. |
 | `isOnlinePurchaseEnabled` | boolean | `is_purchasable` | |
@@ -1781,8 +1805,8 @@ Prezzi e Validità della modifica. Nessun parametro. Permesso `CatalogRead`. Ris
 
 - `barServices`, `standardServices` e `hourlyServices`: tutti i servizi non eliminati dello stabilimento con `kind` `bar`,
   `normal` e `hourly`; `[]` se non ce ne sono. Nessuna pagina.
-- `id`: il `public_id` del servizio. `value`: il nome nella lingua dell'utente, e ordine per nome, come "Nome nella lingua
-  dell'utente" delle tabelle.
+- `id`: il `public_id` del servizio. `value`: il nome nella lingua dell'utente, come in "Nome nella lingua dell'utente" delle
+  tabelle. Ogni elenco è in ordine di `value`, crescente e naturale, come `serviceName` in "Ordinamento" delle tabelle.
 - Errori: 401, 403 `auth.forbidden`, 403 `catalog.property_required`, 404 `catalog.property_not_found`.
 
 ## 42. GET /api/catalog/automatic-prices/get-automatic-price-general-info
@@ -2149,7 +2173,10 @@ prezzo e un'immagine caricata:
     `service.automatic_price_not_found`, voce `catalog.automatic_price_duplicated`; la copia si applica agli stessi
     servizi) e con `duplicate-table-service-item` (404 `service.table_service_not_found`, voce
     `catalog.table_service_duplicated`).
-32. Un servizio con il nome in tutte e 7 le lingue: la copia ha in ogni lingua il suffisso della sua lingua (" copia",
+32. Un servizio con un'IVA che non è più tra le aliquote ammesse, da solo o insieme a uno valido: 422
+    `service.duplicate_vat_rate_not_allowed` con `serviceName` e `rates`, e nessuna copia. Lo stesso con un prezzo automatico,
+    con una disponibilità di un servizio orario, e con un'icona tolta dal catalogo (`service.duplicate_icon_not_found`). Un
+    servizio con il nome in tutte e 7 le lingue: la copia ha in ogni lingua il suffisso della sua lingua (" copia",
     " copy", " copie", " copia", " Kopie", " 副本", " نسخة") e le stesse descrizioni. Se in inglese "Coffee copy" esiste
     già ma in italiano "Caffè copia" no, la copia è "Caffè copia" e "Coffee copy 2".
 
@@ -2241,10 +2268,12 @@ API 33-39, con un token con `CatalogRead` e `CatalogSettings`:
     due periodi, un salvataggio con uno solo: 204, la lettura dà solo quello e l'altro periodo non è più usato dal servizio.
 62. `price` `null`: 400 `validation.required`. `vatRate` `null` con una disponibilità senza aliquota: 400 `validation.invalid`
     su `vatRate`; con tutte le disponibilità a 10: 201 e la lettura dà `vatRate` 10. Su un servizio con una natura dell'IVA,
-    `vatRate` `null`: 204 e la natura non cambia.
+    `vatRate` `null`: 204 e la natura non cambia, anche con le disponibilità a 10 (la lettura dà ancora `null`); con `vatRate`
+    22 la natura non c'è più.
 63. Una fascia accesa senza prezzo, la personalizzata accesa senza minuti o senza prezzo: 400 `validation.required` sul
     campo; i minuti a 0 o 1.441: 400 `validation.out_of_range`.
-64. Una disponibilità con 240 minuti accesi: la lettura dà `FourHours` dopo le otto fasce, e rimandata uguale resta salvata.
+64. Una disponibilità con 240 minuti accesi: la lettura dà `FourHours` dopo le otto fasce, e rimandata uguale resta salvata,
+    anche accesa senza prezzo.
     Una disponibilità salvata senza giorni: la lettura dà `daysOfWeek` `[]`.
 65. Un'opzione di prenotazione con giorni, orari, massimi e intervallo già salvati: `update-hourly-service-booking` con gli
     stessi valori letti non li cambia. Un'opzione senza disponibilità: la lettura dà `availabilityOption` `null`, e rimandata
@@ -2259,7 +2288,9 @@ API 40-46, con un token con `CatalogRead` e `CatalogSettings`:
     non cambia nomi, icona e immagine. Nel registro una voce `catalog.automatic_price_updated` per salvataggio.
 68. `price` `null`: 400 `validation.required`; 100.001: 400 `validation.out_of_range`. Una fascia senza `endTime` o con le due
     ore uguali: 400 `validation.invalid` su `validityPeriods[0].timeSlots`; mai un 500 per un vincolo del database.
-69. Un id di servizio bar in `idHourlyServices`, o di un altro stabilimento: 404 `service.not_found`. Niente cambia.
+69. Un id di servizio bar in `idHourlyServices`, o di un altro stabilimento: 404 `service.not_found`. Niente cambia. Letta la
+    tab, si elimina un servizio del prezzo automatico e poi si salva con la `If-Match` letta: 409 `resource.version_conflict`,
+    non 404.
 70. `get-automatic-price-services` con `Accept-Language: en`: i nomi inglesi dove ci sono, gli altri in italiano; un servizio
     eliminato non compare. Senza `CatalogRead`: 403 `auth.forbidden`.
 71. Ogni nome delle 43 icone: 204, e la lettura lo restituisce uguale.

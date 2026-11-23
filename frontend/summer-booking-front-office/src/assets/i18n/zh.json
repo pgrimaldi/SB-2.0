@@ -158,7 +158,10 @@
       "not_found": "服务已不存在：可能已被删除。",
       "automatic_price_not_found": "自动价格已不存在：可能已被删除。",
       "table_service_not_found": "餐桌服务已不存在：可能已被删除。",
-      "icon_not_found": "所选图标已不可用：请选择其他图标。"
+      "icon_not_found": "所选图标已不可用：请选择其他图标。",
+      "duplicate_vat_rate_not_allowed": "无法复制 {{serviceName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
+      "duplicate_period_not_found": "无法复制 {{serviceName}}：其中有的价格所属时段已不在当前赛季。",
+      "duplicate_icon_not_found": "无法复制 {{serviceName}}：其图标已不可用。请选择其他图标后重试。"
     }
   },
   "alert": {
@@ -900,7 +903,7 @@
           },
           "field_names": {
             "validity_period": "有效期",
-            "day_of_week": "星期"
+            "day_of_week": "日期"
           },
           "options": {
             "title": "选项",
@@ -1491,7 +1494,8 @@
             "limits": {
               "title": "限制",
               "sectors": "可购买此服务的排/区域",
-              "all_sectors": "所有排/区域"
+              "all_sectors": "所有排/区域",
+              "missing_sector": "排/区域已不可用"
             }
           },
           "bookings": {
@@ -1521,6 +1525,7 @@
           "availability": {
             "title": "可用选项",
             "hours": "可用时间",
+            "period_info": "**启用**此选项后，赛季内的每个时段都有各自的可用时间和价格。\n\n**未启用**此选项时，下方填写的可用时间适用于整个赛季。",
             "days_title": "可用日期",
             "days": {
               "monday": "周一",
@@ -1547,7 +1552,7 @@
             "max_bookings_per_time_slot": "每个时段最多预订数",
             "fixed_time_slots": "固定时段",
             "field_names": {
-              "day_of_week": "星期"
+              "day_of_week": "日期"
             }
           },
           "validity": {
@@ -2078,6 +2083,9 @@
     "services": {
       "translation": {
         "name_missing": "请同时填写该语言的名称"
+      },
+      "availability": {
+        "vat_missing": "请填写此可用时段的增值税，或在价格选项卡中填写服务的增值税"
       },
       "tables": {
         "seats_taken": "座位数重复"

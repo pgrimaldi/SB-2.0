@@ -34,7 +34,7 @@
   [idHourlyService]="idHourlyServiceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table, [idHourlyServiceToEdit()])"
+  (failed)="reloadIfGone($event, table, [idHourlyServiceToEdit()]); reloadIfChanged($event, table)"
 />
 
 <app-delete-items-popup

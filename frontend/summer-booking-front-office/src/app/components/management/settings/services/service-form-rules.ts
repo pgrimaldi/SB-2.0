@@ -10,7 +10,9 @@ import {
   required,
   validate,
 } from '@angular/forms/signals';
+import { ComboboxItem } from '../../../../entities/combobox/combobox-item';
 import { AutomaticPriceAddItemRequest } from '../../../../entities/settings/services/automatic-price-add-item-request';
+import { AutomaticPriceServices } from '../../../../entities/settings/services/automatic-price-services';
 import { HourlyServiceAddItemRequest } from '../../../../entities/settings/services/hourly-service-add-item-request';
 import { HourlyServiceDraft } from '../../../../entities/settings/services/hourly-service-draft';
 import {
@@ -23,6 +25,7 @@ import {
   ServiceBookingOption,
 } from '../../../../entities/settings/services/service-booking-option';
 import { MAX_SERVICE_PRICE } from '../../../../entities/settings/services/service-price';
+import { ServiceTimeSlot } from '../../../../entities/enums/service-time-slot';
 import { TableServiceAvailabilityMode } from '../../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../../entities/enums/table-service-booking-payment';
 import { TableServiceAddItemRequest } from '../../../../entities/settings/services/table-service-add-item-request';
@@ -48,6 +51,20 @@ import {
 
 export interface MissingTranslatedNameError extends ValidationError {
   readonly kind: 'services.translation.name_missing';
+}
+
+export interface MissingVatError extends ValidationError {
+  readonly kind: 'services.availability.vat_missing';
+}
+
+/** What an hourly service has besides its form, for the VAT that has to be written. */
+export interface HourlyServiceVat {
+  /** Already saved without VAT: it can stay so. */
+  canLackVat: boolean;
+  /** Of the periods the form does not show. */
+  hiddenAvailabilities: readonly ServiceAvailabilityOptionDraft[];
+  /** Without them only the backend knows whether every availability has its VAT. */
+  areBookingOptionsRead: boolean;
 }
 
 export interface SeatsTakenError extends ValidationError {
@@ -89,11 +106,18 @@ export function serviceBookingOptionRules(option: SchemaPathTree<ServiceBookingO
     min(quantity, 1);
     max(quantity, MAX_SERVICE_BOOKING_QUANTITY);
   }
+  max(
+    option.minItemPerBookingQuantity,
+    ({ valueOf }) => valueOf(option.maxItemPerBookingQuantity) ?? undefined,
+  );
   min(
     option.maxItemPerBookingQuantity,
     ({ valueOf }) => valueOf(option.minItemPerBookingQuantity) ?? undefined,
   );
 }
+
+/** The durations the form shows: the others are sent back as read. */
+const TIME_SLOTS: readonly (string | null)[] = Object.values(ServiceTimeSlot);
 
 /** An availability as the backend wants it: a day at least, and the price of what can be booked. */
 export function serviceAvailabilityRules(
@@ -101,10 +125,16 @@ export function serviceAvailabilityRules(
 ): void {
   timeRange(option.startTime, option.endTime);
   minItems(option.daysOfWeek, 1);
-  applyEach(option.timeSlotPrices, (timeSlotPrice) => {
-    required(timeSlotPrice.price, { when: ({ valueOf }) => valueOf(timeSlotPrice.isEnabled) });
-    max(timeSlotPrice.price, MAX_SERVICE_PRICE);
-  });
+  applyEach(option.timeSlotPrices, (timeSlotPrice) =>
+    applyWhen(
+      timeSlotPrice,
+      ({ valueOf }) => TIME_SLOTS.includes(valueOf(timeSlotPrice.timeSlot)),
+      (shown) => {
+        required(shown.price, { when: ({ valueOf }) => valueOf(shown.isEnabled) });
+        max(shown.price, MAX_SERVICE_PRICE);
+      },
+    ),
+  );
   required(option.customTimeSlotMinuteQuantity, {
     when: ({ valueOf }) =>
       valueOf(option.isCustomTimeSlotEnabled) || valueOf(option.customTimeSlotPrice) !== null,
@@ -121,26 +151,42 @@ export function serviceAvailabilityRules(
 
 /**
  * Price, VAT and availabilities in force of an hourly service as the backend wants them. The VAT is
- * of the service or, without it, of every availability sent, at least one; a service already saved
- * without VAT (`canLackVat`) can stay so.
+ * of the service or, without it, of every availability sent, at least one.
  */
 export function hourlyServicePriceRules(
   path: SchemaPathTree<HourlyServiceDraft>,
-  canLackVat: () => boolean = () => false,
+  vat: () => HourlyServiceVat = () => ({
+    canLackVat: false,
+    hiddenAvailabilities: [],
+    areBookingOptionsRead: true,
+  }),
 ): void {
   required(path.price);
   max(path.price, MAX_SERVICE_PRICE);
   required(path.vatRate, {
     when: ({ valueOf }) => {
-      const options = [
-        ...(valueOf(path.isPeriodPricingEnabled)
-          ? valueOf(path.periodAvailabilities).flatMap((period) => period.availabilityOptions)
-          : valueOf(path.availabilityOptions)),
-        ...valueOf(path.bookingOptions).map((option) => option.availabilityOption),
-      ].filter(isAvailabilitySent);
-      return !canLackVat() && !(options.length && options.every(({ vatRate }) => vatRate !== null));
+      const { canLackVat, hiddenAvailabilities, areBookingOptionsRead } = vat();
+      const options = sentAvailabilities(valueOf(path), hiddenAvailabilities);
+      return (
+        !canLackVat &&
+        (options.some(({ vatRate }) => vatRate === null) ||
+          (areBookingOptionsRead && !options.length))
+      );
     },
   });
+  applyEach(path.bookingOptions, (option) =>
+    validate(
+      option.availabilityOption.vatRate,
+      ({ value, valueOf }): MissingVatError | undefined =>
+        value() === null &&
+        valueOf(path.vatRate) === null &&
+        !vat().canLackVat &&
+        isAvailabilitySent(valueOf(option.availabilityOption)) &&
+        sentAvailabilities(valueOf(path)).some(({ vatRate }) => vatRate !== null)
+          ? { kind: 'services.availability.vat_missing' }
+          : undefined,
+    ),
+  );
   applyWhen(
     path,
     ({ valueOf }) => !valueOf(path.isPeriodPricingEnabled),
@@ -190,6 +236,33 @@ export function withServicesInForce(
     : values;
 }
 
+/** Without the services chosen that are no longer there. */
+export function withExistingServices(
+  values: AutomaticPriceAddItemRequest,
+  { barServices, standardServices, hourlyServices }: AutomaticPriceServices,
+): AutomaticPriceAddItemRequest {
+  const existing = (ids: readonly string[], services: readonly ComboboxItem[]): string[] =>
+    ids.filter((idService) => services.some(({ id }) => id === idService));
+  return {
+    ...values,
+    idBarServices: existing(values.idBarServices, barServices),
+    idStandardServices: existing(values.idStandardServices, standardServices),
+    idHourlyServices: existing(values.idHourlyServices, hourlyServices),
+  };
+}
+
+/** What would be sent, to compare: the order of the services and of the sectors is not a change. */
+export function comparableAutomaticPrice(values: AutomaticPriceAddItemRequest): string {
+  const sent = withServicesInForce(values);
+  return comparableJson({
+    ...sent,
+    idBarServices: [...sent.idBarServices].sort(),
+    idStandardServices: [...sent.idStandardServices].sort(),
+    idHourlyServices: [...sent.idHourlyServices].sort(),
+    idSectors: [...sent.idSectors].sort(),
+  });
+}
+
 const EMPTY_AVAILABILITY = comparableJson(new ServiceAvailabilityOption());
 
 /** One left empty is only what the panel shows where there are none, unless it was saved so. */
@@ -198,6 +271,22 @@ function isAvailabilitySent(option: ServiceAvailabilityOptionDraft): boolean {
     option.isSaved ||
     comparableJson(onlyFieldsOf(ServiceAvailabilityOption, option)) !== EMPTY_AVAILABILITY
   );
+}
+
+/** Every availability to send, those in force and of the booking options. */
+function sentAvailabilities(
+  values: HourlyServiceDraft,
+  hiddenAvailabilities: readonly ServiceAvailabilityOptionDraft[] = [],
+): ServiceAvailabilityOptionDraft[] {
+  return [
+    ...(values.isPeriodPricingEnabled
+      ? [
+          ...values.periodAvailabilities.flatMap((period) => period.availabilityOptions),
+          ...hiddenAvailabilities,
+        ]
+      : values.availabilityOptions),
+    ...values.bookingOptions.map((option) => option.availabilityOption),
+  ].filter(isAvailabilitySent);
 }
 
 /** The availabilities to send: a period without any is left out, a booking option has `null`. */

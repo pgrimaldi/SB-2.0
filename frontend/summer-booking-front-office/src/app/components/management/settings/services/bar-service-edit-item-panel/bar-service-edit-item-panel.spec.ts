@@ -3,16 +3,18 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { Weekday } from '../../../../../entities/enums/weekday';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { BarServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/bar-service-selected-general-info';
 import { BarServiceSelectedPrices } from '../../../../../entities/settings/services/bar-service-selected-prices';
 import { BarServiceUpdateBookingRequest } from '../../../../../entities/settings/services/bar-service-update-booking-request';
 import { BarServiceUpdateGeneralRequest } from '../../../../../entities/settings/services/bar-service-update-general-request';
+import { BarServiceUpdatePricesRequest } from '../../../../../entities/settings/services/bar-service-update-prices-request';
 import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { Language } from '../../../../../entities/shared/language';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
@@ -56,7 +58,10 @@ describe('BarServiceEditItemPanel', () => {
       (request: BarServiceUpdateGeneralRequest): Observable<string | null> =>
         of(request ? 'v2' : null),
     );
-    const updateBarServicePrices = vi.fn((): Observable<string | null> => of('v2'));
+    const updateBarServicePrices = vi.fn(
+      (request: BarServiceUpdatePricesRequest): Observable<string | null> =>
+        of(request ? 'v2' : null),
+    );
     const updateBarServiceBooking = vi.fn(
       (request: BarServiceUpdateBookingRequest): Observable<string | null> =>
         of(request ? 'v2' : null),
@@ -309,6 +314,109 @@ describe('BarServiceEditItemPanel', () => {
     expect(panel['tabErrorMessage']()).toBeNull();
     expect(panel['isEditDisabled']()).toBe(false);
     expect(panel.open()).toBe(true);
+  });
+
+  it('should forget a read still running when the panel is closed', async () => {
+    const { fixture, panel } = await setup();
+    const answer = new Subject<BarServiceSelectedGeneralInfo>();
+    vi.spyOn(panel['catalog'], 'barServiceGeneralInfo').mockReturnValue(answer);
+
+    panel.open.set(false);
+    await fixture.whenStable();
+    panel.open.set(true);
+    await fixture.whenStable();
+    panel.open.set(false);
+    await fixture.whenStable();
+    answer.error(new HttpErrorResponse({ status: 500, error: null }));
+    expect(panel['readError']()).toBeNull();
+  });
+
+  it('should tell of a version conflict once the tab is read again, or only that it cannot be', async () => {
+    const { fixture, panel, save, updateBarServiceGeneral } = await setup();
+    const read = vi.spyOn(panel['catalog'], 'barServiceGeneralInfo');
+    let failed = 0;
+    panel.failed.subscribe(({ code }) => {
+      failed += code === ApiErrorCode.ResourceVersionConflict ? 1 : 0;
+    });
+    updateBarServiceGeneral.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+
+    panel['startEdit']();
+    panel['draftForm'].isHighlighted().value.set(true);
+    await save();
+    expect(panel['isConflictShown']()).toBe(true);
+    expect(panel['isEditing']()).toBe(false);
+    expect(panel['draft']().isHighlighted).toBe(false);
+    expect(failed).toBe(1);
+
+    panel['isConflictShown'].set(false);
+    read.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500, error: null })));
+    panel['startEdit']();
+    panel['draftForm'].isHighlighted().value.set(true);
+    await save();
+    await fixture.whenStable();
+    expect(panel['isConflictShown']()).toBe(false);
+    expect(panel['readError']()).not.toBeNull();
+    expect(panel.open()).toBe(false);
+  });
+
+  it('should read again the sectors or the periods that are no longer there', async () => {
+    const { fixture, panel, save, updateBarServicePrices } = await setup({
+      prices: vi.fn(() =>
+        of(
+          Object.assign(new BarServiceSelectedPrices(), {
+            price: 3,
+            idSectors: ['s2', 's1'],
+            isPeriodPricingEnabled: true,
+            periodPrices: [{ idPeriod: 1, price: 4 }],
+          }),
+        ),
+      ),
+    });
+    const periodsOf = (keys: number[]) =>
+      of(keys.map((key) => Object.assign(new SeasonPeriodItem(), { key })));
+    const readPeriods = vi.spyOn(panel['seasons'], 'periodList').mockReturnValue(periodsOf([1, 2]));
+    const readSectors = vi.spyOn(TestBed.inject(SectorService), 'sectorCombobox');
+    const refuse = (status: number, code: ApiErrorCode) =>
+      updateBarServicePrices.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status, error: { status, code } })),
+      );
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].idSectors().value.set(['s1', 's2']);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+    panel['draftForm'].periodPrices[1].price().value.set(5);
+
+    refuse(404, ApiErrorCode.CatalogSectorNotFound);
+    const sectorReads = readSectors.mock.calls.length;
+    await save();
+    expect(readSectors.mock.calls).toHaveLength(sectorReads + 1);
+    expect(panel['draft']().idSectors).toEqual(['s1', 's2']);
+
+    refuse(422, ApiErrorCode.PricingPeriodNotFound);
+    readPeriods.mockReturnValue(periodsOf([2, 3]));
+    await save();
+    expect(panel['error']()?.code).toBe(ApiErrorCode.PricingPeriodNotFound);
+    expect(panel['draft']().periodPrices).toMatchObject([
+      { idPeriod: 2, price: 5 },
+      { idPeriod: 3, price: null },
+    ]);
+    updateBarServicePrices.mockReturnValue(of('v2'));
+    await save();
+    expect(updateBarServicePrices.mock.lastCall?.[0].periodPrices).toMatchObject([
+      { idPeriod: 2, price: 5 },
+      { idPeriod: 3, price: null },
+      { idPeriod: 1, price: 4 },
+    ]);
   });
 
   it('should forget with Annulla the error of the backend on a field not changed', async () => {

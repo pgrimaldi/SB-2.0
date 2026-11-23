@@ -34,7 +34,9 @@
   [idStandardService]="idStandardServiceToEdit()"
   [(open)]="editing"
   (updated)="table.reload()"
-  (failed)="reloadIfGone($event, table, [idStandardServiceToEdit()])"
+  (failed)="
+    reloadIfGone($event, table, [idStandardServiceToEdit()]); reloadIfChanged($event, table)
+  "
 />
 
 <app-delete-items-popup

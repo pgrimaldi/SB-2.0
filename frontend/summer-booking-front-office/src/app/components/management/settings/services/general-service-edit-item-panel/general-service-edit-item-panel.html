@@ -35,6 +35,7 @@
         [attr.inert]="isLoading(PanelTab.Prices) ? '' : null"
         [form]="draftForm"
         [periods]="periods()"
+        [sectorsVersion]="sectorsVersion()"
       />
     } @else if (selectedTab() === PanelTab.Bookings) {
       <app-general-service-bookings-tab

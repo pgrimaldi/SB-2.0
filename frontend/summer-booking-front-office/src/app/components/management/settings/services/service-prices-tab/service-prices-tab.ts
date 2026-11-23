@@ -31,6 +31,8 @@ export class ServicePricesTab {
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   /** Only to look at: the buttons that change the data (add, remove) are off. */
   readonly isReadonly = input(false);
+  /** When it changes the sectors of Limiti are read again. */
+  readonly sectorsVersion = input(0);
 
   protected readonly validationText = inject(ValidationTextBehaviour);
 }

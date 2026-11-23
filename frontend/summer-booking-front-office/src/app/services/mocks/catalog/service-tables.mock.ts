@@ -14,7 +14,7 @@ import {
 import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, problem } from '../errors/problem.mock';
+import { MockFieldError, MockProblemDetails, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 
 const SORT_DIRECTIONS: readonly SortDirection[] = ['Ascending', 'Descending'];
@@ -38,6 +38,12 @@ interface TranslatedDetails {
   translations: ServiceTranslation[];
 }
 
+/** Why an element cannot be copied, besides its name. */
+export interface MockCopyError {
+  code: ApiErrorCode;
+  args: MockProblemDetails['args'];
+}
+
 /** The rows of a tab of Servizi and, by id, what their panel saves. */
 export interface ServiceTable<Row extends ServiceRow, Details extends TranslatedDetails> {
   rows: Row[];
@@ -47,6 +53,10 @@ export interface ServiceTable<Row extends ServiceRow, Details extends Translated
   notFoundCode: ApiErrorCode;
   /** What else a copy takes from the original, by their ids. */
   copyMore?: (id: string, idCopy: string) => void;
+  /** What else the delete of an element changes, by its id. */
+  deleteMore?: (id: string) => void;
+  /** Why an element cannot be copied; none when it can. */
+  copyError?: (details: Details) => MockCopyError | null;
 }
 
 /**
@@ -110,13 +120,16 @@ export function deleteServicesAnswer<Row extends ServiceRow, Details extends Tra
   return withRows(request, table, idsField, (rows) => {
     for (const row of rows) {
       table.rows.splice(table.rows.indexOf(row), 1);
+      table.deleteMore?.(idOf(table, row));
     }
+    return null;
   });
 }
 
 /**
  * All or nothing, like the delete: each copy has every data of the original and the first free name,
- * also in the other languages, each with its own suffix ("Caffè copia", then "Caffè copia 2").
+ * also in the other languages, each with its own suffix ("Caffè copia", then "Caffè copia 2"). 422
+ * for an element that cannot be copied, with its name (`copyError`).
  */
 export function duplicateServicesAnswer<Row extends ServiceRow, Details extends TranslatedDetails>(
   request: HttpRequest<unknown>,
@@ -124,6 +137,13 @@ export function duplicateServicesAnswer<Row extends ServiceRow, Details extends 
   idsField: string,
 ): Observable<HttpEvent<unknown>> {
   return withRows(request, table, idsField, (rows) => {
+    for (const row of rows) {
+      const error = table.copyError?.(table.detailsOf(row));
+      if (error) {
+        const serviceName = shownName(table, row, languageOf(request)) ?? '';
+        return problem(request, 422, error.code, { args: { ...error.args, serviceName } });
+      }
+    }
     for (const row of rows) {
       const id = idOf(table, row);
       const idCopy = crypto.randomUUID();
@@ -152,6 +172,7 @@ export function duplicateServicesAnswer<Row extends ServiceRow, Details extends 
       table.details.set(idCopy, details);
       table.copyMore?.(id, idCopy);
     }
+    return null;
   });
 }
 
@@ -167,7 +188,7 @@ function withRows<Row extends ServiceRow, Details extends TranslatedDetails>(
   request: HttpRequest<unknown>,
   table: ServiceTable<Row, Details>,
   idsField: string,
-  change: (rows: Row[]) => void,
+  change: (rows: Row[]) => Observable<HttpEvent<unknown>> | null,
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
@@ -183,8 +204,7 @@ function withRows<Row extends ServiceRow, Details extends TranslatedDetails>(
   if (rows.length !== ids.length) {
     return problem(request, 404, table.notFoundCode);
   }
-  change(rows);
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return change(rows) ?? of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 }
 
 function rowsOfProperty<Row extends ServiceRow, Details extends TranslatedDetails>(

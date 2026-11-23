@@ -1,6 +1,6 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FieldTree, ValidationError } from '@angular/forms/signals';
+import { FieldTree, ReadonlyFieldTree, ValidationError } from '@angular/forms/signals';
 import { TranslateService } from '@ngx-translate/core';
 import { ErrorTextBehaviour } from '../errors/error-text.behaviour';
 import { API_ERROR_KIND, ApiValidationError } from './api-field-errors';
@@ -26,7 +26,7 @@ export class ValidationTextBehaviour {
   }
 
   /** The same text, read where a signal per field cannot be kept (e.g. the items of a list). */
-  text(field: FieldTree<unknown>, fieldNameKey?: string): string | null {
+  text(field: ReadonlyFieldTree<unknown>, fieldNameKey?: string): string | null {
     const state = field();
     const [error] = state.errors();
     if (!error || !(state.dirty() || state.touched())) {

@@ -99,6 +99,7 @@
         [isCurrency]="true"
         [formField]="form().customTimeSlotPrice"
         [error]="validationText.text(form().customTimeSlotPrice)"
+        (valueChange)="form().customTimeSlotMinuteQuantity().markAsTouched()"
       />
       <span class="services__availability__option__unit">€</span>
     </div>

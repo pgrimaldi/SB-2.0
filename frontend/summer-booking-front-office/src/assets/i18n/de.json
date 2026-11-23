@@ -158,7 +158,10 @@
       "not_found": "Die Leistung ist nicht mehr vorhanden: Sie wurde vielleicht schon gelöscht.",
       "automatic_price_not_found": "Der automatische Preis ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "table_service_not_found": "Der Tischservice ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
-      "icon_not_found": "Das gewählte Symbol ist nicht mehr verfügbar: Wähle ein anderes."
+      "icon_not_found": "Das gewählte Symbol ist nicht mehr verfügbar: Wähle ein anderes.",
+      "duplicate_vat_rate_not_allowed": "{{serviceName}} kann nicht dupliziert werden: Die MwSt. ist keiner der zulässigen Sätze ({{rates}}). Ändere sie und versuche es erneut.",
+      "duplicate_period_not_found": "{{serviceName}} kann nicht dupliziert werden: Es gibt Preise für einen Zeitraum, der nicht mehr in der aktuellen Saison ist.",
+      "duplicate_icon_not_found": "{{serviceName}} kann nicht dupliziert werden: Das Symbol ist nicht mehr verfügbar. Wähle ein anderes und versuche es erneut."
     }
   },
   "alert": {
@@ -1491,7 +1494,8 @@
             "limits": {
               "title": "Einschränkungen",
               "sectors": "Leistung buchbar in diesen Reihen/Sektoren",
-              "all_sectors": "Alle Reihen/Sektoren"
+              "all_sectors": "Alle Reihen/Sektoren",
+              "missing_sector": "Reihe/Sektor nicht mehr verfügbar"
             }
           },
           "bookings": {
@@ -1521,6 +1525,7 @@
           "availability": {
             "title": "Verfügbarkeitsoptionen",
             "hours": "Verfügbarkeitszeiten",
+            "period_info": "Wenn diese Option **aktiviert ist**, hat jeder Zeitraum der Saison eigene Verfügbarkeiten mit eigenen Preisen.\n\nWenn diese Option **nicht aktiviert ist**, gelten die unten eingegebenen Verfügbarkeiten für die ganze Saison.",
             "days_title": "Verfügbare Tage",
             "days": {
               "monday": "Mo",
@@ -2078,6 +2083,9 @@
     "services": {
       "translation": {
         "name_missing": "Gib auch den Namen in dieser Sprache ein"
+      },
+      "availability": {
+        "vat_missing": "Gib die MwSt. dieser Verfügbarkeit ein, oder die der Leistung im Tab Preise"
       },
       "tables": {
         "seats_taken": "Plätze schon verwendet"
