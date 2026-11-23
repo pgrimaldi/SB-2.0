@@ -152,6 +152,11 @@
       "item_not_found": "The item is no longer there: it may already have been deleted.",
       "name_taken": "Another item already has this name.",
       "item_in_use": "The item {{articleName}} is used in the price lists {{usedIn}} and cannot be deleted: first remove it from these price lists."
+    },
+    "service": {
+      "not_found": "The service is no longer there: it may already have been deleted.",
+      "automatic_price_not_found": "The automatic price is no longer there: it may already have been deleted.",
+      "table_service_not_found": "The table service is no longer there: it may already have been deleted."
     }
   },
   "alert": {
@@ -1284,11 +1289,18 @@
           "add_title": "Add new bar service",
           "edit_title": "Edit bar service",
           "categories": {
-            "cafeteria": "Coffee",
-            "drinks": "Drinks",
-            "snacks_and_sandwiches": "Snacks and sandwiches",
-            "ice_creams": "Ice cream",
-            "desserts": "Desserts"
+            "bar": "Bar",
+            "pizzeria": "Pizzeria",
+            "restaurant": "Restaurant",
+            "fry_shop": "Fried food",
+            "sandwich_shop": "Sandwich bar",
+            "appetizers": "Starters",
+            "first_courses": "First courses",
+            "second_courses": "Main courses",
+            "desserts": "Desserts",
+            "fruit": "Fruit",
+            "ice_cream_shop": "Ice cream shop",
+            "drinks": "Drinks"
           }
         },
         "standard_services": {

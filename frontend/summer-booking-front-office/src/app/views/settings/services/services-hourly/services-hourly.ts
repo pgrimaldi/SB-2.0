@@ -139,7 +139,7 @@ export class ServicesHourly {
     table: { reload(): void },
     idHourlyServices: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.ServiceNotFound) {
       this.forgetDeleted(idHourlyServices);
       table.reload();
     }

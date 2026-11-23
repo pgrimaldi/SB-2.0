@@ -167,7 +167,7 @@ export class ServicesGeneral {
     table: { reload(): void },
     idStandardServices: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.ServiceNotFound) {
       this.forgetDeleted(idStandardServices);
       table.reload();
     }

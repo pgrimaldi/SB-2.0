@@ -319,7 +319,7 @@ describe('CatalogService', () => {
     };
     const request = {
       translations: [{ ...translation, unexpectedFlag: 'extra-field' }],
-      category: BarServiceCategory.Cafeteria,
+      category: BarServiceCategory.Bar,
       icon: BarServiceIcon.Coffee,
       isHighlighted: true,
       price: 1.5,
@@ -351,7 +351,7 @@ describe('CatalogService', () => {
     const request = {
       idBarService: 'b1',
       translations: [{ language: Language.It, serviceName: 'Caffè', description: 'Espresso' }],
-      category: BarServiceCategory.Cafeteria,
+      category: BarServiceCategory.Bar,
       icon: BarServiceIcon.Coffee,
       isHighlighted: true,
     };

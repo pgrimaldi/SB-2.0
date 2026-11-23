@@ -60,9 +60,10 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `duplicate`), spinner a pagina intera, poi la tabella si ricarica.
 - Corpo con la sola lista degli id (es. `{ idBarServices }`), tutto o niente, 204. Le righe eliminate escono dalla
   selezione; dopo "duplica selezionati" la selezione si svuota.
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
-  (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
-  `failed` dei popup e del pannello di modifica).
+- Con il 404 della tab (elemento già eliminato da un altro utente): `service.not_found` per Servizi Bar, Servizi e
+  Servizi Orari, `service.automatic_price_not_found` per Prezzi Automatici, `service.table_service_not_found` per
+  Prenotazione tavoli. Su Elimina, su Duplica e su Modifica (lettura del pannello e Salva) gli id escono dalla
+  selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup e del pannello di modifica).
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `delete-bar-service-item`, `duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `delete-standard-service-item`, `duplicate-standard-service-item` (`idStandardServices`);
@@ -202,9 +203,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 #### Tab Info Generali (`ServiceGeneralInfoTab`)
 
 - Nome e Descrizione nelle lingue (`app-services-translations`).
-- Categoria: tendina dell'enum del frontend `BarServiceCategory` (Caffetteria, Bevande, Snack e panini, Gelati,
-  Dolci), nel form `category`; il valore va al backend, che ha il suo enum corrispondente e ne controlla la
-  validità.
+- Categoria: tendina dell'enum `BarServiceCategory`, con le 12 categorie dell'enum `BarCategory` del backend e nel suo
+  ordine (Bar, Pizzeria, Ristorante, Friggitoria, Paninoteca, Antipasti, Primi piatti, Secondi piatti, Dolci, Frutta,
+  Gelateria, Bevande), nel form `category`; il backend ne controlla la validità.
 - Immagine servizio: 22 icone, elenco fisso del frontend senza API, enum `BarServiceIcon` con file
   `Services_Bar<Nome>.png` (PNG grigi), nel form `icon`; il valore va al backend.
   - Compresa la tazzina grigia `Services_BarCoffee.png`; quella blu, `Services_BarTitle.png`, è del titolo della

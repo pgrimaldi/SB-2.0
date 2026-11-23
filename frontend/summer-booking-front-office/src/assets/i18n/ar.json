@@ -152,6 +152,11 @@
       "item_not_found": "الصنف لم يعد موجودًا: ربما تم حذفه بالفعل.",
       "name_taken": "يوجد صنف آخر بهذا الاسم بالفعل.",
       "item_in_use": "الصنف {{articleName}} مستخدم في قوائم الأسعار {{usedIn}} ولا يمكن حذفه: أزله أولاً من هذه القوائم."
+    },
+    "service": {
+      "not_found": "الخدمة لم تعد موجودة: ربما تم حذفها بالفعل.",
+      "automatic_price_not_found": "السعر التلقائي لم يعد موجودًا: ربما تم حذفه بالفعل.",
+      "table_service_not_found": "خدمة الطاولات لم تعد موجودة: ربما تم حذفها بالفعل."
     }
   },
   "alert": {
@@ -1284,11 +1289,18 @@
           "add_title": "إضافة خدمة بار جديدة",
           "edit_title": "تعديل خدمة البار",
           "categories": {
-            "cafeteria": "القهوة",
-            "drinks": "المشروبات",
-            "snacks_and_sandwiches": "الوجبات الخفيفة والسندويشات",
-            "ice_creams": "المثلجات",
-            "desserts": "الحلويات"
+            "bar": "بار",
+            "pizzeria": "بيتزيريا",
+            "restaurant": "مطعم",
+            "fry_shop": "المقليات",
+            "sandwich_shop": "السندويشات",
+            "appetizers": "المقبلات",
+            "first_courses": "الأطباق الأولى",
+            "second_courses": "الأطباق الرئيسية",
+            "desserts": "الحلويات",
+            "fruit": "الفواكه",
+            "ice_cream_shop": "محل المثلجات",
+            "drinks": "المشروبات"
           }
         },
         "standard_services": {

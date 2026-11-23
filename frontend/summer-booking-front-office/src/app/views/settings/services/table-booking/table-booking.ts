@@ -139,7 +139,7 @@ export class TableBooking {
     table: { reload(): void },
     idTableServices: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.ServiceTableServiceNotFound) {
       this.forgetDeleted(idTableServices);
       table.reload();
     }

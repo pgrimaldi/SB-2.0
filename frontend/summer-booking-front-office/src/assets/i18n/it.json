@@ -152,6 +152,11 @@
       "item_not_found": "L'articolo non c'è più: forse è già stato eliminato.",
       "name_taken": "Un altro articolo ha già questo nome.",
       "item_in_use": "L'articolo {{articleName}} è usato nei listini {{usedIn}} e non si può eliminare: toglilo prima da questi listini."
+    },
+    "service": {
+      "not_found": "Il servizio non c'è più: forse è già stato eliminato.",
+      "automatic_price_not_found": "Il prezzo automatico non c'è più: forse è già stato eliminato.",
+      "table_service_not_found": "Il servizio tavoli non c'è più: forse è già stato eliminato."
     }
   },
   "alert": {
@@ -1284,11 +1289,18 @@
           "add_title": "Aggiungi nuovo servizio bar",
           "edit_title": "Modifica servizio bar",
           "categories": {
-            "cafeteria": "Caffetteria",
-            "drinks": "Bevande",
-            "snacks_and_sandwiches": "Snack e panini",
-            "ice_creams": "Gelati",
-            "desserts": "Dolci"
+            "bar": "Bar",
+            "pizzeria": "Pizzeria",
+            "restaurant": "Ristorante",
+            "fry_shop": "Friggitoria",
+            "sandwich_shop": "Paninoteca",
+            "appetizers": "Antipasti",
+            "first_courses": "Primi piatti",
+            "second_courses": "Secondi piatti",
+            "desserts": "Dolci",
+            "fruit": "Frutta",
+            "ice_cream_shop": "Gelateria",
+            "drinks": "Bevande"
           }
         },
         "standard_services": {

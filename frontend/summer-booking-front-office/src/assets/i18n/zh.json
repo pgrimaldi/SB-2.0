@@ -152,6 +152,11 @@
       "item_not_found": "物品已不存在：可能已被删除。",
       "name_taken": "已有其他物品使用此名称。",
       "item_in_use": "物品 {{articleName}} 用于价目表 {{usedIn}}，无法删除：请先从这些价目表中移除它。"
+    },
+    "service": {
+      "not_found": "服务已不存在：可能已被删除。",
+      "automatic_price_not_found": "自动价格已不存在：可能已被删除。",
+      "table_service_not_found": "餐桌服务已不存在：可能已被删除。"
     }
   },
   "alert": {
@@ -1284,11 +1289,18 @@
           "add_title": "添加新的酒吧服务",
           "edit_title": "编辑酒吧服务",
           "categories": {
-            "cafeteria": "咖啡",
-            "drinks": "饮料",
-            "snacks_and_sandwiches": "小吃和三明治",
-            "ice_creams": "冰淇淋",
-            "desserts": "甜点"
+            "bar": "酒吧",
+            "pizzeria": "披萨店",
+            "restaurant": "餐厅",
+            "fry_shop": "炸物店",
+            "sandwich_shop": "三明治店",
+            "appetizers": "开胃菜",
+            "first_courses": "第一道菜",
+            "second_courses": "第二道菜",
+            "desserts": "甜点",
+            "fruit": "水果",
+            "ice_cream_shop": "冰淇淋店",
+            "drinks": "饮料"
           }
         },
         "standard_services": {

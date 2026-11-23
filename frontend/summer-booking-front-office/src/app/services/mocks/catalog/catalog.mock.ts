@@ -1292,18 +1292,18 @@ type BarServiceRow = BarServiceItem & { propertyId: number };
 
 const BAR_SERVICES: BarServiceRow[] = (
   [
-    ['01', 'Caffè', BarServiceCategory.Cafeteria, 1],
+    ['01', 'Caffè', BarServiceCategory.Bar, 1],
     ['02', 'Croissant', BarServiceCategory.Desserts, 1.4],
-    ['03', 'Panino', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['03', 'Panino', BarServiceCategory.SandwichShop, 3],
     ['04', 'Succo di frutta', BarServiceCategory.Drinks, 2],
-    ['05', 'Pizza', BarServiceCategory.SnacksAndSandwiches, 3],
+    ['05', 'Pizza', BarServiceCategory.Pizzeria, 3],
     ['06', 'Sfoglia', BarServiceCategory.Desserts, 1.3],
     ['07', 'Bibita lattina', BarServiceCategory.Drinks, 2.5],
     ['08', 'Acqua naturale 1L', BarServiceCategory.Drinks, 1.2],
     ['09', 'Acqua frizzante 1L', BarServiceCategory.Drinks, 1.2],
-    ['10', 'Schiacciata', BarServiceCategory.SnacksAndSandwiches, 3],
-    ['11', 'Tramezzino', BarServiceCategory.SnacksAndSandwiches, 2.8],
-    ['12', 'Gelato', BarServiceCategory.IceCreams, 2.5],
+    ['10', 'Schiacciata', BarServiceCategory.SandwichShop, 3],
+    ['11', 'Tramezzino', BarServiceCategory.SandwichShop, 2.8],
+    ['12', 'Gelato', BarServiceCategory.IceCreamShop, 2.5],
   ] as const
 ).map(([suffix, serviceName, category, price]) => ({
   propertyId: 1,
@@ -1325,7 +1325,7 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
         { language: Language.It, serviceName: 'Caffè', description: 'Espresso in tazzina.' },
         { language: Language.En, serviceName: 'Coffee', description: 'Espresso in a small cup.' },
       ],
-      category: BarServiceCategory.Cafeteria,
+      category: BarServiceCategory.Bar,
       icon: BarServiceIcon.Coffee,
       isHighlighted: true,
       price: 1,
@@ -1380,7 +1380,7 @@ function requestedBarService(request: HttpRequest<unknown>): BarServiceRow | und
 /**
  * `GET /api/catalog/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
  * panel. 200 with `BarServiceSelectedGeneralInfo` and the version of the tab, only the languages
- * written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * written; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
 export const barServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -1390,7 +1390,7 @@ export const barServiceGeneralInfoMock = (
   }
   const row = requestedBarService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, barGeneralInfoOf(row));
 };
@@ -1415,7 +1415,7 @@ function barGeneralInfoOf(row: BarServiceRow): Omit<BarServiceSelectedGeneralInf
 /**
  * `GET /api/catalog/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200
  * with `BarServiceSelectedPrices` and the version of the tab, a price only for the periods that
- * have one; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * have one; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
 export const barServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -1425,7 +1425,7 @@ export const barServicePricesMock = (
   }
   const row = requestedBarService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, barPricesOf(row));
 };
@@ -1450,7 +1450,7 @@ function barPricesOf(row: BarServiceRow): Omit<BarServiceSelectedPrices, 'versio
 /**
  * `GET /api/catalog/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
  * edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
- * none) and the version of the tab. 401 without a valid access token; 404 `resource.not_found` for
+ * none) and the version of the tab. 401 without a valid access token; 404 `service.not_found` for
  * an unknown id.
  */
 export const barServiceBookingOptionsMock = (
@@ -1461,7 +1461,7 @@ export const barServiceBookingOptionsMock = (
   }
   const row = requestedBarService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, barBookingOptionsOf(row));
 };
@@ -1589,7 +1589,7 @@ type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
 
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
- * `resource.not_found` for an `idBarService` that is not one of its bar services; 400 with one
+ * `service.not_found` for an `idBarService` that is not one of its bar services; 400 with one
  * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
  * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
  * without a body, with their new version in its `ETag`.
@@ -1613,7 +1613,7 @@ function updateBarService(
     (item) => item.idBarService === body.idBarService && item.propertyId === property.id,
   );
   if (!row?.idBarService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   const errors = errorsOf(body);
   if (errors.length) {
@@ -1692,7 +1692,7 @@ export const updateBarServiceBookingMock = (
 
 /**
  * `POST /api/catalog/delete-bar-service-item` with `{ idBarServices }`: all or nothing. If one id
- * is not a bar service of the property nothing is deleted (404 `resource.not_found`). Repeated ids
+ * is not a bar service of the property nothing is deleted (404 `service.not_found`). Repeated ids
  * count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteBarServiceItemsMock = (
@@ -1705,7 +1705,7 @@ export const deleteBarServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const barServices = barServicesOf(property.id, body.idBarServices);
   if (!barServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   for (const barService of barServices) {
     BAR_SERVICES.splice(BAR_SERVICES.indexOf(barService), 1);
@@ -1728,7 +1728,7 @@ export const duplicateBarServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const barServices = barServicesOf(property.id, body.idBarServices);
   if (!barServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   for (const barService of barServices) {
     BAR_SERVICES.push({
@@ -1888,7 +1888,7 @@ function requestedStandardService(request: HttpRequest<unknown>): StandardServic
 /**
  * `GET /api/catalog/get-standard-service-general-info?idStandardService=…`: the Info Generali tab
  * of the edit panel. 200 with `StandardServiceSelectedGeneralInfo` and the version of the tab, only
- * the languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown
+ * the languages written; 401 without a valid access token; 404 `service.not_found` for an unknown
  * id.
  */
 export const standardServiceGeneralInfoMock = (
@@ -1899,7 +1899,7 @@ export const standardServiceGeneralInfoMock = (
   }
   const row = requestedStandardService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, standardGeneralInfoOf(row));
 };
@@ -1925,7 +1925,7 @@ function standardGeneralInfoOf(
 /**
  * `GET /api/catalog/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
  * panel. 200 with `StandardServiceSelectedPrices` and the version of the tab, a price only for the
- * periods that have one; 401 without a valid access token; 404 `resource.not_found` for an unknown
+ * periods that have one; 401 without a valid access token; 404 `service.not_found` for an unknown
  * id.
  */
 export const standardServicePricesMock = (
@@ -1936,7 +1936,7 @@ export const standardServicePricesMock = (
   }
   const row = requestedStandardService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, standardPricesOf(row));
 };
@@ -1960,7 +1960,7 @@ function standardPricesOf(row: StandardServiceRow): Omit<StandardServiceSelected
 /**
  * `GET /api/catalog/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
  * of the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there
- * are none) and the version of the tab. 401 without a valid access token; 404 `resource.not_found`
+ * are none) and the version of the tab. 401 without a valid access token; 404 `service.not_found`
  * for an unknown id.
  */
 export const standardServiceBookingOptionsMock = (
@@ -1971,7 +1971,7 @@ export const standardServiceBookingOptionsMock = (
   }
   const row = requestedStandardService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, standardBookingOptionsOf(row));
 };
@@ -2056,7 +2056,7 @@ type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService
 
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
- * `resource.not_found` for an `idStandardService` that is not one of its services; 400 with one
+ * `service.not_found` for an `idStandardService` that is not one of its services; 400 with one
  * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
  * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
  * without a body, with their new version in its `ETag`.
@@ -2080,7 +2080,7 @@ function updateStandardService(
     (item) => item.idStandardService === body.idStandardService && item.propertyId === property.id,
   );
   if (!row?.idStandardService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   const errors = errorsOf(body);
   if (errors.length) {
@@ -2322,7 +2322,7 @@ function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow
 /**
  * `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of
  * the edit panel. 200 with `HourlyServiceSelectedGeneralInfo` and the version of the tab, only the
- * languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * languages written; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
 export const hourlyServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -2332,7 +2332,7 @@ export const hourlyServiceGeneralInfoMock = (
   }
   const row = requestedHourlyService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, hourlyGeneralInfoOf(row));
 };
@@ -2358,7 +2358,7 @@ function hourlyGeneralInfoOf(
 /**
  * `GET /api/catalog/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
  * 200 with `HourlyServiceSelectedPrices` and the version of the tab, the availability only of the
- * periods that have it; 401 without a valid access token; 404 `resource.not_found` for an unknown
+ * periods that have it; 401 without a valid access token; 404 `service.not_found` for an unknown
  * id.
  */
 export const hourlyServicePricesMock = (
@@ -2369,7 +2369,7 @@ export const hourlyServicePricesMock = (
   }
   const row = requestedHourlyService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, hourlyPricesOf(row));
 };
@@ -2393,7 +2393,7 @@ function hourlyPricesOf(row: HourlyServiceRow): Omit<HourlyServiceSelectedPrices
 /**
  * `GET /api/catalog/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
  * the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
- * none) and the version of the tab. 401 without a valid access token; 404 `resource.not_found` for
+ * none) and the version of the tab. 401 without a valid access token; 404 `service.not_found` for
  * an unknown id.
  */
 export const hourlyServiceBookingOptionsMock = (
@@ -2404,7 +2404,7 @@ export const hourlyServiceBookingOptionsMock = (
   }
   const row = requestedHourlyService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   return versionedAnswer(request, hourlyBookingOptionsOf(row));
 };
@@ -2492,7 +2492,7 @@ type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unk
 
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
- * `resource.not_found` for an `idHourlyService` that is not one of its hourly services; 400 with
+ * `service.not_found` for an `idHourlyService` that is not one of its hourly services; 400 with
  * one error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of
  * the data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is
  * 204 without a body, with their new version in its `ETag`.
@@ -2516,7 +2516,7 @@ function updateHourlyService(
     (item) => item.idHourlyService === body.idHourlyService && item.propertyId === property.id,
   );
   if (!row?.idHourlyService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   const errors = errorsOf(body);
   if (errors.length) {
@@ -2705,7 +2705,7 @@ type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest>;
 /**
  * `POST /api/catalog/create-automatic-price` with `AutomaticPriceAddItemRequest`: the new automatic
  * price goes into the list, with the name in the language of `Accept-Language`. 204 without a body;
- * 401 without a valid access token; 404 `resource.not_found` for a service that is not one of the
+ * 401 without a valid access token; 404 `service.not_found` for a service that is not one of the
  * property; 400 with one error per wrong field (name and description in the language of the
  * request, icon of one of the two lists, price not below 0).
  */
@@ -2718,7 +2718,7 @@ export const createAutomaticPriceMock = (
   const body = (request.body ?? {}) as CreateAutomaticPriceBody;
   const property = DEMO_PROPERTY;
   if (!areAutomaticServicesOf(body, property.id)) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [
@@ -2775,7 +2775,7 @@ function requestedAutomaticPrice(request: HttpRequest<unknown>): AutomaticPriceR
 /**
  * `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of
  * the edit panel. 200 with `AutomaticPriceSelectedGeneralInfo` and the version of the tab, only the
- * languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * languages written; 401 without a valid access token; 404 `service.automatic_price_not_found` for an unknown id.
  */
 export const automaticPriceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -2785,7 +2785,7 @@ export const automaticPriceGeneralInfoMock = (
   }
   const row = requestedAutomaticPrice(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
   return versionedAnswer(request, automaticGeneralInfoOf(row));
 };
@@ -2810,7 +2810,7 @@ function automaticGeneralInfoOf(
 /**
  * `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
  * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity` and the version of the
- * tab; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * tab; 401 without a valid access token; 404 `service.automatic_price_not_found` for an unknown id.
  */
 export const automaticPricePricesValidityMock = (
   request: HttpRequest<unknown>,
@@ -2820,7 +2820,7 @@ export const automaticPricePricesValidityMock = (
   }
   const row = requestedAutomaticPrice(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
   return versionedAnswer(request, automaticPricesValidityOf(row));
 };
@@ -2850,8 +2850,9 @@ type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: 
 
 /**
  * The common part of the two updates of the edit panel: 401 without a valid access token; 404
- * `resource.not_found` for an `idAutomaticPrice` that is not one of its automatic prices (or for a
- * service that is not one of the property); 400 with one error per wrong field; 409
+ * `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of its automatic
+ * prices, `service.not_found` for a service that is not one of the property; 400 with one error per
+ * wrong field; 409
  * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
  * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their
  * new version in its `ETag`.
@@ -2874,9 +2875,12 @@ function updateAutomaticPrice(
   const row = AUTOMATIC_PRICES.find(
     (item) => item.idAutomaticPrice === body.idAutomaticPrice && item.propertyId === property.id,
   );
-  const errors = row ? errorsOf(body, property.id) : null;
-  if (!row?.idAutomaticPrice || !errors) {
-    return resourceNotFound(request);
+  if (!row?.idAutomaticPrice) {
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
+  }
+  const errors = errorsOf(body, property.id);
+  if (!errors) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
@@ -3101,7 +3105,7 @@ export const tableServiceListMock = (
 
 /**
  * `POST /api/catalog/delete-standard-service-item` with `{ idStandardServices }`: all or nothing.
- * If one id is not a service of the property nothing is deleted (404 `resource.not_found`).
+ * If one id is not a service of the property nothing is deleted (404 `service.not_found`).
  * Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteStandardServiceItemsMock = (
@@ -3114,7 +3118,7 @@ export const deleteStandardServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const standardServices = standardServicesOf(property.id, body.idStandardServices);
   if (!standardServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   for (const standardService of standardServices) {
     STANDARD_SERVICES.splice(STANDARD_SERVICES.indexOf(standardService), 1);
@@ -3137,7 +3141,7 @@ export const duplicateStandardServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const standardServices = standardServicesOf(property.id, body.idStandardServices);
   if (!standardServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   for (const standardService of standardServices) {
     STANDARD_SERVICES.push({
@@ -3185,7 +3189,7 @@ function standardServiceCopyName(standardService: StandardServiceRow): string {
 
 /**
  * `POST /api/catalog/delete-hourly-service-item` with `{ idHourlyServices }`: all or nothing. If
- * one id is not an hourly service of the property nothing is deleted (404 `resource.not_found`).
+ * one id is not an hourly service of the property nothing is deleted (404 `service.not_found`).
  * Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteHourlyServiceItemsMock = (
@@ -3198,7 +3202,7 @@ export const deleteHourlyServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
   if (!hourlyServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   for (const hourlyService of hourlyServices) {
     HOURLY_SERVICES.splice(HOURLY_SERVICES.indexOf(hourlyService), 1);
@@ -3221,7 +3225,7 @@ export const duplicateHourlyServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
   if (!hourlyServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   for (const hourlyService of hourlyServices) {
     HOURLY_SERVICES.push({
@@ -3265,7 +3269,7 @@ function hourlyServiceCopyName(hourlyService: HourlyServiceRow): string {
 
 /**
  * `POST /api/catalog/delete-automatic-price-item` with `{ idAutomaticPrices }`: all or nothing. If
- * one id is not an automatic price of the property nothing is deleted (404 `resource.not_found`).
+ * one id is not an automatic price of the property nothing is deleted (404 `service.automatic_price_not_found`).
  * Repeated ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteAutomaticPriceItemsMock = (
@@ -3278,7 +3282,7 @@ export const deleteAutomaticPriceItemsMock = (
   const property = DEMO_PROPERTY;
   const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
   if (!automaticPrices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
   for (const automaticPrice of automaticPrices) {
     AUTOMATIC_PRICES.splice(AUTOMATIC_PRICES.indexOf(automaticPrice), 1);
@@ -3301,7 +3305,7 @@ export const duplicateAutomaticPriceItemsMock = (
   const property = DEMO_PROPERTY;
   const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
   if (!automaticPrices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
   for (const automaticPrice of automaticPrices) {
     AUTOMATIC_PRICES.push({
@@ -3345,7 +3349,7 @@ function automaticPriceCopyName(automaticPrice: AutomaticPriceRow): string {
 
 /**
  * `POST /api/catalog/delete-table-service-item` with `{ idTableServices }`: all or nothing. If one
- * id is not a table service of the property nothing is deleted (404 `resource.not_found`). Repeated
+ * id is not a table service of the property nothing is deleted (404 `service.table_service_not_found`). Repeated
  * ids count once. 204 without a body; 401 without a valid access token.
  */
 export const deleteTableServiceItemsMock = (
@@ -3358,7 +3362,7 @@ export const deleteTableServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const tableServices = tableServicesOf(property.id, body.idTableServices);
   if (!tableServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
   for (const tableService of tableServices) {
     TABLE_SERVICES.splice(TABLE_SERVICES.indexOf(tableService), 1);
@@ -3381,7 +3385,7 @@ export const duplicateTableServiceItemsMock = (
   const property = DEMO_PROPERTY;
   const tableServices = tableServicesOf(property.id, body.idTableServices);
   if (!tableServices) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
   for (const tableService of tableServices) {
     TABLE_SERVICES.push({
@@ -3459,7 +3463,7 @@ function requestedTableService(request: HttpRequest<unknown>): TableServiceRow |
 /**
  * `GET /api/catalog/get-table-service-general-info?idTableService=…`: the Info Generali tab of the
  * edit panel. 200 with `TableServiceSelectedGeneralInfo` and the version of the tab, only the
- * languages written; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * languages written; 401 without a valid access token; 404 `service.table_service_not_found` for an unknown id.
  */
 export const tableServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -3469,7 +3473,7 @@ export const tableServiceGeneralInfoMock = (
   }
   const row = requestedTableService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
   return versionedAnswer(request, tableGeneralInfoOf(row));
 };
@@ -3494,7 +3498,7 @@ function tableGeneralInfoOf(
 /**
  * `GET /api/catalog/get-table-service-availability-bookings?idTableService=…`: the Disponibilità e
  * Prenotazioni tab of the edit panel. 200 with `TableServiceSelectedAvailabilityBookings` and the
- * version of the tab; 401 without a valid access token; 404 `resource.not_found` for an unknown id.
+ * version of the tab; 401 without a valid access token; 404 `service.table_service_not_found` for an unknown id.
  */
 export const tableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,
@@ -3504,7 +3508,7 @@ export const tableServiceAvailabilityBookingsMock = (
   }
   const row = requestedTableService(request);
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
   return versionedAnswer(request, tableAvailabilityBookingsOf(row));
 };
@@ -3535,7 +3539,7 @@ type UpdateTableServiceBody = CreateTableServiceBody & { idTableService?: unknow
 
 /**
  * The common part of the two updates of the edit panel: 401 without a valid access token; 404
- * `resource.not_found` for an `idTableService` that is not one of its table services; 400 with one
+ * `service.table_service_not_found` for an `idTableService` that is not one of its table services; 400 with one
  * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
  * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
  * without a body, with their new version in its `ETag`.
@@ -3559,7 +3563,7 @@ function updateTableService(
     (item) => item.idTableService === body.idTableService && item.propertyId === property.id,
   );
   if (!row?.idTableService) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
   const errors = errorsOf(body);
   if (errors.length) {

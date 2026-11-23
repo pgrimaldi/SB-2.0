@@ -166,7 +166,7 @@ export class AutomaticPrices {
     table: { reload(): void },
     idAutomaticPrices: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.ServiceAutomaticPriceNotFound) {
       this.forgetDeleted(idAutomaticPrices);
       table.reload();
     }

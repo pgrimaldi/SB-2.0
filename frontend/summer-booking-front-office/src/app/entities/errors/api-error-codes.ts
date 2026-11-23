@@ -63,6 +63,9 @@ export enum ApiErrorCode {
   InventoryItemNotFound = 'inventory.item_not_found',
   InventoryNameTaken = 'inventory.name_taken',
   InventoryItemInUse = 'inventory.item_in_use',
+  ServiceNotFound = 'service.not_found',
+  ServiceAutomaticPriceNotFound = 'service.automatic_price_not_found',
+  ServiceTableServiceNotFound = 'service.table_service_not_found',
 }
 
 export const API_ERROR_CODES: readonly ApiErrorCode[] = Object.values(ApiErrorCode);

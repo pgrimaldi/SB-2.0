@@ -14,21 +14,35 @@ import { ServicesImages, ServicesImagesIcon } from '../shared/services-images/se
 import { ServicesTranslations } from '../shared/services-translations/services-translations';
 
 interface BarServiceCategoryTexts {
-  cafeteria: string;
-  drinks: string;
-  snacks_and_sandwiches: string;
-  ice_creams: string;
+  bar: string;
+  pizzeria: string;
+  restaurant: string;
+  fry_shop: string;
+  sandwich_shop: string;
+  appetizers: string;
+  first_courses: string;
+  second_courses: string;
   desserts: string;
+  fruit: string;
+  ice_cream_shop: string;
+  drinks: string;
 }
 
 const BAR_SERVICE_CATEGORY_KEYS: Readonly<
   Record<BarServiceCategory, keyof BarServiceCategoryTexts>
 > = {
-  [BarServiceCategory.Cafeteria]: 'cafeteria',
-  [BarServiceCategory.Drinks]: 'drinks',
-  [BarServiceCategory.SnacksAndSandwiches]: 'snacks_and_sandwiches',
-  [BarServiceCategory.IceCreams]: 'ice_creams',
+  [BarServiceCategory.Bar]: 'bar',
+  [BarServiceCategory.Pizzeria]: 'pizzeria',
+  [BarServiceCategory.Restaurant]: 'restaurant',
+  [BarServiceCategory.FryShop]: 'fry_shop',
+  [BarServiceCategory.SandwichShop]: 'sandwich_shop',
+  [BarServiceCategory.Appetizers]: 'appetizers',
+  [BarServiceCategory.FirstCourses]: 'first_courses',
+  [BarServiceCategory.SecondCourses]: 'second_courses',
   [BarServiceCategory.Desserts]: 'desserts',
+  [BarServiceCategory.Fruit]: 'fruit',
+  [BarServiceCategory.IceCreamShop]: 'ice_cream_shop',
+  [BarServiceCategory.Drinks]: 'drinks',
 };
 
 @Component({

@@ -2927,7 +2927,7 @@ Servizi: creazione servizio bar.
       "description": null
     }
   ],
-  "category": "Cafeteria",
+  "category": "Bar",
   "icon": "Coffee",
   "isHighlighted": true,
   "price": 1.5,
@@ -2977,7 +2977,7 @@ Servizi: creazione servizio bar.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Caffè ginseng` |
 | `translations[].description` | string \| null | `Caffè al ginseng in tazza piccola` |
-| `category` | string (enum BarServiceCategory) \| null | `Cafeteria` |
+| `category` | string (enum BarServiceCategory) \| null | `Bar` |
 | `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
 | `isHighlighted` | boolean | `true` |
 | `price` | number (decimale, €) \| null | `1.5` |
@@ -3045,7 +3045,7 @@ Stato: 200 OK.
       "description": "Espresso in a small cup."
     }
   ],
-  "category": "Cafeteria",
+  "category": "Bar",
   "icon": "Coffee",
   "isHighlighted": true,
   "version": "feac3ca6"
@@ -3059,7 +3059,7 @@ Stato: 200 OK.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Caffè` |
 | `translations[].description` | string \| null | `Espresso in tazzina.` |
-| `category` | string (enum BarServiceCategory) \| null | `Cafeteria` |
+| `category` | string (enum BarServiceCategory) \| null | `Bar` |
 | `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
 | `isHighlighted` | boolean | `true` |
 | `version` | string | `feac3ca6` |
@@ -3227,7 +3227,7 @@ Servizi: servizio bar, salvataggio Info Generali.
       "description": null
     }
   ],
-  "category": "Cafeteria",
+  "category": "Bar",
   "icon": "Coffee",
   "isHighlighted": true
 }
@@ -3240,7 +3240,7 @@ Servizi: servizio bar, salvataggio Info Generali.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Caffè espresso` |
 | `translations[].description` | string \| null | `Espresso in tazzina.` |
-| `category` | string (enum BarServiceCategory) \| null | `Cafeteria` |
+| `category` | string (enum BarServiceCategory) \| null | `Bar` |
 | `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
 | `isHighlighted` | boolean | `true` |
 

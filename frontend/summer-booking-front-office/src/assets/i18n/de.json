@@ -152,6 +152,11 @@
       "item_not_found": "Der Artikel ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "name_taken": "Ein anderer Artikel hat bereits diesen Namen.",
       "item_in_use": "Der Artikel {{articleName}} wird in den Preislisten {{usedIn}} verwendet und kann nicht gelöscht werden: Entferne ihn zuerst aus diesen Preislisten."
+    },
+    "service": {
+      "not_found": "Die Leistung ist nicht mehr vorhanden: Sie wurde vielleicht schon gelöscht.",
+      "automatic_price_not_found": "Der automatische Preis ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "table_service_not_found": "Der Tischservice ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht."
     }
   },
   "alert": {
@@ -1284,11 +1289,18 @@
           "add_title": "Neue Bar-Leistung hinzufügen",
           "edit_title": "Bar-Leistung bearbeiten",
           "categories": {
-            "cafeteria": "Kaffee",
-            "drinks": "Getränke",
-            "snacks_and_sandwiches": "Snacks und Sandwiches",
-            "ice_creams": "Eis",
-            "desserts": "Desserts"
+            "bar": "Bar",
+            "pizzeria": "Pizzeria",
+            "restaurant": "Restaurant",
+            "fry_shop": "Frittiertes",
+            "sandwich_shop": "Sandwichbar",
+            "appetizers": "Vorspeisen",
+            "first_courses": "Erste Gänge",
+            "second_courses": "Hauptgerichte",
+            "desserts": "Desserts",
+            "fruit": "Obst",
+            "ice_cream_shop": "Eisdiele",
+            "drinks": "Getränke"
           }
         },
         "standard_services": {
