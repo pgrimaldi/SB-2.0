@@ -272,6 +272,32 @@ describe('PriceListService', () => {
     controller.verify();
   });
 
+  it('should send as null the texts made only of spaces', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const priceLists = TestBed.inject(PriceListService);
+    const controller = TestBed.inject(HttpTestingController);
+
+    priceLists
+      .createPackage(
+        Object.assign(new PackageAddItemRequest(), {
+          translations: [{ language: Language.It, packageName: '  ' }],
+          includedServices: ' ',
+        }),
+      )
+      .subscribe();
+
+    const call = controller.expectOne(
+      `${environment.apiBaseUrl}/catalog/price-lists/create-package`,
+    );
+    expect(call.request.body).toMatchObject({
+      translations: [{ language: Language.It, packageName: null }],
+      includedServices: null,
+    });
+    controller.verify();
+  });
+
   it('should create the package sending the whole form without the property', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],

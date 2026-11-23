@@ -14,6 +14,7 @@ import { PackageArticle } from '../../../entities/settings/catalog/package-artic
 import {
   MAX_PACKAGE_INCLUDED_SERVICES_LENGTH,
   MAX_PRICE_LIST_PRICE,
+  MAX_PUBLIC_HOLIDAY_QUANTITY,
   PackageAddItemRequest,
 } from '../../../entities/settings/catalog/package-add-item-request';
 import {
@@ -38,6 +39,7 @@ import {
   activeArticleIdNamed,
   activeArticleName,
   activeArticlesOfCode,
+  priceListsOfArticle,
 } from '../warehouse/warehouse.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 import { DELETED_SECTOR } from './sectors-data.mock';
@@ -58,6 +60,7 @@ const PEOPLE_QUANTITY_RANGE = { from: 1, to: 100 };
 const ADDITIONAL_ITEM_QUANTITY_RANGE = { from: 0, to: 100 };
 const MAX_ARTICLE_QUANTITY = 100;
 const MAX_ITEM_QUANTITY = 50;
+const MAX_PERIOD_PRICE_QUANTITY = 500;
 const PACKAGE_NAMES = [
   'Ombrellone e 2 lettini',
   'Ombrellone, sdraio e lettino',
@@ -88,8 +91,8 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
     PACKAGES[0].idPackage ?? '',
     Object.assign(new PackageAddItemRequest(), {
       translations: [
-        { language: 'it', packageName: PACKAGES[0].packageName },
-        { language: 'en', packageName: 'Umbrella and 2 sunbeds' },
+        { language: Language.It, packageName: PACKAGES[0].packageName },
+        { language: Language.En, packageName: 'Umbrella and 2 sunbeds' },
       ],
       maxAdditionalItemQuantity: 2,
       maxPeopleQuantity: 4,
@@ -155,14 +158,14 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
   [
     PACKAGES[8].idPackage ?? '',
     Object.assign(new PackageAddItemRequest(), {
-      translations: [{ language: 'it', packageName: PACKAGES[8].packageName }],
+      translations: [{ language: Language.It, packageName: PACKAGES[8].packageName }],
       vatRate: VAT_RATE_NO_LONGER_ALLOWED,
     }),
   ],
   [
     PACKAGES[7].idPackage ?? '',
     Object.assign(new PackageAddItemRequest(), {
-      translations: [{ language: 'it', packageName: PACKAGES[7].packageName }],
+      translations: [{ language: Language.It, packageName: PACKAGES[7].packageName }],
       maxPeopleQuantity: 40,
       idSectorAreas: ['9e4b2c71-5d3a-4f8e-b6a1-2c3d4e5f6a01', DELETED_AREA],
     }),
@@ -170,7 +173,7 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
   [
     PACKAGES[9].idPackage ?? '',
     Object.assign(new PackageAddItemRequest(), {
-      translations: [{ language: 'it', packageName: PACKAGES[9].packageName }],
+      translations: [{ language: Language.It, packageName: PACKAGES[9].packageName }],
       periodPrices: [
         Object.assign(new PackagePeriodPrice(), {
           idSector: DELETED_SECTOR,
@@ -184,7 +187,7 @@ const PACKAGE_DETAILS = new Map<string, PackageAddItemRequest>([
   [
     PACKAGES[10].idPackage ?? '',
     Object.assign(new PackageAddItemRequest(), {
-      translations: [{ language: 'it', packageName: PACKAGES[10].packageName }],
+      translations: [{ language: Language.It, packageName: PACKAGES[10].packageName }],
       periodPrices: [
         Object.assign(new PackagePeriodPrice(), {
           idSector: '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01',
@@ -384,10 +387,7 @@ function sectorsOf(details: PriceListDetails): (string | null)[] {
 /** As the backend: the rows of a deleted sector or period, or without prices, are not saved. */
 function savedRows<T extends PriceListDetails>(details: T): T {
   const isKept = (row: PackageSectorPrice | PackagePeriodPrice): boolean =>
-    isSectorOfProperty(row.idSector) &&
-    Object.entries(row).some(
-      ([field, value]) => field !== 'idSector' && field !== 'idPeriod' && value !== null,
-    );
+    isSectorOfProperty(row.idSector) && hasPrice(row);
   return {
     ...details,
     sectorPrices: details.sectorPrices.filter(isKept),
@@ -500,7 +500,7 @@ function savedPackageName(
 ): string | null {
   const nameIn = (code: string): string | undefined =>
     translations?.find((translation) => translation.language === code)?.packageName?.trim();
-  return nameIn('it') || nameIn(language) || null;
+  return nameIn(Language.It) || nameIn(language) || null;
 }
 
 type CreatePackageBody = Partial<PackageAddItemRequest>;
@@ -519,7 +519,7 @@ export const createPackageMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreatePackageBody;
-  const language = request.headers.get('Accept-Language') ?? 'it';
+  const language = languageOf(request);
   const errors = packageErrors(body, language);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
@@ -536,12 +536,21 @@ export const createPackageMock = (
     packageName: savedPackageName(body.translations, language),
   };
   PACKAGES.push(row);
-  PACKAGE_DETAILS.set(
-    row.idPackage ?? '',
-    savedRows(structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest))),
-  );
+  savePackage(row, body);
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+/** Only one default, and only one default online: the other packages stop being it. */
+function savePackage({ idPackage }: PackageRow, body: CreatePackageBody): void {
+  const details = savedRows(
+    structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest)),
+  );
+  for (const other of PACKAGE_DETAILS.values()) {
+    other.isDefault &&= !details.isDefault;
+    other.isDefaultOnline &&= !details.isDefaultOnline;
+  }
+  PACKAGE_DETAILS.set(idPackage ?? '', details);
+}
 
 /**
  * The VAT, the sectors, the areas and the items of the body, in the order of the backend: 422
@@ -589,8 +598,8 @@ export const packageArticlesMock = (
 
 /**
  * The name in the language of the request (the user's), as the panel requires, and every name at most
- * `MAX_PACKAGE_NAME_LENGTH` characters; the quantities, when given, within the choices of their
- * dropdowns; calculation method, monthly and weekend settings, when given, among the values of their
+ * `MAX_PACKAGE_NAME_LENGTH` characters; the quantities, when given, within the ranges of the
+ * backend; calculation method, monthly and weekend settings, when given, among the values of their
  * enums; prices between 0 and `MAX_PRICE_LIST_PRICE`; every reduced seasonal price with its name (at
  * most `MAX_REDUCED_SEASONAL_PRICE_NAME_LENGTH` characters) and its days in order, without days in
  * common with another one.
@@ -686,7 +695,8 @@ function packageErrors(body: CreatePackageBody, language: string): MockFieldErro
         Array.isArray(sectorPrices) &&
         sectorPrices.every(({ seasonalHalfDayPrice, seasonalPrice }) =>
           [seasonalHalfDayPrice, seasonalPrice].every(isPrice),
-        ),
+        ) &&
+        !hasRepeated(sectorPrices.map(({ idSector }) => idSector)),
     )
   ) {
     errors.push({ field: 'reducedSeasonalPrices', code: ApiErrorCode.ValidationInvalid });
@@ -728,9 +738,13 @@ function packageData(row: PackageRow): Omit<PackageSelectedItem, 'version'> {
   const detail =
     PACKAGE_DETAILS.get(row.idPackage ?? '') ??
     Object.assign(new PackageAddItemRequest(), {
-      translations: [{ language: 'it', packageName: row.packageName }],
+      translations: [{ language: Language.It, packageName: row.packageName }],
     });
-  return { ...structuredClone(detail), idPackage: row.idPackage };
+  return {
+    ...structuredClone(detail),
+    translations: detail.translations.filter(({ packageName }) => packageName),
+    idPackage: row.idPackage,
+  };
 }
 
 /**
@@ -749,7 +763,7 @@ export const updatePackageMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreatePackageBody & { idPackage?: unknown };
-  const language = request.headers.get('Accept-Language') ?? 'it';
+  const language = languageOf(request);
   const errors = packageErrors(body, language);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
@@ -769,10 +783,7 @@ export const updatePackageMock = (
     return missing;
   }
   row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
-  PACKAGE_DETAILS.set(
-    row.idPackage ?? '',
-    savedRows(structuredClone(onlyFieldsOf(PackageAddItemRequest, body as PackageAddItemRequest))),
-  );
+  savePackage(row, body);
   return savedWithVersion(request, packageData(row));
 };
 
@@ -835,6 +846,29 @@ Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[8].idAdditionalItem ?
 Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[9].idAdditionalItem ?? '') ?? {}, {
   vatRate: VAT_RATE_NO_LONGER_ALLOWED,
 });
+
+priceListsOfArticle.names = (idArticle) => [
+  ...packagesOfProperty()
+    .filter(({ idPackage }) =>
+      PACKAGE_DETAILS.get(idPackage ?? '')?.items.some(
+        ({ idInventoryItem }) => idInventoryItem === idArticle,
+      ),
+    )
+    .map(({ packageName }) => packageName ?? ''),
+  ...additionalItemsOfProperty()
+    .filter(
+      ({ idAdditionalItem }) =>
+        ADDITIONAL_ITEM_DETAILS.get(idAdditionalItem ?? '')?.idArticle === idArticle,
+    )
+    .map(({ additionalItemName }) => additionalItemName ?? ''),
+];
+
+/** How many packages and additional items have the sector among the enabled ones or in their prices. */
+export function priceListQuantityOfSector(idSector: string | null): number {
+  return [...PACKAGE_DETAILS.values(), ...ADDITIONAL_ITEM_DETAILS.values()].filter((details) =>
+    sectorsOf(details).includes(idSector),
+  ).length;
+}
 
 const ADDITIONAL_ITEM_SORT_FIELDS = ['additionalItemName'] as const;
 
@@ -968,6 +1002,7 @@ function choiceErrors(body: {
   const dates = body.publicHolidayDates ?? [];
   if (
     !Array.isArray(dates) ||
+    dates.length > MAX_PUBLIC_HOLIDAY_QUANTITY ||
     dates.some((date) => typeof date !== 'string' || Number.isNaN(Date.parse(date))) ||
     new Set(dates.map((date: string) => date.slice(0, 10))).size !== dates.length
   ) {
@@ -979,7 +1014,8 @@ function choiceErrors(body: {
     !sectorPrices.every(
       (row: Partial<PackageSectorPrice> | null) =>
         !!row && [row.seasonalHalfDayPrice, row.seasonalPrice].every(isPrice),
-    )
+    ) ||
+    hasRepeated(sectorPrices.map(({ idSector }) => idSector))
   ) {
     errors.push({ field: 'sectorPrices', code: ApiErrorCode.ValidationInvalid });
   }
@@ -1001,7 +1037,9 @@ function choiceErrors(body: {
           row.halfDayMonthlyPrice,
           row.monthlyPrice,
         ].every(isPrice),
-    )
+    ) ||
+    hasRepeated(periodPrices.map(({ idSector, idPeriod }) => `${idSector}|${idPeriod}`)) ||
+    periodPrices.filter(hasPrice).length > MAX_PERIOD_PRICE_QUANTITY
   ) {
     errors.push({ field: 'periodPrices', code: ApiErrorCode.ValidationInvalid });
   }
@@ -1019,6 +1057,17 @@ function choiceErrors(body: {
     errors.push({ field: 'intermediatePrices', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
+}
+
+function hasRepeated(values: readonly unknown[]): boolean {
+  return new Set(values).size !== values.length;
+}
+
+/** A row with at least one price: the others are not saved. */
+function hasPrice(row: PackageSectorPrice | PackagePeriodPrice): boolean {
+  return Object.entries(row).some(
+    ([field, value]) => field !== 'idSector' && field !== 'idPeriod' && value !== null,
+  );
 }
 
 function isIntermediatePrice(value: unknown): boolean {

@@ -37,8 +37,10 @@ export interface MissingLowercaseError extends ValidationError {
   readonly kind: 'missing_lowercase';
 }
 
+export const OVERLAP_KIND = 'overlap';
+
 export interface OverlapError extends ValidationError {
-  readonly kind: 'overlap';
+  readonly kind: typeof OVERLAP_KIND;
 }
 
 export interface WebLinkError extends ValidationError {
@@ -104,7 +106,7 @@ export function noOverlap<T extends DayRange, TPathKind extends PathKind = PathK
   others: () => readonly DayRange[],
 ): void {
   validate(path, ({ value }): OverlapError | undefined =>
-    others().some((other) => rangesOverlap(value(), other)) ? { kind: 'overlap' } : undefined,
+    others().some((other) => rangesOverlap(value(), other)) ? { kind: OVERLAP_KIND } : undefined,
   );
 }
 
@@ -120,7 +122,7 @@ export function noOverlaps<T extends DayRange, TPathKind extends PathKind = Path
         others().some((other) => rangesOverlap(range, other)) ||
         ranges.some((other, otherIndex) => otherIndex !== index && rangesOverlap(range, other)),
     );
-    return isClash ? { kind: 'overlap' } : undefined;
+    return isClash ? { kind: OVERLAP_KIND } : undefined;
   });
 }
 

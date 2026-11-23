@@ -15,7 +15,7 @@
 // In a thin frame, moved back by its border and inner space: every box in one column.
 .additional__item__edit__item__panel__map {
   margin-inline-start: calc(-0.25rem - 0.0625rem);
-  padding: 0 0.75rem 0 0.25rem;
+  padding-inline: 0.25rem 0.75rem;
   border: 0.0625rem solid var(--color__layout__text__soft);
   border-radius: 0.25rem;
 }

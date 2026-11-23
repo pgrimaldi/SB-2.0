@@ -2,36 +2,39 @@
   class="price__list__tab__section"
   [title]="'management.settings.catalog.price_list.seasonal_prices' | translate"
   [pathIcon]="sectionIcons"
+  [(isExpanded)]="isSeasonalExpanded"
 >
   @if (form().sectorPrices().value().length) {
-    <div class="price__list__tab__grid">
-      <table class="price__list__tab__table">
-        <thead>
-          <tr>
-            <th></th>
-            @for (column of seasonalColumns; track column.field) {
-              <th scope="col">{{ column.label | translate }}</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of form().sectorPrices; track row) {
+    @if (isSeasonalExpanded()) {
+      <div class="price__list__tab__grid">
+        <table class="price__list__tab__table">
+          <thead>
             <tr>
-              <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+              <th></th>
               @for (column of seasonalColumns; track column.field) {
-                <td>
-                  <app-filled-number-field
-                    [isDecimal]="true"
-                    [isCurrency]="true"
-                    [formField]="row[column.field]"
-                  />
-                </td>
+                <th scope="col">{{ column.label | translate }}</th>
               }
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (row of form().sectorPrices; track row) {
+              <tr>
+                <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+                @for (column of seasonalColumns; track column.field) {
+                  <td>
+                    <app-filled-number-field
+                      [isDecimal]="true"
+                      [isCurrency]="true"
+                      [formField]="row[column.field]"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   } @else if (isLoaded()) {
     <p class="price__list__tab__empty">
       {{ 'management.settings.catalog.price_list.no_sectors' | translate }}
@@ -46,41 +49,44 @@
   class="price__list__tab__section"
   [title]="'management.settings.catalog.price_list.period_prices' | translate"
   [pathIcon]="sectionIcons"
+  [(isExpanded)]="isPeriodExpanded"
 >
   @if (form().periodPrices().value().length) {
-    <div class="price__list__tab__grid">
-      <table class="price__list__tab__table">
-        <thead>
-          <tr>
-            <th></th>
-            @for (column of periodColumns; track column.field) {
-              <th scope="col">{{ column.label | translate }}</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of form().periodPrices; track row) {
+    @if (isPeriodExpanded()) {
+      <div class="price__list__tab__grid">
+        <table class="price__list__tab__table">
+          <thead>
             <tr>
-              <th scope="row">
-                <span class="price__list__tab__sector">{{
-                  sectorName(row.idSector().value())
-                }}</span>
-                {{ periodName(row.idPeriod().value()) }}
-              </th>
+              <th></th>
               @for (column of periodColumns; track column.field) {
-                <td>
-                  <app-filled-number-field
-                    [isDecimal]="true"
-                    [isCurrency]="true"
-                    [formField]="row[column.field]"
-                  />
-                </td>
+                <th scope="col">{{ column.label | translate }}</th>
               }
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (row of form().periodPrices; track row) {
+              <tr>
+                <th scope="row">
+                  <span class="price__list__tab__sector">{{
+                    sectorName(row.idSector().value())
+                  }}</span>
+                  {{ periodName(row.idPeriod().value()) }}
+                </th>
+                @for (column of periodColumns; track column.field) {
+                  <td>
+                    <app-filled-number-field
+                      [isDecimal]="true"
+                      [isCurrency]="true"
+                      [formField]="row[column.field]"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   } @else if (isLoaded()) {
     <p class="price__list__tab__empty">
       {{ 'management.settings.catalog.price_list.no_periods' | translate }}
@@ -111,8 +117,11 @@
   <app-filled-select
     [placeholder]="'management.settings.catalog.price_list.choose' | translate"
     [options]="calculationMethods()"
-    [formField]="form().calculationMethod"
+    [value]="form().calculationMethod().value()"
+    [readonly]="form().calculationMethod().readonly()"
     [error]="validationText.text(form().calculationMethod)"
+    (valueChange)="choose(form().calculationMethod().value, $event)"
+    (touch)="form().calculationMethod().markAsTouched()"
   />
 </div>
 
@@ -134,15 +143,21 @@
   [label]="'management.settings.catalog.price_list.monthly_setting' | translate"
   [placeholder]="'management.settings.catalog.price_list.choose' | translate"
   [options]="monthlySettings()"
-  [formField]="form().monthlySetting"
+  [value]="form().monthlySetting().value()"
+  [readonly]="form().monthlySetting().readonly()"
   [error]="validationText.text(form().monthlySetting)"
+  (valueChange)="choose(form().monthlySetting().value, $event)"
+  (touch)="form().monthlySetting().markAsTouched()"
 />
 <app-filled-select
   [label]="'management.settings.catalog.price_list.weekend_setting' | translate"
   [placeholder]="'management.settings.catalog.price_list.choose' | translate"
   [options]="weekendSettings()"
-  [formField]="form().weekendSetting"
+  [value]="form().weekendSetting().value()"
+  [readonly]="form().weekendSetting().readonly()"
   [error]="validationText.text(form().weekendSetting)"
+  (valueChange)="choose(form().weekendSetting().value, $event)"
+  (touch)="form().weekendSetting().markAsTouched()"
 />
 
 <app-public-holidays
@@ -156,6 +171,7 @@
   [prices]="form().intermediatePrices"
   [periodPrices]="form().periodPrices"
   [idFirstSector]="idFirstSector()"
+  [hasOtherSectors]="sectors().length > 1"
   [periods]="periods()"
   [name]="itemName()"
 />

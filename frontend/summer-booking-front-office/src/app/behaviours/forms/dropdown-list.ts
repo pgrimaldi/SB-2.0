@@ -13,6 +13,9 @@ export class DropdownList<T> {
   private readonly loadErrorValue = signal<string | null>(null);
   readonly items: Signal<readonly T[]> = this.itemsValue.asReadonly();
   readonly loadError: Signal<string | null> = this.loadErrorValue.asReadonly();
+  private readonly isReadValue = signal(false);
+  /** The options are those of an answer: false before the first one and after a failed read. */
+  readonly isRead: Signal<boolean> = this.isReadValue.asReadonly();
   private subscription?: Subscription;
 
   /** `afterRead` runs at every answer, once `items` holds it. */
@@ -29,11 +32,13 @@ export class DropdownList<T> {
     this.subscription = this.read().subscribe({
       next: (items) => {
         this.itemsValue.set(items);
+        this.isReadValue.set(true);
         this.afterRead?.();
       },
       error: (error: unknown) => {
         const problem = toApiProblem(error);
         this.itemsValue.set([]);
+        this.isReadValue.set(false);
         this.loadErrorValue.set(this.errorText.instant(problem.code, problem.args));
       },
     });
@@ -49,6 +54,7 @@ export class DropdownList<T> {
   clear(): void {
     this.subscription?.unsubscribe();
     this.itemsValue.set([]);
+    this.isReadValue.set(false);
     this.loadErrorValue.set(null);
   }
 

@@ -25,9 +25,20 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import {
+  EMPTY,
+  Observable,
+  Subscription,
+  finalize,
+  firstValueFrom,
+  forkJoin,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -76,9 +87,11 @@ import { PackageReducedPrice } from '../package-reduced-price/package-reduced-pr
 import {
   intermediatePricesOf,
   maxPrices,
+  maxPublicHolidays,
   periodPricesOf,
   reducedPricesOf,
   sectorPricesOf,
+  vatRange,
 } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
@@ -168,6 +181,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
       );
     });
     metadata(path.includedServices, MAX_LENGTH, () => MAX_PACKAGE_INCLUDED_SERVICES_LENGTH);
+    vatRange(path.vatRate);
+    maxPublicHolidays(path.publicHolidayDates);
     maxPrices(path.sectorPrices, sectorPricesOf);
     maxPrices(path.periodPrices, periodPricesOf);
     maxPrices(path.intermediatePrices, intermediatePricesOf);
@@ -193,8 +208,13 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   /** The values as the API gave them: the form is compared with them. */
   private readonly pristine = signal(newDraft());
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
-  protected readonly sectorsVersion = signal(0);
-  /** The articles of the backend, each with its items in the warehouse. */
+  /** The sectors of Info Generali and of the price rows, read once per opening. */
+  private sectorRead: Observable<ComboboxItem[]> = EMPTY;
+  protected readonly sectorList = new DropdownList(() => this.sectorRead, this.errorText);
+  protected readonly sectorAreaList = new DropdownList(
+    () => this.sectorService.sectorAreaCombobox(),
+    this.errorText,
+  );
   protected readonly articles = signal<readonly PackageArticle[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** Saved prices of sectors or periods the panel does not show: sent back as they were. */
@@ -203,7 +223,6 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isLoading = signal(false);
   protected readonly isLoaded = signal(false);
   protected readonly isEditDisabled = computed(() => this.isLoading() || !this.isLoaded());
-  /** The name of the package in the main language. */
   protected readonly packageName = computed(
     () =>
       this.draft()
@@ -219,6 +238,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
   private version: string | null = null;
+  /** The save found a newer version: the popup shows once the package has been read again. */
+  private isConflictPending = false;
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -232,6 +253,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoading());
       }
     });
   }
@@ -239,7 +262,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (comparableJson(this.draft()) !== comparableJson(this.pristine()) ||
+      (comparable(this.draft()) !== comparable(this.pristine()) ||
         this.isReducedSeasonalPriceTyped())
     );
   }
@@ -250,6 +273,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the package goes back to the values read, only to look at. */
@@ -284,8 +309,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
-          this.reset();
+          const tab = this.selectedTab();
+          this.reset(true);
+          this.selectedTab.set(tab);
           return undefined;
         }
         this.showTabOf(problem);
@@ -293,7 +319,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
           problem.code === ApiErrorCode.CatalogSectorNotFound ||
           problem.code === ApiErrorCode.MapSpotNotFound
         ) {
-          this.sectorsVersion.update((version) => version + 1);
+          this.loadSectors();
         }
         if (problem.code === ApiErrorCode.InventoryItemNotFound) {
           this.refreshArticles();
@@ -311,6 +337,19 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         this.isSaving.set(false);
       }
     });
+  }
+
+  private loadSectors(): void {
+    if (!this.auth.user()?.propertyId) {
+      return;
+    }
+    this.sectorRead = this.readSectors();
+    this.sectorList.load();
+    this.sectorAreaList.load();
+  }
+
+  private readSectors(): Observable<ComboboxItem[]> {
+    return this.sectorService.sectorCombobox().pipe(shareReplay({ bufferSize: 1, refCount: true }));
   }
 
   /** The tab of the first wrong field, where its error shows. */
@@ -360,8 +399,15 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     this.open.set(true);
   }
 
-  private reset(): void {
+  /** Closed while the package is being read: its answer, or its error, is not wanted any more. */
+  private stopLoading(): void {
     this.loading?.unsubscribe();
+    this.isConflictPending = false;
+  }
+
+  private reset(isConflictPending = false): void {
+    this.stopLoading();
+    this.isConflictPending = isConflictPending;
     this.isLoading.set(false);
     this.isLoaded.set(false);
     this.error.set(null);
@@ -380,6 +426,8 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     this.hiddenPeriodPrices.set([]);
     this.version = null;
     this.selectedTab.set(PanelTab.GeneralInfo);
+    this.sectorList.clear();
+    this.sectorAreaList.clear();
     this.load();
   }
 
@@ -405,10 +453,11 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
     if (!idPackage || !this.auth.user()?.propertyId) {
       return;
     }
+    this.loadSectors();
     this.isLoading.set(true);
     this.loading = forkJoin({
       item: this.priceLists.selectedPackage(idPackage),
-      sectors: this.sectorService.sectorCombobox(),
+      sectors: this.sectorRead,
       periods: this.seasons.periodList(false),
       articles: this.priceLists.packageArticles(),
     })
@@ -417,9 +466,14 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         next: ({ item, sectors, periods, articles }) => {
           this.setLoaded(item, sectors, periods, articles);
           this.isLoaded.set(true);
+          if (this.isConflictPending) {
+            this.isConflictPending = false;
+            this.isConflictShown.set(true);
+          }
         },
         error: (error: unknown) => {
           const problem = toApiProblem(error);
+          this.isConflictPending = false;
           this.failed.emit(problem);
           this.readError.set(problem);
           this.open.set(false);
@@ -526,7 +580,18 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
     this.loading?.unsubscribe();
+    this.sectorList.destroy();
+    this.sectorAreaList.destroy();
   }
+}
+
+/** The order of the sectors and of the areas does not count as a change. */
+function comparable(values: PackageAddItemRequest): string {
+  return comparableJson({
+    ...values,
+    idSectors: [...values.idSectors].sort(),
+    idSectorAreas: [...values.idSectorAreas].sort(),
+  });
 }
 
 /** Empty, with a name for every language: the user's one is the main. */

@@ -37,10 +37,6 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     articleCode: 'umbrella',
     name: 'Ombrellone',
     mapPlaceable: true,
-    usage: {
-      priceLists: ['Ombrellone e lettino', 'Ombrellone e 2 lettini'],
-      agreementPriceLists: [],
-    },
     totalQuantity: 60,
     lowStockThreshold: 3,
     lowStockAlertEnabled: true,
@@ -53,10 +49,7 @@ const INVENTORY_ITEMS: InventoryRow[] = [
     articleCode: 'sunbed',
     name: 'Lettino',
     mapPlaceable: true,
-    usage: {
-      priceLists: ['Ombrellone e 2 lettini'],
-      agreementPriceLists: ['Hotel Mare – Listino convenzione'],
-    },
+    agreementPriceLists: ['Hotel Mare – Listino convenzione'],
     totalQuantity: 120,
     lowStockThreshold: 5,
     lowStockAlertEnabled: true,
@@ -486,11 +479,13 @@ export const deleteArticlesMock = (
   if (!items) {
     return problem(request, 404, ApiErrorCode.InventoryItemNotFound);
   }
-  const inUse = items.find((item) => item.usage);
-  if (inUse?.usage) {
-    return problem(request, 409, ApiErrorCode.InventoryItemInUse, {
-      args: { articleName: inUse.name, ...inUse.usage },
-    });
+  for (const { publicId, name, agreementPriceLists = [] } of items) {
+    const priceLists = priceListsOfArticle.names(publicId);
+    if (priceLists.length || agreementPriceLists.length) {
+      return problem(request, 409, ApiErrorCode.InventoryItemInUse, {
+        args: { articleName: name, priceLists, agreementPriceLists },
+      });
+    }
   }
 
   const deletedAt = new Date().toISOString();
@@ -539,6 +534,11 @@ export const warehouseDuplicateMock = (
     });
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+};
+
+/** The names of the price lists an article is in: the mock of the price lists fills it. */
+export const priceListsOfArticle: { names: (idArticle: string) => string[] } = {
+  names: () => [],
 };
 
 /** The id of the active article of the property with this name, null when there is none. */
@@ -778,8 +778,8 @@ interface InventoryRow {
   articleCode: string | null;
   name: string;
   mapPlaceable: boolean;
-  /** Names of the price lists (and of the agreements' ones) the article is in: it cannot be deleted. */
-  usage?: { priceLists: string[]; agreementPriceLists: string[] };
+  /** Names of the price lists of the agreements the article is in. */
+  agreementPriceLists?: string[];
   totalQuantity: number;
   lowStockThreshold: number | null;
   lowStockAlertEnabled: boolean;

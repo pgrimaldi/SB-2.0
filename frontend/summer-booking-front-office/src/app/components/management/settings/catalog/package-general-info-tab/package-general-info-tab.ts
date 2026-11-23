@@ -1,22 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   computed,
-  effect,
   inject,
   input,
-  signal,
-  untracked,
+  linkedSignal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { EMPTY, Observable } from 'rxjs';
-import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
-import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { Observable } from 'rxjs';
 import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
+import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import {
   MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
   MAX_PACKAGE_ARTICLE_QUANTITY,
@@ -26,8 +22,8 @@ import {
 import { PackageArticle } from '../../../../../entities/settings/catalog/package-article';
 import { PackageItemQuantity } from '../../../../../entities/settings/catalog/package-item-quantity';
 import { Language } from '../../../../../entities/shared/language';
+import { optionsWithMissing } from '../options-with-missing';
 import { orderedItems } from '../package-items';
-import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { sameTextIgnoringCase } from '../../../../shared/forms/text-comparison';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
@@ -47,9 +43,20 @@ interface ArticleRow {
   itemName: string | null;
   idInventoryItem: string | null;
   isAvailable: boolean;
+  quantity: number | null;
+  /** First the empty choice, to take the article away. */
+  options: readonly SelectOption[];
 }
 
-const ARTICLES_KEY = 'management.settings.catalog.packages.form.articles';
+interface PackageGeneralInfoTexts {
+  no_limit: string;
+  articles: { none: string };
+  missing_sector: string;
+  missing_area: string;
+}
+
+const FORM_KEY = 'management.settings.catalog.packages.form';
+const ARTICLES_KEY = `${FORM_KEY}.articles`;
 const CUSTOM_ARTICLE = /^CustomArticle(\d)$/;
 
 @Component({
@@ -70,34 +77,52 @@ const CUSTOM_ARTICLE = /^CustomArticle(\d)$/;
   styleUrl: './package-general-info-tab.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PackageGeneralInfoTab implements OnDestroy {
+export class PackageGeneralInfoTab {
   readonly form = input.required<FieldTree<PackageAddItemRequest>>();
   /** Language of the main name: the user's; the others are translations. */
   readonly mainLanguage = input.required<Language>();
-  /** When it changes the sectors and the areas are read again, e.g. because one is no longer there. */
-  readonly sectorsVersion = input(0);
-  /** The articles of the backend, each with its items in the warehouse. */
+  /** The lists of the panel, read once per opening. */
+  readonly sectors = input.required<DropdownList<ComboboxItem>>();
+  readonly sectorAreas = input.required<DropdownList<ComboboxItem>>();
   readonly articles = input<readonly PackageArticle[]>([]);
+  /** The panel with the tab is open: the other languages are closed again at every opening. */
+  readonly isPanelOpen = input(true);
 
-  private readonly auth = inject(AuthBehaviour);
-  private readonly sectorService = inject(SectorService);
-  private readonly errorText = inject(ErrorTextBehaviour);
   protected readonly validationText = inject(ValidationTextBehaviour);
 
   /** [before the title, arrow]. */
   protected readonly languagesIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
+  protected readonly areLanguagesExpanded = linkedSignal({
+    source: this.isPanelOpen,
+    computation: () => false,
+  });
+  private readonly texts = toSignal(
+    inject(TranslateService).stream(FORM_KEY) as Observable<PackageGeneralInfoTexts>,
+    { initialValue: null },
+  );
+  /** First the empty choice, as in the quantities of the articles, to take the choice away. */
   protected readonly additionalItemOptions = computed(() =>
     quantityOptions(
       MAX_PACKAGE_ADDITIONAL_ITEM_QUANTITY,
       this.form().maxAdditionalItemQuantity().value(),
+      this.texts()?.no_limit,
     ),
   );
   protected readonly peopleOptions = computed(() =>
-    quantityOptions(MAX_PACKAGE_PEOPLE_QUANTITY, this.form().maxPeopleQuantity().value()),
+    quantityOptions(
+      MAX_PACKAGE_PEOPLE_QUANTITY,
+      this.form().maxPeopleQuantity().value(),
+      this.texts()?.no_limit,
+    ),
   );
-  private readonly noneText = toSignal(
-    inject(TranslateService).stream(`${ARTICLES_KEY}.none`) as Observable<string>,
-    { initialValue: '' },
+  private readonly quantities = computed(
+    () =>
+      new Map(
+        this.form()
+          .items()
+          .value()
+          .map(({ idInventoryItem, quantity }) => [idInventoryItem, quantity]),
+      ),
   );
   protected readonly articleRows = computed<readonly ArticleRow[]>(() =>
     this.articles().flatMap(({ article, items }): ArticleRow[] => {
@@ -105,73 +130,53 @@ export class PackageGeneralInfoTab implements OnDestroy {
       const name = number ? 'custom_article' : snakeCase(article ?? '');
       const label = { labelKey: `${ARTICLES_KEY}.names.${name}`, labelParams: { number } };
       return items.length
-        ? items.map(({ idInventoryItem, itemName, totalQuantity }) => ({
-            ...label,
-            itemName: items.length > 1 ? itemName : null,
-            idInventoryItem,
-            isAvailable: (totalQuantity ?? 0) > 0,
-          }))
-        : [{ ...label, itemName: null, idInventoryItem: null, isAvailable: false }];
+        ? items.map(({ idInventoryItem, itemName, totalQuantity }) => {
+            const quantity = this.quantities().get(idInventoryItem) ?? null;
+            return {
+              ...label,
+              itemName: items.length > 1 ? itemName : null,
+              idInventoryItem,
+              isAvailable: (totalQuantity ?? 0) > 0,
+              quantity,
+              options: quantityOptions(
+                MAX_PACKAGE_ARTICLE_QUANTITY,
+                quantity,
+                this.texts()?.articles.none,
+              ),
+            };
+          })
+        : [
+            {
+              ...label,
+              itemName: null,
+              idInventoryItem: null,
+              isAvailable: false,
+              quantity: null,
+              options: [],
+            },
+          ];
     }),
   );
   protected readonly hasUnavailableArticles = computed(() =>
     this.articleRows().some(({ isAvailable }) => !isAvailable),
   );
 
-  protected readonly sectors = new DropdownList(
-    () => (this.auth.user()?.propertyId ? this.sectorService.sectorCombobox() : EMPTY),
-    this.errorText,
-    () => this.areSectorsRead.set(true),
-  );
-  private readonly areSectorsRead = signal(false);
-  private readonly missingSectorText = toSignal(
-    inject(TranslateService).stream(
-      'management.settings.catalog.packages.form.missing_sector',
-    ) as Observable<string>,
-    { initialValue: '' },
+  /** Also the chosen ones that are no longer there, for the user to take away. */
+  protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
+    optionsWithMissing(
+      this.sectors(),
+      this.form().idSectors().value(),
+      this.texts()?.missing_sector ?? '',
+    ),
   );
   /** Also the chosen ones that are no longer there, for the user to take away. */
-  protected readonly sectorOptions = computed<readonly SelectOption[]>(() => {
-    const sectors = this.sectors.items();
-    const missing =
-      this.areSectorsRead() && !this.sectors.loadError()
-        ? this.form()
-            .idSectors()
-            .value()
-            .filter((idSector) => !sectors.some(({ id }) => id === idSector))
-        : [];
-    return [
-      ...sectors.map(({ id, value }) => ({ value: id, label: value })),
-      ...missing.map((idSector) => ({ value: idSector, label: this.missingSectorText() })),
-    ];
-  });
-  protected readonly sectorAreas = new DropdownList(
-    () => (this.auth.user()?.propertyId ? this.sectorService.sectorAreaCombobox() : EMPTY),
-    this.errorText,
-    () => this.areAreasRead.set(true),
+  protected readonly sectorAreaOptions = computed<readonly SelectOption[]>(() =>
+    optionsWithMissing(
+      this.sectorAreas(),
+      this.form().idSectorAreas().value(),
+      this.texts()?.missing_area ?? '',
+    ),
   );
-  private readonly areAreasRead = signal(false);
-  private readonly missingAreaText = toSignal(
-    inject(TranslateService).stream(
-      'management.settings.catalog.packages.form.missing_area',
-    ) as Observable<string>,
-    { initialValue: '' },
-  );
-  /** Also the chosen ones that are no longer there, for the user to take away. */
-  protected readonly sectorAreaOptions = computed<readonly SelectOption[]>(() => {
-    const areas = this.sectorAreas.items();
-    const missing =
-      this.areAreasRead() && !this.sectorAreas.loadError()
-        ? this.form()
-            .idSectorAreas()
-            .value()
-            .filter((idSectorArea) => !areas.some(({ id }) => id === idSectorArea))
-        : [];
-    return [
-      ...areas.map(({ id, value }) => ({ value: id, label: value })),
-      ...missing.map((idSectorArea) => ({ value: idSectorArea, label: this.missingAreaText() })),
-    ];
-  });
 
   protected readonly mainTranslation = computed(
     () =>
@@ -188,17 +193,6 @@ export class PackageGeneralInfoTab implements OnDestroy {
     () => new Intl.DisplayNames([this.mainLanguage()], { type: 'language' }),
   );
 
-  /** The sectors and the areas are read every time the tab is shown. */
-  constructor() {
-    effect(() => {
-      this.sectorsVersion();
-      untracked(() => {
-        this.sectors.load();
-        this.sectorAreas.load();
-      });
-    });
-  }
-
   /** The name of a language in the main one, with a capital letter (e.g. "Inglese"). */
   protected languageName(language: Language | null): string {
     const name = language ? (this.languageNames().of(language) ?? language) : '';
@@ -209,23 +203,6 @@ export class PackageGeneralInfoTab implements OnDestroy {
     return itemName === null || sameTextIgnoringCase(itemName, article)
       ? article
       : `${article}: ${itemName}`;
-  }
-
-  protected articleQuantity({ idInventoryItem }: ArticleRow): number | null {
-    return (
-      this.form()
-        .items()
-        .value()
-        .find((item) => item.idInventoryItem === idInventoryItem)?.quantity ?? null
-    );
-  }
-
-  /** First the empty choice, to take the article away. */
-  protected articleOptions(row: ArticleRow): readonly SelectOption[] {
-    return [
-      { value: '', label: this.noneText() },
-      ...quantityOptions(MAX_PACKAGE_ARTICLE_QUANTITY, this.articleQuantity(row)),
-    ];
   }
 
   /** In the order of the rows; the items with no row stay as they are, after them. */
@@ -256,21 +233,23 @@ export class PackageGeneralInfoTab implements OnDestroy {
   }
 
   protected setQuantity(field: FieldTree<number | null>, option: string | null): void {
-    field().value.set(option === null ? null : Number(option));
-  }
-
-  ngOnDestroy(): void {
-    this.sectors.destroy();
-    this.sectorAreas.destroy();
+    field().value.set(option ? Number(option) : null);
   }
 }
 
-/** The quantities from 1 to the last one, and the one saved when it is not one of them. */
-function quantityOptions(last: number, saved: number | null): readonly SelectOption[] {
+/** The empty choice, the quantities from 1 to the last one, and the one saved when it is not one of them. */
+function quantityOptions(
+  last: number,
+  saved: number | null,
+  emptyText: string | undefined,
+): readonly SelectOption[] {
   const quantities = Array.from({ length: last }, (_, index) => index + 1);
-  return [...quantities, ...(saved !== null && !quantities.includes(saved) ? [saved] : [])].map(
-    (quantity) => ({ value: String(quantity), label: String(quantity) }),
-  );
+  return [
+    { value: '', label: emptyText ?? '' },
+    ...[...quantities, ...(saved !== null && !quantities.includes(saved) ? [saved] : [])].map(
+      (quantity) => ({ value: String(quantity), label: String(quantity) }),
+    ),
+  ];
 }
 
 function snakeCase(name: string): string {

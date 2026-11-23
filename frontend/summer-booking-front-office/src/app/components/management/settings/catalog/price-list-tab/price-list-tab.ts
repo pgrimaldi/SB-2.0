@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  WritableSignal,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -20,6 +29,7 @@ import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-fi
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { IntermediatePrices } from '../intermediate-prices/intermediate-prices';
+import { PriceField } from '../price-field';
 import { PublicHolidays } from '../public-holidays/public-holidays';
 
 /** The fields the tab shows: those of the package form and of the additional item one. */
@@ -37,9 +47,6 @@ export interface PriceListFields {
   readonly intermediatePrices: FieldTree<PackageIntermediatePrice[]>;
 }
 
-/** The fields of a row that hold a price. */
-type PriceField<T> = { [K in keyof T]: T[K] extends number | null ? K : never }[keyof T];
-
 interface PriceColumn<T> {
   field: PriceField<T>;
   /** Translation key of the header. */
@@ -50,6 +57,8 @@ const KEY = 'management.settings.catalog.price_list';
 
 /** The texts of the choices of the dropdowns, in the translation group of the tab. */
 interface ChoiceTexts {
+  no_calculation: string;
+  no_setting: string;
   calculation_methods: {
     proportional: string;
     daily: string;
@@ -121,6 +130,8 @@ export class PriceListTab {
   readonly isIntermediatePricesEnabled = input(true);
   /** The name of the package or of the article, in the rows of Modifica prezzi intermedi. */
   readonly itemName = input('');
+  /** The panel with the tab is open: the sections are closed again at every opening. */
+  readonly isPanelOpen = input(true);
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);
@@ -133,6 +144,14 @@ export class PriceListTab {
     '/assets/images/GeneralIcon_Close.svg',
     '/assets/images/GeneralIcon_InfoTitle.svg',
   ] as const;
+  protected readonly isSeasonalExpanded = linkedSignal({
+    source: this.isPanelOpen,
+    computation: () => false,
+  });
+  protected readonly isPeriodExpanded = linkedSignal({
+    source: this.isPanelOpen,
+    computation: () => false,
+  });
   protected readonly showingCalculationInfo = signal(false);
   protected readonly showingCumulativeInfo = signal(false);
 
@@ -157,24 +176,33 @@ export class PriceListTab {
     this.translateService.stream(KEY) as Observable<ChoiceTexts>,
     { initialValue: null },
   );
-  protected readonly calculationMethods = computed<readonly SelectOption<PriceCalculationMethod>[]>(
-    () =>
-      Object.values(PriceCalculationMethod).map((value) => ({
+  /** First the empty choice, as in the other two, to take the choice away. */
+  protected readonly calculationMethods = computed<
+    readonly SelectOption<PriceCalculationMethod | ''>[]
+  >(() => [
+    { value: '', label: this.choiceTexts()?.no_calculation ?? '' },
+    ...Object.values(PriceCalculationMethod).map((value) => ({
+      value,
+      label: this.choiceTexts()?.calculation_methods[CALCULATION_METHOD_KEYS[value]] ?? '',
+    })),
+  ]);
+  protected readonly monthlySettings = computed<readonly SelectOption<PriceMonthlySetting | ''>[]>(
+    () => [
+      { value: '', label: this.choiceTexts()?.no_setting ?? '' },
+      ...Object.values(PriceMonthlySetting).map((value) => ({
         value,
-        label: this.choiceTexts()?.calculation_methods[CALCULATION_METHOD_KEYS[value]] ?? '',
+        label: this.choiceTexts()?.monthly_settings[MONTHLY_SETTING_KEYS[value]] ?? '',
       })),
+    ],
   );
-  protected readonly monthlySettings = computed<readonly SelectOption<PriceMonthlySetting>[]>(() =>
-    Object.values(PriceMonthlySetting).map((value) => ({
-      value,
-      label: this.choiceTexts()?.monthly_settings[MONTHLY_SETTING_KEYS[value]] ?? '',
-    })),
-  );
-  protected readonly weekendSettings = computed<readonly SelectOption<PriceWeekendSetting>[]>(() =>
-    Object.values(PriceWeekendSetting).map((value) => ({
-      value,
-      label: this.choiceTexts()?.weekend_settings[WEEKEND_SETTING_KEYS[value]] ?? '',
-    })),
+  protected readonly weekendSettings = computed<readonly SelectOption<PriceWeekendSetting | ''>[]>(
+    () => [
+      { value: '', label: this.choiceTexts()?.no_setting ?? '' },
+      ...Object.values(PriceWeekendSetting).map((value) => ({
+        value,
+        label: this.choiceTexts()?.weekend_settings[WEEKEND_SETTING_KEYS[value]] ?? '',
+      })),
+    ],
   );
 
   /** Fila 1 of Modifica prezzi intermedi: the first sector of the property. */
@@ -185,6 +213,10 @@ export class PriceListTab {
   private readonly periodNames = computed(
     () => new Map(this.periods().map(({ key, name }) => [key, name])),
   );
+
+  protected choose<T extends string>(value: WritableSignal<T | null>, choice: T | '' | null): void {
+    value.set(choice || null);
+  }
 
   protected sectorName(idSector: string | null): string {
     return (idSector && this.sectorNames().get(idSector)) ?? '';

@@ -36,7 +36,8 @@ Regole per HTML e SCSS: nomi delle classi, dimensione dei file, stili condivisi,
   - `_table-page.scss`: layout delle pagine con titolo e tabella; `@include page.table-page(warehouse);` genera
     `.warehouse` e `.warehouse__title`;
   - `_info-button.scss`: la (i) accanto a un'etichetta che apre `app-info-popup`; `@include info.info-button;`
-    sull'`app-icon-button`, sempre attiva, anche nei form in sola lettura.
+    sull'`app-icon-button`, sempre attiva, anche nei form in sola lettura;
+  - `_price-grid.scss`: le griglie dei prezzi del Listino (`scroll`, `table`, `price-table`, `price-field`).
 - Sono dell'app, non della libreria: le misure seguono il nostro header, il nostro menu e gli schermi che dobbiamo far
   stare. Se i file diventano molti si raggruppano in sottocartelle.
 - Gli stili dei wrapper restano nella loro famiglia (`components/shared/ui/<famiglia>/_*.scss`).

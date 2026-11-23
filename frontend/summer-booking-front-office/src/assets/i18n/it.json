@@ -1794,6 +1794,7 @@
             "choose": "Seleziona",
             "max_additional_items": "Numero max di articoli aggiuntivi",
             "max_people": "Numero max di persone",
+            "no_limit": "Nessun limite",
             "articles": {
               "title": "Articoli che compongono il pacchetto",
               "none": "Nessuno",
@@ -1916,6 +1917,8 @@
           "no_periods": "Per i prezzi per periodo servono almeno un settore o una fila e un periodo della stagione in corso.",
           "vat": "IVA (%)",
           "calculation_method": "Calcolo del prezzo",
+          "no_calculation": "Nessun calcolo",
+          "no_setting": "Nessuna impostazione",
           "calculation_methods": {
             "proportional": "Prezzo proporzionale",
             "daily": "Prezzo giornaliero",
@@ -2113,6 +2116,12 @@
     "catalog": {
       "price": {
         "max": "Un prezzo supera il massimo consentito di {max, number, currency}."
+      },
+      "vat": {
+        "range": "L'IVA deve essere maggiore di 0 e minore di 100."
+      },
+      "public_holidays": {
+        "max": "Al massimo {{max}} giorni festivi."
       }
     },
     "services": {

@@ -31,8 +31,9 @@ periodo, festivi, prezzi intermedi).
 | 15 | POST | `/api/catalog/price-lists/update-additional-services-article-item` | Salva un articolo aggiuntivo modificato |
 | 16 | GET + POST | Le API 6, 7, 14 e 15 | Controllo di versione: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
 | 17 | GET | `/api/catalog/price-lists/get-package-articles` | Gli articoli dei pannelli dei pacchetti e quali ci sono in magazzino |
+| 18 | POST | `/api/catalog/quotes` | Esistente: un listino solo online non si vende dal gestionale |
 
-Sono tutte **nuove**. Per il frontend sostituiscono le API di `/api/catalog/price-lists`, che lavorano con
+Sono tutte **nuove**, tranne la 18 (il preventivo, che esiste già). Per il frontend sostituiscono le API di `/api/catalog/price-lists`, che lavorano con
 `SavePriceListRequest` e `PriceListDto`: ogni sezione dice campo per campo cosa cambia rispetto a quelle.
 
 ## Regole comuni
@@ -40,16 +41,17 @@ Sono tutte **nuove**. Per il frontend sostituiscono le API di `/api/catalog/pric
 - **Le API esistenti non cambiano**: `/api/catalog/price-lists` (con le sue sotto-rotte) tiene rotte, richieste e risposte di
   oggi; le nuove si aggiungono e possono riusarne la logica (`PriceListsService`). **Ma non devono perdere i dati nuovi** delle
   sezioni 5 e 13:
-  - `PUT /price-lists/{id}` lascia com'erano i dati che non conosce (aree, testo dei servizi inclusi,
-    `isIntermediatePricesIncluded`, prezzo ridotto di mezza giornata, legame fra pacchetto e prezzi ridotti) e
-    `{id}/duplicate` e `bulk-duplicate` li copiano;
+  - `PUT /price-lists/{id}` lascia com'erano i dati che non conosce (`isOnlineEnabled` di un listino solo online, aree, testo
+    dei servizi inclusi, `isIntermediatePricesIncluded`, prezzo ridotto di mezza giornata, legame fra pacchetto e prezzi
+    ridotti) e `{id}/duplicate` e `bulk-duplicate` li copiano;
   - `isSectorRestricted` e `sectorIds` leggono e scrivono i settori abilitati salvati a parte (sezione 5);
   - un prezzo ridotto con solo la mezza giornata non si perde e non diventa 0: oggi `ReducedPriceDto.Price` non può essere nullo
     (`PriceListDtos.cs:37`) e `SetReducedPrices` toglie le righe che la `PUT` non manda (`PriceList.cs`);
   - lo snapshot offline `price_catalog` (`ConfigSnapshotBuilder.PriceCatalogAsync`) contiene quello che serve al preventivo
     (settori abilitati, prezzo ridotto di mezza giornata) e si rigenera quando cambia: `SnapshotTriggers` guarda il nome
     dell'entità, che oggi deve cominciare con `PriceList` o `ReducedSeason`.
-- **Dati già salvati**: la migrazione della sezione 5 ("Dati già salvati") non cambia i prezzi e le vendite di oggi.
+- **Dati già salvati**: la migrazione della sezione 5 ("Dati già salvati") non cambia i prezzi e le vendite di oggi. Le vendite
+  cambiano solo con le correzioni chieste: il prezzo stagionale (sezione 5) e i listini solo online (sezione 18).
 - **Stabilimento dal token**: nessuna richiesta lo contiene.
 - **Permessi**: come le API dei listini di oggi, salvo dove la sezione dice altro. Senza permesso: 403 `auth.forbidden`.
 - **JSON** in camelCase, con i nomi esatti di questo documento. Date: giorni in UTC ISO 8601
@@ -324,7 +326,7 @@ sezione 12).
 ## 4. POST /api/catalog/sectors/sector-area-combobox
 
 Tendina a scelta multipla "Aree abilitate" della tab Info Generali dei pannelli "Aggiungi nuovo pacchetto" e "Modifica
-pacchetto", riletta a ogni apertura della tab. Segue la regola di tutte le tendine del frontend: `POST`, senza corpo né
+pacchetto", riletta a ogni apertura del pannello. Segue la regola di tutte le tendine del frontend: `POST`, senza corpo né
 pagine, risposta `[{ id, value }]`, come `POST /api/catalog/sectors/sector-combobox` (`Servizi - Frontend requests.md`,
 sezione 25).
 
@@ -569,8 +571,21 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   `sectorPrices` (`QuoteService.cs:120`, `PricingSource._hasSector`), e `sectorIds` di `GET /price-lists/{id}`
   (`PriceListsService.cs:279`) e dello snapshot si ricavano allo stesso modo. Senza questa modifica il pacchetto dell'esempio si
   venderebbe in 10 settori, e uno con solo prezzi per periodo in nessuno.
-- `isOnlineEnabled` e `isOnlineOnly`: al posto di `salesChannel`. Entrambi false = `manager_only`; `isOnlineEnabled`
-  true = `manager_and_online`; `isOnlineOnly` true = `online_only`.
+- `isOnlineEnabled` e `isOnlineOnly`: due scelte **separate e indipendenti**, al posto di `salesChannel`; possono essere tutte e due
+  spente o tutte e due accese, e **si rileggono come sono state salvate**. Da loro dipende dove si vende il listino, cioè il
+  `sales_channel` di oggi, che resta quello usato da preventivo, vetrina e ricerca:
+
+  | `isOnlineEnabled` | `isOnlineOnly` | Dove si vende | `sales_channel` |
+  |---|---|---|---|
+  | false | false | Solo gestionale | `manager_only` |
+  | true | false | Gestionale e online | `manager_and_online` |
+  | false | true | Solo online | `online_only` |
+  | true | true | Solo online (`isOnlineOnly` rende superflua l'altra) | `online_only` |
+
+  **Da aggiungere**: oggi si salva solo `sales_channel` (`PriceList.SalesChannel`), che non distingue le ultime due righe. Basta
+  salvare anche `isOnlineEnabled` (una colonna sì/no): `isOnlineOnly` è vero quando `sales_channel` è `online_only`. Come farlo lo
+  sceglie lo sviluppatore. `PUT /price-lists/{id}` con `salesChannel` `manager_only` o `manager_and_online` scrive anche
+  `isOnlineEnabled` (falso o vero); con `online_only` lo lascia com'era.
 - `reducedSeasonalPrices`: i prezzi stagionali ridotti del pacchetto, quanti se ne vogliono (`[]` se nessuno), ognuno
   con nome, periodo e i suoi prezzi per settore (`sectorPrices`: gli stessi campi dei `sectorPrices` del pacchetto,
   "Prezzo stagionale mezza giornata" e "Prezzo stagionale", una riga per settore). I periodi di due prezzi ridotti dello
@@ -652,7 +667,8 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   90) e `price`. Una sola riga per `idPeriod` + `isFirstRow` + `dayQuantity`. **Sono gli `stayOverrides` di oggi**
   (`catalog.pricing_price_list_stay_prices`, uno per riga di `periodPrices` e numero di giorni, fino a 366; il loro `sector_id` non
   si usa, conta il settore della riga, come nel preventivo):
-  - "Fila 1" è il primo settore di `catalog/sectors/sector-combobox`, "Altre file" tutti gli altri;
+  - "Fila 1" è il primo settore di `catalog/sectors/sector-combobox`, "Altre file" tutti gli altri (con un settore solo il pannello
+    non le offre);
   - **lettura**: "Altre file" ha il prezzo di un numero di giorni solo se è lo stesso in tutti gli altri settori, senza contare
     quelli eliminati e quelli che in quel periodo non hanno nessun prezzo (per esempio un settore appena creato); altrimenti non si
     restituisce. Non si restituiscono nemmeno i giorni oltre 90, i periodi eliminati e le righe "tutte le file";
@@ -683,6 +699,8 @@ La migrazione dei dati nuovi non deve cambiare i prezzi e le vendite di oggi, pe
   (`QuoteService`, `PriceSpot`); il legame fra pacchetto e voce c'è per ogni voce con almeno una riga.
 - **Prezzo stagionale**: quello salvato fino a oggi in `base_price` è quello che il preventivo deve usare.
 - **Prezzi intermedi**: `isIntermediatePricesIncluded` come detto sopra.
+- **Vendita online**: `isOnlineEnabled` parte vero per i listini `manager_and_online`, falso per gli altri; `sales_channel` non
+  cambia.
 
 ## 6. GET /api/catalog/price-lists/get-package?idPackage=…
 
@@ -1077,8 +1095,8 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
 - `idPackages`: i pacchetti scelti in "Pacchetti" (sezione 11), `[]` = tutti i pacchetti, al posto di `packageLinks`. Il pannello
   non ha la **quantità massima** per pacchetto (`maxCount`, 1-100): per i pacchetti già collegati resta quella salvata, per i nuovi
   è 100. Il limite di articoli aggiuntivi del pacchetto (`maxAdditionalItems`) vale comunque (`QuoteService`).
-- `isOnlineEnabled` e `isOnlineOnly` ("Prenotazioni online" e "Solo online"): al posto di `salesChannel`, come in
-  `create-package` (sezione 5).
+- `isOnlineEnabled` e `isOnlineOnly` ("Prenotazioni online" e "Solo online"): al posto di `salesChannel`, separati e indipendenti
+  come in `create-package` (sezione 5).
 - `isMapAssignable`: uguale.
 - `vatRate`, `sectorPrices`, `periodPrices`, `calculationMethod`, `isCumulative`, `monthlySetting`, `weekendSetting`,
   `isPublicHolidaysIncluded`, `publicHolidayDates`, `isIntermediatePricesIncluded`, `intermediatePrices`: gli stessi campi e valori
@@ -1270,6 +1288,50 @@ non ci sono si vedono, spente, con la scritta "Non in magazzino".
 `catalog.property_not_found`. Se fallisce nel pannello di modifica vale la regola delle sue letture (si chiude, avviso con
 "Riprova"); in quello di aggiunta il messaggio compare sopra i bottoni e si riprova alla prossima apertura della tab.
 
+## 18. POST /api/catalog/quotes: un listino solo online non si vende dal gestionale
+
+Un pacchetto o un articolo aggiuntivo "solo online" (`sales_channel` `online_only`, sezione 5) si deve vendere solo dal sito
+pubblico.
+
+### Com'è oggi
+
+Il preventivo controlla il canale in un verso solo: dal sito (`QuoteChannel.Online`) rifiuta un listino `manager_only` con 422
+`pricing.package_not_online` (`QuoteService.cs:118` per il pacchetto, `:154` per gli articoli aggiuntivi). Dal gestionale
+(`QuoteChannel.Manager`) non controlla niente: `PricingSource.IsOnline` è solo "diverso da `manager_only`"
+(`PricingSource.cs:53`), quindi `online_only` si vende come `manager_and_online`.
+
+### Cosa ci serve
+
+- **Con `QuoteChannel.Manager` un listino `online_only` si rifiuta**: 422 `pricing.package_online_only` (codice nuovo,
+  `CatalogErrors`), nello stesso punto dei due controlli di oggi, dopo quello sul tipo, per il pacchetto della postazione
+  (`spots[].priceListId`) e per ogni articolo aggiuntivo (`spots[].additionals[].priceListId`), anche con un prezzo manuale
+  (`manualPrice`). `args`: `priceListName`, il nome nella lingua di `Accept-Language`, come in tabella (sezioni 1 e 8). Senza
+  `errors[]`.
+- **Dal sito non cambia niente**: `online_only` e `manager_and_online` si vendono, `manager_only` no.
+- **Convenzioni**: i loro listini non hanno il canale e non cambiano.
+- **Prenotazioni che hanno già quel listino**: il blocco vale quando dal gestionale lo si mette in una prenotazione. Una prenotazione
+  presa dal sito con un listino solo online (o con un listino diventato solo online dopo) deve potersi modificare e ricalcolare dal
+  gestionale tenendolo. Oggi `QuoteRequest` non dice di quale prenotazione è il preventivo e il salvataggio delle prenotazioni non
+  c'è ancora (`89-api-catalog.md`, "Non ancora disponibile"): quando ci sarà, come riconoscere i listini che la prenotazione ha già
+  lo sceglie lo sviluppatore. Fino ad allora il blocco vale per ogni preventivo del gestionale.
+- **Preventivo offline**: vale la stessa regola (`salesChannel` è già in `PriceListDto`, quindi nello snapshot `price_catalog`).
+- Elenchi e tendine dei listini non cambiano: un listino solo online si vede e si modifica come gli altri, e può essere il
+  predefinito.
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+
+```json
+{
+  "type": "https://errors.summerbooking/pricing/package_online_only",
+  "title": "pricing.package_online_only",
+  "status": 422,
+  "code": "pricing.package_online_only",
+  "args": { "priceListName": "Ombrellone e 2 lettini" },
+  "traceId": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+}
+```
+
+Oggi il frontend non chiama il preventivo: aggiungerà il testo di questo codice, nelle 7 lingue, con le pagine delle prenotazioni.
+
 ## API esistenti usate così come sono
 
 I pannelli dei pacchetti e degli articoli aggiuntivi leggono i periodi della stagione corrente con
@@ -1310,6 +1372,8 @@ API 5-7, con un token con `CatalogRead` e `CatalogPricing`:
 - Preventivo: un pacchetto con `idSectors` [Fila 1], prezzi stagionali per 10 settori e nessun prezzo stagionale di Fila 1: si vende
   solo in Fila 1. Un preventivo stagionale dà il `seasonalPrice` salvato, non 0, anche per un articolo aggiuntivo.
 - `idSectorAreas`: il preventivo non cambia con o senza aree.
+- `isOnlineEnabled` e `isOnlineOnly`: salvate le quattro combinazioni, ognuna si rilegge uguale, con il `sales_channel` della tabella
+  (sezione 5), anche per un articolo aggiuntivo e dopo una duplicazione.
 - Un prezzo ridotto con `sectorPrices` `[]`: salvato e riletto.
 - `isIntermediatePricesIncluded` `false` su un pacchetto con un prezzo a 120 giorni e uno a 5 giorni diverso fra gli altri settori:
   dopo il salvataggio non ce n'è più nessuno.
@@ -1419,3 +1483,12 @@ API 13-15, con un token con `CatalogRead` e `CatalogPricing`:
     dà `null`. In tutti i casi d'errore niente cambia.
 24. Lettura e salvataggio con l'id di un pacchetto, di un altro stabilimento o già eliminato: 404 `pricing.price_list_not_found`.
     Righe di prezzo e prezzi intermedi come per i pacchetti; permessi, token e stabilimento come per le API 5-7.
+
+API 18, con un pacchetto e un articolo aggiuntivo per ognuno dei tre canali:
+
+25. `POST /api/catalog/quotes` con il pacchetto `online_only`: 422 `pricing.package_online_only` con `priceListName`, anche con un
+    prezzo manuale; con il pacchetto `manager_and_online` o `manager_only`: 200. Lo stesso con l'articolo aggiuntivo `online_only`
+    su un pacchetto valido.
+26. `POST /api/catalog/public/bathhouses/{slug}/quote`: 200 con `online_only` e `manager_and_online`, 422
+    `pricing.package_not_online` con `manager_only`, come oggi.
+27. Un pacchetto salvato con `isOnlineEnabled` e `isOnlineOnly` veri si rifiuta dal gestionale; tolta `isOnlineOnly`: 200.

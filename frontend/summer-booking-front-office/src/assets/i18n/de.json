@@ -1794,6 +1794,7 @@
             "choose": "Auswählen",
             "max_additional_items": "Max. Anzahl Zusatzartikel",
             "max_people": "Max. Anzahl Personen",
+            "no_limit": "Keine Begrenzung",
             "articles": {
               "title": "Artikel im Paket",
               "none": "Keine",
@@ -1916,6 +1917,8 @@
           "no_periods": "Für Preise pro Zeitraum braucht es mindestens einen Sektor oder eine Reihe und einen Zeitraum der laufenden Saison.",
           "vat": "MwSt. (%)",
           "calculation_method": "Preisberechnung",
+          "no_calculation": "Keine Berechnung",
+          "no_setting": "Keine Einstellung",
           "calculation_methods": {
             "proportional": "Proportionaler Preis",
             "daily": "Tagespreis",
@@ -2113,6 +2116,12 @@
     "catalog": {
       "price": {
         "max": "Ein Preis überschreitet den zulässigen Höchstwert von {max, number, currency}."
+      },
+      "vat": {
+        "range": "Die MwSt. muss größer als 0 und kleiner als 100 sein."
+      },
+      "public_holidays": {
+        "max": "Höchstens {{max}} Feiertage."
       }
     },
     "services": {

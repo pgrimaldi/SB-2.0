@@ -70,14 +70,25 @@ function readArgs(value: unknown): ApiProblemArgs | undefined {
     return;
   }
   const entries = Object.entries(value)
-    .map(([name, arg]) => [name, isPlainList(arg) ? listText(arg) : arg] as const)
+    .map(([name, arg]) => [name, readArg(arg)] as const)
     .filter(
       ([name, arg]) =>
         ARG_NAME.test(name) &&
-        ((typeof arg === 'string' && arg.length <= MAX_ARG_LENGTH) ||
-          (typeof arg === 'number' && Number.isFinite(arg))),
+        (typeof arg === 'string' || (typeof arg === 'number' && Number.isFinite(arg))),
     );
   return entries.length ? (Object.fromEntries(entries) as ApiProblemArgs) : undefined;
+}
+
+function readArg(arg: unknown): unknown {
+  if (isPlainList(arg)) {
+    return listText(arg);
+  }
+  return typeof arg === 'string' ? cutText(arg) : arg;
+}
+
+/** A text too long for the message ends with …. */
+function cutText(text: string): string {
+  return text.length <= MAX_ARG_LENGTH ? text : `${text.slice(0, MAX_ARG_LENGTH - 1)}…`;
 }
 
 function isPlainList(value: unknown): value is readonly string[] | readonly number[] {
@@ -95,8 +106,7 @@ function isPlainList(value: unknown): value is readonly string[] | readonly numb
  */
 function listText(items: readonly string[] | readonly number[]): string {
   const shown = items.slice(0, MAX_ARG_ITEMS).join(', ');
-  const text = items.length > MAX_ARG_ITEMS ? `${shown}, …` : shown;
-  return text.length <= MAX_ARG_LENGTH ? text : `${text.slice(0, MAX_ARG_LENGTH - 1)}…`;
+  return cutText(items.length > MAX_ARG_ITEMS ? `${shown}, …` : shown);
 }
 
 function readFieldErrors(value: unknown): readonly ApiFieldError[] | undefined {

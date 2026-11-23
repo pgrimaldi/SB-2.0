@@ -140,9 +140,11 @@ export class PriceListService {
 function packageBody(request: PackageAddItemRequest): PackageAddItemRequest {
   return {
     ...onlyFieldsOf(PackageAddItemRequest, request),
-    translations: request.translations.map((translation) =>
-      onlyFieldsOf(PackageTranslation, translation),
-    ),
+    translations: request.translations.map((translation) => ({
+      ...onlyFieldsOf(PackageTranslation, translation),
+      packageName: textOrNull(translation.packageName),
+    })),
+    includedServices: textOrNull(request.includedServices),
     items: request.items.map((item) => onlyFieldsOf(PackageItemQuantity, item)),
     sectorPrices: request.sectorPrices.map((sectorPrice) =>
       onlyFieldsOf(PackageSectorPrice, sectorPrice),
@@ -160,6 +162,11 @@ function packageBody(request: PackageAddItemRequest): PackageAddItemRequest {
       onlyFieldsOf(PackageIntermediatePrice, price),
     ),
   };
+}
+
+/** A text made only of spaces is not a text. */
+function textOrNull(text: string | null): string | null {
+  return text?.trim() ? text : null;
 }
 
 /** Only the fields of the additional item, also inside its price rows. */

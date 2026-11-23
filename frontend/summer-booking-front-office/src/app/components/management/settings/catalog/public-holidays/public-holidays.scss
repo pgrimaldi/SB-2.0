@@ -1,3 +1,5 @@
+@use '../../../../../styles/price-grid';
+
 :host {
   display: flex;
   flex-direction: column;
@@ -25,32 +27,14 @@
 }
 
 .public__holidays__grid {
-  max-width: 100%;
-  max-height: 26rem;
-  overflow: auto;
+  @include price-grid.scroll;
 }
 
-// The colours of the grids of the prices: blue texts, white and light blue rows in turn, thin lines between them.
 .public__holidays__table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  color: var(--color__main__theme__one);
-  font-size: 0.75rem;
-  line-height: 1rem;
+  @include price-grid.table;
 
   th {
-    background: var(--color__layout__surface);
-    font-weight: 600;
     text-align: start;
-  }
-
-  thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    padding: 0 0.5rem 0.75rem;
-    border-bottom: 0.0625rem solid var(--color__layout__border);
   }
 
   tbody th {
@@ -60,14 +44,6 @@
   td {
     padding: 0.125rem 0.5rem;
     text-align: end;
-  }
-
-  tbody tr:not(:last-child) > * {
-    border-bottom: 0.0625rem solid var(--color__layout__border);
-  }
-
-  tbody tr:nth-child(even) > * {
-    background: var(--color__layout__highlight);
   }
 }
 
@@ -86,6 +62,6 @@
 // Phones: more room for the title, as in the other sections.
 @media (width < 48rem) {
   .public__holidays__section {
-    --expansion-panel-header-padding: 0 1rem 0 1.25rem;
+    --expansion-panel-header-padding-inline: 1.25rem 1rem;
   }
 }

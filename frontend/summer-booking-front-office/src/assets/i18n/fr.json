@@ -1794,11 +1794,12 @@
             "choose": "Sélectionner",
             "max_additional_items": "Nombre max d'articles supplémentaires",
             "max_people": "Nombre max de personnes",
+            "no_limit": "Aucune limite",
             "articles": {
               "title": "Articles du forfait",
               "none": "Aucun",
               "unavailable": "Pas en stock",
-              "unavailable_note": "Les articles en gris n'ont aucun élément en stock.",
+              "unavailable_note": "Les articles en gris ne sont pas en stock.",
               "names": {
                 "umbrella": "Parasol",
                 "sunbed": "Bain de soleil",
@@ -1916,6 +1917,8 @@
           "no_periods": "Les prix par période demandent au moins un secteur ou une rangée et une période de la saison en cours.",
           "vat": "TVA (%)",
           "calculation_method": "Calcul du prix",
+          "no_calculation": "Aucun calcul",
+          "no_setting": "Aucun réglage",
           "calculation_methods": {
             "proportional": "Prix proportionnel",
             "daily": "Prix journalier",
@@ -2113,6 +2116,12 @@
     "catalog": {
       "price": {
         "max": "Un prix dépasse le maximum autorisé de {max, number, currency}."
+      },
+      "vat": {
+        "range": "La TVA doit être supérieure à 0 et inférieure à 100."
+      },
+      "public_holidays": {
+        "max": "{{max}} jours fériés au maximum."
       }
     },
     "services": {

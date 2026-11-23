@@ -23,9 +23,20 @@ import {
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import {
+  EMPTY,
+  Observable,
+  Subscription,
+  finalize,
+  firstValueFrom,
+  forkJoin,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
+import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
 import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
@@ -69,9 +80,11 @@ import { PackageReducedPrice } from '../package-reduced-price/package-reduced-pr
 import {
   intermediatePricesOf,
   maxPrices,
+  maxPublicHolidays,
   periodPricesOf,
   reducedPricesOf,
   sectorPricesOf,
+  vatRange,
 } from '../price-limits';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
@@ -136,6 +149,8 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
       );
     });
     metadata(path.includedServices, MAX_LENGTH, () => MAX_PACKAGE_INCLUDED_SERVICES_LENGTH);
+    vatRange(path.vatRate);
+    maxPublicHolidays(path.publicHolidayDates);
     maxPrices(path.sectorPrices, sectorPricesOf);
     maxPrices(path.periodPrices, periodPricesOf);
     maxPrices(path.intermediatePrices, intermediatePricesOf);
@@ -161,8 +176,13 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   /** The form with nothing typed: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(comparableJson(newDraft()));
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
-  protected readonly sectorsVersion = signal(0);
-  /** The articles of the backend, each with its items in the warehouse. */
+  /** The sectors of Info Generali and of the price rows, read once per opening. */
+  private sectorRead: Observable<ComboboxItem[]> = EMPTY;
+  protected readonly sectorList = new DropdownList(() => this.sectorRead, this.errorText);
+  protected readonly sectorAreaList = new DropdownList(
+    () => this.sectorService.sectorAreaCombobox(),
+    this.errorText,
+  );
   protected readonly articles = signal<readonly PackageArticle[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** The rows of the price list are read once per opening, the first time its tab is shown. */
@@ -170,7 +190,6 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isFetching = signal(false);
   protected readonly isFetchingArticles = signal(false);
   private readonly areArticlesLoaded = signal(false);
-  /** The name of the package in the main language. */
   protected readonly packageName = computed(
     () =>
       this.draft()
@@ -187,8 +206,16 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
       this.reducedSeasonalPriceIndex() !== null,
   );
   private readonly error = signal<ApiProblem | null>(null);
+  private readonly articlesError = signal<ApiProblem | null>(null);
+  private readonly priceListError = signal<ApiProblem | null>(null);
+  /** The error of the save, or else the one of what the shown tab reads. */
+  private readonly shownError = computed(
+    () =>
+      this.error() ??
+      (this.selectedTab() === PanelTab.GeneralInfo ? this.articlesError() : this.priceListError()),
+  );
   protected readonly errorMessage = toSignal(
-    toObservable(this.error).pipe(
+    toObservable(this.shownError).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
     ),
     { initialValue: null },
@@ -252,7 +279,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
           problem.code === ApiErrorCode.CatalogSectorNotFound ||
           problem.code === ApiErrorCode.MapSpotNotFound
         ) {
-          this.sectorsVersion.update((version) => version + 1);
+          this.loadSectors();
         }
         if (problem.code === ApiErrorCode.InventoryItemNotFound) {
           this.refreshArticles();
@@ -270,6 +297,19 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
         this.isSaving.set(false);
       }
     });
+  }
+
+  private loadSectors(): void {
+    if (!this.auth.user()?.propertyId) {
+      return;
+    }
+    this.sectorRead = this.readSectors();
+    this.sectorList.load();
+    this.sectorAreaList.load();
+  }
+
+  private readSectors(): Observable<ComboboxItem[]> {
+    return this.sectorService.sectorCombobox().pipe(shareReplay({ bufferSize: 1, refCount: true }));
   }
 
   /** The tab of the first wrong field, where its error shows. */
@@ -290,6 +330,8 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.fetching?.unsubscribe();
     this.isFetching.set(false);
     this.error.set(null);
+    this.articlesError.set(null);
+    this.priceListError.set(null);
     this.draft.set(newDraft());
     this.draftForm().reset();
     this.pristine.set(comparableJson(newDraft()));
@@ -304,6 +346,9 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     this.periods.set([]);
     this.isPriceListLoaded.set(false);
     this.selectedTab.set(PanelTab.GeneralInfo);
+    this.sectorList.clear();
+    this.sectorAreaList.clear();
+    this.loadSectors();
   }
 
   /** What the warehouse has for the package; a chosen item that is no longer there goes away. */
@@ -311,6 +356,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     if (!this.auth.user()?.propertyId || this.isFetchingArticles()) {
       return;
     }
+    this.articlesError.set(null);
     this.isFetchingArticles.set(true);
     this.fetchingArticles = this.priceLists
       .packageArticles()
@@ -322,7 +368,7 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
           this.articles.set(articles);
           this.areArticlesLoaded.set(true);
         },
-        error: (error: unknown) => this.error.set(toApiProblem(error)),
+        error: (error: unknown) => this.articlesError.set(toApiProblem(error)),
       });
   }
 
@@ -331,16 +377,16 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
     if (!this.auth.user()?.propertyId || this.isFetching()) {
       return;
     }
-    this.error.set(null);
+    this.priceListError.set(null);
     this.isFetching.set(true);
-    this.fetching = forkJoin([this.sectorService.sectorCombobox(), this.seasons.periodList(false)])
+    this.fetching = forkJoin([this.sectorRead, this.seasons.periodList(false)])
       .pipe(finalize(() => this.isFetching.set(false)))
       .subscribe({
         next: ([sectors, periods]) => {
           this.setPriceRows(sectors, periods);
           this.isPriceListLoaded.set(true);
         },
-        error: (error: unknown) => this.error.set(toApiProblem(error)),
+        error: (error: unknown) => this.priceListError.set(toApiProblem(error)),
       });
   }
 
@@ -366,6 +412,8 @@ export class PackageAddItemPanel implements UnsavedChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
+    this.sectorList.destroy();
+    this.sectorAreaList.destroy();
     this.fetching?.unsubscribe();
     this.fetchingArticles?.unsubscribe();
   }

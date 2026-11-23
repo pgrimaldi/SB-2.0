@@ -125,7 +125,7 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   per un `computed`. I codici non ancora tradotti mostrano `error.unknown`.
 - `args` riempie i segnaposto: `{{name}}` nei testi semplici; `{date, date, long}`, `{amount, number, currency}`,
   `{count, plural, …}` per date, importi e plurali (vedi `traduzioni-e-lingue.md`).
-- `toApiProblem` tiene solo `args` semplici (testi fino a 200 caratteri e numeri). Un elenco di testi o di numeri (es. i
+- `toApiProblem` tiene solo `args` semplici (testi e numeri; un testo oltre 200 caratteri si taglia con "…"). Un elenco di testi o di numeri (es. i
   nomi dei listini di `pricing.period_in_use`, le aliquote di `catalog.vat_rate_not_allowed`) diventa un testo solo,
   separato da virgole: i primi 20, poi "…", tagliato con "…" oltre i 200 caratteri.
 - **Il frontend riflette gli errori del backend**: per ogni API si leggono nel codice del backend tutti gli errori che
@@ -195,7 +195,7 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   per pagina e restano nella cache della pagina (es. `BathhouseConfigurationCacheBehaviour.countries()`).
 - Ogni tendina che legge la sua lista da un'API usa la classe unica `DropdownList` (`behaviours/forms/dropdown-list.ts`),
   creata con la funzione che chiama l'API, `ErrorTextBehaviour` e, se serve, una funzione da eseguire dopo ogni
-  risposta (es. scegliere la prima voce): `items()` le voci, `loadError()` il testo dell'errore, `load()` la lettura,
+  risposta (es. scegliere la prima voce): `items()` le voci, `isRead()` se sono di una risposta, `loadError()` il testo dell'errore, `load()` la lettura,
   `retry()` la rilettura dopo un errore, `clear()` al reset, `destroy()` in `ngOnDestroy`. Mai segnali e subscription
   scritti a mano per una tendina.
 - Se la lettura fallisce, sotto il campo compare il messaggio dell'errore (`[error]="<lista>.loadError() ?? ..."`,

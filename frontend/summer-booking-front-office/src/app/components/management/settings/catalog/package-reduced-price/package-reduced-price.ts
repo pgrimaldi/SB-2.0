@@ -17,6 +17,7 @@ import { ValidationTextBehaviour } from '../../../../../behaviours/validation/va
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { PackageReducedSeasonalPrice } from '../../../../../entities/settings/catalog/package-reduced-seasonal-price';
 import { PackageSectorPrice } from '../../../../../entities/settings/catalog/package-sector-price';
+import { OVERLAP_KIND } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
@@ -24,11 +25,7 @@ import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion
 import { FilledDateField } from '../../../../shared/ui/inputs/filled-date-field/filled-date-field';
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledTextField } from '../../../../shared/ui/inputs/filled-text-field/filled-text-field';
-
-/** The fields of a sector row that hold a price. */
-type SectorPriceField = {
-  [K in keyof PackageSectorPrice]: PackageSectorPrice[K] extends number | null ? K : never;
-}[keyof PackageSectorPrice];
+import { PriceField } from '../price-field';
 
 const PRICE_LIST_KEY = 'management.settings.catalog.price_list';
 
@@ -60,6 +57,8 @@ export class PackageReducedPrice {
   readonly editedIndex = model.required<number | null>();
   /** The sectors of the property: a row each in every section, as in Prezzi stagionali. */
   readonly sectors = input<readonly ComboboxItem[]>([]);
+  /** Whether the sectors have been read: until then a price cannot be added, as it would have no rows. */
+  readonly isLoaded = input(false);
 
   private readonly dateLanguage = inject(DateLanguageBehaviour);
   protected readonly validationText = inject(ValidationTextBehaviour);
@@ -73,7 +72,10 @@ export class PackageReducedPrice {
   protected readonly deleteIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
   /** [before the title, arrow]. */
   protected readonly sectionIcons = ['', '/assets/images/GeneralIcon_ChevronRight.svg'] as const;
-  protected readonly seasonalColumns: readonly { field: SectorPriceField; label: string }[] = [
+  protected readonly seasonalColumns: readonly {
+    field: PriceField<PackageSectorPrice>;
+    label: string;
+  }[] = [
     { field: 'seasonalHalfDayPrice', label: `${PRICE_LIST_KEY}.seasonal_half_day` },
     { field: 'seasonalPrice', label: `${PRICE_LIST_KEY}.seasonal` },
   ];
@@ -102,7 +104,7 @@ export class PackageReducedPrice {
   protected readonly isOverlapping = computed(() =>
     this.draftForm()()
       .errors()
-      .some(({ kind }) => kind === 'overlap'),
+      .some(({ kind }) => kind === OVERLAP_KIND),
   );
   private readonly dayFormat = computed(
     () =>

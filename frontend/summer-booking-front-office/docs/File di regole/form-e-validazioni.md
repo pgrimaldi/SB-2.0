@@ -54,7 +54,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
   `management.settings.warehouse.form.field_names.quantity` = "della quantità").
 - Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua. Un'eccezione: nei pannelli
-  di modifica di Servizi, premendo Modifica, i campi letti già sbagliati si segnano subito
+  di modifica di Servizi e Listino, premendo Modifica, i campi letti già sbagliati si segnano subito
   (`draftForm().markAsTouched()` in `startEdit`), perché tengono spento Salva.
 - Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con
   `text(field, chiaveNomeCampo)`.
@@ -128,7 +128,7 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   - un popup o pannello sempre modificabile si chiude e i dati nuovi si vedono riaprendolo; se è aperto da una tabella,
     la pagina la ricarica (`reloadIfChanged` sull'uscita `failed`);
   - un form con il bottone Modifica rilegge i dati e torna in sola lettura, così Salva non si preme per sbaglio; se è aperto
-    da una tabella la pagina ricarica anche quella (`reloadIfChanged`). Nei pannelli di Servizi l'avviso compare dopo la
+    da una tabella la pagina ricarica anche quella (`reloadIfChanged`). Nei pannelli di Servizi e Listino l'avviso compare dopo la
     rilettura; se la rilettura fallisce compare solo il suo errore;
   - un popup senza una lettura sua (Settori e file, periodi e intervalli di Stagioni e periodi) si chiude e la lista si
     ricarica;

@@ -3,7 +3,7 @@
   [appearance]="ButtonAppearance.Light"
   [size]="ButtonSize.Small"
   [pathIcon]="addIcon"
-  [disabled]="isOpen() || isLocked()"
+  [disabled]="isOpen() || isLocked() || !isLoaded()"
   (clicked)="add()"
 >
   {{ 'management.settings.catalog.packages.form.reduced_seasonal_price' | translate }}
@@ -81,6 +81,7 @@
   @if (index !== editedIndex()) {
     @let price = reduced().value();
     <app-expansion-panel
+      #section
       class="package__reduced__price__section"
       [title]="
         'management.settings.catalog.packages.form.reduced_seasonal.section_title'
@@ -110,37 +111,39 @@
         />
       </span>
       @if (sectors().length) {
-        <div class="package__reduced__price__grid">
-          <table class="package__reduced__price__table">
-            <thead>
-              <tr>
-                <th></th>
-                @for (column of seasonalColumns; track column.field) {
-                  <th scope="col">{{ column.label | translate }}</th>
+        @if (section.isExpanded()) {
+          <div class="package__reduced__price__grid">
+            <table class="package__reduced__price__table">
+              <thead>
+                <tr>
+                  <th></th>
+                  @for (column of seasonalColumns; track column.field) {
+                    <th scope="col">{{ column.label | translate }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of reduced.sectorPrices; track row) {
+                  @if (isShownSector(row.idSector().value())) {
+                    <tr>
+                      <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
+                      @for (column of seasonalColumns; track column.field) {
+                        <td>
+                          <app-filled-number-field
+                            [isDecimal]="true"
+                            [isCurrency]="true"
+                            [formField]="row[column.field]"
+                          />
+                        </td>
+                      }
+                    </tr>
+                  }
                 }
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of reduced.sectorPrices; track row) {
-                @if (isShownSector(row.idSector().value())) {
-                  <tr>
-                    <th scope="row">{{ sectorName(row.idSector().value()) }}</th>
-                    @for (column of seasonalColumns; track column.field) {
-                      <td>
-                        <app-filled-number-field
-                          [isDecimal]="true"
-                          [isCurrency]="true"
-                          [formField]="row[column.field]"
-                        />
-                      </td>
-                    }
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-      } @else {
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else if (isLoaded()) {
         <p class="package__reduced__price__empty">
           {{ 'management.settings.catalog.price_list.no_sectors' | translate }}
         </p>

@@ -13,6 +13,7 @@ export const MAX_PACKAGE_PEOPLE_QUANTITY = 15;
 export const MAX_PACKAGE_ARTICLE_QUANTITY = 10;
 export const MAX_PACKAGE_INCLUDED_SERVICES_LENGTH = 1000;
 export const MAX_PRICE_LIST_PRICE = 1_000_000;
+export const MAX_PUBLIC_HOLIDAY_QUANTITY = 100;
 
 export class PackageAddItemRequest {
   translations: PackageTranslation[] = [];

@@ -9,6 +9,7 @@
 <app-expansion-panel
   [title]="'management.settings.catalog.packages.form.other_languages' | translate"
   [pathIcon]="languagesIcons"
+  [(isExpanded)]="areLanguagesExpanded"
 >
   <div class="package__general__info__tab__languages">
     @for (translation of otherTranslations(); track translation) {
@@ -66,12 +67,12 @@
           : 'management.settings.catalog.packages.form.articles.unavailable'
         ) | translate
       "
-      [options]="articleOptions(row)"
-      [value]="optionOf(articleQuantity(row))"
-      [disabled]="!row.isAvailable && articleQuantity(row) === null"
+      [options]="row.options"
+      [value]="optionOf(row.quantity)"
+      [disabled]="!row.isAvailable && row.quantity === null"
       [readonly]="form().items().readonly()"
       [error]="
-        !row.isAvailable && articleQuantity(row) !== null
+        !row.isAvailable && row.quantity !== null
           ? ('management.settings.catalog.packages.form.articles.unavailable' | translate)
           : null
       "
@@ -91,22 +92,26 @@
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.enabled_areas' | translate"
   [placeholder]="
-    sectorAreas.loadError() ? '' : ('management.settings.catalog.packages.form.choose' | translate)
+    sectorAreas().loadError()
+      ? ''
+      : ('management.settings.catalog.packages.form.choose' | translate)
   "
   [options]="sectorAreaOptions()"
   [formField]="form().idSectorAreas"
-  [error]="sectorAreas.loadError() ?? validationText.text(form().idSectorAreas)"
-  (openRequest)="sectorAreas.retry()"
+  [error]="sectorAreas().loadError() ?? validationText.text(form().idSectorAreas)"
+  (openRequest)="sectorAreas().retry()"
 />
 <app-filled-multi-select
   [label]="'management.settings.catalog.packages.form.sectors' | translate"
   [placeholder]="
-    sectors.loadError() ? '' : ('management.settings.catalog.packages.form.all_sectors' | translate)
+    sectors().loadError()
+      ? ''
+      : ('management.settings.catalog.packages.form.all_sectors' | translate)
   "
   [options]="sectorOptions()"
   [formField]="form().idSectors"
-  [error]="sectors.loadError() ?? validationText.text(form().idSectors)"
-  (openRequest)="sectors.retry()"
+  [error]="sectors().loadError() ?? validationText.text(form().idSectors)"
+  (openRequest)="sectors().retry()"
 />
 
 <div class="package__general__info__tab__options">

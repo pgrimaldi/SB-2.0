@@ -58,7 +58,14 @@ import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-se
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
-import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
+import {
+  intermediatePricesOf,
+  maxPrices,
+  maxPublicHolidays,
+  periodPricesOf,
+  sectorPricesOf,
+  vatRange,
+} from '../price-limits';
 import { optionsWithMissing } from '../options-with-missing';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { byIntermediatePrice } from '../intermediate-prices/intermediate-prices';
@@ -126,6 +133,8 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.isPublicHolidaysIncluded, () => this.isLocked());
     disabled(path.isIntermediatePricesIncluded, () => this.isLocked());
     required(path.idArticle);
+    vatRange(path.vatRate);
+    maxPublicHolidays(path.publicHolidayDates);
     maxPrices(path.sectorPrices, sectorPricesOf);
     maxPrices(path.periodPrices, periodPricesOf);
     maxPrices(path.intermediatePrices, intermediatePricesOf);
@@ -141,9 +150,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly articles = new DropdownList(
     () => this.warehouse.articleCombobox(),
     this.errorText,
-    () => this.areArticlesRead.set(true),
   );
-  private readonly areArticlesRead = signal(false);
   /** The name of the chosen article, in the rows of the intermediate prices. */
   protected readonly articleName = computed(
     () => this.articles.items().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
@@ -152,24 +159,18 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly articleOptions = computed<readonly SelectOption[]>(() => {
     const { idArticle } = this.draft();
     return optionsWithMissing(
-      this.articles.items(),
-      this.areArticlesRead() && !this.articles.loadError() && idArticle !== null ? [idArticle] : [],
+      this.articles,
+      idArticle === null ? [] : [idArticle],
       this.texts()?.missing_article ?? '',
     );
   });
   protected readonly packages = new DropdownList(
     () => this.priceLists.packageCombobox(),
     this.errorText,
-    () => this.arePackagesRead.set(true),
   );
-  private readonly arePackagesRead = signal(false);
   /** Also the chosen ones that are no longer there, for the user to take away. */
   protected readonly packageOptions = computed<readonly SelectOption[]>(() =>
-    optionsWithMissing(
-      this.packages.items(),
-      this.arePackagesRead() && !this.packages.loadError() ? this.draft().idPackages : [],
-      this.texts()?.missing_package ?? '',
-    ),
+    optionsWithMissing(this.packages, this.draft().idPackages, this.texts()?.missing_package ?? ''),
   );
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
@@ -186,6 +187,8 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
   private version: string | null = null;
+  /** The save found a newer version: the popup shows once the item has been read again. */
+  private isConflictPending = false;
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -199,12 +202,14 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     effect(() => {
       if (this.open()) {
         untracked(() => this.reset());
+      } else {
+        untracked(() => this.stopLoadings());
       }
     });
   }
 
   hasUnsavedChanges(): boolean {
-    return this.open() && comparableJson(this.draft()) !== comparableJson(this.pristine());
+    return this.open() && comparable(this.draft()) !== comparable(this.pristine());
   }
 
   protected startEdit(): void {
@@ -213,6 +218,8 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.error.set(null);
     this.isEditing.set(true);
+    // What was read already wrong shows at once: it keeps Salva off.
+    this.draftForm().markAsTouched();
   }
 
   /** Annulla: the item goes back to the values read, only to look at. */
@@ -246,8 +253,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
         if (problem.code === ApiErrorCode.ResourceVersionConflict) {
-          this.isConflictShown.set(true);
-          this.reset();
+          this.reset(true);
           return undefined;
         }
         if (problem.code === ApiErrorCode.InventoryItemNotFound) {
@@ -293,9 +299,16 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     this.open.set(true);
   }
 
-  private reset(): void {
+  /** Closed while the item is being read: its answer, or its error, is not wanted any more. */
+  private stopLoadings(): void {
     this.loadings.unsubscribe();
     this.loadings = new Subscription();
+    this.isConflictPending = false;
+  }
+
+  private reset(isConflictPending = false): void {
+    this.stopLoadings();
+    this.isConflictPending = isConflictPending;
     this.isLoading.set(false);
     this.isLoaded.set(false);
     this.error.set(null);
@@ -305,9 +318,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     this.pristine.set(new AdditionalItemAddItemRequest());
     this.draftForm().reset();
     this.articles.clear();
-    this.areArticlesRead.set(false);
     this.packages.clear();
-    this.arePackagesRead.set(false);
     this.sectors.set([]);
     this.periods.set([]);
     this.hiddenSectorPrices.set([]);
@@ -336,9 +347,14 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
           next: ({ item, sectors, periods }) => {
             this.setLoaded(item, sectors, periods);
             this.isLoaded.set(true);
+            if (this.isConflictPending) {
+              this.isConflictPending = false;
+              this.isConflictShown.set(true);
+            }
           },
           error: (error: unknown) => {
             const problem = toApiProblem(error);
+            this.isConflictPending = false;
             this.failed.emit(problem);
             this.readError.set(problem);
             this.open.set(false);
@@ -416,4 +432,9 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
     this.articles.destroy();
     this.packages.destroy();
   }
+}
+
+/** The order of the packages does not count as a change. */
+function comparable(values: AdditionalItemAddItemRequest): string {
+  return comparableJson({ ...values, idPackages: [...values.idPackages].sort() });
 }

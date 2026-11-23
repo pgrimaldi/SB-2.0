@@ -45,7 +45,14 @@ import { FilledMultiSelect } from '../../../../shared/ui/selects/filled-multi-se
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
-import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
+import {
+  intermediatePricesOf,
+  maxPrices,
+  maxPublicHolidays,
+  periodPricesOf,
+  sectorPricesOf,
+  vatRange,
+} from '../price-limits';
 import { optionsWithMissing } from '../options-with-missing';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
@@ -90,6 +97,8 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly draft = signal(new AdditionalItemAddItemRequest());
   protected readonly draftForm = form(this.draft, (path) => {
     required(path.idArticle);
+    vatRange(path.vatRate);
+    maxPublicHolidays(path.publicHolidayDates);
     maxPrices(path.sectorPrices, sectorPricesOf);
     maxPrices(path.periodPrices, periodPricesOf);
     maxPrices(path.intermediatePrices, intermediatePricesOf);
@@ -105,9 +114,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly articles = new DropdownList(
     () => this.warehouse.articleCombobox(),
     this.errorText,
-    () => this.areArticlesRead.set(true),
   );
-  private readonly areArticlesRead = signal(false);
   /** The name of the chosen article, in the rows of the intermediate prices. */
   protected readonly articleName = computed(
     () => this.articles.items().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
@@ -116,24 +123,18 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly articleOptions = computed<readonly SelectOption[]>(() => {
     const { idArticle } = this.draft();
     return optionsWithMissing(
-      this.articles.items(),
-      this.areArticlesRead() && !this.articles.loadError() && idArticle !== null ? [idArticle] : [],
+      this.articles,
+      idArticle === null ? [] : [idArticle],
       this.texts()?.missing_article ?? '',
     );
   });
   protected readonly packages = new DropdownList(
     () => this.priceLists.packageCombobox(),
     this.errorText,
-    () => this.arePackagesRead.set(true),
   );
-  private readonly arePackagesRead = signal(false);
   /** Also the chosen ones that are no longer there, for the user to take away. */
   protected readonly packageOptions = computed<readonly SelectOption[]>(() =>
-    optionsWithMissing(
-      this.packages.items(),
-      this.arePackagesRead() && !this.packages.loadError() ? this.draft().idPackages : [],
-      this.texts()?.missing_package ?? '',
-    ),
+    optionsWithMissing(this.packages, this.draft().idPackages, this.texts()?.missing_package ?? ''),
   );
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
@@ -141,7 +142,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly isFetching = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly isSaveDisabled = computed(
-    () => this.isFetching() || this.draftForm().invalid(),
+    () => this.isFetching() || !this.isPriceListLoaded() || this.draftForm().invalid(),
   );
   private readonly error = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
@@ -219,9 +220,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draftForm().reset();
     this.pristine.set(comparableJson(new AdditionalItemAddItemRequest()));
     this.articles.clear();
-    this.areArticlesRead.set(false);
     this.packages.clear();
-    this.arePackagesRead.set(false);
     this.sectors.set([]);
     this.periods.set([]);
     this.isPriceListLoaded.set(false);

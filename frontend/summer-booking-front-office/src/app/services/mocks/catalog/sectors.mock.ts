@@ -18,6 +18,7 @@ import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 import { sectorLimits } from './catalog.mock';
+import { priceListQuantityOfSector } from './price-lists.mock';
 import { SECTOR_AREAS, SECTORS, SectorRow, SectorUsage } from './sectors-data.mock';
 import { naturalOrder } from './service-tables.mock';
 
@@ -206,10 +207,10 @@ export const deleteSectorsMock = (
 function usageOf(sector: SectorRow): SectorUsage {
   return {
     mapSpots: 0,
-    priceLists: 0,
     stayLimits: 0,
     discounts: 0,
     ...sector.usage,
+    priceLists: priceListQuantityOfSector(sector.idSector) || (sector.usage?.priceLists ?? 0),
     ...sectorLimits(sector.idSector ?? ''),
   };
 }

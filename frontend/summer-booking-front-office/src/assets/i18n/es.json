@@ -1794,11 +1794,12 @@
             "choose": "Seleccionar",
             "max_additional_items": "Número máx. de artículos adicionales",
             "max_people": "Número máx. de personas",
+            "no_limit": "Sin límite",
             "articles": {
               "title": "Artículos del paquete",
               "none": "Ninguno",
               "unavailable": "Sin existencias",
-              "unavailable_note": "Los artículos en gris no tienen elementos en el almacén.",
+              "unavailable_note": "Los artículos en gris no están en el almacén.",
               "names": {
                 "umbrella": "Sombrilla",
                 "sunbed": "Tumbona",
@@ -1916,6 +1917,8 @@
           "no_periods": "Los precios por periodo necesitan al menos un sector o fila y un periodo de la temporada actual.",
           "vat": "IVA (%)",
           "calculation_method": "Cálculo del precio",
+          "no_calculation": "Ningún cálculo",
+          "no_setting": "Ningún ajuste",
           "calculation_methods": {
             "proportional": "Precio proporcional",
             "daily": "Precio diario",
@@ -2113,6 +2116,12 @@
     "catalog": {
       "price": {
         "max": "Un precio supera el máximo permitido de {max, number, currency}."
+      },
+      "vat": {
+        "range": "El IVA debe ser mayor que 0 y menor que 100."
+      },
+      "public_holidays": {
+        "max": "Como máximo {{max}} festivos."
       }
     },
     "services": {

@@ -1794,11 +1794,12 @@
             "choose": "Select",
             "max_additional_items": "Max number of additional items",
             "max_people": "Max number of people",
+            "no_limit": "No limit",
             "articles": {
               "title": "Items in the package",
               "none": "None",
               "unavailable": "Not in stock",
-              "unavailable_note": "The articles in grey have no items in the warehouse.",
+              "unavailable_note": "The items in grey are not in the warehouse.",
               "names": {
                 "umbrella": "Umbrella",
                 "sunbed": "Sunbed",
@@ -1916,6 +1917,8 @@
           "no_periods": "Prices per period need at least one sector or row and one period of the current season.",
           "vat": "VAT (%)",
           "calculation_method": "Price calculation",
+          "no_calculation": "No calculation",
+          "no_setting": "No setting",
           "calculation_methods": {
             "proportional": "Proportional price",
             "daily": "Daily price",
@@ -2113,6 +2116,12 @@
     "catalog": {
       "price": {
         "max": "A price exceeds the allowed maximum of {max, number, currency}."
+      },
+      "vat": {
+        "range": "VAT must be more than 0 and less than 100."
+      },
+      "public_holidays": {
+        "max": "At most {{max}} public holidays."
       }
     },
     "services": {

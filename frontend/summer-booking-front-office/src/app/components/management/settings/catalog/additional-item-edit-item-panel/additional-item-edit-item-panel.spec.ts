@@ -3,9 +3,8 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, map, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
-import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { AdditionalItemSelectedItem } from '../../../../../entities/settings/catalog/additional-item-selected-item';
 import { PriceListService } from '../../../../../services/api/catalog/price-list.service';
@@ -17,7 +16,7 @@ import { AdditionalItemEditItemPanel } from './additional-item-edit-item-panel';
 describe('AdditionalItemEditItemPanel', () => {
   const setup = async (
     updateAdditionalItem = vi.fn((): Observable<string | null> => of('v2')),
-    packages = [{ id: 'k1', value: 'Ombrellone' }] as ComboboxItem[],
+    read = (item: AdditionalItemSelectedItem): Observable<AdditionalItemSelectedItem> => of(item),
   ) => {
     // jsdom has no matchMedia.
     vi.stubGlobal(
@@ -30,7 +29,7 @@ describe('AdditionalItemEditItemPanel', () => {
         removeListener: () => undefined,
       })),
     );
-    const packageCombobox = vi.fn(() => of(packages));
+    const packageCombobox = vi.fn(() => of([{ id: 'k1', value: 'Ombrellone' }]));
     const articleCombobox = vi.fn(() => of([{ id: 'r1', value: 'Lettino' }]));
     TestBed.configureTestingModule({
       providers: [
@@ -44,7 +43,7 @@ describe('AdditionalItemEditItemPanel', () => {
             updateAdditionalItem,
             packageCombobox,
             selectedAdditionalItem: () =>
-              of(
+              read(
                 Object.assign(new AdditionalItemSelectedItem(), {
                   idAdditionalItem: 'a1',
                   idArticle: 'r1',
@@ -91,7 +90,11 @@ describe('AdditionalItemEditItemPanel', () => {
       await new Promise((resolve) => setTimeout(resolve));
       await fixture.whenStable();
     };
-    return { panel, save, packageCombobox, articleCombobox, updateAdditionalItem };
+    const shown = async (open: boolean) => {
+      fixture.componentRef.setInput('open', open);
+      await fixture.whenStable();
+    };
+    return { panel, save, shown, packageCombobox, articleCombobox, updateAdditionalItem };
   };
 
   const failing = (code: ApiErrorCode, status: number, args?: object) =>
@@ -110,6 +113,31 @@ describe('AdditionalItemEditItemPanel', () => {
       expect.objectContaining({ idArticle: 'r1', vatRate: 22 }),
       'v1',
     );
+  });
+
+  it('should forget the read of a panel already closed', async () => {
+    const reading = new Subject<AdditionalItemSelectedItem>();
+    const { panel, shown } = await setup(undefined, () => reading);
+
+    await shown(false);
+    reading.error(new HttpErrorResponse({ status: 500 }));
+    expect(panel['readError']()).toBeNull();
+  });
+
+  it('should show the version conflict only once the item has been read again', async () => {
+    const again = new Subject<AdditionalItemSelectedItem>();
+    const reads: ((item: AdditionalItemSelectedItem) => Observable<AdditionalItemSelectedItem>)[] =
+      [(item) => of(item), (item) => again.pipe(map(() => item))];
+    const { panel, save } = await setup(
+      failing(ApiErrorCode.ResourceVersionConflict, 409),
+      (item) => reads.shift()?.(item) ?? of(item),
+    );
+
+    await save();
+    expect(panel['isConflictShown']()).toBe(false);
+    again.next(new AdditionalItemSelectedItem());
+    again.complete();
+    expect(panel['isConflictShown']()).toBe(true);
   });
 
   it('should keep a deleted package among the chosen ones, to be taken away', async () => {

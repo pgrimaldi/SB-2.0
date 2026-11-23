@@ -1794,6 +1794,7 @@
             "choose": "选择",
             "max_additional_items": "附加物品最大数量",
             "max_people": "最多人数",
+            "no_limit": "不限",
             "articles": {
               "title": "套餐包含的物品",
               "none": "无",
@@ -1916,6 +1917,8 @@
           "no_periods": "按时段定价至少需要一个区域或排，以及本季的一个时段。",
           "vat": "增值税 (%)",
           "calculation_method": "价格计算",
+          "no_calculation": "无计算",
+          "no_setting": "无设置",
           "calculation_methods": {
             "proportional": "按比例价",
             "daily": "日价",
@@ -2113,6 +2116,12 @@
     "catalog": {
       "price": {
         "max": "有价格超过了允许的最高值 {max, number, currency}。"
+      },
+      "vat": {
+        "range": "增值税必须大于 0 且小于 100。"
+      },
+      "public_holidays": {
+        "max": "最多 {{max}} 个节假日。"
       }
     },
     "services": {

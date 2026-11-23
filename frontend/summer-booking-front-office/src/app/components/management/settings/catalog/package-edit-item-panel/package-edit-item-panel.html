@@ -12,7 +12,9 @@
         [attr.inert]="isLoading() ? '' : null"
         [form]="draftForm"
         [mainLanguage]="mainLanguage()"
-        [sectorsVersion]="sectorsVersion()"
+        [sectors]="sectorList"
+        [sectorAreas]="sectorAreaList"
+        [isPanelOpen]="open()"
         [articles]="articles()"
       />
     } @else if (selectedTab() === PanelTab.PriceList) {
@@ -30,6 +32,7 @@
           [draftForm]="reducedSeasonalPriceForm"
           [(editedIndex)]="reducedSeasonalPriceIndex"
           [sectors]="sectors()"
+          [isLoaded]="isLoaded()"
         />
       </app-price-list-tab>
     }

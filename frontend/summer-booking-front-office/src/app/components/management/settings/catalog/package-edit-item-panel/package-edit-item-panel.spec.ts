@@ -3,17 +3,19 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, map, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { InventoryArticle } from '../../../../../entities/enums/inventory-article';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { PackageArticle } from '../../../../../entities/settings/catalog/package-article';
+import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
 import { PackageSelectedItem } from '../../../../../entities/settings/catalog/package-selected-item';
 import { Language } from '../../../../../entities/shared/language';
 import { PriceListService } from '../../../../../services/api/catalog/price-list.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
+import { PanelTab } from '../package-panel-tabs';
 import { PackageEditItemPanel } from './package-edit-item-panel';
 
 describe('PackageEditItemPanel', () => {
@@ -21,6 +23,7 @@ describe('PackageEditItemPanel', () => {
     updatePackage = vi.fn((): Observable<string | null> => of('v2')),
     selected = {} as Partial<PackageSelectedItem>,
     articles = [] as PackageArticle[],
+    read = (item: PackageSelectedItem): Observable<PackageSelectedItem> => of(item),
   } = {}) => {
     // jsdom has no matchMedia.
     vi.stubGlobal(
@@ -47,7 +50,7 @@ describe('PackageEditItemPanel', () => {
             updatePackage,
             packageArticles: () => of(articles),
             selectedPackage: () =>
-              of(
+              read(
                 Object.assign(new PackageSelectedItem(), {
                   idPackage: 'k1',
                   translations: [{ language: Language.It, packageName: 'Ombrellone' }],
@@ -71,6 +74,7 @@ describe('PackageEditItemPanel', () => {
               form: {
                 tabs: { general_info: 'Info Generali', price_list: 'Listino' },
                 missing_sector: 'Settore/fila non più disponibile',
+                articles: { none: 'Nessuno' },
               },
             },
           },
@@ -88,7 +92,11 @@ describe('PackageEditItemPanel', () => {
       await new Promise((resolve) => setTimeout(resolve));
       await fixture.whenStable();
     };
-    return { panel, save, sectorCombobox, updatePackage };
+    const shown = async (open: boolean) => {
+      fixture.componentRef.setInput('open', open);
+      await fixture.whenStable();
+    };
+    return { panel, save, shown, sectorCombobox, updatePackage };
   };
 
   afterEach(() =>
@@ -145,6 +153,101 @@ describe('PackageEditItemPanel', () => {
     expect(panel['isSaveDisabled']()).toBe(false);
     expect(panel['draft']().vatRate).toBe(20);
     expect(panel.hasUnsavedChanges()).toBe(false);
+  });
+
+  const conflict = () =>
+    vi.fn(() =>
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { status: 409, code: ApiErrorCode.ResourceVersionConflict },
+          }),
+      ),
+    );
+
+  it('should read the sectors once per opening', async () => {
+    const { panel, shown, sectorCombobox } = await setup();
+
+    panel['selectedTab'].set(PanelTab.PriceList);
+    await shown(true);
+    panel['selectedTab'].set(PanelTab.GeneralInfo);
+    await shown(true);
+    expect(sectorCombobox).toHaveBeenCalledOnce();
+    await shown(false);
+    await shown(true);
+    expect(sectorCombobox).toHaveBeenCalledTimes(2);
+  });
+
+  it('should forget the read of a panel already closed', async () => {
+    const reading = new Subject<PackageSelectedItem>();
+    const { panel, shown } = await setup({ read: () => reading });
+
+    await shown(false);
+    reading.error(new HttpErrorResponse({ status: 500 }));
+    expect(panel['readError']()).toBeNull();
+  });
+
+  it('should show the version conflict only once the package has been read again', async () => {
+    const again = new Subject<PackageSelectedItem>();
+    const reads: ((item: PackageSelectedItem) => Observable<PackageSelectedItem>)[] = [
+      (item) => of(item),
+      (item) => again.pipe(map(() => item)),
+    ];
+    const { panel, save } = await setup({
+      updatePackage: conflict(),
+      read: (item) => reads.shift()?.(item) ?? of(item),
+    });
+
+    panel['startEdit']();
+    panel['selectedTab'].set(PanelTab.PriceList);
+    await save();
+    expect(panel['isConflictShown']()).toBe(false);
+    again.next(new PackageSelectedItem());
+    again.complete();
+    expect(panel['isConflictShown']()).toBe(true);
+    expect(panel['selectedTab']()).toBe(PanelTab.PriceList);
+    expect(panel['isEditing']()).toBe(false);
+  });
+
+  it('should show only the read error when the read after a version conflict fails', async () => {
+    const reads: ((item: PackageSelectedItem) => Observable<PackageSelectedItem>)[] = [
+      (item) => of(item),
+      () => throwError(() => new HttpErrorResponse({ status: 500 })),
+    ];
+    const { panel, save } = await setup({
+      updatePackage: conflict(),
+      read: (item) => reads.shift()?.(item) ?? of(item),
+    });
+
+    panel['startEdit']();
+    await save();
+    expect(panel['isConflictShown']()).toBe(false);
+    expect(panel['readError']()).not.toBeNull();
+    expect(panel.open()).toBe(false);
+  });
+
+  it('should not count the order of the sectors as a change', async () => {
+    const { panel } = await setup({ selected: { idSectors: ['s2', 's1'] } });
+
+    panel['draftForm'].idSectors().value.set(['s1', 's2']);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+  });
+
+  it('should send back the prices that have no row', async () => {
+    const { panel, save, updatePackage } = await setup({
+      selected: {
+        periodPrices: [
+          Object.assign(new PackagePeriodPrice(), { idSector: null, idPeriod: 0, dailyPrice: 9 }),
+        ],
+      },
+    });
+
+    panel['startEdit']();
+    await save();
+    expect(updatePackage.mock.calls).toMatchObject([
+      ['k1', { periodPrices: [{ idSector: null, idPeriod: 0, dailyPrice: 9 }] }, 'v1'],
+    ]);
   });
 
   it('should send back the items of the package that have no row', async () => {

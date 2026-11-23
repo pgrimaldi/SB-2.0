@@ -100,7 +100,6 @@ describe('toApiProblem', () => {
         args: {
           date: '2026-12-25',
           nested: { evil: true },
-          huge: 'x'.repeat(201),
           notANumber: Number.NaN,
           'bad name': 'x',
         },
@@ -120,13 +119,14 @@ describe('toApiProblem', () => {
     );
   });
 
-  it('should turn a list of texts or numbers in the args into one text, cut when too long', () => {
+  it('should turn the lists of the args into one text and cut the texts too long', () => {
     const problem = toApiProblem(
       answer(409, {
         code: ApiErrorCode.PricingPeriodInUse,
         args: {
           priceLists: ['Listino 2026', 'Hotel Mare – Listino base'],
           long: ['x'.repeat(150), 'y'.repeat(150)],
+          name: 'z'.repeat(255),
           rates: [4, 5.5, 22],
           mixed: ['Listino', 3],
           many: Array.from({ length: 21 }, (_, index) => `L${index + 1}`),
@@ -138,6 +138,7 @@ describe('toApiProblem', () => {
       priceLists: 'Listino 2026, Hotel Mare – Listino base',
       rates: '4, 5.5, 22',
       long: `${'x'.repeat(150)}, ${'y'.repeat(47)}…`,
+      name: `${'z'.repeat(199)}…`,
       many: `${Array.from({ length: 20 }, (_, index) => `L${index + 1}`).join(', ')}, …`,
     });
   });

@@ -23,16 +23,12 @@ import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion
 import { FilledNumberField } from '../../../../shared/ui/inputs/filled-number-field/filled-number-field';
 import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled-select';
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
+import { PriceField } from '../price-field';
 
 const KEY = 'management.settings.catalog.price_list.intermediate_prices';
 
-/** The fields of a row of Prezzi per periodo that hold a price. */
-type PeriodPriceField = {
-  [K in keyof PackagePeriodPrice]: PackagePeriodPrice[K] extends number | null ? K : never;
-}[keyof PackagePeriodPrice];
-
 /** The numbers of days whose price is also a column of Prezzi per periodo. */
-const PERIOD_PRICE_FIELDS = new Map<number, PeriodPriceField>([
+const PERIOD_PRICE_FIELDS = new Map<number, PriceField<PackagePeriodPrice>>([
   [7, 'sevenDaysPrice'],
   [14, 'fourteenDaysPrice'],
   [30, 'monthlyPrice'],
@@ -60,6 +56,8 @@ export class IntermediatePrices {
   readonly periodPrices = input.required<FieldTree<PackagePeriodPrice[]>>();
   /** The sector of Fila 1, the first of the property: Altre file are all the others. */
   readonly idFirstSector = input<string | null>(null);
+  /** The property has sectors after the first one: without them there are no Altre file. */
+  readonly hasOtherSectors = input(false);
   /** The periods of the current season: Fila 1 and Altre file in each of them. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   /** The name of the package or of the article, in every row. */
@@ -103,7 +101,7 @@ export class IntermediatePrices {
   private readonly texts = toSignal(this.translateService.stream(KEY), { initialValue: null });
   private readonly choices = computed<readonly IntermediatePriceChoice[]>(() => {
     this.texts();
-    return [true, false].flatMap((isFirstRow) =>
+    return (this.hasOtherSectors() ? [true, false] : [true]).flatMap((isFirstRow) =>
       this.periods().map(({ key, name }) => ({
         idPeriod: key,
         isFirstRow,
@@ -207,6 +205,8 @@ export class IntermediatePrices {
           rows[index][field]().value.set(price);
         }
       });
+    // A price too high shows its message, and not only keeps Salva off.
+    rows().markAsTouched({ skipDescendants: true });
   }
 }
 
