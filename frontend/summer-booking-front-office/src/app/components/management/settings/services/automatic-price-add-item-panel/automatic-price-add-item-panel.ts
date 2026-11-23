@@ -48,7 +48,11 @@ import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-tab/automatic-price-general-info-tab';
 import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-validity-tab/automatic-price-prices-validity-tab';
-import { serviceErrorFields, serviceFieldError } from '../service-field-errors';
+import {
+  HIDDEN_AUTOMATIC_PRICE_FIELDS,
+  serviceErrorFields,
+  serviceFieldError,
+} from '../service-field-errors';
 import {
   automaticPriceRules,
   otherTranslationRules,
@@ -210,7 +214,12 @@ export class AutomaticPriceAddItemPanel implements UnsavedChanges, OnDestroy {
         this.showTabOf(problem);
         return (
           serviceFieldError(problem, this.draftForm) ??
-          apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
+          apiFieldErrorsOrGeneral(
+            problem,
+            this.draftForm,
+            (general) => this.error.set(general),
+            HIDDEN_AUTOMATIC_PRICE_FIELDS,
+          )
         );
       } finally {
         this.isSaving.set(false);

@@ -8,12 +8,14 @@ import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { HourlyServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedBookingOption } from '../../../../../entities/settings/services/hourly-service-selected-booking-option';
 import { HourlyServiceSelectedPrices } from '../../../../../entities/settings/services/hourly-service-selected-prices';
 import { HourlyServiceUpdateBookingRequest } from '../../../../../entities/settings/services/hourly-service-update-booking-request';
 import { HourlyServiceUpdatePricesRequest } from '../../../../../entities/settings/services/hourly-service-update-prices-request';
 import { ServiceAvailabilityOption } from '../../../../../entities/settings/services/service-availability-option';
+import { ServiceAvailabilityOptionDraft } from '../../../../../entities/settings/services/service-availability-option-draft';
 import { HourlyServiceUpdateGeneralRequest } from '../../../../../entities/settings/services/hourly-service-update-general-request';
 import { Language } from '../../../../../entities/shared/language';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
@@ -27,6 +29,9 @@ const SAVED_IMAGE_URL = 'https://files.example.test/doccia.webp';
 const PRICES = 1;
 const BOOKINGS = 2;
 
+const savedAvailability = (values: Partial<ServiceAvailabilityOption>): ServiceAvailabilityOption =>
+  Object.assign(new ServiceAvailabilityOption(), { daysOfWeek: [], timeSlotPrices: [] }, values);
+
 describe('HourlyServiceEditItemPanel', () => {
   const setup = async ({
     uploadServiceImage = vi.fn((): Observable<void> => of(undefined)),
@@ -34,6 +39,7 @@ describe('HourlyServiceEditItemPanel', () => {
     generalInfo = {} as Partial<HourlyServiceSelectedGeneralInfo>,
     prices = {} as Partial<HourlyServiceSelectedPrices>,
     bookingOptions = [] as HourlyServiceSelectedBookingOption[],
+    periods = [] as SeasonPeriodItem[],
   } = {}) => {
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:image');
     vi.spyOn(URL, 'revokeObjectURL').mockReturnValue();
@@ -98,7 +104,7 @@ describe('HourlyServiceEditItemPanel', () => {
           },
         },
         { provide: LanguageBehaviour, useValue: { current: signal(Language.It) } },
-        { provide: SeasonService, useValue: { periodList: () => of([]) } },
+        { provide: SeasonService, useValue: { periodList: () => of(periods) } },
         { provide: SectorService, useValue: { sectorCombobox: () => of([]) } },
       ],
     });
@@ -197,6 +203,42 @@ describe('HourlyServiceEditItemPanel', () => {
     expect(option.timeSlotPrices[8]).toMatchObject(otherDuration);
   });
 
+  it('should not send the empty availabilities it shows where none is saved', async () => {
+    const { fixture, panel, save, updateHourlyServicePrices } = await setup({
+      periods: [1, 2, 3].map((key) => Object.assign(new SeasonPeriodItem(), { key })),
+      prices: {
+        isPeriodPricingEnabled: true,
+        periodAvailabilities: [
+          { idPeriod: 1, availabilityOptions: [savedAvailability({ startTime: '09:00' })] },
+          { idPeriod: 2, availabilityOptions: [savedAvailability({})] },
+          { idPeriod: 9, availabilityOptions: [savedAvailability({})] },
+        ],
+      },
+    });
+
+    await panel['requestTab'](PRICES);
+    await fixture.whenStable();
+    panel['startEdit']();
+    expect(panel['draft']().periodAvailabilities.map((period) => period.idPeriod)).toEqual([
+      1, 2, 3,
+    ]);
+    panel['draftForm'].periodAvailabilities[2]
+      .availabilityOptions()
+      .value.update((options) => [...options, new ServiceAvailabilityOptionDraft()]);
+    expect(panel.hasUnsavedChanges()).toBe(false);
+    panel['draftForm'].price().value.set(12);
+    await save();
+
+    const [{ periodAvailabilities }] = updateHourlyServicePrices.mock.calls[0];
+    expect(
+      periodAvailabilities.map((period) => [period.idPeriod, period.availabilityOptions.length]),
+    ).toEqual([
+      [1, 1],
+      [2, 1],
+      [9, 1],
+    ]);
+  });
+
   it('should let only a service saved without VAT stay without it', async () => {
     for (const { vatRate, isSaveDisabled } of [
       { vatRate: null, isSaveDisabled: false },
@@ -235,7 +277,7 @@ describe('HourlyServiceEditItemPanel', () => {
         dateFrom: '2026-07-01T00:00:00.000Z',
         dateTo: '2026-07-31T00:00:00.000Z',
         ...hidden,
-        availabilityOption: { daysOfWeek: [1, 2, 3, 4, 5, 6, 7] },
+        availabilityOption: null,
       },
     ]);
   });

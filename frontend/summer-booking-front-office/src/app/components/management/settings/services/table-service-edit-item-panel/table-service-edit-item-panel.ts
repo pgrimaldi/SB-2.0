@@ -31,7 +31,10 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { TableServiceAvailabilityMode } from '../../../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../../../entities/enums/table-service-deposit-mode';
@@ -59,6 +62,7 @@ import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/butt
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
+import { hiddenTableServiceFields } from '../service-field-errors';
 import { otherTranslationRules, tableServiceRules } from '../service-form-rules';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
@@ -262,6 +266,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     const tab = this.selectedTab() as PanelTab;
     const pristine = structuredClone(this.pristine());
     this.draft.update((draft) => ({ ...draft, ...pick(pristine, tab) }));
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -316,8 +321,11 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           this.reloadTab(tab);
           return undefined;
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          hiddenTableServiceFields(this.draft()),
         );
       } finally {
         this.isSaving.set(false);
@@ -339,6 +347,11 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -422,13 +435,7 @@ export class TableServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected retryTab(): void {
-    const tab = this.selectedTab() as PanelTab;
-    this.tabErrors.update((errors) => {
-      const next = new Map(errors);
-      next.delete(tab);
-      return next;
-    });
-    this.loadTab(tab);
+    this.loadTab(this.selectedTab());
   }
 
   private reset(): void {

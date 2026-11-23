@@ -13,7 +13,7 @@ export class HourlyServiceAddItemRequest {
   isPeriodPricingEnabled = false;
   /** Without `isPeriodPricingEnabled`: valid in the whole season. */
   availabilityOptions: ServiceAvailabilityOption[] = [];
-  /** With `isPeriodPricingEnabled`. */
+  /** With `isPeriodPricingEnabled`: only the periods with an availability. */
   periodAvailabilities: ServicePeriodAvailability[] = [];
   idSectors: string[] = [];
   isOnlinePurchaseEnabled = false;

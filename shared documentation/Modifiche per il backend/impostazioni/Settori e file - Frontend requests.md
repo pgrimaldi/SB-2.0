@@ -157,6 +157,14 @@ più settori in una sola chiamata, tutto o niente**. È un'**API nuova**: il fro
 - Per ogni settore valgono gli stessi controlli e lo stesso effetto di `DELETE /api/catalog/sectors/{id}`
   (`SectorService.DeleteAsync`): il settore deve essere dello stabilimento e non usato (`CountUsagesAsync`); si elimina
   con il soft delete di sempre e nel registro va una voce `catalog.sector_deleted` per ogni settore.
+- **In più è usato anche il settore a cui è limitato un servizio o un prezzo automatico** dello stabilimento non eliminato
+  (`is_sector_restricted` vero e una riga non eliminata di `catalog.service_sale_item_sectors` o
+  `catalog.automatic_price_sectors`). Oggi `CountUsagesAsync` non li conta, e i vincoli `ON DELETE RESTRICT`
+  (`fk_catalog_service_sale_item_sectors_sector`, `fk_catalog_automatic_price_sectors_sector`) non fermano
+  l'eliminazione, che è un soft delete (`MapSector` è `ISoftDeletable`). Il servizio resta limitato a un settore che non
+  c'è più, le sue letture danno un elenco di settori vuoto (`ServiceItemsService.ToDtoAsync`,
+  `AutomaticPricesService.ToDtoAsync` scartano gli id sconosciuti), che per la pagina Servizi vuol dire "Tutte le
+  file/settori": il primo Salva toglie il limite senza che l'utente lo sappia.
 - **Come farlo lo sceglie lo sviluppatore del backend** (metodo nuovo di `SectorService`, conteggi per più settori
   insieme, transazione...), purché il risultato sia questo.
 
@@ -191,7 +199,7 @@ Nell'ordine in cui si controllano:
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `catalog.sector_not_found` | Un id non è un settore dello stabilimento (anche perché già eliminato). Non si elimina nessun settore. |
-| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`) e **in più `sectorName`**, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. |
+| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`) e **in più** `services` e `automaticPrices`, quanti servizi (bar, normali e orari insieme) e quanti prezzi automatici sono limitati a quel settore, e `sectorName`, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. I conteggi ci sono sempre tutti, 0 compreso. |
 
 Prima si controlla che tutti gli id siano settori dello stabilimento (404 se uno non lo è), poi che nessuno sia usato:
 con più settori in uso, `sectorName` e i conteggi sono quelli del primo in uso nell'ordine di `idSectors`.
@@ -203,13 +211,22 @@ con più settori in uso, `sectorName` e i conteggi sono quelli del primo in uso 
   "status": 409,
   "code": "catalog.sector_in_use",
   "traceId": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
-  "args": { "sectorName": "Fila 1", "mapSpots": 14, "priceLists": 1, "stayLimits": 0, "discounts": 0 }
+  "args": {
+    "sectorName": "Fila 1",
+    "mapSpots": 14,
+    "priceLists": 1,
+    "stayLimits": 0,
+    "discounts": 0,
+    "services": 2,
+    "automaticPrices": 1
+  }
 }
 ```
 
 Il frontend mostra ogni errore di questa API nell'avviso "Operazione non riuscita", con il testo del suo `code`:
 per `catalog.sector_in_use` "Il settore/fila {{sectorName}} è in uso e non si può eliminare: postazioni sulla mappa
-{{mapSpots}}, listini {{priceLists}}, limiti di soggiorno {{stayLimits}}, sconti {{discounts}}."
+{{mapSpots}}, listini {{priceLists}}, limiti di soggiorno {{stayLimits}}, sconti {{discounts}}, servizi {{services}},
+prezzi automatici {{automaticPrices}}."
 
 ## 3. POST /api/catalog/sectors/bulk-duplicate
 
@@ -388,6 +405,9 @@ API 2 e 3, con un token con `catalog.settings`:
    `auth.forbidden`.
 7. `bulk-delete` con un solo id di un settore usato da una postazione: 409 `catalog.sector_in_use` con `sectorName` e
    i conteggi; il settore non è eliminato.
+8. `bulk-delete` di un settore a cui è limitato solo un servizio (bar, normale o orario): 409 `catalog.sector_in_use`
+   con `services` 1 e gli altri conteggi 0; lo stesso con un prezzo automatico (`automaticPrices` 1). Tolto il limite
+   dal servizio, o eliminato il servizio: 204.
 
 Salvataggi contemporanei:
 

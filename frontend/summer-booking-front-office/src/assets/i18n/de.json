@@ -125,7 +125,7 @@
       "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein."
     },
     "catalog": {
-      "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}.",
+      "sector_in_use": "Der Sektor/die Reihe {{sectorName}} wird verwendet und kann nicht gelöscht werden: Plätze auf der Karte {{mapSpots}}, Preislisten {{priceLists}}, Aufenthaltsgrenzen {{stayLimits}}, Rabatte {{discounts}}, Leistungen {{services}}, automatische Preise {{automaticPrices}}.",
       "sector_name_taken": "Ein Sektor/eine Reihe mit diesem Namen existiert bereits.",
       "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein.",
       "invalid_pdf": "Die Datei muss ein PDF sein und darf höchstens 10 MB groß sein.",
@@ -1479,7 +1479,8 @@
             "variants": {
               "title": "Varianten",
               "add": "Variante hinzufügen",
-              "name": "Name der Variante"
+              "name": "Name der Variante",
+              "surcharge": "Aufpreis"
             },
             "online_purchase": "Online-Kauf aktivieren",
             "period_pricing": {

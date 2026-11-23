@@ -31,14 +31,18 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { ServiceTimeSlot } from '../../../../../entities/enums/service-time-slot';
 import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
-import { HourlyServiceBookingOption } from '../../../../../entities/settings/services/hourly-service-booking-option';
+import { HourlyServiceBookingOptionDraft } from '../../../../../entities/settings/services/hourly-service-booking-option-draft';
+import { HourlyServiceDraft } from '../../../../../entities/settings/services/hourly-service-draft';
 import { HourlyServiceSelectedBookingOptions } from '../../../../../entities/settings/services/hourly-service-selected-booking-options';
 import { HourlyServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedPrices } from '../../../../../entities/settings/services/hourly-service-selected-prices';
@@ -46,7 +50,8 @@ import { HourlyServiceUpdateBookingRequest } from '../../../../../entities/setti
 import { HourlyServiceUpdateGeneralRequest } from '../../../../../entities/settings/services/hourly-service-update-general-request';
 import { HourlyServiceUpdatePricesRequest } from '../../../../../entities/settings/services/hourly-service-update-prices-request';
 import { ServiceAvailabilityOption } from '../../../../../entities/settings/services/service-availability-option';
-import { ServicePeriodAvailability } from '../../../../../entities/settings/services/service-period-availability';
+import { ServiceAvailabilityOptionDraft } from '../../../../../entities/settings/services/service-availability-option-draft';
+import { ServicePeriodAvailabilityDraft } from '../../../../../entities/settings/services/service-period-availability-draft';
 import { ServiceTimeSlotPrice } from '../../../../../entities/settings/services/service-time-slot-price';
 import {
   MAX_SERVICE_DESCRIPTION_LENGTH,
@@ -66,12 +71,13 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { HourlyServiceBookingsTab } from '../hourly-service-bookings-tab/hourly-service-bookings-tab';
 import { HourlyServiceGeneralInfoTab } from '../hourly-service-general-info-tab/hourly-service-general-info-tab';
 import { HourlyServicePricesTab } from '../hourly-service-prices-tab/hourly-service-prices-tab';
-import { serviceFieldError } from '../service-field-errors';
+import { hiddenHourlyServiceFields, serviceFieldError } from '../service-field-errors';
 import {
   hourlyServicePriceRules,
   otherTranslationRules,
   serviceAvailabilityRules,
   withAvailabilitiesInForce,
+  withoutEmptyAvailabilities,
 } from '../service-form-rules';
 import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
@@ -212,7 +218,9 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   private readonly pristine = signal(newDraft());
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
   /** Availabilities read for periods the tab does not show (e.g. of no current period): sent back as read. */
-  private readonly hiddenPeriodAvailabilities = signal<readonly ServicePeriodAvailability[]>([]);
+  private readonly hiddenPeriodAvailabilities = signal<readonly ServicePeriodAvailabilityDraft[]>(
+    [],
+  );
   /** The tabs read (or being read) since the panel opened: changing tab keeps their data. */
   private readonly loadedTabs = signal<ReadonlySet<PanelTab>>(new Set());
   /** The tabs whose data are being read: their fields cannot be used meanwhile. */
@@ -278,7 +286,9 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   hasUnsavedChanges(): boolean {
     return (
       this.open() &&
-      (this.image() !== null || comparableJson(this.draft()) !== comparableJson(this.pristine()))
+      (this.image() !== null ||
+        comparableJson(withoutEmptyAvailabilities(this.draft())) !==
+          comparableJson(withoutEmptyAvailabilities(this.pristine())))
     );
   }
 
@@ -355,6 +365,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.setImage(null);
       this.imageRemovalError.set(null);
     }
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -414,7 +425,12 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         return (
           // The VAT refused can be of an availability: its message is the general one.
           serviceFieldError(problem, { icon: this.draftForm.icon }) ??
-          apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
+          apiFieldErrorsOrGeneral(
+            problem,
+            this.draftForm,
+            (general) => this.error.set(general),
+            hiddenHourlyServiceFields(this.draft()),
+          )
         );
       } finally {
         this.isSaving.set(false);
@@ -436,6 +452,11 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -541,7 +562,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     return this.catalog.updateHourlyServiceBooking(
       Object.assign(new HourlyServiceUpdateBookingRequest(), {
         idHourlyService,
-        ...pick(draft, tab),
+        ...pick(withoutEmptyAvailabilities(draft), tab),
       }),
       version,
     );
@@ -566,13 +587,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected retryTab(): void {
-    const tab = this.selectedTab() as PanelTab;
-    this.tabErrors.update((errors) => {
-      const next = new Map(errors);
-      next.delete(tab);
-      return next;
-    });
-    this.loadTab(tab);
+    this.loadTab(this.selectedTab());
   }
 
   private reset(): void {
@@ -623,7 +638,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   /**
    * The availability options of the whole season and of each period of the current one: the saved
-   * ones, or an empty one as in the add panel.
+   * ones, or an empty one as in the add panel, which is not sent while it is empty.
    */
   private setPrices(
     prices: HourlyServiceSelectedPrices,
@@ -631,7 +646,15 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   ): void {
     this.versions.set(PanelTab.Prices, prices.version);
     this.periods.set(periods);
-    this.hiddenPeriodAvailabilities.set(hiddenOf(prices.periodAvailabilities, periods));
+    this.hiddenPeriodAvailabilities.set(
+      hiddenOf(prices.periodAvailabilities, periods).map((period) => ({
+        ...period,
+        availabilityOptions: period.availabilityOptions.map((option) => ({
+          ...option,
+          isSaved: true,
+        })),
+      })),
+    );
     this.applyLoaded({
       price: prices.price,
       vatRate: prices.vatRate,
@@ -639,7 +662,7 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       availabilityOptions: availabilitiesOf(prices.availabilityOptions),
       periodAvailabilities: periods.map(({ key: idPeriod }) => {
         const saved = prices.periodAvailabilities.find((item) => item.idPeriod === idPeriod);
-        return Object.assign(new ServicePeriodAvailability(), {
+        return Object.assign(new ServicePeriodAvailabilityDraft(), {
           idPeriod,
           availabilityOptions: availabilitiesOf(saved?.availabilityOptions ?? []),
         });
@@ -653,17 +676,17 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.versions.set(PanelTab.Bookings, answer.version);
     this.applyLoaded({
       bookingOptions: answer.bookingOptions.map((option) =>
-        Object.assign(new HourlyServiceBookingOption(), option, {
+        Object.assign(new HourlyServiceBookingOptionDraft(), option, {
           availabilityOption: option.availabilityOption
             ? availabilityOf(option.availabilityOption)
-            : new ServiceAvailabilityOption(),
+            : new ServiceAvailabilityOptionDraft(),
         }),
       ),
     });
   }
 
   /** Values read from an API: into the form, and into what the form is compared with. */
-  private applyLoaded(values: Partial<HourlyServiceAddItemRequest>): void {
+  private applyLoaded(values: Partial<HourlyServiceDraft>): void {
     this.draft.update((draft) => ({ ...draft, ...values }));
     this.pristine.update((pristine) => ({ ...pristine, ...structuredClone(values) }));
   }
@@ -698,8 +721,8 @@ export class HourlyServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 }
 
 /** Empty, with a name and a description for every language: the user's one is the main. */
-function newDraft(): HourlyServiceAddItemRequest {
-  return Object.assign(new HourlyServiceAddItemRequest(), {
+function newDraft(): HourlyServiceDraft {
+  return Object.assign(new HourlyServiceDraft(), {
     translations: SERVICE_LANGUAGES.map((language) =>
       Object.assign(new ServiceTranslation(), { language }),
     ),
@@ -709,18 +732,19 @@ function newDraft(): HourlyServiceAddItemRequest {
 /** The saved availabilities as the form shows them, or an empty one. */
 function availabilitiesOf(
   saved: readonly ServiceAvailabilityOption[],
-): ServiceAvailabilityOption[] {
-  return saved.length ? saved.map(availabilityOf) : [new ServiceAvailabilityOption()];
+): ServiceAvailabilityOptionDraft[] {
+  return saved.length ? saved.map(availabilityOf) : [new ServiceAvailabilityOptionDraft()];
 }
 
 /**
  * A saved availability with every time slot of the list, in its order, then the durations that are
  * not in it. Without days it is of every day.
  */
-function availabilityOf(saved: ServiceAvailabilityOption): ServiceAvailabilityOption {
-  const option = new ServiceAvailabilityOption();
+function availabilityOf(saved: ServiceAvailabilityOption): ServiceAvailabilityOptionDraft {
+  const option = new ServiceAvailabilityOptionDraft();
   const timeSlots: readonly string[] = Object.values(ServiceTimeSlot);
   return Object.assign(option, saved, {
+    isSaved: true,
     daysOfWeek: saved.daysOfWeek.length ? [...saved.daysOfWeek] : option.daysOfWeek,
     timeSlotPrices: [
       ...timeSlots.map((timeSlot) =>
@@ -745,9 +769,6 @@ function hiddenOf<T extends { idPeriod: number | null }>(
 }
 
 /** The values of the fields of one tab. */
-function pick(
-  values: HourlyServiceAddItemRequest,
-  tab: PanelTab,
-): Partial<HourlyServiceAddItemRequest> {
-  return Object.fromEntries(TAB_FIELDS[tab].map((field) => [field, values[field]]));
+function pick<T extends HourlyServiceAddItemRequest>(values: T, tab: PanelTab): Partial<T> {
+  return Object.fromEntries(TAB_FIELDS[tab].map((field) => [field, values[field]])) as Partial<T>;
 }

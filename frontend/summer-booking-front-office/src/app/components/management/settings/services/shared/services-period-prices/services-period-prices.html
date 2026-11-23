@@ -1,5 +1,8 @@
 <div class="services__period__prices__heading">
-  <app-toggle [formField]="isPeriodPricingEnabled()">
+  <app-toggle
+    [formField]="isPeriodPricingEnabled()"
+    [error]="validationText.text(isPeriodPricingEnabled())"
+  >
     {{ 'management.settings.services.form.prices.period_pricing.enable' | translate }}
   </app-toggle>
   <app-icon-button

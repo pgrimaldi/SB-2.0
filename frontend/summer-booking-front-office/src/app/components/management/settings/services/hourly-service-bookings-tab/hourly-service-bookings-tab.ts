@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
-import { HourlyServiceBookingOption } from '../../../../../entities/settings/services/hourly-service-booking-option';
+import { HourlyServiceBookingOptionDraft } from '../../../../../entities/settings/services/hourly-service-booking-option-draft';
 import { Button, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { FormRow } from '../../../../shared/ui/forms/form-row/form-row';
@@ -31,7 +31,7 @@ import { ServicesAvailabilityOption } from '../shared/services-availability-opti
 })
 export class HourlyServiceBookingsTab {
   /** The booking options of the form of the panel, which validates and saves them. */
-  readonly form = input.required<FieldTree<HourlyServiceBookingOption[]>>();
+  readonly form = input.required<FieldTree<HourlyServiceBookingOptionDraft[]>>();
   /** Only to look at: adding and removing an option are off. */
   readonly isReadonly = input(false);
 
@@ -43,7 +43,7 @@ export class HourlyServiceBookingsTab {
   protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
 
   protected addOption(): void {
-    this.form()().value.update((options) => [...options, new HourlyServiceBookingOption()]);
+    this.form()().value.update((options) => [...options, new HourlyServiceBookingOptionDraft()]);
   }
 
   protected removeOption(index: number): void {

@@ -26,32 +26,54 @@ export function apiFieldError(
 /**
  * The errors of `problem` that belong to a field of `form` (same name as in the request), for the
  * action of Signal Forms `submit()`: each one is shown under its field until that field changes.
+ * `hiddenFields` are the fields with no place for their error.
  */
 export function apiFieldErrors<TModel extends object>(
   problem: ApiProblem,
   form: FieldTree<TModel>,
+  hiddenFields: readonly string[] = [],
 ): ApiValidationError[] {
   const fields = form as unknown as Readonly<Record<string, FieldTree<unknown>>>;
   const value = form().value();
   return (problem.errors ?? [])
-    .filter(({ field }) => Object.hasOwn(value, field) && !isId(field))
+    .filter(
+      ({ field }) => Object.hasOwn(value, field) && !isId(field) && !hiddenFields.includes(field),
+    )
     .map(({ field, code, args }) => apiFieldError(fields[field], code, args));
 }
 
 /**
  * The same, for a form with a general message too: an error with no field to go under (an id, a
- * field the form has not, or none at all) sends the whole problem there.
+ * field the form has not or does not show, or none at all) sends the whole problem there.
  */
 export function apiFieldErrorsOrGeneral<TModel extends object>(
   problem: ApiProblem,
   form: FieldTree<TModel>,
   general: (problem: ApiProblem) => void,
+  hiddenFields: readonly string[] = [],
 ): ApiValidationError[] {
-  const errors = apiFieldErrors(problem, form);
+  const errors = apiFieldErrors(problem, form, hiddenFields);
   if (!errors.length || errors.length < (problem.errors?.length ?? 0)) {
     general(problem);
   }
   return errors;
+}
+
+/**
+ * Takes away the errors of the backend under the fields of `form`, e.g. with Annulla: Angular drops
+ * them only when the value of their field changes, and `reset()` keeps them.
+ */
+export function clearApiFieldErrors<TModel extends object>(form: FieldTree<TModel>): void {
+  const fields = form as unknown as Readonly<Record<string, FieldTree<unknown>>>;
+  for (const name of Object.keys(form().value())) {
+    const field = fields[name]();
+    if (field.errors().some(({ kind }) => kind === API_ERROR_KIND)) {
+      const value = field.value();
+      field.value.set(Array.isArray(value) ? [...value] : value === null ? undefined : null);
+      field.errors();
+      field.value.set(value);
+    }
+  }
 }
 
 /**

@@ -17,18 +17,21 @@ import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
+import { sectorLimits } from './catalog.mock';
 
 interface SectorUsage {
   mapSpots: number;
   priceLists: number;
   stayLimits: number;
   discounts: number;
+  services: number;
+  automaticPrices: number;
 }
 
 type SectorRow = Omit<SectorItem, 'version'> & {
   propertyId: number;
   sortOrder: number;
-  usage?: SectorUsage;
+  usage?: Partial<SectorUsage>;
 };
 
 const SECTOR_NAMES = [
@@ -51,7 +54,7 @@ const SECTORS: SectorRow[] = SECTOR_NAMES.map((sectorName, index) => ({
   idSector: `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a${String(index + 1).padStart(2, '0')}`,
   sectorName,
   sortOrder: index,
-  ...(index === 0 ? { usage: { mapSpots: 14, priceLists: 1, stayLimits: 0, discounts: 0 } } : {}),
+  ...(index === 0 ? { usage: { mapSpots: 14, priceLists: 1 } } : {}),
 }));
 
 const SORT_FIELDS = ['sectorName'] as const;
@@ -206,10 +209,10 @@ export const deleteSectorsMock = (
   if (!sectors) {
     return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
   }
-  const used = sectors.find((sector) => sector.usage);
-  if (used?.usage) {
+  const used = sectors.find((sector) => Object.values(usageOf(sector)).some((count) => count > 0));
+  if (used) {
     return problem(request, 409, ApiErrorCode.CatalogSectorInUse, {
-      args: { sectorName: used.sectorName ?? '', ...used.usage },
+      args: { sectorName: used.sectorName ?? '', ...usageOf(used) },
     });
   }
   for (const sector of sectors) {
@@ -217,6 +220,17 @@ export const deleteSectorsMock = (
   }
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
+
+function usageOf(sector: SectorRow): SectorUsage {
+  return {
+    mapSpots: 0,
+    priceLists: 0,
+    stayLimits: 0,
+    discounts: 0,
+    ...sector.usage,
+    ...sectorLimits(sector.idSector ?? ''),
+  };
+}
 
 /**
  * `POST /api/catalog/sectors/bulk-duplicate` with `{ idSectors }`: all or nothing, like the delete.

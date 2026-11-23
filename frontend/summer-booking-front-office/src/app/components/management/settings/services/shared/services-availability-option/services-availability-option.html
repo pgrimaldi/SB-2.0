@@ -118,6 +118,9 @@
   [formField]="form().maxBookingPerTimeSlotQuantity"
   [error]="validationText.text(form().maxBookingPerTimeSlotQuantity)"
 />
-<app-toggle [formField]="form().hasFixedTimeSlots">
+<app-toggle
+  [formField]="form().hasFixedTimeSlots"
+  [error]="validationText.text(form().hasFixedTimeSlots)"
+>
   {{ 'management.settings.services.form.availability.fixed_time_slots' | translate }}
 </app-toggle>

@@ -3,7 +3,7 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
-import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceDraft } from '../../../../../entities/settings/services/hourly-service-draft';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { ServicesAvailabilityOptions } from '../shared/services-availability-options/services-availability-options';
 import { ServicesLimits } from '../shared/services-limits/services-limits';
@@ -28,7 +28,7 @@ import { ServicesPriceVat } from '../shared/services-price-vat/services-price-va
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HourlyServicePricesTab {
-  readonly form = input.required<FieldTree<HourlyServiceAddItemRequest>>();
+  readonly form = input.required<FieldTree<HourlyServiceDraft>>();
   /** The periods of the current season, each with its own availability options when the toggle is on; off, they are the same for all. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   /** Only to look at: adding and removing an availability option are off. */

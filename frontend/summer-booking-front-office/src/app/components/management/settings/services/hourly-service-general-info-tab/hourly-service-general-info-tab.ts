@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output } from '@angu
 import { FieldTree } from '@angular/forms/signals';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { StandardServiceIcon } from '../../../../../entities/enums/standard-service-icon';
-import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceDraft } from '../../../../../entities/settings/services/hourly-service-draft';
 import { Language } from '../../../../../entities/shared/language';
 import { ServicesHighlighted } from '../shared/services-highlighted/services-highlighted';
 import { ServicesImages, ServicesImagesIcon } from '../shared/services-images/services-images';
@@ -16,7 +16,7 @@ import { ServicesTranslations } from '../shared/services-translations/services-t
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HourlyServiceGeneralInfoTab {
-  readonly form = input.required<FieldTree<HourlyServiceAddItemRequest>>();
+  readonly form = input.required<FieldTree<HourlyServiceDraft>>();
   /** Language of the main name and description: the user's; the others are translations. */
   readonly mainLanguage = input.required<Language>();
   /** Only to look at: the buttons that change the data (icons, image) are off. */

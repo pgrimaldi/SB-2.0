@@ -814,7 +814,9 @@ function hourlyBookingOptionFields(
 ): HourlyServiceBookingOption {
   return {
     ...onlyFieldsOf(HourlyServiceBookingOption, bookingOption),
-    availabilityOption: availabilityOptionFields(bookingOption.availabilityOption),
+    availabilityOption:
+      bookingOption.availabilityOption &&
+      availabilityOptionFields(bookingOption.availabilityOption),
   };
 }
 

@@ -2925,7 +2925,7 @@ Servizi: creazione servizio bar.
   "variants": [
     {
       "variantName": "Grande",
-      "price": 2
+      "price": 0.5
     }
   ],
   "isPeriodPricingEnabled": true,
@@ -2977,9 +2977,9 @@ Servizi: creazione servizio bar.
 | `isHighlighted` | boolean | `true` |
 | `price` | number (decimale, €) | `1.5` |
 | `vatRate` | number (decimale, %) \| null | `10` |
-| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Grande", "price": 2}]` |
+| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Grande", "price": 0.5}]` |
 | `variants[].variantName` | string | `Grande` |
-| `variants[].price` | number (decimale, €) | `2` |
+| `variants[].price` | number (decimale, €) | `0.5` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.5}, {"idPeriod": 1, "price": 1.8}]` |
 | `periodPrices[].idPeriod` | number (intero) | `0` |
@@ -3130,7 +3130,7 @@ Stato: 200 OK.
   "variants": [
     {
       "variantName": "Doppio",
-      "price": 1.8
+      "price": 0.8
     }
   ],
   "isPeriodPricingEnabled": true,
@@ -3152,9 +3152,9 @@ Stato: 200 OK.
 |---|---|---|
 | `price` | number (decimale, €) | `1` |
 | `vatRate` | number (decimale, %) \| null | `10` |
-| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 1.8}]` |
+| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 0.8}]` |
 | `variants[].variantName` | string | `Doppio` |
-| `variants[].price` | number (decimale, €) | `1.8` |
+| `variants[].price` | number (decimale, €) | `0.8` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.2}]` |
 | `periodPrices[].idPeriod` | number (intero) | `0` |
@@ -3310,7 +3310,7 @@ Servizi: servizio bar, salvataggio Prezzi.
   "variants": [
     {
       "variantName": "Doppio",
-      "price": 1.8
+      "price": 0.8
     }
   ],
   "isPeriodPricingEnabled": true,
@@ -3336,9 +3336,9 @@ Servizi: servizio bar, salvataggio Prezzi.
 | `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
 | `price` | number (decimale, €) | `1.3` |
 | `vatRate` | number (decimale, %) \| null | `10` |
-| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 1.8}]` |
+| `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 0.8}]` |
 | `variants[].variantName` | string | `Doppio` |
-| `variants[].price` | number (decimale, €) | `1.8` |
+| `variants[].price` | number (decimale, €) | `0.8` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.2}, {"idPeriod": 1, "price": 1.5}]` |
 | `periodPrices[].idPeriod` | number (intero) | `0` |

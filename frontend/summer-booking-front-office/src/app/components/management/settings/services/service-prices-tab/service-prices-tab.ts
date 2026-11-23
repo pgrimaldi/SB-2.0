@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
@@ -30,4 +31,6 @@ export class ServicePricesTab {
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
   /** Only to look at: the buttons that change the data (add, remove) are off. */
   readonly isReadonly = input(false);
+
+  protected readonly validationText = inject(ValidationTextBehaviour);
 }

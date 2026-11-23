@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ValidationTextBehaviour } from '../../../../../../behaviours/validation/validation-text.behaviour';
 import { IconButton } from '../../../../../shared/ui/buttons/icon-button/icon-button';
 import { InfoPopup } from '../../../../../shared/ui/dialogs/info-popup/info-popup';
 import { Toggle } from '../../../../../shared/ui/toggles/toggle/toggle';
@@ -16,6 +17,8 @@ import { Toggle } from '../../../../../shared/ui/toggles/toggle/toggle';
 export class ServicesHighlighted {
   /** The field of the form of the panel, which saves it. */
   readonly form = input.required<FieldTree<boolean>>();
+
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
   /** [X, before the title]. */

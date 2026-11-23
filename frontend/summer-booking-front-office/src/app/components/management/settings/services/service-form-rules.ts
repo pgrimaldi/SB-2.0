@@ -12,10 +12,12 @@ import {
 } from '@angular/forms/signals';
 import { AutomaticPriceAddItemRequest } from '../../../../entities/settings/services/automatic-price-add-item-request';
 import { HourlyServiceAddItemRequest } from '../../../../entities/settings/services/hourly-service-add-item-request';
+import { HourlyServiceDraft } from '../../../../entities/settings/services/hourly-service-draft';
 import {
   MAX_CUSTOM_TIME_SLOT_MINUTES,
   ServiceAvailabilityOption,
 } from '../../../../entities/settings/services/service-availability-option';
+import { ServiceAvailabilityOptionDraft } from '../../../../entities/settings/services/service-availability-option-draft';
 import {
   MAX_SERVICE_BOOKING_QUANTITY,
   ServiceBookingOption,
@@ -34,6 +36,8 @@ import {
   MAX_SERVICE_VARIANT_NAME_LENGTH,
   ServiceVariant,
 } from '../../../../entities/settings/services/service-variant';
+import { onlyFieldsOf } from '../../../../services/api/only-fields-of';
+import { comparableJson } from '../../../shared/forms/text-comparison';
 import {
   MinItemsError,
   greaterThan,
@@ -92,7 +96,9 @@ export function serviceBookingOptionRules(option: SchemaPathTree<ServiceBookingO
 }
 
 /** An availability as the backend wants it: a day at least, and the price of what can be booked. */
-export function serviceAvailabilityRules(option: SchemaPathTree<ServiceAvailabilityOption>): void {
+export function serviceAvailabilityRules(
+  option: SchemaPathTree<ServiceAvailabilityOptionDraft>,
+): void {
   timeRange(option.startTime, option.endTime);
   minItems(option.daysOfWeek, 1);
   applyEach(option.timeSlotPrices, (timeSlotPrice) => {
@@ -115,11 +121,11 @@ export function serviceAvailabilityRules(option: SchemaPathTree<ServiceAvailabil
 
 /**
  * Price, VAT and availabilities in force of an hourly service as the backend wants them. The VAT is
- * of the service or, without it, of every availability, at least one; a service already saved
+ * of the service or, without it, of every availability sent, at least one; a service already saved
  * without VAT (`canLackVat`) can stay so.
  */
 export function hourlyServicePriceRules(
-  path: SchemaPathTree<HourlyServiceAddItemRequest>,
+  path: SchemaPathTree<HourlyServiceDraft>,
   canLackVat: () => boolean = () => false,
 ): void {
   required(path.price);
@@ -131,7 +137,7 @@ export function hourlyServicePriceRules(
           ? valueOf(path.periodAvailabilities).flatMap((period) => period.availabilityOptions)
           : valueOf(path.availabilityOptions)),
         ...valueOf(path.bookingOptions).map((option) => option.availabilityOption),
-      ];
+      ].filter(isAvailabilitySent);
       return !canLackVat() && !(options.length && options.every(({ vatRate }) => vatRate !== null));
     },
   });
@@ -184,13 +190,44 @@ export function withServicesInForce(
     : values;
 }
 
-/** The availabilities in force only, by period or not: the backend keeps one kind of them. */
-export function withAvailabilitiesInForce(
-  values: HourlyServiceAddItemRequest,
+const EMPTY_AVAILABILITY = comparableJson(new ServiceAvailabilityOption());
+
+/** One left empty is only what the panel shows where there are none, unless it was saved so. */
+function isAvailabilitySent(option: ServiceAvailabilityOptionDraft): boolean {
+  return (
+    option.isSaved ||
+    comparableJson(onlyFieldsOf(ServiceAvailabilityOption, option)) !== EMPTY_AVAILABILITY
+  );
+}
+
+/** The availabilities to send: a period without any is left out, a booking option has `null`. */
+export function withoutEmptyAvailabilities(
+  values: HourlyServiceDraft,
 ): HourlyServiceAddItemRequest {
-  return values.isPeriodPricingEnabled
-    ? { ...values, availabilityOptions: [] }
-    : { ...values, periodAvailabilities: [] };
+  return {
+    ...values,
+    availabilityOptions: values.availabilityOptions.filter(isAvailabilitySent),
+    periodAvailabilities: values.periodAvailabilities
+      .map((period) => ({
+        ...period,
+        availabilityOptions: period.availabilityOptions.filter(isAvailabilitySent),
+      }))
+      .filter(({ availabilityOptions }) => availabilityOptions.length > 0),
+    bookingOptions: values.bookingOptions.map((option) => ({
+      ...option,
+      availabilityOption: isAvailabilitySent(option.availabilityOption)
+        ? option.availabilityOption
+        : null,
+    })),
+  };
+}
+
+/** The availabilities to send of the kind in force only: the backend keeps one kind of them. */
+export function withAvailabilitiesInForce(values: HourlyServiceDraft): HourlyServiceAddItemRequest {
+  const sent = withoutEmptyAvailabilities(values);
+  return sent.isPeriodPricingEnabled
+    ? { ...sent, availabilityOptions: [] }
+    : { ...sent, periodAvailabilities: [] };
 }
 
 const MAX_PERCENTAGE = 100;

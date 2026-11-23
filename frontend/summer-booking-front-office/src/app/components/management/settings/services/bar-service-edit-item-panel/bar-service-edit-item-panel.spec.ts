@@ -35,6 +35,9 @@ describe('BarServiceEditItemPanel', () => {
     uploadServiceImage = vi.fn((): Observable<void> => of(undefined)),
     deleteServiceImage = vi.fn((): Observable<void> => of(undefined)),
     generalInfo = {} as Partial<BarServiceSelectedGeneralInfo>,
+    prices = vi.fn((): Observable<BarServiceSelectedPrices> =>
+      of(Object.assign(new BarServiceSelectedPrices(), { price: 3, vatRate: 22, version: 'v1' })),
+    ),
   } = {}) => {
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:image');
     vi.spyOn(URL, 'revokeObjectURL').mockReturnValue();
@@ -53,6 +56,7 @@ describe('BarServiceEditItemPanel', () => {
       (request: BarServiceUpdateGeneralRequest): Observable<string | null> =>
         of(request ? 'v2' : null),
     );
+    const updateBarServicePrices = vi.fn((): Observable<string | null> => of('v2'));
     const updateBarServiceBooking = vi.fn(
       (request: BarServiceUpdateBookingRequest): Observable<string | null> =>
         of(request ? 'v2' : null),
@@ -83,8 +87,8 @@ describe('BarServiceEditItemPanel', () => {
                   ...generalInfo,
                 }),
               ),
-            barServicePrices: () =>
-              of(Object.assign(new BarServiceSelectedPrices(), { price: 3, version: 'v1' })),
+            barServicePrices: prices,
+            updateBarServicePrices,
           },
         },
         { provide: LanguageBehaviour, useValue: { current: signal(Language.It) } },
@@ -124,6 +128,7 @@ describe('BarServiceEditItemPanel', () => {
       panel,
       save,
       updateBarServiceGeneral,
+      updateBarServicePrices,
       updateBarServiceBooking,
       updated: () => updated,
     };
@@ -285,6 +290,56 @@ describe('BarServiceEditItemPanel', () => {
     expect(updateBarServiceBooking.mock.calls[0][0].bookingOptions).toMatchObject([
       { ...BOOKING_OPTION, maxBookingPerHourQuantity: 25 },
     ]);
+  });
+
+  it('should read again a tab that could not be read, without its error', async () => {
+    const prices = vi.fn((): Observable<BarServiceSelectedPrices> =>
+      throwError(() => new HttpErrorResponse({ status: 500, error: null })),
+    );
+    const { fixture, panel } = await setup({ prices });
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    expect(panel['tabErrorMessage']()).not.toBeNull();
+    expect(panel['isEditDisabled']()).toBe(true);
+    await panel['requestTab'](0);
+    prices.mockReturnValue(of(Object.assign(new BarServiceSelectedPrices(), { price: 3 })));
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    expect(panel['tabErrorMessage']()).toBeNull();
+    expect(panel['isEditDisabled']()).toBe(false);
+    expect(panel.open()).toBe(true);
+  });
+
+  it('should forget with Annulla the error of the backend on a field not changed', async () => {
+    const { fixture, panel, save, updateBarServicePrices } = await setup();
+    updateBarServicePrices.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 422,
+            error: {
+              status: 422,
+              code: ApiErrorCode.CatalogVatRateNotAllowed,
+              args: { rates: [10] },
+            },
+          }),
+      ),
+    );
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].price().value.set(4);
+    await save();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(1);
+    expect(panel['isSaveDisabled']()).toBe(true);
+    panel['cancelEdit']();
+    panel['startEdit']();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(0);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    expect(panel['draft']()).toMatchObject({ price: 3, vatRate: 22 });
+    expect(panel.hasUnsavedChanges()).toBe(false);
   });
 
   it('should keep Salva off without a price, only in the Prezzi tab', async () => {

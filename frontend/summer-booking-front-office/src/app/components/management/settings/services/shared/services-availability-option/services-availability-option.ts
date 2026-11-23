@@ -5,7 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ValidationTextBehaviour } from '../../../../../../behaviours/validation/validation-text.behaviour';
 import { ServiceTimeSlot } from '../../../../../../entities/enums/service-time-slot';
-import { ServiceAvailabilityOption } from '../../../../../../entities/settings/services/service-availability-option';
+import { ServiceAvailabilityOptionDraft } from '../../../../../../entities/settings/services/service-availability-option-draft';
 import { DAYS_OF_WEEK } from '../../../../../../entities/shared/days-of-week';
 import { Checkbox } from '../../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { FormRow } from '../../../../../shared/ui/forms/form-row/form-row';
@@ -62,7 +62,7 @@ const TIME_SLOT_KEYS: Readonly<Record<string, keyof TimeSlotTexts>> = {
 })
 export class ServicesAvailabilityOption {
   /** One option of the form of the panel, which validates and saves it. */
-  readonly form = input.required<FieldTree<ServiceAvailabilityOption>>();
+  readonly form = input.required<FieldTree<ServiceAvailabilityOptionDraft>>();
 
   private readonly translateService = inject(TranslateService);
   protected readonly validationText = inject(ValidationTextBehaviour);

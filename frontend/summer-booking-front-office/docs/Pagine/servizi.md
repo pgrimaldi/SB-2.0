@@ -88,8 +88,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     come il backend (`IMAGE_UPLOAD_TYPES`, `MAX_IMAGE_UPLOAD_MEGABYTES`): un file più grande non passa e sotto il
     riquadro compare "Il file supera i 5 MB"; un file vuoto non passa (`isUploadable`) e compare il messaggio di
     `catalog.invalid_image`, come lo darebbe il backend; l'input `error` mostra lì sotto un errore dell'icona;
-  - `app-services-popup-alternatives`: sezione Varianti, sull'elenco `variants` del form; nome e prezzo di ogni
-    variante sono obbligatori (asterisco);
+  - `app-services-popup-alternatives`: sezione Varianti, sull'elenco `variants` del form; nome e sovrapprezzo
+    (`price`) di ogni variante sono obbligatori (asterisco);
   - `app-services-price-vat`: Prezzo e IVA (%) affiancati, sui campi `price` e `vatRate`; con `isPriceMandatory`
     l'asterisco sul prezzo;
   - `app-services-period-prices`: "Abilita variazioni di prezzo per periodo" con la sua (i) e un pannello per
@@ -181,7 +181,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   pannello resta aperto. Durante una GET i campi della sua tab sono bloccati e Modifica è spento. Se fallisce la
   lettura all'apertura il pannello si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e
   Riprova, che riapre il pannello; per un 404 solo Chiudi); se fallisce una tab letta dopo, al posto dei suoi campi
-  compaiono il messaggio e Riprova (`retryTab()`), e il pannello resta aperto.
+  compaiono il messaggio e Riprova (`retryTab()`), e il pannello resta aperto; anche tornando sulla tab si rilegge. Il
+  messaggio sparisce quando comincia la rilettura (`loadTab`).
 - I dati letti sono il confronto per le modifiche non salvate (`pristine`, aggiornato tab per tab).
 - Controllo di versione, una versione per tab: ogni GET di tab porta `version`, che il pannello tiene per quella tab
   (`versions`) e che il Salva della tab rimanda nell'header `If-Match`; salvare una tab non cambia la versione delle
@@ -192,10 +193,14 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   le regole delle letture qui sopra.
 - La richiesta al backend è in
   `shared documentation/Modifiche per il backend/impostazioni/Servizi - Frontend requests.md`.
-- **Modifica** rende modificabile la tab aperta e mostra **Annulla** (rimette i valori letti e torna in sola
-  lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
+- **Modifica** rende modificabile la tab aperta e mostra **Annulla** (rimette i valori letti, toglie gli
+  errori del backend con `clearApiFieldErrors`, perché `reset()` di Angular non li toglie dai campi non cambiati, e torna in
+  sola lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
 - Spinner su Salva e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(updated)`); se
   fallisce resta aperto in modifica, errori dei campi di primo livello sotto il campo, gli altri sopra i bottoni.
+- Ogni interruttore ha il suo `[error]`. I campi senza un posto per l'errore (`service-field-errors.ts`: la casella del
+  prezzo per servizio, le scelte e i campi non mostrati dei tavoli, le disponibilità della stagione con i prezzi per
+  periodo) lo mostrano sopra i bottoni, anche nell'aggiunta.
 - I campi obbligatori (nome e descrizione nella lingua dell'utente) contano solo sulla tab Info Generali, gli altri
   controlli (prezzi, coppie Dalle / alle con `timeRange`) solo sulla loro tab.
 - Cambiare tab in modifica con modifiche non salvate chiede "Modifiche non salvate" (Resta: si rimane sulla tab,
@@ -214,7 +219,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   servizio creato; poi, se c'è, l'immagine (sotto).
 - Obbligatori, come nel backend: Nome e Descrizione nella lingua dell'utente, il nome nelle altre lingue che hanno una
   descrizione (`otherTranslationRules`: l'errore "Scrivi anche il nome in questa lingua" è sotto la descrizione, perché il
-  nome può stare in un riquadro chiuso), Prezzo, e nome e prezzo di ogni variante. I limiti dell'IVA (tra 0 e 100), delle
+  nome può stare in un riquadro chiuso), Prezzo, e nome e sovrapprezzo di ogni variante. I limiti dell'IVA (tra 0 e 100), delle
   varianti (50) e delle opzioni di prenotazione (20) non sono nel form: si vede l'errore del backend.
   Limiti: nome 255 caratteri, descrizione 10.000, nome della variante 120, ogni prezzo fino a 100.000 (anche quelli per
   periodo), numeri delle opzioni di prenotazione da 1 a 32.767 con il massimo di articoli non minore del minimo.
@@ -254,7 +259,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `app-services-limits`, in quest'ordine, poi l'interruttore "Abilita acquisto online" (`isOnlinePurchaseEnabled`).
 - Prezzo (obbligatorio) e IVA (%) affiancati, con "€" scritto accanto ai campi in euro, come nelle altre pagine. L'IVA
   vuota vuol dire senza aliquota; un'aliquota non ammessa la rifiuta il backend (`catalog.vat_rate_not_allowed`).
-- Varianti: "Aggiungi nuova variante", righe Nome variante + Prezzo (tutti e due obbligatori) + cestino.
+- Varianti: "Aggiungi nuova variante", righe Nome variante + Sovrapprezzo (tutti e due obbligatori) + cestino. Il
+  sovrapprezzo (`price`) si somma al prezzo del servizio, o a quello del periodo: 0 per una variante che costa uguale. Su
+  telefono il nome sta su una riga, sovrapprezzo e cestino su quella sotto.
 - Su telefono i riquadri della tab hanno 0.75rem di margine ai lati, così l'interruttore dei prezzi per periodo e
   la sua (i) stanno su una riga a 412px.
 
@@ -347,19 +354,26 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   nelle lingue, Immagine servizio con le icone `StandardServiceIcon`, Metti in evidenza).
 - Prezzi (`app-hourly-service-prices-tab`), in quest'ordine:
   - Prezzo (obbligatorio, 0-100.000) e IVA (`app-services-price-vat`); l'IVA ha l'asterisco (`isVatMandatory`) finché non
-    ce l'hanno tutte le disponibilità in vigore e delle opzioni di prenotazione, almeno una, come nel backend;
+    ce l'hanno tutte le disponibilità che si mandano, in vigore e delle opzioni di prenotazione, almeno una, come nel
+    backend;
   - "Abilita variazioni di prezzo per periodo" con `app-services-period-prices` senza `periodPrices`: acceso, ogni
     periodo ha sotto le date le sue Opzioni disponibilità (`periodAvailabilities`); spento, ce n'è un blocco solo che
     vale per tutta la stagione (`availabilityOptions`);
   - Limiti e "Abilita acquisto online".
 - Si mandano solo le disponibilità in vigore, l'altro elenco è `[]` (`withAvailabilitiesInForce`): il backend ne tiene un
   tipo solo.
+- Una disponibilità lasciata vuota (tutti i giorni e nient'altro) non si manda, non conta per l'IVA e non è una modifica
+  da perdere (`withoutEmptyAvailabilities`): un periodo senza disponibilità non è nell'elenco, un'opzione di prenotazione
+  ha `availabilityOption` `null`. Fa eccezione quella che era già salvata così, che torna come letta finché non la si toglie
+  (`isSaved` di `ServiceAvailabilityOptionDraft`, che non si manda). Il form è `HourlyServiceDraft`, le richieste restano
+  quelle del contratto.
 - Prenotazioni (`app-hourly-service-bookings-tab`): sezione "Opzioni di prenotazione" come negli altri servizi
   (titolo, bottone blu "Aggiungi opzioni di prenotazione", un riquadro per opzione con la X, nessuno all'apertura).
   - Ogni riquadro ha la riga Periodo Dal/al (`app-filled-date-field`, "al" con `minDate` = "Dal", allineati con
     Dalle/alle) e sotto lo stesso blocco `app-services-availability-option` dei periodi.
-  - Entità `HourlyServiceBookingOption`, elenco `bookingOptions`: `ServiceBookingOption` più `availabilityOption`. Il form
-    mostra solo date e disponibilità; gli altri campi tornano come sono stati letti.
+  - Entità `HourlyServiceBookingOption` (nel form `HourlyServiceBookingOptionDraft`), elenco `bookingOptions`:
+    `ServiceBookingOption` più `availabilityOption`. Il form mostra solo date e disponibilità; gli altri campi tornano
+    come sono stati letti.
   - Sul telefono la sezione e i riquadri hanno meno margini ai lati.
 - Salva: `POST /api/catalog/services/create-hourly-service` (`CatalogService.createHourlyService`), ripulito a ogni livello
   con `onlyFieldsOf` (anche periodi, opzioni e fasce); risponde con l'id del servizio creato, poi parte l'immagine.
@@ -375,7 +389,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   - Fasce orarie disponibili: casella e prezzo in € per 10, 15, 30, 45 min, 1 hr, 1 hr e 30 min, 2 e 3 hr (enum
     `ServiceTimeSlot`), più Personalizzato con casella, minuti e prezzo;
   - IVA (%), Max prenotazioni per fascia oraria e l'interruttore Fasce orarie fisse.
-- Entità `ServicePeriodAvailability`, `ServiceAvailabilityOption`, `ServiceTimeSlotPrice`.
+- Entità `ServicePeriodAvailability`, `ServiceAvailabilityOption`, `ServiceTimeSlotPrice`; nel form
+  `ServicePeriodAvailabilityDraft` e `ServiceAvailabilityOptionDraft`.
 - Controlli come nel backend (`serviceAvailabilityRules`): fine dopo l'inizio, almeno un giorno, prezzo obbligatorio
   nelle fasce accese (0-100.000), minuti della personalizzata 1-1.440 e obbligatori se è accesa o ha un prezzo, massimo
   prenotazioni 1-32.767. Accendendo una fascia il campo che manca si segna subito.

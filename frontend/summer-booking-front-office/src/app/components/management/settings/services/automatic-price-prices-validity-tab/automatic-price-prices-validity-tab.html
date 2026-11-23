@@ -4,7 +4,10 @@
   [isPriceMandatory]="true"
 />
 
-<app-toggle [formField]="form().isOnlinePurchaseEnabled">
+<app-toggle
+  [formField]="form().isOnlinePurchaseEnabled"
+  [error]="validationText.text(form().isOnlinePurchaseEnabled)"
+>
   {{ 'management.settings.services.form.prices.online_purchase' | translate }}
 </app-toggle>
 

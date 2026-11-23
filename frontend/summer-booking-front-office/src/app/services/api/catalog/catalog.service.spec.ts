@@ -326,7 +326,7 @@ describe('CatalogService', () => {
       isHighlighted: true,
       price: 1.5,
       vatRate: 10,
-      variants: [{ variantName: 'Grande', price: 2 }],
+      variants: [{ variantName: 'Grande', price: 0.5 }],
       isPeriodPricingEnabled: true,
       periodPrices: [{ idPeriod: 1, price: 1.8 }],
       idSectors: ['s1'],
@@ -431,7 +431,7 @@ describe('CatalogService', () => {
       idBarService: 'b1',
       price: 1,
       vatRate: 10,
-      variants: [{ variantName: 'Doppio', price: 1.8 }],
+      variants: [{ variantName: 'Doppio', price: 0.8 }],
       isPeriodPricingEnabled: true,
       periodPrices: [{ idPeriod: 1, price: 1.2 }],
       idSectors: ['s1'],
@@ -903,13 +903,20 @@ describe('CatalogService', () => {
       maxPerSlot: 3,
       availabilityOption: option.clean,
     });
-    const request = { idHourlyService: 'h1', bookingOptions: [bookingOption] };
+    const withoutAvailability = new HourlyServiceBookingOption();
+    const request = {
+      idHourlyService: 'h1',
+      bookingOptions: [bookingOption, withoutAvailability],
+    };
 
     catalog
       .updateHourlyServiceBooking(
         Object.assign(new HourlyServiceUpdateBookingRequest(), {
           ...request,
-          bookingOptions: [{ ...bookingOption, availabilityOption: option.sent }],
+          bookingOptions: [
+            { ...bookingOption, availabilityOption: option.sent },
+            withoutAvailability,
+          ],
           unexpectedFlag: 'extra-field',
         }),
         null,

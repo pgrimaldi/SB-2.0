@@ -1,11 +1,13 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS, provideNativeDateAdapter } from '@angular/material/core';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
 import { TableServiceBookingPayment } from '../../../../../entities/enums/table-service-booking-payment';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { TableServiceAvailabilityDay } from '../../../../../entities/settings/services/table-service-availability-day';
 import { TableServiceSelectedAvailabilityBookings } from '../../../../../entities/settings/services/table-service-selected-availability-bookings';
 import { TableServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/table-service-selected-general-info';
@@ -130,6 +132,38 @@ describe('TableServiceEditItemPanel', () => {
       maxBookingPerTimeSlotQuantity: 5,
     });
     expect(request.availabilities[0].days[5]).toMatchObject({ dayOfWeek: 6, otherTimeSlots });
+  });
+
+  it('should say above the buttons an error on a field with no place for it, with Salva on', async () => {
+    const { panel, save, updateTableServiceAvailabilityBookings } = await setup({
+      minSeatPerBookingQuantity: 2,
+    });
+    const refuse = (field: string) =>
+      updateTableServiceAvailabilityBookings.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: {
+                status: 400,
+                code: ApiErrorCode.ValidationFailed,
+                errors: [{ field, code: ApiErrorCode.ValidationInvalid }],
+              },
+            }),
+        ),
+      );
+
+    panel['startEdit']();
+    for (const field of ['minSeatPerBookingQuantity', 'bookingPayment', 'totalSeatQuantity']) {
+      refuse(field);
+      await save();
+      expect(panel['error']()?.code).toBe(ApiErrorCode.ValidationFailed);
+      expect(panel['isSaveDisabled']()).toBe(false);
+    }
+    refuse('tableGroups');
+    await save();
+    expect(panel['error']()).toBeNull();
+    expect(panel['draftForm'].tableGroups().errors()).toHaveLength(1);
   });
 
   it('should show the same hours for all the days when two or more have the same', async () => {

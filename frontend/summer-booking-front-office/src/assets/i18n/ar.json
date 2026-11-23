@@ -125,7 +125,7 @@
       "invalid_image": "يجب أن تكون الصورة بصيغة PNG أو JPEG أو WebP وألا يتجاوز حجمها 5 ميغابايت."
     },
     "catalog": {
-      "sector_in_use": "القطاع/الصف {{sectorName}} مستخدم ولا يمكن حذفه: المواقع على الخريطة {{mapSpots}}، قوائم الأسعار {{priceLists}}، حدود الإقامة {{stayLimits}}، الخصومات {{discounts}}.",
+      "sector_in_use": "القطاع/الصف {{sectorName}} مستخدم ولا يمكن حذفه: المواقع على الخريطة {{mapSpots}}، قوائم الأسعار {{priceLists}}، حدود الإقامة {{stayLimits}}، الخصومات {{discounts}}، الخدمات {{services}}، الأسعار التلقائية {{automaticPrices}}.",
       "sector_name_taken": "يوجد بالفعل قطاع/صف بهذا الاسم.",
       "invalid_image": "يجب أن تكون الصورة بصيغة PNG أو JPEG أو WebP وألا يتجاوز حجمها 5 ميغابايت.",
       "invalid_pdf": "يجب أن يكون الملف بصيغة PDF وألا يتجاوز حجمه 10 ميغابايت.",
@@ -1479,7 +1479,8 @@
             "variants": {
               "title": "المتغيرات",
               "add": "إضافة متغير",
-              "name": "اسم المتغير"
+              "name": "اسم المتغير",
+              "surcharge": "سعر إضافي"
             },
             "online_purchase": "تفعيل الشراء عبر الإنترنت",
             "period_pricing": {

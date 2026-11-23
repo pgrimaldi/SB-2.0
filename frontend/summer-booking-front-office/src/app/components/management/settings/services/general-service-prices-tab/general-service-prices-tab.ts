@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { StandardServiceAddItemRequest } from '../../../../../entities/settings/services/standard-service-add-item-request';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
@@ -26,4 +27,6 @@ export class GeneralServicePricesTab {
   readonly form = input.required<FieldTree<StandardServiceAddItemRequest>>();
   /** The periods of the current season, each with its own price when the toggle is on. */
   readonly periods = input<readonly SeasonPeriodItem[]>([]);
+
+  protected readonly validationText = inject(ValidationTextBehaviour);
 }

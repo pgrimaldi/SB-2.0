@@ -34,7 +34,10 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
@@ -364,6 +367,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.setImage(null);
       this.imageRemovalError.set(null);
     }
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -444,6 +448,11 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -563,13 +572,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected retryTab(): void {
-    const tab = this.selectedTab() as PanelTab;
-    this.tabErrors.update((errors) => {
-      const next = new Map(errors);
-      next.delete(tab);
-      return next;
-    });
-    this.loadTab(tab);
+    this.loadTab(this.selectedTab());
   }
 
   private reset(): void {

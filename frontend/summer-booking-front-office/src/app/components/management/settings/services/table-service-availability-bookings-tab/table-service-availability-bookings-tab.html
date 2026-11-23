@@ -16,6 +16,9 @@
   [depositAmount]="form().depositAmount"
 />
 
-<app-toggle [formField]="form().isOnlineBookingEnabled">
+<app-toggle
+  [formField]="form().isOnlineBookingEnabled"
+  [error]="validationText.text(form().isOnlineBookingEnabled)"
+>
   {{ 'management.settings.services.form.tables.online_booking' | translate }}
 </app-toggle>

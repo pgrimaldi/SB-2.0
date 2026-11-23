@@ -73,7 +73,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   Angular lo toglie appena il campo cambia.
 - `submit()` non invia nulla se un campo è sbagliato e segna tutti i campi come toccati, così ogni errore si vede.
 - Un errore che non ha un campo dove andare finisce nel messaggio generale: sotto il riquadro resta solo l'errore che
-  non riguarda un campo (es. rete assente).
+  non riguarda un campo (es. rete assente). Vale anche per un campo del form senza un posto per il suo errore (una scelta
+  `app-radio-group`, un campo non mostrato): il pannello lo passa come ultimo argomento di `apiFieldErrorsOrGeneral`
+  (es. `hiddenTableServiceFields`), così Salva non resta spento senza spiegazione.
 - Un codice del backend che arriva senza `errors[]` ma riguarda un solo campo (es. `pricing.period_name_taken`, nome
   già usato; `account.email_taken` sotto Email) il form lo mette sotto quel campo, restituendo da `submit()` `apiFieldError(campo, codice)`. Un errore del
   backend su un campo si crea solo con `apiFieldError`, mai scrivendo l'oggetto con il suo `kind`.

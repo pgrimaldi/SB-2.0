@@ -31,8 +31,8 @@ Rotta `/settings/rows-and-sectors` · vista `views/settings/rows-and-sectors/` (
   backend (sezione 2 del documento delle richieste).
   - Spinner a pagina intera, poi tabella ricaricata e righe tolte dalla selezione.
   - Un errore, per esempio 404 `catalog.sector_not_found` o 409 `catalog.sector_in_use`
-    (`error.catalog.sector_in_use` con nome e utilizzi: `sectorName` arriva dal backend anche con un id solo), va nel
-    popup "Operazione non riuscita".
+    (`error.catalog.sector_in_use` con nome e utilizzi, anche i servizi e i prezzi automatici limitati a quel settore:
+    `sectorName` arriva dal backend anche con un id solo), va nel popup "Operazione non riuscita".
   - Dopo `catalog.sector_not_found` (settore eliminato nel frattempo) la pagina ricarica la tabella e toglie dalla
     selezione gli id dell'azione (`reloadIfGone`): dopo "Elimina selezione" la selezione si svuota, perché con il tutto o
     niente non è stato eliminato nulla e non si sa quale id manca.

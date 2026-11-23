@@ -125,7 +125,7 @@
       "invalid_image": "L'immagine deve essere PNG, JPEG o WebP e non superare i 5 MB."
     },
     "catalog": {
-      "sector_in_use": "Il settore/fila {{sectorName}} è in uso e non si può eliminare: postazioni sulla mappa {{mapSpots}}, listini {{priceLists}}, limiti di soggiorno {{stayLimits}}, sconti {{discounts}}.",
+      "sector_in_use": "Il settore/fila {{sectorName}} è in uso e non si può eliminare: postazioni sulla mappa {{mapSpots}}, listini {{priceLists}}, limiti di soggiorno {{stayLimits}}, sconti {{discounts}}, servizi {{services}}, prezzi automatici {{automaticPrices}}.",
       "sector_name_taken": "Esiste già un settore/fila con questo nome.",
       "invalid_image": "L'immagine deve essere PNG, JPEG o WebP e non superare i 5 MB.",
       "invalid_pdf": "Il file deve essere un PDF e non superare i 10 MB.",
@@ -1479,7 +1479,8 @@
             "variants": {
               "title": "Varianti",
               "add": "Aggiungi nuova variante",
-              "name": "Nome variante"
+              "name": "Nome variante",
+              "surcharge": "Sovrapprezzo"
             },
             "online_purchase": "Abilita acquisto online",
             "period_pricing": {

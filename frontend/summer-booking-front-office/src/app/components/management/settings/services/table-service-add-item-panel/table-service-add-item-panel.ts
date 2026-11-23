@@ -44,7 +44,7 @@ import { toApiProblem } from '../../../../../services/api/errors/to-api-problem'
 import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
-import { serviceErrorFields } from '../service-field-errors';
+import { hiddenTableServiceFields, serviceErrorFields } from '../service-field-errors';
 import { otherTranslationRules, tableServiceRules } from '../service-form-rules';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { TableServiceAvailabilityBookingsTab } from '../table-service-availability-bookings-tab/table-service-availability-bookings-tab';
@@ -182,8 +182,11 @@ export class TableServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.showTabOf(problem);
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
+        return apiFieldErrorsOrGeneral(
+          problem,
+          this.draftForm,
+          (general) => this.error.set(general),
+          hiddenTableServiceFields(this.draft()),
         );
       } finally {
         this.isSaving.set(false);

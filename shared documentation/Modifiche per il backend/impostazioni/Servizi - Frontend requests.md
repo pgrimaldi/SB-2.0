@@ -129,7 +129,7 @@ unico per tutte le API**: `resource.version_conflict`.
 {
   "price": 1,
   "vatRate": 10,
-  "variants": [{ "variantName": "Doppio", "price": 1.8 }],
+  "variants": [{ "variantName": "Doppio", "price": 0.8 }],
   "isPeriodPricingEnabled": true,
   "periodPrices": [{ "idPeriod": 0, "price": 1.2 }],
   "idSectors": ["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"],
@@ -786,6 +786,10 @@ si adegui.
    sviluppatore", in fondo). Per un servizio con un'icona fuori da questi 22 la lettura dà un nome che identifica quella
    riga (per esempio il suo `name`), diverso dai 22, e `update-bar-service-general` lo riceve uguale e lascia l'icona
    com'è.
+3. **Servizi e prezzi automatici già limitati solo a settori eliminati** (`is_sector_restricted` vero): la lettura darebbe
+   `idSectors` `[]`, che vuol dire "tutti i settori", e il primo Salva toglierebbe il limite. Da ora l'eliminazione di un
+   settore usato è bloccata (`Settori e file - Frontend requests.md`, sezione 2); come sistemare i dati di prima lo decide
+   lo sviluppatore. Vale per le sezioni 19, 28, 35 e 43.
 
 ### Errori
 
@@ -857,7 +861,7 @@ Salva del pannello "Aggiungi nuovo servizio bar". Crea un servizio con `kind` `b
   "isHighlighted": true,
   "price": 1.5,
   "vatRate": 10,
-  "variants": [{ "variantName": "Grande", "price": 2 }],
+  "variants": [{ "variantName": "Grande", "price": 0.5 }],
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     { "idPeriod": 0, "price": 1.5 },
@@ -893,7 +897,7 @@ Salva del pannello "Aggiungi nuovo servizio bar". Crea un servizio con `kind` `b
 | `isHighlighted` | boolean | `is_highlighted` | "Metti in evidenza". |
 | `price` | number | `price` | In euro, da 0 a 100.000. Obbligatorio. |
 | `vatRate` | number o `null` | `vat_rate` | In percentuale. `null` = senza aliquota: si salva la natura predefinita (`VatPolicy.ResolveAsync`, `VatRules.DefaultExemptNature`), come vuole il vincolo `ck_catalog_service_sale_items_vat`. |
-| `variants` | array | `catalog.service_sale_item_variants` | `variantName` = `name`, `price`, tutti e due obbligatori; nell'ordine ricevuto. `[]` = nessuna variante. |
+| `variants` | array | `catalog.service_sale_item_variants` | `variantName` = `name`, `price`, tutti e due obbligatori; nell'ordine ricevuto. `[]` = nessuna variante. `price` è il **sovrapprezzo**, che si somma al prezzo del servizio o del periodo come oggi (`ServiceSaleItemVariant`, `QuoteService.PriceServicesAsync`): un servizio a 1,00 con "Doppio" 0,80 costa 1,80. |
 | `isPeriodPricingEnabled` | boolean | `has_period_prices` | |
 | `periodPrices` | array | `catalog.service_sale_item_period_prices` | `idPeriod` = la `key` del periodo di `catalog/tariff-periods` (da 0), `price`. Il frontend manda una riga per ogni periodo della stagione corrente: una riga con `price` `null` non si salva. |
 | `idSectors` | array di string (UUID) | `is_sector_restricted` e `catalog.service_sale_item_sectors` | Gli `id` della sezione 25. `[]` = tutti i settori (`is_sector_restricted` falso); altrimenti solo questi (vero). |
@@ -966,7 +970,7 @@ Risposta 200:
 {
   "price": 1,
   "vatRate": 10,
-  "variants": [{ "variantName": "Doppio", "price": 1.8 }],
+  "variants": [{ "variantName": "Doppio", "price": 0.8 }],
   "isPeriodPricingEnabled": true,
   "periodPrices": [{ "idPeriod": 0, "price": 1.2 }],
   "idSectors": ["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"],
@@ -1053,7 +1057,7 @@ prezzi per periodo, settori e acquisto online.
   "idBarService": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01",
   "price": 1.3,
   "vatRate": 10,
-  "variants": [{ "variantName": "Doppio", "price": 1.8 }],
+  "variants": [{ "variantName": "Doppio", "price": 0.8 }],
   "isPeriodPricingEnabled": true,
   "periodPrices": [
     { "idPeriod": 0, "price": 1.2 },
@@ -1444,6 +1448,12 @@ Nella tab Prezzi sono di due tipi, e **vale sempre uno solo**, come nel backend 
 L'altro elenco è sempre `[]`, nelle letture e nei salvataggi: se l'utente cambia l'interruttore e salva, le disponibilità
 dell'altro tipo non ci sono più.
 
+**Arrivano solo le disponibilità in cui l'utente ha scritto qualcosa**: il pannello mostra un riquadro vuoto dove non ce ne
+sono, ma non lo manda. `availabilityOptions` può essere `[]`, `periodAvailabilities` ha solo i periodi con almeno una
+disponibilità (`[]` se nessuno) e `availabilityOption` di un'opzione di prenotazione può essere `null`, come il backend
+accetta già (`SaveServiceRequestValidator`, `HourlyOptions`). Una disponibilità vuota che era già salvata torna come è stata
+letta, finché l'utente non la toglie.
+
 ```json
 {
   "startTime": "09:00",
@@ -1490,8 +1500,8 @@ toglie.
 Ogni elemento di `bookingOptions` ha **tutti i campi della sezione 17** più `availabilityOption`, la sua disponibilità (la
 riga di `catalog.service_hourly_options` con il suo `booking_option_id`, `Hourly` di `BookingOptionDto`). Il pannello mostra
 solo `dateFrom`, `dateTo` e `availabilityOption`: gli altri campi li rimanda come li ha letti, e per un'opzione nuova sono
-`null` (`weekdays` `[]`). `availabilityOption` è `null` in lettura per un'opzione che non l'ha; il pannello ne mostra una
-vuota e nel salvataggio c'è sempre.
+`null` (`weekdays` `[]`). `availabilityOption` è `null` per un'opzione che non l'ha, in lettura e nel salvataggio: il
+pannello ne mostra una vuota e la manda solo se l'utente ci scrive qualcosa.
 
 ### Da chiedere allo sviluppatore prima di scrivere codice
 
@@ -1580,9 +1590,9 @@ Salva del pannello "Aggiungi nuovo servizio orario". Crea un servizio con `kind`
 | `price`, `vatRate` | `price`, `vat_rate` | Regole qui sopra. |
 | `isPeriodPricingEnabled` | `has_period_prices` | |
 | `availabilityOptions` | `catalog.service_hourly_options` senza `period_group_key` né `booking_option_id` | "Disponibilità"; nell'ordine ricevuto. |
-| `periodAvailabilities` | `catalog.service_hourly_options` con `period_group_key` | `idPeriod` = la `key` di `catalog/tariff-periods`; una voce per ogni periodo della stagione corrente, con le sue disponibilità nell'ordine ricevuto. |
+| `periodAvailabilities` | `catalog.service_hourly_options` con `period_group_key` | `idPeriod` = la `key` di `catalog/tariff-periods`; una voce per ogni periodo della stagione corrente che ha almeno una disponibilità, con le sue disponibilità nell'ordine ricevuto. |
 | `idSectors`, `isOnlinePurchaseEnabled` | come la sezione 17 | |
-| `bookingOptions` | `catalog.service_booking_options` con la disponibilità in `catalog.service_hourly_options` (`booking_option_id`) | "Opzioni di prenotazione"; nell'ordine ricevuto. |
+| `bookingOptions` | `catalog.service_booking_options` con la disponibilità in `catalog.service_hourly_options` (`booking_option_id`) | "Opzioni di prenotazione"; nell'ordine ricevuto. `availabilityOption` `null` = senza disponibilità. |
 
 Risposta: **201 con il solo id del servizio creato**, come stringa JSON, come la sezione 17. Serve all'immagine (sezione 24).
 
@@ -2172,6 +2182,7 @@ API 17-24, con un token con `CatalogRead` e `CatalogSettings`:
 42. Giorni e orari tornano come sono stati mandati: `"2026-07-01T00:00:00.000Z"`, `"08:30"`.
 43. `price` `null` o assente: 400 con `validation.required` su `price`; -1 o 100.001: `validation.out_of_range`. Una
     variante con il nome vuoto o senza prezzo: `validation.required` su `variants[0].variantName` o `variants[0].price`.
+    Un servizio a 1 con una variante a 0.8: il preventivo con quella variante dà 1.8, come oggi.
 44. `POST` di `image` con un PNG sull'id appena creato: 200; `get-bar-service-general-info` ha `icon` `null` e l'indirizzo
     del file in `imageUrl`. Dopo `update-bar-service-general` con `icon` `null`, `imageUrl` resta; con `icon` `"Coffee"` è
     `null`. Due letture di fila hanno la stessa `version` anche se l'indirizzo cambia. Su un servizio con un'icona,
@@ -2226,7 +2237,8 @@ API 33-39, con un token con `CatalogRead` e `CatalogSettings`:
     `bar` o `normal`: 404 `service.not_found`.
 61. Con `isPeriodPricingEnabled` falso e una `availabilityOptions`: 201, e la lettura la restituisce con
     `periodAvailabilities` `[]`. Poi `update-hourly-service-prices` con `isPeriodPricingEnabled` vero e un periodo: 204, e la
-    lettura dà solo quello. I due elenchi pieni insieme: 400 `validation.invalid` su quello non in vigore.
+    lettura dà solo quello. I due elenchi pieni insieme: 400 `validation.invalid` su quello non in vigore. Su un servizio con
+    due periodi, un salvataggio con uno solo: 204, la lettura dà solo quello e l'altro periodo non è più usato dal servizio.
 62. `price` `null`: 400 `validation.required`. `vatRate` `null` con una disponibilità senza aliquota: 400 `validation.invalid`
     su `vatRate`; con tutte le disponibilità a 10: 201 e la lettura dà `vatRate` 10. Su un servizio con una natura dell'IVA,
     `vatRate` `null`: 204 e la natura non cambia.
@@ -2235,7 +2247,8 @@ API 33-39, con un token con `CatalogRead` e `CatalogSettings`:
 64. Una disponibilità con 240 minuti accesi: la lettura dà `FourHours` dopo le otto fasce, e rimandata uguale resta salvata.
     Una disponibilità salvata senza giorni: la lettura dà `daysOfWeek` `[]`.
 65. Un'opzione di prenotazione con giorni, orari, massimi e intervallo già salvati: `update-hourly-service-booking` con gli
-    stessi valori letti non li cambia. Un'opzione senza disponibilità: la lettura dà `availabilityOption` `null`.
+    stessi valori letti non li cambia. Un'opzione senza disponibilità: la lettura dà `availabilityOption` `null`, e rimandata
+    con `null` resta senza.
 
 API 40-46, con un token con `CatalogRead` e `CatalogSettings`:
 

@@ -67,4 +67,13 @@
   :host {
     padding-inline: 0.75rem;
   }
+
+  // The name on its own line, the surcharge and the bin under it.
+  .services__popup__alternatives__variant {
+    flex-wrap: wrap;
+  }
+
+  .services__popup__alternatives__name {
+    flex-basis: 100%;
+  }
 }

@@ -9,7 +9,7 @@ import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behav
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { HourlyServiceAddItemRequest } from '../../../../../entities/settings/services/hourly-service-add-item-request';
-import { HourlyServiceBookingOption } from '../../../../../entities/settings/services/hourly-service-booking-option';
+import { HourlyServiceBookingOptionDraft } from '../../../../../entities/settings/services/hourly-service-booking-option-draft';
 import { Language } from '../../../../../entities/shared/language';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
@@ -134,12 +134,16 @@ describe('HourlyServiceAddItemPanel', () => {
     expect(panel['isSaveDisabled']()).toBe(true);
     form.availabilityOptions[0].vatRate().value.set(22);
     expect(panel['isSaveDisabled']()).toBe(false);
-    form.bookingOptions().value.set([new HourlyServiceBookingOption()]);
+    form.bookingOptions().value.set([new HourlyServiceBookingOptionDraft()]);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    form.bookingOptions[0].availabilityOption.startTime().value.set('09:00');
     expect(panel['isSaveDisabled']()).toBe(true);
     form.bookingOptions[0].availabilityOption.vatRate().value.set(10);
     expect(panel['isSaveDisabled']()).toBe(false);
 
     form.isPeriodPricingEnabled().value.set(true);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    form.periodAvailabilities[0].availabilityOptions[0].startTime().value.set('09:00');
     expect(panel['isSaveDisabled']()).toBe(true);
     form.periodAvailabilities[0].availabilityOptions[0].vatRate().value.set(22);
     expect(panel['isSaveDisabled']()).toBe(false);
@@ -215,7 +219,7 @@ describe('HourlyServiceAddItemPanel', () => {
     expect(panel['isSaveDisabled']()).toBe(false);
   });
 
-  it('should send only the availabilities in force', async () => {
+  it('should send only the availabilities in force, without those left empty', async () => {
     const { panel, form, fill, save, createHourlyService } = await setup({
       createHourlyService: vi.fn(() =>
         throwError(() => new HttpErrorResponse({ status: 500, error: null })),
@@ -223,18 +227,34 @@ describe('HourlyServiceAddItemPanel', () => {
     });
 
     await fill();
+    form.bookingOptions().value.set([new HourlyServiceBookingOptionDraft()]);
     await save();
     expect(createHourlyService.mock.lastCall?.[0]).toMatchObject({
-      availabilityOptions: [{ daysOfWeek: [1, 2, 3, 4, 5, 6, 7] }],
+      availabilityOptions: [],
       periodAvailabilities: [],
+      bookingOptions: [{ availabilityOption: null }],
+    });
+
+    form.availabilityOptions[0].startTime().value.set('09:00');
+    form.periodAvailabilities[0].availabilityOptions[0].startTime().value.set('10:00');
+    form.bookingOptions[0].availabilityOption.startTime().value.set('11:00');
+    await save();
+    expect(createHourlyService.mock.lastCall?.[0]).toMatchObject({
+      availabilityOptions: [{ startTime: '09:00', daysOfWeek: [1, 2, 3, 4, 5, 6, 7] }],
+      periodAvailabilities: [],
+      bookingOptions: [{ availabilityOption: { startTime: '11:00' } }],
     });
 
     form.isPeriodPricingEnabled().value.set(true);
     await save();
     expect(createHourlyService.mock.lastCall?.[0]).toMatchObject({
       availabilityOptions: [],
-      periodAvailabilities: [{ idPeriod: 3 }],
+      periodAvailabilities: [{ idPeriod: 3, availabilityOptions: [{ startTime: '10:00' }] }],
     });
+
+    form.periodAvailabilities[0].availabilityOptions[0].startTime().value.set(null);
+    await save();
+    expect(createHourlyService.mock.lastCall?.[0].periodAvailabilities).toEqual([]);
     expect(panel['draft']().availabilityOptions).toHaveLength(1);
   });
 

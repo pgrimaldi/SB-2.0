@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { AutomaticPriceAddItemRequest } from '../../../../../entities/settings/services/automatic-price-add-item-request';
 import { AutomaticPriceServices } from '../../../../../entities/settings/services/automatic-price-services';
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
@@ -30,4 +31,6 @@ export class AutomaticPricePricesValidityTab {
   readonly services = input<AutomaticPriceServices | null>(null);
   /** Only to look at: adding and removing periods and time slots are off. */
   readonly isReadonly = input(false);
+
+  protected readonly validationText = inject(ValidationTextBehaviour);
 }

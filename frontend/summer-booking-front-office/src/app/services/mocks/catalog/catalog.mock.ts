@@ -1347,7 +1347,7 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
       isHighlighted: true,
       price: 1,
       vatRate: 10,
-      variants: [{ variantName: 'Doppio', price: 1.8 }],
+      variants: [{ variantName: 'Doppio', price: 0.8 }],
       isPeriodPricingEnabled: true,
       periodPrices: [{ idPeriod: 0, price: 1.2 }],
       isOnlinePurchaseEnabled: true,
@@ -2388,6 +2388,21 @@ export function servicesUsingPeriod(key: number): string[] {
   return [...new Set(names.filter((name): name is string => !!name))];
 }
 
+/** How many services (bar, standard and hourly) and automatic prices are limited to a sector. */
+export function sectorLimits(idSector: string): { services: number; automaticPrices: number } {
+  const limits: { idSectors: string[] }[] = [
+    ...BAR_SERVICES.map(detailsOf),
+    ...STANDARD_SERVICES.map(standardDetailsOf),
+    ...HOURLY_SERVICES.map(hourlyDetailsOf),
+  ];
+  const countOf = (items: readonly { idSectors: string[] }[]): number =>
+    items.filter(({ idSectors }) => idSectors.includes(idSector)).length;
+  return {
+    services: countOf(limits),
+    automaticPrices: countOf(AUTOMATIC_PRICES.map(automaticDetailsOf)),
+  };
+}
+
 function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
   return (
     HOURLY_SERVICE_DETAILS.get(row.idHourlyService ?? '') ??
@@ -2583,7 +2598,7 @@ function availabilitiesOf(body: CreateHourlyServiceBody): ServiceAvailabilityOpt
     ...(body.isPeriodPricingEnabled
       ? (body.periodAvailabilities ?? []).flatMap((period) => period.availabilityOptions)
       : (body.availabilityOptions ?? [])),
-    ...(body.bookingOptions ?? []).map((option) => option.availabilityOption),
+    ...(body.bookingOptions ?? []).flatMap(({ availabilityOption }) => availabilityOption ?? []),
   ];
 }
 
@@ -2642,8 +2657,10 @@ function hourlyPriceErrors(
 }
 
 function hourlyBookingErrors(body: CreateHourlyServiceBody): MockFieldError[] {
-  return (body.bookingOptions ?? []).flatMap((option, index) =>
-    availabilityErrors(option.availabilityOption, `bookingOptions[${index}].availabilityOption`),
+  return (body.bookingOptions ?? []).flatMap(({ availabilityOption }, index) =>
+    availabilityOption
+      ? availabilityErrors(availabilityOption, `bookingOptions[${index}].availabilityOption`)
+      : [],
   );
 }
 

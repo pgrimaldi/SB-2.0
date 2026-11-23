@@ -125,7 +125,7 @@
       "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB."
     },
     "catalog": {
-      "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}.",
+      "sector_in_use": "The sector/row {{sectorName}} is in use and cannot be deleted: spots on the map {{mapSpots}}, price lists {{priceLists}}, stay limits {{stayLimits}}, discounts {{discounts}}, services {{services}}, automatic prices {{automaticPrices}}.",
       "sector_name_taken": "A sector/row with this name already exists.",
       "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB.",
       "invalid_pdf": "The file must be a PDF and no larger than 10 MB.",
@@ -1479,7 +1479,8 @@
             "variants": {
               "title": "Variants",
               "add": "Add new variant",
-              "name": "Variant name"
+              "name": "Variant name",
+              "surcharge": "Surcharge"
             },
             "online_purchase": "Enable online purchase",
             "period_pricing": {

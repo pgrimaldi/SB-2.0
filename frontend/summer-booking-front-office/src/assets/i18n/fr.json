@@ -125,7 +125,7 @@
       "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo."
     },
     "catalog": {
-      "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}.",
+      "sector_in_use": "Le secteur/la rangée {{sectorName}} est utilisé et ne peut pas être supprimé : emplacements sur la carte {{mapSpots}}, tarifs {{priceLists}}, limites de séjour {{stayLimits}}, remises {{discounts}}, services {{services}}, prix automatiques {{automaticPrices}}.",
       "sector_name_taken": "Un secteur/une rangée porte déjà ce nom.",
       "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo.",
       "invalid_pdf": "Le fichier doit être un PDF et ne pas dépasser 10 Mo.",
@@ -1479,7 +1479,8 @@
             "variants": {
               "title": "Variantes",
               "add": "Ajouter une variante",
-              "name": "Nom de la variante"
+              "name": "Nom de la variante",
+              "surcharge": "Supplément"
             },
             "online_purchase": "Activer l'achat en ligne",
             "period_pricing": {

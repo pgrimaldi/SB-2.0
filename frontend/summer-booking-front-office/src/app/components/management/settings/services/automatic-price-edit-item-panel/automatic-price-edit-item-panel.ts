@@ -31,7 +31,10 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
@@ -60,7 +63,7 @@ import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-sp
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { AutomaticPriceGeneralInfoTab } from '../automatic-price-general-info-tab/automatic-price-general-info-tab';
 import { AutomaticPricePricesValidityTab } from '../automatic-price-prices-validity-tab/automatic-price-prices-validity-tab';
-import { serviceFieldError } from '../service-field-errors';
+import { HIDDEN_AUTOMATIC_PRICE_FIELDS, serviceFieldError } from '../service-field-errors';
 import {
   automaticPriceRules,
   otherTranslationRules,
@@ -339,6 +342,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.setImage(null);
       this.imageRemovalError.set(null);
     }
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.error.set(null);
     this.isEditing.set(false);
@@ -397,7 +401,12 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
         }
         return (
           serviceFieldError(problem, this.draftForm) ??
-          apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
+          apiFieldErrorsOrGeneral(
+            problem,
+            this.draftForm,
+            (general) => this.error.set(general),
+            HIDDEN_AUTOMATIC_PRICE_FIELDS,
+          )
         );
       } finally {
         this.isSaving.set(false);
@@ -419,6 +428,11 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
     }
     this.loadedTabs.update((tabs) => new Set(tabs).add(tab));
     this.error.set(null);
+    this.tabErrors.update((errors) => {
+      const next = new Map(errors);
+      next.delete(tab);
+      return next;
+    });
     this.setLoading(tab, true);
     if (tab === PanelTab.GeneralInfo) {
       this.loadings.set(
@@ -520,13 +534,7 @@ export class AutomaticPriceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   protected retryTab(): void {
-    const tab = this.selectedTab() as PanelTab;
-    this.tabErrors.update((errors) => {
-      const next = new Map(errors);
-      next.delete(tab);
-      return next;
-    });
-    this.loadTab(tab);
+    this.loadTab(this.selectedTab());
   }
 
   private reset(): void {
