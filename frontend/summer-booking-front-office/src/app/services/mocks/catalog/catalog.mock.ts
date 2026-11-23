@@ -1366,6 +1366,7 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
 /** The uploaded images, by id of the service. */
 const SERVICE_IMAGES = new Map<string, string>([
   ['8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c05', '/assets/images/hub/hero-beach-mobile-863.webp'],
+  ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d03', '/assets/images/hub/hero-beach-mobile-1290.webp'],
 ]);
 
 function detailsOf(row: BarServiceRow): BarServiceAddItemRequest {
@@ -1497,6 +1498,13 @@ function barBookingOptionsOf(
   return { bookingOptions: detailsOf(row).bookingOptions };
 }
 
+function copyImage(idService: string, idCopy: string): void {
+  const image = SERVICE_IMAGES.get(idService);
+  if (image) {
+    SERVICE_IMAGES.set(idCopy, image);
+  }
+}
+
 const VAT_RATES: readonly number[] = [4, 5, 10, 22];
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
@@ -1506,12 +1514,7 @@ const BAR_SERVICE_TABLE = {
   details: BAR_SERVICE_DETAILS,
   detailsOf,
   notFoundCode: ApiErrorCode.ServiceNotFound,
-  copyMore: (id: string, idCopy: string): void => {
-    const image = SERVICE_IMAGES.get(id);
-    if (image) {
-      SERVICE_IMAGES.set(idCopy, image);
-    }
-  },
+  copyMore: copyImage,
 };
 
 /** `POST /api/catalog/services/bar-service-list`: one page of the bar services (see `serviceListAnswer`). */
@@ -1566,8 +1569,8 @@ export const createBarServiceMock = (
 
 /**
  * `POST /api/catalog/services/{id}/image` with the image in the multipart field `file`: it replaces
- * the icon or the image of the bar service. 200 with the service, here without data: the frontend
- * does not read it; 422 `catalog.invalid_image` as for the photos of the property; 404
+ * the icon or the image of the service. 200 with the service, here without data: the frontend does
+ * not read it; 422 `catalog.invalid_image` as for the photos of the property; 404
  * `service.not_found` for an unknown id; 401 without a valid access token.
  */
 export const uploadServiceImageMock = (
@@ -1575,17 +1578,24 @@ export const uploadServiceImageMock = (
 ): Observable<HttpEvent<unknown>> =>
   withImage(request, (image) => {
     const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
-    const row = BAR_SERVICES.find((item) => item.idBarService === idService);
-    if (!row) {
+    const barRow = BAR_SERVICES.find((item) => item.idBarService === idService);
+    const standardRow = STANDARD_SERVICES.find((item) => item.idStandardService === idService);
+    if (barRow) {
+      BAR_SERVICE_DETAILS.set(idService, { ...structuredClone(detailsOf(barRow)), icon: null });
+    } else if (standardRow) {
+      STANDARD_SERVICE_DETAILS.set(idService, {
+        ...structuredClone(standardDetailsOf(standardRow)),
+        icon: null,
+      });
+    } else {
       return problem(request, 404, ApiErrorCode.ServiceNotFound);
     }
-    BAR_SERVICE_DETAILS.set(idService, { ...structuredClone(detailsOf(row)), icon: null });
     SERVICE_IMAGES.set(idService, URL.createObjectURL(image));
     return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
   });
 
 /**
- * `DELETE /api/catalog/services/{id}/image`: the bar service has no image any more. 200 with the
+ * `DELETE /api/catalog/services/{id}/image`: the service has no image any more. 200 with the
  * service, here without data; 404 `service.not_found` for an unknown id; 401 without a valid access
  * token.
  */
@@ -1596,7 +1606,10 @@ export const deleteServiceImageMock = (
     return unauthorized(request);
   }
   const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
-  if (!BAR_SERVICES.some((item) => item.idBarService === idService)) {
+  if (
+    !BAR_SERVICES.some((item) => item.idBarService === idService) &&
+    !STANDARD_SERVICES.some((item) => item.idStandardService === idService)
+  ) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   SERVICE_IMAGES.delete(idService);
@@ -1607,16 +1620,25 @@ function barServiceErrors(body: CreateBarServiceBody, language: string): MockFie
   return [...generalErrors(body, language), ...barPriceErrors(body)];
 }
 
-/** Price and variants always filled, prices up to the limit; one wrong price of a period for all. */
+/** As `servicePriceErrors`, with name and price of every variant always filled. */
 function barPriceErrors(body: CreateBarServiceBody): MockFieldError[] {
   const variants = body.variants ?? [];
-  const errors: MockFieldError[] = [
-    ...requiredPriceErrors('price', body.price),
+  return [
+    ...servicePriceErrors(body),
     ...variants.flatMap(({ variantName, price }, index): MockFieldError[] => [
       ...variantNameErrors(`variants[${index}].variantName`, variantName),
       ...requiredPriceErrors(`variants[${index}].price`, price),
     ]),
   ];
+}
+
+/** The price always filled, prices up to the limit; one wrong price of a period for all. */
+function servicePriceErrors(body: {
+  price?: number | null;
+  vatRate?: number | null;
+  periodPrices?: ServicePeriodPrice[];
+}): MockFieldError[] {
+  const errors = requiredPriceErrors('price', body.price);
   if (body.vatRate != null && (body.vatRate <= 0 || body.vatRate >= 100)) {
     errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
   }
@@ -1670,6 +1692,14 @@ function vatRateNotAllowed(
     : problem(request, 422, ApiErrorCode.CatalogVatRateNotAllowed, { args: { rates: VAT_RATES } });
 }
 
+function missingNameErrors(translations: readonly ServiceTranslation[]): MockFieldError[] {
+  return translations.some(
+    ({ serviceName, description }) => description?.trim() && !serviceName?.trim(),
+  )
+    ? [{ field: 'translations', code: ApiErrorCode.ValidationInvalid }]
+    : [];
+}
+
 /**
  * Name and description in the language of the request (the user's), as the panel requires, and the
  * name in every language with a description; category and icon, when given, among the values of
@@ -1687,13 +1717,8 @@ function generalErrors(body: CreateBarServiceBody, language: string): MockFieldE
   if (typeof main?.description !== 'string' || !main.description.trim()) {
     errors.push({ field: `${at}.description`, code: ApiErrorCode.ValidationRequired });
   }
-  if (
-    translations.some(
-      (translation) => translation.description?.trim() && !translation.serviceName?.trim(),
-    ) &&
-    !errors.length
-  ) {
-    errors.push({ field: 'translations', code: ApiErrorCode.ValidationInvalid });
+  if (!errors.length) {
+    errors.push(...missingNameErrors(translations));
   }
   if (body.category != null && !Object.values(BarServiceCategory).includes(body.category)) {
     errors.push({ field: 'category', code: ApiErrorCode.ValidationInvalid });
@@ -1851,7 +1876,7 @@ const STANDARD_SERVICES: StandardServiceRow[] = (
 
 const STANDARD_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
-/** `POST /api/catalog/standard-service-list`: one page of the services (neither bar nor hourly) (see `serviceListAnswer`). */
+/** `POST /api/catalog/services/standard-service-list`: one page of the services (neither bar nor hourly) (see `serviceListAnswer`). */
 export const standardServiceListMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
@@ -1933,6 +1958,7 @@ const STANDARD_SERVICE_TABLE = {
   details: STANDARD_SERVICE_DETAILS,
   detailsOf: standardDetailsOf,
   notFoundCode: ApiErrorCode.ServiceNotFound,
+  copyMore: copyImage,
 };
 
 /** The service of the `idStandardService` of the query string, if it exists. */
@@ -1942,9 +1968,9 @@ function requestedStandardService(request: HttpRequest<unknown>): StandardServic
 }
 
 /**
- * `GET /api/catalog/get-standard-service-general-info?idStandardService=…`: the Info Generali tab
+ * `GET /api/catalog/services/get-standard-service-general-info?idStandardService=…`: the Info Generali tab
  * of the edit panel. 200 with `StandardServiceSelectedGeneralInfo` and the version of the tab, only
- * the languages written; 401 without a valid access token; 404 `service.not_found` for an unknown
+ * the languages written and the uploaded image, which the version does not cover; 401 without a valid access token; 404 `service.not_found` for an unknown
  * id.
  */
 export const standardServiceGeneralInfoMock = (
@@ -1957,16 +1983,19 @@ export const standardServiceGeneralInfoMock = (
   if (!row) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  return versionedAnswer(request, standardGeneralInfoOf(row));
+  const imageUrl = SERVICE_IMAGES.get(row.idStandardService ?? '');
+  return versionedAnswer(request, standardGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
 };
 
 /**
- * What `GET /api/catalog/get-standard-service-general-info` answers besides the version: the
- * version covers it.
+ * What `GET /api/catalog/services/get-standard-service-general-info` answers besides the version and
+ * the image: the version covers it.
  */
 function standardGeneralInfoOf(
   row: StandardServiceRow,
-): Omit<StandardServiceSelectedGeneralInfo, 'version'> {
+): Omit<StandardServiceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = standardDetailsOf(row);
   return {
     idStandardService: row.idStandardService,
@@ -1979,7 +2008,7 @@ function standardGeneralInfoOf(
 }
 
 /**
- * `GET /api/catalog/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
+ * `GET /api/catalog/services/get-standard-service-prices?idStandardService=…`: the Prezzi tab of the edit
  * panel. 200 with `StandardServiceSelectedPrices` and the version of the tab, a price only for the
  * periods that have one; 401 without a valid access token; 404 `service.not_found` for an unknown
  * id.
@@ -1998,7 +2027,7 @@ export const standardServicePricesMock = (
 };
 
 /**
- * What `GET /api/catalog/get-standard-service-prices` answers besides the version: the version
+ * What `GET /api/catalog/services/get-standard-service-prices` answers besides the version: the version
  * covers it.
  */
 function standardPricesOf(row: StandardServiceRow): Omit<StandardServiceSelectedPrices, 'version'> {
@@ -2014,7 +2043,7 @@ function standardPricesOf(row: StandardServiceRow): Omit<StandardServiceSelected
 }
 
 /**
- * `GET /api/catalog/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
+ * `GET /api/catalog/services/get-standard-service-booking-options?idStandardService=…`: the Prenotazioni tab
  * of the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there
  * are none) and the version of the tab. 401 without a valid access token; 404 `service.not_found`
  * for an unknown id.
@@ -2033,7 +2062,7 @@ export const standardServiceBookingOptionsMock = (
 };
 
 /**
- * What `GET /api/catalog/get-standard-service-booking-options` answers besides the version: the
+ * What `GET /api/catalog/services/get-standard-service-booking-options` answers besides the version: the
  * version covers it.
  */
 function standardBookingOptionsOf(
@@ -2045,10 +2074,10 @@ function standardBookingOptionsOf(
 type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-standard-service` with `StandardServiceAddItemRequest`: the new service
- * goes into the list, with the name in the language of `Accept-Language`. 204 without a body; 401
- * without a valid access token; 400 with one error per wrong field (see `standardGeneralErrors` and
- * `priceErrors`).
+ * `POST /api/catalog/services/create-standard-service` with `StandardServiceAddItemRequest`: the new service
+ * goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one error per
+ * wrong field (see `standardGeneralErrors` and `servicePriceErrors`); 422
+ * `catalog.vat_rate_not_allowed` for a rate that is not one of the property.
  */
 export const createStandardServiceMock = (
   request: HttpRequest<unknown>,
@@ -2059,13 +2088,20 @@ export const createStandardServiceMock = (
   const body = (request.body ?? {}) as CreateStandardServiceBody;
   const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [...standardGeneralErrors(body, language), ...priceErrors(body)];
+  const errors = [
+    ...standardGeneralErrors(body, language),
+    ...missingNameErrors(body.translations ?? []),
+    ...servicePriceErrors(body),
+  ];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
   const idStandardService = crypto.randomUUID();
   STANDARD_SERVICE_DETAILS.set(
     idStandardService,
@@ -2076,10 +2112,12 @@ export const createStandardServiceMock = (
   STANDARD_SERVICES.push({
     propertyId: property.id,
     idStandardService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
     price: body.price ?? null,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idStandardService })).pipe(
+    delay(600),
+  );
 };
 
 /**
@@ -2113,7 +2151,7 @@ type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
  * `service.not_found` for an `idStandardService` that is not one of its services; 400 with one
- * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
+ * error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409 `resource.version_conflict` when `If-Match` is not the version of the
  * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
  * without a body, with their new version in its `ETag`.
  */
@@ -2144,6 +2182,10 @@ function updateStandardService(
       errors,
     });
   }
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
@@ -2155,7 +2197,7 @@ function updateStandardService(
 }
 
 /**
- * `POST /api/catalog/update-standard-service-general` with `StandardServiceUpdateGeneralRequest`:
+ * `POST /api/catalog/services/update-standard-service-general` with `StandardServiceUpdateGeneralRequest`:
  * names, descriptions, icon and Metti in evidenza; the list shows the new name (language of
  * `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
  */
@@ -2166,25 +2208,30 @@ export const updateStandardServiceGeneralMock = (
   return updateStandardService(
     request,
     standardGeneralInfoOf,
-    (body) => standardGeneralErrors(body, language),
+    (body) => [
+      ...standardGeneralErrors(body, language),
+      ...missingNameErrors(body.translations ?? []),
+    ],
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idStandardService ?? '');
+      }
     },
   );
 };
 
 /**
- * `POST /api/catalog/update-standard-service-prices` with `StandardServiceUpdatePricesRequest`: the
- * Prezzi tab; the list shows the new price. 400 for a price below 0.
+ * `POST /api/catalog/services/update-standard-service-prices` with `StandardServiceUpdatePricesRequest`: the
+ * Prezzi tab; the list shows the new price. Errors as the creation (see `servicePriceErrors`).
  */
 export const updateStandardServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateStandardService(request, standardPricesOf, priceErrors, (details, body, row) => {
+  updateStandardService(request, standardPricesOf, servicePriceErrors, (details, body, row) => {
     details.price = body.price ?? null;
     details.vatRate = body.vatRate ?? null;
     details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
@@ -2195,7 +2242,7 @@ export const updateStandardServicePricesMock = (
   });
 
 /**
- * `POST /api/catalog/update-standard-service-booking` with `StandardServiceUpdateBookingRequest`:
+ * `POST /api/catalog/services/update-standard-service-booking` with `StandardServiceUpdateBookingRequest`:
  * the booking options of the Prenotazioni tab, all of them.
  */
 export const updateStandardServiceBookingMock = (
@@ -3110,13 +3157,13 @@ export const tableServiceListMock = (
 ): Observable<HttpEvent<unknown>> =>
   serviceListAnswer(request, TABLE_SERVICE_TABLE, TableServiceItem, TABLE_SERVICE_SORT_FIELDS);
 
-/** `POST /api/catalog/delete-standard-service-item` with `{ idStandardServices }` (see `deleteServicesAnswer`). */
+/** `POST /api/catalog/services/delete-standard-service-item` with `{ idStandardServices }` (see `deleteServicesAnswer`). */
 export const deleteStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   deleteServicesAnswer(request, STANDARD_SERVICE_TABLE, 'idStandardServices');
 
-/** `POST /api/catalog/duplicate-standard-service-item` with `{ idStandardServices }` (see `duplicateServicesAnswer`). */
+/** `POST /api/catalog/services/duplicate-standard-service-item` with `{ idStandardServices }` (see `duplicateServicesAnswer`). */
 export const duplicateStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>

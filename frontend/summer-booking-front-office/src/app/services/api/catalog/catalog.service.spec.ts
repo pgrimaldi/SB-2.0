@@ -578,19 +578,24 @@ describe('CatalogService', () => {
       ],
     };
 
+    let idStandardService: string | undefined;
+
     catalog
       .createStandardService(
         Object.assign(new StandardServiceAddItemRequest(), request, {
           unexpectedFlag: 'extra-field',
         }),
       )
-      .subscribe();
+      .subscribe((id) => (idStandardService = id));
 
-    const body = controller.expectOne(
+    const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-standard-service`,
-    ).request.body;
-    expect(body).toEqual({ ...request, translations: [translation] });
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/services/create-standard-service`,
+    );
+    expect(call.request.body).toEqual({ ...request, translations: [translation] });
+    call.flush('s9', { status: 201, statusText: 'Created' });
+    expect(idStandardService).toBe('s9');
     controller.verify();
   });
 
@@ -615,7 +620,7 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-standard-service-general`,
+        url === `${environment.apiBaseUrl}/catalog/services/update-standard-service-general`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -645,7 +650,7 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-standard-service-prices`,
+        url === `${environment.apiBaseUrl}/catalog/services/update-standard-service-prices`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -686,7 +691,7 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-standard-service-booking`,
+        url === `${environment.apiBaseUrl}/catalog/services/update-standard-service-booking`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -700,7 +705,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-standard-service-general-info` &&
+        url === `${environment.apiBaseUrl}/catalog/services/get-standard-service-general-info` &&
         params.get('idStandardService') === 's1',
     ).request;
     expect(request.body).toBeNull();
@@ -715,7 +720,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-standard-service-prices` &&
+        url === `${environment.apiBaseUrl}/catalog/services/get-standard-service-prices` &&
         params.get('idStandardService') === 's1',
     ).request;
     expect(request.body).toBeNull();
@@ -730,7 +735,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-standard-service-booking-options` &&
+        url === `${environment.apiBaseUrl}/catalog/services/get-standard-service-booking-options` &&
         params.get('idStandardService') === 's1',
     ).request;
     expect(request.body).toBeNull();
@@ -1316,7 +1321,7 @@ describe('CatalogService', () => {
         () => catalog.updateBarServiceBooking(new BarServiceUpdateBookingRequest(), READ_VERSION),
       ],
       [
-        'update-standard-service-general',
+        'services/update-standard-service-general',
         () =>
           catalog.updateStandardServiceGeneral(
             new StandardServiceUpdateGeneralRequest(),
@@ -1324,7 +1329,7 @@ describe('CatalogService', () => {
           ),
       ],
       [
-        'update-standard-service-prices',
+        'services/update-standard-service-prices',
         () =>
           catalog.updateStandardServicePrices(
             new StandardServiceUpdatePricesRequest(),
@@ -1332,7 +1337,7 @@ describe('CatalogService', () => {
           ),
       ],
       [
-        'update-standard-service-booking',
+        'services/update-standard-service-booking',
         () =>
           catalog.updateStandardServiceBooking(
             new StandardServiceUpdateBookingRequest(),

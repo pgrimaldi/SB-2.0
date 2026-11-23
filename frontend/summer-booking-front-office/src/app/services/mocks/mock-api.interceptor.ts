@@ -710,70 +710,71 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/standard-service-list`
+    request.url === `${environment.apiBaseUrl}/catalog/services/standard-service-list`
   ) {
     return standardServiceListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/create-standard-service`
+    request.url === `${environment.apiBaseUrl}/catalog/services/create-standard-service`
   ) {
     return createStandardServiceMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-standard-service-general-info`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-standard-service-general-info`
   ) {
     return standardServiceGeneralInfoMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-standard-service-prices`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-standard-service-prices`
   ) {
     return standardServicePricesMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-standard-service-booking-options`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/services/get-standard-service-booking-options`
   ) {
     return standardServiceBookingOptionsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-standard-service-general`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-standard-service-general`
   ) {
     return updateStandardServiceGeneralMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-standard-service-prices`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-standard-service-prices`
   ) {
     return updateStandardServicePricesMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-standard-service-booking`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-standard-service-booking`
   ) {
     return updateStandardServiceBookingMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-standard-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/services/delete-standard-service-item`
   ) {
     return deleteStandardServiceItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-standard-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/services/duplicate-standard-service-item`
   ) {
     return duplicateStandardServiceItemsMock(request);
   }

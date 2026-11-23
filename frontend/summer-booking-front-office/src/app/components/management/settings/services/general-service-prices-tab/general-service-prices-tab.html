@@ -1,4 +1,8 @@
-<app-services-price-vat [price]="form().price" [vatRate]="form().vatRate" />
+<app-services-price-vat
+  [price]="form().price"
+  [vatRate]="form().vatRate"
+  [isPriceMandatory]="true"
+/>
 
 <app-services-period-prices
   [isPeriodPricingEnabled]="form().isPeriodPricingEnabled"

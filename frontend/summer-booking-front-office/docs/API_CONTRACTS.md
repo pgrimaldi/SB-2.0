@@ -3457,7 +3457,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/standard-service-list`
+### POST `/api/catalog/services/standard-service-list`
 
 Servizi: servizi.
 
@@ -3508,7 +3508,7 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Doccia calda` |
 | `rows[].price` | number (decimale, €) \| null | `3` |
 
-### POST `/api/catalog/create-standard-service`
+### POST `/api/catalog/services/create-standard-service`
 
 Servizi: creazione servizio.
 
@@ -3603,7 +3603,7 @@ Servizi: creazione servizio.
 | `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
 | `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
 | `isHighlighted` | boolean | `true` |
-| `price` | number (decimale, €) \| null | `3` |
+| `price` | number (decimale, €) | `3` |
 | `vatRate` | number (decimale, %) \| null | `22` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 2.5}, {"idPeriod": 1, "price": 3.5}]` |
@@ -3628,11 +3628,15 @@ Servizi: creazione servizio.
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 201 Created.
 
-Nessun corpo.
+Il corpo è solo l'id del servizio creato, come stringa JSON (tra virgolette, Content-Type application/json).
 
-### GET `/api/catalog/get-standard-service-general-info?idStandardService={idStandardService}`
+```json
+"9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d04"
+```
+
+### GET `/api/catalog/services/get-standard-service-general-info?idStandardService={idStandardService}`
 
 Servizi: servizio, tab Info Generali.
 
@@ -3641,7 +3645,7 @@ Servizi: servizio, tab Info Generali.
 Nessun corpo: è una GET, l'id del servizio va nella query string.
 
 ```text
-/api/catalog/get-standard-service-general-info?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
+/api/catalog/services/get-standard-service-general-info?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
 ```
 
 | Property | Tipo | Esempio |
@@ -3668,6 +3672,7 @@ Stato: 200 OK.
     }
   ],
   "icon": "Shower",
+  "imageUrl": null,
   "isHighlighted": true,
   "version": "339ffdae"
 }
@@ -3680,11 +3685,12 @@ Stato: 200 OK.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Doccia calda` |
 | `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
-| `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
+| `icon` | string \| null | `Shower` |
+| `imageUrl` | string (URL) \| null | `null` |
 | `isHighlighted` | boolean | `true` |
 | `version` | string | `339ffdae` |
 
-### GET `/api/catalog/get-standard-service-prices?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-prices?idStandardService={idStandardService}`
 
 Servizi: servizio, tab Prezzi.
 
@@ -3693,7 +3699,7 @@ Servizi: servizio, tab Prezzi.
 Nessun corpo: è una GET, l'id del servizio va nella query string.
 
 ```text
-/api/catalog/get-standard-service-prices?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
+/api/catalog/services/get-standard-service-prices?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
 ```
 
 | Property | Tipo | Esempio |
@@ -3725,7 +3731,7 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `price` | number (decimale, €) \| null | `3` |
+| `price` | number (decimale, €) | `3` |
 | `vatRate` | number (decimale, %) \| null | `22` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 2.5}]` |
@@ -3735,7 +3741,7 @@ Stato: 200 OK.
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `version` | string | `52f0d596` |
 
-### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-booking-options?idStandardService={idStandardService}`
 
 Servizi: servizio, tab Prenotazioni.
 
@@ -3744,7 +3750,7 @@ Servizi: servizio, tab Prenotazioni.
 Nessun corpo: è una GET, l'id del servizio va nella query string.
 
 ```text
-/api/catalog/get-standard-service-booking-options?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
+/api/catalog/services/get-standard-service-booking-options?idStandardService=9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01
 ```
 
 | Property | Tipo | Esempio |
@@ -3799,7 +3805,7 @@ Stato: 200 OK.
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
 | `version` | string | `f71a86f3` |
 
-### POST `/api/catalog/update-standard-service-general`
+### POST `/api/catalog/services/update-standard-service-general`
 
 Servizi: servizio, salvataggio Info Generali.
 
@@ -3857,7 +3863,7 @@ Servizi: servizio, salvataggio Info Generali.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Doccia calda` |
 | `translations[].description` | string \| null | `Acqua calda nelle docce dello stabilimento.` |
-| `icon` | string (enum StandardServiceIcon) \| null | `Shower` |
+| `icon` | string \| null | `Shower` |
 | `isHighlighted` | boolean | `false` |
 
 #### Response
@@ -3866,7 +3872,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/update-standard-service-prices`
+### POST `/api/catalog/services/update-standard-service-prices`
 
 Servizi: servizio, salvataggio Prezzi.
 
@@ -3898,7 +3904,7 @@ Servizi: servizio, salvataggio Prezzi.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
-| `price` | number (decimale, €) \| null | `4` |
+| `price` | number (decimale, €) | `4` |
 | `vatRate` | number (decimale, %) \| null | `22` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 2.5}, {"idPeriod": 1, "price": 3.5}]` |
@@ -3913,7 +3919,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/update-standard-service-booking`
+### POST `/api/catalog/services/update-standard-service-booking`
 
 Servizi: servizio, salvataggio Prenotazioni.
 
@@ -3969,7 +3975,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/delete-standard-service-item`
+### POST `/api/catalog/services/delete-standard-service-item`
 
 Servizi: eliminazione servizi.
 
@@ -3994,7 +4000,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/duplicate-standard-service-item`
+### POST `/api/catalog/services/duplicate-standard-service-item`
 
 Servizi: duplicazione servizi.
 

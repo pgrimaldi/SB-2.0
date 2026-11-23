@@ -17,6 +17,7 @@
         [imagePreviewUrl]="imagePreviewUrl()"
         (iconChosen)="chooseIcon($event)"
         (imageChosen)="chooseImage($event)"
+        (imageRemoveRequest)="removeImage()"
       />
     } @else if (selectedTab() === PanelTab.Prices) {
       <app-general-service-prices-tab
@@ -35,3 +36,4 @@
     }
   </app-tab-group>
 </app-side-panel>
+<app-service-image-error-popup [pathIcon]="pathIcon()" [(problem)]="imageError" />

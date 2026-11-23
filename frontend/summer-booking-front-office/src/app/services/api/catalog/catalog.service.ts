@@ -330,7 +330,7 @@ export class CatalogService {
 
   readonly standardServiceList = (request: PageRequest): Observable<Page<StandardServiceItem>> =>
     this.httpClient.post<Page<StandardServiceItem>>(
-      `${this.endpoint}/standard-service-list`,
+      `${this.endpoint}/services/standard-service-list`,
       request,
     );
 
@@ -339,7 +339,7 @@ export class CatalogService {
     idStandardService: string,
   ): Observable<StandardServiceSelectedGeneralInfo> =>
     this.httpClient.get<StandardServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-standard-service-general-info`,
+      `${this.endpoint}/services/get-standard-service-general-info`,
       { params: { idStandardService } },
     );
 
@@ -348,7 +348,7 @@ export class CatalogService {
     idStandardService: string,
   ): Observable<StandardServiceSelectedPrices> =>
     this.httpClient.get<StandardServiceSelectedPrices>(
-      `${this.endpoint}/get-standard-service-prices`,
+      `${this.endpoint}/services/get-standard-service-prices`,
       { params: { idStandardService } },
     );
 
@@ -357,7 +357,7 @@ export class CatalogService {
     idStandardService: string,
   ): Observable<StandardServiceSelectedBookingOptions> =>
     this.httpClient.get<StandardServiceSelectedBookingOptions>(
-      `${this.endpoint}/get-standard-service-booking-options`,
+      `${this.endpoint}/services/get-standard-service-booking-options`,
       { params: { idStandardService } },
     );
 
@@ -371,7 +371,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-standard-service-general`,
+        `${this.endpoint}/services/update-standard-service-general`,
         {
           ...onlyFieldsOf(StandardServiceUpdateGeneralRequest, request),
           translations: request.translations.map((translation) =>
@@ -392,7 +392,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-standard-service-prices`,
+        `${this.endpoint}/services/update-standard-service-prices`,
         {
           ...onlyFieldsOf(StandardServiceUpdatePricesRequest, request),
           periodPrices: request.periodPrices.map((periodPrice) =>
@@ -413,7 +413,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-standard-service-booking`,
+        `${this.endpoint}/services/update-standard-service-booking`,
         {
           ...onlyFieldsOf(StandardServiceUpdateBookingRequest, request),
           bookingOptions: request.bookingOptions.map((bookingOption) =>
@@ -424,9 +424,9 @@ export class CatalogService {
       )
       .pipe(map(versionOf));
 
-  /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createStandardService = (request: StandardServiceAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-standard-service`, {
+  /** The data of the three tabs of the add panel. Answers the id of the new service. */
+  readonly createStandardService = (request: StandardServiceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/services/create-standard-service`, {
       ...onlyFieldsOf(StandardServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
@@ -441,13 +441,13 @@ export class CatalogService {
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteStandardServiceItems = (idStandardServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-standard-service-item`, {
+    this.httpClient.post<void>(`${this.endpoint}/services/delete-standard-service-item`, {
       idStandardServices,
     });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicateStandardServiceItems = (idStandardServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-standard-service-item`, {
+    this.httpClient.post<void>(`${this.endpoint}/services/duplicate-standard-service-item`, {
       idStandardServices,
     });
 

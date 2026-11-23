@@ -36,7 +36,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   colonne Servizio, Categoria, Prezzo; righe da `POST /api/catalog/services/bar-service-list`
   (`CatalogService.barServiceList`, `Page<BarServiceItem>`).
 - Servizi: titolo "Servizi" con la piuma (`Services_StandardTitle.png`), bottone "Aggiungi servizio", colonne
-  Servizio, Prezzo; righe da `POST /api/catalog/standard-service-list` (`CatalogService.standardServiceList`,
+  Servizio, Prezzo; righe da `POST /api/catalog/services/standard-service-list` (`CatalogService.standardServiceList`,
   `Page<StandardServiceItem>`).
 - Servizi Orari: titolo "Servizi orari" con l'orologio (`Services_HourlyTitle.png`), bottone "Aggiungi servizio
   orario", sola colonna Servizio; righe da `POST /api/catalog/hourly-service-list`
@@ -66,7 +66,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup e del pannello di modifica).
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `services/delete-bar-service-item`, `services/duplicate-bar-service-item` (`idBarServices`);
-  - Servizi: `delete-standard-service-item`, `duplicate-standard-service-item` (`idStandardServices`);
+  - Servizi: `services/delete-standard-service-item`, `services/duplicate-standard-service-item` (`idStandardServices`);
   - Servizi orari: `delete-hourly-service-item`, `duplicate-hourly-service-item` (`idHourlyServices`);
   - Prezzi automatici: `delete-automatic-price-item`, `duplicate-automatic-price-item` (`idAutomaticPrices`);
   - Prenotazione tavoli: `delete-table-service-item`, `duplicate-table-service-item` (`idTableServices`).
@@ -159,11 +159,11 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   finché i periodi non arrivano); il resto del servizio si salva lo stesso e riaprendo il pannello si riprova.
 - Salva (`isSaveDisabled` di `app-side-panel`) è spento finché mancano Nome e Descrizione nella lingua
   dell'utente: asterisco, "Campo obbligatorio" sotto il campo dopo averlo toccato, `requiredText` solo sulla
-  traduzione principale. Servizi Bar ha anche altri campi obbligatori (sotto).
+  traduzione principale. Servizi Bar e Servizi hanno anche altri campi obbligatori (sotto).
 - Ogni coppia Dalle / alle ha `timeRange`: un "alle" che non viene dopo il "dalle" (anche la stessa ora) dà l'errore
   sotto i due orari e Salva resta spento.
-- Salva manda tutto il form all'API di creazione (risposta 204, nei servizi bar l'id del nuovo servizio): spinner sul
-  bottone e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(created)`).
+- Salva manda tutto il form all'API di creazione (risposta 204, in Servizi Bar e Servizi l'id del nuovo servizio): spinner
+  sul bottone e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(created)`).
 - Se fallisce il pannello resta aperto con i dati: errori dei campi di primo livello sotto il campo, gli altri in
   fondo alla tab, sopra i bottoni.
 - Chiudere con dati scritti chiede conferma (modifiche non salvate); anche un riquadro di opzioni aggiunto conta
@@ -309,6 +309,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   la sezione `app-services-booking-option` sull'elenco `bookingOptions`.
 - Il form ha anche `price`, `vatRate`, `isPeriodPricingEnabled`, `periodPrices`, `idSectors`,
   `isOnlinePurchaseEnabled` e `bookingOptions`.
+- Obbligatori, limiti, errori del backend e immagine come in Servizi Bar (prezzo obbligatorio, nome nelle lingue con una
+  descrizione, X e caricamento dell'immagine, `app-service-image-error-popup`).
 - Nella modifica (bar, servizi standard e servizi orari), Salva della tab Prezzi rimanda anche i prezzi per periodo (e
   per i servizi orari le disponibilità) letti per periodi che la tab non mostra, es. non più nella stagione corrente
   (`hiddenPeriodPrices`, `hiddenPeriodAvailabilities`): niente di quello che è stato letto si perde.
@@ -316,7 +318,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `StandardServiceIcon` (Surfing, Surfboard, Sailing, Kitesurfing, Volleyball, Baseball, Basketball, Cricket,
   SportsField, Tennis, Pool, Locker, Lock, Cabin, Shower, Baby, Accessible, Parking, Pets, Motorcycle, Bicycle);
   nel form `icon`.
-- Salva: `POST /api/catalog/create-standard-service` (`CatalogService.createStandardService`).
+- Salva: `POST /api/catalog/services/create-standard-service` (`CatalogService.createStandardService`), che risponde con
+  l'id del servizio creato; poi, se c'è, l'immagine.
 
 ### Modifica ("Modifica servizio")
 
@@ -324,10 +327,10 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Categoria e Varianti, input `idStandardService`, form `StandardServiceAddItemRequest`, titolo
   `standard_services.edit_title`.
 - GET: `get-standard-service-general-info`, `get-standard-service-prices` insieme a `catalog/tariff-periods`,
-  `get-standard-service-booking-options` (`GET /api/catalog/…`; risposte `StandardServiceSelectedGeneralInfo`,
+  `get-standard-service-booking-options` (`GET /api/catalog/services/…`; risposte `StandardServiceSelectedGeneralInfo`,
   `StandardServiceSelectedPrices` e `StandardServiceSelectedBookingOptions`, tutte con `version`).
 - Salvataggi: `update-standard-service-general`, `update-standard-service-prices`, `update-standard-service-booking`
-  (`POST /api/catalog/…`; corpi `StandardServiceUpdateGeneralRequest`, `StandardServiceUpdatePricesRequest`,
+  (`POST /api/catalog/services/…`; corpi `StandardServiceUpdateGeneralRequest`, `StandardServiceUpdatePricesRequest`,
   `StandardServiceUpdateBookingRequest` con `idStandardService`).
 
 ## Servizi Orari

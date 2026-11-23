@@ -4699,7 +4699,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/standard-service-list`
+### POST `/api/catalog/services/standard-service-list`
 
 **Payload JSON**
 
@@ -4757,7 +4757,7 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### POST `/api/catalog/create-standard-service`
+### POST `/api/catalog/services/create-standard-service`
 
 **Payload JSON**
 
@@ -4772,7 +4772,7 @@ Nessun corpo (204).
   ],
   "icon": "string (enum StandardServiceIcon) | null",
   "isHighlighted": "boolean",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
@@ -4817,7 +4817,7 @@ Nessun corpo (204).
 | `translations[].description` | string \| null |
 | `icon` | string (enum StandardServiceIcon) \| null |
 | `isHighlighted` | boolean |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
@@ -4844,7 +4844,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-standard-service-general-info?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-general-info?idStandardService={idStandardService}`
 
 **Payload JSON** (query string)
 
@@ -4866,7 +4866,8 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
   "isHighlighted": "boolean",
   "version": "string"
 }
@@ -4887,11 +4888,12 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `isHighlighted` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-standard-service-prices?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-prices?idStandardService={idStandardService}`
 
 **Payload JSON** (query string)
 
@@ -4905,7 +4907,7 @@ Nessun corpo (204).
 
 ```json
 {
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
@@ -4930,7 +4932,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
@@ -4940,7 +4942,7 @@ Nessun corpo (204).
 | `isOnlinePurchaseEnabled` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-standard-service-booking-options?idStandardService={idStandardService}`
+### GET `/api/catalog/services/get-standard-service-booking-options?idStandardService={idStandardService}`
 
 **Payload JSON** (query string)
 
@@ -5001,7 +5003,7 @@ Nessun corpo (204).
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 | `version` | string |
 
-### POST `/api/catalog/update-standard-service-general`
+### POST `/api/catalog/services/update-standard-service-general`
 
 **Payload JSON**
 
@@ -5015,7 +5017,7 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
+  "icon": "string | null",
   "isHighlighted": "boolean"
 }
 ```
@@ -5033,21 +5035,21 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
 | `isHighlighted` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-standard-service-prices`
+### POST `/api/catalog/services/update-standard-service-prices`
 
 **Payload JSON**
 
 ```json
 {
   "idStandardService": "string (UUID)",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
   "periodPrices": [
@@ -5070,7 +5072,7 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idStandardService` | string (UUID) |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
@@ -5083,7 +5085,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-standard-service-booking`
+### POST `/api/catalog/services/update-standard-service-booking`
 
 **Payload JSON**
 
@@ -5138,7 +5140,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/delete-standard-service-item`
+### POST `/api/catalog/services/delete-standard-service-item`
 
 **Payload JSON**
 
@@ -5162,7 +5164,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-standard-service-item`
+### POST `/api/catalog/services/duplicate-standard-service-item`
 
 **Payload JSON**
 
