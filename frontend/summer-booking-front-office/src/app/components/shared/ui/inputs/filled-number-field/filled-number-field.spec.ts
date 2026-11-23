@@ -8,6 +8,7 @@ import { FilledNumberField } from './filled-number-field';
     label="Soglia"
     [isDecimal]="decimal()"
     [isCurrency]="currency()"
+    [maxDecimals]="maxDecimals()"
     [isSigned]="signed()"
     [pathIcon]="['/assets/images/euro.svg']"
     [error]="error()"
@@ -18,6 +19,7 @@ class FilledNumberFieldHost {
   readonly threshold = signal<number | null>(3);
   readonly decimal = signal(false);
   readonly currency = signal(false);
+  readonly maxDecimals = signal<number | undefined>(undefined);
   readonly signed = signal(false);
   readonly error = signal<string | null>(null);
 }
@@ -104,6 +106,17 @@ describe('FilledNumberField', () => {
     await type('12,345');
     expect(input.value).toBe('12,34');
     expect(host.threshold()).toBe(12.34);
+  });
+
+  it('should keep at most the decimals asked for', async () => {
+    const { fixture, host, type } = await setup(true);
+
+    await type('0,0015');
+    expect(host.threshold()).toBe(0.0015);
+    host.maxDecimals.set(2);
+    await fixture.whenStable();
+    await type('33,339');
+    expect(host.threshold()).toBe(33.33);
   });
 
   it('should accept a minus only at the start, with signed', async () => {

@@ -1515,6 +1515,7 @@
             "min_items_per_booking": "Minimum items per booking",
             "max_items_per_booking": "Maximum items per booking",
             "time_intervals": {
+              "none": "No interval",
               "fifteen_minutes": "15 minutes",
               "thirty_minutes": "30 minutes",
               "forty_five_minutes": "45 minutes",
@@ -1579,6 +1580,7 @@
             "add_availability": "Add availability",
             "days_hours": "Days and time slots",
             "same_hours": "Apply the same hours to all days",
+            "other_time_slots": "Other time slots:",
             "days": {
               "monday": "Monday",
               "tuesday": "Tuesday",
@@ -1608,6 +1610,7 @@
             "seats_hint": "Set the total number of available seats.",
             "meal_duration": "Average meal duration",
             "meal_durations": {
+              "none": "No duration",
               "thirty_minutes": "30 minutes",
               "forty_five_minutes": "45 minutes",
               "one_hour": "1 h",

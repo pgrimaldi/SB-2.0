@@ -220,7 +220,7 @@ function idOf<Row extends ServiceRow, Details extends TranslatedDetails>(
   return String(row[table.idField]);
 }
 
-function languageOf(request: HttpRequest<unknown>): string {
+export function languageOf(request: HttpRequest<unknown>): string {
   return request.headers.get('Accept-Language') ?? Language.It;
 }
 
@@ -232,7 +232,7 @@ function nameIn(translations: readonly ServiceTranslation[], language: string): 
 }
 
 /** The Italian name is the one of the row; the other languages fall back on it. */
-function shownName<Row extends ServiceRow, Details extends TranslatedDetails>(
+export function shownName<Row extends ServiceRow, Details extends TranslatedDetails>(
   table: ServiceTable<Row, Details>,
   row: Row,
   language: string,
@@ -283,7 +283,7 @@ function compare(
 }
 
 /** "Cabina 2" before "Cabina 10"; capitals and accents do not count. */
-function naturalOrder(first: string | null, second: string | null): number {
+export function naturalOrder(first: string | null, second: string | null): number {
   return (first ?? '')
     .trim()
     .localeCompare((second ?? '').trim(), 'it', { sensitivity: 'base', numeric: true });

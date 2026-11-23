@@ -98,6 +98,21 @@ $gap: 0.5rem;
   align-items: center;
 }
 
+.table__service__availabilities__others {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: 0.25rem 0.5rem;
+  margin: 0.25rem 0 0;
+  color: var(--color__layout__text__soft);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.table__service__availabilities__other {
+  white-space: nowrap;
+}
+
 // The line under "Applica stessi orari per tutti i giorni".
 .table__service__availabilities__all {
   padding-bottom: 1rem;

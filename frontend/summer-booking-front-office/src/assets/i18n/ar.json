@@ -1515,6 +1515,7 @@
             "min_items_per_booking": "الحد الأدنى للعناصر في كل حجز",
             "max_items_per_booking": "الحد الأقصى للعناصر في كل حجز",
             "time_intervals": {
+              "none": "بدون فاصل",
               "fifteen_minutes": "15 دقيقة",
               "thirty_minutes": "30 دقيقة",
               "forty_five_minutes": "45 دقيقة",
@@ -1579,6 +1580,7 @@
             "add_availability": "إضافة توفر",
             "days_hours": "الأيام والفترات الزمنية",
             "same_hours": "تطبيق نفس الأوقات على كل الأيام",
+            "other_time_slots": "فترات أخرى:",
             "days": {
               "monday": "الاثنين",
               "tuesday": "الثلاثاء",
@@ -1608,6 +1610,7 @@
             "seats_hint": "حدد العدد الإجمالي للمقاعد المتاحة.",
             "meal_duration": "متوسط مدة الوجبة",
             "meal_durations": {
+              "none": "بدون مدة",
               "thirty_minutes": "30 دقيقة",
               "forty_five_minutes": "45 دقيقة",
               "one_hour": "ساعة واحدة",

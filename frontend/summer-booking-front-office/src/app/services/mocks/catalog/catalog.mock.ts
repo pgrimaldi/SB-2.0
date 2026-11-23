@@ -80,6 +80,7 @@ import {
   MAX_IMAGE_UPLOAD_MEGABYTES,
   MEGABYTE,
 } from '../../../entities/shared/image-upload-types';
+import { DAYS_OF_WEEK } from '../../../entities/shared/days-of-week';
 import { Language } from '../../../entities/shared/language';
 import { Country } from '../../../entities/shared/country';
 import { onlyFieldsOf } from '../../api/only-fields-of';
@@ -93,11 +94,24 @@ import {
 } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import {
+  bookingOptionErrors,
+  iconErrors,
+  isNotLater,
+  missingPeriod,
+  missingSector,
+  sectorErrors,
+  translationErrors,
+} from './service-checks.mock';
+import {
   MockCopyError,
+  ServiceTable,
   deleteServicesAnswer,
   duplicateServicesAnswer,
+  languageOf,
   nameToSave,
+  naturalOrder,
   serviceListAnswer,
+  shownName,
 } from './service-tables.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
@@ -1518,6 +1532,8 @@ function copyImage(id: string, idCopy: string): void {
 }
 
 const VAT_RATES: readonly number[] = [4, 5, 10, 22];
+/** As `ServiceSaleItem.MaxVariants`. */
+const MAX_VARIANT_QUANTITY = 50;
 
 /** The VAT of the element, or of its availabilities, has to be still allowed. */
 function copyVatError(vatRates: readonly (number | null)[]): MockCopyError | null {
@@ -1550,8 +1566,8 @@ type CreateBarServiceBody = Partial<BarServiceAddItemRequest>;
 /**
  * `POST /api/catalog/services/create-bar-service` with `BarServiceAddItemRequest`: the new bar service goes
  * into the list, with the name in the language of `Accept-Language`. 201 with its id alone; 401
- * without a valid access token; 400 with one error per wrong field (see `barServiceErrors`); 422
- * `catalog.vat_rate_not_allowed` for a rate that is not one of the property.
+ * without a valid access token; 400 with one error per wrong field (see `barServiceErrors`); 422 and
+ * 404 of its references (`referenceProblem`).
  */
 export const createBarServiceMock = (
   request: HttpRequest<unknown>,
@@ -1568,9 +1584,9 @@ export const createBarServiceMock = (
       errors,
     });
   }
-  const vatProblem = vatRateNotAllowed(request, body.vatRate);
-  if (vatProblem) {
-    return vatProblem;
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
   }
   const idBarService = crypto.randomUUID();
   BAR_SERVICE_DETAILS.set(
@@ -1646,7 +1662,12 @@ export const deleteServiceImageMock = (
 };
 
 function barServiceErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
-  return [...generalErrors(body, language), ...barPriceErrors(body)];
+  return [
+    ...generalErrors(body, language),
+    ...iconErrors(body.icon, Object.values(BarServiceIcon)),
+    ...barPriceErrors(body),
+    ...bookingOptionErrors(body.bookingOptions),
+  ];
 }
 
 /** As `servicePriceErrors`, with name and price of every variant always filled. */
@@ -1654,6 +1675,9 @@ function barPriceErrors(body: CreateBarServiceBody): MockFieldError[] {
   const variants = body.variants ?? [];
   return [
     ...servicePriceErrors(body),
+    ...(variants.length > MAX_VARIANT_QUANTITY
+      ? [{ field: 'variants', code: ApiErrorCode.ValidationInvalid }]
+      : []),
     ...variants.flatMap(({ variantName, price }, index): MockFieldError[] => [
       ...variantNameErrors(`variants[${index}].variantName`, variantName),
       ...requiredPriceErrors(`variants[${index}].price`, price),
@@ -1666,12 +1690,17 @@ function servicePriceErrors(body: {
   price?: number | null;
   vatRate?: number | null;
   periodPrices?: ServicePeriodPrice[];
+  idSectors?: string[];
 }): MockFieldError[] {
-  const errors = requiredPriceErrors('price', body.price);
+  const errors = [...requiredPriceErrors('price', body.price), ...sectorErrors(body.idSectors)];
   if (body.vatRate != null && (body.vatRate <= 0 || body.vatRate >= 100)) {
     errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
   }
-  if (body.periodPrices?.some(({ price }) => price !== null && !isServicePrice(price))) {
+  const idPeriods = (body.periodPrices ?? []).map(({ idPeriod }) => idPeriod);
+  if (
+    body.periodPrices?.some(({ price }) => price !== null && !isServicePrice(price)) ||
+    new Set(idPeriods).size !== idPeriods.length
+  ) {
     errors.push({ field: 'periodPrices', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
@@ -1721,51 +1750,46 @@ function vatRateNotAllowed(
     : problem(request, 422, ApiErrorCode.CatalogVatRateNotAllowed, { args: { rates: VAT_RATES } });
 }
 
-function missingNameErrors(translations: readonly ServiceTranslation[]): MockFieldError[] {
-  return translations.some(
-    ({ serviceName, description }) => description?.trim() && !serviceName?.trim(),
-  )
-    ? [{ field: 'translations', code: ApiErrorCode.ValidationInvalid }]
-    : [];
+/**
+ * The VAT, the periods and the sectors of the body, in the order of the backend: 422
+ * `catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404 `catalog.sector_not_found`.
+ */
+function referenceProblem(
+  request: HttpRequest<unknown>,
+  body: { vatRate?: number | null; periodPrices?: ServicePeriodPrice[]; idSectors?: string[] },
+  saved: readonly ServicePeriodPrice[] = [],
+): Observable<never> | null {
+  return (
+    vatRateNotAllowed(request, body.vatRate) ??
+    missingPeriod(
+      request,
+      (body.periodPrices ?? []).map(({ idPeriod }) => idPeriod),
+      saved.map(({ idPeriod }) => idPeriod),
+    ) ??
+    missingSector(request, body.idSectors)
+  );
 }
 
-/**
- * Name and description in the language of the request (the user's), as the panel requires, and the
- * name in every language with a description; category and icon, when given, among the values of
- * their enums.
- */
+/** The texts, and the category among the values of its enum (see `translationErrors`). */
 function generalErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
-  const errors: MockFieldError[] = [];
-  const translations = Array.isArray(body.translations) ? body.translations : [];
-  const index = translations.findIndex((translation) => translation.language === language);
-  const main = translations[index];
-  const at = `translations[${Math.max(index, 0)}]`;
-  if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
-    errors.push({ field: `${at}.serviceName`, code: ApiErrorCode.ValidationRequired });
-  }
-  if (typeof main?.description !== 'string' || !main.description.trim()) {
-    errors.push({ field: `${at}.description`, code: ApiErrorCode.ValidationRequired });
-  }
-  if (!errors.length) {
-    errors.push(...missingNameErrors(translations));
-  }
-  if (body.category != null && !Object.values(BarServiceCategory).includes(body.category)) {
-    errors.push({ field: 'category', code: ApiErrorCode.ValidationInvalid });
-  }
-  if (body.icon != null && !Object.values(BarServiceIcon).includes(body.icon)) {
-    errors.push({ field: 'icon', code: ApiErrorCode.ValidationInvalid });
-  }
-  return errors;
+  return [
+    ...translationErrors(body.translations, language),
+    ...(body.category != null && !Object.values(BarServiceCategory).includes(body.category)
+      ? [{ field: 'category', code: ApiErrorCode.ValidationInvalid }]
+      : []),
+  ];
 }
 
 type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 404
- * `service.not_found` for an `idBarService` that is not one of its bar services; 400 with one
- * error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409 `resource.version_conflict` when
- * `If-Match` is not the version of the data of the tab (`dataOf`); otherwise `apply` changes the
- * data of its tab and the answer is 204 without a body, with their new version in its `ETag`.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.not_found` for an `idBarService` that is not one of
+ * its bar services; 400 for what depends on
+ * the saved service (`savedErrorsOf`); 422 and 404 of its references (`referenceProblem`); 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateBarService(
   request: HttpRequest<unknown>,
@@ -1776,27 +1800,35 @@ function updateBarService(
     body: UpdateBarServiceBody,
     row: BarServiceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateBarServiceBody,
+    details: BarServiceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateBarServiceBody;
   const property = DEMO_PROPERTY;
-  const row = BAR_SERVICES.find(
-    (item) => item.idBarService === body.idBarService && item.propertyId === property.id,
-  );
-  if (!row?.idBarService) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
-  const vatProblem = vatRateNotAllowed(request, body.vatRate);
-  if (vatProblem) {
-    return vatProblem;
+  const row = BAR_SERVICES.find(
+    (item) => item.idBarService === body.idBarService && item.propertyId === property.id,
+  );
+  if (!row?.idBarService) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  const savedErrors = savedErrorsOf(body, detailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
+  }
+  const missing = referenceProblem(request, body, detailsOf(row).periodPrices);
+  if (missing) {
+    return missing;
   }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
@@ -1832,6 +1864,7 @@ export const updateBarServiceGeneralMock = (
         SERVICE_IMAGES.delete(row.idBarService ?? '');
       }
     },
+    (body, details) => iconErrors(body.icon, Object.values(BarServiceIcon), details.icon),
   );
 };
 
@@ -1863,7 +1896,7 @@ export const updateBarServiceBookingMock = (
   updateBarService(
     request,
     barBookingOptionsOf,
-    () => [],
+    (body) => bookingOptionErrors(body.bookingOptions),
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
     },
@@ -2102,8 +2135,8 @@ type CreateStandardServiceBody = Partial<StandardServiceAddItemRequest>;
 /**
  * `POST /api/catalog/services/create-standard-service` with `StandardServiceAddItemRequest`: the new service
  * goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one error per
- * wrong field (see `standardGeneralErrors` and `servicePriceErrors`); 422
- * `catalog.vat_rate_not_allowed` for a rate that is not one of the property.
+ * wrong field (see `translationErrors` and `servicePriceErrors`); 422 and 404 of its references
+ * (`referenceProblem`).
  */
 export const createStandardServiceMock = (
   request: HttpRequest<unknown>,
@@ -2115,18 +2148,19 @@ export const createStandardServiceMock = (
   const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [
-    ...standardGeneralErrors(body, language),
-    ...missingNameErrors(body.translations ?? []),
+    ...translationErrors(body.translations, language),
+    ...iconErrors(body.icon, Object.values(StandardServiceIcon)),
     ...servicePriceErrors(body),
+    ...bookingOptionErrors(body.bookingOptions),
   ];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
-  const vatProblem = vatRateNotAllowed(request, body.vatRate);
-  if (vatProblem) {
-    return vatProblem;
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
   }
   const idStandardService = crypto.randomUUID();
   STANDARD_SERVICE_DETAILS.set(
@@ -2146,40 +2180,16 @@ export const createStandardServiceMock = (
   );
 };
 
-/**
- * Name and description in the language of the request (the user's), as the panel requires; the
- * icon, when given, among the values of its enum. Also for the hourly services, which have the same
- * icons.
- */
-function standardGeneralErrors(
-  body: { translations?: ServiceTranslation[]; icon?: StandardServiceIcon | null },
-  language: string,
-): MockFieldError[] {
-  const errors: MockFieldError[] = [];
-  const translations = Array.isArray(body.translations) ? body.translations : [];
-  const index = translations.findIndex((translation) => translation.language === language);
-  const main = translations[index];
-  const at = `translations[${Math.max(index, 0)}]`;
-  if (typeof main?.serviceName !== 'string' || !main.serviceName.trim()) {
-    errors.push({ field: `${at}.serviceName`, code: ApiErrorCode.ValidationRequired });
-  }
-  if (typeof main?.description !== 'string' || !main.description.trim()) {
-    errors.push({ field: `${at}.description`, code: ApiErrorCode.ValidationRequired });
-  }
-  if (body.icon != null && !Object.values(StandardServiceIcon).includes(body.icon)) {
-    errors.push({ field: 'icon', code: ApiErrorCode.ValidationInvalid });
-  }
-  return errors;
-}
-
 type UpdateStandardServiceBody = CreateStandardServiceBody & { idStandardService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 404
- * `service.not_found` for an `idStandardService` that is not one of its services; 400 with one
- * error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409 `resource.version_conflict` when `If-Match` is not the version of the
- * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
- * without a body, with their new version in its `ETag`.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.not_found` for an `idStandardService` that is not one of
+ * its services; 400 for what depends on
+ * the saved service (`savedErrorsOf`); 422 and 404 of its references (`referenceProblem`); 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateStandardService(
   request: HttpRequest<unknown>,
@@ -2190,27 +2200,35 @@ function updateStandardService(
     body: UpdateStandardServiceBody,
     row: StandardServiceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateStandardServiceBody,
+    details: StandardServiceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateStandardServiceBody;
   const property = DEMO_PROPERTY;
-  const row = STANDARD_SERVICES.find(
-    (item) => item.idStandardService === body.idStandardService && item.propertyId === property.id,
-  );
-  if (!row?.idStandardService) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
-  const vatProblem = vatRateNotAllowed(request, body.vatRate);
-  if (vatProblem) {
-    return vatProblem;
+  const row = STANDARD_SERVICES.find(
+    (item) => item.idStandardService === body.idStandardService && item.propertyId === property.id,
+  );
+  if (!row?.idStandardService) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  const savedErrors = savedErrorsOf(body, standardDetailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
+  }
+  const missing = referenceProblem(request, body, standardDetailsOf(row).periodPrices);
+  if (missing) {
+    return missing;
   }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
@@ -2234,10 +2252,7 @@ export const updateStandardServiceGeneralMock = (
   return updateStandardService(
     request,
     standardGeneralInfoOf,
-    (body) => [
-      ...standardGeneralErrors(body, language),
-      ...missingNameErrors(body.translations ?? []),
-    ],
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
@@ -2247,6 +2262,7 @@ export const updateStandardServiceGeneralMock = (
         SERVICE_IMAGES.delete(row.idStandardService ?? '');
       }
     },
+    (body, details) => iconErrors(body.icon, Object.values(StandardServiceIcon), details.icon),
   );
 };
 
@@ -2277,13 +2293,24 @@ export const updateStandardServiceBookingMock = (
   updateStandardService(
     request,
     standardBookingOptionsOf,
-    () => [],
+    (body) => bookingOptionErrors(body.bookingOptions),
     (details, body) => {
       details.bookingOptions = body.bookingOptions ?? [];
     },
   );
 
 type HourlyServiceRow = HourlyServiceItem & { propertyId: number };
+
+/** As `ContentRules.MaxHourlyOptions` and `SaveServiceRequestValidator`. */
+const MAX_AVAILABILITY_QUANTITY = 20;
+const MAX_PERIOD_QUANTITY = 50;
+const TIME_SLOTS: readonly (string | null)[] = Object.values(ServiceTimeSlot);
+/** The durations of the backend that the frontend does not show. */
+const OTHER_TIME_SLOTS: readonly (string | null)[] = ['FourHours', 'FiveHours', 'SixHours'];
+
+function isOtherTimeSlot(timeSlot: string | null): boolean {
+  return OTHER_TIME_SLOTS.includes(timeSlot);
+}
 
 const HOURLY_SERVICES: HourlyServiceRow[] = (
   [
@@ -2565,8 +2592,8 @@ type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest>;
 /**
  * `POST /api/catalog/services/create-hourly-service` with `HourlyServiceAddItemRequest`: the new hourly
  * service goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one
- * error per wrong field (see `standardGeneralErrors`, `hourlyPriceErrors` and `hourlyBookingErrors`);
- * 422 `catalog.vat_rate_not_allowed`.
+ * error per wrong field (see `translationErrors`, `hourlyPriceErrors`, `missingVatErrors` and
+ * `hourlyBookingErrors`); 422 and 404 of its references (`hourlyReferenceProblem`).
  */
 export const createHourlyServiceMock = (
   request: HttpRequest<unknown>,
@@ -2578,9 +2605,10 @@ export const createHourlyServiceMock = (
   const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = [
-    ...standardGeneralErrors(body, language),
-    ...missingNameErrors(body.translations ?? []),
-    ...hourlyPriceErrors(body, availabilitiesOf(body)),
+    ...translationErrors(body.translations, language),
+    ...iconErrors(body.icon, Object.values(StandardServiceIcon)),
+    ...hourlyPriceErrors(body),
+    ...missingVatErrors(body, availabilitiesOf(body)),
     ...hourlyBookingErrors(body),
   ];
   if (errors.length) {
@@ -2588,9 +2616,9 @@ export const createHourlyServiceMock = (
       errors,
     });
   }
-  const vatProblem = hourlyVatRateNotAllowed(request, body);
-  if (vatProblem) {
-    return vatProblem;
+  const missing = hourlyReferenceProblem(request, body);
+  if (missing) {
+    return missing;
   }
   const idHourlyService = crypto.randomUUID();
   HOURLY_SERVICE_DETAILS.set(
@@ -2627,6 +2655,23 @@ function hourlyVatRate(body: CreateHourlyServiceBody): number | null {
   );
 }
 
+/** As `referenceProblem`, for the availabilities by period. */
+function hourlyReferenceProblem(
+  request: HttpRequest<unknown>,
+  body: CreateHourlyServiceBody,
+  saved: readonly ServicePeriodAvailability[] = [],
+): Observable<never> | null {
+  return (
+    hourlyVatRateNotAllowed(request, body) ??
+    missingPeriod(
+      request,
+      (body.periodAvailabilities ?? []).map(({ idPeriod }) => idPeriod),
+      saved.map(({ idPeriod }) => idPeriod),
+    ) ??
+    missingSector(request, body.idSectors)
+  );
+}
+
 function hourlyVatRateNotAllowed(
   request: HttpRequest<unknown>,
   body: CreateHourlyServiceBody,
@@ -2637,22 +2682,37 @@ function hourlyVatRateNotAllowed(
   return vatRateNotAllowed(request, notAllowed);
 }
 
-/**
- * The Prezzi tab: the price, the VAT of the service or of all its `availabilities` (not for a service
- * already without it, `canLackVat`), the availabilities of the kind in force only.
- */
-function hourlyPriceErrors(
+/** The VAT of the service or of all its availabilities, not for a service already without it. */
+function missingVatErrors(
   body: CreateHourlyServiceBody,
   availabilities: readonly ServiceAvailabilityOption[],
   canLackVat = false,
 ): MockFieldError[] {
-  const errors = requiredPriceErrors('price', body.price);
-  const isVatMissing =
-    body.vatRate == null &&
+  return body.vatRate == null &&
     !canLackVat &&
-    !(availabilities.length && availabilities.every(({ vatRate }) => vatRate !== null));
-  if (isVatMissing || isVatOutOfRange(body.vatRate)) {
+    !(availabilities.length && availabilities.every(({ vatRate }) => vatRate !== null))
+    ? [{ field: 'vatRate', code: ApiErrorCode.ValidationInvalid }]
+    : [];
+}
+
+/** The Prezzi tab: the price, the VAT, the availabilities of the kind in force only. */
+function hourlyPriceErrors(body: CreateHourlyServiceBody): MockFieldError[] {
+  const errors = [...requiredPriceErrors('price', body.price), ...sectorErrors(body.idSectors)];
+  if (isVatOutOfRange(body.vatRate)) {
     errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
+  }
+  const periods = body.periodAvailabilities ?? [];
+  if ((body.availabilityOptions?.length ?? 0) > MAX_AVAILABILITY_QUANTITY) {
+    errors.push({ field: 'availabilityOptions', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (
+    periods.length > MAX_PERIOD_QUANTITY ||
+    new Set(periods.map(({ idPeriod }) => idPeriod)).size !== periods.length ||
+    periods.some(
+      ({ availabilityOptions }) => availabilityOptions.length > MAX_AVAILABILITY_QUANTITY,
+    )
+  ) {
+    errors.push({ field: 'periodAvailabilities', code: ApiErrorCode.ValidationInvalid });
   }
   const notInForce = body.isPeriodPricingEnabled ? 'availabilityOptions' : 'periodAvailabilities';
   if (body[notInForce]?.length) {
@@ -2675,20 +2735,34 @@ function hourlyPriceErrors(
 }
 
 function hourlyBookingErrors(body: CreateHourlyServiceBody): MockFieldError[] {
-  return (body.bookingOptions ?? []).flatMap(({ availabilityOption }, index) =>
-    availabilityOption
-      ? availabilityErrors(availabilityOption, `bookingOptions[${index}].availabilityOption`)
-      : [],
-  );
+  return [
+    ...bookingOptionErrors(body.bookingOptions),
+    ...(body.bookingOptions ?? []).flatMap(({ availabilityOption }, index) =>
+      availabilityOption
+        ? availabilityErrors(availabilityOption, `bookingOptions[${index}].availabilityOption`)
+        : [],
+    ),
+  ];
 }
 
 function availabilityErrors(option: ServiceAvailabilityOption, at: string): MockFieldError[] {
   const errors: MockFieldError[] = [];
-  if (option.startTime && option.endTime && option.endTime <= option.startTime) {
+  if (isNotLater(option.endTime, option.startTime)) {
     errors.push({ field: `${at}.endTime`, code: ApiErrorCode.ValidationInvalid });
   }
-  option.timeSlotPrices.forEach(({ isEnabled, price }, index) => {
-    if (isEnabled || price !== null) {
+  if (!option.daysOfWeek.every((day) => isBetween(day, 1, DAYS_OF_WEEK.length))) {
+    errors.push({ field: `${at}.daysOfWeek`, code: ApiErrorCode.ValidationInvalid });
+  }
+  const timeSlots = option.timeSlotPrices.map(({ timeSlot }) => timeSlot);
+  if (
+    new Set(timeSlots).size !== timeSlots.length ||
+    !timeSlots.every((timeSlot) => TIME_SLOTS.includes(timeSlot) || isOtherTimeSlot(timeSlot))
+  ) {
+    errors.push({ field: `${at}.timeSlotPrices`, code: ApiErrorCode.ValidationInvalid });
+  }
+  option.timeSlotPrices.forEach(({ timeSlot, isEnabled, price }, index) => {
+    // The durations the frontend does not show are accepted as they are.
+    if (price !== null || (isEnabled && !isOtherTimeSlot(timeSlot))) {
       errors.push(...requiredPriceErrors(`${at}.timeSlotPrices[${index}].price`, price));
     }
   });
@@ -2738,45 +2812,52 @@ function isVatOutOfRange(vatRate: number | null | undefined): boolean {
 type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unknown };
 
 /**
- * The common part of the three updates of the edit panel: 401 without a valid access token; 404
- * `service.not_found` for an `idHourlyService` that is not one of its hourly services; 400 with
- * one error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409 `resource.version_conflict`
- * when `If-Match` is not the version of the data of the tab (`dataOf`); otherwise `apply` changes
- * the data of its tab and the answer is 204 without a body, with their new version in its `ETag`.
+ * The common part of the three updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.not_found` for an `idHourlyService` that is not one of
+ * its hourly services; 400 for what depends on
+ * the saved service (`savedErrorsOf`); 422 and 404 of its references (`hourlyReferenceProblem`); 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateHourlyService(
   request: HttpRequest<unknown>,
   dataOf: (row: HourlyServiceRow) => unknown,
-  errorsOf: (
-    body: UpdateHourlyServiceBody,
-    details: HourlyServiceAddItemRequest,
-  ) => MockFieldError[],
+  errorsOf: (body: UpdateHourlyServiceBody) => MockFieldError[],
   apply: (
     details: HourlyServiceAddItemRequest,
     body: UpdateHourlyServiceBody,
     row: HourlyServiceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateHourlyServiceBody,
+    details: HourlyServiceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateHourlyServiceBody;
   const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
+  }
   const row = HOURLY_SERVICES.find(
     (item) => item.idHourlyService === body.idHourlyService && item.propertyId === property.id,
   );
   if (!row?.idHourlyService) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const errors = errorsOf(body, hourlyDetailsOf(row));
-  if (errors.length) {
-    return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      errors,
-    });
+  const savedErrors = savedErrorsOf(body, hourlyDetailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
   }
-  const vatProblem = hourlyVatRateNotAllowed(request, body);
-  if (vatProblem) {
-    return vatProblem;
+  const missing = hourlyReferenceProblem(request, body, hourlyDetailsOf(row).periodAvailabilities);
+  if (missing) {
+    return missing;
   }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
@@ -2800,10 +2881,7 @@ export const updateHourlyServiceGeneralMock = (
   return updateHourlyService(
     request,
     hourlyGeneralInfoOf,
-    (body) => [
-      ...standardGeneralErrors(body, language),
-      ...missingNameErrors(body.translations ?? []),
-    ],
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
@@ -2813,6 +2891,7 @@ export const updateHourlyServiceGeneralMock = (
         SERVICE_IMAGES.delete(row.idHourlyService ?? '');
       }
     },
+    (body, details) => iconErrors(body.icon, Object.values(StandardServiceIcon), details.icon),
   );
 };
 
@@ -2826,12 +2905,7 @@ export const updateHourlyServicePricesMock = (
   updateHourlyService(
     request,
     hourlyPricesOf,
-    (body, details) =>
-      hourlyPriceErrors(
-        body,
-        availabilitiesOf({ ...body, bookingOptions: details.bookingOptions }),
-        details.vatRate === null,
-      ),
+    hourlyPriceErrors,
     (details, body) => {
       details.price = body.price ?? null;
       if (details.vatRate !== null || body.vatRate != null) {
@@ -2843,6 +2917,12 @@ export const updateHourlyServicePricesMock = (
       details.idSectors = body.idSectors ?? [];
       details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
     },
+    (body, details) =>
+      missingVatErrors(
+        body,
+        availabilitiesOf({ ...body, bookingOptions: details.bookingOptions }),
+        details.vatRate === null,
+      ),
   );
 
 /**
@@ -2873,6 +2953,8 @@ const AUTOMATIC_PRICES: AutomaticPriceRow[] = [
   },
 ];
 
+/** Of a period, as `SaveAutomaticPriceRequestValidator`. */
+const MAX_TIME_SLOT_QUANTITY = 20;
 const AUTOMATIC_PRICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
 /**
@@ -2935,15 +3017,18 @@ function leaveAutomaticPrices(idService: string): void {
   }
 }
 
-/** The services of a property as `{ id, value }`, with the name. */
-function serviceItemsOf<Row extends { propertyId: number; serviceName: string | null }>(
-  rows: readonly Row[],
-  propertyId: number,
-  idOf: (row: Row) => string | null,
-): ComboboxItem[] {
-  return rows
-    .filter((row) => row.propertyId === propertyId)
-    .map((row) => ({ id: idOf(row) ?? '', value: row.serviceName ?? '' }));
+/** The services of a tab as `{ id, value }`, with the name and the order of its table. */
+function serviceItemsOf<
+  Row extends { propertyId: number; serviceName: string | null },
+  Details extends { translations: ServiceTranslation[] },
+>(request: HttpRequest<unknown>, table: ServiceTable<Row, Details>): ComboboxItem[] {
+  return table.rows
+    .filter((row) => row.propertyId === DEMO_PROPERTY.id)
+    .map((row) => ({
+      id: String(row[table.idField]),
+      value: shownName(table, row, languageOf(request)) ?? '',
+    }))
+    .sort((first, second) => naturalOrder(first.value, second.value));
 }
 
 /** Every id, when the list is given, of a service of the property. */
@@ -2970,15 +3055,10 @@ export const automaticPriceServicesMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = DEMO_PROPERTY;
   const answer: AutomaticPriceServices = {
-    barServices: serviceItemsOf(BAR_SERVICES, property.id, (row) => row.idBarService),
-    standardServices: serviceItemsOf(
-      STANDARD_SERVICES,
-      property.id,
-      (row) => row.idStandardService,
-    ),
-    hourlyServices: serviceItemsOf(HOURLY_SERVICES, property.id, (row) => row.idHourlyService),
+    barServices: serviceItemsOf(request, BAR_SERVICE_TABLE),
+    standardServices: serviceItemsOf(request, STANDARD_SERVICE_TABLE),
+    hourlyServices: serviceItemsOf(request, HOURLY_SERVICE_TABLE),
   };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
@@ -2989,8 +3069,8 @@ type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest>;
  * `POST /api/catalog/automatic-prices/create-automatic-price` with `AutomaticPriceAddItemRequest`: the new automatic
  * price goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one
  * error per wrong field (see `automaticGeneralErrors` and `automaticPriceErrors`); 422
- * `catalog.vat_rate_not_allowed`; 404 `service.not_found` for a service that is not one of the
- * property.
+ * `catalog.vat_rate_not_allowed`; 404 `service.not_found` and `catalog.sector_not_found` for a
+ * service or a sector that is not one of the property.
  */
 export const createAutomaticPriceMock = (
   request: HttpRequest<unknown>,
@@ -3013,6 +3093,10 @@ export const createAutomaticPriceMock = (
   }
   if (!areAutomaticServicesOf(body, property.id)) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  const missing = missingSector(request, body.idSectors);
+  if (missing) {
+    return missing;
   }
   const idAutomaticPrice = crypto.randomUUID();
   AUTOMATIC_PRICE_DETAILS.set(
@@ -3184,12 +3268,14 @@ function automaticPricesValidityOf(
 type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: unknown };
 
 /**
- * The common part of the two updates of the edit panel: 401 without a valid access token; 404
- * `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of its automatic
- * prices; 400 with one error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of
+ * its automatic prices; 400 for what depends on
+ * the saved one (`savedErrorsOf`); 422 `catalog.vat_rate_not_allowed`; 409
  * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
- * 404 `service.not_found` for a service that is not one of the property; otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their
- * new version in its `ETag`.
+ * 404 `service.not_found` and `catalog.sector_not_found` for a service or a sector that is not one of
+ * the property; otherwise `apply` changes the data of its tab and the answer is 204 without a body,
+ * with their new version in its `ETag`.
  */
 function updateAutomaticPrice(
   request: HttpRequest<unknown>,
@@ -3200,23 +3286,31 @@ function updateAutomaticPrice(
     body: UpdateAutomaticPriceBody,
     row: AutomaticPriceRow,
   ) => void,
+  savedErrorsOf: (
+    body: UpdateAutomaticPriceBody,
+    details: AutomaticPriceAddItemRequest,
+  ) => MockFieldError[] = () => [],
 ): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as UpdateAutomaticPriceBody;
   const property = DEMO_PROPERTY;
+  const errors = errorsOf(body);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, {
+      errors,
+    });
+  }
   const row = AUTOMATIC_PRICES.find(
     (item) => item.idAutomaticPrice === body.idAutomaticPrice && item.propertyId === property.id,
   );
   if (!row?.idAutomaticPrice) {
     return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
-  const errors = errorsOf(body);
-  if (errors.length) {
-    return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      errors,
-    });
+  const savedErrors = savedErrorsOf(body, automaticDetailsOf(row));
+  if (savedErrors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors: savedErrors });
   }
   const vatProblem = vatRateNotAllowed(request, body.vatRate);
   if (vatProblem) {
@@ -3228,6 +3322,10 @@ function updateAutomaticPrice(
   }
   if (!areAutomaticServicesOf(body, property.id)) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  const missing = missingSector(request, body.idSectors);
+  if (missing) {
+    return missing;
   }
   const details = structuredClone(automaticDetailsOf(row));
   apply(details, structuredClone(body), row);
@@ -3247,7 +3345,7 @@ export const updateAutomaticPriceGeneralMock = (
   return updateAutomaticPrice(
     request,
     automaticGeneralInfoOf,
-    (body) => automaticGeneralErrors(body, language),
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
@@ -3256,6 +3354,7 @@ export const updateAutomaticPriceGeneralMock = (
         SERVICE_IMAGES.delete(row.idAutomaticPrice ?? '');
       }
     },
+    (body, details) => iconErrors(body.icon, AUTOMATIC_PRICE_ICONS, details.icon),
   );
 };
 
@@ -3305,9 +3404,8 @@ function automaticGeneralErrors(
   language: string,
 ): MockFieldError[] {
   return [
-    ...standardGeneralErrors({ translations: body.translations }, language),
-    ...missingNameErrors(body.translations ?? []),
-    ...automaticIconErrors(body.icon ?? null),
+    ...translationErrors(body.translations, language),
+    ...iconErrors(body.icon, AUTOMATIC_PRICE_ICONS),
   ];
 }
 
@@ -3329,11 +3427,14 @@ function automaticPriceErrors(body: CreateAutomaticPriceBody): MockFieldError[] 
         ]
       : []),
     ...requiredPriceErrors('price', body.price),
+    ...((body.validityPeriods?.length ?? 0) > MAX_PERIOD_QUANTITY
+      ? [{ field: 'validityPeriods', code: ApiErrorCode.ValidationInvalid }]
+      : []),
     ...(isVatOutOfRange(body.vatRate)
       ? [{ field: 'vatRate', code: ApiErrorCode.ValidationInvalid }]
       : []),
     ...(body.validityPeriods ?? []).flatMap(
-      ({ dateFrom, dateTo, timeSlots }, index): MockFieldError[] => [
+      ({ dateFrom, dateTo, daysOfWeek, timeSlots }, index): MockFieldError[] => [
         ...(dateFrom && dateTo && dateTo < dateFrom
           ? [
               {
@@ -3342,7 +3443,16 @@ function automaticPriceErrors(body: CreateAutomaticPriceBody): MockFieldError[] 
               },
             ]
           : []),
-        ...(timeSlots.every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
+        ...(daysOfWeek.every((day) => isBetween(day, 1, DAYS_OF_WEEK.length))
+          ? []
+          : [
+              {
+                field: `validityPeriods[${index}].daysOfWeek`,
+                code: ApiErrorCode.ValidationInvalid,
+              },
+            ]),
+        ...(timeSlots.length <= MAX_TIME_SLOT_QUANTITY &&
+        timeSlots.every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
           ? []
           : [
               {
@@ -3355,14 +3465,11 @@ function automaticPriceErrors(body: CreateAutomaticPriceBody): MockFieldError[] 
   ];
 }
 
-/** The icon, when given, of the bar services or of the other services. */
-function automaticIconErrors(icon: string | null): MockFieldError[] {
-  return icon === null ||
-    Object.values<string>(BarServiceIcon).includes(icon) ||
-    Object.values<string>(StandardServiceIcon).includes(icon)
-    ? []
-    : [{ field: 'icon', code: ApiErrorCode.ValidationInvalid }];
-}
+/** The icons of the bar services and of the other services. */
+const AUTOMATIC_PRICE_ICONS: readonly string[] = [
+  ...Object.values(BarServiceIcon),
+  ...Object.values(StandardServiceIcon),
+];
 
 const AUTOMATIC_PRICE_TABLE = {
   rows: AUTOMATIC_PRICES,
@@ -3399,6 +3506,7 @@ const TABLE_SERVICES: TableServiceRow[] = (
   serviceName,
 }));
 
+const MAX_DAY_TIME_SLOT_QUANTITY = 50;
 const TABLE_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
 /**
@@ -3432,6 +3540,7 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
               isEnabled: true,
               startTime: '12:00',
               endTime: '15:00',
+              otherTimeSlots: dayOfWeek > 5 ? [{ startTime: '19:00', endTime: '22:00' }] : [],
             }),
           ),
         },
@@ -3519,7 +3628,7 @@ type CreateTableServiceBody = Partial<TableServiceAddItemRequest>;
 /**
  * `POST /api/catalog/table-services/create-table-service` with `TableServiceAddItemRequest`: the new table service
  * goes into the list. 204 without a body; 401 without a valid access token; 400 with one error per
- * wrong field (see `standardGeneralErrors`, `missingNameErrors` and `tableServiceErrors`).
+ * wrong field (see `translationErrors` and `tableServiceErrors`).
  */
 export const createTableServiceMock = (
   request: HttpRequest<unknown>,
@@ -3530,11 +3639,7 @@ export const createTableServiceMock = (
   const body = (request.body ?? {}) as CreateTableServiceBody;
   const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [
-    ...standardGeneralErrors({ translations: body.translations }, language),
-    ...missingNameErrors(body.translations ?? []),
-    ...tableServiceErrors(body),
-  ];
+  const errors = [...translationErrors(body.translations, language), ...tableServiceErrors(body)];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
@@ -3657,11 +3762,12 @@ function tableAvailabilityBookingsOf(
 type UpdateTableServiceBody = CreateTableServiceBody & { idTableService?: unknown };
 
 /**
- * The common part of the two updates of the edit panel: 401 without a valid access token; 404
- * `service.table_service_not_found` for an `idTableService` that is not one of its table services; 400 with one
- * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
- * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
- * without a body, with their new version in its `ETag`.
+ * The common part of the two updates of the edit panel: 401 without a valid access token; 400 with
+ * one error per wrong field; 404 `service.table_service_not_found` for an `idTableService` that is not one of
+ * its table services; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
+ * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their new
+ * version in its `ETag`.
  */
 function updateTableService(
   request: HttpRequest<unknown>,
@@ -3678,17 +3784,17 @@ function updateTableService(
   }
   const body = (request.body ?? {}) as UpdateTableServiceBody;
   const property = DEMO_PROPERTY;
-  const row = TABLE_SERVICES.find(
-    (item) => item.idTableService === body.idTableService && item.propertyId === property.id,
-  );
-  if (!row?.idTableService) {
-    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
-  }
   const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
+  }
+  const row = TABLE_SERVICES.find(
+    (item) => item.idTableService === body.idTableService && item.propertyId === property.id,
+  );
+  if (!row?.idTableService) {
+    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
   }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
@@ -3712,10 +3818,7 @@ export const updateTableServiceGeneralMock = (
   return updateTableService(
     request,
     tableGeneralInfoOf,
-    (body) => [
-      ...standardGeneralErrors({ translations: body.translations }, language),
-      ...missingNameErrors(body.translations ?? []),
-    ],
+    (body) => translationErrors(body.translations, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.isHighlighted = body.isHighlighted === true;
@@ -3733,7 +3836,10 @@ export const updateTableServiceAvailabilityBookingsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   updateTableService(request, tableAvailabilityBookingsOf, tableServiceErrors, (details, body) => {
-    details.availabilities = body.availabilities ?? [];
+    details.availabilities = (body.availabilities ?? []).map((availability) => ({
+      ...availability,
+      days: availability.days.map(withTimeSlotsInOrder),
+    }));
     details.availabilityMode = body.availabilityMode ?? TableServiceAvailabilityMode.Tables;
     details.tableGroups = body.tableGroups ?? [];
     details.totalSeatQuantity = body.totalSeatQuantity ?? null;
@@ -3747,6 +3853,18 @@ export const updateTableServiceAvailabilityBookingsMock = (
     details.depositAmount = body.depositAmount ?? null;
     details.isOnlineBookingEnabled = body.isOnlineBookingEnabled === true;
   });
+
+/** The first time slot of a day is the one of the form, the others follow; none without the day. */
+function withTimeSlotsInOrder(day: TableServiceAvailabilityDay): TableServiceAvailabilityDay {
+  if (!day.isEnabled) {
+    return { ...day, startTime: null, endTime: null, otherTimeSlots: [] };
+  }
+  const [first, ...otherTimeSlots] = [
+    { startTime: day.startTime, endTime: day.endTime },
+    ...day.otherTimeSlots,
+  ].sort((one, other) => (one.startTime ?? '').localeCompare(other.startTime ?? ''));
+  return { ...day, ...first, otherTimeSlots };
+}
 
 /**
  * The choices among the values of their enums; the tables or the seats, as chosen; the quantities in
@@ -3797,8 +3915,23 @@ function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
     1,
     MAX_SERVICE_BOOKING_QUANTITY,
   );
+  const { minSeatPerBookingQuantity: minSeats, maxSeatPerBookingQuantity: maxSeats } = body;
+  if (minSeats != null && minSeats < 1) {
+    add('minSeatPerBookingQuantity', ApiErrorCode.ValidationOutOfRange);
+  }
+  if (maxSeats != null && maxSeats < (minSeats ?? 1)) {
+    add('maxSeatPerBookingQuantity', ApiErrorCode.ValidationOutOfRange);
+  }
+  if ((body.availabilities?.length ?? 0) > MAX_AVAILABILITY_QUANTITY) {
+    add('availabilities', ApiErrorCode.ValidationInvalid);
+  }
   if (body.bookingPayment === TableServiceBookingPayment.Deposit) {
     const deposit = body.depositPercentage;
+    if (body.depositAmount != null && deposit != null) {
+      add('depositAmount', ApiErrorCode.ValidationInvalid);
+    } else if (body.depositAmount != null && body.depositAmount <= 0) {
+      add('depositAmount', ApiErrorCode.ValidationOutOfRange);
+    }
     if (deposit == null && body.depositAmount == null) {
       add('depositPercentage', ApiErrorCode.ValidationRequired);
     } else if (deposit != null && !(deposit > 0 && deposit <= 100)) {
@@ -3820,10 +3953,16 @@ function tableServiceErrors(body: CreateTableServiceBody): MockFieldError[] {
       add(`${at}.dateTo`, ApiErrorCode.ValidationEndBeforeStart);
     }
     const enabled = days.filter(({ isEnabled }) => isEnabled);
+    const daysOfWeek = days.map(({ dayOfWeek }) => dayOfWeek);
     if (!enabled.length) {
       add(`${at}.days`, ApiErrorCode.ValidationRequired);
     } else if (
-      !enabled.every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
+      new Set(daysOfWeek).size !== daysOfWeek.length ||
+      !daysOfWeek.every((day) => isBetween(day, 1, DAYS_OF_WEEK.length)) ||
+      enabled.some(({ otherTimeSlots }) => otherTimeSlots.length >= MAX_DAY_TIME_SLOT_QUANTITY) ||
+      !enabled
+        .flatMap((day) => [day, ...day.otherTimeSlots])
+        .every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
     ) {
       add(`${at}.days`, ApiErrorCode.ValidationInvalid);
     }

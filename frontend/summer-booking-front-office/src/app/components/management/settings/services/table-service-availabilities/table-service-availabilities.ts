@@ -83,18 +83,31 @@ export class TableServiceAvailabilities {
     availability: FieldTree<TableServiceAvailabilityDraft>,
     day: FieldTree<TableServiceAvailabilityDay>,
   ): void {
-    availability.days().markAsTouched();
+    availability.days().markAsTouched({ skipDescendants: true });
     day.startTime().markAsTouched();
     day.endTime().markAsTouched();
   }
 
+  /** The hours written for all the days or, without them, those of the first day chosen. */
   protected chooseSameTime(
     availability: FieldTree<TableServiceAvailabilityDraft>,
     isSameTimeForAllDays: boolean,
   ): void {
-    if (isSameTimeForAllDays) {
-      copyTimes(availability, availability.startTime().value(), availability.endTime().value());
+    if (!isSameTimeForAllDays) {
+      return;
     }
+    if (!availability.startTime().value() && !availability.endTime().value()) {
+      const first = availability
+        .days()
+        .value()
+        .find(({ isEnabled, startTime, endTime }) => isEnabled && startTime && endTime);
+      if (!first) {
+        return;
+      }
+      availability.startTime().value.set(first.startTime);
+      availability.endTime().value.set(first.endTime);
+    }
+    copyTimes(availability, availability.startTime().value(), availability.endTime().value());
   }
 
   protected changeStartTime(

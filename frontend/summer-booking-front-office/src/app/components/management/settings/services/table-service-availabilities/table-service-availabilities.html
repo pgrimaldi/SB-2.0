@@ -118,6 +118,16 @@
                   [error]="validationText.text(day.endTime)"
                 />
               </div>
+              @if (day.otherTimeSlots().value().length) {
+                <p class="table__service__availabilities__others">
+                  {{ 'management.settings.services.form.tables.other_time_slots' | translate }}
+                  @for (timeSlot of day.otherTimeSlots().value(); track $index) {
+                    <span dir="ltr" class="table__service__availabilities__other">
+                      {{ timeSlot.startTime }}–{{ timeSlot.endTime }}
+                    </span>
+                  }
+                </p>
+              }
             </div>
           }
           @if (

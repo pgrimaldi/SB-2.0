@@ -22,6 +22,7 @@ import { SelectOption } from '../../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../../shared/ui/titles/section-title/section-title';
 
 interface TimeIntervalTexts {
+  none: string;
   fifteen_minutes: string;
   thirty_minutes: string;
   forty_five_minutes: string;
@@ -85,13 +86,16 @@ export class ServicesBookingOption {
     ) as Observable<TimeIntervalTexts>,
     { initialValue: null },
   );
-  protected readonly timeIntervalOptions = computed<readonly SelectOption<BookingTimeInterval>[]>(
-    () =>
-      Object.values(BookingTimeInterval).map((value) => ({
-        value,
-        label: this.timeIntervalTexts()?.[TIME_INTERVAL_KEYS[value]] ?? '',
-      })),
-  );
+  /** First the empty choice, to take the interval away. */
+  protected readonly timeIntervalOptions = computed<
+    readonly SelectOption<BookingTimeInterval | ''>[]
+  >(() => [
+    { value: '', label: this.timeIntervalTexts()?.none ?? '' },
+    ...Object.values(BookingTimeInterval).map((value) => ({
+      value,
+      label: this.timeIntervalTexts()?.[TIME_INTERVAL_KEYS[value]] ?? '',
+    })),
+  ]);
 
   /** The choice of those minutes; none for other minutes, which stay until one is chosen. */
   protected timeIntervalOf(minutes: number | null): BookingTimeInterval | null {
@@ -104,7 +108,7 @@ export class ServicesBookingOption {
 
   protected chooseTimeInterval(
     field: FieldTree<number | null>,
-    interval: BookingTimeInterval | null,
+    interval: BookingTimeInterval | '' | null,
   ): void {
     field().value.set(interval ? BOOKING_TIME_INTERVAL_MINUTES[interval] : null);
     field().markAsDirty();

@@ -4248,7 +4248,9 @@ Nessun payload.
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
@@ -4289,7 +4291,9 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
 ### POST `/api/catalog/services/{id}/image`
 
@@ -4303,7 +4307,7 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+200 OK (il servizio, che il frontend non legge).
 
 **Payload tabella**
 
@@ -4313,7 +4317,7 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+200 OK (il servizio, che il frontend non legge).
 
 ### DELETE `/api/catalog/services/{id}/image`
 
@@ -4323,7 +4327,7 @@ Nessun payload.
 
 **Response JSON**
 
-Nessun corpo (204).
+200 OK (il servizio, che il frontend non legge).
 
 **Payload tabella**
 
@@ -4331,7 +4335,7 @@ Nessun payload.
 
 **Response tabella**
 
-Nessun corpo (204).
+200 OK (il servizio, che il frontend non legge).
 
 ### GET `/api/catalog/services/get-bar-service-general-info?idBarService={idBarService}`
 
@@ -4805,7 +4809,9 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
@@ -4842,7 +4848,9 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
 ### GET `/api/catalog/services/get-standard-service-general-info?idStandardService={idStandardService}`
 
@@ -5397,7 +5405,9 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
@@ -5475,7 +5485,9 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
 ### GET `/api/catalog/services/get-hourly-service-general-info?idHourlyService={idHourlyService}`
 
@@ -6117,7 +6129,9 @@ Nessun payload.
 
 **Response JSON**
 
-Nessun corpo (204).
+```json
+"string"
+```
 
 **Payload tabella**
 
@@ -6147,7 +6161,9 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+| Campo | Tipo |
+|---|---|
+| `(corpo)` | string |
 
 ### GET `/api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
 
@@ -6375,7 +6391,7 @@ Nessun corpo (204).
 
 **Response JSON**
 
-Nessun corpo (204).
+200 OK (il prezzo automatico, che il frontend non legge).
 
 **Payload tabella**
 
@@ -6385,7 +6401,7 @@ Nessun corpo (204).
 
 **Response tabella**
 
-Nessun corpo (204).
+200 OK (il prezzo automatico, che il frontend non legge).
 
 ### DELETE `/api/catalog/automatic-prices/{id}/image`
 
@@ -6395,7 +6411,7 @@ Nessun payload.
 
 **Response JSON**
 
-Nessun corpo (204).
+200 OK (il prezzo automatico, che il frontend non legge).
 
 **Payload tabella**
 
@@ -6403,7 +6419,7 @@ Nessun payload.
 
 **Response tabella**
 
-Nessun corpo (204).
+200 OK (il prezzo automatico, che il frontend non legge).
 
 ### POST `/api/catalog/automatic-prices/delete-automatic-price-item`
 

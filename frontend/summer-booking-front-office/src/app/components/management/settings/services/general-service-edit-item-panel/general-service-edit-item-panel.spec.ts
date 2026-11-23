@@ -12,7 +12,9 @@ import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { StandardServiceSelectedGeneralInfo } from '../../../../../entities/settings/services/standard-service-selected-general-info';
 import { StandardServiceSelectedPrices } from '../../../../../entities/settings/services/standard-service-selected-prices';
 import { StandardServiceUpdateBookingRequest } from '../../../../../entities/settings/services/standard-service-update-booking-request';
+import { StandardServiceUpdatePricesRequest } from '../../../../../entities/settings/services/standard-service-update-prices-request';
 import { StandardServiceUpdateGeneralRequest } from '../../../../../entities/settings/services/standard-service-update-general-request';
+import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { Language } from '../../../../../entities/shared/language';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
@@ -35,6 +37,8 @@ describe('GeneralServiceEditItemPanel', () => {
     uploadServiceImage = vi.fn((): Observable<void> => of(undefined)),
     deleteServiceImage = vi.fn((): Observable<void> => of(undefined)),
     generalInfo = {} as Partial<StandardServiceSelectedGeneralInfo>,
+    prices = {} as Partial<StandardServiceSelectedPrices>,
+    periods = [] as readonly SeasonPeriodItem[],
   } = {}) => {
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:image');
     vi.spyOn(URL, 'revokeObjectURL').mockReturnValue();
@@ -57,6 +61,10 @@ describe('GeneralServiceEditItemPanel', () => {
       (request: StandardServiceUpdateBookingRequest): Observable<string | null> =>
         of(request ? 'v2' : null),
     );
+    const updateStandardServicePrices = vi.fn(
+      (request: StandardServiceUpdatePricesRequest): Observable<string | null> =>
+        of(request ? 'v2' : null),
+    );
     TestBed.configureTestingModule({
       providers: [
         provideNativeDateAdapter(),
@@ -70,6 +78,7 @@ describe('GeneralServiceEditItemPanel', () => {
             deleteServiceImage,
             updateStandardServiceGeneral,
             updateStandardServiceBooking,
+            updateStandardServicePrices,
             standardServiceBookingOptions: () =>
               of({ bookingOptions: [BOOKING_OPTION], version: 'v1' }),
             standardServiceGeneralInfo: () =>
@@ -85,11 +94,17 @@ describe('GeneralServiceEditItemPanel', () => {
                 }),
               ),
             standardServicePrices: () =>
-              of(Object.assign(new StandardServiceSelectedPrices(), { price: 3, version: 'v1' })),
+              of(
+                Object.assign(new StandardServiceSelectedPrices(), {
+                  price: 3,
+                  version: 'v1',
+                  ...prices,
+                }),
+              ),
           },
         },
         { provide: LanguageBehaviour, useValue: { current: signal(Language.It) } },
-        { provide: SeasonService, useValue: { periodList: () => of([]) } },
+        { provide: SeasonService, useValue: { periodList: () => of(periods) } },
         { provide: SectorService, useValue: { sectorCombobox: () => of([]) } },
       ],
     });
@@ -126,6 +141,7 @@ describe('GeneralServiceEditItemPanel', () => {
       save,
       updateStandardServiceGeneral,
       updateStandardServiceBooking,
+      updateStandardServicePrices,
       updated: () => updated,
     };
   };
@@ -287,6 +303,31 @@ describe('GeneralServiceEditItemPanel', () => {
 
     expect(updateStandardServiceBooking.mock.calls[0][0].bookingOptions).toMatchObject([
       { ...BOOKING_OPTION, maxBookingPerHourQuantity: 25 },
+    ]);
+  });
+
+  it('should send back the prices of the periods that are not of the season any more', async () => {
+    const { fixture, panel, save, updateStandardServicePrices } = await setup({
+      prices: {
+        isPeriodPricingEnabled: true,
+        periodPrices: [
+          { idPeriod: 7, price: 9 },
+          { idPeriod: 1, price: 4 },
+        ],
+      },
+      periods: [Object.assign(new SeasonPeriodItem(), { key: 1, name: 'Agosto' })],
+    });
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    expect(panel['draft']().periodPrices).toMatchObject([{ idPeriod: 1, price: 4 }]);
+    panel['draftForm'].periodPrices[0].price().value.set(5);
+    await save();
+
+    expect(updateStandardServicePrices.mock.lastCall?.[0].periodPrices).toMatchObject([
+      { idPeriod: 1, price: 5 },
+      { idPeriod: 7, price: 9 },
     ]);
   });
 

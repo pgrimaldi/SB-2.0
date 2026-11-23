@@ -1515,6 +1515,7 @@
             "min_items_per_booking": "每次预订最少物品数",
             "max_items_per_booking": "每次预订最多物品数",
             "time_intervals": {
+              "none": "无间隔",
               "fifteen_minutes": "15分钟",
               "thirty_minutes": "30分钟",
               "forty_five_minutes": "45分钟",
@@ -1579,6 +1580,7 @@
             "add_availability": "添加可用时间",
             "days_hours": "日期与时段",
             "same_hours": "所有日期使用相同时间",
+            "other_time_slots": "其他时段：",
             "days": {
               "monday": "星期一",
               "tuesday": "星期二",
@@ -1608,6 +1610,7 @@
             "seats_hint": "设置可用座位总数。",
             "meal_duration": "平均用餐时长",
             "meal_durations": {
+              "none": "无时长",
               "thirty_minutes": "30分钟",
               "forty_five_minutes": "45分钟",
               "one_hour": "1小时",

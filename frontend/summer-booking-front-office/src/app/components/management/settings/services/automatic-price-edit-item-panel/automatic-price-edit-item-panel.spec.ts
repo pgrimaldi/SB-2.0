@@ -142,6 +142,32 @@ describe('AutomaticPriceEditItemPanel', () => {
     document.querySelectorAll('.cdk-overlay-container').forEach((overlay) => overlay.remove()),
   );
 
+  it('should save the Prezzi e Validità tab alone, with the services in force and its version', async () => {
+    const { fixture, panel, save, updateAutomaticPricePricesValidity, updated } = await setup({
+      pricesValidity: { vatRate: 10, idSectors: ['s1'], version: 'v7' },
+    });
+
+    await panel['requestTab'](1);
+    await fixture.whenStable();
+    panel['startEdit']();
+    panel['draftForm'].price().value.set(3);
+    panel['draftForm'].isAllServicesEnabled().value.set(true);
+    await save();
+
+    expect(updateAutomaticPricePricesValidity).toHaveBeenCalledExactlyOnceWith(
+      Object.assign(new AutomaticPriceUpdatePricesValidityRequest(), {
+        idAutomaticPrice: 's5',
+        price: 3,
+        vatRate: 10,
+        isAllServicesEnabled: true,
+        idSectors: ['s1'],
+      }),
+      'v7',
+    );
+    expect(panel.open()).toBe(false);
+    expect(updated()).toBe(1);
+  });
+
   it('should take away a chosen service that is no longer there, reading them again', async () => {
     const { fixture, panel, save, updateAutomaticPricePricesValidity, automaticPriceServices } =
       await setup();

@@ -20,11 +20,10 @@ import { priceListsUsingPeriod } from '../catalog/price-lists.mock';
 import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
+import { PERIODS, PeriodRow } from './periods-data.mock';
 import { sameTextIgnoringCase } from '../../../components/shared/forms/text-comparison';
 
 type SeasonDatesRow = Omit<SeasonDates, 'version'> & { propertyId: number };
-/** The days of its date ranges as the backend keeps them (`2026-05-01`). */
-type PeriodRow = Omit<SeasonPeriodItem, 'version'> & { propertyId: number; isNextSeason: boolean };
 
 /** What a missing day becomes in the backend's DTOs (`DateOnly` default). */
 const MISSING_DAY = '0001-01-01';
@@ -35,50 +34,6 @@ const SEASON_DATES: SeasonDatesRow[] = [
     endsOn: '2026-09-30T00:00:00.000Z',
     nextStartsOn: '2027-05-01T00:00:00.000Z',
     nextEndsOn: '2027-09-30T00:00:00.000Z',
-  },
-];
-
-const PERIODS: PeriodRow[] = [
-  {
-    propertyId: 1,
-    isNextSeason: false,
-    key: 0,
-    name: 'Bassa stagione',
-    ranges: [
-      { startsOn: '2026-05-01', endsOn: '2026-06-15' },
-      { startsOn: '2026-09-01', endsOn: '2026-09-30' },
-    ],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: false,
-    key: 1,
-    name: 'Media stagione',
-    ranges: [{ startsOn: '2026-06-16', endsOn: '2026-07-31' }],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: false,
-    key: 2,
-    name: 'Alta stagione',
-    ranges: [{ startsOn: '2026-08-01', endsOn: '2026-08-31' }],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: true,
-    key: 0,
-    name: 'Bassa stagione',
-    ranges: [
-      { startsOn: '2027-05-01', endsOn: '2027-06-30' },
-      { startsOn: '2027-09-01', endsOn: '2027-09-30' },
-    ],
-  },
-  {
-    propertyId: 1,
-    isNextSeason: true,
-    key: 1,
-    name: 'Alta stagione',
-    ranges: [{ startsOn: '2027-07-01', endsOn: '2027-08-31' }],
   },
 ];
 

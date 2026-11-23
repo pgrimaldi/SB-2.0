@@ -122,7 +122,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   (`MAX_SERVICE_NAME_LENGTH`, `MAX_SERVICE_DESCRIPTION_LENGTH`, `MAX_SERVICE_PRICE`,
   `MAX_SERVICE_VARIANT_NAME_LENGTH`, `MAX_SERVICE_BOOKING_QUANTITY`).
 - Codici del backend senza `errors[]` che riguardano un campo: `service-field-errors.ts` li mette sotto il campo
-  (`catalog.vat_rate_not_allowed` sotto IVA, con le aliquote ammesse; `service.icon_not_found` sotto le icone).
+  (`catalog.vat_rate_not_allowed` sotto IVA, con le aliquote ammesse; `service.icon_not_found` sotto le icone). Nei
+  Servizi Orari `catalog.vat_rate_not_allowed` va sopra i bottoni: può essere l'aliquota di una disponibilità.
 
 ### Nome e descrizione nelle lingue
 
@@ -257,7 +258,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - In modifica il riquadro mostra l'immagine che il servizio ha già (`imageUrl` di
   `get-bar-service-general-info`), finché non si sceglie un'icona o un'altra immagine; Annulla la rimette.
 - La X sull'immagine (`isImageRemovable` e `imageRemoveRequest` di `app-services-images`): un'immagine non ancora salvata
-  si toglie senza chiedere e torna l'icona di prima; quella salvata, in Modifica, si elimina subito dopo la conferma
+  si toglie senza chiedere (in Modifica torna l'icona di prima, nell'aggiunta nessuna); quella salvata, in Modifica, si elimina subito dopo la conferma
   (`app-confirm-popup`, `DELETE /api/catalog/services/{id}/image`, `CatalogService.deleteServiceImage`), con lo spinner a
   pagina intera e l'errore sotto l'immagine. In sola lettura la X è spenta.
 
@@ -299,7 +300,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   - Intervallo di tempo (enum `BookingTimeInterval`: 15, 30, 45 minuti, 1 e 2 ore; nel form i minuti,
     `intervalMinutes`, con `BOOKING_TIME_INTERVAL_MINUTES`), con la (i) accanto all'etichetta: quanto tempo deve passare
     tra un'ordinazione e l'altra dello stesso servizio. Minuti diversi da questi già salvati non si vedono nella tendina e
-    restano finché non si sceglie un valore;
+    restano finché non si sceglie un valore. La prima voce, "Nessun intervallo", lo toglie (`null`);
   - Numero minimo e massimo di articoli per prenotazione.
 - Ogni opzione ha anche `weekdays` (enum `Weekday`) e `maxPerSlot`, che il form non mostra: tornano al backend come letti
   (`[]` e `null` per le opzioni nuove), così un Salva non li cancella.
@@ -517,9 +518,11 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Con la casella spuntata gli orari comuni si copiano in tutti i giorni e quelli dei giorni si spengono; senza la
   spunta sono spenti gli orari comuni (regole `disabled` nel form del pannello).
 - La casella e gli orari comuni non si mandano (`TableServiceAvailabilityDraft`): in lettura la casella è accesa quando
-  almeno due giorni scelti hanno gli stessi orari (`availabilityDraftOf`).
+  tutti i giorni scelti, almeno due, hanno gli stessi orari (`availabilityDraftOf`).
+- Spuntandola senza orari comuni valgono quelli del primo giorno scelto che li ha; se non ce ne sono, quelli dei giorni non
+  si toccano.
 - Date obbligatorie, almeno un giorno scelto, le due ore per ogni giorno scelto. Le altre fasce dello stesso giorno
-  (`otherTimeSlots`) non si mostrano e tornano come lette.
+  (`otherTimeSlots`) si vedono sotto il giorno in sola lettura ("Altre fasce: 19:00–22:00") e tornano come lette.
 
 #### Disponibilità tavoli e posti (`app-table-service-capacity`)
 
@@ -536,7 +539,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 #### Opzioni di prenotazione (`app-table-service-booking-options`)
 
 - "Durata media del pasto", facoltativa: `app-filled-select` sull'enum `TableServiceMealDuration`, da 30 minuti a 3 ore. Si
-  mandano i minuti (`averageMealMinutes`); altri minuti già salvati restano finché non se ne sceglie una.
+  mandano i minuti (`averageMealMinutes`); altri minuti già salvati restano finché non se ne sceglie una. La prima voce,
+  "Nessuna durata", la toglie (`null`).
 - "Numero massimo di prenotazioni per fascia oraria", 1-32.767. I posti minimi e massimi per prenotazione non si mostrano
   e tornano come letti.
 - "Consenti prenotazione": `app-radio-group` sull'enum `TableServiceBookingPayment` (`None`, `Deposit`).

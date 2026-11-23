@@ -64,6 +64,7 @@
         <app-filled-number-field
           class="table__service__booking__options__amount"
           [isDecimal]="true"
+          [maxDecimals]="2"
           [formField]="depositPercentage()"
           [error]="
             validationText.text(

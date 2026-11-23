@@ -44,6 +44,8 @@ export class FilledNumberField {
   readonly autocomplete = input<string>();
   readonly isDecimal = input(false);
   readonly isCurrency = input(false);
+  /** Decimals that can be typed with `isDecimal`: 2 for a currency and any number of them otherwise. */
+  readonly maxDecimals = input<number>();
   /** Negative numbers too: a minus at the start, kept on the left also in Arabic. */
   readonly isSigned = input(false);
   /** The digits are dots, as in a password field, with the eye after them to show them. */
@@ -79,7 +81,9 @@ export class FilledNumberField {
     this.isSigned() ? null : this.isDecimal() ? 'decimal' : 'numeric',
   );
   protected readonly decimals = computed(() =>
-    !this.isDecimal() ? 0 : this.isCurrency() ? CURRENCY_DECIMALS : Infinity,
+    this.isDecimal()
+      ? (this.maxDecimals() ?? (this.isCurrency() ? CURRENCY_DECIMALS : Infinity))
+      : 0,
   );
   /**
    * Text in the field. It stays as typed while it means the same number (e.g. "3," while typing

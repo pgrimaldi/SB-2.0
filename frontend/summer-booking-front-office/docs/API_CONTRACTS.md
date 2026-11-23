@@ -2947,17 +2947,14 @@ Servizi: creazione servizio bar.
     {
       "dateFrom": "2026-07-01T00:00:00.000Z",
       "dateTo": "2026-07-31T00:00:00.000Z",
-      "weekdays": [
-        "Saturday",
-        "Sunday"
-      ],
+      "weekdays": [],
       "managementStartTime": "09:00",
       "managementEndTime": "12:00",
       "onlineStartTime": "09:00",
       "onlineEndTime": "12:00",
       "maxBookingPerHourQuantity": 2,
       "maxBookingPerDayQuantity": 5,
-      "maxPerSlot": 5,
+      "maxPerSlot": null,
       "intervalMinutes": 30,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 2
@@ -2986,17 +2983,17 @@ Servizi: creazione servizio bar.
 | `periodPrices[].price` | number (decimale, €) \| null | `1.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "09:00", "managementEndTime": "12:00", "onlineStartTime": "09:00", "onlineEndTime": "12:00", "maxBookingPerHourQuantity": 2, "maxBookingPerDayQuantity": 5, "maxPerSlot": 5, "intervalMinutes": 30, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "weekdays": [], "managementStartTime": "09:00", "managementEndTime": "12:00", "onlineStartTime": "09:00", "onlineEndTime": "12:00", "maxBookingPerHourQuantity": 2, "maxBookingPerDayQuantity": 5, "maxPerSlot": null, "intervalMinutes": 30, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
-| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `[]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `12:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `12:00` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `2` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `5` |
-| `bookingOptions[].maxPerSlot` | number (intero) \| null | `5` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `null` |
 | `bookingOptions[].intervalMinutes` | number (intero) \| null | `30` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
@@ -3576,10 +3573,7 @@ Servizi: creazione servizio.
     {
       "dateFrom": "2026-06-15T00:00:00.000Z",
       "dateTo": "2026-09-15T00:00:00.000Z",
-      "weekdays": [
-        "Saturday",
-        "Sunday"
-      ],
+      "weekdays": [],
       "managementStartTime": "09:00",
       "managementEndTime": "19:00",
       "onlineStartTime": "09:00",
@@ -3611,10 +3605,10 @@ Servizi: creazione servizio.
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "maxPerSlot": null, "intervalMinutes": 15, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": [], "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "maxPerSlot": null, "intervalMinutes": 15, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
-| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `[]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
@@ -4249,10 +4243,7 @@ Servizi Orari: creazione servizio orario.
     {
       "dateFrom": "2026-06-01T00:00:00.000Z",
       "dateTo": "2026-09-15T00:00:00.000Z",
-      "weekdays": [
-        "Saturday",
-        "Sunday"
-      ],
+      "weekdays": [],
       "managementStartTime": null,
       "managementEndTime": null,
       "onlineStartTime": null,
@@ -4359,10 +4350,10 @@ Servizi Orari: creazione servizio orario.
 | `periodAvailabilities[].availabilityOptions[].hasFixedTimeSlots` | boolean | `false` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
-| `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": null, "managementEndTime": null, "onlineStartTime": null, "onlineEndTime": null, "maxBookingPerHourQuantity": null, "maxBookingPerDayQuantity": null, "maxPerSlot": null, "intervalMinutes": null, "minItemPerBookingQuantity": null, "maxItemPerBookingQuantity": null, "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
+| `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": [], "managementStartTime": null, "managementEndTime": null, "onlineStartTime": null, "onlineEndTime": null, "maxBookingPerHourQuantity": null, "maxBookingPerDayQuantity": null, "maxPerSlot": null, "intervalMinutes": null, "minItemPerBookingQuantity": null, "maxItemPerBookingQuantity": null, "availabilityOption": {"startTime": "09:00", "endTime": "19:00", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlotPrices": [{"timeSlot": "TenMinutes", "isEnabled": true, "price": 3}, {"timeSlot": "FifteenMinutes", "isEnabled": false, "price": null}, {"timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8}, {"timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null}, {"timeSlot": "OneHour", "isEnabled": true, "price": 15}, {"timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null}, {"timeSlot": "TwoHours", "isEnabled": true, "price": 25}, {"timeSlot": "ThreeHours", "isEnabled": false, "price": null}], "isCustomTimeSlotEnabled": true, "customTimeSlotMinuteQuantity": 20, "customTimeSlotPrice": 6, "vatRate": 22, "maxBookingPerTimeSlotQuantity": 4, "hasFixedTimeSlots": false}}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null | `2026-06-01T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-15T00:00:00.000Z` |
-| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `[]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `null` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `null` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `null` |

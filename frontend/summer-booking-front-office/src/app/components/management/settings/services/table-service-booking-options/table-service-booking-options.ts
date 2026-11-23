@@ -22,6 +22,7 @@ import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 
 interface MealDurationTexts {
+  none: string;
   thirty_minutes: string;
   forty_five_minutes: string;
   one_hour: string;
@@ -105,13 +106,16 @@ export class TableServiceBookingOptions {
     ) as Observable<BookingOptionsTexts>,
     { initialValue: null },
   );
-  protected readonly mealDurations = computed<readonly SelectOption<TableServiceMealDuration>[]>(
-    () =>
-      Object.values(TableServiceMealDuration).map((value) => ({
-        value,
-        label: this.texts()?.meal_durations[MEAL_DURATION_KEYS[value]] ?? '',
-      })),
-  );
+  /** First the empty choice, to take the duration away. */
+  protected readonly mealDurations = computed<
+    readonly SelectOption<TableServiceMealDuration | ''>[]
+  >(() => [
+    { value: '', label: this.texts()?.meal_durations.none ?? '' },
+    ...Object.values(TableServiceMealDuration).map((value) => ({
+      value,
+      label: this.texts()?.meal_durations[MEAL_DURATION_KEYS[value]] ?? '',
+    })),
+  ]);
   /** The choice of the minutes; none for other minutes, which stay until one is chosen. */
   protected readonly mealDuration = computed(
     () =>
@@ -134,7 +138,7 @@ export class TableServiceBookingOptions {
     ],
   );
 
-  protected chooseMealDuration(duration: TableServiceMealDuration | null): void {
+  protected chooseMealDuration(duration: TableServiceMealDuration | '' | null): void {
     const field = this.averageMealMinutes()();
     field.value.set(duration ? TABLE_SERVICE_MEAL_DURATION_MINUTES[duration] : null);
     field.markAsDirty();
