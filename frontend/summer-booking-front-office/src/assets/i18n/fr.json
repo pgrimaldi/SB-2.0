@@ -1544,7 +1544,10 @@
             "custom": "Personnalisé",
             "minutes": "min",
             "max_bookings_per_time_slot": "Réservations max par créneau",
-            "fixed_time_slots": "Créneaux fixes"
+            "fixed_time_slots": "Créneaux fixes",
+            "field_names": {
+              "day_of_week": "jour"
+            }
           },
           "validity": {
             "periods_title": "Périodes de validité",

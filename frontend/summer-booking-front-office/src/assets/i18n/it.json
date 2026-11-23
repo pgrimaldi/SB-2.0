@@ -1544,7 +1544,10 @@
             "custom": "Personalizzato",
             "minutes": "min",
             "max_bookings_per_time_slot": "Max prenotazioni per fascia oraria",
-            "fixed_time_slots": "Fasce orarie fisse"
+            "fixed_time_slots": "Fasce orarie fisse",
+            "field_names": {
+              "day_of_week": "giorno"
+            }
           },
           "validity": {
             "periods_title": "Periodi validità",

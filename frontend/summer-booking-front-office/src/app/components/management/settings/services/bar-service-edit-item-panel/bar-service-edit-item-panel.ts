@@ -695,7 +695,6 @@ function newDraft(): BarServiceAddItemRequest {
   });
 }
 
-/** The values of the fields of one tab. */
 /** The rows read for a period the tab does not show. */
 function hiddenOf<T extends { idPeriod: number | null }>(
   rows: readonly T[],
@@ -705,6 +704,7 @@ function hiddenOf<T extends { idPeriod: number | null }>(
   return rows.filter(({ idPeriod }) => idPeriod === null || !idPeriods.has(idPeriod));
 }
 
+/** The values of the fields of one tab. */
 function pick(values: BarServiceAddItemRequest, tab: PanelTab): Partial<BarServiceAddItemRequest> {
   return Object.fromEntries(TAB_FIELDS[tab].map((field) => [field, values[field]]));
 }

@@ -50,7 +50,11 @@ import { HourlyServiceItem } from '../../../entities/settings/services/hourly-se
 import { HourlyServiceSelectedBookingOptions } from '../../../entities/settings/services/hourly-service-selected-booking-options';
 import { HourlyServiceSelectedGeneralInfo } from '../../../entities/settings/services/hourly-service-selected-general-info';
 import { HourlyServiceSelectedPrices } from '../../../entities/settings/services/hourly-service-selected-prices';
-import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
+import {
+  MAX_CUSTOM_TIME_SLOT_MINUTES,
+  ServiceAvailabilityOption,
+} from '../../../entities/settings/services/service-availability-option';
+import { MAX_SERVICE_BOOKING_QUANTITY } from '../../../entities/settings/services/service-booking-option';
 import { ServicePeriodAvailability } from '../../../entities/settings/services/service-period-availability';
 import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
 import { MAX_SERVICE_PRICE } from '../../../entities/settings/services/service-price';
@@ -1367,6 +1371,7 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
 const SERVICE_IMAGES = new Map<string, string>([
   ['8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c05', '/assets/images/hub/hero-beach-mobile-863.webp'],
   ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d03', '/assets/images/hub/hero-beach-mobile-1290.webp'],
+  ['4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03', '/assets/images/hub/hero-beach-desktop.webp'],
 ]);
 
 function detailsOf(row: BarServiceRow): BarServiceAddItemRequest {
@@ -1580,11 +1585,17 @@ export const uploadServiceImageMock = (
     const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
     const barRow = BAR_SERVICES.find((item) => item.idBarService === idService);
     const standardRow = STANDARD_SERVICES.find((item) => item.idStandardService === idService);
+    const hourlyRow = HOURLY_SERVICES.find((item) => item.idHourlyService === idService);
     if (barRow) {
       BAR_SERVICE_DETAILS.set(idService, { ...structuredClone(detailsOf(barRow)), icon: null });
     } else if (standardRow) {
       STANDARD_SERVICE_DETAILS.set(idService, {
         ...structuredClone(standardDetailsOf(standardRow)),
+        icon: null,
+      });
+    } else if (hourlyRow) {
+      HOURLY_SERVICE_DETAILS.set(idService, {
+        ...structuredClone(hourlyDetailsOf(hourlyRow)),
         icon: null,
       });
     } else {
@@ -1608,7 +1619,8 @@ export const deleteServiceImageMock = (
   const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
   if (
     !BAR_SERVICES.some((item) => item.idBarService === idService) &&
-    !STANDARD_SERVICES.some((item) => item.idStandardService === idService)
+    !STANDARD_SERVICES.some((item) => item.idStandardService === idService) &&
+    !HOURLY_SERVICES.some((item) => item.idHourlyService === idService)
   ) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
@@ -2274,7 +2286,7 @@ const HOURLY_SERVICES: HourlyServiceRow[] = (
 
 const HOURLY_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
-/** `POST /api/catalog/hourly-service-list`: one page of the hourly services (see `serviceListAnswer`). */
+/** `POST /api/catalog/services/hourly-service-list`: one page of the hourly services (see `serviceListAnswer`). */
 export const hourlyServiceListMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
@@ -2282,7 +2294,7 @@ export const hourlyServiceListMock = (
 
 /** An availability of the examples: every day from 9 to 19, four time slots and a custom one. */
 function exampleAvailability(): ServiceAvailabilityOption {
-  const prices: Partial<Record<ServiceTimeSlot, number>> = {
+  const prices: Readonly<Record<string, number | undefined>> = {
     [ServiceTimeSlot.TenMinutes]: 3,
     [ServiceTimeSlot.ThirtyMinutes]: 8,
     [ServiceTimeSlot.OneHour]: 15,
@@ -2326,6 +2338,8 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
         },
       ],
       icon: StandardServiceIcon.Surfing,
+      price: 15,
+      vatRate: 22,
       isPeriodPricingEnabled: true,
       periodAvailabilities: [
         {
@@ -2336,11 +2350,11 @@ const HOURLY_SERVICE_DETAILS = new Map<string, HourlyServiceAddItemRequest>([
       idSectors: ['5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01'],
       isOnlinePurchaseEnabled: true,
       bookingOptions: [
-        {
+        Object.assign(new HourlyServiceBookingOption(), {
           dateFrom: '2026-06-01T00:00:00.000Z',
           dateTo: '2026-09-15T00:00:00.000Z',
           availabilityOption: exampleAvailability(),
-        },
+        }),
       ],
     }),
   ],
@@ -2386,6 +2400,9 @@ function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
           description: 'Servizio a ore offerto dallo stabilimento.',
         },
       ],
+      price: 10,
+      vatRate: 22,
+      availabilityOptions: [exampleAvailability()],
     })
   );
 }
@@ -2396,6 +2413,7 @@ const HOURLY_SERVICE_TABLE = {
   details: HOURLY_SERVICE_DETAILS,
   detailsOf: hourlyDetailsOf,
   notFoundCode: ApiErrorCode.ServiceNotFound,
+  copyMore: copyImage,
 };
 
 /** The hourly service of the `idHourlyService` of the query string, if it exists. */
@@ -2405,7 +2423,7 @@ function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow
 }
 
 /**
- * `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of
+ * `GET /api/catalog/services/get-hourly-service-general-info?idHourlyService=…`: the Info Generali tab of
  * the edit panel. 200 with `HourlyServiceSelectedGeneralInfo` and the version of the tab, only the
  * languages written; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
@@ -2419,16 +2437,19 @@ export const hourlyServiceGeneralInfoMock = (
   if (!row) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  return versionedAnswer(request, hourlyGeneralInfoOf(row));
+  const imageUrl = SERVICE_IMAGES.get(row.idHourlyService ?? '');
+  return versionedAnswer(request, hourlyGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
 };
 
 /**
- * What `GET /api/catalog/get-hourly-service-general-info` answers besides the version: the version
+ * What `GET /api/catalog/services/get-hourly-service-general-info` answers besides the version: the version
  * covers it.
  */
 function hourlyGeneralInfoOf(
   row: HourlyServiceRow,
-): Omit<HourlyServiceSelectedGeneralInfo, 'version'> {
+): Omit<HourlyServiceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = hourlyDetailsOf(row);
   return {
     idHourlyService: row.idHourlyService,
@@ -2441,10 +2462,10 @@ function hourlyGeneralInfoOf(
 }
 
 /**
- * `GET /api/catalog/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
- * 200 with `HourlyServiceSelectedPrices` and the version of the tab, the availability only of the
- * periods that have it; 401 without a valid access token; 404 `service.not_found` for an unknown
- * id.
+ * `GET /api/catalog/services/get-hourly-service-prices?idHourlyService=…`: the Prezzi tab of the edit panel.
+ * 200 with `HourlyServiceSelectedPrices` and the version of the tab, the availabilities of the whole
+ * season or only of the periods that have them; 401 without a valid access token; 404
+ * `service.not_found` for an unknown id.
  */
 export const hourlyServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -2460,13 +2481,16 @@ export const hourlyServicePricesMock = (
 };
 
 /**
- * What `GET /api/catalog/get-hourly-service-prices` answers besides the version: the version covers
+ * What `GET /api/catalog/services/get-hourly-service-prices` answers besides the version: the version covers
  * it.
  */
 function hourlyPricesOf(row: HourlyServiceRow): Omit<HourlyServiceSelectedPrices, 'version'> {
   const details = hourlyDetailsOf(row);
   return {
+    price: details.price,
+    vatRate: details.vatRate,
     isPeriodPricingEnabled: details.isPeriodPricingEnabled,
+    availabilityOptions: details.availabilityOptions,
     periodAvailabilities: details.periodAvailabilities.filter(
       ({ availabilityOptions }) => availabilityOptions.length > 0,
     ),
@@ -2476,7 +2500,7 @@ function hourlyPricesOf(row: HourlyServiceRow): Omit<HourlyServiceSelectedPrices
 }
 
 /**
- * `GET /api/catalog/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
+ * `GET /api/catalog/services/get-hourly-service-booking-options?idHourlyService=…`: the Prenotazioni tab of
  * the edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
  * none) and the version of the tab. 401 without a valid access token; 404 `service.not_found` for
  * an unknown id.
@@ -2495,7 +2519,7 @@ export const hourlyServiceBookingOptionsMock = (
 };
 
 /**
- * What `GET /api/catalog/get-hourly-service-booking-options` answers besides the version: the
+ * What `GET /api/catalog/services/get-hourly-service-booking-options` answers besides the version: the
  * version covers it.
  */
 function hourlyBookingOptionsOf(
@@ -2507,10 +2531,10 @@ function hourlyBookingOptionsOf(
 type CreateHourlyServiceBody = Partial<HourlyServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-hourly-service` with `HourlyServiceAddItemRequest`: the new hourly
- * service goes into the list, with the name in the language of `Accept-Language`. 204 without a
- * body; 401 without a valid access token; 400 with one error per wrong field (see
- * `standardGeneralErrors` and `hourlyPriceErrors`).
+ * `POST /api/catalog/services/create-hourly-service` with `HourlyServiceAddItemRequest`: the new hourly
+ * service goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one
+ * error per wrong field (see `standardGeneralErrors`, `hourlyPriceErrors` and `hourlyBookingErrors`);
+ * 422 `catalog.vat_rate_not_allowed`.
  */
 export const createHourlyServiceMock = (
   request: HttpRequest<unknown>,
@@ -2521,56 +2545,160 @@ export const createHourlyServiceMock = (
   const body = (request.body ?? {}) as CreateHourlyServiceBody;
   const property = DEMO_PROPERTY;
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [...standardGeneralErrors(body, language), ...hourlyPriceErrors(body)];
+  const errors = [
+    ...standardGeneralErrors(body, language),
+    ...missingNameErrors(body.translations ?? []),
+    ...hourlyPriceErrors(body, availabilitiesOf(body)),
+    ...hourlyBookingErrors(body),
+  ];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const vatProblem = hourlyVatRateNotAllowed(request, body);
+  if (vatProblem) {
+    return vatProblem;
+  }
   const idHourlyService = crypto.randomUUID();
   HOURLY_SERVICE_DETAILS.set(
     idHourlyService,
-    structuredClone(onlyFieldsOf(HourlyServiceAddItemRequest, body as HourlyServiceAddItemRequest)),
+    structuredClone({
+      ...onlyFieldsOf(HourlyServiceAddItemRequest, body as HourlyServiceAddItemRequest),
+      vatRate: hourlyVatRate(body),
+    }),
   );
   HOURLY_SERVICES.push({
     propertyId: property.id,
     idHourlyService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idHourlyService })).pipe(
+    delay(600),
+  );
 };
 
-/** Every price of the time slots, of the periods and of the booking options, when given, not below 0. */
-function hourlyPriceErrors(body: {
-  periodAvailabilities?: ServicePeriodAvailability[];
-  bookingOptions?: HourlyServiceBookingOption[];
-}): MockFieldError[] {
-  const errorsOf = (option: ServiceAvailabilityOption, at: string): MockFieldError[] => [
-    ...option.timeSlotPrices.flatMap(({ price }, index) =>
-      priceErrors({ price }).map((): MockFieldError => ({
-        field: `${at}.timeSlotPrices[${index}].price`,
-        code: ApiErrorCode.ValidationInvalid,
-      })),
-    ),
-    ...priceErrors({ price: option.customTimeSlotPrice }).map((): MockFieldError => ({
-      field: `${at}.customTimeSlotPrice`,
-      code: ApiErrorCode.ValidationInvalid,
-    })),
-  ];
+/** The availabilities in force and those of the booking options. */
+function availabilitiesOf(body: CreateHourlyServiceBody): ServiceAvailabilityOption[] {
   return [
-    ...(body.periodAvailabilities ?? []).flatMap((periodAvailability, periodIndex) =>
-      periodAvailability.availabilityOptions.flatMap((option, optionIndex) =>
-        errorsOf(
+    ...(body.isPeriodPricingEnabled
+      ? (body.periodAvailabilities ?? []).flatMap((period) => period.availabilityOptions)
+      : (body.availabilityOptions ?? [])),
+    ...(body.bookingOptions ?? []).map((option) => option.availabilityOption),
+  ];
+}
+
+/** Without a VAT of the service, that of its first availability. */
+function hourlyVatRate(body: CreateHourlyServiceBody): number | null {
+  return (
+    body.vatRate ?? availabilitiesOf(body).find(({ vatRate }) => vatRate !== null)?.vatRate ?? null
+  );
+}
+
+function hourlyVatRateNotAllowed(
+  request: HttpRequest<unknown>,
+  body: CreateHourlyServiceBody,
+): Observable<never> | null {
+  const notAllowed = [body.vatRate, ...availabilitiesOf(body).map(({ vatRate }) => vatRate)].find(
+    (vatRate) => vatRateNotAllowed(request, vatRate),
+  );
+  return vatRateNotAllowed(request, notAllowed);
+}
+
+/**
+ * The Prezzi tab: the price, the VAT of the service or of all its `availabilities` (not for a service
+ * already without it, `canLackVat`), the availabilities of the kind in force only.
+ */
+function hourlyPriceErrors(
+  body: CreateHourlyServiceBody,
+  availabilities: readonly ServiceAvailabilityOption[],
+  canLackVat = false,
+): MockFieldError[] {
+  const errors = requiredPriceErrors('price', body.price);
+  const isVatMissing =
+    body.vatRate == null &&
+    !canLackVat &&
+    !(availabilities.length && availabilities.every(({ vatRate }) => vatRate !== null));
+  if (isVatMissing || isVatOutOfRange(body.vatRate)) {
+    errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
+  }
+  const notInForce = body.isPeriodPricingEnabled ? 'availabilityOptions' : 'periodAvailabilities';
+  if (body[notInForce]?.length) {
+    errors.push({ field: notInForce, code: ApiErrorCode.ValidationInvalid });
+  }
+  return [
+    ...errors,
+    ...(body.availabilityOptions ?? []).flatMap((option, index) =>
+      availabilityErrors(option, `availabilityOptions[${index}]`),
+    ),
+    ...(body.periodAvailabilities ?? []).flatMap((period, periodIndex) =>
+      period.availabilityOptions.flatMap((option, index) =>
+        availabilityErrors(
           option,
-          `periodAvailabilities[${periodIndex}].availabilityOptions[${optionIndex}]`,
+          `periodAvailabilities[${periodIndex}].availabilityOptions[${index}]`,
         ),
       ),
     ),
-    ...(body.bookingOptions ?? []).flatMap((bookingOption, index) =>
-      errorsOf(bookingOption.availabilityOption, `bookingOptions[${index}].availabilityOption`),
-    ),
   ];
+}
+
+function hourlyBookingErrors(body: CreateHourlyServiceBody): MockFieldError[] {
+  return (body.bookingOptions ?? []).flatMap((option, index) =>
+    availabilityErrors(option.availabilityOption, `bookingOptions[${index}].availabilityOption`),
+  );
+}
+
+function availabilityErrors(option: ServiceAvailabilityOption, at: string): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  if (option.startTime && option.endTime && option.endTime <= option.startTime) {
+    errors.push({ field: `${at}.endTime`, code: ApiErrorCode.ValidationInvalid });
+  }
+  option.timeSlotPrices.forEach(({ isEnabled, price }, index) => {
+    if (isEnabled || price !== null) {
+      errors.push(...requiredPriceErrors(`${at}.timeSlotPrices[${index}].price`, price));
+    }
+  });
+  const minutes = option.customTimeSlotMinuteQuantity;
+  if (minutes === null) {
+    if (option.isCustomTimeSlotEnabled || option.customTimeSlotPrice !== null) {
+      errors.push({
+        field: `${at}.customTimeSlotMinuteQuantity`,
+        code: ApiErrorCode.ValidationRequired,
+      });
+    }
+  } else if (minutes < 1 || minutes > MAX_CUSTOM_TIME_SLOT_MINUTES) {
+    errors.push({
+      field: `${at}.customTimeSlotMinuteQuantity`,
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: 1, to: MAX_CUSTOM_TIME_SLOT_MINUTES },
+    });
+  }
+  if (option.isCustomTimeSlotEnabled || option.customTimeSlotPrice !== null) {
+    errors.push(...requiredPriceErrors(`${at}.customTimeSlotPrice`, option.customTimeSlotPrice));
+  }
+  if (isVatOutOfRange(option.vatRate)) {
+    errors.push({
+      field: `${at}.vatRate`,
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: 0, to: 100 },
+    });
+  }
+  if (
+    option.maxBookingPerTimeSlotQuantity !== null &&
+    (option.maxBookingPerTimeSlotQuantity < 1 ||
+      option.maxBookingPerTimeSlotQuantity > MAX_SERVICE_BOOKING_QUANTITY)
+  ) {
+    errors.push({
+      field: `${at}.maxBookingPerTimeSlotQuantity`,
+      code: ApiErrorCode.ValidationOutOfRange,
+      args: { from: 1, to: MAX_SERVICE_BOOKING_QUANTITY },
+    });
+  }
+  return errors;
+}
+
+function isVatOutOfRange(vatRate: number | null | undefined): boolean {
+  return vatRate != null && (vatRate <= 0 || vatRate >= 100);
 }
 
 type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unknown };
@@ -2578,14 +2706,17 @@ type UpdateHourlyServiceBody = CreateHourlyServiceBody & { idHourlyService?: unk
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
  * `service.not_found` for an `idHourlyService` that is not one of its hourly services; 400 with
- * one error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of
- * the data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is
- * 204 without a body, with their new version in its `ETag`.
+ * one error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409 `resource.version_conflict`
+ * when `If-Match` is not the version of the data of the tab (`dataOf`); otherwise `apply` changes
+ * the data of its tab and the answer is 204 without a body, with their new version in its `ETag`.
  */
 function updateHourlyService(
   request: HttpRequest<unknown>,
   dataOf: (row: HourlyServiceRow) => unknown,
-  errorsOf: (body: UpdateHourlyServiceBody) => MockFieldError[],
+  errorsOf: (
+    body: UpdateHourlyServiceBody,
+    details: HourlyServiceAddItemRequest,
+  ) => MockFieldError[],
   apply: (
     details: HourlyServiceAddItemRequest,
     body: UpdateHourlyServiceBody,
@@ -2603,11 +2734,15 @@ function updateHourlyService(
   if (!row?.idHourlyService) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  const errors = errorsOf(body);
+  const errors = errorsOf(body, hourlyDetailsOf(row));
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
+  }
+  const vatProblem = hourlyVatRateNotAllowed(request, body);
+  if (vatProblem) {
+    return vatProblem;
   }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
@@ -2620,7 +2755,7 @@ function updateHourlyService(
 }
 
 /**
- * `POST /api/catalog/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest`:
+ * `POST /api/catalog/services/update-hourly-service-general` with `HourlyServiceUpdateGeneralRequest`:
  * names, descriptions, icon and Metti in evidenza; the list shows the new name (language of
  * `Accept-Language`). Errors as the creation (see `standardGeneralErrors`).
  */
@@ -2631,20 +2766,25 @@ export const updateHourlyServiceGeneralMock = (
   return updateHourlyService(
     request,
     hourlyGeneralInfoOf,
-    (body) => standardGeneralErrors(body, language),
+    (body) => [
+      ...standardGeneralErrors(body, language),
+      ...missingNameErrors(body.translations ?? []),
+    ],
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idHourlyService ?? '');
+      }
     },
   );
 };
 
 /**
- * `POST /api/catalog/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest`: the
- * Prezzi tab. 400 for a price below 0.
+ * `POST /api/catalog/services/update-hourly-service-prices` with `HourlyServiceUpdatePricesRequest`: the
+ * Prezzi tab (see `hourlyPriceErrors`). A service already without VAT can stay so.
  */
 export const updateHourlyServicePricesMock = (
   request: HttpRequest<unknown>,
@@ -2652,9 +2792,17 @@ export const updateHourlyServicePricesMock = (
   updateHourlyService(
     request,
     hourlyPricesOf,
-    (body) => hourlyPriceErrors({ periodAvailabilities: body.periodAvailabilities }),
+    (body, details) =>
+      hourlyPriceErrors(
+        body,
+        availabilitiesOf({ ...body, bookingOptions: details.bookingOptions }),
+        details.vatRate === null,
+      ),
     (details, body) => {
+      details.price = body.price ?? null;
+      details.vatRate = hourlyVatRate({ ...body, bookingOptions: details.bookingOptions });
       details.isPeriodPricingEnabled = body.isPeriodPricingEnabled === true;
+      details.availabilityOptions = body.availabilityOptions ?? [];
       details.periodAvailabilities = body.periodAvailabilities ?? [];
       details.idSectors = body.idSectors ?? [];
       details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
@@ -2662,20 +2810,15 @@ export const updateHourlyServicePricesMock = (
   );
 
 /**
- * `POST /api/catalog/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest`: the
- * booking options of the Prenotazioni tab, all of them. 400 for a price below 0.
+ * `POST /api/catalog/services/update-hourly-service-booking` with `HourlyServiceUpdateBookingRequest`: the
+ * booking options of the Prenotazioni tab, all of them (see `hourlyBookingErrors`).
  */
 export const updateHourlyServiceBookingMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateHourlyService(
-    request,
-    hourlyBookingOptionsOf,
-    (body) => hourlyPriceErrors({ bookingOptions: body.bookingOptions }),
-    (details, body) => {
-      details.bookingOptions = body.bookingOptions ?? [];
-    },
-  );
+  updateHourlyService(request, hourlyBookingOptionsOf, hourlyBookingErrors, (details, body) => {
+    details.bookingOptions = body.bookingOptions ?? [];
+  });
 
 type AutomaticPriceRow = AutomaticPriceItem & { propertyId: number };
 
@@ -3169,13 +3312,13 @@ export const duplicateStandardServiceItemsMock = (
 ): Observable<HttpEvent<unknown>> =>
   duplicateServicesAnswer(request, STANDARD_SERVICE_TABLE, 'idStandardServices');
 
-/** `POST /api/catalog/delete-hourly-service-item` with `{ idHourlyServices }` (see `deleteServicesAnswer`). */
+/** `POST /api/catalog/services/delete-hourly-service-item` with `{ idHourlyServices }` (see `deleteServicesAnswer`). */
 export const deleteHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   deleteServicesAnswer(request, HOURLY_SERVICE_TABLE, 'idHourlyServices');
 
-/** `POST /api/catalog/duplicate-hourly-service-item` with `{ idHourlyServices }` (see `duplicateServicesAnswer`). */
+/** `POST /api/catalog/services/duplicate-hourly-service-item` with `{ idHourlyServices }` (see `duplicateServicesAnswer`). */
 export const duplicateHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>

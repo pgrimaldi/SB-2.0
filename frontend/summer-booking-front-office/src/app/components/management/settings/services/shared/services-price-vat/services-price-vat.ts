@@ -18,6 +18,8 @@ export class ServicesPriceVat {
   readonly vatRate = input.required<FieldTree<number | null>>();
   /** Asterisk after the label of the price. */
   readonly isPriceMandatory = input(false);
+  /** Asterisk after the label of the VAT. */
+  readonly isVatMandatory = input(false);
 
   protected readonly validationText = inject(ValidationTextBehaviour);
 }

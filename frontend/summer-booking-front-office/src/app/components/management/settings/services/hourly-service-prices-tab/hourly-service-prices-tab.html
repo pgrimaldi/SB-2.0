@@ -1,3 +1,10 @@
+<app-services-price-vat
+  [price]="form().price"
+  [vatRate]="form().vatRate"
+  [isPriceMandatory]="true"
+  [isVatMandatory]="form().vatRate().required()"
+/>
+
 <app-services-period-prices
   [isPeriodPricingEnabled]="form().isPeriodPricingEnabled"
   [periods]="periods()"
@@ -11,6 +18,18 @@
     }
   </ng-template>
 </app-services-period-prices>
+@if (validationText.text(form().periodAvailabilities); as error) {
+  <p class="hourly__service__prices__tab__error">{{ error }}</p>
+}
+@if (!form().isPeriodPricingEnabled().value()) {
+  <app-services-availability-options
+    [form]="form().availabilityOptions"
+    [isReadonly]="isReadonly()"
+  />
+  @if (validationText.text(form().availabilityOptions); as error) {
+    <p class="hourly__service__prices__tab__error">{{ error }}</p>
+  }
+}
 
 <app-services-limits [form]="form().idSectors" />
 

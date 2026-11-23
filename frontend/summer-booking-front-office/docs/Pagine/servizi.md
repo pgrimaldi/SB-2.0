@@ -39,7 +39,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Servizio, Prezzo; righe da `POST /api/catalog/services/standard-service-list` (`CatalogService.standardServiceList`,
   `Page<StandardServiceItem>`).
 - Servizi Orari: titolo "Servizi orari" con l'orologio (`Services_HourlyTitle.png`), bottone "Aggiungi servizio
-  orario", sola colonna Servizio; righe da `POST /api/catalog/hourly-service-list`
+  orario", sola colonna Servizio; righe da `POST /api/catalog/services/hourly-service-list`
   (`CatalogService.hourlyServiceList`, `Page<HourlyServiceItem>`).
 - Prezzi Automatici: titolo "Prezzi automatici" con l'euro (`Services_AutomaticPricesTitle.png`), bottone
   "Aggiungi prezzo automatico", colonne Servizio, Prezzo; righe da `POST /api/catalog/automatic-price-list`
@@ -67,7 +67,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - API (tutte `POST /api/catalog/…`):
   - Servizi bar: `services/delete-bar-service-item`, `services/duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `services/delete-standard-service-item`, `services/duplicate-standard-service-item` (`idStandardServices`);
-  - Servizi orari: `delete-hourly-service-item`, `duplicate-hourly-service-item` (`idHourlyServices`);
+  - Servizi orari: `services/delete-hourly-service-item`, `services/duplicate-hourly-service-item`
+    (`idHourlyServices`);
   - Prezzi automatici: `delete-automatic-price-item`, `duplicate-automatic-price-item` (`idAutomaticPrices`);
   - Prenotazione tavoli: `delete-table-service-item`, `duplicate-table-service-item` (`idTableServices`).
 
@@ -162,7 +163,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   traduzione principale. Servizi Bar e Servizi hanno anche altri campi obbligatori (sotto).
 - Ogni coppia Dalle / alle ha `timeRange`: un "alle" che non viene dopo il "dalle" (anche la stessa ora) dà l'errore
   sotto i due orari e Salva resta spento.
-- Salva manda tutto il form all'API di creazione (risposta 204, in Servizi Bar e Servizi l'id del nuovo servizio): spinner
+- Salva manda tutto il form all'API di creazione (risposta 204, in Servizi Bar, Servizi e Servizi Orari l'id del nuovo servizio): spinner
   sul bottone e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(created)`).
 - Se fallisce il pannello resta aperto con i dati: errori dei campi di primo livello sotto il campo, gli altri in
   fondo alla tab, sopra i bottoni.
@@ -341,36 +342,49 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   `HourlyServiceAddItemRequest` (`entities/settings/services/`).
 - Info Generali (`app-hourly-service-general-info-tab`): come quella del servizio generale (nomi e descrizioni
   nelle lingue, Immagine servizio con le icone `StandardServiceIcon`, Metti in evidenza).
-- Prezzi (`app-hourly-service-prices-tab`): niente Prezzo e IVA in alto (i prezzi stanno nelle fasce orarie);
-  "Abilita variazioni di prezzo per periodo" con `app-services-period-prices` senza `periodPrices`, dove ogni
-  periodo ha sotto le date le sue Opzioni disponibilità; poi Limiti e "Abilita acquisto online".
+- Prezzi (`app-hourly-service-prices-tab`), in quest'ordine:
+  - Prezzo (obbligatorio, 0-100.000) e IVA (`app-services-price-vat`); l'IVA ha l'asterisco (`isVatMandatory`) finché non
+    ce l'hanno tutte le disponibilità in vigore e delle opzioni di prenotazione, almeno una, come nel backend;
+  - "Abilita variazioni di prezzo per periodo" con `app-services-period-prices` senza `periodPrices`: acceso, ogni
+    periodo ha sotto le date le sue Opzioni disponibilità (`periodAvailabilities`); spento, ce n'è un blocco solo che
+    vale per tutta la stagione (`availabilityOptions`);
+  - Limiti e "Abilita acquisto online".
+- Si mandano solo le disponibilità in vigore, l'altro elenco è `[]` (`withAvailabilitiesInForce`): il backend ne tiene un
+  tipo solo.
 - Prenotazioni (`app-hourly-service-bookings-tab`): sezione "Opzioni di prenotazione" come negli altri servizi
   (titolo, bottone blu "Aggiungi opzioni di prenotazione", un riquadro per opzione con la X, nessuno all'apertura).
   - Ogni riquadro ha la riga Periodo Dal/al (`app-filled-date-field`, "al" con `minDate` = "Dal", allineati con
     Dalle/alle) e sotto lo stesso blocco `app-services-availability-option` dei periodi.
-  - Entità `HourlyServiceBookingOption` (`dateFrom`, `dateTo`, `availabilityOption`), elenco `bookingOptions`.
+  - Entità `HourlyServiceBookingOption`, elenco `bookingOptions`: `ServiceBookingOption` più `availabilityOption`. Il form
+    mostra solo date e disponibilità; gli altri campi tornano come sono stati letti.
   - Sul telefono la sezione e i riquadri hanno meno margini ai lati.
-- Salva: `POST /api/catalog/create-hourly-service` (`CatalogService.createHourlyService`), ripulito a ogni livello
-  con `onlyFieldsOf` (anche periodi, opzioni e fasce).
+- Salva: `POST /api/catalog/services/create-hourly-service` (`CatalogService.createHourlyService`), ripulito a ogni livello
+  con `onlyFieldsOf` (anche periodi, opzioni e fasce); risponde con l'id del servizio creato, poi parte l'immagine.
+- Nome nelle lingue con una descrizione, limiti dei testi, errori dell'icona e immagine come in Servizi Bar.
 
 ### Opzioni disponibilità (`app-services-availability-options`)
 
 - Titolo, bottone chiaro "Aggiungi opzioni di prenotazione" con il + blu `GeneralIcon_AddBlue.svg`, un riquadro per
-  opzione con la X; all'apertura una vuota per periodo.
+  opzione con la X; all'apertura una vuota per la stagione e per ogni periodo, con tutti i giorni scelti.
 - Ogni riquadro è `app-services-availability-option`, usato anche dai riquadri della tab Prenotazioni:
   - Orari disponibilità Dalle/alle;
   - Giorni disponibili: sette caselle Lun-Dom, quattro per riga, numeri ISO 1-7 da `DAYS_OF_WEEK`;
   - Fasce orarie disponibili: casella e prezzo in € per 10, 15, 30, 45 min, 1 hr, 1 hr e 30 min, 2 e 3 hr (enum
     `ServiceTimeSlot`), più Personalizzato con casella, minuti e prezzo;
   - IVA (%), Max prenotazioni per fascia oraria e l'interruttore Fasce orarie fisse.
-- Entità `ServicePeriodAvailability`, `ServiceAvailabilityOption`, `ServiceTimeSlotPrice`. Nessun controllo nel
-  frontend, come i prezzi per periodo degli altri servizi.
+- Entità `ServicePeriodAvailability`, `ServiceAvailabilityOption`, `ServiceTimeSlotPrice`.
+- Controlli come nel backend (`serviceAvailabilityRules`): fine dopo l'inizio, almeno un giorno, prezzo obbligatorio
+  nelle fasce accese (0-100.000), minuti della personalizzata 1-1.440 e obbligatori se è accesa o ha un prezzo, massimo
+  prenotazioni 1-32.767. Accendendo una fascia il campo che manca si segna subito.
+- Durate del backend non integrate (4, 5 e 6 ore): non si mostrano e tornano come sono state lette, in fondo a
+  `timeSlotPrices`.
 - Quando il riquadro è più stretto di 20rem (telefoni) il prezzo va sotto la sua fascia e i giorni due per riga; la
   tab riduce i margini dei periodi con `--expansion-panel-content-padding`.
 
 ### Modifica ("Modifica servizio orario")
 
 - `app-hourly-service-edit-item-panel`, come quello del servizio generale, input `idHourlyService`.
+- API sotto `/api/catalog/services/…`.
 - GET (`idHourlyService` nella query string): `get-hourly-service-general-info`, `get-hourly-service-prices`
   insieme a `catalog/tariff-periods`, `get-hourly-service-booking-options`.
 - Salvataggi: `update-hourly-service-general`, `update-hourly-service-prices`, `update-hourly-service-booking`;
@@ -378,8 +392,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   (tutte con `version`), `HourlyServiceUpdate*Request`.
 - Il form si blocca con `disabled(path, …)` (caselle e interruttori non hanno `readonly`); le tab Prezzi e
   Prenotazioni ricevono `isReadonly` per spegnere "Aggiungi" e le X.
-- Le opzioni lette si completano con tutte le otto fasce (`availabilityOf`) e i periodi senza opzioni ne ricevono
-  una vuota, come nell'aggiunta.
+- Le opzioni lette si completano con tutte le otto fasce (`availabilityOf`); senza giorni valgono tutti, e dove non ce ne
+  sono se ne mostra una vuota, come nell'aggiunta (anche in un'opzione di prenotazione con `availabilityOption` `null`).
+- Un servizio letto senza IVA (esente) può restare senza.
 
 ## Prezzi Automatici
 

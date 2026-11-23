@@ -1544,7 +1544,10 @@
             "custom": "Personalizado",
             "minutes": "min",
             "max_bookings_per_time_slot": "Máx. reservas por franja horaria",
-            "fixed_time_slots": "Franjas horarias fijas"
+            "fixed_time_slots": "Franjas horarias fijas",
+            "field_names": {
+              "day_of_week": "día"
+            }
           },
           "validity": {
             "periods_title": "Periodos de validez",

@@ -32,7 +32,7 @@ interface AvailabilityTexts {
   time_slot_names: TimeSlotTexts;
 }
 
-const TIME_SLOT_KEYS: Readonly<Record<ServiceTimeSlot, keyof TimeSlotTexts>> = {
+const TIME_SLOT_KEYS: Readonly<Record<string, keyof TimeSlotTexts>> = {
   [ServiceTimeSlot.TenMinutes]: 'ten_minutes',
   [ServiceTimeSlot.FifteenMinutes]: 'fifteen_minutes',
   [ServiceTimeSlot.ThirtyMinutes]: 'thirty_minutes',
@@ -82,11 +82,24 @@ export class ServicesAvailabilityOption {
     () => this.form().daysOfWeek().disabled() || this.form().daysOfWeek().readonly(),
   );
 
-  protected timeSlotName(timeSlot: ServiceTimeSlot | null): string {
+  protected readonly timeSlotPrices = computed(() =>
+    [...this.form().timeSlotPrices].filter(
+      ({ timeSlot }) => (timeSlot().value() ?? '') in TIME_SLOT_KEYS,
+    ),
+  );
+
+  protected timeSlotName(timeSlot: string | null): string {
     return timeSlot ? (this.texts()?.time_slot_names[TIME_SLOT_KEYS[timeSlot]] ?? '') : '';
   }
 
+  /** What an enabled time slot wants shows at once. */
+  protected touchCustomTimeSlot(): void {
+    this.form().customTimeSlotMinuteQuantity().markAsTouched();
+    this.form().customTimeSlotPrice().markAsTouched();
+  }
+
   protected setDay(day: number, isChosen: boolean): void {
+    this.form().daysOfWeek().markAsTouched();
     this.form()
       .daysOfWeek()
       .value.update((days) =>

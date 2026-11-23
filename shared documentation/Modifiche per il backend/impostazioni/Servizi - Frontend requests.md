@@ -16,7 +16,7 @@ Le API della pagina (`/api/catalog/services/bar-service-list`, `/api/catalog/ser
 che va aggiunto a quei contratti e, una sezione alla volta, le API che il backend deve creare (sezioni 2-6, le tabelle
 delle cinque tab; sezioni 7-11, le eliminazioni; sezioni 12-16, le duplicazioni; sezioni 17-24, i pannelli di Servizi
 Bar; sezione 25, la tendina dei settori, che serve anche a Listino e Prenotazioni online; sezioni 26-32, i pannelli di
-Servizi).
+Servizi; sezioni 33-39, i pannelli di Servizi Orari).
 
 ## Riepilogo
 
@@ -25,17 +25,17 @@ Servizi).
 | 1 | GET + POST | Le 13 coppie lettura e salvataggio dei pannelli di modifica (tabella della sezione 1) | Controllo di versione, una versione per tab: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
 | 2 | POST | `/api/catalog/services/bar-service-list` | Tabella della tab Servizi Bar, a pagine |
 | 3 | POST | `/api/catalog/services/standard-service-list` | Tabella della tab Servizi, a pagine |
-| 4 | POST | `/api/catalog/hourly-service-list` | Tabella della tab Servizi Orari, a pagine |
+| 4 | POST | `/api/catalog/services/hourly-service-list` | Tabella della tab Servizi Orari, a pagine |
 | 5 | POST | `/api/catalog/automatic-price-list` | Tabella della tab Prezzi Automatici, a pagine |
 | 6 | POST | `/api/catalog/table-service-list` | Tabella della tab Prenotazione tavoli, a pagine |
 | 7 | POST | `/api/catalog/services/delete-bar-service-item` | Elimina uno o più servizi bar, tutto o niente |
 | 8 | POST | `/api/catalog/services/delete-standard-service-item` | Elimina uno o più servizi, tutto o niente |
-| 9 | POST | `/api/catalog/delete-hourly-service-item` | Elimina uno o più servizi orari, tutto o niente |
+| 9 | POST | `/api/catalog/services/delete-hourly-service-item` | Elimina uno o più servizi orari, tutto o niente |
 | 10 | POST | `/api/catalog/delete-automatic-price-item` | Elimina uno o più prezzi automatici, tutto o niente |
 | 11 | POST | `/api/catalog/delete-table-service-item` | Elimina uno o più servizi tavoli, tutto o niente |
 | 12 | POST | `/api/catalog/services/duplicate-bar-service-item` | Duplica uno o più servizi bar, tutto o niente |
 | 13 | POST | `/api/catalog/services/duplicate-standard-service-item` | Duplica uno o più servizi, tutto o niente |
-| 14 | POST | `/api/catalog/duplicate-hourly-service-item` | Duplica uno o più servizi orari, tutto o niente |
+| 14 | POST | `/api/catalog/services/duplicate-hourly-service-item` | Duplica uno o più servizi orari, tutto o niente |
 | 15 | POST | `/api/catalog/duplicate-automatic-price-item` | Duplica uno o più prezzi automatici, tutto o niente |
 | 16 | POST | `/api/catalog/duplicate-table-service-item` | Duplica uno o più servizi tavoli, tutto o niente |
 | 17 | POST | `/api/catalog/services/create-bar-service` | Crea un servizio bar con i dati delle tre tab e risponde con il suo id |
@@ -54,6 +54,13 @@ Servizi).
 | 30 | POST | `/api/catalog/services/update-standard-service-general` | Salva la tab Info Generali di un servizio |
 | 31 | POST | `/api/catalog/services/update-standard-service-prices` | Salva la tab Prezzi di un servizio |
 | 32 | POST | `/api/catalog/services/update-standard-service-booking` | Salva la tab Prenotazioni di un servizio |
+| 33 | POST | `/api/catalog/services/create-hourly-service` | Crea un servizio orario con i dati delle tre tab e risponde con il suo id |
+| 34 | GET | `/api/catalog/services/get-hourly-service-general-info` | Legge la tab Info Generali di un servizio orario |
+| 35 | GET | `/api/catalog/services/get-hourly-service-prices` | Legge la tab Prezzi di un servizio orario |
+| 36 | GET | `/api/catalog/services/get-hourly-service-booking-options` | Legge la tab Prenotazioni di un servizio orario |
+| 37 | POST | `/api/catalog/services/update-hourly-service-general` | Salva la tab Info Generali di un servizio orario |
+| 38 | POST | `/api/catalog/services/update-hourly-service-prices` | Salva la tab Prezzi di un servizio orario |
+| 39 | POST | `/api/catalog/services/update-hourly-service-booking` | Salva la tab Prenotazioni di un servizio orario |
 
 ## 1. Controllo di versione sui salvataggi dei pannelli di modifica
 
@@ -141,9 +148,9 @@ del salvataggio, tranne l'id.
 | Servizio, Info Generali | `GET /api/catalog/services/get-standard-service-general-info?idStandardService=…` | `POST /api/catalog/services/update-standard-service-general` | `translations`, `icon`, `isHighlighted` |
 | Servizio, Prezzi | `GET /api/catalog/services/get-standard-service-prices?idStandardService=…` | `POST /api/catalog/services/update-standard-service-prices` | `price`, `vatRate`, `isPeriodPricingEnabled`, `periodPrices` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
 | Servizio, Prenotazioni | `GET /api/catalog/services/get-standard-service-booking-options?idStandardService=…` | `POST /api/catalog/services/update-standard-service-booking` | `bookingOptions` |
-| Servizio orario, Info Generali | `GET /api/catalog/get-hourly-service-general-info?idHourlyService=…` | `POST /api/catalog/update-hourly-service-general` | `translations`, `icon`, `isHighlighted` |
-| Servizio orario, Prezzi | `GET /api/catalog/get-hourly-service-prices?idHourlyService=…` | `POST /api/catalog/update-hourly-service-prices` | `isPeriodPricingEnabled`, `periodAvailabilities` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
-| Servizio orario, Prenotazioni | `GET /api/catalog/get-hourly-service-booking-options?idHourlyService=…` | `POST /api/catalog/update-hourly-service-booking` | `bookingOptions` |
+| Servizio orario, Info Generali | `GET /api/catalog/services/get-hourly-service-general-info?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-general` | `translations`, `icon`, `isHighlighted` |
+| Servizio orario, Prezzi | `GET /api/catalog/services/get-hourly-service-prices?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-prices` | `price`, `vatRate`, `isPeriodPricingEnabled`, `availabilityOptions`, `periodAvailabilities` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
+| Servizio orario, Prenotazioni | `GET /api/catalog/services/get-hourly-service-booking-options?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-booking` | `bookingOptions` |
 | Prezzo automatico, Info Generali | `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…` | `POST /api/catalog/update-automatic-price-general` | `translations`, `icon` |
 | Prezzo automatico, Prezzi e Validità | `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…` | `POST /api/catalog/update-automatic-price-prices-validity` | `price`, `vatRate`, `isOnlinePurchaseEnabled`, `validityPeriods`, `idBarServices`, `idStandardServices`, `idHourlyServices`, `isPricePerServiceEnabled`, `idSectors` |
 | Servizio tavoli, Info Generali | `GET /api/catalog/get-table-service-general-info?idTableService=…` | `POST /api/catalog/update-table-service-general` | `translations`, `isHighlighted` |
@@ -330,7 +337,7 @@ Tabella della tab Servizi (`/settings/services/2`). Per il frontend sostituisce 
 | `serviceName` | `name` o traduzione | string | Colonna "Servizio"; vedi "Nome nella lingua dell'utente". |
 | `price` | `price` | number | Colonna "Prezzo", in euro. |
 
-## 4. POST /api/catalog/hourly-service-list
+## 4. POST /api/catalog/services/hourly-service-list
 
 Tabella della tab Servizi Orari (`/settings/services/3`). Per il frontend sostituisce
 `GET /api/catalog/services?kind=hourly`.
@@ -514,7 +521,7 @@ Cestino e "Elimina selezione" della tab Servizi.
 - Un id che non è un servizio `normal` dello stabilimento: 404 `service.not_found`.
 - Registro: una voce `catalog.service_deleted` per servizio.
 
-## 9. POST /api/catalog/delete-hourly-service-item
+## 9. POST /api/catalog/services/delete-hourly-service-item
 
 Cestino e "Elimina selezione" della tab Servizi Orari.
 
@@ -654,7 +661,7 @@ Bottone "Duplica" e "Duplica selezione" della tab Servizi.
 - Un id che non è un servizio `normal` dello stabilimento: 404 `service.not_found`.
 - Registro: una voce `catalog.service_duplicated` per copia.
 
-## 14. POST /api/catalog/duplicate-hourly-service-item
+## 14. POST /api/catalog/services/duplicate-hourly-service-item
 
 Bottone "Duplica" e "Duplica selezione" della tab Servizi Orari.
 
@@ -1090,9 +1097,10 @@ posto di un'icona.
 
 ### POST
 
-- Vale per i pannelli di Servizi Bar e di Servizi. Parte con Salva: nell'aggiunta dopo `create-bar-service` o
-  `create-standard-service`, con l'id della risposta; nella modifica dopo `update-bar-service-general` o
-  `update-standard-service-general`, con l'id del servizio. Non manda `If-Match`.
+- Vale per i pannelli di Servizi Bar, Servizi e Servizi Orari. Parte con Salva: nell'aggiunta dopo
+  `create-bar-service`, `create-standard-service` o `create-hourly-service`, con l'id della risposta; nella modifica dopo
+  `update-bar-service-general`, `update-standard-service-general` o `update-hourly-service-general`, con l'id del
+  servizio. Non manda `If-Match`.
 - `id`: l'id del servizio nella rotta. Corpo `multipart/form-data` con il file nel campo `file`: PNG, JPEG o WebP fino a
   5 MB (il frontend lo controlla prima di mandarlo).
 - Risposta 200 con `ServiceDto`, che il frontend non legge. L'immagine prende il posto dell'icona o dell'immagine di
@@ -1109,7 +1117,7 @@ posto di un'icona.
   un'immagine scelta e non ancora salvata non chiama niente.
 - `id`: l'id del servizio nella rotta. Nessun corpo, nessun `If-Match`.
 - Risposta 200 con `ServiceDto`, che il frontend non legge: il servizio resta senza immagine e senza icona, come oggi. La
-  `version` di Info Generali non cambia, perché non comprende l'immagine (sezioni 18 e 27).
+  `version` di Info Generali non cambia, perché non comprende l'immagine (sezioni 18, 27 e 34).
 - Errori, come oggi: 401 `auth.unauthenticated`, 403 `auth.forbidden` senza `CatalogSettings`, 403
   `catalog.property_required`, 404 `catalog.property_not_found`, 404 `service.not_found`. Il frontend li mostra sotto
   l'immagine con il testo del `code`; con `service.not_found` ricarica anche la tabella.
@@ -1386,6 +1394,236 @@ prenotazione: il corpo ha `idStandardService` e `bookingOptions`, l'elenco inter
 Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 409
 `resource.version_conflict` e gli altri comuni.
 
+## Regole comuni dei pannelli di Servizi Orari (sezioni 33-39)
+
+I pannelli "Aggiungi nuovo servizio orario" e "Modifica servizio orario" hanno le tab Info Generali, Prezzi e Prenotazioni.
+**Valgono le regole comuni dei pannelli di Servizi Bar** (API nuove sotto `/api/catalog/services`, una tab non tocca le
+altre, quello che il form non mostra torna com'era, controllo di versione, permessi, registro, JSON, nome e descrizione
+nelle lingue, ordine degli errori), con queste differenze:
+
+- **Solo servizi con `kind` `hourly`**: ogni altro id risponde 404 `service.not_found`. La creazione li fa di questo tipo.
+- **Info Generali** come Servizi (sezione 26): niente `category`, stesse 21 icone, righe del catalogo con `type` `hourly`.
+- **Niente `variants`** e niente prezzi per periodo del servizio (`catalog.service_sale_item_period_prices`): quelli che
+  un servizio dovesse avere restano com'erano, come `allergens`.
+- **`price`** obbligatorio, come Servizi.
+- **`vatRate`** del servizio: può essere `null` solo se **tutte** le disponibilità (quelle in vigore e quelle delle opzioni
+  di prenotazione, almeno una) hanno la loro, come vuole già `SaveServiceRequestValidator`; il servizio prende allora
+  l'aliquota della prima, come fa già `ServiceItemsService.ApplyAsync`. Un servizio che ha già una natura dell'IVA la
+  mantiene se `vatRate` è ancora `null`.
+- **Id**: `idHourlyService`, il `public_id` del servizio.
+
+### Disponibilità
+
+Lo stesso oggetto nella tab Prezzi e nella tab Prenotazioni (una per opzione). Corrisponde a una riga di
+`catalog.service_hourly_options` con le sue fasce in `catalog.service_sale_item_time_slots` (`HourlyOptionDto` e
+`HourlySlotDto` di oggi).
+
+Nella tab Prezzi sono di due tipi, e **vale sempre uno solo**, come nel backend (`SaveServiceRequestValidator`,
+`hourlyPrices`):
+
+- con `isPeriodPricingEnabled` falso, `availabilityOptions`: valgono per tutta la stagione (`period_group_key` e
+  `booking_option_id` `null`);
+- con `isPeriodPricingEnabled` vero, `periodAvailabilities`: quelle di ogni periodo (`period_group_key`).
+
+L'altro elenco è sempre `[]`, nelle letture e nei salvataggi: se l'utente cambia l'interruttore e salva, le disponibilità
+dell'altro tipo non ci sono più.
+
+```json
+{
+  "startTime": "09:00",
+  "endTime": "19:00",
+  "daysOfWeek": [1, 2, 3, 4, 5, 6, 7],
+  "timeSlotPrices": [
+    { "timeSlot": "TenMinutes", "isEnabled": true, "price": 3 },
+    { "timeSlot": "FifteenMinutes", "isEnabled": false, "price": null },
+    { "timeSlot": "ThirtyMinutes", "isEnabled": true, "price": 8 },
+    { "timeSlot": "FortyFiveMinutes", "isEnabled": false, "price": null },
+    { "timeSlot": "OneHour", "isEnabled": true, "price": 15 },
+    { "timeSlot": "OneHourThirtyMinutes", "isEnabled": false, "price": null },
+    { "timeSlot": "TwoHours", "isEnabled": true, "price": 25 },
+    { "timeSlot": "ThreeHours", "isEnabled": false, "price": null }
+  ],
+  "isCustomTimeSlotEnabled": true,
+  "customTimeSlotMinuteQuantity": 20,
+  "customTimeSlotPrice": 6,
+  "vatRate": 22,
+  "maxBookingPerTimeSlotQuantity": 4,
+  "hasFixedTimeSlots": false
+}
+```
+
+| Campo | Tipo | Corrisponde a |
+|---|---|---|
+| `startTime`, `endTime` | string `"HH:mm"` o `null` | `time_from`, `time_to` |
+| `daysOfWeek` | array di number (ISO: 1 lunedì … 7 domenica) | `weekdays`. Il frontend ne manda sempre almeno uno; `[]` in lettura vuol dire tutti i giorni, come nel backend, e il pannello li mostra tutti scelti. |
+| `timeSlotPrices` | array, sempre tutte e otto nell'ordine qui sopra, poi quelle di "Durate non integrate" | Le fasce con `is_custom` falso: `timeSlot` = `duration_minutes` (`TenMinutes` 10, `FifteenMinutes` 15, `ThirtyMinutes` 30, `FortyFiveMinutes` 45, `OneHour` 60, `OneHourThirtyMinutes` 90, `TwoHours` 120, `ThreeHours` 180), `isEnabled` = `is_active`, `price` = `price` (number o `null`) |
+| `isCustomTimeSlotEnabled`, `customTimeSlotMinuteQuantity`, `customTimeSlotPrice` | boolean, number o `null`, number o `null` | La fascia con `is_custom` vero: `is_active`, `duration_minutes`, `price`. Con i minuti `null` la fascia non c'è. |
+| `vatRate` | number o `null` | `vat_rate`; `null` = quella del servizio |
+| `maxBookingPerTimeSlotQuantity` | number (intero) o `null` | `max_per_slot` |
+| `hasFixedTimeSlots` | boolean | `has_fixed_time_slots` |
+
+### Durate non integrate
+
+Il backend ha 11 durate (`ContentRules.HourlyDurations`), il frontend per ora solo le 8 dell'esempio: **240, 300 e 360 minuti
+non sono state integrate**. Il pannello non le mostra e non le fa scegliere. Se una disponibilità le ha già, la lettura le dà
+in `timeSlotPrices` dopo le otto, come `FourHours`, `FiveHours` e `SixHours`, e il frontend le rimanda uguali: un Salva non le
+toglie.
+
+### Opzioni di prenotazione
+
+Ogni elemento di `bookingOptions` ha **tutti i campi della sezione 17** più `availabilityOption`, la sua disponibilità (la
+riga di `catalog.service_hourly_options` con il suo `booking_option_id`, `Hourly` di `BookingOptionDto`). Il pannello mostra
+solo `dateFrom`, `dateTo` e `availabilityOption`: gli altri campi li rimanda come li ha letti, e per un'opzione nuova sono
+`null` (`weekdays` `[]`). `availabilityOption` è `null` in lettura per un'opzione che non l'ha; il pannello ne mostra una
+vuota e nel salvataggio c'è sempre.
+
+### Da chiedere allo sviluppatore prima di scrivere codice
+
+1. **Fasce ricreate**: oggi ogni salvataggio ricrea le fasce (`ServiceSaleItem.ReplaceHourly`), quindi cambia il loro id, che
+   preventivi e prenotazioni usano come `timeSlotId` (`QuoteServiceRequest`, `BookingServiceTimeSlot`,
+   `ResourceConsumption`). Le fasce già prenotate devono tenere il loro id?
+
+### Errori
+
+Quelli comuni dei pannelli di Servizi Bar, nello stesso ordine (401, 403 `auth.forbidden`, 400, 403
+`catalog.property_required`, 404 `catalog.property_not_found`, 404 `service.not_found`, 422
+`catalog.vat_rate_not_allowed` per il `vatRate` del servizio o di una disponibilità, 404 `service.icon_not_found`, 422
+`pricing.period_not_found`, 404 `catalog.sector_not_found`, 409 `resource.version_conflict`). Errori di campo del 400:
+
+| Campo | `code` | Quando |
+|---|---|---|
+| `translations…`, `icon` | come Servizi Bar | Come Servizi Bar, con le icone di Servizi. |
+| `price` | `validation.required` o `validation.out_of_range` | Assente, o fuori da 0-100.000. |
+| `vatRate` | `validation.invalid` | Non maggiore di 0 e minore di 100, oppure `null` quando non può esserlo (regole qui sopra). |
+| `availabilityOptions` | `validation.invalid` | Più di 20 (`ContentRules.MaxHourlyOptions`), o non vuoto con `isPeriodPricingEnabled` vero. |
+| `periodAvailabilities` | `validation.invalid` | Più di 50 periodi, lo stesso `idPeriod` due volte, più di 20 disponibilità in un periodo, o non vuoto con `isPeriodPricingEnabled` falso. |
+| `bookingOptions` | `validation.invalid` | Più di 20 (`ServiceSaleItem.MaxBookingOptions`). |
+| `bookingOptions[i].dateTo` | `validation.end_before_start` | Prima di `dateFrom`. |
+| `<disponibilità>.endTime` | `validation.invalid` | Non dopo `startTime`: nemmeno la stessa ora (`ContentRules.TimeRange`, `ck_catalog_service_hourly_options_hours`). |
+| `<disponibilità>.daysOfWeek` | `validation.invalid` | Un valore fuori da 1-7. |
+| `<disponibilità>.timeSlotPrices` | `validation.invalid` | Una fascia sconosciuta o ripetuta. |
+| `<disponibilità>.timeSlotPrices[j].price`, `<disponibilità>.customTimeSlotPrice` | `validation.required` o `validation.out_of_range` | Assente con la fascia accesa, o fuori da 0-100.000. |
+| `<disponibilità>.customTimeSlotMinuteQuantity` | `validation.required` o `validation.out_of_range` | Assente con la fascia accesa o con il suo prezzo scritto, o fuori da 1-1.440. |
+| `<disponibilità>.vatRate` | `validation.out_of_range` | Non maggiore di 0 e minore di 100. |
+| `<disponibilità>.maxBookingPerTimeSlotQuantity` | `validation.out_of_range` | Fuori da 1-32.767 (`smallint`). |
+
+`<disponibilità>` è `availabilityOptions[i]`, `periodAvailabilities[i].availabilityOptions[j]` o
+`bookingOptions[i].availabilityOption`. Il frontend controlla già tutto tranne i limiti dell'IVA e i numeri massimi di
+elementi. Mostra sotto il campo gli errori dei campi di primo livello e `service.icon_not_found` (sotto le icone), sopra i
+bottoni tutti gli altri con il testo del loro `code`, compreso `catalog.vat_rate_not_allowed`, che non dice di quale
+aliquota parla.
+
+## 33. POST /api/catalog/services/create-hourly-service
+
+Salva del pannello "Aggiungi nuovo servizio orario". Crea un servizio con `kind` `hourly`.
+
+```json
+{
+  "translations": [
+    { "language": "it", "serviceName": "Sup", "description": "Tavola da stand up paddle a ore" },
+    { "language": "en", "serviceName": "Sup", "description": "Stand up paddle board by the hour" },
+    { "language": "fr", "serviceName": null, "description": null },
+    { "language": "de", "serviceName": null, "description": null },
+    { "language": "es", "serviceName": null, "description": null },
+    { "language": "ar", "serviceName": null, "description": null },
+    { "language": "zh", "serviceName": null, "description": null }
+  ],
+  "icon": "Surfing",
+  "isHighlighted": false,
+  "price": 15,
+  "vatRate": 22,
+  "isPeriodPricingEnabled": true,
+  "availabilityOptions": [],
+  "periodAvailabilities": [{ "idPeriod": 0, "availabilityOptions": ["…una o più disponibilità…"] }],
+  "idSectors": [],
+  "isOnlinePurchaseEnabled": true,
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-15T00:00:00.000Z",
+      "weekdays": [],
+      "managementStartTime": null,
+      "managementEndTime": null,
+      "onlineStartTime": null,
+      "onlineEndTime": null,
+      "maxBookingPerHourQuantity": null,
+      "maxBookingPerDayQuantity": null,
+      "maxPerSlot": null,
+      "intervalMinutes": null,
+      "minItemPerBookingQuantity": null,
+      "maxItemPerBookingQuantity": null,
+      "availabilityOption": "…una disponibilità…"
+    }
+  ]
+}
+```
+
+| Campo | Corrisponde a | Note |
+|---|---|---|
+| `translations`, `icon`, `isHighlighted` | come la sezione 26 | |
+| `price`, `vatRate` | `price`, `vat_rate` | Regole qui sopra. |
+| `isPeriodPricingEnabled` | `has_period_prices` | |
+| `availabilityOptions` | `catalog.service_hourly_options` senza `period_group_key` né `booking_option_id` | "Disponibilità"; nell'ordine ricevuto. |
+| `periodAvailabilities` | `catalog.service_hourly_options` con `period_group_key` | `idPeriod` = la `key` di `catalog/tariff-periods`; una voce per ogni periodo della stagione corrente, con le sue disponibilità nell'ordine ricevuto. |
+| `idSectors`, `isOnlinePurchaseEnabled` | come la sezione 17 | |
+| `bookingOptions` | `catalog.service_booking_options` con la disponibilità in `catalog.service_hourly_options` (`booking_option_id`) | "Opzioni di prenotazione"; nell'ordine ricevuto. |
+
+Risposta: **201 con il solo id del servizio creato**, come stringa JSON, come la sezione 17. Serve all'immagine (sezione 24).
+
+## 34. GET /api/catalog/services/get-hourly-service-general-info
+
+Tab Info Generali del pannello "Modifica servizio orario", letta all'apertura, con `idHourlyService` nella query string.
+Risposta 200 come la sezione 27, con `idHourlyService` al posto di `idStandardService`: `translations`, `icon`, `imageUrl`,
+`isHighlighted`, `version`. Errori: 404 `service.not_found` e gli altri comuni.
+
+## 35. GET /api/catalog/services/get-hourly-service-prices
+
+Tab Prezzi, letta la prima volta che si apre, con `idHourlyService` nella query string. Risposta 200:
+
+```json
+{
+  "price": 15,
+  "vatRate": 22,
+  "isPeriodPricingEnabled": true,
+  "availabilityOptions": [],
+  "periodAvailabilities": [{ "idPeriod": 0, "availabilityOptions": ["…una o più disponibilità…"] }],
+  "idSectors": [],
+  "isOnlinePurchaseEnabled": true,
+  "version": "5b8c0e1f"
+}
+```
+
+`periodAvailabilities` ha solo i periodi con almeno una disponibilità, **anche quelli che non sono più nella stagione
+corrente**: il frontend non li mostra ma li rimanda con il salvataggio. Errori: 404 `service.not_found` e gli altri comuni.
+
+## 36. GET /api/catalog/services/get-hourly-service-booking-options
+
+Tab Prenotazioni, letta la prima volta che si apre, con `idHourlyService` nella query string. Risposta 200:
+`{ "bookingOptions": [...], "version": "..." }`, con le opzioni come nella sezione 33 (`[]` se non ce ne sono;
+`availabilityOption` `null` dove non c'è), nell'ordine salvato. Errori: 404 `service.not_found` e gli altri comuni.
+
+## 37. POST /api/catalog/services/update-hourly-service-general
+
+Salva della tab Info Generali, con l'header `If-Match` della versione letta (sezione 34). Corpo e regole come la sezione 30,
+con `idHourlyService`: scrive solo nomi, descrizioni, icona e "Metti in evidenza". Risposta: **204 senza corpo**, con l'header
+`ETag`. Errori: 404 `service.not_found`, 404 `service.icon_not_found`, 409 `resource.version_conflict` e gli altri comuni.
+
+## 38. POST /api/catalog/services/update-hourly-service-prices
+
+Salva della tab Prezzi, con l'header `If-Match` della versione letta (sezione 35). Corpo: `idHourlyService`, `price`,
+`vatRate`, `isPeriodPricingEnabled`, `availabilityOptions`, `periodAvailabilities`, `idSectors` e `isOnlinePurchaseEnabled`,
+come nella sezione 33. Le disponibilità in vigore arrivano sempre tutte, anche quelle di periodi letti e non mostrati, e
+prendono il posto di quelle salvate. Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 422
+`catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found`, 404 `catalog.sector_not_found`, 409
+`resource.version_conflict` e gli altri comuni.
+
+## 39. POST /api/catalog/services/update-hourly-service-booking
+
+Salva della tab Prenotazioni, con l'header `If-Match` della versione letta (sezione 36). Corpo: `idHourlyService` e
+`bookingOptions`, l'elenco intero come nella sezione 33, che prende il posto di quello salvato (`[]` le toglie tutte).
+Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 422 `catalog.vat_rate_not_allowed`, 409
+`resource.version_conflict` e gli altri comuni.
+
 ## Icone da controllare con lo sviluppatore
 
 Il frontend ha i suoi elenchi fissi di icone. Il catalogo del backend (`catalog.service_type_icons`, letto da
@@ -1399,12 +1637,13 @@ nome di queste liste deve corrispondere a una riga attiva del suo `type`; altrim
 |---|---|---|
 | `bar` | `Coffee`, `Croissant`, `Cocktail`, `Juice`, `Drink`, `WaterBottle`, `Beer`, `Jam`, `Cookie`, `Macaron`, `IceCream`, `Cupcake`, `RoomService`, `Mug`, `PizzaSlice`, `Sandwich`, `Cutlery`, `Burger`, `FastFood`, `RiceBowl`, `Cake`, `Pancakes` | 22 |
 | `normal` | `Surfing`, `Surfboard`, `Sailing`, `Kitesurfing`, `Volleyball`, `Baseball`, `Basketball`, `Cricket`, `SportsField`, `Tennis`, `Pool`, `Locker`, `Lock`, `Cabin`, `Shower`, `Baby`, `Accessible`, `Parking`, `Pets`, `Motorcycle`, `Bicycle` | 21 |
+| `hourly` | Gli stessi nomi di `normal` | 21 |
 
 - **`bar`**: se il catalogo è ancora quello di partenza **ne mancano almeno 11** (11 contro 22).
-- **`normal`**: il numero basterebbe (25 contro 21), ma i nomi vanno confrontati uno per uno.
-- Servizi Orari e Prezzi Automatici usano gli stessi nomi: si aggiungono qui quando si chiedono le loro API.
+- **`normal` e `hourly`**: il numero basterebbe (25 contro 21), ma i nomi vanno confrontati uno per uno.
+- Prezzi Automatici usa gli stessi nomi: si aggiunge qui quando si chiedono le sue API.
 - Le icone del catalogo che non sono in queste liste non si possono scegliere dal frontend; un servizio che ne ha già una
-  la tiene (sezioni 18 e 27).
+  la tiene (sezioni 18, 27 e 34).
 - Nella richiesta e nella risposta viaggia il **nome** del frontend, non l'id del catalogo.
 
 ## Verifica
@@ -1556,7 +1795,32 @@ API 26-32, con un token con `CatalogRead` e `CatalogSettings`:
 53. Le letture e i salvataggi di Servizi con l'id di un servizio `bar` o `hourly`, e quelli di Servizi Bar con l'id di un
     servizio `normal`: 404 `service.not_found`.
 54. Ogni nome della tabella "Icone da controllare con lo sviluppatore", mandato in `icon` con la sua API (`bar` con
-    `update-bar-service-general`, `normal` con `update-standard-service-general`), risponde 204 e la lettura lo restituisce
-    uguale.
+    `update-bar-service-general`, `normal` con `update-standard-service-general`, `hourly` con
+    `update-hourly-service-general`), risponde 204 e la lettura lo restituisce uguale.
 55. Letture senza `CatalogRead` e salvataggi senza `CatalogSettings`: 403 `auth.forbidden`; senza token 401
     `auth.unauthenticated`; token senza stabilimento 403 `catalog.property_required`.
+
+API 33-39, con un token con `CatalogRead` e `CatalogSettings`:
+
+56. `create-hourly-service` con due periodi e una opzione di prenotazione: 201 con il solo id; il servizio compare in
+    `hourly-service-list` e le tre letture restituiscono gli stessi dati, con tutte e otto le fasce di ogni disponibilità
+    nello stesso ordine. Nel registro una voce `catalog.service_created`.
+57. `update-hourly-service-prices` non cambia nomi, icona, immagine e opzioni di prenotazione; `update-hourly-service-booking`
+    non cambia le disponibilità dei periodi; `update-hourly-service-general` non cambia né le une né le altre.
+58. `endTime` uguale a `startTime`, `daysOfWeek` con 8, un prezzo di 100.001 o 0 in `maxBookingPerTimeSlotQuantity`: 400 con
+    gli errori della tabella; mai un 500 per un vincolo del database.
+59. Un `idPeriod` che non esiste: 422 `pricing.period_not_found`; uno già salvato ma non più nella stagione corrente: 204.
+60. Le prove 34, 44, 46 e 55 riescono anche con le API di Servizi Orari; le letture e i salvataggi con l'id di un servizio
+    `bar` o `normal`: 404 `service.not_found`.
+61. Con `isPeriodPricingEnabled` falso e una `availabilityOptions`: 201, e la lettura la restituisce con
+    `periodAvailabilities` `[]`. Poi `update-hourly-service-prices` con `isPeriodPricingEnabled` vero e un periodo: 204, e la
+    lettura dà solo quello. I due elenchi pieni insieme: 400 `validation.invalid` su quello non in vigore.
+62. `price` `null`: 400 `validation.required`. `vatRate` `null` con una disponibilità senza aliquota: 400 `validation.invalid`
+    su `vatRate`; con tutte le disponibilità a 10: 201 e la lettura dà `vatRate` 10. Su un servizio con una natura dell'IVA,
+    `vatRate` `null`: 204 e la natura non cambia.
+63. Una fascia accesa senza prezzo, la personalizzata accesa senza minuti o senza prezzo: 400 `validation.required` sul
+    campo; i minuti a 0 o 1.441: 400 `validation.out_of_range`.
+64. Una disponibilità con 240 minuti accesi: la lettura dà `FourHours` dopo le otto fasce, e rimandata uguale resta salvata.
+    Una disponibilità salvata senza giorni: la lettura dà `daysOfWeek` `[]`.
+65. Un'opzione di prenotazione con giorni, orari, massimi e intervallo già salvati: `update-hourly-service-booking` con gli
+    stessi valori letti non li cambia. Un'opzione senza disponibilità: la lettura dà `availabilityOption` `null`.

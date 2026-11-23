@@ -1544,7 +1544,10 @@
             "custom": "Custom",
             "minutes": "min",
             "max_bookings_per_time_slot": "Max bookings per time slot",
-            "fixed_time_slots": "Fixed time slots"
+            "fixed_time_slots": "Fixed time slots",
+            "field_names": {
+              "day_of_week": "day"
+            }
           },
           "validity": {
             "periods_title": "Validity periods",

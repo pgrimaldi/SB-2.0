@@ -1,6 +1,6 @@
-import { HourlyServiceBookingOption } from './hourly-service-booking-option';
+import { HourlyServiceSelectedBookingOption } from './hourly-service-selected-booking-option';
 
 export class HourlyServiceSelectedBookingOptions {
-  bookingOptions: HourlyServiceBookingOption[] = [];
+  bookingOptions: HourlyServiceSelectedBookingOption[] = [];
   version: string | null = null;
 }

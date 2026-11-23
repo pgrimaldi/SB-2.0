@@ -1544,7 +1544,10 @@
             "custom": "Individuell",
             "minutes": "Min.",
             "max_bookings_per_time_slot": "Max. Buchungen pro Zeitfenster",
-            "fixed_time_slots": "Feste Zeitfenster"
+            "fixed_time_slots": "Feste Zeitfenster",
+            "field_names": {
+              "day_of_week": "Tag"
+            }
           },
           "validity": {
             "periods_title": "Gültigkeitszeiträume",

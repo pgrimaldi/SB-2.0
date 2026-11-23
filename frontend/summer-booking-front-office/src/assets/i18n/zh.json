@@ -1544,7 +1544,10 @@
             "custom": "自定义",
             "minutes": "分钟",
             "max_bookings_per_time_slot": "每个时段最多预订数",
-            "fixed_time_slots": "固定时段"
+            "fixed_time_slots": "固定时段",
+            "field_names": {
+              "day_of_week": "星期"
+            }
           },
           "validity": {
             "periods_title": "有效期",

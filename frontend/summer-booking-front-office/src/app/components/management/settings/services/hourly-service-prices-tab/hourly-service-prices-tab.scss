@@ -4,6 +4,13 @@
   gap: 1.25rem;
 }
 
+.hourly__service__prices__tab__error {
+  margin: 0;
+  color: var(--color__layout__error);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 // The availability options need the width of the period: less room around them on phones.
 @media (width < 48rem) {
   :host {

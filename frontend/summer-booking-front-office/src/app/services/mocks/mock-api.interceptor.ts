@@ -781,70 +781,70 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/hourly-service-list`
+    request.url === `${environment.apiBaseUrl}/catalog/services/hourly-service-list`
   ) {
     return hourlyServiceListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/create-hourly-service`
+    request.url === `${environment.apiBaseUrl}/catalog/services/create-hourly-service`
   ) {
     return createHourlyServiceMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-hourly-service-general-info`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-hourly-service-general-info`
   ) {
     return hourlyServiceGeneralInfoMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-hourly-service-prices`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-hourly-service-prices`
   ) {
     return hourlyServicePricesMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-hourly-service-booking-options`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-hourly-service-booking-options`
   ) {
     return hourlyServiceBookingOptionsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-hourly-service-general`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-hourly-service-general`
   ) {
     return updateHourlyServiceGeneralMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-hourly-service-prices`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-hourly-service-prices`
   ) {
     return updateHourlyServicePricesMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-hourly-service-booking`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-hourly-service-booking`
   ) {
     return updateHourlyServiceBookingMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-hourly-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/services/delete-hourly-service-item`
   ) {
     return deleteHourlyServiceItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-hourly-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/services/duplicate-hourly-service-item`
   ) {
     return duplicateHourlyServiceItemsMock(request);
   }

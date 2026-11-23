@@ -50,4 +50,7 @@
       <app-services-availability-option [form]="option.availabilityOption" />
     </div>
   }
+  @if (validationText.text(form()); as error) {
+    <p class="hourly__service__bookings__tab__error">{{ error }}</p>
+  }
 </section>

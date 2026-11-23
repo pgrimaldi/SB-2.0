@@ -12,6 +12,7 @@
 </div>
 <app-filled-number-field
   [label]="'management.settings.services.form.prices.vat' | translate"
+  [isMandatory]="isVatMandatory()"
   [isDecimal]="true"
   [formField]="vatRate()"
   [error]="validationText.text(vatRate())"

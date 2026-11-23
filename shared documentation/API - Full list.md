@@ -5188,7 +5188,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/hourly-service-list`
+### POST `/api/catalog/services/hourly-service-list`
 
 **Payload JSON**
 
@@ -5244,7 +5244,7 @@ Nessun corpo (204).
 | `rows[].idHourlyService` | string (UUID) |
 | `rows[].serviceName` | string \| null |
 
-### POST `/api/catalog/delete-hourly-service-item`
+### POST `/api/catalog/services/delete-hourly-service-item`
 
 **Payload JSON**
 
@@ -5268,7 +5268,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-hourly-service-item`
+### POST `/api/catalog/services/duplicate-hourly-service-item`
 
 **Payload JSON**
 
@@ -5292,7 +5292,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/create-hourly-service`
+### POST `/api/catalog/services/create-hourly-service`
 
 **Payload JSON**
 
@@ -5307,7 +5307,29 @@ Nessun corpo (204).
   ],
   "icon": "string (enum StandardServiceIcon) | null",
   "isHighlighted": "boolean",
+  "price": "number (decimale, €)",
+  "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
+  "availabilityOptions": [
+    {
+      "startTime": "string (HH:mm) | null",
+      "endTime": "string (HH:mm) | null",
+      "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+      "timeSlotPrices": [
+        {
+          "timeSlot": "string (enum ServiceTimeSlot)",
+          "isEnabled": "boolean",
+          "price": "number (decimale, €) | null"
+        }
+      ],
+      "isCustomTimeSlotEnabled": "boolean",
+      "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+      "customTimeSlotPrice": "number (decimale, €) | null",
+      "vatRate": "number (decimale, %) | null",
+      "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+      "hasFixedTimeSlots": "boolean"
+    }
+  ],
   "periodAvailabilities": [
     {
       "idPeriod": "number (intero)",
@@ -5339,6 +5361,17 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, UTC) | null",
       "dateTo": "string (ISO 8601, UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null",
       "availabilityOption": {
         "startTime": "string (HH:mm) | null",
         "endTime": "string (HH:mm) | null",
@@ -5376,7 +5409,23 @@ Nessun corpo (204).
 | `translations[].description` | string \| null |
 | `icon` | string (enum StandardServiceIcon) \| null |
 | `isHighlighted` | boolean |
+| `price` | number (decimale, €) |
+| `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
+| `availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `availabilityOptions[].hasFixedTimeSlots` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
 | `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
@@ -5398,7 +5447,18 @@ Nessun corpo (204).
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null |
-| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) \| null |
 | `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
@@ -5417,7 +5477,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-hourly-service-general-info?idHourlyService={idHourlyService}`
+### GET `/api/catalog/services/get-hourly-service-general-info?idHourlyService={idHourlyService}`
 
 **Payload JSON** (query string)
 
@@ -5439,7 +5499,8 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
   "isHighlighted": "boolean",
   "version": "string"
 }
@@ -5460,11 +5521,12 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `isHighlighted` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-hourly-service-prices?idHourlyService={idHourlyService}`
+### GET `/api/catalog/services/get-hourly-service-prices?idHourlyService={idHourlyService}`
 
 **Payload JSON** (query string)
 
@@ -5478,7 +5540,29 @@ Nessun corpo (204).
 
 ```json
 {
+  "price": "number (decimale, €)",
+  "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
+  "availabilityOptions": [
+    {
+      "startTime": "string (HH:mm) | null",
+      "endTime": "string (HH:mm) | null",
+      "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+      "timeSlotPrices": [
+        {
+          "timeSlot": "string (enum ServiceTimeSlot)",
+          "isEnabled": "boolean",
+          "price": "number (decimale, €) | null"
+        }
+      ],
+      "isCustomTimeSlotEnabled": "boolean",
+      "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+      "customTimeSlotPrice": "number (decimale, €) | null",
+      "vatRate": "number (decimale, %) | null",
+      "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+      "hasFixedTimeSlots": "boolean"
+    }
+  ],
   "periodAvailabilities": [
     {
       "idPeriod": "number (intero)",
@@ -5520,7 +5604,23 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
+| `price` | number (decimale, €) |
+| `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
+| `availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `availabilityOptions[].hasFixedTimeSlots` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
 | `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
@@ -5541,7 +5641,7 @@ Nessun corpo (204).
 | `isOnlinePurchaseEnabled` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
+### GET `/api/catalog/services/get-hourly-service-booking-options?idHourlyService={idHourlyService}`
 
 **Payload JSON** (query string)
 
@@ -5559,6 +5659,17 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, UTC) | null",
       "dateTo": "string (ISO 8601, UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null",
       "availabilityOption": {
         "startTime": "string (HH:mm) | null",
         "endTime": "string (HH:mm) | null",
@@ -5596,7 +5707,18 @@ Nessun corpo (204).
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null |
-| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) \| null |
 | `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
@@ -5612,7 +5734,7 @@ Nessun corpo (204).
 | `bookingOptions[].availabilityOption.hasFixedTimeSlots` | boolean |
 | `version` | string |
 
-### POST `/api/catalog/update-hourly-service-general`
+### POST `/api/catalog/services/update-hourly-service-general`
 
 **Payload JSON**
 
@@ -5626,7 +5748,7 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum StandardServiceIcon) | null",
+  "icon": "string | null",
   "isHighlighted": "boolean"
 }
 ```
@@ -5644,21 +5766,43 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum StandardServiceIcon) \| null |
+| `icon` | string \| null |
 | `isHighlighted` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-hourly-service-prices`
+### POST `/api/catalog/services/update-hourly-service-prices`
 
 **Payload JSON**
 
 ```json
 {
   "idHourlyService": "string (UUID)",
+  "price": "number (decimale, €)",
+  "vatRate": "number (decimale, %) | null",
   "isPeriodPricingEnabled": "boolean",
+  "availabilityOptions": [
+    {
+      "startTime": "string (HH:mm) | null",
+      "endTime": "string (HH:mm) | null",
+      "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
+      "timeSlotPrices": [
+        {
+          "timeSlot": "string (enum ServiceTimeSlot)",
+          "isEnabled": "boolean",
+          "price": "number (decimale, €) | null"
+        }
+      ],
+      "isCustomTimeSlotEnabled": "boolean",
+      "customTimeSlotMinuteQuantity": "number (intero, minuti) | null",
+      "customTimeSlotPrice": "number (decimale, €) | null",
+      "vatRate": "number (decimale, %) | null",
+      "maxBookingPerTimeSlotQuantity": "number (intero) | null",
+      "hasFixedTimeSlots": "boolean"
+    }
+  ],
   "periodAvailabilities": [
     {
       "idPeriod": "number (intero)",
@@ -5698,7 +5842,23 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idHourlyService` | string (UUID) |
+| `price` | number (decimale, €) |
+| `vatRate` | number (decimale, %) \| null |
 | `isPeriodPricingEnabled` | boolean |
+| `availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
+| `availabilityOptions[].startTime` | string (HH:mm) \| null |
+| `availabilityOptions[].endTime` | string (HH:mm) \| null |
+| `availabilityOptions[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
+| `availabilityOptions[].timeSlotPrices[]` | ServiceTimeSlotPrice[] (array di oggetti) |
+| `availabilityOptions[].timeSlotPrices[].timeSlot` | string (enum ServiceTimeSlot) |
+| `availabilityOptions[].timeSlotPrices[].isEnabled` | boolean |
+| `availabilityOptions[].timeSlotPrices[].price` | number (decimale, €) \| null |
+| `availabilityOptions[].isCustomTimeSlotEnabled` | boolean |
+| `availabilityOptions[].customTimeSlotMinuteQuantity` | number (intero, minuti) \| null |
+| `availabilityOptions[].customTimeSlotPrice` | number (decimale, €) \| null |
+| `availabilityOptions[].vatRate` | number (decimale, %) \| null |
+| `availabilityOptions[].maxBookingPerTimeSlotQuantity` | number (intero) \| null |
+| `availabilityOptions[].hasFixedTimeSlots` | boolean |
 | `periodAvailabilities[]` | ServicePeriodAvailability[] (array di oggetti) |
 | `periodAvailabilities[].idPeriod` | number (intero) |
 | `periodAvailabilities[].availabilityOptions[]` | ServiceAvailabilityOption[] (array di oggetti) |
@@ -5722,7 +5882,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-hourly-service-booking`
+### POST `/api/catalog/services/update-hourly-service-booking`
 
 **Payload JSON**
 
@@ -5733,6 +5893,17 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, UTC) | null",
       "dateTo": "string (ISO 8601, UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
+      "managementStartTime": "string (HH:mm) | null",
+      "managementEndTime": "string (HH:mm) | null",
+      "onlineStartTime": "string (HH:mm) | null",
+      "onlineEndTime": "string (HH:mm) | null",
+      "maxBookingPerHourQuantity": "number (intero) | null",
+      "maxBookingPerDayQuantity": "number (intero) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
+      "minItemPerBookingQuantity": "number (intero) | null",
+      "maxItemPerBookingQuantity": "number (intero) | null",
       "availabilityOption": {
         "startTime": "string (HH:mm) | null",
         "endTime": "string (HH:mm) | null",
@@ -5768,7 +5939,18 @@ Nessun corpo (204).
 | `bookingOptions[]` | HourlyServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, UTC) \| null |
-| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
+| `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
+| `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
+| `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
+| `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
+| `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
+| `bookingOptions[].availabilityOption` | ServiceAvailabilityOption (oggetto) \| null |
 | `bookingOptions[].availabilityOption.startTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.endTime` | string (HH:mm) \| null |
 | `bookingOptions[].availabilityOption.daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |

@@ -17,10 +17,11 @@ const FIELD_OF_CODE: Readonly<Partial<Record<string, ServiceErrorField>>> = {
 /** The error under its field, for the codes that are about one; null for the others. */
 export function serviceFieldError(
   problem: ApiProblem,
-  form: Readonly<Record<ServiceErrorField, FieldTree<unknown>>>,
+  form: Readonly<Partial<Record<ServiceErrorField, FieldTree<unknown>>>>,
 ): ApiValidationError | null {
   const field = FIELD_OF_CODE[problem.code];
-  return field ? apiFieldError(form[field], problem.code, problem.args) : null;
+  const fieldTree = field && form[field];
+  return fieldTree ? apiFieldError(fieldTree, problem.code, problem.args) : null;
 }
 
 /** The fields of the first level that the error is about. */

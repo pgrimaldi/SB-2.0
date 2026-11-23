@@ -457,15 +457,20 @@ export class CatalogService {
    * passed around on its own.
    */
   readonly hourlyServiceList = (request: PageRequest): Observable<Page<HourlyServiceItem>> =>
-    this.httpClient.post<Page<HourlyServiceItem>>(`${this.endpoint}/hourly-service-list`, request);
+    this.httpClient.post<Page<HourlyServiceItem>>(
+      `${this.endpoint}/services/hourly-service-list`,
+      request,
+    );
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteHourlyServiceItems = (idHourlyServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-hourly-service-item`, { idHourlyServices });
+    this.httpClient.post<void>(`${this.endpoint}/services/delete-hourly-service-item`, {
+      idHourlyServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicateHourlyServiceItems = (idHourlyServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-hourly-service-item`, {
+    this.httpClient.post<void>(`${this.endpoint}/services/duplicate-hourly-service-item`, {
       idHourlyServices,
     });
 
@@ -474,7 +479,7 @@ export class CatalogService {
     idHourlyService: string,
   ): Observable<HourlyServiceSelectedGeneralInfo> =>
     this.httpClient.get<HourlyServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-hourly-service-general-info`,
+      `${this.endpoint}/services/get-hourly-service-general-info`,
       { params: { idHourlyService } },
     );
 
@@ -482,16 +487,19 @@ export class CatalogService {
   readonly hourlyServicePrices = (
     idHourlyService: string,
   ): Observable<HourlyServiceSelectedPrices> =>
-    this.httpClient.get<HourlyServiceSelectedPrices>(`${this.endpoint}/get-hourly-service-prices`, {
-      params: { idHourlyService },
-    });
+    this.httpClient.get<HourlyServiceSelectedPrices>(
+      `${this.endpoint}/services/get-hourly-service-prices`,
+      {
+        params: { idHourlyService },
+      },
+    );
 
   /** The Prenotazioni tab of an hourly service, its booking options, for the edit panel. */
   readonly hourlyServiceBookingOptions = (
     idHourlyService: string,
   ): Observable<HourlyServiceSelectedBookingOptions> =>
     this.httpClient.get<HourlyServiceSelectedBookingOptions>(
-      `${this.endpoint}/get-hourly-service-booking-options`,
+      `${this.endpoint}/services/get-hourly-service-booking-options`,
       { params: { idHourlyService } },
     );
 
@@ -505,7 +513,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-hourly-service-general`,
+        `${this.endpoint}/services/update-hourly-service-general`,
         {
           ...onlyFieldsOf(HourlyServiceUpdateGeneralRequest, request),
           translations: request.translations.map((translation) =>
@@ -526,9 +534,10 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-hourly-service-prices`,
+        `${this.endpoint}/services/update-hourly-service-prices`,
         {
           ...onlyFieldsOf(HourlyServiceUpdatePricesRequest, request),
+          availabilityOptions: request.availabilityOptions.map(availabilityOptionFields),
           periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
         },
         { headers: ifMatch(version), observe: 'response' },
@@ -545,7 +554,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-hourly-service-booking`,
+        `${this.endpoint}/services/update-hourly-service-booking`,
         {
           ...onlyFieldsOf(HourlyServiceUpdateBookingRequest, request),
           bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
@@ -554,13 +563,14 @@ export class CatalogService {
       )
       .pipe(map(versionOf));
 
-  /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createHourlyService = (request: HourlyServiceAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-hourly-service`, {
+  /** The data of the three tabs of the add panel. Answers the id of the new hourly service. */
+  readonly createHourlyService = (request: HourlyServiceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/services/create-hourly-service`, {
       ...onlyFieldsOf(HourlyServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
       ),
+      availabilityOptions: request.availabilityOptions.map(availabilityOptionFields),
       periodAvailabilities: request.periodAvailabilities.map(periodAvailabilityFields),
       bookingOptions: request.bookingOptions.map(hourlyBookingOptionFields),
     });

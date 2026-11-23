@@ -1544,7 +1544,10 @@
             "custom": "مخصص",
             "minutes": "دقيقة",
             "max_bookings_per_time_slot": "أقصى عدد حجوزات لكل فترة",
-            "fixed_time_slots": "فترات ثابتة"
+            "fixed_time_slots": "فترات ثابتة",
+            "field_names": {
+              "day_of_week": "يوم من أيام الأسبوع"
+            }
           },
           "validity": {
             "periods_title": "فترات الصلاحية",
