@@ -1556,13 +1556,17 @@
             "time_slots": "Fasce orarie",
             "add_time_slot": "Aggiungi fascia oraria",
             "services_title": "Validità sui servizi",
+            "all_services": "Tutti i servizi",
             "bar_services": "Servizi bar",
             "standard_services": "Servizi",
             "hourly_services": "Servizi orari",
             "select_all": "Seleziona tutti",
             "no_services": "Nessun servizio di questo tipo.",
             "price_per_service": "Abilita prezzo automatico per ogni singolo servizio",
-            "price_per_service_info": "Se questa opzione **è abilitata**, il prezzo automatico verrà applicato e inserito automaticamente per ogni singolo servizio che viene aggiunto alla prenotazione.\n\nSe questa opzione **non è abilitata**, il prezzo automatico verrà applicato e inserito automaticamente una sola volta per singolo ordine."
+            "price_per_service_info": "Se questa opzione **è abilitata**, il prezzo automatico verrà applicato e inserito automaticamente per ogni singolo servizio che viene aggiunto alla prenotazione.\n\nSe questa opzione **non è abilitata**, il prezzo automatico verrà applicato e inserito automaticamente una sola volta per singolo ordine.",
+            "field_names": {
+              "service": "servizio"
+            }
           },
           "tables": {
             "availability_title": "Disponibilità",

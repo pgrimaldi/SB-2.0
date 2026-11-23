@@ -577,17 +577,19 @@ export class CatalogService {
 
   readonly automaticPriceList = (request: PageRequest): Observable<Page<AutomaticPriceItem>> =>
     this.httpClient.post<Page<AutomaticPriceItem>>(
-      `${this.endpoint}/automatic-price-list`,
+      `${this.endpoint}/automatic-prices/automatic-price-list`,
       request,
     );
 
   /** The bar, standard and hourly services of the property, for "Validità sui servizi". */
   readonly automaticPriceServices = (): Observable<AutomaticPriceServices> =>
-    this.httpClient.get<AutomaticPriceServices>(`${this.endpoint}/get-automatic-price-services`);
+    this.httpClient.get<AutomaticPriceServices>(
+      `${this.endpoint}/automatic-prices/get-automatic-price-services`,
+    );
 
-  /** The data of the two tabs of the add panel. Answers 204 with no body. */
-  readonly createAutomaticPrice = (request: AutomaticPriceAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-automatic-price`, {
+  /** The data of the two tabs of the add panel. Answers the id of the new automatic price. */
+  readonly createAutomaticPrice = (request: AutomaticPriceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/automatic-prices/create-automatic-price`, {
       ...onlyFieldsOf(AutomaticPriceAddItemRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
@@ -595,12 +597,25 @@ export class CatalogService {
       validityPeriods: request.validityPeriods.map(validityPeriodFields),
     });
 
+  /** The image of an automatic price, instead of an icon. The answer, the price, is not read. */
+  readonly uploadAutomaticPriceImage = (idAutomaticPrice: string, image: File): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/automatic-prices/${encodeURIComponent(idAutomaticPrice)}/image`,
+      formOf(image),
+    );
+
+  /** The uploaded image of an automatic price. The answer is not read. */
+  readonly deleteAutomaticPriceImage = (idAutomaticPrice: string): Observable<void> =>
+    this.httpClient.delete<void>(
+      `${this.endpoint}/automatic-prices/${encodeURIComponent(idAutomaticPrice)}/image`,
+    );
+
   /** The Info Generali tab of an automatic price, for the edit panel. */
   readonly automaticPriceGeneralInfo = (
     idAutomaticPrice: string,
   ): Observable<AutomaticPriceSelectedGeneralInfo> =>
     this.httpClient.get<AutomaticPriceSelectedGeneralInfo>(
-      `${this.endpoint}/get-automatic-price-general-info`,
+      `${this.endpoint}/automatic-prices/get-automatic-price-general-info`,
       { params: { idAutomaticPrice } },
     );
 
@@ -609,7 +624,7 @@ export class CatalogService {
     idAutomaticPrice: string,
   ): Observable<AutomaticPriceSelectedPricesValidity> =>
     this.httpClient.get<AutomaticPriceSelectedPricesValidity>(
-      `${this.endpoint}/get-automatic-price-prices-validity`,
+      `${this.endpoint}/automatic-prices/get-automatic-price-prices-validity`,
       { params: { idAutomaticPrice } },
     );
 
@@ -623,7 +638,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-automatic-price-general`,
+        `${this.endpoint}/automatic-prices/update-automatic-price-general`,
         {
           ...onlyFieldsOf(AutomaticPriceUpdateGeneralRequest, request),
           translations: request.translations.map((translation) =>
@@ -644,7 +659,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-automatic-price-prices-validity`,
+        `${this.endpoint}/automatic-prices/update-automatic-price-prices-validity`,
         {
           ...onlyFieldsOf(AutomaticPriceUpdatePricesValidityRequest, request),
           validityPeriods: request.validityPeriods.map(validityPeriodFields),
@@ -655,13 +670,13 @@ export class CatalogService {
 
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteAutomaticPriceItems = (idAutomaticPrices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-automatic-price-item`, {
+    this.httpClient.post<void>(`${this.endpoint}/automatic-prices/delete-automatic-price-item`, {
       idAutomaticPrices,
     });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicateAutomaticPriceItems = (idAutomaticPrices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-automatic-price-item`, {
+    this.httpClient.post<void>(`${this.endpoint}/automatic-prices/duplicate-automatic-price-item`, {
       idAutomaticPrices,
     });
 

@@ -979,7 +979,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-automatic-price-services` &&
+        url === `${environment.apiBaseUrl}/catalog/automatic-prices/get-automatic-price-services` &&
         params.keys().length === 0,
     ).request;
     expect(request.body).toBeNull();
@@ -1003,6 +1003,7 @@ describe('CatalogService', () => {
       vatRate: 10,
       isOnlinePurchaseEnabled: true,
       validityPeriods: [validityPeriod],
+      isAllServicesEnabled: false,
       idBarServices: ['b1'],
       idStandardServices: [],
       idHourlyServices: ['h1'],
@@ -1029,9 +1030,28 @@ describe('CatalogService', () => {
 
     const body = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-automatic-price`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/automatic-prices/create-automatic-price`,
     ).request.body;
     expect(body).toEqual({ ...request });
+    controller.verify();
+  });
+
+  it('should upload and delete the image of an automatic price under automatic-prices', () => {
+    const { catalog, controller } = setup();
+    const image = new File(['image'], 'coperto.png', { type: 'image/png' });
+
+    catalog.uploadAutomaticPriceImage('a1', image).subscribe();
+    catalog.deleteAutomaticPriceImage('a1').subscribe();
+
+    const bodyOf = (wanted: string) =>
+      controller.expectOne(
+        ({ method, url }) =>
+          method === wanted &&
+          url === `${environment.apiBaseUrl}/catalog/automatic-prices/a1/image`,
+      ).request.body;
+    expect((bodyOf('POST') as FormData).get('file')).toBe(image);
+    expect(bodyOf('DELETE')).toBeNull();
     controller.verify();
   });
 
@@ -1043,7 +1063,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-automatic-price-general-info` &&
+        url ===
+          `${environment.apiBaseUrl}/catalog/automatic-prices/get-automatic-price-general-info` &&
         params.get('idAutomaticPrice') === 'a1',
     ).request;
     expect(request.body).toBeNull();
@@ -1058,7 +1079,8 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-automatic-price-prices-validity` &&
+        url ===
+          `${environment.apiBaseUrl}/catalog/automatic-prices/get-automatic-price-prices-validity` &&
         params.get('idAutomaticPrice') === 'a1',
     ).request;
     expect(request.body).toBeNull();
@@ -1088,7 +1110,7 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-automatic-price-general`,
+        url === `${environment.apiBaseUrl}/catalog/automatic-prices/update-automatic-price-general`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -1109,6 +1131,7 @@ describe('CatalogService', () => {
       vatRate: 10,
       isOnlinePurchaseEnabled: false,
       validityPeriods: [validityPeriod],
+      isAllServicesEnabled: false,
       idBarServices: ['b1'],
       idStandardServices: ['s1'],
       idHourlyServices: [],
@@ -1136,7 +1159,8 @@ describe('CatalogService', () => {
     const body = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-automatic-price-prices-validity`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/automatic-prices/update-automatic-price-prices-validity`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -1374,7 +1398,7 @@ describe('CatalogService', () => {
           catalog.updateHourlyServiceBooking(new HourlyServiceUpdateBookingRequest(), READ_VERSION),
       ],
       [
-        'update-automatic-price-general',
+        'automatic-prices/update-automatic-price-general',
         () =>
           catalog.updateAutomaticPriceGeneral(
             new AutomaticPriceUpdateGeneralRequest(),
@@ -1382,7 +1406,7 @@ describe('CatalogService', () => {
           ),
       ],
       [
-        'update-automatic-price-prices-validity',
+        'automatic-prices/update-automatic-price-prices-validity',
         () =>
           catalog.updateAutomaticPricePricesValidity(
             new AutomaticPriceUpdatePricesValidityRequest(),

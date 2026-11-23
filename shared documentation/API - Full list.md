@@ -5969,7 +5969,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/automatic-price-list`
+### POST `/api/catalog/automatic-prices/automatic-price-list`
 
 **Payload JSON**
 
@@ -6027,7 +6027,7 @@ Nessun corpo (204).
 | `rows[].serviceName` | string \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### GET `/api/catalog/get-automatic-price-services`
+### GET `/api/catalog/automatic-prices/get-automatic-price-services`
 
 **Payload JSON**
 
@@ -6076,7 +6076,7 @@ Nessun payload.
 | `hourlyServices[].id` | string (UUID) |
 | `hourlyServices[].value` | string |
 
-### POST `/api/catalog/create-automatic-price`
+### POST `/api/catalog/automatic-prices/create-automatic-price`
 
 **Payload JSON**
 
@@ -6090,7 +6090,7 @@ Nessun payload.
     }
   ],
   "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isOnlinePurchaseEnabled": "boolean",
   "validityPeriods": [
@@ -6100,12 +6100,13 @@ Nessun payload.
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
       "timeSlots": [
         {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "startTime": "string (HH:mm)",
+          "endTime": "string (HH:mm)"
         }
       ]
     }
   ],
+  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -6127,7 +6128,7 @@ Nessun corpo (204).
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isOnlinePurchaseEnabled` | boolean |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
@@ -6135,8 +6136,9 @@ Nessun corpo (204).
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
+| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -6147,7 +6149,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
+### GET `/api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
 
 **Payload JSON** (query string)
 
@@ -6169,7 +6171,8 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null",
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
   "version": "string"
 }
 ```
@@ -6189,10 +6192,11 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `version` | string |
 
-### GET `/api/catalog/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
+### GET `/api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
 
 **Payload JSON** (query string)
 
@@ -6206,7 +6210,7 @@ Nessun corpo (204).
 
 ```json
 {
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isOnlinePurchaseEnabled": "boolean",
   "validityPeriods": [
@@ -6216,12 +6220,13 @@ Nessun corpo (204).
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
       "timeSlots": [
         {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "startTime": "string (HH:mm)",
+          "endTime": "string (HH:mm)"
         }
       ]
     }
   ],
+  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -6241,7 +6246,7 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isOnlinePurchaseEnabled` | boolean |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
@@ -6249,8 +6254,9 @@ Nessun corpo (204).
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
+| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -6258,7 +6264,7 @@ Nessun corpo (204).
 | `idSectors` | string[] (UUID) |
 | `version` | string |
 
-### POST `/api/catalog/update-automatic-price-general`
+### POST `/api/catalog/automatic-prices/update-automatic-price-general`
 
 **Payload JSON**
 
@@ -6272,7 +6278,7 @@ Nessun corpo (204).
       "description": "string | null"
     }
   ],
-  "icon": "string (enum BarServiceIcon o StandardServiceIcon) | null"
+  "icon": "string | null"
 }
 ```
 
@@ -6289,20 +6295,20 @@ Nessun corpo (204).
 | `translations[].language` | string |
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
-| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null |
+| `icon` | string \| null |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-automatic-price-prices-validity`
+### POST `/api/catalog/automatic-prices/update-automatic-price-prices-validity`
 
 **Payload JSON**
 
 ```json
 {
   "idAutomaticPrice": "string (UUID)",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "isOnlinePurchaseEnabled": "boolean",
   "validityPeriods": [
@@ -6312,12 +6318,13 @@ Nessun corpo (204).
       "daysOfWeek": "number[] (interi ISO 8601: 1 = lunedì … 7 = domenica)",
       "timeSlots": [
         {
-          "startTime": "string (HH:mm) | null",
-          "endTime": "string (HH:mm) | null"
+          "startTime": "string (HH:mm)",
+          "endTime": "string (HH:mm)"
         }
       ]
     }
   ],
+  "isAllServicesEnabled": "boolean",
   "idBarServices": "string[] (UUID)",
   "idStandardServices": "string[] (UUID)",
   "idHourlyServices": "string[] (UUID)",
@@ -6335,7 +6342,7 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idAutomaticPrice` | string (UUID) |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `isOnlinePurchaseEnabled` | boolean |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) |
@@ -6343,8 +6350,9 @@ Nessun corpo (204).
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) |
+| `isAllServicesEnabled` | boolean |
 | `idBarServices` | string[] (UUID) |
 | `idStandardServices` | string[] (UUID) |
 | `idHourlyServices` | string[] (UUID) |
@@ -6355,7 +6363,49 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/delete-automatic-price-item`
+### POST `/api/catalog/automatic-prices/{id}/image`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### DELETE `/api/catalog/automatic-prices/{id}/image`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### POST `/api/catalog/automatic-prices/delete-automatic-price-item`
 
 **Payload JSON**
 
@@ -6379,7 +6429,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-automatic-price-item`
+### POST `/api/catalog/automatic-prices/duplicate-automatic-price-item`
 
 **Payload JSON**
 

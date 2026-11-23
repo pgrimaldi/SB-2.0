@@ -42,8 +42,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   orario", sola colonna Servizio; righe da `POST /api/catalog/services/hourly-service-list`
   (`CatalogService.hourlyServiceList`, `Page<HourlyServiceItem>`).
 - Prezzi Automatici: titolo "Prezzi automatici" con l'euro (`Services_AutomaticPricesTitle.png`), bottone
-  "Aggiungi prezzo automatico", colonne Servizio, Prezzo; righe da `POST /api/catalog/automatic-price-list`
-  (`CatalogService.automaticPriceList`, `Page<AutomaticPriceItem>`).
+  "Aggiungi prezzo automatico", colonne Servizio, Prezzo; righe da
+  `POST /api/catalog/automatic-prices/automatic-price-list` (`CatalogService.automaticPriceList`, `Page<AutomaticPriceItem>`).
 - Prenotazione tavoli: titolo "Prenotazione servizio tavoli" con il tavolo (`Services_TableBookingTitle.png`),
   bottone "Aggiungi servizio tavoli", sola colonna Nome servizio; righe da `POST /api/catalog/table-service-list`
   (`CatalogService.tableServiceList`, `Page<TableServiceItem>`).
@@ -69,7 +69,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   - Servizi: `services/delete-standard-service-item`, `services/duplicate-standard-service-item` (`idStandardServices`);
   - Servizi orari: `services/delete-hourly-service-item`, `services/duplicate-hourly-service-item`
     (`idHourlyServices`);
-  - Prezzi automatici: `delete-automatic-price-item`, `duplicate-automatic-price-item` (`idAutomaticPrices`);
+  - Prezzi automatici: `automatic-prices/delete-automatic-price-item`,
+    `automatic-prices/duplicate-automatic-price-item` (`idAutomaticPrices`);
   - Prenotazione tavoli: `delete-table-service-item`, `duplicate-table-service-item` (`idTableServices`).
 
 ## Parti comuni dei pannelli (`services/shared/`)
@@ -163,7 +164,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   traduzione principale. Servizi Bar e Servizi hanno anche altri campi obbligatori (sotto).
 - Ogni coppia Dalle / alle ha `timeRange`: un "alle" che non viene dopo il "dalle" (anche la stessa ora) dà l'errore
   sotto i due orari e Salva resta spento.
-- Salva manda tutto il form all'API di creazione (risposta 204, in Servizi Bar, Servizi e Servizi Orari l'id del nuovo servizio): spinner
+- Salva manda tutto il form all'API di creazione (risposta 204, in Servizi Bar, Servizi, Servizi Orari e Prezzi Automatici l'id del nuovo elemento): spinner
   sul bottone e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(created)`).
 - Se fallisce il pannello resta aperto con i dati: errori dei campi di primo livello sotto il campo, gli altri in
   fondo alla tab, sopra i bottoni.
@@ -408,27 +409,35 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   senza Metti in evidenza. Le icone sono quelle del bar (`BarServiceIcon`) seguite da quelle degli altri servizi
   (`StandardServiceIcon`); `icon` vale una delle due (i nomi non si sovrappongono).
 - Prezzi e Validità (`app-automatic-price-prices-validity-tab`), in quest'ordine:
-  - Prezzo e IVA (`app-services-price-vat`);
+  - Prezzo (obbligatorio, 0-100.000) e IVA (`app-services-price-vat`);
   - "Abilita acquisto online";
   - "Periodi validità" (`app-automatic-price-validity-periods`): bottone blu "Aggiungi periodo validità", un
     riquadro con la X per periodo, nessuno all'apertura, con Periodo Dal/al, Giorni della settimana (sette caselle
     Lun-Dom su una riga, numeri ISO da `DAYS_OF_WEEK`, testi brevi dei servizi orari) e Fasce orarie Dalle/alle
-    con il cestino e "Aggiungi fascia oraria" come nei voucher;
-  - "Validità sui servizi" (`app-automatic-price-service-validity`): un `app-expansion-panel` per Servizi bar,
-    Servizi e Servizi orari con "Seleziona tutti" e una casella per servizio, tre per riga; poi la casella
+    con il cestino e "Aggiungi fascia oraria" come nei voucher; di ogni fascia servono le due ore, come nel backend
+    (`automaticPriceRules`). Un periodo nuovo ha tutti i giorni scelti e almeno uno è obbligatorio; un periodo letto senza
+    giorni vale tutti i giorni e li mostra tutti scelti;
+  - "Validità sui servizi" (`app-automatic-price-service-validity`): l'interruttore "Tutti i servizi"
+    (`isAllServicesEnabled`, anche per quelli creati dopo) e, se è spento, un `app-expansion-panel` per Servizi bar,
+    Servizi e Servizi orari con "Seleziona tutti" e una casella per servizio, tre per riga: ne serve almeno uno, come nel
+    backend. Con l'interruttore acceso i tre elenchi si mandano vuoti (`withServicesInForce`); poi la casella
     "Abilita prezzo automatico per ogni singolo servizio" con la (i): attiva, il prezzo si applica e si inserisce
     per ogni singolo servizio aggiunto alla prenotazione; spenta, una sola volta per singolo ordine;
   - Limiti (`app-services-limits`).
-- I servizi arrivano all'apertura da `GET /api/catalog/get-automatic-price-services`, senza parametri
+- I servizi arrivano all'apertura da `GET /api/catalog/automatic-prices/get-automatic-price-services`, senza parametri
   (`AutomaticPriceServices`, tre elenchi di `ComboboxItem`): durante la lettura le tab sono bloccate e Salva è
   spento; se fallisce compare l'errore e i pannelli restano vuoti.
 - Entità `AutomaticPriceValidityPeriod`, `AutomaticPriceTimeSlot`.
-- Salva: `POST /api/catalog/create-automatic-price` (`CatalogService.createAutomaticPrice`), ripulito a ogni
-  livello con `onlyFieldsOf`.
+- Salva: `POST /api/catalog/automatic-prices/create-automatic-price` (`CatalogService.createAutomaticPrice`), ripulito a
+  ogni livello con `onlyFieldsOf`; risponde con l'id del prezzo automatico creato, poi parte l'immagine
+  (`POST /api/catalog/automatic-prices/{id}/image`, `CatalogService.uploadAutomaticPriceImage`).
+- Nome nelle lingue con una descrizione, limiti dei testi, errori dell'icona e dell'IVA e immagine come in Servizi Bar.
 
 ### Modifica ("Modifica prezzo automatico")
 
 - `app-automatic-price-edit-item-panel`, come quello dei servizi orari ma con le due tab, input `idAutomaticPrice`.
+- API sotto `/api/catalog/automatic-prices/…`; la X sull'immagine salvata chiama, dopo la conferma,
+  `DELETE /api/catalog/automatic-prices/{id}/image` (`CatalogService.deleteAutomaticPriceImage`).
 - GET (`idAutomaticPrice` nella query string): `get-automatic-price-general-info`;
   `get-automatic-price-prices-validity` insieme a `get-automatic-price-services`.
 - Salvataggi: `update-automatic-price-general`, `update-automatic-price-prices-validity`; entità

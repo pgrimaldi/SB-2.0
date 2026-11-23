@@ -17,6 +17,7 @@
         [imagePreviewUrl]="imagePreviewUrl()"
         (iconChosen)="chooseIcon($event)"
         (imageChosen)="chooseImage($event)"
+        (imageRemoveRequest)="removeImage()"
       />
     } @else if (selectedTab() === PanelTab.PricesValidity) {
       <app-automatic-price-prices-validity-tab
@@ -30,3 +31,4 @@
     }
   </app-tab-group>
 </app-side-panel>
+<app-service-image-error-popup [pathIcon]="pathIcon()" [(problem)]="imageError" />

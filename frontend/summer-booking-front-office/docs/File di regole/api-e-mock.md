@@ -65,6 +65,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   backend così com'è, adattando il frontend senza differenze per chi usa il gestionale, oppure chiedere una nuova
   API nel documento di richieste della pagina (`shared documentation/Modifiche per il backend/`).
 - Le API usate così come sono stanno nella sezione "API esistenti usate così come sono" dello stesso documento.
+- Le rotte delle API nuove stanno sempre sotto la radice che il backend ha già per quei dati (es.
+  `/api/catalog/services`, `/api/catalog/automatic-prices`, `/api/catalog/sectors`), anche quelle di elenco, eliminazione
+  e duplicazione.
 
 ## Documenti delle richieste al backend
 

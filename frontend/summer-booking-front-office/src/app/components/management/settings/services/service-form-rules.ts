@@ -10,6 +10,7 @@ import {
   required,
   validate,
 } from '@angular/forms/signals';
+import { AutomaticPriceAddItemRequest } from '../../../../entities/settings/services/automatic-price-add-item-request';
 import { HourlyServiceAddItemRequest } from '../../../../entities/settings/services/hourly-service-add-item-request';
 import {
   MAX_CUSTOM_TIME_SLOT_MINUTES,
@@ -25,7 +26,7 @@ import {
   MAX_SERVICE_VARIANT_NAME_LENGTH,
   ServiceVariant,
 } from '../../../../entities/settings/services/service-variant';
-import { minItems, requiredText, timeRange } from '../../../shared/forms/validators';
+import { MinItemsError, minItems, requiredText, timeRange } from '../../../shared/forms/validators';
 
 export interface MissingTranslatedNameError extends ValidationError {
   readonly kind: 'services.translation.name_missing';
@@ -129,6 +130,40 @@ export function hourlyServicePriceRules(
         applyEach(periodAvailability.availabilityOptions, serviceAvailabilityRules),
       ),
   );
+}
+
+/**
+ * An automatic price as the backend wants it: the price always, a day at least and both hours of the
+ * time slots in every period, a service at least unless it applies to all of them.
+ */
+export function automaticPriceRules(path: SchemaPathTree<AutomaticPriceAddItemRequest>): void {
+  required(path.price);
+  max(path.price, MAX_SERVICE_PRICE);
+  applyEach(path.validityPeriods, (period) => {
+    minItems(period.daysOfWeek, 1);
+    applyEach(period.timeSlots, (timeSlot) => {
+      required(timeSlot.startTime);
+      required(timeSlot.endTime);
+      timeRange(timeSlot.startTime, timeSlot.endTime);
+    });
+  });
+  validate(path.isAllServicesEnabled, ({ value, valueOf }): MinItemsError | undefined =>
+    value() ||
+    [path.idBarServices, path.idStandardServices, path.idHourlyServices].some(
+      (ids) => valueOf(ids).length > 0,
+    )
+      ? undefined
+      : { kind: 'min_items', count: 1 },
+  );
+}
+
+/** The services chosen only when the automatic price does not apply to all of them. */
+export function withServicesInForce(
+  values: AutomaticPriceAddItemRequest,
+): AutomaticPriceAddItemRequest {
+  return values.isAllServicesEnabled
+    ? { ...values, idBarServices: [], idStandardServices: [], idHourlyServices: [] }
+    : values;
 }
 
 /** The availabilities in force only, by period or not: the backend keeps one kind of them. */

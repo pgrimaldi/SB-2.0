@@ -5037,7 +5037,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/automatic-price-list`
+### POST `/api/catalog/automatic-prices/automatic-price-list`
 
 Servizi: prezzi automatici.
 
@@ -5088,7 +5088,7 @@ Stato: 200 OK.
 | `rows[].serviceName` | string \| null | `Coperto` |
 | `rows[].price` | number (decimale, €) \| null | `2` |
 
-### GET `/api/catalog/get-automatic-price-services`
+### GET `/api/catalog/automatic-prices/get-automatic-price-services`
 
 Prezzi Automatici: servizi a cui si applicano.
 
@@ -5139,7 +5139,7 @@ Stato: 200 OK.
 | `hourlyServices[].id` | string (UUID) | `4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01` |
 | `hourlyServices[].value` | string | `Sup` |
 
-### POST `/api/catalog/create-automatic-price`
+### POST `/api/catalog/automatic-prices/create-automatic-price`
 
 Prezzi Automatici: creazione prezzo automatico.
 
@@ -5209,6 +5209,7 @@ Prezzi Automatici: creazione prezzo automatico.
       ]
     }
   ],
+  "isAllServicesEnabled": false,
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
@@ -5233,7 +5234,7 @@ Prezzi Automatici: creazione prezzo automatico.
 | `translations[].serviceName` | string \| null | `Menu pranzo` |
 | `translations[].description` | string \| null | `Prezzo fisso per il pranzo al bar.` |
 | `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null | `Cutlery` |
-| `price` | number (decimale, €) \| null | `12` |
+| `price` | number (decimale, €) | `12` |
 | `vatRate` | number (decimale, %) \| null | `10` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) | `[{"dateFrom": "2026-08-01T00:00:00.000Z", "dateTo": "2026-08-31T00:00:00.000Z", "daysOfWeek": [1, 2, 3], "timeSlots": [{"startTime": "09:00", "endTime": "12:00"}, {"startTime": "15:00", "endTime": "17:00"}]}]` |
@@ -5241,8 +5242,9 @@ Prezzi Automatici: creazione prezzo automatico.
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null | `2026-08-31T00:00:00.000Z` |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3]` |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "09:00", "endTime": "12:00"}, {"startTime": "15:00", "endTime": "17:00"}]` |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null | `09:00` |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null | `12:00` |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) | `09:00` |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) | `12:00` |
+| `isAllServicesEnabled` | boolean | `false` |
 | `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
@@ -5251,11 +5253,15 @@ Prezzi Automatici: creazione prezzo automatico.
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 201 Created.
 
-Nessun corpo.
+Il corpo è solo l'id del prezzo automatico creato, come stringa JSON (tra virgolette, Content-Type application/json).
 
-### GET `/api/catalog/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
+```json
+"7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d03"
+```
+
+### GET `/api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice={idAutomaticPrice}`
 
 Prezzi Automatici: prezzo automatico, tab Info Generali.
 
@@ -5264,7 +5270,7 @@ Prezzi Automatici: prezzo automatico, tab Info Generali.
 Nessun corpo: è una GET, l'id del prezzo automatico va nella query string.
 
 ```text
-/api/catalog/get-automatic-price-general-info?idAutomaticPrice=7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01
+/api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice=7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01
 ```
 
 | Property | Tipo | Esempio |
@@ -5291,6 +5297,7 @@ Stato: 200 OK.
     }
   ],
   "icon": "Cutlery",
+  "imageUrl": null,
   "version": "390a8384"
 }
 ```
@@ -5302,10 +5309,11 @@ Stato: 200 OK.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Coperto` |
 | `translations[].description` | string \| null | `Coperto a persona per i servizi del bar.` |
-| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null | `Cutlery` |
+| `icon` | string \| null | `Cutlery` |
+| `imageUrl` | string (URL) \| null | `null` |
 | `version` | string | `390a8384` |
 
-### GET `/api/catalog/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
+### GET `/api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice={idAutomaticPrice}`
 
 Prezzi Automatici: prezzo automatico, tab Prezzi e Validità.
 
@@ -5314,7 +5322,7 @@ Prezzi Automatici: prezzo automatico, tab Prezzi e Validità.
 Nessun corpo: è una GET, l'id del prezzo automatico va nella query string.
 
 ```text
-/api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01
+/api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01
 ```
 
 | Property | Tipo | Esempio |
@@ -5355,6 +5363,7 @@ Stato: 200 OK.
       ]
     }
   ],
+  "isAllServicesEnabled": false,
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
@@ -5375,7 +5384,7 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `price` | number (decimale, €) \| null | `2` |
+| `price` | number (decimale, €) | `2` |
 | `vatRate` | number (decimale, %) \| null | `10` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlots": [{"startTime": "12:00", "endTime": "15:00"}, {"startTime": "19:00", "endTime": "23:00"}]}]` |
@@ -5383,8 +5392,9 @@ Stato: 200 OK.
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-30T00:00:00.000Z` |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "12:00", "endTime": "15:00"}, {"startTime": "19:00", "endTime": "23:00"}]` |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null | `12:00` |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null | `15:00` |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) | `12:00` |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) | `15:00` |
+| `isAllServicesEnabled` | boolean | `false` |
 | `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
@@ -5392,7 +5402,7 @@ Stato: 200 OK.
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `version` | string | `5221df56` |
 
-### POST `/api/catalog/update-automatic-price-general`
+### POST `/api/catalog/automatic-prices/update-automatic-price-general`
 
 Prezzi Automatici: prezzo automatico, salvataggio Info Generali.
 
@@ -5449,7 +5459,7 @@ Prezzi Automatici: prezzo automatico, salvataggio Info Generali.
 | `translations[].language` | string | `it` |
 | `translations[].serviceName` | string \| null | `Coperto` |
 | `translations[].description` | string \| null | `Coperto a persona per i servizi del bar.` |
-| `icon` | string (enum BarServiceIcon o StandardServiceIcon) \| null | `Cutlery` |
+| `icon` | string \| null | `Cutlery` |
 
 #### Response
 
@@ -5457,7 +5467,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/update-automatic-price-prices-validity`
+### POST `/api/catalog/automatic-prices/update-automatic-price-prices-validity`
 
 Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 
@@ -5494,6 +5504,7 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
       ]
     }
   ],
+  "isAllServicesEnabled": false,
   "idBarServices": [
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01",
     "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"
@@ -5514,7 +5525,7 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idAutomaticPrice` | string (UUID) | `7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d01` |
-| `price` | number (decimale, €) \| null | `2.5` |
+| `price` | number (decimale, €) | `2.5` |
 | `vatRate` | number (decimale, %) \| null | `10` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `validityPeriods[]` | AutomaticPriceValidityPeriod[] (array di oggetti) | `[{"dateFrom": "2026-06-01T00:00:00.000Z", "dateTo": "2026-09-30T00:00:00.000Z", "daysOfWeek": [1, 2, 3, 4, 5, 6, 7], "timeSlots": [{"startTime": "12:00", "endTime": "15:00"}, {"startTime": "19:00", "endTime": "23:00"}]}]` |
@@ -5522,8 +5533,9 @@ Prezzi Automatici: prezzo automatico, salvataggio Prezzi e Validità.
 | `validityPeriods[].dateTo` | string (ISO 8601, UTC) \| null | `2026-09-30T00:00:00.000Z` |
 | `validityPeriods[].daysOfWeek` | number[] (interi ISO 8601: 1 = lunedì … 7 = domenica) | `[1, 2, 3, 4, 5, 6, 7]` |
 | `validityPeriods[].timeSlots[]` | AutomaticPriceTimeSlot[] (array di oggetti) | `[{"startTime": "12:00", "endTime": "15:00"}, {"startTime": "19:00", "endTime": "23:00"}]` |
-| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) \| null | `12:00` |
-| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) \| null | `15:00` |
+| `validityPeriods[].timeSlots[].startTime` | string (HH:mm) | `12:00` |
+| `validityPeriods[].timeSlots[].endTime` | string (HH:mm) | `15:00` |
+| `isAllServicesEnabled` | boolean | `false` |
 | `idBarServices` | string[] (UUID) | `["8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01", "8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c02"]` |
 | `idStandardServices` | string[] (UUID) | `["9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01"]` |
 | `idHourlyServices` | string[] (UUID) | `["4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a01"]` |
@@ -5536,7 +5548,43 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/delete-automatic-price-item`
+### POST `/api/catalog/automatic-prices/{id}/image`
+
+Prezzi Automatici: immagine di un prezzo automatico.
+
+#### Payload
+
+```json
+{
+  "file": "coperto.webp (image/webp, 0,4 MB)"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `file` | file (multipart/form-data) | `coperto.webp (image/webp, 0,4 MB)` |
+
+#### Response
+
+Stato: 200 OK (il prezzo automatico, che il frontend non legge).
+
+Nessun corpo.
+
+### DELETE `/api/catalog/automatic-prices/{id}/image`
+
+Prezzi Automatici: eliminazione dell'immagine di un prezzo automatico.
+
+#### Payload
+
+Nessun corpo: l'id del prezzo automatico è nella rotta.
+
+#### Response
+
+Stato: 200 OK (il prezzo automatico, che il frontend non legge).
+
+Nessun corpo.
+
+### POST `/api/catalog/automatic-prices/delete-automatic-price-item`
 
 Servizi: eliminazione prezzi automatici.
 
@@ -5561,7 +5609,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/duplicate-automatic-price-item`
+### POST `/api/catalog/automatic-prices/duplicate-automatic-price-item`
 
 Servizi: duplicazione prezzi automatici.
 

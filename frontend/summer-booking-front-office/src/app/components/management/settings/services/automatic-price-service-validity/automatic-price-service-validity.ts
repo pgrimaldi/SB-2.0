@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { AutomaticPriceServices } from '../../../../../entities/settings/services/automatic-price-services';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
@@ -10,6 +11,7 @@ import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
 import { InfoPopup } from '../../../../shared/ui/dialogs/info-popup/info-popup';
 import { ExpansionPanel } from '../../../../shared/ui/expansion-panels/expansion-panel/expansion-panel';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
+import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 
 interface ServiceValidityTexts {
   bar_services: string;
@@ -34,6 +36,7 @@ interface ServiceGroup {
     IconButton,
     InfoPopup,
     SectionTitle,
+    Toggle,
     TranslatePipe,
   ],
   templateUrl: './automatic-price-service-validity.html',
@@ -42,6 +45,7 @@ interface ServiceGroup {
 })
 export class AutomaticPriceServiceValidity {
   /** The fields of the form of the panel, which validates and saves them. */
+  readonly isAllServicesEnabled = input.required<FieldTree<boolean>>();
   readonly idBarServices = input.required<FieldTree<string[]>>();
   readonly idStandardServices = input.required<FieldTree<string[]>>();
   readonly idHourlyServices = input.required<FieldTree<string[]>>();
@@ -50,6 +54,7 @@ export class AutomaticPriceServiceValidity {
   readonly services = input<AutomaticPriceServices | null>(null);
 
   private readonly translateService = inject(TranslateService);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   protected readonly infoIcon = ['/assets/images/GeneralIcon_Info.svg'] as const;
   /** [X, before the title]. */
@@ -95,10 +100,12 @@ export class AutomaticPriceServiceValidity {
   }
 
   protected chooseAll(group: ServiceGroup, isChosen: boolean): void {
+    this.isAllServicesEnabled()().markAsTouched();
     group.field().value.set(isChosen ? group.services.map(({ id }) => id) : []);
   }
 
   protected choose(group: ServiceGroup, id: string, isChosen: boolean): void {
+    this.isAllServicesEnabled()().markAsTouched();
     group
       .field()
       .value.update((chosen) =>

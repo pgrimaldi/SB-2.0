@@ -16,7 +16,10 @@ Le API della pagina (`/api/catalog/services/bar-service-list`, `/api/catalog/ser
 che va aggiunto a quei contratti e, una sezione alla volta, le API che il backend deve creare (sezioni 2-6, le tabelle
 delle cinque tab; sezioni 7-11, le eliminazioni; sezioni 12-16, le duplicazioni; sezioni 17-24, i pannelli di Servizi
 Bar; sezione 25, la tendina dei settori, che serve anche a Listino e Prenotazioni online; sezioni 26-32, i pannelli di
-Servizi; sezioni 33-39, i pannelli di Servizi Orari).
+Servizi; sezioni 33-39, i pannelli di Servizi Orari; sezioni 40-46, i pannelli di Prezzi Automatici).
+
+Le rotte nuove stanno sempre **sotto la radice che il backend ha già per quei dati**: `/api/catalog/services`,
+`/api/catalog/automatic-prices`, `/api/catalog/sectors`.
 
 ## Riepilogo
 
@@ -26,17 +29,17 @@ Servizi; sezioni 33-39, i pannelli di Servizi Orari).
 | 2 | POST | `/api/catalog/services/bar-service-list` | Tabella della tab Servizi Bar, a pagine |
 | 3 | POST | `/api/catalog/services/standard-service-list` | Tabella della tab Servizi, a pagine |
 | 4 | POST | `/api/catalog/services/hourly-service-list` | Tabella della tab Servizi Orari, a pagine |
-| 5 | POST | `/api/catalog/automatic-price-list` | Tabella della tab Prezzi Automatici, a pagine |
+| 5 | POST | `/api/catalog/automatic-prices/automatic-price-list` | Tabella della tab Prezzi Automatici, a pagine |
 | 6 | POST | `/api/catalog/table-service-list` | Tabella della tab Prenotazione tavoli, a pagine |
 | 7 | POST | `/api/catalog/services/delete-bar-service-item` | Elimina uno o più servizi bar, tutto o niente |
 | 8 | POST | `/api/catalog/services/delete-standard-service-item` | Elimina uno o più servizi, tutto o niente |
 | 9 | POST | `/api/catalog/services/delete-hourly-service-item` | Elimina uno o più servizi orari, tutto o niente |
-| 10 | POST | `/api/catalog/delete-automatic-price-item` | Elimina uno o più prezzi automatici, tutto o niente |
+| 10 | POST | `/api/catalog/automatic-prices/delete-automatic-price-item` | Elimina uno o più prezzi automatici, tutto o niente |
 | 11 | POST | `/api/catalog/delete-table-service-item` | Elimina uno o più servizi tavoli, tutto o niente |
 | 12 | POST | `/api/catalog/services/duplicate-bar-service-item` | Duplica uno o più servizi bar, tutto o niente |
 | 13 | POST | `/api/catalog/services/duplicate-standard-service-item` | Duplica uno o più servizi, tutto o niente |
 | 14 | POST | `/api/catalog/services/duplicate-hourly-service-item` | Duplica uno o più servizi orari, tutto o niente |
-| 15 | POST | `/api/catalog/duplicate-automatic-price-item` | Duplica uno o più prezzi automatici, tutto o niente |
+| 15 | POST | `/api/catalog/automatic-prices/duplicate-automatic-price-item` | Duplica uno o più prezzi automatici, tutto o niente |
 | 16 | POST | `/api/catalog/duplicate-table-service-item` | Duplica uno o più servizi tavoli, tutto o niente |
 | 17 | POST | `/api/catalog/services/create-bar-service` | Crea un servizio bar con i dati delle tre tab e risponde con il suo id |
 | 18 | GET | `/api/catalog/services/get-bar-service-general-info` | Legge la tab Info Generali di un servizio bar |
@@ -61,6 +64,13 @@ Servizi; sezioni 33-39, i pannelli di Servizi Orari).
 | 37 | POST | `/api/catalog/services/update-hourly-service-general` | Salva la tab Info Generali di un servizio orario |
 | 38 | POST | `/api/catalog/services/update-hourly-service-prices` | Salva la tab Prezzi di un servizio orario |
 | 39 | POST | `/api/catalog/services/update-hourly-service-booking` | Salva la tab Prenotazioni di un servizio orario |
+| 40 | POST | `/api/catalog/automatic-prices/create-automatic-price` | Crea un prezzo automatico con i dati delle due tab e risponde con il suo id |
+| 41 | GET | `/api/catalog/automatic-prices/get-automatic-price-services` | I servizi dello stabilimento per "Validità sui servizi" |
+| 42 | GET | `/api/catalog/automatic-prices/get-automatic-price-general-info` | Legge la tab Info Generali di un prezzo automatico |
+| 43 | GET | `/api/catalog/automatic-prices/get-automatic-price-prices-validity` | Legge la tab Prezzi e Validità di un prezzo automatico |
+| 44 | POST | `/api/catalog/automatic-prices/update-automatic-price-general` | Salva la tab Info Generali di un prezzo automatico |
+| 45 | POST | `/api/catalog/automatic-prices/update-automatic-price-prices-validity` | Salva la tab Prezzi e Validità di un prezzo automatico |
+| 46 | POST + DELETE | `/api/catalog/automatic-prices/{id}/image` | POST: c'è già e resta com'è. DELETE: nuova, toglie l'immagine |
 
 ## 1. Controllo di versione sui salvataggi dei pannelli di modifica
 
@@ -151,8 +161,8 @@ del salvataggio, tranne l'id.
 | Servizio orario, Info Generali | `GET /api/catalog/services/get-hourly-service-general-info?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-general` | `translations`, `icon`, `isHighlighted` |
 | Servizio orario, Prezzi | `GET /api/catalog/services/get-hourly-service-prices?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-prices` | `price`, `vatRate`, `isPeriodPricingEnabled`, `availabilityOptions`, `periodAvailabilities` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
 | Servizio orario, Prenotazioni | `GET /api/catalog/services/get-hourly-service-booking-options?idHourlyService=…` | `POST /api/catalog/services/update-hourly-service-booking` | `bookingOptions` |
-| Prezzo automatico, Info Generali | `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…` | `POST /api/catalog/update-automatic-price-general` | `translations`, `icon` |
-| Prezzo automatico, Prezzi e Validità | `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…` | `POST /api/catalog/update-automatic-price-prices-validity` | `price`, `vatRate`, `isOnlinePurchaseEnabled`, `validityPeriods`, `idBarServices`, `idStandardServices`, `idHourlyServices`, `isPricePerServiceEnabled`, `idSectors` |
+| Prezzo automatico, Info Generali | `GET /api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-general` | `translations`, `icon` |
+| Prezzo automatico, Prezzi e Validità | `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=…` | `POST /api/catalog/automatic-prices/update-automatic-price-prices-validity` | `price`, `vatRate`, `isOnlinePurchaseEnabled`, `validityPeriods`, `isAllServicesEnabled`, `idBarServices`, `idStandardServices`, `idHourlyServices`, `isPricePerServiceEnabled`, `idSectors` |
 | Servizio tavoli, Info Generali | `GET /api/catalog/get-table-service-general-info?idTableService=…` | `POST /api/catalog/update-table-service-general` | `translations`, `isHighlighted` |
 | Servizio tavoli, Disponibilità e Prenotazioni | `GET /api/catalog/get-table-service-availability-bookings?idTableService=…` | `POST /api/catalog/update-table-service-availability-bookings` | `availabilities`, `availabilityMode`, `tableGroups`, `totalSeatQuantity`, `averageMealDuration`, `maxBookingPerTimeSlotQuantity`, `bookingPayment`, `depositMode`, `depositPercentage`, `isOnlineBookingEnabled` |
 
@@ -362,7 +372,7 @@ Tabella della tab Servizi Orari (`/settings/services/3`). Per il frontend sostit
 | `idHourlyService` | `public_id` | string (UUID) | Non si mostra: serve alle azioni della riga. |
 | `serviceName` | `name` o traduzione | string | Colonna "Servizio"; vedi "Nome nella lingua dell'utente". |
 
-## 5. POST /api/catalog/automatic-price-list
+## 5. POST /api/catalog/automatic-prices/automatic-price-list
 
 Tabella della tab Prezzi Automatici (`/settings/services/4`). Per il frontend sostituisce
 `GET /api/catalog/automatic-prices`, che oggi restituisce tutti i prezzi automatici insieme, senza pagine né ricerca,
@@ -536,7 +546,7 @@ Cestino e "Elimina selezione" della tab Servizi Orari.
 - Un id che non è un servizio orario dello stabilimento: 404 `service.not_found`.
 - Registro: una voce `catalog.service_deleted` per servizio.
 
-## 10. POST /api/catalog/delete-automatic-price-item
+## 10. POST /api/catalog/automatic-prices/delete-automatic-price-item
 
 Cestino e "Elimina selezione" della tab Prezzi Automatici.
 
@@ -676,7 +686,7 @@ Bottone "Duplica" e "Duplica selezione" della tab Servizi Orari.
 - Un id che non è un servizio orario dello stabilimento: 404 `service.not_found`.
 - Registro: una voce `catalog.service_duplicated` per copia.
 
-## 15. POST /api/catalog/duplicate-automatic-price-item
+## 15. POST /api/catalog/automatic-prices/duplicate-automatic-price-item
 
 Bottone "Duplica" e "Duplica selezione" della tab Prezzi Automatici.
 
@@ -1624,6 +1634,228 @@ Salva della tab Prenotazioni, con l'header `If-Match` della versione letta (sezi
 Risposta: **204 senza corpo**, con l'header `ETag`. Errori: 404 `service.not_found`, 422 `catalog.vat_rate_not_allowed`, 409
 `resource.version_conflict` e gli altri comuni.
 
+## Regole comuni dei pannelli di Prezzi Automatici (sezioni 40-46)
+
+I pannelli "Aggiungi nuovo prezzo automatico" e "Modifica prezzo automatico" hanno due tab: Info Generali e Prezzi e
+Validità. **Valgono le regole comuni dei pannelli di Servizi Bar** (una tab non tocca l'altra, quello che il form non mostra
+torna com'era, controllo di versione, permessi, JSON, nome e descrizione nelle lingue), con queste differenze:
+
+- **API nuove sotto `/api/catalog/automatic-prices`**, la radice che il backend ha già (`Endpoints/ServiceEndpoints.cs:85`).
+  `GET` e `POST /api/catalog/automatic-prices`, `GET` e `PUT /api/catalog/automatic-prices/{id}` restano come sono: il
+  frontend non le usa.
+- **Solo prezzi automatici dello stabilimento** (`catalog.automatic_prices`, tabelle `catalog.automatic_price_periods`,
+  `automatic_price_time_ranges`, `automatic_price_services`, `automatic_price_sectors` e `automatic_price_translations`):
+  ogni altro id risponde 404 `service.automatic_price_not_found` (`CatalogErrors.AutomaticPriceNotFound`).
+- **Niente `category`, `isHighlighted`, varianti e opzioni di prenotazione**: il modello non li ha.
+- **Registro**: `catalog.automatic_price_created` per la creazione, `catalog.automatic_price_updated` per ogni salvataggio e
+  per l'immagine, come oggi.
+- **Id**: `idAutomaticPrice`, il `public_id` del prezzo automatico.
+
+### Servizi e giorni
+
+- **Servizi**: `isAllServicesEnabled` (`applies_to_all_services`) vero = il prezzo vale per tutti i servizi, anche per quelli
+  creati dopo; i tre elenchi di id sono allora `[]`, nelle letture e nei salvataggi. Falso = vale per i servizi dei tre
+  elenchi, **almeno uno** in tutto, come vuole già il backend (`SaveAutomaticPriceRequestValidator`, `serviceIds`). Se
+  l'utente accende l'interruttore e salva, i servizi scelti prima non ci sono più, come oggi
+  (`AutomaticPricesService.ApplyAsync`).
+- **Giorni**: il frontend manda sempre almeno un giorno per periodo; `[]` in lettura vuol dire tutti i giorni, come nel
+  backend (`AutomaticPricePeriod.Covers`), e il pannello li mostra tutti scelti.
+
+### Errori
+
+Nell'ordine in cui si controllano. Le righe 404 `service.automatic_price_not_found` e 409 valgono per letture e salvataggi
+dove la sezione lo dice.
+
+| Status | `code` | Quando |
+|---|---|---|
+| 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 403 | `auth.forbidden` | Utente senza il permesso (`CatalogRead` o `CatalogSettings`). |
+| 400 | `validation.failed` | Corpo non valido, con un elemento di `errors[]` per campo (tabella qui sotto). |
+| 403 | `catalog.property_required` | Token senza stabilimento. |
+| 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 404 | `service.automatic_price_not_found` | `idAutomaticPrice` non è un prezzo automatico dello stabilimento. Niente cambia. |
+| 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args.rates` come oggi (`VatPolicy.ResolveAsync`). Niente cambia. |
+| 404 | `service.icon_not_found` | `icon` non ha un'icona corrispondente nel catalogo (`CatalogErrors.ServiceIconNotFound`). Niente cambia. |
+| 404 | `service.not_found` | Un id dei tre elenchi non è un servizio dello stabilimento di quel tipo (`CatalogErrors.ServiceNotFound`). Niente cambia. |
+| 404 | `catalog.sector_not_found` | Un id di `idSectors` non è un settore dello stabilimento (`ContentMapping.SectorIdsAsync`). Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
+
+Errori di campo del 400, con `field` uguale al nome nel corpo:
+
+| Campo | `code` | Quando |
+|---|---|---|
+| `translations…` | come Servizi Bar | Come Servizi Bar. |
+| `icon` | `validation.invalid` | Un nome fuori dalle 43 icone (sezione 40); nella sezione 44 va bene anche l'icona già salvata. |
+| `price` | `validation.required` o `validation.out_of_range` | Assente, o fuori da 0-100.000. |
+| `vatRate` | `validation.invalid` | Non maggiore di 0 e minore di 100 (`ContentRules.Vat`). |
+| `isAllServicesEnabled` | `validation.required` o `validation.invalid` | Falso senza nessun servizio nei tre elenchi, o vero con almeno uno. |
+| `validityPeriods` | `validation.invalid` | Più di 50. |
+| `validityPeriods[i].dateTo` | `validation.end_before_start` | Prima di `dateFrom`. |
+| `validityPeriods[i].daysOfWeek` | `validation.invalid` | Un valore fuori da 1-7. |
+| `validityPeriods[i].timeSlots` | `validation.invalid` | Più di 20, un'ora assente o `endTime` non dopo `startTime`: nemmeno la stessa ora (`ck_catalog_automatic_price_time_ranges_range`). |
+
+Il frontend controlla già nomi, limiti dei testi, prezzo, servizi, giorni, ore e date. Mostra sotto il campo gli errori dei campi di primo
+livello, `catalog.vat_rate_not_allowed` (sotto IVA, con le aliquote di `rates`) e `service.icon_not_found` (sotto le icone),
+sopra i bottoni tutti gli altri con il testo del loro `code`. Con `service.automatic_price_not_found` ricarica la tabella.
+
+## 40. POST /api/catalog/automatic-prices/create-automatic-price
+
+Salva del pannello "Aggiungi nuovo prezzo automatico".
+
+```json
+{
+  "translations": [
+    { "language": "it", "serviceName": "Coperto", "description": "Coperto a persona per i servizi del bar" },
+    { "language": "en", "serviceName": "Cover charge", "description": "Cover charge per person for the bar services" },
+    { "language": "fr", "serviceName": null, "description": null },
+    { "language": "de", "serviceName": null, "description": null },
+    { "language": "es", "serviceName": null, "description": null },
+    { "language": "ar", "serviceName": null, "description": null },
+    { "language": "zh", "serviceName": null, "description": null }
+  ],
+  "icon": "Cutlery",
+  "price": 2,
+  "vatRate": 10,
+  "isOnlinePurchaseEnabled": true,
+  "validityPeriods": [
+    {
+      "dateFrom": "2026-06-01T00:00:00.000Z",
+      "dateTo": "2026-09-30T00:00:00.000Z",
+      "daysOfWeek": [1, 2, 3, 4, 5, 6, 7],
+      "timeSlots": [{ "startTime": "12:00", "endTime": "15:00" }]
+    }
+  ],
+  "isAllServicesEnabled": false,
+  "idBarServices": ["0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01"],
+  "idStandardServices": [],
+  "idHourlyServices": [],
+  "isPricePerServiceEnabled": false,
+  "idSectors": []
+}
+```
+
+| Campo | Tipo | Corrisponde a | Note |
+|---|---|---|---|
+| `translations` | array | `name`, `description` e `catalog.automatic_price_translations` | Come Servizi Bar. |
+| `icon` | string o `null` | `icon_id` | Una delle 22 di Servizi Bar (sezione 17, righe del catalogo con `type` `bar`) o delle 21 di Servizi (sezione 26, righe con `type` `normal`); i nomi non si ripetono. |
+| `price` | number | `price` | In euro, da 0 a 100.000. Obbligatorio. |
+| `vatRate` | number o `null` | `vat_rate` | Come Servizi Bar: `null` = senza aliquota, con la natura predefinita (`VatPolicy.ResolveAsync`); un prezzo che ha già una natura la mantiene se `vatRate` è ancora `null`. |
+| `isOnlinePurchaseEnabled` | boolean | `is_purchasable` | |
+| `validityPeriods` | array | `catalog.automatic_price_periods` | `[]` = sempre. `dateFrom`, `dateTo` (giorno UTC o `null`) = `starts_on`, `ends_on`; `daysOfWeek` (ISO: 1 lunedì … 7 domenica) = `weekdays`; `timeSlots` = `catalog.automatic_price_time_ranges`, con `startTime` ed `endTime` obbligatori (`"HH:mm"`); `[]` = tutto il giorno. |
+| `isAllServicesEnabled` | boolean | `applies_to_all_services` | "Servizi e giorni". |
+| `idBarServices`, `idStandardServices`, `idHourlyServices` | array di string (UUID) | `catalog.automatic_price_services` | I servizi scelti, con gli `id` della sezione 41; `[]` tutti e tre con `isAllServicesEnabled` vero. |
+| `isPricePerServiceEnabled` | boolean | `applies_per_service` | |
+| `idSectors` | array di string (UUID) | `is_sector_restricted` e `catalog.automatic_price_sectors` | Come la sezione 17. |
+
+Risposta: **201 con il solo id del prezzo automatico creato**, come stringa JSON, come la sezione 17. Serve all'immagine
+(sezione 46).
+
+## 41. GET /api/catalog/automatic-prices/get-automatic-price-services
+
+I servizi dello stabilimento per i tre pannelli di "Validità sui servizi", letti all'apertura dell'aggiunta e con la tab
+Prezzi e Validità della modifica. Nessun parametro. Permesso `CatalogRead`. Risposta 200:
+
+```json
+{
+  "barServices": [{ "id": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01", "value": "Caffè" }],
+  "standardServices": [{ "id": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f11", "value": "Doccia calda" }],
+  "hourlyServices": [{ "id": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f21", "value": "Sup" }]
+}
+```
+
+- `barServices`, `standardServices` e `hourlyServices`: tutti i servizi non eliminati dello stabilimento con `kind` `bar`,
+  `normal` e `hourly`; `[]` se non ce ne sono. Nessuna pagina.
+- `id`: il `public_id` del servizio. `value`: il nome nella lingua dell'utente, e ordine per nome, come "Nome nella lingua
+  dell'utente" delle tabelle.
+- Errori: 401, 403 `auth.forbidden`, 403 `catalog.property_required`, 404 `catalog.property_not_found`.
+
+## 42. GET /api/catalog/automatic-prices/get-automatic-price-general-info
+
+Tab Info Generali del pannello "Modifica prezzo automatico", letta all'apertura, con `idAutomaticPrice` nella query string.
+Risposta 200:
+
+```json
+{
+  "idAutomaticPrice": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f31",
+  "translations": [
+    { "language": "it", "serviceName": "Coperto", "description": "Coperto a persona per i servizi del bar" },
+    { "language": "en", "serviceName": "Cover charge", "description": "Cover charge per person for the bar services" }
+  ],
+  "icon": "Cutlery",
+  "imageUrl": null,
+  "version": "c293ede7"
+}
+```
+
+Come la sezione 18, senza `category` e `isHighlighted`: `icon` può essere anche un nome fuori dalle 43, `imageUrl` è
+l'indirizzo dell'immagine caricata (`null` con un'icona o senza) e non fa parte di `version`. Errori: 404
+`service.automatic_price_not_found` e gli altri comuni.
+
+## 43. GET /api/catalog/automatic-prices/get-automatic-price-prices-validity
+
+Tab Prezzi e Validità, letta la prima volta che si apre, con `idAutomaticPrice` nella query string. Risposta 200 con i campi
+della sezione 40 da `price` a `idSectors`, più `version`:
+
+```json
+{
+  "price": 2,
+  "vatRate": 10,
+  "isOnlinePurchaseEnabled": true,
+  "validityPeriods": [],
+  "isAllServicesEnabled": false,
+  "idBarServices": ["0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01"],
+  "idStandardServices": [],
+  "idHourlyServices": [],
+  "isPricePerServiceEnabled": false,
+  "idSectors": [],
+  "version": "afabd0e9"
+}
+```
+
+I periodi arrivano in ordine di `starts_on` e le fasce in ordine di inizio, come oggi. Errori: 404
+`service.automatic_price_not_found` e gli altri comuni.
+
+## 44. POST /api/catalog/automatic-prices/update-automatic-price-general
+
+Salva della tab Info Generali, con l'header `If-Match` della versione letta (sezione 42). Corpo: `idAutomaticPrice`,
+`translations` (tutte e 7 le lingue) e `icon`, come nella sezione 40; `icon` può essere anche quella letta fuori dalle 43, o
+`null` se c'è un'immagine, che resta. Se l'utente ha scelto un'immagine, `icon` è quella di prima: la toglie il caricamento
+(sezione 46), che parte dopo il 204. Scrive solo nomi, descrizioni e icona. Risposta: **204 senza corpo**, con l'header
+`ETag`. Errori: 404 `service.automatic_price_not_found`, 404 `service.icon_not_found`, 409 `resource.version_conflict` e gli
+altri comuni.
+
+## 45. POST /api/catalog/automatic-prices/update-automatic-price-prices-validity
+
+Salva della tab Prezzi e Validità, con l'header `If-Match` della versione letta (sezione 43). Corpo: `idAutomaticPrice` e i
+campi della sezione 40 da `price` a `idSectors`; gli elenchi arrivano interi e prendono il posto di quelli salvati. Risposta:
+**204 senza corpo**, con l'header `ETag`. Errori: 404 `service.automatic_price_not_found`, 422
+`catalog.vat_rate_not_allowed`, 404 `service.not_found`, 404 `catalog.sector_not_found`, 409 `resource.version_conflict` e gli
+altri comuni.
+
+## 46. POST e DELETE /api/catalog/automatic-prices/{id}/image
+
+### POST
+
+**C'è già e resta com'è** (`ServiceEndpoints.cs:133-138`, `AutomaticPricesService.UploadImageAsync`). Il frontend la usa come
+la sezione 24: parte con Salva, dopo `create-automatic-price` con l'id della risposta, o dopo
+`update-automatic-price-general`; corpo `multipart/form-data` con il campo `file` (PNG, JPEG o WebP fino a 5 MB); risposta
+200 con `AutomaticPriceDto`, che il frontend non legge. Errori, come oggi: 401, 403 `auth.forbidden` senza `CatalogSettings`,
+422 `catalog.invalid_image`, 403 `catalog.property_required`, 404 `catalog.property_not_found`, 404
+`service.automatic_price_not_found`. Se fallisce, i dati sono già salvati e un avviso ("Immagine non caricata") dice perché.
+
+### DELETE (nuova)
+
+Come la DELETE dei servizi (sezione 24, `ServiceItemsService.RemoveImageAsync`), che i prezzi automatici non hanno.
+
+- La chiama la X sull'immagine già caricata, in Modifica, dopo la conferma dell'utente: subito, senza Salva.
+- `id`: l'id del prezzo automatico nella rotta. Nessun corpo, nessun `If-Match`. Permesso `CatalogSettings`.
+- Il prezzo resta senza immagine e senza icona; se non ha un'immagine non cambia niente. La `version` di Info Generali non
+  cambia. Registro: `catalog.automatic_price_updated`.
+- Risposta 200 con `AutomaticPriceDto`, come la DELETE dei servizi; il frontend non la legge.
+- Errori: 401 `auth.unauthenticated`, 403 `auth.forbidden`, 403 `catalog.property_required`, 404
+  `catalog.property_not_found`, 404 `service.automatic_price_not_found`. Il frontend li mostra sotto l'immagine; con
+  `service.automatic_price_not_found` ricarica anche la tabella.
+
 ## Icone da controllare con lo sviluppatore
 
 Il frontend ha i suoi elenchi fissi di icone. Il catalogo del backend (`catalog.service_type_icons`, letto da
@@ -1641,9 +1873,10 @@ nome di queste liste deve corrispondere a una riga attiva del suo `type`; altrim
 
 - **`bar`**: se il catalogo è ancora quello di partenza **ne mancano almeno 11** (11 contro 22).
 - **`normal` e `hourly`**: il numero basterebbe (25 contro 21), ma i nomi vanno confrontati uno per uno.
-- Prezzi Automatici usa gli stessi nomi: si aggiunge qui quando si chiedono le sue API.
+- I prezzi automatici usano i 22 nomi di `bar` e i 21 di `normal`: non hanno un `type` loro, e il backend accetta già
+  un'icona di qualunque `type` (`ServiceCatalogRepository.FindIconIdAsync`).
 - Le icone del catalogo che non sono in queste liste non si possono scegliere dal frontend; un servizio che ne ha già una
-  la tiene (sezioni 18, 27 e 34).
+  la tiene (sezioni 18, 27, 34 e 42).
 - Nella richiesta e nella risposta viaggia il **nome** del frontend, non l'id del catalogo.
 
 ## Verifica
@@ -1824,3 +2057,24 @@ API 33-39, con un token con `CatalogRead` e `CatalogSettings`:
     Una disponibilità salvata senza giorni: la lettura dà `daysOfWeek` `[]`.
 65. Un'opzione di prenotazione con giorni, orari, massimi e intervallo già salvati: `update-hourly-service-booking` con gli
     stessi valori letti non li cambia. Un'opzione senza disponibilità: la lettura dà `availabilityOption` `null`.
+
+API 40-46, con un token con `CatalogRead` e `CatalogSettings`:
+
+66. `create-automatic-price` con un periodo, due fasce e un servizio per tipo: 201 con il solo id; il prezzo compare in
+    `automatic-price-list` e le due letture restituiscono gli stessi dati. Nel registro una voce
+    `catalog.automatic_price_created`.
+67. `update-automatic-price-general` non cambia prezzo, periodi, servizi e settori; `update-automatic-price-prices-validity`
+    non cambia nomi, icona e immagine. Nel registro una voce `catalog.automatic_price_updated` per salvataggio.
+68. `price` `null`: 400 `validation.required`; 100.001: 400 `validation.out_of_range`. Una fascia senza `endTime` o con le due
+    ore uguali: 400 `validation.invalid` su `validityPeriods[0].timeSlots`; mai un 500 per un vincolo del database.
+69. Un id di servizio bar in `idHourlyServices`, o di un altro stabilimento: 404 `service.not_found`. Niente cambia.
+70. `get-automatic-price-services` con `Accept-Language: en`: i nomi inglesi dove ci sono, gli altri in italiano; un servizio
+    eliminato non compare. Senza `CatalogRead`: 403 `auth.forbidden`.
+71. Ogni nome delle 43 icone: 204, e la lettura lo restituisce uguale.
+72. `POST …/image` e poi `DELETE …/image`: la lettura dà `imageUrl`, poi `null` con `icon` `null`; la `version` di Info
+    Generali non cambia con la DELETE. Con un id di un altro stabilimento: 404 `service.automatic_price_not_found`.
+73. Due salvataggi con la stessa `If-Match`: il primo 204 con l'`ETag` nuovo, il secondo 409 `resource.version_conflict`.
+74. `isAllServicesEnabled` falso con i tre elenchi vuoti: 400 `validation.required` su `isAllServicesEnabled`; vero con un
+    servizio: 400 `validation.invalid`. Vero con gli elenchi vuoti: 204, e un servizio creato dopo prende il prezzo
+    automatico (preventivo). Poi falso con un servizio: 204, e la lettura dà solo quello.
+75. Un periodo salvato senza giorni: la lettura dà `daysOfWeek` `[]` e il periodo vale tutti i giorni.

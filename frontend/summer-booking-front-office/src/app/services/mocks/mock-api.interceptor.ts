@@ -11,6 +11,8 @@ import {
   updateAutomaticPriceGeneralMock,
   updateAutomaticPricePricesValidityMock,
   createAutomaticPriceMock,
+  deleteAutomaticPriceImageMock,
+  uploadAutomaticPriceImageMock,
   barServiceBookingOptionsMock,
   barServiceGeneralInfoMock,
   barServiceListMock,
@@ -653,6 +655,18 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   if (
+    request.url.startsWith(`${environment.apiBaseUrl}/catalog/automatic-prices/`) &&
+    request.url.endsWith('/image')
+  ) {
+    if (request.method === 'POST') {
+      return uploadAutomaticPriceImageMock(request);
+    }
+    if (request.method === 'DELETE') {
+      return deleteAutomaticPriceImageMock(request);
+    }
+  }
+
+  if (
     request.method === 'GET' &&
     request.url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-general-info`
   ) {
@@ -851,63 +865,69 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/automatic-price-list`
+    request.url === `${environment.apiBaseUrl}/catalog/automatic-prices/automatic-price-list`
   ) {
     return automaticPriceListMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-automatic-price-services`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/automatic-prices/get-automatic-price-services`
   ) {
     return automaticPriceServicesMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/create-automatic-price`
+    request.url === `${environment.apiBaseUrl}/catalog/automatic-prices/create-automatic-price`
   ) {
     return createAutomaticPriceMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-automatic-price-general-info`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/automatic-prices/get-automatic-price-general-info`
   ) {
     return automaticPriceGeneralInfoMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-automatic-price-prices-validity`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/automatic-prices/get-automatic-price-prices-validity`
   ) {
     return automaticPricePricesValidityMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-automatic-price-general`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/automatic-prices/update-automatic-price-general`
   ) {
     return updateAutomaticPriceGeneralMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-automatic-price-prices-validity`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/automatic-prices/update-automatic-price-prices-validity`
   ) {
     return updateAutomaticPricePricesValidityMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-automatic-price-item`
+    request.url === `${environment.apiBaseUrl}/catalog/automatic-prices/delete-automatic-price-item`
   ) {
     return deleteAutomaticPriceItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-automatic-price-item`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/automatic-prices/duplicate-automatic-price-item`
   ) {
     return duplicateAutomaticPriceItemsMock(request);
   }

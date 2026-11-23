@@ -1556,13 +1556,17 @@
             "time_slots": "Franjas horarias",
             "add_time_slot": "Añadir franja horaria",
             "services_title": "Validez en los servicios",
+            "all_services": "Todos los servicios",
             "bar_services": "Servicios de bar",
             "standard_services": "Servicios",
             "hourly_services": "Servicios por horas",
             "select_all": "Seleccionar todo",
             "no_services": "No hay servicios de este tipo.",
             "price_per_service": "Activar precio automático para cada servicio",
-            "price_per_service_info": "Si esta opción **está activada**, el precio automático se aplica y se añade automáticamente por cada servicio que se añade a la reserva.\n\nSi esta opción **no está activada**, el precio automático se aplica y se añade automáticamente una sola vez por pedido."
+            "price_per_service_info": "Si esta opción **está activada**, el precio automático se aplica y se añade automáticamente por cada servicio que se añade a la reserva.\n\nSi esta opción **no está activada**, el precio automático se aplica y se añade automáticamente una sola vez por pedido.",
+            "field_names": {
+              "service": "servicio"
+            }
           },
           "tables": {
             "availability_title": "Disponibilidad",

@@ -1367,11 +1367,12 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
   ],
 ]);
 
-/** The uploaded images, by id of the service. */
+/** The uploaded images, by id of the service or of the automatic price. */
 const SERVICE_IMAGES = new Map<string, string>([
   ['8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c05', '/assets/images/hub/hero-beach-mobile-863.webp'],
   ['9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d03', '/assets/images/hub/hero-beach-mobile-1290.webp'],
   ['4c6e8a0b-3d5f-4b7c-9e1a-5f7b9d1e3a03', '/assets/images/hub/hero-beach-desktop.webp'],
+  ['7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02', '/assets/images/hub/hero-beach-mobile-863.webp'],
 ]);
 
 function detailsOf(row: BarServiceRow): BarServiceAddItemRequest {
@@ -1503,8 +1504,8 @@ function barBookingOptionsOf(
   return { bookingOptions: detailsOf(row).bookingOptions };
 }
 
-function copyImage(idService: string, idCopy: string): void {
-  const image = SERVICE_IMAGES.get(idService);
+function copyImage(id: string, idCopy: string): void {
+  const image = SERVICE_IMAGES.get(id);
   if (image) {
     SERVICE_IMAGES.set(idCopy, image);
   }
@@ -1739,13 +1740,6 @@ function generalErrors(body: CreateBarServiceBody, language: string): MockFieldE
     errors.push({ field: 'icon', code: ApiErrorCode.ValidationInvalid });
   }
   return errors;
-}
-
-/** A price, when given, not below 0. */
-function priceErrors(body: { price?: number | null }): MockFieldError[] {
-  return body.price != null && !(typeof body.price === 'number' && body.price >= 0)
-    ? [{ field: 'price', code: ApiErrorCode.ValidationInvalid }]
-    : [];
 }
 
 type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
@@ -2829,6 +2823,12 @@ const AUTOMATIC_PRICES: AutomaticPriceRow[] = [
     serviceName: 'Coperto',
     price: 2,
   },
+  {
+    propertyId: 1,
+    idAutomaticPrice: '7e9a1c3d-5b7f-4d9a-8c2e-6a8c0e2b4d02',
+    serviceName: 'Servizio in spiaggia',
+    price: 1.5,
+  },
 ];
 
 const AUTOMATIC_PRICE_SORT_FIELDS = ['serviceName', 'price'] as const;
@@ -2905,7 +2905,7 @@ function areServicesOf<Row extends { propertyId: number }>(
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-services`: the bar, standard and hourly services of the
+ * `GET /api/catalog/automatic-prices/get-automatic-price-services`: the bar, standard and hourly services of the
  * property, as `{ id, value }` with the name, for "Validità sui servizi". 401 without a valid
  * access token.
  */
@@ -2931,11 +2931,11 @@ export const automaticPriceServicesMock = (
 type CreateAutomaticPriceBody = Partial<AutomaticPriceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-automatic-price` with `AutomaticPriceAddItemRequest`: the new automatic
- * price goes into the list, with the name in the language of `Accept-Language`. 204 without a body;
- * 401 without a valid access token; 404 `service.not_found` for a service that is not one of the
- * property; 400 with one error per wrong field (name and description in the language of the
- * request, icon of one of the two lists, price not below 0).
+ * `POST /api/catalog/automatic-prices/create-automatic-price` with `AutomaticPriceAddItemRequest`: the new automatic
+ * price goes into the list. 201 with its id alone; 401 without a valid access token; 400 with one
+ * error per wrong field (see `automaticGeneralErrors` and `automaticPriceErrors`); 422
+ * `catalog.vat_rate_not_allowed`; 404 `service.not_found` for a service that is not one of the
+ * property.
  */
 export const createAutomaticPriceMock = (
   request: HttpRequest<unknown>,
@@ -2945,21 +2945,20 @@ export const createAutomaticPriceMock = (
   }
   const body = (request.body ?? {}) as CreateAutomaticPriceBody;
   const property = DEMO_PROPERTY;
-  if (!areAutomaticServicesOf(body, property.id)) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
   const language = request.headers.get('Accept-Language') ?? 'it';
-  const errors = [
-    ...standardGeneralErrors({ translations: body.translations }, language),
-    ...automaticIconErrors(body.icon ?? null),
-    ...priceErrors(body),
-  ];
+  const errors = [...automaticGeneralErrors(body, language), ...automaticPriceErrors(body)];
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
+  if (!areAutomaticServicesOf(body, property.id)) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
   const idAutomaticPrice = crypto.randomUUID();
   AUTOMATIC_PRICE_DETAILS.set(
     idAutomaticPrice,
@@ -2970,11 +2969,58 @@ export const createAutomaticPriceMock = (
   AUTOMATIC_PRICES.push({
     propertyId: property.id,
     idAutomaticPrice,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
     price: body.price ?? null,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idAutomaticPrice })).pipe(
+    delay(600),
+  );
 };
+
+/**
+ * `POST /api/catalog/automatic-prices/{id}/image` with the image in the multipart field `file`: it
+ * replaces the icon or the image of the automatic price, as for the services
+ * (`uploadServiceImageMock`). 404 `service.automatic_price_not_found` for an unknown id.
+ */
+export const uploadAutomaticPriceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    const row = automaticPriceOfImage(request);
+    if (!row?.idAutomaticPrice) {
+      return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
+    }
+    AUTOMATIC_PRICE_DETAILS.set(row.idAutomaticPrice, {
+      ...structuredClone(automaticDetailsOf(row)),
+      icon: null,
+    });
+    SERVICE_IMAGES.set(row.idAutomaticPrice, URL.createObjectURL(image));
+    return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
+  });
+
+/**
+ * `DELETE /api/catalog/automatic-prices/{id}/image`: the automatic price has no image any more, as
+ * for the services (`deleteServiceImageMock`).
+ */
+export const deleteAutomaticPriceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const row = automaticPriceOfImage(request);
+  if (!row?.idAutomaticPrice) {
+    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
+  }
+  SERVICE_IMAGES.delete(row.idAutomaticPrice);
+  return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
+};
+
+/** The automatic price of the id before `/image`, if it exists. */
+function automaticPriceOfImage(request: HttpRequest<unknown>): AutomaticPriceRow | undefined {
+  const idAutomaticPrice = decodeURIComponent(request.url.split('/').at(-2) ?? '');
+  return AUTOMATIC_PRICES.find((row) => row.idAutomaticPrice === idAutomaticPrice);
+}
 
 /** The data of the add panel of an automatic price: the saved one, or a minimal one from the list. */
 function automaticDetailsOf(row: AutomaticPriceRow): AutomaticPriceAddItemRequest {
@@ -2990,6 +3036,7 @@ function automaticDetailsOf(row: AutomaticPriceRow): AutomaticPriceAddItemReques
       ],
       price: row.price,
       vatRate: 10,
+      isAllServicesEnabled: true,
     })
   );
 }
@@ -3001,9 +3048,10 @@ function requestedAutomaticPrice(request: HttpRequest<unknown>): AutomaticPriceR
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of
+ * `GET /api/catalog/automatic-prices/get-automatic-price-general-info?idAutomaticPrice=…`: the Info Generali tab of
  * the edit panel. 200 with `AutomaticPriceSelectedGeneralInfo` and the version of the tab, only the
- * languages written; 401 without a valid access token; 404 `service.automatic_price_not_found` for an unknown id.
+ * languages written and the uploaded image, which the version does not cover; 401 without a valid
+ * access token; 404 `service.automatic_price_not_found` for an unknown id.
  */
 export const automaticPriceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -3015,16 +3063,19 @@ export const automaticPriceGeneralInfoMock = (
   if (!row) {
     return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
-  return versionedAnswer(request, automaticGeneralInfoOf(row));
+  const imageUrl = SERVICE_IMAGES.get(row.idAutomaticPrice ?? '');
+  return versionedAnswer(request, automaticGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
 };
 
 /**
- * What `GET /api/catalog/get-automatic-price-general-info` answers besides the version: the version
+ * What `GET /api/catalog/automatic-prices/get-automatic-price-general-info` answers besides the version: the version
  * covers it.
  */
 function automaticGeneralInfoOf(
   row: AutomaticPriceRow,
-): Omit<AutomaticPriceSelectedGeneralInfo, 'version'> {
+): Omit<AutomaticPriceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = automaticDetailsOf(row);
   return {
     idAutomaticPrice: row.idAutomaticPrice,
@@ -3036,7 +3087,7 @@ function automaticGeneralInfoOf(
 }
 
 /**
- * `GET /api/catalog/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
+ * `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity?idAutomaticPrice=…`: the Prezzi e Validità
  * tab of the edit panel. 200 with `AutomaticPriceSelectedPricesValidity` and the version of the
  * tab; 401 without a valid access token; 404 `service.automatic_price_not_found` for an unknown id.
  */
@@ -3054,7 +3105,7 @@ export const automaticPricePricesValidityMock = (
 };
 
 /**
- * What `GET /api/catalog/get-automatic-price-prices-validity` answers besides the version: the
+ * What `GET /api/catalog/automatic-prices/get-automatic-price-prices-validity` answers besides the version: the
  * version covers it.
  */
 function automaticPricesValidityOf(
@@ -3066,6 +3117,7 @@ function automaticPricesValidityOf(
     vatRate: details.vatRate,
     isOnlinePurchaseEnabled: details.isOnlinePurchaseEnabled,
     validityPeriods: details.validityPeriods,
+    isAllServicesEnabled: details.isAllServicesEnabled,
     idBarServices: details.idBarServices,
     idStandardServices: details.idStandardServices,
     idHourlyServices: details.idHourlyServices,
@@ -3079,8 +3131,8 @@ type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: 
 /**
  * The common part of the two updates of the edit panel: 401 without a valid access token; 404
  * `service.automatic_price_not_found` for an `idAutomaticPrice` that is not one of its automatic
- * prices, `service.not_found` for a service that is not one of the property; 400 with one error per
- * wrong field; 409
+ * prices; 400 with one error per wrong field; 422 `catalog.vat_rate_not_allowed`; 404
+ * `service.not_found` for a service that is not one of the property; 409
  * `resource.version_conflict` when `If-Match` is not the version of the data of the tab (`dataOf`);
  * otherwise `apply` changes the data of its tab and the answer is 204 without a body, with their
  * new version in its `ETag`.
@@ -3088,7 +3140,7 @@ type UpdateAutomaticPriceBody = CreateAutomaticPriceBody & { idAutomaticPrice?: 
 function updateAutomaticPrice(
   request: HttpRequest<unknown>,
   dataOf: (row: AutomaticPriceRow) => unknown,
-  errorsOf: (body: UpdateAutomaticPriceBody, propertyId: number) => MockFieldError[] | null,
+  errorsOf: (body: UpdateAutomaticPriceBody) => MockFieldError[],
   apply: (
     details: AutomaticPriceAddItemRequest,
     body: UpdateAutomaticPriceBody,
@@ -3106,14 +3158,18 @@ function updateAutomaticPrice(
   if (!row?.idAutomaticPrice) {
     return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
   }
-  const errors = errorsOf(body, property.id);
-  if (!errors) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
+  const errors = errorsOf(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
+  }
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
+  if (!areAutomaticServicesOf(body, property.id)) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
@@ -3126,7 +3182,7 @@ function updateAutomaticPrice(
 }
 
 /**
- * `POST /api/catalog/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest`:
+ * `POST /api/catalog/automatic-prices/update-automatic-price-general` with `AutomaticPriceUpdateGeneralRequest`:
  * names, descriptions and icon; the list shows the new name (language of `Accept-Language`). Errors
  * as the creation.
  */
@@ -3137,23 +3193,22 @@ export const updateAutomaticPriceGeneralMock = (
   return updateAutomaticPrice(
     request,
     automaticGeneralInfoOf,
-    (body) => [
-      ...standardGeneralErrors({ translations: body.translations }, language),
-      ...automaticIconErrors(body.icon ?? null),
-    ],
+    (body) => automaticGeneralErrors(body, language),
     (details, body, row) => {
       details.translations = body.translations ?? [];
       details.icon = body.icon ?? null;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idAutomaticPrice ?? '');
+      }
     },
   );
 };
 
 /**
- * `POST /api/catalog/update-automatic-price-prices-validity` with
+ * `POST /api/catalog/automatic-prices/update-automatic-price-prices-validity` with
  * `AutomaticPriceUpdatePricesValidityRequest`: the Prezzi e Validità tab; the list shows the new
- * price. 400 for a price below 0; 404 for a service that is not one of the property.
+ * price. Errors as the creation.
  */
 export const updateAutomaticPricePricesValidityMock = (
   request: HttpRequest<unknown>,
@@ -3161,12 +3216,13 @@ export const updateAutomaticPricePricesValidityMock = (
   updateAutomaticPrice(
     request,
     automaticPricesValidityOf,
-    (body, propertyId) => (areAutomaticServicesOf(body, propertyId) ? priceErrors(body) : null),
+    automaticPriceErrors,
     (details, body, row) => {
       details.price = body.price ?? null;
       details.vatRate = body.vatRate ?? null;
       details.isOnlinePurchaseEnabled = body.isOnlinePurchaseEnabled === true;
       details.validityPeriods = body.validityPeriods ?? [];
+      details.isAllServicesEnabled = body.isAllServicesEnabled === true;
       details.idBarServices = body.idBarServices ?? [];
       details.idStandardServices = body.idStandardServices ?? [];
       details.idHourlyServices = body.idHourlyServices ?? [];
@@ -3190,6 +3246,61 @@ function areAutomaticServicesOf(body: CreateAutomaticPriceBody, propertyId: numb
   );
 }
 
+function automaticGeneralErrors(
+  body: CreateAutomaticPriceBody,
+  language: string,
+): MockFieldError[] {
+  return [
+    ...standardGeneralErrors({ translations: body.translations }, language),
+    ...missingNameErrors(body.translations ?? []),
+    ...automaticIconErrors(body.icon ?? null),
+  ];
+}
+
+/**
+ * The price always, the VAT when given, the days and the time slots of every period in their order;
+ * a service at least without `isAllServicesEnabled`, none with it.
+ */
+function automaticPriceErrors(body: CreateAutomaticPriceBody): MockFieldError[] {
+  const hasServices = [body.idBarServices, body.idStandardServices, body.idHourlyServices].some(
+    (ids) => ids?.length,
+  );
+  return [
+    ...(hasServices === (body.isAllServicesEnabled === true)
+      ? [
+          {
+            field: 'isAllServicesEnabled',
+            code: hasServices ? ApiErrorCode.ValidationInvalid : ApiErrorCode.ValidationRequired,
+          },
+        ]
+      : []),
+    ...requiredPriceErrors('price', body.price),
+    ...(isVatOutOfRange(body.vatRate)
+      ? [{ field: 'vatRate', code: ApiErrorCode.ValidationInvalid }]
+      : []),
+    ...(body.validityPeriods ?? []).flatMap(
+      ({ dateFrom, dateTo, timeSlots }, index): MockFieldError[] => [
+        ...(dateFrom && dateTo && dateTo < dateFrom
+          ? [
+              {
+                field: `validityPeriods[${index}].dateTo`,
+                code: ApiErrorCode.ValidationEndBeforeStart,
+              },
+            ]
+          : []),
+        ...(timeSlots.every(({ startTime, endTime }) => startTime && endTime && endTime > startTime)
+          ? []
+          : [
+              {
+                field: `validityPeriods[${index}].timeSlots`,
+                code: ApiErrorCode.ValidationInvalid,
+              },
+            ]),
+      ],
+    ),
+  ];
+}
+
 /** The icon, when given, of the bar services or of the other services. */
 function automaticIconErrors(icon: string | null): MockFieldError[] {
   return icon === null ||
@@ -3205,9 +3316,10 @@ const AUTOMATIC_PRICE_TABLE = {
   details: AUTOMATIC_PRICE_DETAILS,
   detailsOf: automaticDetailsOf,
   notFoundCode: ApiErrorCode.ServiceAutomaticPriceNotFound,
+  copyMore: copyImage,
 };
 
-/** `POST /api/catalog/automatic-price-list`: one page of the automatic prices (see `serviceListAnswer`). */
+/** `POST /api/catalog/automatic-prices/automatic-price-list`: one page of the automatic prices (see `serviceListAnswer`). */
 export const automaticPriceListMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
@@ -3324,13 +3436,13 @@ export const duplicateHourlyServiceItemsMock = (
 ): Observable<HttpEvent<unknown>> =>
   duplicateServicesAnswer(request, HOURLY_SERVICE_TABLE, 'idHourlyServices');
 
-/** `POST /api/catalog/delete-automatic-price-item` with `{ idAutomaticPrices }` (see `deleteServicesAnswer`). */
+/** `POST /api/catalog/automatic-prices/delete-automatic-price-item` with `{ idAutomaticPrices }` (see `deleteServicesAnswer`). */
 export const deleteAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
   deleteServicesAnswer(request, AUTOMATIC_PRICE_TABLE, 'idAutomaticPrices');
 
-/** `POST /api/catalog/duplicate-automatic-price-item` with `{ idAutomaticPrices }` (see `duplicateServicesAnswer`). */
+/** `POST /api/catalog/automatic-prices/duplicate-automatic-price-item` with `{ idAutomaticPrices }` (see `duplicateServicesAnswer`). */
 export const duplicateAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
