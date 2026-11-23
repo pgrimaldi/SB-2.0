@@ -13,6 +13,7 @@
     <app-filled-text-field
       class="services__popup__alternatives__name"
       [label]="'management.settings.services.form.prices.variants.name' | translate"
+      [isMandatory]="true"
       [formField]="variant.variantName"
       [error]="validationText.text(variant.variantName)"
     />
@@ -20,6 +21,7 @@
       <app-filled-number-field
         class="services__popup__alternatives__field"
         [label]="'management.settings.services.form.prices.price' | translate"
+        [isMandatory]="true"
         [isDecimal]="true"
         [isCurrency]="true"
         [formField]="variant.price"
@@ -34,4 +36,7 @@
       (click)="removeVariant(variantIndex)"
     />
   </div>
+}
+@if (validationText.text(form()); as error) {
+  <p class="services__popup__alternatives__error">{{ error }}</p>
 }

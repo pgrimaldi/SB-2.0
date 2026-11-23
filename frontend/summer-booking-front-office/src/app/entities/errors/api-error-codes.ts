@@ -50,6 +50,7 @@ export enum ApiErrorCode {
   CatalogPropertyNotFound = 'catalog.property_not_found',
   CatalogCountryNotFound = 'catalog.country_not_found',
   CatalogSectorNotFound = 'catalog.sector_not_found',
+  CatalogVatRateNotAllowed = 'catalog.vat_rate_not_allowed',
   PricingSeasonRequired = 'pricing.season_required',
   PricingNextSeasonRequired = 'pricing.next_season_required',
   PricingPeriodNotFound = 'pricing.period_not_found',
@@ -66,6 +67,7 @@ export enum ApiErrorCode {
   ServiceNotFound = 'service.not_found',
   ServiceAutomaticPriceNotFound = 'service.automatic_price_not_found',
   ServiceTableServiceNotFound = 'service.table_service_not_found',
+  ServiceIconNotFound = 'service.icon_not_found',
 }
 
 export const API_ERROR_CODES: readonly ApiErrorCode[] = Object.values(ApiErrorCode);

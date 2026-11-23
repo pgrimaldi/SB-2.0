@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { BarServiceCategory } from '../../../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
@@ -66,10 +67,13 @@ export class ServiceGeneralInfoTab {
   /** Only to look at: the buttons that change the data (icons, image, add, remove) are off. */
   readonly isReadonly = input(false);
   readonly imagePreviewUrl = input<string | null>(null);
+  readonly imageError = input<string | null>(null);
   readonly iconChosen = output<BarServiceIcon>();
   readonly imageChosen = output<File>();
+  readonly imageRemoveRequest = output<void>();
 
   private readonly translateService = inject(TranslateService);
+  protected readonly validationText = inject(ValidationTextBehaviour);
 
   /** Every icon a bar service can have, as shown in the grid. */
   protected readonly icons: readonly ServicesImagesIcon<BarServiceIcon>[] = Object.values(

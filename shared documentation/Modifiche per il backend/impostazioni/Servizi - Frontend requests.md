@@ -8,34 +8,44 @@ La pagina è `/settings/services` e ha cinque tab: Servizi Bar, Servizi (servizi
 Automatici e Prenotazione tavoli. Ogni tab è una tabella; la matita di una riga apre un pannello di modifica con due o
 tre tab interne, ognuna letta con la sua GET e salvata con la sua API, una tab alla volta.
 
-Le API della pagina (`/api/catalog/bar-service-list`, `/api/catalog/get-bar-service-general-info`,
-`/api/catalog/update-bar-service-general`…) non ci sono ancora nel backend, che ha `/api/catalog/services`,
+Le API della pagina (`/api/catalog/services/bar-service-list`, `/api/catalog/services/get-bar-service-general-info`,
+`/api/catalog/services/update-bar-service-general`…) non ci sono ancora nel backend, che ha `/api/catalog/services`,
 `/api/catalog/automatic-prices` e `/api/catalog/table-services` con altre rotte e altri corpi
 (`Endpoints/ServiceEndpoints.cs`). Rotte, richieste e risposte sono nei contratti delle API
 (`shared documentation/API_CONTRACTS.docx` e `shared documentation/API - Full list.md`); questo documento chiede quello
 che va aggiunto a quei contratti e, una sezione alla volta, le API che il backend deve creare (sezioni 2-6, le tabelle
-delle cinque tab; sezioni 7-11, le eliminazioni; sezioni 12-16, le duplicazioni).
+delle cinque tab; sezioni 7-11, le eliminazioni; sezioni 12-16, le duplicazioni; sezioni 17-24, i pannelli di Servizi
+Bar; sezione 25, la tendina dei settori, che serve anche a Listino e Prenotazioni online).
 
 ## Riepilogo
 
 | # | Metodo | Rotta | Cosa fa |
 |---|---|---|---|
 | 1 | GET + POST | Le 13 coppie lettura e salvataggio dei pannelli di modifica (tabella della sezione 1) | Controllo di versione, una versione per tab: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
-| 2 | POST | `/api/catalog/bar-service-list` | Tabella della tab Servizi Bar, a pagine |
+| 2 | POST | `/api/catalog/services/bar-service-list` | Tabella della tab Servizi Bar, a pagine |
 | 3 | POST | `/api/catalog/standard-service-list` | Tabella della tab Servizi, a pagine |
 | 4 | POST | `/api/catalog/hourly-service-list` | Tabella della tab Servizi Orari, a pagine |
 | 5 | POST | `/api/catalog/automatic-price-list` | Tabella della tab Prezzi Automatici, a pagine |
 | 6 | POST | `/api/catalog/table-service-list` | Tabella della tab Prenotazione tavoli, a pagine |
-| 7 | POST | `/api/catalog/delete-bar-service-item` | Elimina uno o più servizi bar, tutto o niente |
+| 7 | POST | `/api/catalog/services/delete-bar-service-item` | Elimina uno o più servizi bar, tutto o niente |
 | 8 | POST | `/api/catalog/delete-standard-service-item` | Elimina uno o più servizi, tutto o niente |
 | 9 | POST | `/api/catalog/delete-hourly-service-item` | Elimina uno o più servizi orari, tutto o niente |
 | 10 | POST | `/api/catalog/delete-automatic-price-item` | Elimina uno o più prezzi automatici, tutto o niente |
 | 11 | POST | `/api/catalog/delete-table-service-item` | Elimina uno o più servizi tavoli, tutto o niente |
-| 12 | POST | `/api/catalog/duplicate-bar-service-item` | Duplica uno o più servizi bar, tutto o niente |
+| 12 | POST | `/api/catalog/services/duplicate-bar-service-item` | Duplica uno o più servizi bar, tutto o niente |
 | 13 | POST | `/api/catalog/duplicate-standard-service-item` | Duplica uno o più servizi, tutto o niente |
 | 14 | POST | `/api/catalog/duplicate-hourly-service-item` | Duplica uno o più servizi orari, tutto o niente |
 | 15 | POST | `/api/catalog/duplicate-automatic-price-item` | Duplica uno o più prezzi automatici, tutto o niente |
 | 16 | POST | `/api/catalog/duplicate-table-service-item` | Duplica uno o più servizi tavoli, tutto o niente |
+| 17 | POST | `/api/catalog/services/create-bar-service` | Crea un servizio bar con i dati delle tre tab e risponde con il suo id |
+| 18 | GET | `/api/catalog/services/get-bar-service-general-info` | Legge la tab Info Generali di un servizio bar |
+| 19 | GET | `/api/catalog/services/get-bar-service-prices` | Legge la tab Prezzi di un servizio bar |
+| 20 | GET | `/api/catalog/services/get-bar-service-booking-options` | Legge la tab Prenotazioni di un servizio bar |
+| 21 | POST | `/api/catalog/services/update-bar-service-general` | Salva la tab Info Generali di un servizio bar |
+| 22 | POST | `/api/catalog/services/update-bar-service-prices` | Salva la tab Prezzi di un servizio bar |
+| 23 | POST | `/api/catalog/services/update-bar-service-booking` | Salva la tab Prenotazioni di un servizio bar |
+| 24 | POST + DELETE | `/api/catalog/services/{id}/image` | Ci sono già e restano come sono: il frontend le usa per caricare e togliere l'immagine del servizio |
+| 25 | POST | `/api/catalog/sectors/sector-combobox` | Settori e file per le tendine, tutti insieme (anche Listino e Prenotazioni online) |
 
 ## 1. Controllo di versione sui salvataggi dei pannelli di modifica
 
@@ -64,13 +74,15 @@ unico per tutte le API**: `resource.version_conflict`.
     {
       "dateFrom": "2026-07-01T00:00:00.000Z",
       "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": ["Saturday", "Sunday"],
       "managementStartTime": "08:00",
       "managementEndTime": "12:00",
       "onlineStartTime": "08:30",
       "onlineEndTime": "11:30",
       "maxBookingPerHourQuantity": 20,
       "maxBookingPerDayQuantity": 80,
-      "timeInterval": "ThirtyMinutes",
+      "maxPerSlot": 5,
+      "intervalMinutes": 30,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 4
     }
@@ -115,9 +127,9 @@ del salvataggio, tranne l'id.
 
 | Pannello e tab | Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
 |---|---|---|---|
-| Servizio bar, Info Generali | `GET /api/catalog/get-bar-service-general-info?idBarService=…` | `POST /api/catalog/update-bar-service-general` | `translations`, `category`, `icon`, `isHighlighted` |
-| Servizio bar, Prezzi | `GET /api/catalog/get-bar-service-prices?idBarService=…` | `POST /api/catalog/update-bar-service-prices` | `price`, `vatRate`, `variants`, `isPeriodPricingEnabled`, `periodPrices` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
-| Servizio bar, Prenotazioni | `GET /api/catalog/get-bar-service-booking-options?idBarService=…` | `POST /api/catalog/update-bar-service-booking` | `bookingOptions` |
+| Servizio bar, Info Generali | `GET /api/catalog/services/get-bar-service-general-info?idBarService=…` | `POST /api/catalog/services/update-bar-service-general` | `translations`, `category`, `icon`, `isHighlighted` |
+| Servizio bar, Prezzi | `GET /api/catalog/services/get-bar-service-prices?idBarService=…` | `POST /api/catalog/services/update-bar-service-prices` | `price`, `vatRate`, `variants`, `isPeriodPricingEnabled`, `periodPrices` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
+| Servizio bar, Prenotazioni | `GET /api/catalog/services/get-bar-service-booking-options?idBarService=…` | `POST /api/catalog/services/update-bar-service-booking` | `bookingOptions` |
 | Servizio, Info Generali | `GET /api/catalog/get-standard-service-general-info?idStandardService=…` | `POST /api/catalog/update-standard-service-general` | `translations`, `icon`, `isHighlighted` |
 | Servizio, Prezzi | `GET /api/catalog/get-standard-service-prices?idStandardService=…` | `POST /api/catalog/update-standard-service-prices` | `price`, `vatRate`, `isPeriodPricingEnabled`, `periodPrices` (anche dei periodi che la tab non mostra), `idSectors`, `isOnlinePurchaseEnabled` |
 | Servizio, Prenotazioni | `GET /api/catalog/get-standard-service-booking-options?idStandardService=…` | `POST /api/catalog/update-standard-service-booking` | `bookingOptions` |
@@ -241,7 +253,7 @@ Nell'ordine in cui si controllano:
 Il frontend mostra ogni errore di queste API nel popup di errore della tabella (testo fisso, con "Riprova"), senza il
 testo del codice.
 
-## 2. POST /api/catalog/bar-service-list
+## 2. POST /api/catalog/services/bar-service-list
 
 Tabella della tab Servizi Bar (`/settings/services/1`). Per il frontend sostituisce
 `GET /api/catalog/services?kind=bar`, che ha la stessa funzione con un'altra richiesta (parametri nell'indirizzo) e
@@ -465,7 +477,7 @@ più.
 }
 ```
 
-## 7. POST /api/catalog/delete-bar-service-item
+## 7. POST /api/catalog/services/delete-bar-service-item
 
 Cestino e "Elimina selezione" della tab Servizi Bar.
 
@@ -605,7 +617,7 @@ in una sola chiamata, tutto o niente**, come `POST /api/catalog/duplicate-wareho
 - Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con il 404 della
   sezione toglie gli id dalla selezione e ricarica la tabella.
 
-## 12. POST /api/catalog/duplicate-bar-service-item
+## 12. POST /api/catalog/services/duplicate-bar-service-item
 
 Bottone "Duplica" e "Duplica selezione" della tab Servizi Bar.
 
@@ -676,6 +688,484 @@ Bottone "Duplica" e "Duplica selezione" della tab Prenotazione tavoli.
 - `idTableServices`: gli `idTableService` delle righe di `table-service-list` (sezione 6).
 - Un id che non è un servizio tavoli dello stabilimento: 404 `service.table_service_not_found`.
 - Registro: una voce `catalog.table_service_duplicated` per copia.
+
+## Regole comuni dei pannelli di Servizi Bar (sezioni 17-24)
+
+I pannelli "Aggiungi nuovo servizio bar" e "Modifica servizio bar" hanno tre tab: Info Generali, Prezzi e Prenotazioni.
+L'aggiunta manda le tre tab insieme; la modifica legge e salva **una tab alla volta**, ognuna con la sua GET e il suo
+salvataggio.
+
+### Cosa ci serve
+
+- **API nuove sotto `/api/catalog/services`**, la radice che il backend ha già (`Endpoints/ServiceEndpoints.cs:19`). I
+  nomi non si confondono con `/{id:guid}`, perché non sono UUID. `GET` e `POST /api/catalog/services`,
+  `GET` e `PUT /api/catalog/services/{id}` restano come sono: per questi pannelli il frontend non le usa.
+- **Corpo e risposta sono quelli di questo documento**, con questi nomi. Le tabelle delle sezioni dicono a quale dato
+  di `ServiceSaleItem` (`catalog.service_sale_items` e tabelle collegate) corrisponde ogni campo.
+- **Una tab non tocca le altre**: ogni salvataggio scrive solo i dati della sua tab. Restano com'erano i dati delle
+  altre due e tutto quello che il corpo non contiene, per esempio `allergens` e l'immagine caricata
+  (`icon_asset_id`). Il `PUT /api/catalog/services/{id}` di oggi invece riscrive tutto il servizio
+  (`ServiceItemsService.ApplyAsync`), quindi non si può riusare così com'è.
+- **Quello che il form non mostra torna com'era**: le letture danno anche i dati che il pannello non fa vedere (i giorni
+  `weekdays`, il massimo per fascia `maxPerSlot`, un intervallo diverso da quelli della tendina, un'icona fuori dalle 22
+  del frontend) e il pannello li rimanda uguali, finché l'utente non sceglie un altro valore. Un Salva non li toglie mai.
+- **Solo servizi bar**: le letture e i salvataggi accettano solo servizi con `kind` `bar` dello stabilimento; ogni altro
+  id risponde 404 `service.not_found`.
+- **Permesso**: `CatalogRead` per le letture, `CatalogSettings` per creazione e salvataggi, come oggi
+  (`ServiceEndpoints.cs:16-17`). **Stabilimento** dal token (`CurrentProperty.IdAsync`): nessuna richiesta lo contiene.
+- **Controllo di versione**: le tre letture restituiscono `version`, i tre salvataggi la ricevono in `If-Match` e
+  rispondono con `ETag`, come dice la sezione 1.
+- **Registro**: `catalog.service_created` per la creazione, `catalog.service_updated` per ogni salvataggio, come oggi.
+- **JSON** in camelCase. Enum con il nome .NET. Giorni in UTC ISO 8601 (`"2026-07-01T00:00:00.000Z"`), orari `"HH:mm"`,
+  nella richiesta e nella risposta.
+- **Errori**: gli stessi codici che il backend usa già per questi dati (`SaveServiceRequestValidator`, `VatPolicy`,
+  `ContentMapping`, `UploadRules`). Il frontend li conosce e li traduce tutti; un codice nuovo va prima scritto qui.
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+
+### Nome e descrizione nelle lingue
+
+- `translations` ha nella richiesta sempre tutte e 7 le lingue (`it`, `en`, `fr`, `de`, `es`, `ar`, `zh`), con
+  `serviceName` e `description` `null` dove l'utente non ha scritto niente. Nella risposta ci sono solo le lingue con
+  almeno uno dei due testi: le altre le aggiunge vuote il frontend.
+- Sono obbligatori **nome e descrizione nella lingua di `Accept-Language`**, quella dell'utente, che nel pannello è la
+  principale e non è sempre l'italiano. Oggi invece il backend vuole sempre il nome italiano (`name`) e non accetta
+  l'italiano fra le `translations` (`ContentRules.Translations`).
+- Nella colonna `name`, che non può essere vuota, va il nome italiano se c'è, altrimenti quello nella lingua di
+  `Accept-Language`, come per i pacchetti (`Listino - Frontend requests.md`, sezione 5). Se
+  l'italiano non è stato scritto, la lettura non deve restituire quel nome come italiano.
+- Nelle altre lingue il **nome è obbligatorio se c'è la descrizione**, come vuole già il backend (`ContentRules.Translations`
+  e la colonna `name` di `catalog.service_sale_item_translations`); la descrizione da sola non si può salvare. Il
+  frontend non la manda.
+- Nome al massimo 255 caratteri (`ServiceSaleItem.NameMaxLength`), descrizione al massimo 10.000.
+
+### Da chiedere allo sviluppatore prima di scrivere codice
+
+Il corpo può contenere valori che il modello di oggi non può salvare. Il frontend li manda e si aspetta di rileggerli
+uguali: come salvarli lo decide lo sviluppatore. Se per uno di questi la risposta è che il dato è obbligatorio, l'API
+risponde 400 `validation.failed` con `validation.required` su quel campo e la scelta si scrive qui, perché il frontend
+si adegui.
+
+1. **Italiano non scritto**: il nome italiano **non è obbligatorio**, come per i pacchetti (`Listino - Frontend
+   requests.md`, sezione 5). Un utente inglese che scrive solo "Coffee" salva: la colonna `name` contiene "Coffee", ma
+   la lettura deve dare "Coffee" in `en` e nessuna traduzione `it`. Come ricordare che quel `name` non è italiano lo
+   decide lo sviluppatore, allo stesso modo per servizi e pacchetti.
+2. **`icon`**: oggi l'icona è una riga di `catalog.service_type_icons` (`type`, `name`), scelta con il suo id
+   (`GET /api/catalog/lookups/service-icons`). Il frontend ha un elenco fisso di 22 nomi (sezione 17), che devono valere
+   **tutti**: come farli corrispondere alle righe, e quali aggiungere al catalogo (l'analisi
+   `analisi-post/db/catalog/catalog_service_type_icons.md` conta 11 icone `bar` in quello di partenza). Per un servizio
+   con un'icona fuori da questi 22 la lettura dà un nome che identifica quella riga (per esempio il suo `name`), diverso
+   dai 22, e `update-bar-service-general` lo riceve uguale e lascia l'icona com'è.
+
+### Errori
+
+Nell'ordine in cui si controllano. Le righe 404 `service.not_found` e 409 valgono per letture e salvataggi dove la
+sezione lo dice.
+
+| Status | `code` | Quando |
+|---|---|---|
+| 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 403 | `auth.forbidden` | Utente senza il permesso (`CatalogRead` o `CatalogSettings`). |
+| 400 | `validation.failed` | Corpo non valido, con un elemento di `errors[]` per campo (tabella qui sotto). |
+| 403 | `catalog.property_required` | Token senza stabilimento. |
+| 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 404 | `service.not_found` | `idBarService` non è un servizio bar dello stabilimento (anche perché già eliminato). Niente cambia. |
+| 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args` `{ "rates": [4, 5, 10, 22] }` come oggi (`VatPolicy.ResolveAsync`). Niente cambia. |
+| 404 | `service.icon_not_found` | `icon` non ha un'icona corrispondente nel catalogo (`CatalogErrors.ServiceIconNotFound`). Niente cambia. |
+| 422 | `pricing.period_not_found` | Un `idPeriod` di `periodPrices` non è un periodo della stagione corrente e non è già salvato su quel servizio. Niente cambia. |
+| 404 | `catalog.sector_not_found` | Un id di `idSectors` non è un settore dello stabilimento (`ContentMapping.SectorIdsAsync`). Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` non è più la versione dei dati della tab (sezione 1). Niente cambia. |
+
+Errori di campo del 400, con `field` uguale al nome nel corpo:
+
+| Campo | `code` | Quando |
+|---|---|---|
+| `translations[i].serviceName`, `translations[i].description` | `validation.required` | Vuoti nella lingua di `Accept-Language` (`i` è la sua posizione nell'elenco). |
+| `translations[i].serviceName`, `translations[i].description` | `validation.max_length` | Oltre 255 o 10.000 caratteri nella lingua di `Accept-Language`. |
+| `translations` | `validation.invalid` | Un'altra lingua con la descrizione ma senza il nome, o con un testo oltre i limiti, come oggi (`ContentRules.Translations`). |
+| `category` | `validation.invalid` | Valore fuori dall'enum. |
+| `icon` | `validation.invalid` | Non è uno dei 22 nomi e, in `update-bar-service-general`, nemmeno l'icona che il servizio ha già. |
+| `price` | `validation.required` | `null` o assente. |
+| `price` | `validation.out_of_range` | Fuori da 0-100.000. |
+| `vatRate` | `validation.invalid` | Non maggiore di 0 e minore di 100 (`ContentRules.Vat`). |
+| `variants` | `validation.invalid` | Più di 50 (`ServiceSaleItem.MaxVariants`). |
+| `variants[i].variantName` | `validation.required` | Vuoto o di soli spazi. |
+| `variants[i].variantName` | `validation.max_length` | Oltre 120 caratteri (`ServiceSaleItemVariant.NameMaxLength`). |
+| `variants[i].price` | `validation.required` | `null` o assente. |
+| `variants[i].price` | `validation.out_of_range` | Fuori da 0-100.000. |
+| `periodPrices` | `validation.invalid` | Un `price` fuori da 0-100.000, o lo stesso `idPeriod` due volte. |
+| `bookingOptions` | `validation.invalid` | Più di 20 (`ServiceSaleItem.MaxBookingOptions`). |
+| `bookingOptions[i].dateTo` | `validation.end_before_start` | Prima di `dateFrom`. |
+| `bookingOptions[i].managementEndTime`, `bookingOptions[i].onlineEndTime` | `validation.invalid` | Non dopo l'ora di inizio: nemmeno la stessa ora, come `ContentRules.TimeRange` e i vincoli `ck_catalog_service_booking_options_management` e `_online`. |
+| `bookingOptions[i].weekdays` | `validation.invalid` | Un valore fuori dall'enum `Weekday` (`ContentRules.Weekdays`). |
+| `bookingOptions[i].maxBookingPerHourQuantity`, `.maxBookingPerDayQuantity`, `.maxPerSlot`, `.intervalMinutes`, `.minItemPerBookingQuantity`, `.maxItemPerBookingQuantity` | `validation.invalid` | Non un intero da 1 a 32.767, oppure massimo di articoli minore del minimo (sul massimo). |
+
+Il frontend controlla già prima di mandare: testi obbligatori e loro lunghezza (anche il nome nelle lingue con una
+descrizione), prezzo e varianti, prezzi massimi, orari, numeri delle opzioni di prenotazione. Non controlla i limiti
+dell'IVA (tra 0 e 100), delle varianti (50) e delle opzioni di prenotazione (20): lì mostra l'errore del backend. Gli errori dei campi di primo livello (per esempio `price`) vanno sotto il
+campo, come `catalog.vat_rate_not_allowed` (sotto IVA, con le aliquote di `rates`) e `service.icon_not_found` (sotto le
+icone); tutti gli altri sopra i bottoni, con il testo del loro `code`. Con 404 `service.not_found` ricarica anche la
+tabella.
+
+## 17. POST /api/catalog/services/create-bar-service
+
+Salva del pannello "Aggiungi nuovo servizio bar". Crea un servizio con `kind` `bar`.
+
+```json
+{
+  "translations": [
+    { "language": "it", "serviceName": "Caffè ginseng", "description": "Caffè al ginseng in tazza piccola" },
+    { "language": "en", "serviceName": "Ginseng coffee", "description": "Ginseng coffee in a small cup" },
+    { "language": "fr", "serviceName": null, "description": null },
+    { "language": "de", "serviceName": null, "description": null },
+    { "language": "es", "serviceName": null, "description": null },
+    { "language": "ar", "serviceName": null, "description": null },
+    { "language": "zh", "serviceName": null, "description": null }
+  ],
+  "category": "Bar",
+  "icon": "Coffee",
+  "isHighlighted": true,
+  "price": 1.5,
+  "vatRate": 10,
+  "variants": [{ "variantName": "Grande", "price": 2 }],
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    { "idPeriod": 0, "price": 1.5 },
+    { "idPeriod": 1, "price": null }
+  ],
+  "idSectors": ["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"],
+  "isOnlinePurchaseEnabled": true,
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-07-01T00:00:00.000Z",
+      "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": [],
+      "managementStartTime": "09:00",
+      "managementEndTime": "12:00",
+      "onlineStartTime": "09:00",
+      "onlineEndTime": "12:00",
+      "maxBookingPerHourQuantity": 2,
+      "maxBookingPerDayQuantity": 5,
+      "maxPerSlot": null,
+      "intervalMinutes": 30,
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 2
+    }
+  ]
+}
+```
+
+| Campo | Tipo | Corrisponde a | Note |
+|---|---|---|---|
+| `translations` | array | `name`, `description` e `catalog.service_sale_item_translations` | "Nome e descrizione nelle lingue". |
+| `category` | string o `null` | `category` | Enum `BarCategory` (sezione 2). |
+| `icon` | string o `null` | `icon_id` | Una di: `Coffee`, `Croissant`, `Cocktail`, `Juice`, `Drink`, `WaterBottle`, `Beer`, `Jam`, `Cookie`, `Macaron`, `IceCream`, `Cupcake`, `RoomService`, `Mug`, `PizzaSlice`, `Sandwich`, `Cutlery`, `Burger`, `FastFood`, `RiceBowl`, `Cake`, `Pancakes`. `null` = nessuna icona scelta. Nella lettura e in `update-bar-service-general` può essere anche il nome di un'icona fuori da queste, che il servizio ha già. |
+| `isHighlighted` | boolean | `is_highlighted` | "Metti in evidenza". |
+| `price` | number | `price` | In euro, da 0 a 100.000. Obbligatorio. |
+| `vatRate` | number o `null` | `vat_rate` | In percentuale. `null` = senza aliquota: si salva la natura predefinita (`VatPolicy.ResolveAsync`, `VatRules.DefaultExemptNature`), come vuole il vincolo `ck_catalog_service_sale_items_vat`. |
+| `variants` | array | `catalog.service_sale_item_variants` | `variantName` = `name`, `price`, tutti e due obbligatori; nell'ordine ricevuto. `[]` = nessuna variante. |
+| `isPeriodPricingEnabled` | boolean | `has_period_prices` | |
+| `periodPrices` | array | `catalog.service_sale_item_period_prices` | `idPeriod` = la `key` del periodo di `catalog/tariff-periods` (da 0), `price`. Il frontend manda una riga per ogni periodo della stagione corrente: una riga con `price` `null` non si salva. |
+| `idSectors` | array di string (UUID) | `is_sector_restricted` e `catalog.service_sale_item_sectors` | Gli `id` della sezione 25. `[]` = tutti i settori (`is_sector_restricted` falso); altrimenti solo questi (vero). |
+| `isOnlinePurchaseEnabled` | boolean | `is_purchasable` | "Abilita acquisto online". |
+| `bookingOptions` | array | `catalog.service_booking_options` | Nell'ordine ricevuto; i campi qui sotto, tutti anche `null` tranne `weekdays`. |
+
+Campi di ogni elemento di `bookingOptions`:
+
+| Campo | Tipo | Corrisponde a |
+|---|---|---|
+| `dateFrom`, `dateTo` | string (giorno UTC) o `null` | `starts_on`, `ends_on` |
+| `weekdays` | array di string | `weekdays`: nomi .NET dell'enum `Weekday` (`Monday`…`Sunday`); `[]` = tutti i giorni. Il pannello non lo mostra: lo rimanda come l'ha letto, `[]` per le opzioni nuove. |
+| `managementStartTime`, `managementEndTime` | string `"HH:mm"` o `null` | `management_from`, `management_to` |
+| `onlineStartTime`, `onlineEndTime` | string `"HH:mm"` o `null` | `online_from`, `online_to` |
+| `maxBookingPerHourQuantity`, `maxBookingPerDayQuantity` | number (intero) o `null` | `max_per_hour`, `max_per_day` |
+| `maxPerSlot` | number (intero) o `null` | `max_per_slot`. Il pannello non lo mostra: lo rimanda come l'ha letto, `null` per le opzioni nuove. |
+| `intervalMinutes` | number (intero) o `null` | `interval_minutes`, in minuti. La tendina fa scegliere 15, 30, 45, 60 e 120; un altro valore già salvato torna uguale finché l'utente non ne sceglie uno. |
+| `minItemPerBookingQuantity`, `maxItemPerBookingQuantity` | number (intero) o `null` | `min_items`, `max_items` |
+
+`allergens` non c'è nel corpo: il servizio nasce senza allergeni.
+
+Risposta: **201 con il solo id del servizio creato** (il suo `public_id`), come stringa JSON, `Content-Type`
+`application/json`:
+
+```json
+"0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01"
+```
+
+Il frontend ne ha bisogno per l'immagine scelta nel pannello, che carica subito dopo con la sezione 24. Poi il pannello
+si chiude e la tabella si ricarica.
+
+## 18. GET /api/catalog/services/get-bar-service-general-info
+
+Tab Info Generali del pannello "Modifica servizio bar", letta all'apertura. `idBarService` (l'id della riga di
+`bar-service-list`) viaggia nella query string: `?idBarService=0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01`.
+
+Risposta 200:
+
+```json
+{
+  "idBarService": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01",
+  "translations": [
+    { "language": "it", "serviceName": "Caffè", "description": "Espresso in tazzina." },
+    { "language": "en", "serviceName": "Coffee", "description": "Espresso in a small cup." }
+  ],
+  "category": "Bar",
+  "icon": "Coffee",
+  "imageUrl": null,
+  "isHighlighted": true,
+  "version": "feac3ca6"
+}
+```
+
+I campi sono quelli della sezione 17, più `idBarService` (`public_id`), `imageUrl` e `version`.
+
+`imageUrl` (string o `null`) è l'indirizzo dell'**immagine caricata** (`icon_asset_id`), con `UrlsAsync` come la
+`imageUrl` di `ServiceDto`; il pannello la mostra nel riquadro dell'immagine. Con un'icona, o senza immagine, è `null`:
+la `imageUrl` di oggi invece vale anche per le icone. La `version` **non** la comprende, perché l'indirizzo può cambiare
+a ogni lettura: copre solo i campi del salvataggio (sezione 1).
+
+Errori: 404 `service.not_found` e gli altri comuni.
+
+## 19. GET /api/catalog/services/get-bar-service-prices
+
+Tab Prezzi del pannello "Modifica servizio bar", letta la prima volta che si apre. `idBarService` nella query string.
+
+Risposta 200:
+
+```json
+{
+  "price": 1,
+  "vatRate": 10,
+  "variants": [{ "variantName": "Doppio", "price": 1.8 }],
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [{ "idPeriod": 0, "price": 1.2 }],
+  "idSectors": ["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"],
+  "isOnlinePurchaseEnabled": true,
+  "version": "37b6a44c"
+}
+```
+
+I campi sono quelli della sezione 17, più `version`. `periodPrices` ha solo i periodi con un prezzo, **anche quelli che
+non sono più nella stagione corrente**: il frontend non li mostra ma li rimanda con il salvataggio, per non perderli.
+`idSectors` è `[]` quando `is_sector_restricted` è falso. Errori: 404 `service.not_found` e gli altri comuni.
+
+## 20. GET /api/catalog/services/get-bar-service-booking-options
+
+Tab Prenotazioni del pannello "Modifica servizio bar", letta la prima volta che si apre. `idBarService` nella query
+string.
+
+Risposta 200, un oggetto con le opzioni nell'ordine salvato (`[]` se non ce ne sono) e la versione:
+
+```json
+{
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-07-01T00:00:00.000Z",
+      "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": ["Saturday", "Sunday"],
+      "managementStartTime": "08:00",
+      "managementEndTime": "12:00",
+      "onlineStartTime": "08:30",
+      "onlineEndTime": "11:30",
+      "maxBookingPerHourQuantity": 20,
+      "maxBookingPerDayQuantity": 80,
+      "maxPerSlot": 5,
+      "intervalMinutes": 30,
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 4
+    }
+  ],
+  "version": "96f5de5b"
+}
+```
+
+I campi sono quelli della sezione 17. Errori: 404 `service.not_found` e gli altri comuni.
+
+## 21. POST /api/catalog/services/update-bar-service-general
+
+Salva della tab Info Generali, con l'header `If-Match` della versione letta (sezione 18). Scrive solo nomi,
+descrizioni, categoria, icona e "Metti in evidenza".
+
+```json
+{
+  "idBarService": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01",
+  "translations": [
+    { "language": "it", "serviceName": "Caffè espresso", "description": "Espresso in tazzina." },
+    { "language": "en", "serviceName": "Coffee", "description": "Espresso in a small cup." },
+    { "language": "fr", "serviceName": null, "description": null },
+    { "language": "de", "serviceName": null, "description": null },
+    { "language": "es", "serviceName": null, "description": null },
+    { "language": "ar", "serviceName": null, "description": null },
+    { "language": "zh", "serviceName": null, "description": null }
+  ],
+  "category": "Bar",
+  "icon": "Coffee",
+  "isHighlighted": true
+}
+```
+
+I campi sono quelli della sezione 17, più `idBarService`. Una lingua con i due testi `null` si toglie. `icon` uguale a
+quella letta, anche fuori dalle 22, lascia l'icona com'è. Con `icon` `null` l'immagine caricata resta; con un'icona
+l'immagine caricata non vale più, come oggi (`ServiceItemsService.ApplyAsync`). Se nel pannello è stata scelta
+un'immagine nuova, il frontend manda `icon` com'era e, dopo il 204, la carica con la sezione 24: è il caricamento a
+togliere l'icona, così se fallisce l'icona resta.
+
+Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 409
+`resource.version_conflict` e gli altri comuni.
+
+## 22. POST /api/catalog/services/update-bar-service-prices
+
+Salva della tab Prezzi, con l'header `If-Match` della versione letta (sezione 19). Scrive solo prezzo, IVA, varianti,
+prezzi per periodo, settori e acquisto online.
+
+```json
+{
+  "idBarService": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01",
+  "price": 1.3,
+  "vatRate": 10,
+  "variants": [{ "variantName": "Doppio", "price": 1.8 }],
+  "isPeriodPricingEnabled": true,
+  "periodPrices": [
+    { "idPeriod": 0, "price": 1.2 },
+    { "idPeriod": 1, "price": null }
+  ],
+  "idSectors": ["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"],
+  "isOnlinePurchaseEnabled": true
+}
+```
+
+I campi sono quelli della sezione 17, più `idBarService`. `variants`, `periodPrices` e `idSectors` arrivano sempre tutti
+e prendono il posto di quelli salvati. Un servizio senza aliquota che ha già una natura dell'IVA la mantiene se
+`vatRate` è ancora `null`.
+
+Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 404
+`catalog.sector_not_found`, 422 `pricing.period_not_found`, 409 `resource.version_conflict` e gli altri comuni.
+
+## 23. POST /api/catalog/services/update-bar-service-booking
+
+Salva della tab Prenotazioni, con l'header `If-Match` della versione letta (sezione 20). Scrive solo le opzioni di
+prenotazione.
+
+```json
+{
+  "idBarService": "0193b6d1-4a2e-7c3f-8d1e-5b6c7d8e9f01",
+  "bookingOptions": [
+    {
+      "dateFrom": "2026-07-01T00:00:00.000Z",
+      "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": ["Saturday", "Sunday"],
+      "managementStartTime": "08:00",
+      "managementEndTime": "12:00",
+      "onlineStartTime": "08:30",
+      "onlineEndTime": "11:30",
+      "maxBookingPerHourQuantity": 20,
+      "maxBookingPerDayQuantity": 80,
+      "maxPerSlot": 5,
+      "intervalMinutes": 30,
+      "minItemPerBookingQuantity": 1,
+      "maxItemPerBookingQuantity": 4
+    }
+  ]
+}
+```
+
+I campi sono quelli della sezione 17, più `idBarService`. L'elenco arriva sempre tutto e prende il posto di quello
+salvato: un'opzione tolta nel pannello non c'è più, `[]` le toglie tutte.
+
+Risposta: **204 senza corpo**, con l'header `ETag` della nuova versione. Errori: 404 `service.not_found`, 409
+`resource.version_conflict` e gli altri comuni.
+
+## 24. POST e DELETE /api/catalog/services/{id}/image
+
+**Ci sono già e restano come sono** (`ServiceEndpoints.cs:72-83`, `ServiceItemsService.UploadImageAsync` e
+`RemoveImageAsync`): qui si descrive solo come le usa il frontend, per l'immagine che l'utente sceglie dal computer al
+posto di un'icona.
+
+### POST
+
+- Parte con Salva: nell'aggiunta dopo `create-bar-service`, con l'id della sua risposta; nella modifica dopo
+  `update-bar-service-general`, con `idBarService`. Non manda `If-Match`.
+- `id`: l'id del servizio nella rotta. Corpo `multipart/form-data` con il file nel campo `file`: PNG, JPEG o WebP fino a
+  5 MB (il frontend lo controlla prima di mandarlo).
+- Risposta 200 con `ServiceDto`, che il frontend non legge. L'immagine prende il posto dell'icona o dell'immagine di
+  prima, come oggi.
+- Errori, come oggi: 401 `auth.unauthenticated`, 403 `auth.forbidden` senza `CatalogSettings`, 422
+  `catalog.invalid_image` (`args` `maxBytes` e `contentTypes`), 403 `catalog.property_required`, 404
+  `catalog.property_not_found`, 404 `service.not_found`.
+- Se il caricamento fallisce i dati del servizio sono già salvati: il pannello si chiude, la tabella si ricarica e un
+  avviso ("Immagine non caricata") dice perché, con il testo del `code`.
+
+### DELETE
+
+- La chiama la X sull'immagine già caricata, in Modifica, dopo la conferma dell'utente: subito, senza Salva. Una X su
+  un'immagine scelta e non ancora salvata non chiama niente.
+- `id`: l'id del servizio nella rotta. Nessun corpo, nessun `If-Match`.
+- Risposta 200 con `ServiceDto`, che il frontend non legge: il servizio resta senza immagine e senza icona, come oggi. La
+  `version` di Info Generali non cambia, perché non comprende l'immagine (sezione 18).
+- Errori, come oggi: 401 `auth.unauthenticated`, 403 `auth.forbidden` senza `CatalogSettings`, 403
+  `catalog.property_required`, 404 `catalog.property_not_found`, 404 `service.not_found`. Il frontend li mostra sotto
+  l'immagine con il testo del `code`; con `service.not_found` ricarica anche la tabella.
+
+## 25. POST /api/catalog/sectors/sector-combobox
+
+Tutti i settori (le file) dello stabilimento, per le tendine. È **una sola API per tre pagine**:
+
+- **Servizi**: tendina a scelta multipla "Servizio acquistabile nelle seguenti file/settori" (sezione Limiti) della tab
+  Prezzi dei pannelli di Servizi Bar, Servizi e Servizi Orari e della tab Prezzi e Validità di quelli dei Prezzi
+  Automatici, riletta ogni volta che la tab si apre;
+- **Listino**: tendina "Settori e file" della tab Info Generali dei pannelli dei pacchetti, riletta ogni volta che la tab
+  si apre, e righe dei prezzi per settore dei pannelli dei pacchetti e degli articoli aggiuntivi
+  (`Listino - Frontend requests.md`);
+- **Prenotazioni online**: tendina "Fila/settore" delle regole di "Configurazione limiti di booking", riletta a ogni
+  apertura del pannello "Opzioni prenotazioni online".
+
+Segue la regola di tutte le tendine del frontend: `POST`, senza corpo né pagine, risposta `[{ id, value }]`, come
+`article-combobox` (`Impostazioni magazzino - Frontend requests.md`, sezione 2).
+
+### Cosa ci serve
+
+- **Un'API nuova nel gruppo `/api/catalog/sectors`** (`Endpoints/SeasonEndpoints.cs:83`). Il nome non si confonde con
+  `/{id:guid}`, perché non è un UUID. `GET`, `POST`, `PUT` e `DELETE /api/catalog/sectors` restano come sono:
+  `GET /api/catalog/sectors` risponde `[{ id, name, sortOrder }]` (`SectorDto`) e per le tendine il frontend non la usa.
+- **I settori sono quelli di `GET /api/catalog/sectors`** (`SectorService.ListAsync`, `SectorRepository.ListAsync`):
+  tutti quelli dello stabilimento, senza gli eliminati, **nello stesso ordine** (`sort_order`, poi l'id interno).
+- **Permesso**: `CatalogRead`, come `GET /api/catalog/sectors`. **Stabilimento** dal token (`CurrentProperty.IdAsync`).
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+
+### Richiesta
+
+`POST` senza corpo.
+
+### Risposta
+
+200 con un array di `{ id, value }`, vuoto se lo stabilimento non ha settori. Nessun altro campo:
+
+```json
+[
+  { "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "value": "Fila 1" },
+  { "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a02", "value": "Fila 2" },
+  { "id": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a09", "value": "Settore Est" }
+]
+```
+
+| Campo | In `SectorDto` | Tipo | Note |
+|---|---|---|---|
+| `id` | `id` | string (UUID) | Il `public_id` del settore: lo stesso `idSector` delle righe di `sectors-list` e quello che le pagine mandano e leggono in `idSectors` e `idSector`. |
+| `value` | `name` | string | Il nome del settore, così com'è: non ha traduzioni. |
+
+### Errori
+
+Nell'ordine in cui si controllano, come `GET /api/catalog/sectors`:
+
+| Status | `code` | Quando |
+|---|---|---|
+| 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 403 | `auth.forbidden` | Utente senza il permesso `CatalogRead`. |
+| 403 | `catalog.property_required` | Token senza stabilimento. |
+| 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+
+Il frontend mostra l'errore sotto la tendina, con il testo del suo `code`, e rilegge l'elenco quando l'utente prova ad
+aprirla; dove l'elenco serve alle righe dei prezzi (Listino) vale quello che il pannello fa quando una sua lettura
+fallisce.
 
 ## Verifica
 
@@ -761,3 +1251,57 @@ prezzo e un'immagine caricata:
 32. Un servizio con il nome in tutte e 7 le lingue: la copia ha in ogni lingua il suffisso della sua lingua (" copia",
     " copy", " copie", " copia", " Kopie", " 副本", " نسخة") e le stesse descrizioni. Se in inglese "Coffee copy" esiste
     già ma in italiano "Caffè copia" no, la copia è "Caffè copia" e "Coffee copy 2".
+
+API 17-24, con un token con `CatalogRead` e `CatalogSettings`:
+
+33. `create-bar-service` con il corpo della sezione 17 e `Accept-Language: it`: 201 con il solo id, come stringa JSON; il
+    servizio compare in `bar-service-list` con quell'id, nome, categoria e prezzo, e le tre letture restituiscono gli
+    stessi dati (`periodPrices` senza la riga con `price` `null`, `translations` solo `it` e `en`). Nel registro una voce
+    `catalog.service_created`.
+34. `create-bar-service` con la descrizione francese ma senza il nome francese: 400 con `validation.invalid` su
+    `translations`. Con `Accept-Language: en` e solo i testi inglesi: 201; la tabella mostra il nome inglese a un
+    utente italiano e `get-bar-service-general-info` restituisce solo la traduzione `en`, non una `it`. Senza i testi
+    inglesi, anche con quelli italiani: 400 con `validation.required` su `translations[1].serviceName` e
+    `translations[1].description`.
+35. Su un servizio con allergeni e un'immagine caricata: dopo `update-bar-service-prices` e `update-bar-service-booking`
+    allergeni, immagine, nomi e categoria non cambiano; dopo `update-bar-service-general` con `icon` `null` non cambiano
+    prezzi, opzioni di prenotazione, allergeni e immagine.
+36. `vatRate` `null`: 204 e la lettura restituisce `null`. `vatRate` 7 in Italia: 422 `catalog.vat_rate_not_allowed` con
+    le aliquote ammesse in `args.rates`; `vatRate` 0 o 100: 400 con `validation.invalid` su `vatRate`. Niente cambia.
+37. `idSectors` `[]`: il servizio non è limitato e la lettura restituisce `[]`; con un id sconosciuto 404
+    `catalog.sector_not_found` e niente cambia.
+38. Un `idPeriod` che non esiste: 422 `pricing.period_not_found`. Un `idPeriod` già salvato sul servizio ma non più nella
+    stagione corrente, rimandato da `update-bar-service-prices`: 204 e resta salvato.
+39. `bookingOptions` con `dateTo` prima di `dateFrom`, un'ora di fine uguale a quella di inizio, 0 in un massimo o il
+    massimo di articoli minore del minimo: 400 con gli errori della tabella; mai un 500 per un vincolo del database.
+40. Le letture e i salvataggi con l'id di un servizio `normal` o `hourly`, di un altro stabilimento o eliminato: 404
+    `service.not_found`.
+41. Letture senza `CatalogRead` e salvataggi senza `CatalogSettings`: 403 `auth.forbidden`; senza token 401
+    `auth.unauthenticated`; token senza stabilimento 403 `catalog.property_required`.
+42. Giorni e orari tornano come sono stati mandati: `"2026-07-01T00:00:00.000Z"`, `"08:30"`.
+43. `price` `null` o assente: 400 con `validation.required` su `price`; -1 o 100.001: `validation.out_of_range`. Una
+    variante con il nome vuoto o senza prezzo: `validation.required` su `variants[0].variantName` o `variants[0].price`.
+44. `POST` di `image` con un PNG sull'id appena creato: 200; `get-bar-service-general-info` ha `icon` `null` e l'indirizzo
+    del file in `imageUrl`. Dopo `update-bar-service-general` con `icon` `null`, `imageUrl` resta; con `icon` `"Coffee"` è
+    `null`. Due letture di fila hanno la stessa `version` anche se l'indirizzo cambia. Su un servizio con un'icona,
+    `update-bar-service-general` con la stessa icona e poi il `POST` di `image`: l'icona non c'è più e c'è l'immagine; se il
+    `POST` fallisce (per esempio 422 con un PDF) l'icona resta. `DELETE` di `image`: 200, `imageUrl` `null` e la stessa
+    `version` di prima.
+45. Su un'opzione con `weekdays` sabato e domenica, `max_per_slot` 5 e `interval_minutes` 20:
+    `get-bar-service-booking-options` li restituisce (`["Saturday", "Sunday"]`, 5, 20) e `update-bar-service-booking` con
+    gli stessi valori e un `maxBookingPerHourQuantity` diverso cambia solo quest'ultimo. `weekdays` con `"Lunedi"`: 400 con
+    `validation.invalid` su `bookingOptions[0].weekdays`.
+46. Su un servizio con un'icona fuori dalle 22: `get-bar-service-general-info` ne dà il nome in `icon`, e
+    `update-bar-service-general` con quel nome cambia il nome del servizio ma non l'icona; con `"Cake"` l'icona cambia.
+
+
+API 25, con uno stabilimento con i settori "Fila 1", "Fila 2" e "Settore Est" (in quest'ordine), un settore eliminato e
+il token di un utente con `CatalogRead`:
+
+47. `sector-combobox` senza corpo: 200 con i tre settori nell'ordine di `GET /api/catalog/sectors`, ognuno con solo `id` e
+    `value`; gli `id` sono gli `idSector` di `sectors-list`. Il settore eliminato e quelli di un altro stabilimento non ci
+    sono. Per uno stabilimento senza settori: 200 con `[]`.
+48. Un `id` della risposta mandato in `idSectors` da `create-bar-service`: 201, e `get-bar-service-prices` lo restituisce
+    uguale.
+49. Senza token 401 `auth.unauthenticated`; senza `CatalogRead` 403 `auth.forbidden`; token senza stabilimento 403
+    `catalog.property_required`. `GET /api/catalog/sectors` risponde come prima.

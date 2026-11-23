@@ -43,7 +43,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - Si apre in sola lettura, come i pannelli dei Servizi, con il pacchetto letto da
   `GET /api/catalog/packages/{idPackage}` (`PriceListService.selectedPackage`, `PackageSelectedItem` = `idPackage`
-  e i campi del modulo), insieme a `POST /api/catalog/sector-combobox` e `GET /api/catalog/tariff-periods` (i periodi
+  e i campi del modulo), insieme a `POST /api/catalog/sectors/sector-combobox` e `GET /api/catalog/tariff-periods` (i periodi
   della stagione corrente; il loro `key` numerico è l'`idPeriod` delle righe dei prezzi).
 - Le lingue senza nome restano vuote; le righe dei prezzi sono una per settore e una per settore e periodo, con i
   prezzi salvati o vuote.
@@ -84,7 +84,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   Le tendine lavorano con testi, il modulo tiene il numero nei campi `*Quantity`.
 - "Servizi inclusi (opzionale)": testo libero (`includedServices`).
 - "Aree abilitate": scelta multipla da `POST /api/catalog/map/sector-area-combobox` (`idSectorAreas`).
-- "Settori e file": scelta multipla da `POST /api/catalog/sector-combobox` (`idSectors`; vuota = "Tutti i settori
+- "Settori e file": scelta multipla da `POST /api/catalog/sectors/sector-combobox` (`idSectors`; vuota = "Tutti i settori
   e file").
 - Le due scelte multiple si rileggono a ogni apertura della tab. In fondo quattro caselle.
 

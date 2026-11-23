@@ -52,7 +52,7 @@ describe('SectorService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sector-combobox`,
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/sectors/sector-combobox`,
     );
     expect(call.request.body).toBeNull();
     call.flush([{ id: 's1', value: 'Fila 1' }]);

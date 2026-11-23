@@ -1,0 +1,12 @@
+<app-table-error-popup
+  [pathIcon]="pathIcon()"
+  [title]="'management.settings.services.form.image.upload_failed_title' | translate"
+  [text]="
+    'management.settings.services.form.image.upload_failed_text'
+      | translate: { reason: reason() ?? '' }
+  "
+  [texts]="'table.load_error' | translate"
+  [isRetryButtonHidden]="true"
+  [open]="problem() !== null"
+  (openChange)="closed($event)"
+/>

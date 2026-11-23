@@ -2813,7 +2813,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/bar-service-list`
+### POST `/api/catalog/services/bar-service-list`
 
 Servizi: servizi bar.
 
@@ -2824,15 +2824,7 @@ Servizi: servizi bar.
   "page": 1,
   "pageSize": 10,
   "search": "acqua",
-  "filters": [
-    {
-      "field": "serviceName",
-      "value": [
-        "Acqua naturale 1L",
-        "Acqua frizzante 1L"
-      ]
-    }
-  ],
+  "filters": [],
   "sortField": "price",
   "sortDirection": "Ascending"
 }
@@ -2843,9 +2835,7 @@ Servizi: servizi bar.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `acqua` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Acqua naturale 1L", "Acqua frizzante 1L"]}]` |
-| `filters[].field` | string | `serviceName` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Acqua naturale 1L", "Acqua frizzante 1L"]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
 | `sortField` | string | `price` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -2882,7 +2872,7 @@ Stato: 200 OK.
 | `rows[].category` | string (enum BarServiceCategory) \| null | `Drinks` |
 | `rows[].price` | number (decimale, €) \| null | `1.2` |
 
-### POST `/api/catalog/create-bar-service`
+### POST `/api/catalog/services/create-bar-service`
 
 Servizi: creazione servizio bar.
 
@@ -2957,13 +2947,18 @@ Servizi: creazione servizio bar.
     {
       "dateFrom": "2026-07-01T00:00:00.000Z",
       "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": [
+        "Saturday",
+        "Sunday"
+      ],
       "managementStartTime": "09:00",
       "managementEndTime": "12:00",
       "onlineStartTime": "09:00",
       "onlineEndTime": "12:00",
       "maxBookingPerHourQuantity": 2,
       "maxBookingPerDayQuantity": 5,
-      "timeInterval": "ThirtyMinutes",
+      "maxPerSlot": 5,
+      "intervalMinutes": 30,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 2
     }
@@ -2980,37 +2975,79 @@ Servizi: creazione servizio bar.
 | `category` | string (enum BarServiceCategory) \| null | `Bar` |
 | `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
 | `isHighlighted` | boolean | `true` |
-| `price` | number (decimale, €) \| null | `1.5` |
+| `price` | number (decimale, €) | `1.5` |
 | `vatRate` | number (decimale, %) \| null | `10` |
 | `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Grande", "price": 2}]` |
-| `variants[].variantName` | string \| null | `Grande` |
-| `variants[].price` | number (decimale, €) \| null | `2` |
+| `variants[].variantName` | string | `Grande` |
+| `variants[].price` | number (decimale, €) | `2` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.5}, {"idPeriod": 1, "price": 1.8}]` |
 | `periodPrices[].idPeriod` | number (intero) | `0` |
 | `periodPrices[].price` | number (decimale, €) \| null | `1.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "12:00", "onlineStartTime": "09:00", "onlineEndTime": "12:00", "maxBookingPerHourQuantity": 2, "maxBookingPerDayQuantity": 5, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "09:00", "managementEndTime": "12:00", "onlineStartTime": "09:00", "onlineEndTime": "12:00", "maxBookingPerHourQuantity": 2, "maxBookingPerDayQuantity": 5, "maxPerSlot": 5, "intervalMinutes": 30, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `12:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `12:00` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `2` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `5` |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `5` |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null | `30` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
 
 #### Response
 
-Stato: 204 No Content (nessun corpo).
+Stato: 201 Created.
+
+Il corpo è solo l'id del servizio bar creato, come stringa JSON (tra virgolette, Content-Type application/json).
+
+```json
+"8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c13"
+```
+
+### POST `/api/catalog/services/{id}/image`
+
+Servizi: caricamento dell'immagine di un servizio.
+
+#### Payload
+
+```json
+{
+  "file": "caffe.webp (image/webp, 0,4 MB)"
+}
+```
+
+| Property | Tipo | Esempio |
+|---|---|---|
+| `file` | file (multipart/form-data) | `caffe.webp (image/webp, 0,4 MB)` |
+
+#### Response
+
+Stato: 200 OK (il servizio, che il frontend non legge).
 
 Nessun corpo.
 
-### GET `/api/catalog/get-bar-service-general-info?idBarService={idBarService}`
+### DELETE `/api/catalog/services/{id}/image`
+
+Servizi: eliminazione dell'immagine di un servizio.
+
+#### Payload
+
+Nessun corpo: l'id del servizio è nella rotta.
+
+#### Response
+
+Stato: 200 OK (il servizio, che il frontend non legge).
+
+Nessun corpo.
+
+### GET `/api/catalog/services/get-bar-service-general-info?idBarService={idBarService}`
 
 Servizi: servizio bar, tab Info Generali.
 
@@ -3019,7 +3056,7 @@ Servizi: servizio bar, tab Info Generali.
 Nessun corpo: è una GET, l'id del servizio bar va nella query string.
 
 ```text
-/api/catalog/get-bar-service-general-info?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
+/api/catalog/services/get-bar-service-general-info?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
 ```
 
 | Property | Tipo | Esempio |
@@ -3047,6 +3084,7 @@ Stato: 200 OK.
   ],
   "category": "Bar",
   "icon": "Coffee",
+  "imageUrl": null,
   "isHighlighted": true,
   "version": "feac3ca6"
 }
@@ -3060,11 +3098,12 @@ Stato: 200 OK.
 | `translations[].serviceName` | string \| null | `Caffè` |
 | `translations[].description` | string \| null | `Espresso in tazzina.` |
 | `category` | string (enum BarServiceCategory) \| null | `Bar` |
-| `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
+| `icon` | string \| null | `Coffee` |
+| `imageUrl` | string (URL) \| null | `null` |
 | `isHighlighted` | boolean | `true` |
 | `version` | string | `feac3ca6` |
 
-### GET `/api/catalog/get-bar-service-prices?idBarService={idBarService}`
+### GET `/api/catalog/services/get-bar-service-prices?idBarService={idBarService}`
 
 Servizi: servizio bar, tab Prezzi.
 
@@ -3073,7 +3112,7 @@ Servizi: servizio bar, tab Prezzi.
 Nessun corpo: è una GET, l'id del servizio bar va nella query string.
 
 ```text
-/api/catalog/get-bar-service-prices?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
+/api/catalog/services/get-bar-service-prices?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
 ```
 
 | Property | Tipo | Esempio |
@@ -3111,11 +3150,11 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `price` | number (decimale, €) \| null | `1` |
+| `price` | number (decimale, €) | `1` |
 | `vatRate` | number (decimale, %) \| null | `10` |
 | `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 1.8}]` |
-| `variants[].variantName` | string \| null | `Doppio` |
-| `variants[].price` | number (decimale, €) \| null | `1.8` |
+| `variants[].variantName` | string | `Doppio` |
+| `variants[].price` | number (decimale, €) | `1.8` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.2}]` |
 | `periodPrices[].idPeriod` | number (intero) | `0` |
@@ -3124,7 +3163,7 @@ Stato: 200 OK.
 | `isOnlinePurchaseEnabled` | boolean | `true` |
 | `version` | string | `37b6a44c` |
 
-### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
+### GET `/api/catalog/services/get-bar-service-booking-options?idBarService={idBarService}`
 
 Servizi: servizio bar, tab Prenotazioni.
 
@@ -3133,7 +3172,7 @@ Servizi: servizio bar, tab Prenotazioni.
 Nessun corpo: è una GET, l'id del servizio bar va nella query string.
 
 ```text
-/api/catalog/get-bar-service-booking-options?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
+/api/catalog/services/get-bar-service-booking-options?idBarService=8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01
 ```
 
 | Property | Tipo | Esempio |
@@ -3150,13 +3189,18 @@ Stato: 200 OK.
     {
       "dateFrom": "2026-07-01T00:00:00.000Z",
       "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": [
+        "Saturday",
+        "Sunday"
+      ],
       "managementStartTime": "08:00",
       "managementEndTime": "12:00",
       "onlineStartTime": "08:30",
       "onlineEndTime": "11:30",
       "maxBookingPerHourQuantity": 20,
       "maxBookingPerDayQuantity": 80,
-      "timeInterval": "ThirtyMinutes",
+      "maxPerSlot": 5,
+      "intervalMinutes": 30,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 4
     }
@@ -3167,21 +3211,23 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "08:00", "managementEndTime": "12:00", "onlineStartTime": "08:30", "onlineEndTime": "11:30", "maxBookingPerHourQuantity": 20, "maxBookingPerDayQuantity": 80, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 4}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "08:00", "managementEndTime": "12:00", "onlineStartTime": "08:30", "onlineEndTime": "11:30", "maxBookingPerHourQuantity": 20, "maxBookingPerDayQuantity": 80, "maxPerSlot": 5, "intervalMinutes": 30, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 4}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `08:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `12:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `08:30` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `11:30` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `20` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `80` |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `5` |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null | `30` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `4` |
 | `version` | string | `96f5de5b` |
 
-### POST `/api/catalog/update-bar-service-general`
+### POST `/api/catalog/services/update-bar-service-general`
 
 Servizi: servizio bar, salvataggio Info Generali.
 
@@ -3241,7 +3287,7 @@ Servizi: servizio bar, salvataggio Info Generali.
 | `translations[].serviceName` | string \| null | `Caffè espresso` |
 | `translations[].description` | string \| null | `Espresso in tazzina.` |
 | `category` | string (enum BarServiceCategory) \| null | `Bar` |
-| `icon` | string (enum BarServiceIcon) \| null | `Coffee` |
+| `icon` | string \| null | `Coffee` |
 | `isHighlighted` | boolean | `true` |
 
 #### Response
@@ -3250,7 +3296,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/update-bar-service-prices`
+### POST `/api/catalog/services/update-bar-service-prices`
 
 Servizi: servizio bar, salvataggio Prezzi.
 
@@ -3288,11 +3334,11 @@ Servizi: servizio bar, salvataggio Prezzi.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
-| `price` | number (decimale, €) \| null | `1.3` |
+| `price` | number (decimale, €) | `1.3` |
 | `vatRate` | number (decimale, %) \| null | `10` |
 | `variants[]` | ServiceVariant[] (array di oggetti) | `[{"variantName": "Doppio", "price": 1.8}]` |
-| `variants[].variantName` | string \| null | `Doppio` |
-| `variants[].price` | number (decimale, €) \| null | `1.8` |
+| `variants[].variantName` | string | `Doppio` |
+| `variants[].price` | number (decimale, €) | `1.8` |
 | `isPeriodPricingEnabled` | boolean | `true` |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) | `[{"idPeriod": 0, "price": 1.2}, {"idPeriod": 1, "price": 1.5}]` |
 | `periodPrices[].idPeriod` | number (intero) | `0` |
@@ -3306,7 +3352,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/update-bar-service-booking`
+### POST `/api/catalog/services/update-bar-service-booking`
 
 Servizi: servizio bar, salvataggio Prenotazioni.
 
@@ -3319,13 +3365,18 @@ Servizi: servizio bar, salvataggio Prenotazioni.
     {
       "dateFrom": "2026-07-01T00:00:00.000Z",
       "dateTo": "2026-07-31T00:00:00.000Z",
+      "weekdays": [
+        "Saturday",
+        "Sunday"
+      ],
       "managementStartTime": "08:00",
       "managementEndTime": "12:00",
       "onlineStartTime": "08:30",
       "onlineEndTime": "11:30",
       "maxBookingPerHourQuantity": 20,
       "maxBookingPerDayQuantity": 80,
-      "timeInterval": "ThirtyMinutes",
+      "maxPerSlot": 5,
+      "intervalMinutes": 30,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 4
     }
@@ -3336,16 +3387,18 @@ Servizi: servizio bar, salvataggio Prenotazioni.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idBarService` | string (UUID) | `8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c01` |
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "managementStartTime": "08:00", "managementEndTime": "12:00", "onlineStartTime": "08:30", "onlineEndTime": "11:30", "maxBookingPerHourQuantity": 20, "maxBookingPerDayQuantity": 80, "timeInterval": "ThirtyMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 4}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-07-01T00:00:00.000Z", "dateTo": "2026-07-31T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "08:00", "managementEndTime": "12:00", "onlineStartTime": "08:30", "onlineEndTime": "11:30", "maxBookingPerHourQuantity": 20, "maxBookingPerDayQuantity": 80, "maxPerSlot": 5, "intervalMinutes": 30, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 4}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-01T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-07-31T00:00:00.000Z` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `08:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `12:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `08:30` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `11:30` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `20` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `80` |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `ThirtyMinutes` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `5` |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null | `30` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `4` |
 
@@ -3355,7 +3408,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/delete-bar-service-item`
+### POST `/api/catalog/services/delete-bar-service-item`
 
 Servizi: eliminazione servizi bar.
 
@@ -3380,7 +3433,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/duplicate-bar-service-item`
+### POST `/api/catalog/services/duplicate-bar-service-item`
 
 Servizi: duplicazione servizi bar.
 
@@ -3415,14 +3468,7 @@ Servizi: servizi.
   "page": 1,
   "pageSize": 10,
   "search": "doccia",
-  "filters": [
-    {
-      "field": "serviceName",
-      "value": [
-        "Doccia calda"
-      ]
-    }
-  ],
+  "filters": [],
   "sortField": "serviceName",
   "sortDirection": "Ascending"
 }
@@ -3433,9 +3479,7 @@ Servizi: servizi.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `doccia` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Doccia calda"]}]` |
-| `filters[].field` | string | `serviceName` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Doccia calda"]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
 | `sortField` | string | `serviceName` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -3532,13 +3576,18 @@ Servizi: creazione servizio.
     {
       "dateFrom": "2026-06-15T00:00:00.000Z",
       "dateTo": "2026-09-15T00:00:00.000Z",
+      "weekdays": [
+        "Saturday",
+        "Sunday"
+      ],
       "managementStartTime": "09:00",
       "managementEndTime": "19:00",
       "onlineStartTime": "09:00",
       "onlineEndTime": "18:00",
       "maxBookingPerHourQuantity": 6,
       "maxBookingPerDayQuantity": 50,
-      "timeInterval": "FifteenMinutes",
+      "maxPerSlot": null,
+      "intervalMinutes": 15,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 2
     }
@@ -3562,16 +3611,18 @@ Servizi: creazione servizio.
 | `periodPrices[].price` | number (decimale, €) \| null | `2.5` |
 | `idSectors` | string[] (UUID) | `["5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01"]` |
 | `isOnlinePurchaseEnabled` | boolean | `true` |
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "maxPerSlot": null, "intervalMinutes": 15, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `18:00` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `6` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `50` |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `null` |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null | `15` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
 
@@ -3710,13 +3761,18 @@ Stato: 200 OK.
     {
       "dateFrom": "2026-06-15T00:00:00.000Z",
       "dateTo": "2026-09-15T00:00:00.000Z",
+      "weekdays": [
+        "Saturday",
+        "Sunday"
+      ],
       "managementStartTime": "09:00",
       "managementEndTime": "19:00",
       "onlineStartTime": "09:00",
       "onlineEndTime": "18:00",
       "maxBookingPerHourQuantity": 6,
       "maxBookingPerDayQuantity": 50,
-      "timeInterval": "FifteenMinutes",
+      "maxPerSlot": null,
+      "intervalMinutes": 15,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 2
     }
@@ -3727,16 +3783,18 @@ Stato: 200 OK.
 
 | Property | Tipo | Esempio |
 |---|---|---|
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "maxPerSlot": null, "intervalMinutes": 15, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `18:00` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `6` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `50` |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `null` |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null | `15` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
 | `version` | string | `f71a86f3` |
@@ -3868,13 +3926,18 @@ Servizi: servizio, salvataggio Prenotazioni.
     {
       "dateFrom": "2026-06-15T00:00:00.000Z",
       "dateTo": "2026-09-15T00:00:00.000Z",
+      "weekdays": [
+        "Saturday",
+        "Sunday"
+      ],
       "managementStartTime": "09:00",
       "managementEndTime": "19:00",
       "onlineStartTime": "09:00",
       "onlineEndTime": "18:00",
       "maxBookingPerHourQuantity": 6,
       "maxBookingPerDayQuantity": 50,
-      "timeInterval": "FifteenMinutes",
+      "maxPerSlot": null,
+      "intervalMinutes": 15,
       "minItemPerBookingQuantity": 1,
       "maxItemPerBookingQuantity": 2
     }
@@ -3885,16 +3948,18 @@ Servizi: servizio, salvataggio Prenotazioni.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idStandardService` | string (UUID) | `9b3d5f7a-2c4e-4a6b-8d0f-3e5a7b9c1d01` |
-| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "timeInterval": "FifteenMinutes", "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
+| `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) | `[{"dateFrom": "2026-06-15T00:00:00.000Z", "dateTo": "2026-09-15T00:00:00.000Z", "weekdays": ["Saturday", "Sunday"], "managementStartTime": "09:00", "managementEndTime": "19:00", "onlineStartTime": "09:00", "onlineEndTime": "18:00", "maxBookingPerHourQuantity": 6, "maxBookingPerDayQuantity": 50, "maxPerSlot": null, "intervalMinutes": 15, "minItemPerBookingQuantity": 1, "maxItemPerBookingQuantity": 2}]` |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null | `2026-06-15T00:00:00.000Z` |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null | `2026-09-15T00:00:00.000Z` |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) | `["Saturday", "Sunday"]` |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null | `19:00` |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null | `09:00` |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null | `18:00` |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null | `6` |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null | `50` |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null | `FifteenMinutes` |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null | `null` |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null | `15` |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null | `1` |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null | `2` |
 
@@ -3964,14 +4029,7 @@ Servizi: servizi orari.
   "page": 1,
   "pageSize": 10,
   "search": "pisc",
-  "filters": [
-    {
-      "field": "serviceName",
-      "value": [
-        "Piscina"
-      ]
-    }
-  ],
+  "filters": [],
   "sortField": "serviceName",
   "sortDirection": "Ascending"
 }
@@ -3982,9 +4040,7 @@ Servizi: servizi orari.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `pisc` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Piscina"]}]` |
-| `filters[].field` | string | `serviceName` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Piscina"]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
 | `sortField` | string | `serviceName` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -4887,14 +4943,7 @@ Servizi: prezzi automatici.
   "page": 1,
   "pageSize": 10,
   "search": "cop",
-  "filters": [
-    {
-      "field": "serviceName",
-      "value": [
-        "Coperto"
-      ]
-    }
-  ],
+  "filters": [],
   "sortField": "price",
   "sortDirection": "Ascending"
 }
@@ -4905,9 +4954,7 @@ Servizi: prezzi automatici.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `cop` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Coperto"]}]` |
-| `filters[].field` | string | `serviceName` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Coperto"]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
 | `sortField` | string | `price` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -5444,14 +5491,7 @@ Servizi: prenotazione servizio tavoli.
   "page": 1,
   "pageSize": 10,
   "search": "cen",
-  "filters": [
-    {
-      "field": "serviceName",
-      "value": [
-        "Cena"
-      ]
-    }
-  ],
+  "filters": [],
   "sortField": "serviceName",
   "sortDirection": "Ascending"
 }
@@ -5462,9 +5502,7 @@ Servizi: prenotazione servizio tavoli.
 | `page` | number (intero, da 1) | `1` |
 | `pageSize` | number (intero) | `10` |
 | `search` | string | `cen` |
-| `filters[]` | PageFilter[] (array di oggetti) | `[{"field": "serviceName", "value": ["Cena"]}]` |
-| `filters[].field` | string | `serviceName` |
-| `filters[].value` | string[] (array di stringhe, almeno una) | `["Cena"]` |
+| `filters[]` | PageFilter[] (array di oggetti) | `[]` |
 | `sortField` | string | `serviceName` |
 | `sortDirection` | string (enum SortDirection) | `Ascending` |
 
@@ -6808,7 +6846,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/sector-combobox`
+### POST `/api/catalog/sectors/sector-combobox`
 
 Settori e file: settori per la tendina.
 

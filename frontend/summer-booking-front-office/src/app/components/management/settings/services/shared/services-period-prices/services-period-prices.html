@@ -50,6 +50,9 @@
     </p>
   }
 }
+@if (periodPricesError(); as error) {
+  <p class="services__period__prices__error">{{ error }}</p>
+}
 
 <app-info-popup
   [title]="'management.settings.services.form.prices.period_pricing.enable' | translate"

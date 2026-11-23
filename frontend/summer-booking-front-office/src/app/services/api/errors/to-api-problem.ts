@@ -70,7 +70,7 @@ function readArgs(value: unknown): ApiProblemArgs | undefined {
     return;
   }
   const entries = Object.entries(value)
-    .map(([name, arg]) => [name, isTextList(arg) ? listText(arg) : arg] as const)
+    .map(([name, arg]) => [name, isPlainList(arg) ? listText(arg) : arg] as const)
     .filter(
       ([name, arg]) =>
         ARG_NAME.test(name) &&
@@ -80,14 +80,20 @@ function readArgs(value: unknown): ApiProblemArgs | undefined {
   return entries.length ? (Object.fromEntries(entries) as ApiProblemArgs) : undefined;
 }
 
-function isTextList(value: unknown): value is readonly string[] {
+function isPlainList(value: unknown): value is readonly string[] | readonly number[] {
   return (
-    Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === 'string')
+    Array.isArray(value) &&
+    value.length > 0 &&
+    (value.every((item) => typeof item === 'string') ||
+      value.every((item) => Number.isFinite(item)))
   );
 }
 
-/** A list of names as one text for the message (`A, B, C`): the first 20, cut with … when too long. */
-function listText(items: readonly string[]): string {
+/**
+ * A list of names or numbers as one text for the message (`A, B, C`): the first 20, cut with … when
+ * too long.
+ */
+function listText(items: readonly string[] | readonly number[]): string {
   const shown = items.slice(0, MAX_ARG_ITEMS).join(', ');
   const text = items.length > MAX_ARG_ITEMS ? `${shown}, …` : shown;
   return text.length <= MAX_ARG_LENGTH ? text : `${text.slice(0, MAX_ARG_LENGTH - 1)}…`;

@@ -134,7 +134,8 @@
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento.",
       "property_not_found": "No se ha encontrado el establecimiento de tu cuenta. Cierra sesión y vuelve a entrar; si se repite, contacta con el soporte.",
       "country_not_found": "El país elegido ya no está disponible: elige otro.",
-      "sector_not_found": "El sector/fila ya no existe: puede que ya se haya eliminado."
+      "sector_not_found": "El sector/fila ya no existe: puede que ya se haya eliminado.",
+      "vat_rate_not_allowed": "Tipo no permitido. Tipos válidos: {{rates}}."
     },
     "pricing": {
       "season_required": "Configura primero las fechas de la temporada.",
@@ -156,7 +157,8 @@
     "service": {
       "not_found": "El servicio ya no existe: puede que ya se haya eliminado.",
       "automatic_price_not_found": "El precio automático ya no existe: puede que ya se haya eliminado.",
-      "table_service_not_found": "El servicio de mesas ya no existe: puede que ya se haya eliminado."
+      "table_service_not_found": "El servicio de mesas ya no existe: puede que ya se haya eliminado.",
+      "icon_not_found": "El icono elegido ya no está disponible: elige otro."
     }
   },
   "alert": {
@@ -1459,7 +1461,15 @@
             "title": "Imagen del servicio",
             "choose_icon": "Elige un icono",
             "upload": "O sube una imagen",
-            "drop": "Arrastra la imagen aquí o haz clic para subirla"
+            "drop": "Arrastra la imagen aquí o haz clic para subirla",
+            "upload_failed_title": "Imagen no subida",
+            "upload_failed_text": "El servicio se ha guardado, pero la imagen no. {{reason}}",
+            "delete": {
+              "title": "Eliminar imagen",
+              "text": "¿Seguro que quieres eliminar esta imagen?",
+              "cancel": "Cancelar",
+              "confirm": "Eliminar"
+            }
           },
           "highlighted": "Destacar",
           "highlighted_info": "Si esta opción **está activada**, cuando un cliente reserva un servicio de playa, puede ver este servicio y añadirlo directamente a su reserva.",
@@ -2035,8 +2045,6 @@
     "phone_digits": "Solo números y espacios: el prefijo va en el campo de al lado",
     "phone_digits_without_prefix": "Solo números y espacios, sin +",
     "phone_max_length": "El número puede tener como máximo {{max}} caracteres, espacios incluidos",
-    "time_not_after_end": "No puede ser posterior a la hora de fin",
-    "time_not_before_start": "No puede ser anterior a la hora de inicio",
     "time_before_end": "Debe ser anterior a la hora de fin",
     "time_after_start": "Debe ser posterior a la hora de inicio",
     "seasons": {
@@ -2054,6 +2062,11 @@
     "catalog": {
       "price": {
         "max": "Un precio supera el máximo permitido de {max, number, currency}."
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "Escribe también el nombre en este idioma"
       }
     }
   },

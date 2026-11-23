@@ -134,7 +134,8 @@
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento.",
       "property_not_found": "Lo stabilimento del tuo account non è stato trovato. Esci e accedi di nuovo; se si ripete, contatta l'assistenza.",
       "country_not_found": "La nazione scelta non è più disponibile: scegline un'altra.",
-      "sector_not_found": "Il settore/fila non c'è più: forse è già stato eliminato."
+      "sector_not_found": "Il settore/fila non c'è più: forse è già stato eliminato.",
+      "vat_rate_not_allowed": "Aliquota non ammessa. Aliquote valide: {{rates}}."
     },
     "pricing": {
       "season_required": "Imposta prima le date della stagione.",
@@ -156,7 +157,8 @@
     "service": {
       "not_found": "Il servizio non c'è più: forse è già stato eliminato.",
       "automatic_price_not_found": "Il prezzo automatico non c'è più: forse è già stato eliminato.",
-      "table_service_not_found": "Il servizio tavoli non c'è più: forse è già stato eliminato."
+      "table_service_not_found": "Il servizio tavoli non c'è più: forse è già stato eliminato.",
+      "icon_not_found": "L'icona scelta non è più disponibile: scegline un'altra."
     }
   },
   "alert": {
@@ -1459,7 +1461,15 @@
             "title": "Immagine servizio",
             "choose_icon": "Seleziona un'icona",
             "upload": "Oppure carica un'immagine",
-            "drop": "Trascina qui l'immagine o clicca per caricare"
+            "drop": "Trascina qui l'immagine o clicca per caricare",
+            "upload_failed_title": "Immagine non caricata",
+            "upload_failed_text": "Il servizio è stato salvato, ma l'immagine no. {{reason}}",
+            "delete": {
+              "title": "Elimina immagine",
+              "text": "Vuoi davvero eliminare questa immagine?",
+              "cancel": "Annulla",
+              "confirm": "Elimina"
+            }
           },
           "highlighted": "Metti in evidenza",
           "highlighted_info": "Se questa opzione **è abilitata**, quando un cliente prenota un servizio spiaggia, può visualizzare ed aggiungere direttamente questo servizio alla sua prenotazione.",
@@ -2035,8 +2045,6 @@
     "phone_digits": "Solo numeri e spazi: il prefisso va nel campo accanto",
     "phone_digits_without_prefix": "Solo numeri e spazi, senza +",
     "phone_max_length": "Il numero può avere al massimo {{max}} caratteri, spazi compresi",
-    "time_not_after_end": "Non può essere dopo l'orario di fine",
-    "time_not_before_start": "Non può essere prima dell'orario di inizio",
     "time_before_end": "Deve precedere l'orario di fine",
     "time_after_start": "Deve seguire l'orario di inizio",
     "seasons": {
@@ -2054,6 +2062,11 @@
     "catalog": {
       "price": {
         "max": "Un prezzo supera il massimo consentito di {max, number, currency}."
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "Scrivi anche il nome in questa lingua"
       }
     }
   },

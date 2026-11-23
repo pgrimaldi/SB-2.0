@@ -191,29 +191,35 @@ export class CatalogService {
       .pipe(map(versionOf));
 
   readonly barServiceList = (request: PageRequest): Observable<Page<BarServiceItem>> =>
-    this.httpClient.post<Page<BarServiceItem>>(`${this.endpoint}/bar-service-list`, request);
+    this.httpClient.post<Page<BarServiceItem>>(
+      `${this.endpoint}/services/bar-service-list`,
+      request,
+    );
 
   /** The Info Generali tab of a bar service, for the edit panel. */
   readonly barServiceGeneralInfo = (
     idBarService: string,
   ): Observable<BarServiceSelectedGeneralInfo> =>
     this.httpClient.get<BarServiceSelectedGeneralInfo>(
-      `${this.endpoint}/get-bar-service-general-info`,
+      `${this.endpoint}/services/get-bar-service-general-info`,
       { params: { idBarService } },
     );
 
   /** The Prezzi tab of a bar service, for the edit panel. */
   readonly barServicePrices = (idBarService: string): Observable<BarServiceSelectedPrices> =>
-    this.httpClient.get<BarServiceSelectedPrices>(`${this.endpoint}/get-bar-service-prices`, {
-      params: { idBarService },
-    });
+    this.httpClient.get<BarServiceSelectedPrices>(
+      `${this.endpoint}/services/get-bar-service-prices`,
+      {
+        params: { idBarService },
+      },
+    );
 
   /** The Prenotazioni tab of a bar service, its booking options, for the edit panel. */
   readonly barServiceBookingOptions = (
     idBarService: string,
   ): Observable<BarServiceSelectedBookingOptions> =>
     this.httpClient.get<BarServiceSelectedBookingOptions>(
-      `${this.endpoint}/get-bar-service-booking-options`,
+      `${this.endpoint}/services/get-bar-service-booking-options`,
       { params: { idBarService } },
     );
 
@@ -227,7 +233,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-bar-service-general`,
+        `${this.endpoint}/services/update-bar-service-general`,
         {
           ...onlyFieldsOf(BarServiceUpdateGeneralRequest, request),
           translations: request.translations.map((translation) =>
@@ -248,7 +254,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-bar-service-prices`,
+        `${this.endpoint}/services/update-bar-service-prices`,
         {
           ...onlyFieldsOf(BarServiceUpdatePricesRequest, request),
           variants: request.variants.map((variant) => onlyFieldsOf(ServiceVariant, variant)),
@@ -270,7 +276,7 @@ export class CatalogService {
   ): Observable<string | null> =>
     this.httpClient
       .post<void>(
-        `${this.endpoint}/update-bar-service-booking`,
+        `${this.endpoint}/services/update-bar-service-booking`,
         {
           ...onlyFieldsOf(BarServiceUpdateBookingRequest, request),
           bookingOptions: request.bookingOptions.map((bookingOption) =>
@@ -281,9 +287,9 @@ export class CatalogService {
       )
       .pipe(map(versionOf));
 
-  /** The data of the three tabs of the add panel. Answers 204 with no body. */
-  readonly createBarService = (request: BarServiceAddItemRequest): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/create-bar-service`, {
+  /** The data of the three tabs of the add panel. Answers the id of the new bar service. */
+  readonly createBarService = (request: BarServiceAddItemRequest): Observable<string> =>
+    this.httpClient.post<string>(`${this.endpoint}/services/create-bar-service`, {
       ...onlyFieldsOf(BarServiceAddItemRequest, request),
       translations: request.translations.map((translation) =>
         onlyFieldsOf(ServiceTranslation, translation),
@@ -297,13 +303,30 @@ export class CatalogService {
       ),
     });
 
+  /** The image of a service of any kind, instead of an icon. The answer, the service, is not read. */
+  readonly uploadServiceImage = (idService: string, image: File): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/services/${encodeURIComponent(idService)}/image`,
+      formOf(image),
+    );
+
+  /** The uploaded image of a service of any kind. The answer, the service, is not read. */
+  readonly deleteServiceImage = (idService: string): Observable<void> =>
+    this.httpClient.delete<void>(
+      `${this.endpoint}/services/${encodeURIComponent(idService)}/image`,
+    );
+
   /** All or nothing: one id that cannot be deleted and none is. Answers 204 with no body. */
   readonly deleteBarServiceItems = (idBarServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/delete-bar-service-item`, { idBarServices });
+    this.httpClient.post<void>(`${this.endpoint}/services/delete-bar-service-item`, {
+      idBarServices,
+    });
 
   /** All or nothing, like the delete. The backend names the copies. Answers 204 with no body. */
   readonly duplicateBarServiceItems = (idBarServices: string[]): Observable<void> =>
-    this.httpClient.post<void>(`${this.endpoint}/duplicate-bar-service-item`, { idBarServices });
+    this.httpClient.post<void>(`${this.endpoint}/services/duplicate-bar-service-item`, {
+      idBarServices,
+    });
 
   readonly standardServiceList = (request: PageRequest): Observable<Page<StandardServiceItem>> =>
     this.httpClient.post<Page<StandardServiceItem>>(

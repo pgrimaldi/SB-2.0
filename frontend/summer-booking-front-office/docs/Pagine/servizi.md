@@ -33,7 +33,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   SVG come le altre.
 
 - Servizi Bar: titolo "Servizi bar" con la tazzina (`Services_BarTitle.png`), bottone "Aggiungi servizio bar",
-  colonne Servizio, Categoria, Prezzo; righe da `POST /api/catalog/bar-service-list`
+  colonne Servizio, Categoria, Prezzo; righe da `POST /api/catalog/services/bar-service-list`
   (`CatalogService.barServiceList`, `Page<BarServiceItem>`).
 - Servizi: titolo "Servizi" con la piuma (`Services_StandardTitle.png`), bottone "Aggiungi servizio", colonne
   Servizio, Prezzo; righe da `POST /api/catalog/standard-service-list` (`CatalogService.standardServiceList`,
@@ -65,7 +65,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   Prenotazione tavoli. Su Elimina, su Duplica e su Modifica (lettura del pannello e Salva) gli id escono dalla
   selezione e la tabella si ricarica (`reloadIfGone`, uscita `failed` dei popup e del pannello di modifica).
 - API (tutte `POST /api/catalog/…`):
-  - Servizi bar: `delete-bar-service-item`, `duplicate-bar-service-item` (`idBarServices`);
+  - Servizi bar: `services/delete-bar-service-item`, `services/duplicate-bar-service-item` (`idBarServices`);
   - Servizi: `delete-standard-service-item`, `duplicate-standard-service-item` (`idStandardServices`);
   - Servizi orari: `delete-hourly-service-item`, `duplicate-hourly-service-item` (`idHourlyServices`);
   - Prezzi automatici: `delete-automatic-price-item`, `duplicate-automatic-price-item` (`idAutomaticPrices`);
@@ -83,9 +83,11 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
     `imageChosen`; generico sul tipo del valore; il riquadro di caricamento accetta solo png, jpeg e webp fino a 5 MB,
     come il backend (`IMAGE_UPLOAD_TYPES`, `MAX_IMAGE_UPLOAD_MEGABYTES`): un file più grande non passa e sotto il
     riquadro compare "Il file supera i 5 MB"; un file vuoto non passa (`isUploadable`) e compare il messaggio di
-    `catalog.invalid_image`, come lo darebbe il backend;
-  - `app-services-popup-alternatives`: sezione Varianti, sull'elenco `variants` del form;
-  - `app-services-price-vat`: Prezzo e IVA (%) affiancati, sui campi `price` e `vatRate`;
+    `catalog.invalid_image`, come lo darebbe il backend; l'input `error` mostra lì sotto un errore dell'icona;
+  - `app-services-popup-alternatives`: sezione Varianti, sull'elenco `variants` del form; nome e prezzo di ogni
+    variante sono obbligatori (asterisco);
+  - `app-services-price-vat`: Prezzo e IVA (%) affiancati, sui campi `price` e `vatRate`; con `isPriceMandatory`
+    l'asterisco sul prezzo;
   - `app-services-period-prices`: "Abilita variazioni di prezzo per periodo" con la sua (i) e un pannello per
     periodo; riceve `isPeriodPricingEnabled`, `periodPrices` e i periodi della stagione;
   - `app-services-limits`: sezione Limiti, sul campo `idSectors`;
@@ -94,7 +96,14 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   - `app-services-availability-options` / `app-services-availability-option`: Opzioni disponibilità dei servizi
     orari.
 - Varianti e opzioni ricevono un pezzo del form del pannello, che quindi le valida, le salva e le modifica; sotto
-  ogni campo mostrano gli errori della validazione.
+  ogni campo mostrano gli errori della validazione, sotto l'elenco un errore che riguarda l'elenco intero (es. troppe
+  varianti). Lo stesso per i prezzi per periodo.
+- Regole comuni delle varianti e delle opzioni di prenotazione, uguali a quelle del backend: `service-form-rules.ts`
+  (`serviceVariantRules`, `serviceBookingOptionRules`). I limiti sono costanti delle entità
+  (`MAX_SERVICE_NAME_LENGTH`, `MAX_SERVICE_DESCRIPTION_LENGTH`, `MAX_SERVICE_PRICE`,
+  `MAX_SERVICE_VARIANT_NAME_LENGTH`, `MAX_SERVICE_BOOKING_QUANTITY`).
+- Codici del backend senza `errors[]` che riguardano un campo: `service-field-errors.ts` li mette sotto il campo
+  (`catalog.vat_rate_not_allowed` sotto IVA, con le aliquote ammesse; `service.icon_not_found` sotto le icone).
 
 ### Nome e descrizione nelle lingue
 
@@ -128,7 +137,7 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - "Servizio acquistabile nelle seguenti file/settori": `app-filled-multi-select` a scelta multipla su `idSectors`,
   vuota = "Tutte le file/settori".
 - Le voci sono i settori dello stabilimento, che il componente chiede da sé a `SectorService.sectorCombobox`
-  (`POST /api/catalog/sector-combobox`) ogni volta che compare, cioè a ogni apertura della tab Prezzi; come la
+  (`POST /api/catalog/sectors/sector-combobox`) ogni volta che compare, cioè a ogni apertura della tab Prezzi; come la
   tendina Fila/settore della pagina Prenotazioni online (`online-booking-options-panel`).
 
 ### Le (i)
@@ -149,12 +158,12 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - Se la lettura dei periodi fallisce l'interruttore dei prezzi per periodo resta spento e bloccato (`disabled`
   finché i periodi non arrivano); il resto del servizio si salva lo stesso e riaprendo il pannello si riprova.
 - Salva (`isSaveDisabled` di `app-side-panel`) è spento finché mancano Nome e Descrizione nella lingua
-  dell'utente, gli unici campi obbligatori: asterisco, "Campo obbligatorio" sotto il campo dopo averlo toccato,
-  `requiredText` solo sulla traduzione principale.
-- Ogni coppia Dalle / alle ha `timeRange`: un "alle" prima del "dalle" dà l'errore sotto i due orari e Salva
-  resta spento.
-- Salva manda tutto il form all'API di creazione (risposta 204): spinner sul bottone e pannello bloccato; se riesce
-  il pannello si chiude e la tabella si ricarica (`(created)`).
+  dell'utente: asterisco, "Campo obbligatorio" sotto il campo dopo averlo toccato, `requiredText` solo sulla
+  traduzione principale. Servizi Bar ha anche altri campi obbligatori (sotto).
+- Ogni coppia Dalle / alle ha `timeRange`: un "alle" che non viene dopo il "dalle" (anche la stessa ora) dà l'errore
+  sotto i due orari e Salva resta spento.
+- Salva manda tutto il form all'API di creazione (risposta 204, nei servizi bar l'id del nuovo servizio): spinner sul
+  bottone e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(created)`).
 - Se fallisce il pannello resta aperto con i dati: errori dei campi di primo livello sotto il campo, gli altri in
   fondo alla tab, sopra i bottoni.
 - Chiudere con dati scritti chiede conferma (modifiche non salvate); anche un riquadro di opzioni aggiunto conta
@@ -183,8 +192,8 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   lettura) e **Salva**, che manda la sola tab aperta alla sua API con l'id (risposta 204).
 - Spinner su Salva e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica (`(updated)`); se
   fallisce resta aperto in modifica, errori dei campi di primo livello sotto il campo, gli altri sopra i bottoni.
-- I campi obbligatori (nome e descrizione nella lingua dell'utente) contano solo sulla tab Info Generali, le coppie
-  Dalle / alle (`timeRange`) solo sulla loro tab.
+- I campi obbligatori (nome e descrizione nella lingua dell'utente) contano solo sulla tab Info Generali, gli altri
+  controlli (prezzi, coppie Dalle / alle con `timeRange`) solo sulla loro tab.
 - Cambiare tab in modifica con modifiche non salvate chiede "Modifiche non salvate" (Resta: si rimane sulla tab,
   la barra la segna di nuovo; Esci senza salvare: la tab torna ai valori letti e si cambia tab); senza modifiche
   si esce dalla modifica e si cambia tab. La X, Esc e il cambio di pagina chiedono lo stesso.
@@ -197,8 +206,29 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   34%, 33%, 33% come in Informazioni stabilimento.
 - Form `BarServiceAddItemRequest`: traduzioni, categoria, icona, Metti in evidenza, prezzi, varianti, prezzi per
   periodo, settori, acquisto online, opzioni di prenotazione.
-- Salva: `POST /api/catalog/create-bar-service` (`CatalogService.createBarService`). L'immagine caricata dal
-  computer non viene inviata: non c'è un'API per i file.
+- Salva: `POST /api/catalog/services/create-bar-service` (`CatalogService.createBarService`), che risponde con l'id del
+  servizio creato; poi, se c'è, l'immagine (sotto).
+- Obbligatori, come nel backend: Nome e Descrizione nella lingua dell'utente, il nome nelle altre lingue che hanno una
+  descrizione (`otherTranslationRules`: l'errore "Scrivi anche il nome in questa lingua" è sotto la descrizione, perché il
+  nome può stare in un riquadro chiuso), Prezzo, e nome e prezzo di ogni variante. I limiti dell'IVA (tra 0 e 100), delle
+  varianti (50) e delle opzioni di prenotazione (20) non sono nel form: si vede l'errore del backend.
+  Limiti: nome 255 caratteri, descrizione 10.000, nome della variante 120, ogni prezzo fino a 100.000 (anche quelli per
+  periodo), numeri delle opzioni di prenotazione da 1 a 32.767 con il massimo di articoli non minore del minimo.
+- Un errore dell'API su un campo apre la tab di quel campo (`showTabOf`), dove si vede.
+
+#### Immagine
+
+- L'immagine scelta dal computer parte con Salva, dopo i dati: `POST /api/catalog/services/{id}/image`
+  (`CatalogService.uploadServiceImage`, multipart, campo `file`), nell'aggiunta con l'id della risposta, nella modifica
+  dopo il Salva di Info Generali. Il Salva manda l'icona com'era: la toglie il caricamento, così se fallisce resta.
+- Se il caricamento fallisce il servizio resta salvato: il pannello si chiude, la tabella si ricarica e compare
+  `app-service-image-error-popup` ("Immagine non caricata", con il messaggio del `code` e Chiudi).
+- In modifica il riquadro mostra l'immagine che il servizio ha già (`imageUrl` di
+  `get-bar-service-general-info`), finché non si sceglie un'icona o un'altra immagine; Annulla la rimette.
+- La X sull'immagine (`isImageRemovable` e `imageRemoveRequest` di `app-services-images`): un'immagine non ancora salvata
+  si toglie senza chiedere e torna l'icona di prima; quella salvata, in Modifica, si elimina subito dopo la conferma
+  (`app-confirm-popup`, `DELETE /api/catalog/services/{id}/image`, `CatalogService.deleteServiceImage`), con lo spinner a
+  pagina intera e l'errore sotto l'immagine. In sola lettura la X è spenta.
 
 #### Tab Info Generali (`ServiceGeneralInfoTab`)
 
@@ -218,8 +248,9 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 
 - Fatta con `app-services-price-vat`, `app-services-popup-alternatives`, `app-services-period-prices` e
   `app-services-limits`, in quest'ordine, poi l'interruttore "Abilita acquisto online" (`isOnlinePurchaseEnabled`).
-- Prezzo e IVA (%) affiancati, con "€" scritto accanto ai campi in euro, come nelle altre pagine.
-- Varianti: "Aggiungi nuova variante", righe Nome variante + Prezzo + cestino.
+- Prezzo (obbligatorio) e IVA (%) affiancati, con "€" scritto accanto ai campi in euro, come nelle altre pagine. L'IVA
+  vuota vuol dire senza aliquota; un'aliquota non ammessa la rifiuta il backend (`catalog.vat_rate_not_allowed`).
+- Varianti: "Aggiungi nuova variante", righe Nome variante + Prezzo (tutti e due obbligatori) + cestino.
 - Su telefono i riquadri della tab hanno 0.75rem di margine ai lati, così l'interruttore dei prezzi per periodo e
   la sua (i) stanno su una riga a 412px.
 
@@ -232,9 +263,13 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
   - Orari prenotazioni da gestionale e Orari prenotazioni online, Dalle / alle (`app-filled-time-field`,
     `managementStartTime`/`managementEndTime`, `onlineStartTime`/`onlineEndTime`);
   - Numero massimo di prenotazioni all'ora e al giorno;
-  - Intervallo di tempo (enum `BookingTimeInterval`: 15, 30, 45 minuti, 1 e 2 ore), con la (i) accanto
-    all'etichetta: quanto tempo deve passare tra un'ordinazione e l'altra dello stesso servizio;
+  - Intervallo di tempo (enum `BookingTimeInterval`: 15, 30, 45 minuti, 1 e 2 ore; nel form i minuti,
+    `intervalMinutes`, con `BOOKING_TIME_INTERVAL_MINUTES`), con la (i) accanto all'etichetta: quanto tempo deve passare
+    tra un'ordinazione e l'altra dello stesso servizio. Minuti diversi da questi già salvati non si vedono nella tendina e
+    restano finché non si sceglie un valore;
   - Numero minimo e massimo di articoli per prenotazione.
+- Ogni opzione ha anche `weekdays` (enum `Weekday`) e `maxPerSlot`, che il form non mostra: tornano al backend come letti
+  (`[]` e `null` per le opzioni nuove), così un Salva non li cancella.
 - I campi delle coppie sono larghi uguali (8.5rem) e le parole Dal / al / Dalle / alle hanno una larghezza comune,
   così stanno in due colonne allineate; un campo da solo (numeri e Intervallo di tempo) occupa lo spazio di una
   coppia. Su telefono i campi riempiono la riga.
@@ -244,16 +279,18 @@ Rotta `/settings/services` · vista `views/settings/services/` (`Services`, `app
 - `bar-service-edit-item-panel/` (`BarServiceEditItemPanel`): copia del pannello di aggiunta, input `idBarService`,
   stesse tre tab e stesso form `BarServiceAddItemRequest`.
 - GET (`idBarService` nella query string):
-  - Info Generali, all'apertura: `GET /api/catalog/get-bar-service-general-info` (`BarServiceSelectedGeneralInfo`,
-    le lingue mancanti restano vuote);
-  - Prezzi: `GET /api/catalog/get-bar-service-prices` insieme a `catalog/tariff-periods` (`BarServiceSelectedPrices`,
-    i prezzi sui periodi della stagione corrente);
-  - Prenotazioni: `GET /api/catalog/get-bar-service-booking-options` (`BarServiceSelectedBookingOptions`:
+  - Info Generali, all'apertura: `GET /api/catalog/services/get-bar-service-general-info`
+    (`BarServiceSelectedGeneralInfo`, le lingue mancanti restano vuote);
+  - Prezzi: `GET /api/catalog/services/get-bar-service-prices` insieme a `catalog/tariff-periods`
+    (`BarServiceSelectedPrices`, i prezzi sui periodi della stagione corrente);
+  - Prenotazioni: `GET /api/catalog/services/get-bar-service-booking-options` (`BarServiceSelectedBookingOptions`:
     `bookingOptions`, l'elenco `ServiceBookingOption[]`, e `version`).
 - Ogni risposta delle GET ha in più `version` (vedi "Pannelli di modifica").
-- Salvataggi (`POST /api/catalog/…`): `update-bar-service-general` (`BarServiceUpdateGeneralRequest`),
+- Salvataggi (`POST /api/catalog/services/…`): `update-bar-service-general` (`BarServiceUpdateGeneralRequest`),
   `update-bar-service-prices` (`BarServiceUpdatePricesRequest`), `update-bar-service-booking`
   (`BarServiceUpdateBookingRequest`, l'elenco intero delle opzioni).
+- Un'icona salvata fuori dalle 22 non si vede nella griglia: il suo nome resta in `otherIcon` e torna con il Salva di Info
+  Generali, finché non si sceglie un'icona o un'immagine.
 - In sola lettura: campi `readonly` dei Signal Forms (interruttori e tendina dei settori `disabled`) e, con l'input
   `isReadonly` delle tre tab, spenti icone, caricamento immagine, aggiungi/togli varianti e opzioni.
 

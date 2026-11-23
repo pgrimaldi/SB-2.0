@@ -120,13 +120,14 @@ describe('toApiProblem', () => {
     );
   });
 
-  it('should turn a list of texts in the args into one text, cut when too long', () => {
+  it('should turn a list of texts or numbers in the args into one text, cut when too long', () => {
     const problem = toApiProblem(
       answer(409, {
         code: ApiErrorCode.PricingPeriodInUse,
         args: {
           priceLists: ['Listino 2026', 'Hotel Mare – Listino base'],
           long: ['x'.repeat(150), 'y'.repeat(150)],
+          rates: [4, 5.5, 22],
           mixed: ['Listino', 3],
           many: Array.from({ length: 21 }, (_, index) => `L${index + 1}`),
         },
@@ -135,6 +136,7 @@ describe('toApiProblem', () => {
 
     expect(problem.args).toEqual({
       priceLists: 'Listino 2026, Hotel Mare – Listino base',
+      rates: '4, 5.5, 22',
       long: `${'x'.repeat(150)}, ${'y'.repeat(47)}…`,
       many: `${Array.from({ length: 20 }, (_, index) => `L${index + 1}`).join(', ')}, …`,
     });

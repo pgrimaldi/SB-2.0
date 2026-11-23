@@ -27,11 +27,9 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   `invalidate.phone_max_length` (es. `PHONE_MAX_LENGTH`, 32, il limite del backend).
 - `phoneNumberWithoutPrefix(path, lunghezza)`: le stesse regole per un numero che non ha accanto il campo del prefisso;
   il primo errore è `invalidate.phone_digits_without_prefix` ("Solo numeri e spazi, senza +").
-- `timeRange(inizio, fine)`: due orari `HH:mm`; se ci sono tutti e due la fine non può venire prima dell'inizio (uguali
-  vanno bene). L'errore va su tutti e due i campi, ognuno col suo testo (`invalidate.time_not_after_end`,
-  `invalidate.time_not_before_start`), così si vede sotto quello che l'utente ha cambiato.
-- `strictTimeRange(inizio, fine)`: lo stesso dove il backend vuole la fine strettamente dopo l'inizio, quindi anche
-  uguali è un errore (`invalidate.time_before_end`, `invalidate.time_after_start`).
+- `timeRange(inizio, fine)`: due orari `HH:mm`; se ci sono tutti e due la fine deve venire dopo l'inizio (anche uguali è
+  un errore). L'errore va su tutti e due i campi, ognuno col suo testo (`invalidate.time_before_end`,
+  `invalidate.time_after_start`), così si vede sotto quello che l'utente ha cambiato.
 - `webLink(path)`: un testo che non è un link completo http o https (`invalidate.web_link`). Il campo vuoto lo lascia
   a `requiredText`.
 - `emailAddress(path)`: un'email come la controlla il backend, cioè una sola `@`, né prima né ultima
@@ -105,6 +103,11 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   di partenza al posto di quelli veri.
 - Vale per ogni form di modifica, pagine, tab, pannelli e popup, anche futuri. Prima di consegnare un form di creazione
   o modifica si controlla che cosa parte quando la lettura fallisce.
+- Quello che il backend ha e il form non mostra si legge e si rimanda uguale, così un Salva non lo cancella: campi in più
+  nell'entità (es. `weekdays` e `maxPerSlot` delle opzioni di prenotazione di Servizi), righe nascoste (es.
+  `hiddenPeriodPrices`), un valore fuori dalle scelte di una tendina o di una griglia (es. `intervalMinutes`,
+  `otherIcon`), che resta finché l'utente non ne sceglie un altro. Se l'API è nostra, i campi si chiedono nel documento
+  delle richieste.
 - Un popup o pannello di modifica non mostra mai il form vuoto: se la lettura all'apertura fallisce si chiude e
   compare `app-read-error-popup` (`components/management/read-error-popup/`: "Errore", il messaggio del `code`,
   Chiudi e Riprova, che riapre la modifica e rilegge; per un 404, quando l'elemento non c'è più, solo Chiudi). Il
@@ -187,13 +190,12 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
 
 ## Coppie Dal / Al e Dalle / Alle
 
-- In ogni form la fine di una coppia non viene mai prima dell'inizio: il "Al" non prima del "Dal", l'"Alle" non prima
-  del "Dalle". Uguali vanno bene (es. 01/06–01/06, 09:00–09:00), salvo dove il backend lo vieta o l'utente dice
-  altrimenti. Ogni coppia nuova segue la stessa regola.
-- Orari: ogni coppia di `app-filled-time-field` ha `timeRange`, o `strictTimeRange` dove il backend vuole la fine
-  strettamente dopo l'inizio (orario di apertura di Informazioni stabilimento, fasce orarie dei voucher). Ognuno dei
-  due campi ha il suo `[error]`. Nei pannelli che salvano una tab alla volta il controllo vale solo sulla tab aperta,
-  come gli altri (`applyWhen` su `selectedTab()`).
+- In ogni form la fine di una coppia non viene mai prima dell'inizio. Giorni: il "Al" non prima del "Dal", uguali vanno
+  bene (es. 01/06–01/06), salvo dove il backend lo vieta o l'utente dice altrimenti. Orari: l'"Alle" **sempre dopo** il
+  "Dalle", mai la stessa ora (come vuole il backend). Ogni coppia nuova segue la stessa regola.
+- Orari: ogni coppia di `app-filled-time-field` ha `timeRange` e ognuno dei due campi ha il suo `[error]`. Nei pannelli
+  che salvano una tab alla volta il controllo vale solo sulla tab aperta, come gli altri (`applyWhen` su
+  `selectedTab()`).
 - Giorni: sotto.
 
 ## Campi data e coppie Dal / Al

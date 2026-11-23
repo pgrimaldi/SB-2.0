@@ -122,9 +122,18 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   per un `computed`. I codici non ancora tradotti mostrano `error.unknown`.
 - `args` riempie i segnaposto: `{{name}}` nei testi semplici; `{date, date, long}`, `{amount, number, currency}`,
   `{count, plural, …}` per date, importi e plurali (vedi `traduzioni-e-lingue.md`).
-- `toApiProblem` tiene solo `args` semplici (testi fino a 200 caratteri e numeri). Un elenco di testi (es. i nomi dei
-  listini di `pricing.period_in_use`) diventa un testo solo, separato da virgole: i primi 20, poi "…", tagliato con
-  "…" oltre i 200 caratteri.
+- `toApiProblem` tiene solo `args` semplici (testi fino a 200 caratteri e numeri). Un elenco di testi o di numeri (es. i
+  nomi dei listini di `pricing.period_in_use`, le aliquote di `catalog.vat_rate_not_allowed`) diventa un testo solo,
+  separato da virgole: i primi 20, poi "…", tagliato con "…" oltre i 200 caratteri.
+- **Il frontend riflette gli errori del backend**: per ogni API si leggono nel codice del backend tutti gli errori che
+  può dare (validatori, `DomainException`, permessi) e ognuno va in `ApiErrorCode`, nelle 7 lingue, nei mock, nei
+  contratti e collegato al punto giusto dello schermo (sotto il campo, sopra i bottoni, nell'avviso). Se il backend ha
+  già un codice per una situazione si usa quello, mai uno diverso chiesto da noi. Un codice che arriva senza `errors[]`
+  ma riguarda un campo va sotto quel campo con `apiFieldError` (es. `service-field-errors.ts` di Servizi).
+- **Quello che il backend vuole obbligatorio o limita è obbligatorio e limitato anche nel form** (asterisco, errore sotto
+  il campo, Salva spento): stessi obblighi, stessi valori minimi e massimi, stesse lunghezze. Un limite che l'utente
+  decide di non mettere nel form (es. 50 varianti in Servizi Bar) si scrive nel documento della pagina, e il suo errore
+  del backend si vede lo stesso.
 - I codici del backend sono nell'enum `ApiErrorCode` di `entities/errors/api-error-codes.ts`, un membro per codice
   (es. `ValidationOutOfRange = 'validation.out_of_range'`), lo stesso catalogo di `API_CONTRACTS.docx`; ognuno ha la sua
   traduzione in `error.`. Componenti, mock e test usano sempre il membro (`ApiErrorCode.ValidationOutOfRange`), mai la
@@ -211,7 +220,9 @@ Regole per le chiamate al backend: servizi e mock, ambienti, contratti, date e h
   `entities/shared/pdf-upload-types.ts`, con i tipi MIME dell'enum `UploadContentType`
   (`entities/enums/upload-content-type.ts`). Il peso massimo dei PDF sta nell'entità della pagina (es.
   `MAX_BATHHOUSE_PDF_MEGABYTES`). Gli stessi elenchi danno l'`accept` del campo che sceglie il file.
-- Un form con un solo allegato manda invece il file insieme agli altri dati, con il suo Salva.
+- Un form con un solo allegato manda invece il file insieme agli altri dati, con il suo Salva. Se il file ha una sua API
+  che vuole l'id dell'elemento (es. l'immagine di un servizio), parte dopo i dati: la creazione risponde con il solo id
+  (stringa JSON). Se il file fallisce i dati restano salvati: il form si chiude e un avviso dice perché.
 
 ## Id del database
 

@@ -19,7 +19,7 @@ export interface MockFieldError extends ApiFieldError {
 }
 
 export interface MockProblemDetails {
-  args?: Readonly<Record<string, ApiProblemArgs[string] | readonly string[]>>;
+  args?: Readonly<Record<string, ApiProblemArgs[string] | readonly string[] | readonly number[]>>;
   errors?: readonly MockFieldError[];
 }
 

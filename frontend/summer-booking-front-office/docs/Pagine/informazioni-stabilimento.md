@@ -47,7 +47,7 @@ Rotta `/settings/bathhouse-configuration/1` … `/3`, vista `views/settings/bath
 - Telefono e Whatsapp: `isPhoneField` e `phoneNumberWithoutPrefix`, solo cifre e spazi, al massimo 32 caratteri
   (`MAX_BATHHOUSE_PHONE_LENGTH`), come il backend, che non ha un prefisso per questi numeri. Il campo accetta anche
   caratteri oltre il limite: l'errore va sotto il campo e Salva si spegne.
-- Orario di apertura: due `app-filled-time-field` "Dalle" e "Alle" (`HH:mm`) con `strictTimeRange`: con tutti e due gli
+- Orario di apertura: due `app-filled-time-field` "Dalle" e "Alle" (`HH:mm`) con `timeRange`: con tutti e due gli
   orari "Alle" deve venire dopo "Dalle" (uguale non va), come vuole il backend.
 - Descrizione e Regolamento: `app-rich-text-field` (grassetto, corsivo, sottolineato, elenco puntato e numerato, link),
   alte 6.25rem (`--rich-text-field-height`) con lo scorrimento interno. Al massimo 5000 caratteri visibili,

@@ -59,3 +59,6 @@
     }
   </div>
 </app-expansion-panel>
+@if (validationText.text(form()); as error) {
+  <p class="services__translations__error">{{ error }}</p>
+}

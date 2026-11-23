@@ -76,6 +76,10 @@ export class ServicesPeriodPrices implements OnDestroy {
         ]),
       ),
   );
+  protected readonly periodPricesError = computed(() => {
+    const periodPrices = this.periodPrices();
+    return periodPrices ? this.validationText.text(periodPrices) : null;
+  });
   private readonly dayFormat = computed(
     () =>
       new Intl.DateTimeFormat(this.dateLanguage.locale(), {

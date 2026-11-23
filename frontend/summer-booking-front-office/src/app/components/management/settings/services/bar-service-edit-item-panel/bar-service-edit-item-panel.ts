@@ -13,12 +13,16 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  max,
+  metadata,
   readonly,
+  required,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -44,19 +48,33 @@ import { BarServiceUpdateGeneralRequest } from '../../../../../entities/settings
 import { BarServiceUpdatePricesRequest } from '../../../../../entities/settings/services/bar-service-update-prices-request';
 import { ServiceBookingOption } from '../../../../../entities/settings/services/service-booking-option';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { MAX_SERVICE_PRICE } from '../../../../../entities/settings/services/service-price';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { ServiceVariant } from '../../../../../entities/settings/services/service-variant';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { requiredText, timeRange } from '../../../../shared/forms/validators';
+import { requiredText } from '../../../../shared/forms/validators';
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
+import { ConfirmPopup } from '../../../../shared/ui/dialogs/confirm-popup/confirm-popup';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { SidePanelButtons } from '../../../../shared/ui/dialogs/side-panel/side-panel-buttons';
+import { PageSpinner } from '../../../../shared/ui/spinners/page-spinner/page-spinner';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab';
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
+import { serviceFieldError } from '../service-field-errors';
+import {
+  otherTranslationRules,
+  serviceBookingOptionRules,
+  serviceVariantRules,
+} from '../service-form-rules';
 import { ServiceGeneralInfoTab } from '../service-general-info-tab/service-general-info-tab';
+import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
@@ -96,9 +114,12 @@ const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof BarServiceAddItemReq
   selector: 'app-bar-service-edit-item-panel',
   imports: [
     Button,
+    ConfirmPopup,
+    PageSpinner,
     ReadErrorPopup,
     ServiceBookingsTab,
     ServiceGeneralInfoTab,
+    ServiceImageErrorPopup,
     ServicePricesTab,
     SidePanel,
     SidePanelButtons,
@@ -136,7 +157,11 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Modifica pressed: the fields of the tab can be changed, until Annulla or Salva. */
   protected readonly isEditing = signal(false);
   protected readonly isSaving = signal(false);
-  protected readonly isLocked = computed(() => !this.isEditing() || this.isSaving());
+  protected readonly isRemovingImage = signal(false);
+  protected readonly isImageDeletionAsked = signal(false);
+  protected readonly isLocked = computed(
+    () => !this.isEditing() || this.isSaving() || this.isRemovingImage(),
+  );
   private readonly texts = toSignal(
     this.translateService.stream(
       'management.settings.services.form',
@@ -156,6 +181,8 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     disabled(path.idSectors, () => this.isLocked());
     disabled(path.isOnlinePurchaseEnabled, () => this.isLocked());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) =>
@@ -166,15 +193,28 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+      applyWhen(
+        translation,
+        ({ valueOf }) =>
+          this.selectedTab() === PanelTab.GeneralInfo &&
+          valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
+      );
     });
+    applyWhen(
+      path,
+      () => this.selectedTab() === PanelTab.Prices,
+      (prices) => {
+        required(prices.price);
+        max(prices.price, MAX_SERVICE_PRICE);
+        applyEach(prices.variants, serviceVariantRules);
+        applyEach(prices.periodPrices, (periodPrice) => max(periodPrice.price, MAX_SERVICE_PRICE));
+      },
+    );
     applyWhen(
       path.bookingOptions,
       () => this.selectedTab() === PanelTab.Bookings,
-      (options) =>
-        applyEach(options, (option) => {
-          timeRange(option.managementStartTime, option.managementEndTime);
-          timeRange(option.onlineStartTime, option.onlineEndTime);
-        }),
+      (options) => applyEach(options, serviceBookingOptionRules),
     );
   });
   /** The values as the APIs gave them, tab by tab: the form is compared with them. */
@@ -200,8 +240,23 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   );
   /** The image chosen from the computer, instead of an icon of the list. */
   private readonly image = signal<File | null>(null);
-  protected readonly imagePreviewUrl = signal<string | null>(null);
+  private readonly chosenImageUrl = signal<string | null>(null);
+  /** The icon read when it is not one of the list: sent back as read until another is chosen. */
+  private readonly otherIcon = signal<string | null>(null);
+  /** The image the service has, until an icon or another image is chosen. */
+  private readonly savedImageUrl = signal<string | null>(null);
+  protected readonly imagePreviewUrl = computed(
+    () => this.chosenImageUrl() ?? (this.draft().icon === null ? this.savedImageUrl() : null),
+  );
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly imageError = signal<ApiProblem | null>(null);
+  private readonly imageRemovalError = signal<ApiProblem | null>(null);
+  protected readonly imageRemovalMessage = toSignal(
+    toObservable(this.imageRemovalError).pipe(
+      switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
+    ),
+    { initialValue: null },
+  );
   protected readonly readError = signal<ApiProblem | null>(null);
   protected readonly isConflictShown = signal(false);
   private readonly tabErrors = signal<ReadonlyMap<PanelTab, ApiProblem>>(new Map());
@@ -218,6 +273,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     { initialValue: null },
   );
   private readonly loadings = new Map<PanelTab, Subscription>();
+  private imageRemoval?: Subscription;
 
   constructor() {
     this.unsaved.watch(this);
@@ -241,12 +297,48 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
 
   protected chooseIcon(icon: BarServiceIcon): void {
     this.draftForm.icon().value.set(icon);
+    this.imageRemovalError.set(null);
     this.setImage(null);
   }
 
   protected chooseImage(image: File): void {
     this.draftForm.icon().value.set(null);
+    this.imageRemovalError.set(null);
     this.setImage(image);
+  }
+
+  /** The X of the image: one not saved yet just goes away, the saved one once confirmed. */
+  protected removeImage(): void {
+    if (this.isLocked()) {
+      return;
+    }
+    if (this.image()) {
+      this.setImage(null);
+      this.draftForm.icon().value.set(this.pristine().icon);
+    } else {
+      this.isImageDeletionAsked.set(true);
+    }
+  }
+
+  protected confirmImageDeletion(): void {
+    this.isImageDeletionAsked.set(false);
+    const idBarService = this.idBarService();
+    if (this.isLocked() || !idBarService) {
+      return;
+    }
+    this.imageRemovalError.set(null);
+    this.isRemovingImage.set(true);
+    this.imageRemoval = this.catalog
+      .deleteServiceImage(idBarService)
+      .pipe(finalize(() => this.isRemovingImage.set(false)))
+      .subscribe({
+        next: () => this.savedImageUrl.set(null),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          this.imageRemovalError.set(problem);
+          this.failed.emit(problem);
+        },
+      });
   }
 
   protected startEdit(): void {
@@ -270,6 +362,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.draft.update((draft) => ({ ...draft, ...pick(pristine, tab) }));
     if (tab === PanelTab.GeneralInfo) {
       this.setImage(null);
+      this.imageRemovalError.set(null);
     }
     this.draftForm().reset();
     this.error.set(null);
@@ -314,9 +407,11 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         await firstValueFrom(this.update(tab, idBarService));
+        const imageError = await this.uploadImage(idBarService);
         this.isSaving.set(false);
         this.open.set(false);
         this.updated.emit();
+        this.imageError.set(imageError);
       } catch (error: unknown) {
         const problem = toApiProblem(error);
         this.failed.emit(problem);
@@ -325,8 +420,9 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
           this.reloadTab(tab);
           return undefined;
         }
-        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
-          this.error.set(general),
+        return (
+          serviceFieldError(problem, this.draftForm) ??
+          apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
         );
       } finally {
         this.isSaving.set(false);
@@ -423,7 +519,12 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     const version = this.versions.get(tab) ?? null;
     if (tab === PanelTab.GeneralInfo) {
       return this.catalog.updateBarServiceGeneral(
-        Object.assign(new BarServiceUpdateGeneralRequest(), { idBarService, ...pick(draft, tab) }),
+        Object.assign(new BarServiceUpdateGeneralRequest(), {
+          idBarService,
+          ...pick(draft, tab),
+          // The upload itself takes the icon away: without it, the icon stays.
+          icon: draft.icon ?? (this.image() ? this.pristine().icon : null) ?? this.otherIcon(),
+        }),
         version,
       );
     }
@@ -441,6 +542,20 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
       Object.assign(new BarServiceUpdateBookingRequest(), { idBarService, ...pick(draft, tab) }),
       version,
     );
+  }
+
+  /** The image goes after the data of its tab, which stay saved also without it. */
+  private async uploadImage(idBarService: string): Promise<ApiProblem | null> {
+    const image = this.image();
+    if (!image) {
+      return null;
+    }
+    try {
+      await firstValueFrom(this.catalog.uploadServiceImage(idBarService, image));
+      return null;
+    } catch (error: unknown) {
+      return toApiProblem(error);
+    }
   }
 
   protected retryRead(): void {
@@ -473,6 +588,11 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
     this.draftForm().reset();
     this.periods.set([]);
     this.setImage(null);
+    this.savedImageUrl.set(null);
+    this.otherIcon.set(null);
+    this.imageRemoval?.unsubscribe();
+    this.imageRemovalError.set(null);
+    this.isImageDeletionAsked.set(false);
     this.selectedTab.set(PanelTab.GeneralInfo);
     this.tabIndex.set(PanelTab.GeneralInfo);
     this.loadTab(PanelTab.GeneralInfo);
@@ -481,6 +601,9 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   /** Name and description in every language, also those the API leaves out (empty). */
   private setGeneralInfo(info: BarServiceSelectedGeneralInfo): void {
     this.versions.set(PanelTab.GeneralInfo, info.version);
+    this.savedImageUrl.set(info.imageUrl);
+    const icon = Object.values(BarServiceIcon).find((value) => value === info.icon) ?? null;
+    this.otherIcon.set(icon ? null : info.icon);
     this.applyLoaded({
       translations: SERVICE_LANGUAGES.map((language) => {
         const translation = info.translations.find((item) => item.language === language);
@@ -491,7 +614,7 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
         });
       }),
       category: info.category,
-      icon: info.icon,
+      icon,
       isHighlighted: info.isHighlighted ?? false,
     });
   }
@@ -547,17 +670,18 @@ export class BarServiceEditItemPanel implements UnsavedChanges, OnDestroy {
   }
 
   private setImage(image: File | null): void {
-    const previewUrl = this.imagePreviewUrl();
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+    const chosenImageUrl = this.chosenImageUrl();
+    if (chosenImageUrl) {
+      URL.revokeObjectURL(chosenImageUrl);
     }
     this.image.set(image);
-    this.imagePreviewUrl.set(image ? URL.createObjectURL(image) : null);
+    this.chosenImageUrl.set(image ? URL.createObjectURL(image) : null);
   }
 
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
     this.loadings.forEach((loading) => loading.unsubscribe());
+    this.imageRemoval?.unsubscribe();
     this.setImage(null);
   }
 }

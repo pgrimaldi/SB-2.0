@@ -46,7 +46,7 @@ import {
   maxRichTextLength,
   phoneNumberWithoutPrefix,
   requiredText,
-  strictTimeRange,
+  timeRange,
 } from '../../../../components/shared/forms/validators';
 import { FilledTextField } from '../../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTimeField } from '../../../../components/shared/ui/inputs/filled-time-field/filled-time-field';
@@ -140,7 +140,7 @@ export class BathhouseGeneralSettings implements UnsavedChanges, OnDestroy {
     maxRichTextLength(path.regulation, MAX_BATHHOUSE_RICH_TEXT_LENGTH);
     phoneNumberWithoutPrefix(path.phone, MAX_BATHHOUSE_PHONE_LENGTH);
     phoneNumberWithoutPrefix(path.whatsapp, MAX_BATHHOUSE_PHONE_LENGTH);
-    strictTimeRange(path.openingTime, path.closingTime);
+    timeRange(path.openingTime, path.closingTime);
     readonly(path, () => !this.isEditing() || this.isSaving());
   });
   protected readonly fieldErrors = Object.fromEntries(

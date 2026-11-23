@@ -3681,7 +3681,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/sector-combobox`
+### POST `/api/catalog/sectors/sector-combobox`
 
 **Payload JSON**
 
@@ -4066,7 +4066,7 @@ Nessun corpo (204).
 
 ## Servizi
 
-### POST `/api/catalog/bar-service-list`
+### POST `/api/catalog/services/bar-service-list`
 
 **Payload JSON**
 
@@ -4126,7 +4126,7 @@ Nessun corpo (204).
 | `rows[].category` | string (enum BarServiceCategory) \| null |
 | `rows[].price` | number (decimale, €) \| null |
 
-### POST `/api/catalog/sector-combobox`
+### POST `/api/catalog/sectors/sector-combobox`
 
 **Payload JSON**
 
@@ -4193,7 +4193,7 @@ Nessun payload.
 | `[].ranges[].endsOn` | string (data, AAAA-MM-GG) |
 | `[].version` | string |
 
-### POST `/api/catalog/create-bar-service`
+### POST `/api/catalog/services/create-bar-service`
 
 **Payload JSON**
 
@@ -4209,12 +4209,12 @@ Nessun payload.
   "category": "string (enum BarServiceCategory) | null",
   "icon": "string (enum BarServiceIcon) | null",
   "isHighlighted": "boolean",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "variants": [
     {
-      "variantName": "string | null",
-      "price": "number (decimale, €) | null"
+      "variantName": "string",
+      "price": "number (decimale, €)"
     }
   ],
   "isPeriodPricingEnabled": "boolean",
@@ -4230,13 +4230,15 @@ Nessun payload.
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -4259,11 +4261,11 @@ Nessun corpo (204).
 | `category` | string (enum BarServiceCategory) \| null |
 | `icon` | string (enum BarServiceIcon) \| null |
 | `isHighlighted` | boolean |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `variants[]` | ServiceVariant[] (array di oggetti) |
-| `variants[].variantName` | string \| null |
-| `variants[].price` | number (decimale, €) \| null |
+| `variants[].variantName` | string |
+| `variants[].price` | number (decimale, €) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idPeriod` | number (intero) |
@@ -4273,13 +4275,15 @@ Nessun corpo (204).
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
@@ -4287,7 +4291,49 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-bar-service-general-info?idBarService={idBarService}`
+### POST `/api/catalog/services/{id}/image`
+
+**Payload JSON**
+
+```json
+{
+  "file": "file (multipart/form-data)"
+}
+```
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+| Campo | Tipo |
+|---|---|
+| `file` | file (multipart/form-data) |
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### DELETE `/api/catalog/services/{id}/image`
+
+**Payload JSON**
+
+Nessun payload.
+
+**Response JSON**
+
+Nessun corpo (204).
+
+**Payload tabella**
+
+Nessun payload.
+
+**Response tabella**
+
+Nessun corpo (204).
+
+### GET `/api/catalog/services/get-bar-service-general-info?idBarService={idBarService}`
 
 **Payload JSON** (query string)
 
@@ -4310,7 +4356,8 @@ Nessun corpo (204).
     }
   ],
   "category": "string (enum BarServiceCategory) | null",
-  "icon": "string (enum BarServiceIcon) | null",
+  "icon": "string | null",
+  "imageUrl": "string (URL) | null",
   "isHighlighted": "boolean",
   "version": "string"
 }
@@ -4332,11 +4379,12 @@ Nessun corpo (204).
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `category` | string (enum BarServiceCategory) \| null |
-| `icon` | string (enum BarServiceIcon) \| null |
+| `icon` | string \| null |
+| `imageUrl` | string (URL) \| null |
 | `isHighlighted` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-bar-service-prices?idBarService={idBarService}`
+### GET `/api/catalog/services/get-bar-service-prices?idBarService={idBarService}`
 
 **Payload JSON** (query string)
 
@@ -4350,12 +4398,12 @@ Nessun corpo (204).
 
 ```json
 {
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "variants": [
     {
-      "variantName": "string | null",
-      "price": "number (decimale, €) | null"
+      "variantName": "string",
+      "price": "number (decimale, €)"
     }
   ],
   "isPeriodPricingEnabled": "boolean",
@@ -4381,11 +4429,11 @@ Nessun corpo (204).
 
 | Campo | Tipo |
 |---|---|
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `variants[]` | ServiceVariant[] (array di oggetti) |
-| `variants[].variantName` | string \| null |
-| `variants[].price` | number (decimale, €) \| null |
+| `variants[].variantName` | string |
+| `variants[].price` | number (decimale, €) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idPeriod` | number (intero) |
@@ -4394,7 +4442,7 @@ Nessun corpo (204).
 | `isOnlinePurchaseEnabled` | boolean |
 | `version` | string |
 
-### GET `/api/catalog/get-bar-service-booking-options?idBarService={idBarService}`
+### GET `/api/catalog/services/get-bar-service-booking-options?idBarService={idBarService}`
 
 **Payload JSON** (query string)
 
@@ -4412,13 +4460,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -4440,18 +4490,20 @@ Nessun corpo (204).
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 | `version` | string |
 
-### POST `/api/catalog/update-bar-service-general`
+### POST `/api/catalog/services/update-bar-service-general`
 
 **Payload JSON**
 
@@ -4466,7 +4518,7 @@ Nessun corpo (204).
     }
   ],
   "category": "string (enum BarServiceCategory) | null",
-  "icon": "string (enum BarServiceIcon) | null",
+  "icon": "string | null",
   "isHighlighted": "boolean"
 }
 ```
@@ -4485,26 +4537,26 @@ Nessun corpo (204).
 | `translations[].serviceName` | string \| null |
 | `translations[].description` | string \| null |
 | `category` | string (enum BarServiceCategory) \| null |
-| `icon` | string (enum BarServiceIcon) \| null |
+| `icon` | string \| null |
 | `isHighlighted` | boolean |
 
 **Response tabella**
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-bar-service-prices`
+### POST `/api/catalog/services/update-bar-service-prices`
 
 **Payload JSON**
 
 ```json
 {
   "idBarService": "string (UUID)",
-  "price": "number (decimale, €) | null",
+  "price": "number (decimale, €)",
   "vatRate": "number (decimale, %) | null",
   "variants": [
     {
-      "variantName": "string | null",
-      "price": "number (decimale, €) | null"
+      "variantName": "string",
+      "price": "number (decimale, €)"
     }
   ],
   "isPeriodPricingEnabled": "boolean",
@@ -4528,11 +4580,11 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idBarService` | string (UUID) |
-| `price` | number (decimale, €) \| null |
+| `price` | number (decimale, €) |
 | `vatRate` | number (decimale, %) \| null |
 | `variants[]` | ServiceVariant[] (array di oggetti) |
-| `variants[].variantName` | string \| null |
-| `variants[].price` | number (decimale, €) \| null |
+| `variants[].variantName` | string |
+| `variants[].price` | number (decimale, €) |
 | `isPeriodPricingEnabled` | boolean |
 | `periodPrices[]` | ServicePeriodPrice[] (array di oggetti) |
 | `periodPrices[].idPeriod` | number (intero) |
@@ -4544,7 +4596,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/update-bar-service-booking`
+### POST `/api/catalog/services/update-bar-service-booking`
 
 **Payload JSON**
 
@@ -4555,13 +4607,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -4581,13 +4635,15 @@ Nessun corpo (204).
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
@@ -4595,7 +4651,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/delete-bar-service-item`
+### POST `/api/catalog/services/delete-bar-service-item`
 
 **Payload JSON**
 
@@ -4619,7 +4675,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-bar-service-item`
+### POST `/api/catalog/services/duplicate-bar-service-item`
 
 **Payload JSON**
 
@@ -4731,13 +4787,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -4770,13 +4828,15 @@ Nessun corpo (204).
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
@@ -4898,13 +4958,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -4926,13 +4988,15 @@ Nessun corpo (204).
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 | `version` | string |
@@ -5030,13 +5094,15 @@ Nessun corpo (204).
     {
       "dateFrom": "string (ISO 8601, mezzanotte UTC) | null",
       "dateTo": "string (ISO 8601, mezzanotte UTC) | null",
+      "weekdays": "string[] (enum Weekday)",
       "managementStartTime": "string (HH:mm) | null",
       "managementEndTime": "string (HH:mm) | null",
       "onlineStartTime": "string (HH:mm) | null",
       "onlineEndTime": "string (HH:mm) | null",
       "maxBookingPerHourQuantity": "number (intero) | null",
       "maxBookingPerDayQuantity": "number (intero) | null",
-      "timeInterval": "string (enum BookingTimeInterval) | null",
+      "maxPerSlot": "number (intero) | null",
+      "intervalMinutes": "number (intero) | null",
       "minItemPerBookingQuantity": "number (intero) | null",
       "maxItemPerBookingQuantity": "number (intero) | null"
     }
@@ -5056,13 +5122,15 @@ Nessun corpo (204).
 | `bookingOptions[]` | ServiceBookingOption[] (array di oggetti) |
 | `bookingOptions[].dateFrom` | string (ISO 8601, mezzanotte UTC) \| null |
 | `bookingOptions[].dateTo` | string (ISO 8601, mezzanotte UTC) \| null |
+| `bookingOptions[].weekdays` | string[] (enum Weekday) |
 | `bookingOptions[].managementStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].managementEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineStartTime` | string (HH:mm) \| null |
 | `bookingOptions[].onlineEndTime` | string (HH:mm) \| null |
 | `bookingOptions[].maxBookingPerHourQuantity` | number (intero) \| null |
 | `bookingOptions[].maxBookingPerDayQuantity` | number (intero) \| null |
-| `bookingOptions[].timeInterval` | string (enum BookingTimeInterval) \| null |
+| `bookingOptions[].maxPerSlot` | number (intero) \| null |
+| `bookingOptions[].intervalMinutes` | number (intero) \| null |
 | `bookingOptions[].minItemPerBookingQuantity` | number (intero) \| null |
 | `bookingOptions[].maxItemPerBookingQuantity` | number (intero) \| null |
 
@@ -6799,7 +6867,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/sector-combobox`
+### POST `/api/catalog/sectors/sector-combobox`
 
 **Payload JSON**
 

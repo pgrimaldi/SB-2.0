@@ -86,7 +86,7 @@ unico per tutte le API**: `resource.version_conflict`.
 | `GET /api/booking/get-online-services-options` | `POST /api/booking/update-online-services-options` | Tutte le opzioni della prenotazione online dei servizi (tutti i campi del corpo di `update-online-services-options`) |
 
 Le altre API della pagina non ne hanno bisogno: `GET /api/system/get-stripe-information` e
-`POST /api/catalog/sector-combobox` leggono soltanto.
+`POST /api/catalog/sectors/sector-combobox` (chiesta in `Servizi - Frontend requests.md`, sezione 25) leggono soltanto.
 
 ### Cosa fa il frontend
 

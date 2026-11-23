@@ -33,6 +33,10 @@ descrizioni delle pagine in `docs/Pagine/`.
   `comparableJson` per due modelli (testi senza spazi ai lati, un testo vuoto conta come `null`); per cercare e ordinare
   `trim()` su tutti e due i lati. Non riguarda i valori tecnici che nessuno scrive (codici, enum, id, chiavi, URL,
   date ISO, nomi dei campi).
+- Il frontend riflette il backend: ogni errore che un'API può dare ha il suo codice, la sua traduzione e il suo posto
+  sullo schermo (se il backend ha già un codice si usa quello), e quello che il backend vuole obbligatorio o limita lo è
+  anche nel form. Un orario di fine viene sempre dopo quello di inizio. Dettagli in `api-e-mock.md` e
+  `form-e-validazioni.md`.
 - Mai stringhe scritte a mano nel codice per valori con un significato (codici di errore, nomi di campi, scelte): si usa
   il membro di un enum o una costante (es. `ApiErrorCode.ValidationOutOfRange`). Se una stringa sembra inevitabile, prima
   si dice all'utente dove e perché e si cerca una soluzione insieme.

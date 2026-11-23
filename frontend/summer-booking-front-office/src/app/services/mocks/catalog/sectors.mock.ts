@@ -95,7 +95,7 @@ export const sectorListMock = (request: HttpRequest<unknown>): Observable<HttpEv
 };
 
 /**
- * `POST /api/catalog/sector-combobox` without a body: every sector of the property, in its order,
+ * `POST /api/catalog/sectors/sector-combobox` without a body: every sector of the property, in its order,
  * as `{ id, value }`. 401 without a valid access token.
  */
 export const sectorComboboxMock = (

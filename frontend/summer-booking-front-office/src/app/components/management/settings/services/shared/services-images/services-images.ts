@@ -8,6 +8,7 @@ import {
   MAX_IMAGE_UPLOAD_MEGABYTES,
   MEGABYTE,
 } from '../../../../../../entities/shared/image-upload-types';
+import { IconButton } from '../../../../../shared/ui/buttons/icon-button/icon-button';
 import { SectionTitle } from '../../../../../shared/ui/titles/section-title/section-title';
 import { FileDropZone } from '../../../../../shared/ui/uploads/file-drop-zone/file-drop-zone';
 
@@ -20,7 +21,7 @@ export interface ServicesImagesIcon<K extends string = string> {
 /** The image of a service: one of the icons given, or an image from the computer. */
 @Component({
   selector: 'app-services-images',
-  imports: [FileDropZone, SectionTitle, TranslatePipe],
+  imports: [FileDropZone, IconButton, SectionTitle, TranslatePipe],
   templateUrl: './services-images.html',
   styleUrl: './services-images.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,11 +33,16 @@ export class ServicesImages<K extends string = string> {
   readonly imagePreviewUrl = input<string | null>(null);
   /** Only to look at: icons and upload are off. */
   readonly isReadonly = input(false);
+  readonly error = input<string | null>();
+  /** The X on the image, for who listens to `imageRemoveRequest`. */
+  readonly isImageRemovable = input(false);
   readonly iconChosen = output<K>();
   readonly imageChosen = output<File>();
+  readonly imageRemoveRequest = output<void>();
 
   protected readonly imagesIcon = ['/assets/images/GeneralIcon_Images.svg'] as const;
   protected readonly addImageIcon = ['/assets/images/GeneralIcon_AddImage.svg'] as const;
+  protected readonly removeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly imageTypes = IMAGE_UPLOAD_TYPES.join(',');
   protected readonly maxImageMegabytes = MAX_IMAGE_UPLOAD_MEGABYTES;
   protected readonly isImageTooLarge = signal(false);

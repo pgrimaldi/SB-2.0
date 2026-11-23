@@ -134,7 +134,8 @@
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。",
       "property_not_found": "未找到您账户所属的浴场。请退出后重新登录；如果仍然出现，请联系支持。",
       "country_not_found": "所选国家已不可用：请选择其他国家。",
-      "sector_not_found": "区域/排已不存在：可能已被删除。"
+      "sector_not_found": "区域/排已不存在：可能已被删除。",
+      "vat_rate_not_allowed": "不允许使用此税率。有效税率：{{rates}}。"
     },
     "pricing": {
       "season_required": "请先设置季节日期。",
@@ -156,7 +157,8 @@
     "service": {
       "not_found": "服务已不存在：可能已被删除。",
       "automatic_price_not_found": "自动价格已不存在：可能已被删除。",
-      "table_service_not_found": "餐桌服务已不存在：可能已被删除。"
+      "table_service_not_found": "餐桌服务已不存在：可能已被删除。",
+      "icon_not_found": "所选图标已不可用：请选择其他图标。"
     }
   },
   "alert": {
@@ -1459,7 +1461,15 @@
             "title": "服务图片",
             "choose_icon": "选择图标",
             "upload": "或上传图片",
-            "drop": "将图片拖到此处或点击上传"
+            "drop": "将图片拖到此处或点击上传",
+            "upload_failed_title": "图片未上传",
+            "upload_failed_text": "服务已保存，但图片未保存。{{reason}}",
+            "delete": {
+              "title": "删除图片",
+              "text": "确定要删除这张图片吗？",
+              "cancel": "取消",
+              "confirm": "删除"
+            }
           },
           "highlighted": "设为推荐",
           "highlighted_info": "**启用**此选项后，客户预订海滩服务时，可以看到此服务并直接将其添加到预订中。",
@@ -2035,8 +2045,6 @@
     "phone_digits": "只能输入数字和空格：区号请填在旁边的字段",
     "phone_digits_without_prefix": "只能输入数字和空格，不含 +",
     "phone_max_length": "号码最多 {{max}} 个字符（含空格）",
-    "time_not_after_end": "不能晚于结束时间",
-    "time_not_before_start": "不能早于开始时间",
     "time_before_end": "必须早于结束时间",
     "time_after_start": "必须晚于开始时间",
     "seasons": {
@@ -2054,6 +2062,11 @@
     "catalog": {
       "price": {
         "max": "有价格超过了允许的最高值 {max, number, currency}。"
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "请同时填写该语言的名称"
       }
     }
   },

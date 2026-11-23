@@ -134,7 +134,8 @@
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an.",
       "property_not_found": "Das Strandbad deines Kontos wurde nicht gefunden. Melde dich ab und wieder an; wenn es erneut passiert, wende dich an den Support.",
       "country_not_found": "Das gewählte Land ist nicht mehr verfügbar: Wähle ein anderes.",
-      "sector_not_found": "Der Sektor/die Reihe ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht."
+      "sector_not_found": "Der Sektor/die Reihe ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "vat_rate_not_allowed": "Dieser Satz ist nicht zulässig. Gültige Sätze: {{rates}}."
     },
     "pricing": {
       "season_required": "Lege zuerst die Daten der Saison fest.",
@@ -156,7 +157,8 @@
     "service": {
       "not_found": "Die Leistung ist nicht mehr vorhanden: Sie wurde vielleicht schon gelöscht.",
       "automatic_price_not_found": "Der automatische Preis ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
-      "table_service_not_found": "Der Tischservice ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht."
+      "table_service_not_found": "Der Tischservice ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "icon_not_found": "Das gewählte Symbol ist nicht mehr verfügbar: Wähle ein anderes."
     }
   },
   "alert": {
@@ -1459,7 +1461,15 @@
             "title": "Bild der Leistung",
             "choose_icon": "Wähle ein Symbol",
             "upload": "Oder lade ein Bild hoch",
-            "drop": "Ziehe das Bild hierher oder klicke zum Hochladen"
+            "drop": "Ziehe das Bild hierher oder klicke zum Hochladen",
+            "upload_failed_title": "Bild nicht hochgeladen",
+            "upload_failed_text": "Die Leistung wurde gespeichert, das Bild jedoch nicht. {{reason}}",
+            "delete": {
+              "title": "Bild löschen",
+              "text": "Möchtest du dieses Bild wirklich löschen?",
+              "cancel": "Abbrechen",
+              "confirm": "Löschen"
+            }
           },
           "highlighted": "Hervorheben",
           "highlighted_info": "Wenn diese Option **aktiviert ist**, sieht ein Kunde bei der Buchung einer Strandleistung diese Leistung und kann sie direkt zu seiner Buchung hinzufügen.",
@@ -2035,8 +2045,6 @@
     "phone_digits": "Nur Ziffern und Leerzeichen: Die Vorwahl gehört ins Feld daneben",
     "phone_digits_without_prefix": "Nur Ziffern und Leerzeichen, ohne +",
     "phone_max_length": "Die Nummer darf höchstens {{max}} Zeichen haben, Leerzeichen eingeschlossen",
-    "time_not_after_end": "Darf nicht nach der Endzeit liegen",
-    "time_not_before_start": "Darf nicht vor der Startzeit liegen",
     "time_before_end": "Muss vor der Endzeit liegen",
     "time_after_start": "Muss nach der Startzeit liegen",
     "seasons": {
@@ -2054,6 +2062,11 @@
     "catalog": {
       "price": {
         "max": "Ein Preis überschreitet den zulässigen Höchstwert von {max, number, currency}."
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "Gib auch den Namen in dieser Sprache ein"
       }
     }
   },

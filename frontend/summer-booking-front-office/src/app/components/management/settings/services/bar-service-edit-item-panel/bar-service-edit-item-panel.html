@@ -26,7 +26,9 @@
         [isReadonly]="isLocked()"
         [imagePreviewUrl]="imagePreviewUrl()"
         (iconChosen)="chooseIcon($event)"
+        [imageError]="imageRemovalMessage()"
         (imageChosen)="chooseImage($event)"
+        (imageRemoveRequest)="removeImage()"
       />
     } @else if (selectedTab() === PanelTab.Prices) {
       <app-service-prices-tab
@@ -82,3 +84,14 @@
 </app-side-panel>
 <app-read-error-popup [pathIcon]="pathIcon()" [(problem)]="readError" (retry)="retryRead()" />
 <app-version-conflict-popup [pathIcon]="pathIcon()" [(open)]="isConflictShown" />
+<app-service-image-error-popup [pathIcon]="pathIcon()" [(problem)]="imageError" />
+<app-confirm-popup
+  [pathIcon]="pathIcon()"
+  [title]="'management.settings.services.form.image.delete.title' | translate"
+  [text]="'management.settings.services.form.image.delete.text' | translate"
+  [texts]="'management.settings.services.form.image.delete' | translate"
+  [danger]="true"
+  [(open)]="isImageDeletionAsked"
+  (confirmed)="confirmImageDeletion()"
+/>
+<app-page-spinner [isLoading]="isRemovingImage()" />

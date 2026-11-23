@@ -4,7 +4,10 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ValidationTextBehaviour } from '../../../../../../behaviours/validation/validation-text.behaviour';
-import { BookingTimeInterval } from '../../../../../../entities/enums/booking-time-interval';
+import {
+  BOOKING_TIME_INTERVAL_MINUTES,
+  BookingTimeInterval,
+} from '../../../../../../entities/enums/booking-time-interval';
 import { ServiceBookingOption } from '../../../../../../entities/settings/services/service-booking-option';
 import { Button, ButtonSize } from '../../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../../shared/ui/buttons/icon-button/icon-button';
@@ -89,6 +92,23 @@ export class ServicesBookingOption {
         label: this.timeIntervalTexts()?.[TIME_INTERVAL_KEYS[value]] ?? '',
       })),
   );
+
+  /** The choice of those minutes; none for other minutes, which stay until one is chosen. */
+  protected timeIntervalOf(minutes: number | null): BookingTimeInterval | null {
+    return (
+      Object.values(BookingTimeInterval).find(
+        (value) => BOOKING_TIME_INTERVAL_MINUTES[value] === minutes,
+      ) ?? null
+    );
+  }
+
+  protected chooseTimeInterval(
+    field: FieldTree<number | null>,
+    interval: BookingTimeInterval | null,
+  ): void {
+    field().value.set(interval ? BOOKING_TIME_INTERVAL_MINUTES[interval] : null);
+    field().markAsDirty();
+  }
 
   protected addOption(): void {
     this.form()().value.update((options) => [...options, new ServiceBookingOption()]);

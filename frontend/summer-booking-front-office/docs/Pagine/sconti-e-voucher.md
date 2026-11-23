@@ -39,7 +39,7 @@ Rotta `/settings/vouchers`, vista `views/settings/vouchers/` (`Vouchers`).
   - riquadro "Opzioni": tipo, valore con % o €, applica a, numero massimo di utilizzi;
   - interruttore "Abilita sconto/voucher".
 - Form `VoucherAddItemRequest` con i Signal Forms: nome obbligatorio; almeno un periodo; per ogni periodo Dal, al e
-  almeno un giorno; in ogni fascia oraria "alle" dopo "dalle" (`strictTimeRange`, errore sotto i due orari); valore
+  almeno un giorno; in ogni fascia oraria "alle" dopo "dalle" (`timeRange`, errore sotto i due orari); valore
   obbligatorio (percentuale intera da 1 a 100, importo con 2 decimali); utilizzi almeno 1.
 - Salva chiama l'aggiunta con lo spinner sul bottone, poi chiude il popup e ricarica la tabella.
 - Con dati scritti chiede prima di chiudere (`UnsavedChangesBehaviour`).

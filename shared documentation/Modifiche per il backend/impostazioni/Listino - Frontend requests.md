@@ -149,8 +149,8 @@ tabelle (per esempio `vouchers/duplicate-voucher-item`). Per il frontend sostitu
 
 Tendina a scelta multipla "Aree abilitate" della tab Info Generali dei pannelli "Aggiungi nuovo pacchetto" e
 "Modifica pacchetto" (pagina Listino), riletta a ogni apertura della tab. Combobox standard come le altre del frontend
-(`catalog/sector-combobox`, `catalog/article-combobox`): tutte le aree della mappa dello stabilimento, senza pagine,
-nel loro ordine.
+(`catalog/sectors/sector-combobox`, chiesta in `Servizi - Frontend requests.md`, sezione 25, e
+`catalog/article-combobox`): tutte le aree della mappa dello stabilimento, senza pagine, nel loro ordine.
 
 - POST senza corpo: lo stabilimento lo prende il backend dal token.
 - Risposta 200: un array di `{ id, value }`, con `id` = id dell'area e `value` = nome; array vuoto se non ce ne sono.
@@ -308,7 +308,7 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   `isFirstRow` (true = "Fila 1", false = "Altre file"), `dayQuantity` (giorni di soggiorno, da 1 a 90) e `price` (non negativo). Una sola riga per
   `idPeriod` + `isFirstRow` + `dayQuantity`. Oggi i prezzi per durata sono `catalog_pricing_price_list_stay_prices`,
   per periodo tariffario e settore: il backend li lega alle sue righe ("Fila 1" = il primo settore di
-  `catalog/sector-combobox`, "Altre file" = tutti gli altri). I prezzi di 7, 14 e 30 giorni il frontend li scrive anche
+  `catalog/sectors/sector-combobox`, "Altre file" = tutti gli altri). I prezzi di 7, 14 e 30 giorni il frontend li scrive anche
   in `sevenDaysPrice`, `fourteenDaysPrice` e `monthlyPrice` delle righe di `periodPrices` di quel periodo (della prima
   fila o delle altre), così i due valori arrivano uguali. Spegnere il checkbox, dopo una conferma, svuota la lista.
 - Non arrivano ancora, perché il pannello non li ha: `isMapAssignable`, `vatRate`, `vatNature`. Se mancano valgono
@@ -387,7 +387,7 @@ pacchetto in una sola chiamata e ci riempie il modulo delle due tab. Per il fron
 - `translations`: solo le lingue con un nome. Il frontend aggiunge le altre vuote.
 - `idSectors`: quelli salvati con `create-package` o `update-package`, non i settori che hanno una riga di prezzo.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
-  `catalog/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
+  `catalog/sectors/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
   mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le
   rimanda invariate con `update-package`.
 - `publicHolidayDates` e `intermediatePrices`: in qualsiasi ordine (il frontend li ordina).
@@ -522,7 +522,7 @@ Listino), come `duplicate-package-item`. Per il frontend sostituisce `POST /pric
 ## 11. POST /api/catalog/package-combobox
 
 Tendina a scelta multipla "Pacchetti" dei pannelli di aggiunta e di modifica degli articoli/servizi aggiuntivi
-(pagina Listino), riletta a ogni apertura del pannello. Combobox standard come le altre del frontend (`catalog/sector-combobox`,
+(pagina Listino), riletta a ogni apertura del pannello. Combobox standard come le altre del frontend (`catalog/sectors/sector-combobox`,
 `catalog/article-combobox`): tutti i pacchetti dello stabilimento, senza pagine, nel loro ordine.
 
 - POST senza corpo: lo stabilimento lo prende il backend dal token.
@@ -634,7 +634,7 @@ con gli stessi nomi e valori, che il frontend manda a `POST /api/catalog/create-
 - `version`: la versione dell'articolo aggiuntivo (stringa opaca, sezione 16), che il frontend rimanda con
   `update-additional-services-article-item`.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
-  `catalog/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
+  `catalog/sectors/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
   mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le
   rimanda invariate con `update-additional-services-article-item`.
 - `publicHolidayDates` e `intermediatePrices`: in qualsiasi ordine (il frontend li ordina).

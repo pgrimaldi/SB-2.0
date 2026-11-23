@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
-import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
+import { Weekday } from '../../../entities/enums/weekday';
 import { ServiceTimeSlot } from '../../../entities/enums/service-time-slot';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
@@ -313,7 +313,9 @@ describe('CatalogService', () => {
       onlineEndTime: '12:00',
       maxBookingPerHourQuantity: 2,
       maxBookingPerDayQuantity: 5,
-      timeInterval: BookingTimeInterval.ThirtyMinutes,
+      weekdays: [Weekday.Saturday],
+      maxPerSlot: 5,
+      intervalMinutes: 30,
       minItemPerBookingQuantity: 1,
       maxItemPerBookingQuantity: 2,
     };
@@ -332,17 +334,66 @@ describe('CatalogService', () => {
       bookingOptions: [bookingOption],
     };
 
+    let idBarService: string | undefined;
+
     catalog
       .createBarService(
         Object.assign(new BarServiceAddItemRequest(), request, { unexpectedFlag: 'extra-field' }),
       )
-      .subscribe();
+      .subscribe((id) => (idBarService = id));
 
-    const body = controller.expectOne(
+    const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/create-bar-service`,
-    ).request.body;
-    expect(body).toEqual({ ...request, translations: [translation] });
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/services/create-bar-service`,
+    );
+    expect(call.request.body).toEqual({ ...request, translations: [translation] });
+    call.flush('b9', { status: 201, statusText: 'Created' });
+    expect(idBarService).toBe('b9');
+    controller.verify();
+  });
+
+  it('should upload the image of a service as the file field', () => {
+    const { catalog, controller } = setup();
+    const image = new File(['image'], 'caffe.png', { type: 'image/png' });
+
+    catalog.uploadServiceImage('b1', image).subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/services/b1/image`,
+    ).request;
+    expect((request.body as FormData).get('file')).toBe(image);
+    controller.verify();
+  });
+
+  it('should delete the image of a service without a body', () => {
+    const { catalog, controller } = setup();
+
+    catalog.deleteServiceImage('b1').subscribe();
+
+    const request = controller.expectOne(
+      ({ method, url }) =>
+        method === 'DELETE' && url === `${environment.apiBaseUrl}/catalog/services/b1/image`,
+    ).request;
+    expect(request.body).toBeNull();
+    controller.verify();
+  });
+
+  it('should delete and duplicate the bar services under services', () => {
+    const { catalog, controller } = setup();
+
+    catalog.deleteBarServiceItems(['b1', 'b2']).subscribe();
+    catalog.duplicateBarServiceItems(['b1']).subscribe();
+
+    const bodyOf = (action: string) =>
+      controller.expectOne(
+        ({ method, url }) =>
+          method === 'POST' &&
+          url === `${environment.apiBaseUrl}/catalog/services/${action}-bar-service-item`,
+      ).request.body;
+    expect(bodyOf('delete')).toEqual({ idBarServices: ['b1', 'b2'] });
+    expect(bodyOf('duplicate')).toEqual({ idBarServices: ['b1'] });
     controller.verify();
   });
 
@@ -367,7 +418,8 @@ describe('CatalogService', () => {
 
     const body = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-general`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/services/update-bar-service-general`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -397,7 +449,8 @@ describe('CatalogService', () => {
 
     const body = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-prices`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/services/update-bar-service-prices`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -417,7 +470,9 @@ describe('CatalogService', () => {
           onlineEndTime: '11:30',
           maxBookingPerHourQuantity: 20,
           maxBookingPerDayQuantity: 80,
-          timeInterval: BookingTimeInterval.ThirtyMinutes,
+          weekdays: [Weekday.Saturday],
+          maxPerSlot: 5,
+          intervalMinutes: 30,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 4,
         },
@@ -435,7 +490,8 @@ describe('CatalogService', () => {
 
     const body = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/update-bar-service-booking`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/services/update-bar-service-booking`,
     ).request.body;
     expect(body).toEqual({ ...request });
     controller.verify();
@@ -449,7 +505,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-bar-service-general-info` &&
+        url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-general-info` &&
         params.get('idBarService') === 'b1',
     ).request;
     expect(request.body).toBeNull();
@@ -464,7 +520,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-bar-service-prices` &&
+        url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-prices` &&
         params.get('idBarService') === 'b1',
     ).request;
     expect(request.body).toBeNull();
@@ -479,7 +535,7 @@ describe('CatalogService', () => {
     const request = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-bar-service-booking-options` &&
+        url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-booking-options` &&
         params.get('idBarService') === 'b1',
     ).request;
     expect(request.body).toBeNull();
@@ -513,7 +569,9 @@ describe('CatalogService', () => {
           onlineEndTime: '17:00',
           maxBookingPerHourQuantity: 4,
           maxBookingPerDayQuantity: 30,
-          timeInterval: BookingTimeInterval.FifteenMinutes,
+          weekdays: [Weekday.Saturday],
+          maxPerSlot: 5,
+          intervalMinutes: 15,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 2,
         },
@@ -607,7 +665,9 @@ describe('CatalogService', () => {
           onlineEndTime: '17:00',
           maxBookingPerHourQuantity: 4,
           maxBookingPerDayQuantity: 30,
-          timeInterval: BookingTimeInterval.OneHour,
+          weekdays: [Weekday.Saturday],
+          maxPerSlot: 5,
+          intervalMinutes: 60,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 1,
         },
@@ -1244,15 +1304,15 @@ describe('CatalogService', () => {
         () => catalog.saveBathhouseConfigurationMedia(new BathhouseMediaRequest(), READ_VERSION),
       ],
       [
-        'update-bar-service-general',
+        'services/update-bar-service-general',
         () => catalog.updateBarServiceGeneral(new BarServiceUpdateGeneralRequest(), READ_VERSION),
       ],
       [
-        'update-bar-service-prices',
+        'services/update-bar-service-prices',
         () => catalog.updateBarServicePrices(new BarServiceUpdatePricesRequest(), READ_VERSION),
       ],
       [
-        'update-bar-service-booking',
+        'services/update-bar-service-booking',
         () => catalog.updateBarServiceBooking(new BarServiceUpdateBookingRequest(), READ_VERSION),
       ],
       [

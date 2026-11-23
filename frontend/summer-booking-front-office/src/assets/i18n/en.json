@@ -134,7 +134,8 @@
       "property_required": "Your account is not linked to a property: sign in with an account of the property.",
       "property_not_found": "The property of your account was not found. Sign out and sign in again; if it happens again, contact support.",
       "country_not_found": "The selected country is no longer available: choose another one.",
-      "sector_not_found": "The sector/row is no longer there: it may already have been deleted."
+      "sector_not_found": "The sector/row is no longer there: it may already have been deleted.",
+      "vat_rate_not_allowed": "This rate is not allowed. Valid rates: {{rates}}."
     },
     "pricing": {
       "season_required": "Set the season dates first.",
@@ -156,7 +157,8 @@
     "service": {
       "not_found": "The service is no longer there: it may already have been deleted.",
       "automatic_price_not_found": "The automatic price is no longer there: it may already have been deleted.",
-      "table_service_not_found": "The table service is no longer there: it may already have been deleted."
+      "table_service_not_found": "The table service is no longer there: it may already have been deleted.",
+      "icon_not_found": "The selected icon is no longer available: choose another one."
     }
   },
   "alert": {
@@ -1459,7 +1461,15 @@
             "title": "Service image",
             "choose_icon": "Choose an icon",
             "upload": "Or upload an image",
-            "drop": "Drag the image here or click to upload"
+            "drop": "Drag the image here or click to upload",
+            "upload_failed_title": "Image not uploaded",
+            "upload_failed_text": "The service was saved, but the image was not. {{reason}}",
+            "delete": {
+              "title": "Delete image",
+              "text": "Do you really want to delete this image?",
+              "cancel": "Cancel",
+              "confirm": "Delete"
+            }
           },
           "highlighted": "Highlight",
           "highlighted_info": "If this option **is enabled**, when a customer books a beach service, they can see this service and add it straight to their booking.",
@@ -2035,8 +2045,6 @@
     "phone_digits": "Only digits and spaces: the prefix goes in the field beside",
     "phone_digits_without_prefix": "Only digits and spaces, no +",
     "phone_max_length": "The number can have at most {{max}} characters, spaces included",
-    "time_not_after_end": "Cannot be after the end time",
-    "time_not_before_start": "Cannot be before the start time",
     "time_before_end": "Must be before the end time",
     "time_after_start": "Must be after the start time",
     "seasons": {
@@ -2054,6 +2062,11 @@
     "catalog": {
       "price": {
         "max": "A price exceeds the allowed maximum of {max, number, currency}."
+      }
+    },
+    "services": {
+      "translation": {
+        "name_missing": "Write the name in this language too"
       }
     }
   },

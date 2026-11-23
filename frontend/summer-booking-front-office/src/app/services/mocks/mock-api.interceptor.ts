@@ -34,6 +34,8 @@ import {
   deleteBathhousePhotoMock,
   uploadBathhouseDocumentMock,
   uploadBathhouseMainPhotoMock,
+  deleteServiceImageMock,
+  uploadServiceImageMock,
   bathhouseConfigurationServicesMock,
   lookupCountriesMock,
   deleteBarServiceItemsMock,
@@ -626,70 +628,82 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/bar-service-list`
+    request.url === `${environment.apiBaseUrl}/catalog/services/bar-service-list`
   ) {
     return barServiceListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/create-bar-service`
+    request.url === `${environment.apiBaseUrl}/catalog/services/create-bar-service`
   ) {
     return createBarServiceMock(request);
   }
 
   if (
+    request.url.startsWith(`${environment.apiBaseUrl}/catalog/services/`) &&
+    request.url.endsWith('/image')
+  ) {
+    if (request.method === 'POST') {
+      return uploadServiceImageMock(request);
+    }
+    if (request.method === 'DELETE') {
+      return deleteServiceImageMock(request);
+    }
+  }
+
+  if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-general-info`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-general-info`
   ) {
     return barServiceGeneralInfoMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-prices`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-prices`
   ) {
     return barServicePricesMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-bar-service-booking-options`
+    request.url === `${environment.apiBaseUrl}/catalog/services/get-bar-service-booking-options`
   ) {
     return barServiceBookingOptionsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-bar-service-general`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-bar-service-general`
   ) {
     return updateBarServiceGeneralMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-bar-service-prices`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-bar-service-prices`
   ) {
     return updateBarServicePricesMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-bar-service-booking`
+    request.url === `${environment.apiBaseUrl}/catalog/services/update-bar-service-booking`
   ) {
     return updateBarServiceBookingMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-bar-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/services/delete-bar-service-item`
   ) {
     return deleteBarServiceItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-bar-service-item`
+    request.url === `${environment.apiBaseUrl}/catalog/services/duplicate-bar-service-item`
   ) {
     return duplicateBarServiceItemsMock(request);
   }
@@ -962,7 +976,7 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/sector-combobox`
+    request.url === `${environment.apiBaseUrl}/catalog/sectors/sector-combobox`
   ) {
     return sectorComboboxMock(request);
   }

@@ -18,7 +18,7 @@ export class SectorService {
 
   /** Every sector of the property, in its order: `id` is the idSector, `value` the name. */
   readonly sectorCombobox = (): Observable<ComboboxItem[]> =>
-    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sector-combobox`, null);
+    this.httpClient.post<ComboboxItem[]>(`${this.endpoint}/sectors/sector-combobox`, null);
 
   /** The backend puts the new sector at the end of the order. Answers 201 with the sector created. */
   readonly addSector = (name: string): Observable<Sector> =>

@@ -5,14 +5,13 @@ import { isEmailAddress } from '../../../components/shared/forms/validators';
 import { ComboboxItem } from '../../../entities/combobox/combobox-item';
 import { BarServiceCategory } from '../../../entities/enums/bar-service-category';
 import { BarServiceIcon } from '../../../entities/enums/bar-service-icon';
-import { BookingTimeInterval } from '../../../entities/enums/booking-time-interval';
+import { Weekday } from '../../../entities/enums/weekday';
 import { StandardServiceIcon } from '../../../entities/enums/standard-service-icon';
 import { TableServiceAvailabilityMode } from '../../../entities/enums/table-service-availability-mode';
 import { TableServiceBookingPayment } from '../../../entities/enums/table-service-booking-payment';
 import { TableServiceDepositMode } from '../../../entities/enums/table-service-deposit-mode';
 import { TableServiceMealDuration } from '../../../entities/enums/table-service-meal-duration';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
-import { DEFAULT_PAGE_SIZE, Page, PageRequest } from '../../../entities/pagination/page';
 import {
   BathhouseGeneralInformation,
   MAX_BATHHOUSE_PHONE_LENGTH,
@@ -54,7 +53,9 @@ import { HourlyServiceSelectedPrices } from '../../../entities/settings/services
 import { ServiceAvailabilityOption } from '../../../entities/settings/services/service-availability-option';
 import { ServicePeriodAvailability } from '../../../entities/settings/services/service-period-availability';
 import { ServicePeriodPrice } from '../../../entities/settings/services/service-period-price';
+import { MAX_SERVICE_PRICE } from '../../../entities/settings/services/service-price';
 import { ServiceTranslation } from '../../../entities/settings/services/service-translation';
+import { MAX_SERVICE_VARIANT_NAME_LENGTH } from '../../../entities/settings/services/service-variant';
 import { StandardServiceAddItemRequest } from '../../../entities/settings/services/standard-service-add-item-request';
 import { StandardServiceItem } from '../../../entities/settings/services/standard-service-item';
 import { StandardServiceSelectedBookingOptions } from '../../../entities/settings/services/standard-service-selected-booking-options';
@@ -82,6 +83,12 @@ import {
   resourceNotFound,
 } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
+import {
+  deleteServicesAnswer,
+  duplicateServicesAnswer,
+  nameToSave,
+  serviceListAnswer,
+} from './service-tables.mock';
 import { savedWithVersion, versionConflict, versionOf } from '../versions/versions.mock';
 
 /** ISO 3166-1 alpha-2 codes, in the order of `catalog.countries.sort_order`. */
@@ -1278,12 +1285,13 @@ function propertyInfoAnswer(request: HttpRequest<unknown>): Observable<HttpEvent
 function versionedAnswer<T extends object>(
   request: HttpRequest<unknown>,
   data: T,
+  withoutVersion: object = {},
 ): Observable<HttpEvent<unknown>> {
   return of(
     new HttpResponse({
       status: 200,
       url: request.url,
-      body: { ...structuredClone(data), version: versionOf(data) },
+      body: { ...structuredClone(data), ...withoutVersion, version: versionOf(data) },
     }),
   ).pipe(delay(300));
 }
@@ -1344,13 +1352,20 @@ const BAR_SERVICE_DETAILS = new Map<string, BarServiceAddItemRequest>([
           onlineEndTime: '11:30',
           maxBookingPerHourQuantity: 20,
           maxBookingPerDayQuantity: 80,
-          timeInterval: BookingTimeInterval.ThirtyMinutes,
+          weekdays: [Weekday.Saturday, Weekday.Sunday],
+          maxPerSlot: 5,
+          intervalMinutes: 30,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 4,
         },
       ],
     }),
   ],
+]);
+
+/** The uploaded images, by id of the service. */
+const SERVICE_IMAGES = new Map<string, string>([
+  ['8a2c4e6f-1b3d-4f5a-9c7e-2d4f6a8b0c05', '/assets/images/hub/hero-beach-mobile-863.webp'],
 ]);
 
 function detailsOf(row: BarServiceRow): BarServiceAddItemRequest {
@@ -1378,9 +1393,10 @@ function requestedBarService(request: HttpRequest<unknown>): BarServiceRow | und
 }
 
 /**
- * `GET /api/catalog/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
+ * `GET /api/catalog/services/get-bar-service-general-info?idBarService=…`: the Info Generali tab of the edit
  * panel. 200 with `BarServiceSelectedGeneralInfo` and the version of the tab, only the languages
- * written; 401 without a valid access token; 404 `service.not_found` for an unknown id.
+ * written and the uploaded image, which the version does not cover; 401 without a valid access
+ * token; 404 `service.not_found` for an unknown id.
  */
 export const barServiceGeneralInfoMock = (
   request: HttpRequest<unknown>,
@@ -1392,14 +1408,19 @@ export const barServiceGeneralInfoMock = (
   if (!row) {
     return problem(request, 404, ApiErrorCode.ServiceNotFound);
   }
-  return versionedAnswer(request, barGeneralInfoOf(row));
+  const imageUrl = SERVICE_IMAGES.get(row.idBarService ?? '');
+  return versionedAnswer(request, barGeneralInfoOf(row), {
+    imageUrl: imageUrl ? completeLink(imageUrl) : null,
+  });
 };
 
 /**
- * What `GET /api/catalog/get-bar-service-general-info` answers besides the version: the version
- * covers it.
+ * What `GET /api/catalog/services/get-bar-service-general-info` answers besides the version and the
+ * image: the version covers it.
  */
-function barGeneralInfoOf(row: BarServiceRow): Omit<BarServiceSelectedGeneralInfo, 'version'> {
+function barGeneralInfoOf(
+  row: BarServiceRow,
+): Omit<BarServiceSelectedGeneralInfo, 'imageUrl' | 'version'> {
   const details = detailsOf(row);
   return {
     idBarService: row.idBarService,
@@ -1413,7 +1434,7 @@ function barGeneralInfoOf(row: BarServiceRow): Omit<BarServiceSelectedGeneralInf
 }
 
 /**
- * `GET /api/catalog/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200
+ * `GET /api/catalog/services/get-bar-service-prices?idBarService=…`: the Prezzi tab of the edit panel. 200
  * with `BarServiceSelectedPrices` and the version of the tab, a price only for the periods that
  * have one; 401 without a valid access token; 404 `service.not_found` for an unknown id.
  */
@@ -1431,7 +1452,7 @@ export const barServicePricesMock = (
 };
 
 /**
- * What `GET /api/catalog/get-bar-service-prices` answers besides the version: the version covers
+ * What `GET /api/catalog/services/get-bar-service-prices` answers besides the version: the version covers
  * it.
  */
 function barPricesOf(row: BarServiceRow): Omit<BarServiceSelectedPrices, 'version'> {
@@ -1448,7 +1469,7 @@ function barPricesOf(row: BarServiceRow): Omit<BarServiceSelectedPrices, 'versio
 }
 
 /**
- * `GET /api/catalog/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
+ * `GET /api/catalog/services/get-bar-service-booking-options?idBarService=…`: the Prenotazioni tab of the
  * edit panel, `{ bookingOptions, version }`: the booking options (an empty array when there are
  * none) and the version of the tab. 401 without a valid access token; 404 `service.not_found` for
  * an unknown id.
@@ -1467,7 +1488,7 @@ export const barServiceBookingOptionsMock = (
 };
 
 /**
- * What `GET /api/catalog/get-bar-service-booking-options` answers besides the version: the version
+ * What `GET /api/catalog/services/get-bar-service-booking-options` answers besides the version: the version
  * covers it.
  */
 function barBookingOptionsOf(
@@ -1476,47 +1497,36 @@ function barBookingOptionsOf(
   return { bookingOptions: detailsOf(row).bookingOptions };
 }
 
-const MAX_PAGE_SIZE = 100;
+const VAT_RATES: readonly number[] = [4, 5, 10, 22];
 const BAR_SERVICE_SORT_FIELDS = ['serviceName', 'category', 'price'] as const;
 
-/**
- * `POST /api/catalog/bar-service-list`: one page of the bar services of the property of the token,
- * searched in the name. 401 without a valid access token.
- */
-export const barServiceListMock = (
-  request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = BAR_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(BarServiceItem, row));
-  const field = BAR_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<BarServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
+const BAR_SERVICE_TABLE = {
+  rows: BAR_SERVICES,
+  idField: 'idBarService' as const,
+  details: BAR_SERVICE_DETAILS,
+  detailsOf,
+  notFoundCode: ApiErrorCode.ServiceNotFound,
+  copyMore: (id: string, idCopy: string): void => {
+    const image = SERVICE_IMAGES.get(id);
+    if (image) {
+      SERVICE_IMAGES.set(idCopy, image);
+    }
+  },
 };
+
+/** `POST /api/catalog/services/bar-service-list`: one page of the bar services (see `serviceListAnswer`). */
+export const barServiceListMock = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(request, BAR_SERVICE_TABLE, BarServiceItem, BAR_SERVICE_SORT_FIELDS, {
+    category: Object.values(BarServiceCategory),
+  });
 
 type CreateBarServiceBody = Partial<BarServiceAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-bar-service` with `BarServiceAddItemRequest`: the new bar service goes
- * into the list, with the name in the language of `Accept-Language`. 204 without a body; 401
- * without a valid access token; 400 with one error per wrong field (see `barServiceErrors`).
+ * `POST /api/catalog/services/create-bar-service` with `BarServiceAddItemRequest`: the new bar service goes
+ * into the list, with the name in the language of `Accept-Language`. 201 with its id alone; 401
+ * without a valid access token; 400 with one error per wrong field (see `barServiceErrors`); 422
+ * `catalog.vat_rate_not_allowed` for a rate that is not one of the property.
  */
 export const createBarServiceMock = (
   request: HttpRequest<unknown>,
@@ -1533,7 +1543,10 @@ export const createBarServiceMock = (
       errors,
     });
   }
-  const main = body.translations?.find((translation) => translation.language === language);
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
   const idBarService = crypto.randomUUID();
   BAR_SERVICE_DETAILS.set(
     idBarService,
@@ -1542,20 +1555,125 @@ export const createBarServiceMock = (
   BAR_SERVICES.push({
     propertyId: property.id,
     idBarService,
-    serviceName: main?.serviceName?.trim() ?? null,
+    serviceName: nameToSave(body.translations ?? [], language),
     category: body.category ?? null,
     price: body.price ?? null,
   });
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
+  return of(new HttpResponse({ status: 201, url: request.url, body: idBarService })).pipe(
+    delay(600),
+  );
+};
+
+/**
+ * `POST /api/catalog/services/{id}/image` with the image in the multipart field `file`: it replaces
+ * the icon or the image of the bar service. 200 with the service, here without data: the frontend
+ * does not read it; 422 `catalog.invalid_image` as for the photos of the property; 404
+ * `service.not_found` for an unknown id; 401 without a valid access token.
+ */
+export const uploadServiceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> =>
+  withImage(request, (image) => {
+    const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
+    const row = BAR_SERVICES.find((item) => item.idBarService === idService);
+    if (!row) {
+      return problem(request, 404, ApiErrorCode.ServiceNotFound);
+    }
+    BAR_SERVICE_DETAILS.set(idService, { ...structuredClone(detailsOf(row)), icon: null });
+    SERVICE_IMAGES.set(idService, URL.createObjectURL(image));
+    return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
+  });
+
+/**
+ * `DELETE /api/catalog/services/{id}/image`: the bar service has no image any more. 200 with the
+ * service, here without data; 404 `service.not_found` for an unknown id; 401 without a valid access
+ * token.
+ */
+export const deleteServiceImageMock = (
+  request: HttpRequest<unknown>,
+): Observable<HttpEvent<unknown>> => {
+  if (!isAuthorized(request)) {
+    return unauthorized(request);
+  }
+  const idService = decodeURIComponent(request.url.split('/').at(-2) ?? '');
+  if (!BAR_SERVICES.some((item) => item.idBarService === idService)) {
+    return problem(request, 404, ApiErrorCode.ServiceNotFound);
+  }
+  SERVICE_IMAGES.delete(idService);
+  return of(new HttpResponse({ status: 200, url: request.url, body: {} })).pipe(delay(600));
 };
 
 function barServiceErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
-  return [...generalErrors(body, language), ...priceErrors(body)];
+  return [...generalErrors(body, language), ...barPriceErrors(body)];
+}
+
+/** Price and variants always filled, prices up to the limit; one wrong price of a period for all. */
+function barPriceErrors(body: CreateBarServiceBody): MockFieldError[] {
+  const variants = body.variants ?? [];
+  const errors: MockFieldError[] = [
+    ...requiredPriceErrors('price', body.price),
+    ...variants.flatMap(({ variantName, price }, index): MockFieldError[] => [
+      ...variantNameErrors(`variants[${index}].variantName`, variantName),
+      ...requiredPriceErrors(`variants[${index}].price`, price),
+    ]),
+  ];
+  if (body.vatRate != null && (body.vatRate <= 0 || body.vatRate >= 100)) {
+    errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (body.periodPrices?.some(({ price }) => price !== null && !isServicePrice(price))) {
+    errors.push({ field: 'periodPrices', code: ApiErrorCode.ValidationInvalid });
+  }
+  return errors;
+}
+
+function requiredPriceErrors(field: string, price: number | null | undefined): MockFieldError[] {
+  if (price == null) {
+    return [{ field, code: ApiErrorCode.ValidationRequired }];
+  }
+  return isServicePrice(price)
+    ? []
+    : [
+        {
+          field,
+          code: ApiErrorCode.ValidationOutOfRange,
+          args: { from: 0, to: MAX_SERVICE_PRICE },
+        },
+      ];
+}
+
+function variantNameErrors(field: string, name: string | null): MockFieldError[] {
+  if (!name?.trim()) {
+    return [{ field, code: ApiErrorCode.ValidationRequired }];
+  }
+  return name.trim().length > MAX_SERVICE_VARIANT_NAME_LENGTH
+    ? [
+        {
+          field,
+          code: ApiErrorCode.ValidationMaxLength,
+          args: { max: MAX_SERVICE_VARIANT_NAME_LENGTH },
+        },
+      ]
+    : [];
+}
+
+function isServicePrice(price: number): boolean {
+  return typeof price === 'number' && price >= 0 && price <= MAX_SERVICE_PRICE;
+}
+
+/** The rates of the country of the property (`VatPolicy` of the backend): another one is refused. */
+function vatRateNotAllowed(
+  request: HttpRequest<unknown>,
+  vatRate: number | null | undefined,
+): Observable<never> | null {
+  return vatRate == null || VAT_RATES.includes(vatRate)
+    ? null
+    : problem(request, 422, ApiErrorCode.CatalogVatRateNotAllowed, { args: { rates: VAT_RATES } });
 }
 
 /**
- * Name and description in the language of the request (the user's), as the panel requires; category
- * and icon, when given, among the values of their enums.
+ * Name and description in the language of the request (the user's), as the panel requires, and the
+ * name in every language with a description; category and icon, when given, among the values of
+ * their enums.
  */
 function generalErrors(body: CreateBarServiceBody, language: string): MockFieldError[] {
   const errors: MockFieldError[] = [];
@@ -1568,6 +1686,14 @@ function generalErrors(body: CreateBarServiceBody, language: string): MockFieldE
   }
   if (typeof main?.description !== 'string' || !main.description.trim()) {
     errors.push({ field: `${at}.description`, code: ApiErrorCode.ValidationRequired });
+  }
+  if (
+    translations.some(
+      (translation) => translation.description?.trim() && !translation.serviceName?.trim(),
+    ) &&
+    !errors.length
+  ) {
+    errors.push({ field: 'translations', code: ApiErrorCode.ValidationInvalid });
   }
   if (body.category != null && !Object.values(BarServiceCategory).includes(body.category)) {
     errors.push({ field: 'category', code: ApiErrorCode.ValidationInvalid });
@@ -1590,9 +1716,9 @@ type UpdateBarServiceBody = CreateBarServiceBody & { idBarService?: unknown };
 /**
  * The common part of the three updates of the edit panel: 401 without a valid access token; 404
  * `service.not_found` for an `idBarService` that is not one of its bar services; 400 with one
- * error per wrong field; 409 `resource.version_conflict` when `If-Match` is not the version of the
- * data of the tab (`dataOf`); otherwise `apply` changes the data of its tab and the answer is 204
- * without a body, with their new version in its `ETag`.
+ * error per wrong field; 422 `catalog.vat_rate_not_allowed`; 409 `resource.version_conflict` when
+ * `If-Match` is not the version of the data of the tab (`dataOf`); otherwise `apply` changes the
+ * data of its tab and the answer is 204 without a body, with their new version in its `ETag`.
  */
 function updateBarService(
   request: HttpRequest<unknown>,
@@ -1621,6 +1747,10 @@ function updateBarService(
       errors,
     });
   }
+  const vatProblem = vatRateNotAllowed(request, body.vatRate);
+  if (vatProblem) {
+    return vatProblem;
+  }
   const conflict = versionConflict(request, dataOf(row));
   if (conflict) {
     return conflict;
@@ -1632,7 +1762,7 @@ function updateBarService(
 }
 
 /**
- * `POST /api/catalog/update-bar-service-general` with `BarServiceUpdateGeneralRequest`: names,
+ * `POST /api/catalog/services/update-bar-service-general` with `BarServiceUpdateGeneralRequest`: names,
  * descriptions, category, icon and Metti in evidenza; the list shows the new name (language of
  * `Accept-Language`) and category. Errors as the creation (see `generalErrors`).
  */
@@ -1649,21 +1779,23 @@ export const updateBarServiceGeneralMock = (
       details.category = body.category ?? null;
       details.icon = body.icon ?? null;
       details.isHighlighted = body.isHighlighted === true;
-      const main = details.translations.find((translation) => translation.language === language);
-      row.serviceName = main?.serviceName?.trim() ?? row.serviceName;
+      row.serviceName = nameToSave(details.translations, language) ?? row.serviceName;
       row.category = details.category;
+      if (details.icon !== null) {
+        SERVICE_IMAGES.delete(row.idBarService ?? '');
+      }
     },
   );
 };
 
 /**
- * `POST /api/catalog/update-bar-service-prices` with `BarServiceUpdatePricesRequest`: the Prezzi
- * tab; the list shows the new price. 400 for a price below 0.
+ * `POST /api/catalog/services/update-bar-service-prices` with `BarServiceUpdatePricesRequest`: the Prezzi
+ * tab; the list shows the new price. Errors as the creation (see `barPriceErrors`).
  */
 export const updateBarServicePricesMock = (
   request: HttpRequest<unknown>,
 ): Observable<HttpEvent<unknown>> =>
-  updateBarService(request, barPricesOf, priceErrors, (details, body, row) => {
+  updateBarService(request, barPricesOf, barPriceErrors, (details, body, row) => {
     details.price = body.price ?? null;
     details.vatRate = body.vatRate ?? null;
     details.variants = body.variants ?? [];
@@ -1675,7 +1807,7 @@ export const updateBarServicePricesMock = (
   });
 
 /**
- * `POST /api/catalog/update-bar-service-booking` with `BarServiceUpdateBookingRequest`: the booking
+ * `POST /api/catalog/services/update-bar-service-booking` with `BarServiceUpdateBookingRequest`: the booking
  * options of the Prenotazioni tab, all of them.
  */
 export const updateBarServiceBookingMock = (
@@ -1690,82 +1822,17 @@ export const updateBarServiceBookingMock = (
     },
   );
 
-/**
- * `POST /api/catalog/delete-bar-service-item` with `{ idBarServices }`: all or nothing. If one id
- * is not a bar service of the property nothing is deleted (404 `service.not_found`). Repeated ids
- * count once. 204 without a body; 401 without a valid access token.
- */
+/** `POST /api/catalog/services/delete-bar-service-item` with `{ idBarServices }` (see `deleteServicesAnswer`). */
 export const deleteBarServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idBarServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const barServices = barServicesOf(property.id, body.idBarServices);
-  if (!barServices) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
-  for (const barService of barServices) {
-    BAR_SERVICES.splice(BAR_SERVICES.indexOf(barService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, BAR_SERVICE_TABLE, 'idBarServices');
 
-/**
- * `POST /api/catalog/duplicate-bar-service-item` with `{ idBarServices }`: all or
- * nothing, like the delete. Each copy keeps the price; the name is chosen by the backend: the mock
- * invents "Caffè (copia)", then "Caffè (copia 2)" and so on.
- */
+/** `POST /api/catalog/services/duplicate-bar-service-item` with `{ idBarServices }` (see `duplicateServicesAnswer`). */
 export const duplicateBarServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idBarServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const barServices = barServicesOf(property.id, body.idBarServices);
-  if (!barServices) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
-  for (const barService of barServices) {
-    BAR_SERVICES.push({
-      ...barService,
-      idBarService: crypto.randomUUID(),
-      serviceName: barServiceCopyName(barService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
-
-/**
- * The bar services of the property for `idBarServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function barServicesOf(propertyId: number, idBarServices: unknown): BarServiceRow[] | null {
-  const ids = Array.isArray(idBarServices) ? [...new Set(idBarServices)] : [];
-  const barServices = ids
-    .map((id) =>
-      BAR_SERVICES.find((row) => row.idBarService === id && row.propertyId === propertyId),
-    )
-    .filter((barService): barService is BarServiceRow => barService !== undefined);
-  return ids.length && barServices.length === ids.length ? barServices : null;
-}
-
-function barServiceCopyName(barService: BarServiceRow): string {
-  const taken = new Set(
-    BAR_SERVICES.filter((row) => row.propertyId === barService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${barService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${barService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, BAR_SERVICE_TABLE, 'idBarServices');
 
 type StandardServiceRow = StandardServiceItem & { propertyId: number };
 
@@ -1784,37 +1851,16 @@ const STANDARD_SERVICES: StandardServiceRow[] = (
 
 const STANDARD_SERVICE_SORT_FIELDS = ['serviceName', 'price'] as const;
 
-/**
- * `POST /api/catalog/standard-service-list`: one page of the services (neither bar nor hourly) of
- * the property of the token, searched in the name. 401 without a valid access token.
- */
+/** `POST /api/catalog/standard-service-list`: one page of the services (neither bar nor hourly) (see `serviceListAnswer`). */
 export const standardServiceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = STANDARD_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(StandardServiceItem, row));
-  const field = STANDARD_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<StandardServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(
+    request,
+    STANDARD_SERVICE_TABLE,
+    StandardServiceItem,
+    STANDARD_SERVICE_SORT_FIELDS,
+  );
 
 /**
  * The data of the add panel of a service, by id: those created with the panel and Doccia calda; the
@@ -1853,7 +1899,9 @@ const STANDARD_SERVICE_DETAILS = new Map<string, StandardServiceAddItemRequest>(
           onlineEndTime: '18:00',
           maxBookingPerHourQuantity: 6,
           maxBookingPerDayQuantity: 50,
-          timeInterval: BookingTimeInterval.FifteenMinutes,
+          weekdays: [],
+          maxPerSlot: null,
+          intervalMinutes: 15,
           minItemPerBookingQuantity: 1,
           maxItemPerBookingQuantity: 2,
         },
@@ -1878,6 +1926,14 @@ function standardDetailsOf(row: StandardServiceRow): StandardServiceAddItemReque
     })
   );
 }
+
+const STANDARD_SERVICE_TABLE = {
+  rows: STANDARD_SERVICES,
+  idField: 'idStandardService' as const,
+  details: STANDARD_SERVICE_DETAILS,
+  detailsOf: standardDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceNotFound,
+};
 
 /** The service of the `idStandardService` of the query string, if it exists. */
 function requestedStandardService(request: HttpRequest<unknown>): StandardServiceRow | undefined {
@@ -2171,37 +2227,11 @@ const HOURLY_SERVICES: HourlyServiceRow[] = (
 
 const HOURLY_SERVICE_SORT_FIELDS = ['serviceName'] as const;
 
-/**
- * `POST /api/catalog/hourly-service-list`: one page of the hourly services of the property of the
- * token, searched in the name. 401 without a valid access token.
- */
+/** `POST /api/catalog/hourly-service-list`: one page of the hourly services (see `serviceListAnswer`). */
 export const hourlyServiceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = HOURLY_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(HourlyServiceItem, row));
-  const field = HOURLY_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<HourlyServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(request, HOURLY_SERVICE_TABLE, HourlyServiceItem, HOURLY_SERVICE_SORT_FIELDS);
 
 /** An availability of the examples: every day from 9 to 19, four time slots and a custom one. */
 function exampleAvailability(): ServiceAvailabilityOption {
@@ -2312,6 +2342,14 @@ function hourlyDetailsOf(row: HourlyServiceRow): HourlyServiceAddItemRequest {
     })
   );
 }
+
+const HOURLY_SERVICE_TABLE = {
+  rows: HOURLY_SERVICES,
+  idField: 'idHourlyService' as const,
+  details: HOURLY_SERVICE_DETAILS,
+  detailsOf: hourlyDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceNotFound,
+};
 
 /** The hourly service of the `idHourlyService` of the query string, if it exists. */
 function requestedHourlyService(request: HttpRequest<unknown>): HourlyServiceRow | undefined {
@@ -2971,37 +3009,24 @@ function automaticIconErrors(icon: string | null): MockFieldError[] {
     : [{ field: 'icon', code: ApiErrorCode.ValidationInvalid }];
 }
 
-/**
- * `POST /api/catalog/automatic-price-list`: one page of the automatic prices of the property of the
- * token, searched in the name. 401 without a valid access token.
- */
+const AUTOMATIC_PRICE_TABLE = {
+  rows: AUTOMATIC_PRICES,
+  idField: 'idAutomaticPrice' as const,
+  details: AUTOMATIC_PRICE_DETAILS,
+  detailsOf: automaticDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceAutomaticPriceNotFound,
+};
+
+/** `POST /api/catalog/automatic-price-list`: one page of the automatic prices (see `serviceListAnswer`). */
 export const automaticPriceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = AUTOMATIC_PRICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(AutomaticPriceItem, row));
-  const field = AUTOMATIC_PRICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<AutomaticPriceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(
+    request,
+    AUTOMATIC_PRICE_TABLE,
+    AutomaticPriceItem,
+    AUTOMATIC_PRICE_SORT_FIELDS,
+  );
 
 type TableServiceRow = TableServiceItem & { propertyId: number };
 
@@ -3071,331 +3096,67 @@ const TABLE_SERVICE_DETAILS = new Map<string, TableServiceAddItemRequest>([
   ],
 ]);
 
-/**
- * `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) of
- * the property of the token, searched in the name. 401 without a valid access token.
- */
+const TABLE_SERVICE_TABLE = {
+  rows: TABLE_SERVICES,
+  idField: 'idTableService' as const,
+  details: TABLE_SERVICE_DETAILS,
+  detailsOf: tableDetailsOf,
+  notFoundCode: ApiErrorCode.ServiceTableServiceNotFound,
+};
+
+/** `POST /api/catalog/table-service-list`: one page of the table services (e.g. lunch, dinner) (see `serviceListAnswer`). */
 export const tableServiceListMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = TABLE_SERVICES.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.serviceName?.trim().toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(TableServiceItem, row));
-  const field = TABLE_SERVICE_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
-  }
-  const answer: Page<TableServiceItem> = {
-    total: found.length,
-    rows: found.slice((page - 1) * pageSize, page * pageSize),
-  };
-  return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(150));
-};
+): Observable<HttpEvent<unknown>> =>
+  serviceListAnswer(request, TABLE_SERVICE_TABLE, TableServiceItem, TABLE_SERVICE_SORT_FIELDS);
 
-/**
- * `POST /api/catalog/delete-standard-service-item` with `{ idStandardServices }`: all or nothing.
- * If one id is not a service of the property nothing is deleted (404 `service.not_found`).
- * Repeated ids count once. 204 without a body; 401 without a valid access token.
- */
+/** `POST /api/catalog/delete-standard-service-item` with `{ idStandardServices }` (see `deleteServicesAnswer`). */
 export const deleteStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idStandardServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const standardServices = standardServicesOf(property.id, body.idStandardServices);
-  if (!standardServices) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
-  for (const standardService of standardServices) {
-    STANDARD_SERVICES.splice(STANDARD_SERVICES.indexOf(standardService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, STANDARD_SERVICE_TABLE, 'idStandardServices');
 
-/**
- * `POST /api/catalog/duplicate-standard-service-item` with `{ idStandardServices }`:
- * all or nothing, like the delete. Each copy keeps the price; the name is chosen by the backend:
- * the mock invents "Doccia calda (copia)", then "Doccia calda (copia 2)" and so on.
- */
+/** `POST /api/catalog/duplicate-standard-service-item` with `{ idStandardServices }` (see `duplicateServicesAnswer`). */
 export const duplicateStandardServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idStandardServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const standardServices = standardServicesOf(property.id, body.idStandardServices);
-  if (!standardServices) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
-  for (const standardService of standardServices) {
-    STANDARD_SERVICES.push({
-      ...standardService,
-      idStandardService: crypto.randomUUID(),
-      serviceName: standardServiceCopyName(standardService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, STANDARD_SERVICE_TABLE, 'idStandardServices');
 
-/**
- * The services of the property for `idStandardServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function standardServicesOf(
-  propertyId: number,
-  idStandardServices: unknown,
-): StandardServiceRow[] | null {
-  const ids = Array.isArray(idStandardServices) ? [...new Set(idStandardServices)] : [];
-  const standardServices = ids
-    .map((id) =>
-      STANDARD_SERVICES.find(
-        (row) => row.idStandardService === id && row.propertyId === propertyId,
-      ),
-    )
-    .filter(
-      (standardService): standardService is StandardServiceRow => standardService !== undefined,
-    );
-  return ids.length && standardServices.length === ids.length ? standardServices : null;
-}
-
-function standardServiceCopyName(standardService: StandardServiceRow): string {
-  const taken = new Set(
-    STANDARD_SERVICES.filter((row) => row.propertyId === standardService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${standardService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${standardService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/**
- * `POST /api/catalog/delete-hourly-service-item` with `{ idHourlyServices }`: all or nothing. If
- * one id is not an hourly service of the property nothing is deleted (404 `service.not_found`).
- * Repeated ids count once. 204 without a body; 401 without a valid access token.
- */
+/** `POST /api/catalog/delete-hourly-service-item` with `{ idHourlyServices }` (see `deleteServicesAnswer`). */
 export const deleteHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idHourlyServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
-  if (!hourlyServices) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
-  for (const hourlyService of hourlyServices) {
-    HOURLY_SERVICES.splice(HOURLY_SERVICES.indexOf(hourlyService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, HOURLY_SERVICE_TABLE, 'idHourlyServices');
 
-/**
- * `POST /api/catalog/duplicate-hourly-service-item` with `{ idHourlyServices }`: all
- * or nothing, like the delete. The name of each copy is chosen by the backend: the mock invents
- * "Sup (copia)", then "Sup (copia 2)" and so on.
- */
+/** `POST /api/catalog/duplicate-hourly-service-item` with `{ idHourlyServices }` (see `duplicateServicesAnswer`). */
 export const duplicateHourlyServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idHourlyServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const hourlyServices = hourlyServicesOf(property.id, body.idHourlyServices);
-  if (!hourlyServices) {
-    return problem(request, 404, ApiErrorCode.ServiceNotFound);
-  }
-  for (const hourlyService of hourlyServices) {
-    HOURLY_SERVICES.push({
-      ...hourlyService,
-      idHourlyService: crypto.randomUUID(),
-      serviceName: hourlyServiceCopyName(hourlyService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, HOURLY_SERVICE_TABLE, 'idHourlyServices');
 
-/**
- * The hourly services of the property for `idHourlyServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function hourlyServicesOf(
-  propertyId: number,
-  idHourlyServices: unknown,
-): HourlyServiceRow[] | null {
-  const ids = Array.isArray(idHourlyServices) ? [...new Set(idHourlyServices)] : [];
-  const hourlyServices = ids
-    .map((id) =>
-      HOURLY_SERVICES.find((row) => row.idHourlyService === id && row.propertyId === propertyId),
-    )
-    .filter((hourlyService): hourlyService is HourlyServiceRow => hourlyService !== undefined);
-  return ids.length && hourlyServices.length === ids.length ? hourlyServices : null;
-}
-
-function hourlyServiceCopyName(hourlyService: HourlyServiceRow): string {
-  const taken = new Set(
-    HOURLY_SERVICES.filter((row) => row.propertyId === hourlyService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${hourlyService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${hourlyService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/**
- * `POST /api/catalog/delete-automatic-price-item` with `{ idAutomaticPrices }`: all or nothing. If
- * one id is not an automatic price of the property nothing is deleted (404 `service.automatic_price_not_found`).
- * Repeated ids count once. 204 without a body; 401 without a valid access token.
- */
+/** `POST /api/catalog/delete-automatic-price-item` with `{ idAutomaticPrices }` (see `deleteServicesAnswer`). */
 export const deleteAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idAutomaticPrices?: string[] };
-  const property = DEMO_PROPERTY;
-  const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
-  if (!automaticPrices) {
-    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
-  }
-  for (const automaticPrice of automaticPrices) {
-    AUTOMATIC_PRICES.splice(AUTOMATIC_PRICES.indexOf(automaticPrice), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, AUTOMATIC_PRICE_TABLE, 'idAutomaticPrices');
 
-/**
- * `POST /api/catalog/duplicate-automatic-price-item` with `{ idAutomaticPrices }`:
- * all or nothing, like the delete. Each copy keeps the price; the name is chosen by the backend:
- * the mock invents "Coperto (copia)", then "Coperto (copia 2)" and so on.
- */
+/** `POST /api/catalog/duplicate-automatic-price-item` with `{ idAutomaticPrices }` (see `duplicateServicesAnswer`). */
 export const duplicateAutomaticPriceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idAutomaticPrices?: string[] };
-  const property = DEMO_PROPERTY;
-  const automaticPrices = automaticPricesOf(property.id, body.idAutomaticPrices);
-  if (!automaticPrices) {
-    return problem(request, 404, ApiErrorCode.ServiceAutomaticPriceNotFound);
-  }
-  for (const automaticPrice of automaticPrices) {
-    AUTOMATIC_PRICES.push({
-      ...automaticPrice,
-      idAutomaticPrice: crypto.randomUUID(),
-      serviceName: automaticPriceCopyName(automaticPrice),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, AUTOMATIC_PRICE_TABLE, 'idAutomaticPrices');
 
-/**
- * The automatic prices of the property for `idAutomaticPrices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function automaticPricesOf(
-  propertyId: number,
-  idAutomaticPrices: unknown,
-): AutomaticPriceRow[] | null {
-  const ids = Array.isArray(idAutomaticPrices) ? [...new Set(idAutomaticPrices)] : [];
-  const automaticPrices = ids
-    .map((id) =>
-      AUTOMATIC_PRICES.find((row) => row.idAutomaticPrice === id && row.propertyId === propertyId),
-    )
-    .filter((automaticPrice): automaticPrice is AutomaticPriceRow => automaticPrice !== undefined);
-  return ids.length && automaticPrices.length === ids.length ? automaticPrices : null;
-}
-
-function automaticPriceCopyName(automaticPrice: AutomaticPriceRow): string {
-  const taken = new Set(
-    AUTOMATIC_PRICES.filter((row) => row.propertyId === automaticPrice.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${automaticPrice.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${automaticPrice.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/**
- * `POST /api/catalog/delete-table-service-item` with `{ idTableServices }`: all or nothing. If one
- * id is not a table service of the property nothing is deleted (404 `service.table_service_not_found`). Repeated
- * ids count once. 204 without a body; 401 without a valid access token.
- */
+/** `POST /api/catalog/delete-table-service-item` with `{ idTableServices }` (see `deleteServicesAnswer`). */
 export const deleteTableServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idTableServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const tableServices = tableServicesOf(property.id, body.idTableServices);
-  if (!tableServices) {
-    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
-  }
-  for (const tableService of tableServices) {
-    TABLE_SERVICES.splice(TABLE_SERVICES.indexOf(tableService), 1);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  deleteServicesAnswer(request, TABLE_SERVICE_TABLE, 'idTableServices');
 
-/**
- * `POST /api/catalog/duplicate-table-service-item` with `{ idTableServices }`: all or
- * nothing, like the delete. The name of each copy is chosen by the backend: the mock invents
- * "Pranzo (copia)", then "Pranzo (copia 2)" and so on.
- */
+/** `POST /api/catalog/duplicate-table-service-item` with `{ idTableServices }` (see `duplicateServicesAnswer`). */
 export const duplicateTableServiceItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idTableServices?: string[] };
-  const property = DEMO_PROPERTY;
-  const tableServices = tableServicesOf(property.id, body.idTableServices);
-  if (!tableServices) {
-    return problem(request, 404, ApiErrorCode.ServiceTableServiceNotFound);
-  }
-  for (const tableService of tableServices) {
-    TABLE_SERVICES.push({
-      ...tableService,
-      idTableService: crypto.randomUUID(),
-      serviceName: tableServiceCopyName(tableService),
-    });
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  duplicateServicesAnswer(request, TABLE_SERVICE_TABLE, 'idTableServices');
 
 type CreateTableServiceBody = Partial<TableServiceAddItemRequest>;
 
@@ -3673,45 +3434,4 @@ function isValueOf(choices: Record<string, string>, value: unknown): boolean {
 /** Empty, or a whole number above 0. */
 function isQuantity(value: unknown): boolean {
   return value == null || (Number.isInteger(value) && (value as number) > 0);
-}
-
-/**
- * The table services of the property for `idTableServices` (repeated ids once); null when one id is not
- * one of them, or there are none: the whole request is cancelled.
- */
-function tableServicesOf(propertyId: number, idTableServices: unknown): TableServiceRow[] | null {
-  const ids = Array.isArray(idTableServices) ? [...new Set(idTableServices)] : [];
-  const tableServices = ids
-    .map((id) =>
-      TABLE_SERVICES.find((row) => row.idTableService === id && row.propertyId === propertyId),
-    )
-    .filter((tableService): tableService is TableServiceRow => tableService !== undefined);
-  return ids.length && tableServices.length === ids.length ? tableServices : null;
-}
-
-function tableServiceCopyName(tableService: TableServiceRow): string {
-  const taken = new Set(
-    TABLE_SERVICES.filter((row) => row.propertyId === tableService.propertyId).map(
-      (row) => row.serviceName,
-    ),
-  );
-  let copy = `${tableService.serviceName} (copia)`;
-  for (let number = 2; taken.has(copy); number++) {
-    copy = `${tableService.serviceName} (copia ${number})`;
-  }
-  return copy;
-}
-
-/** Numbers by value, texts alphabetically; a missing value first ascending, last descending. */
-function compare(first: string | number | null, second: string | number | null): number {
-  if (first === null || second === null) {
-    return first === second ? 0 : first === null ? -1 : 1;
-  }
-  return typeof first === 'number' && typeof second === 'number'
-    ? first - second
-    : String(first).trim().localeCompare(String(second).trim(), 'it', { sensitivity: 'base' });
-}
-
-function positiveInteger(value: unknown, fallback: number): number {
-  return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
 }

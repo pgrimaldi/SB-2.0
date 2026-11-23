@@ -13,11 +13,15 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  MAX_LENGTH,
   TreeValidationResult,
   applyEach,
   applyWhen,
   disabled,
   form,
+  max,
+  metadata,
+  required,
   submit,
 } from '@angular/forms/signals';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -35,16 +39,28 @@ import { BarServiceIcon } from '../../../../../entities/enums/bar-service-icon';
 import { SeasonPeriodItem } from '../../../../../entities/settings/seasons/season-period-item';
 import { BarServiceAddItemRequest } from '../../../../../entities/settings/services/bar-service-add-item-request';
 import { ServicePeriodPrice } from '../../../../../entities/settings/services/service-period-price';
-import { ServiceTranslation } from '../../../../../entities/settings/services/service-translation';
+import { MAX_SERVICE_PRICE } from '../../../../../entities/settings/services/service-price';
+import {
+  MAX_SERVICE_DESCRIPTION_LENGTH,
+  MAX_SERVICE_NAME_LENGTH,
+  ServiceTranslation,
+} from '../../../../../entities/settings/services/service-translation';
 import { CatalogService } from '../../../../../services/api/catalog/catalog.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { SeasonService } from '../../../../../services/api/seasons/season.service';
-import { requiredText, timeRange } from '../../../../shared/forms/validators';
+import { requiredText } from '../../../../shared/forms/validators';
 import { SidePanel } from '../../../../shared/ui/dialogs/side-panel/side-panel';
 import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-group';
 import { ServiceBookingsTab } from '../service-bookings-tab/service-bookings-tab';
 import { ServicePricesTab } from '../service-prices-tab/service-prices-tab';
+import { serviceErrorFields, serviceFieldError } from '../service-field-errors';
+import {
+  otherTranslationRules,
+  serviceBookingOptionRules,
+  serviceVariantRules,
+} from '../service-form-rules';
 import { ServiceGeneralInfoTab } from '../service-general-info-tab/service-general-info-tab';
+import { ServiceImageErrorPopup } from '../service-image-error-popup/service-image-error-popup';
 import { SERVICE_LANGUAGES } from '../shared/services-translations/services-translations';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
 
@@ -63,11 +79,27 @@ enum PanelTab {
   Bookings,
 }
 
+/** The fields of the form each tab shows. */
+const TAB_FIELDS: Readonly<Record<PanelTab, readonly (keyof BarServiceAddItemRequest)[]>> = {
+  [PanelTab.GeneralInfo]: ['translations', 'category', 'icon', 'isHighlighted'],
+  [PanelTab.Prices]: [
+    'price',
+    'vatRate',
+    'variants',
+    'isPeriodPricingEnabled',
+    'periodPrices',
+    'idSectors',
+    'isOnlinePurchaseEnabled',
+  ],
+  [PanelTab.Bookings]: ['bookingOptions'],
+};
+
 @Component({
   selector: 'app-bar-service-add-item-panel',
   imports: [
     ServiceBookingsTab,
     ServiceGeneralInfoTab,
+    ServiceImageErrorPopup,
     ServicePricesTab,
     SidePanel,
     TabGroup,
@@ -111,6 +143,8 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected readonly draftForm = form(this.draft, (path) => {
     disabled(path.isPeriodPricingEnabled, () => !this.arePeriodsLoaded());
     applyEach(path.translations, (translation) => {
+      metadata(translation.serviceName, MAX_LENGTH, () => MAX_SERVICE_NAME_LENGTH);
+      metadata(translation.description, MAX_LENGTH, () => MAX_SERVICE_DESCRIPTION_LENGTH);
       applyWhen(
         translation,
         ({ valueOf }) => valueOf(translation.language) === this.mainLanguage(),
@@ -119,11 +153,17 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
           requiredText(main.description);
         },
       );
+      applyWhen(
+        translation,
+        ({ valueOf }) => valueOf(translation.language) !== this.mainLanguage(),
+        otherTranslationRules,
+      );
     });
-    applyEach(path.bookingOptions, (option) => {
-      timeRange(option.managementStartTime, option.managementEndTime);
-      timeRange(option.onlineStartTime, option.onlineEndTime);
-    });
+    required(path.price);
+    max(path.price, MAX_SERVICE_PRICE);
+    applyEach(path.variants, serviceVariantRules);
+    applyEach(path.periodPrices, (periodPrice) => max(periodPrice.price, MAX_SERVICE_PRICE));
+    applyEach(path.bookingOptions, serviceBookingOptionRules);
   });
   /** The form as it was when the panel opened, with an empty price for every period. */
   private readonly pristine = signal(comparableJson(newDraft()));
@@ -137,6 +177,7 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly image = signal<File | null>(null);
   protected readonly imagePreviewUrl = signal<string | null>(null);
   private readonly error = signal<ApiProblem | null>(null);
+  protected readonly imageError = signal<ApiProblem | null>(null);
   protected readonly errorMessage = toSignal(
     toObservable(this.error).pipe(
       switchMap((problem) => (problem ? this.errorText.text(problem) : of(null))),
@@ -170,6 +211,11 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
     this.setImage(image);
   }
 
+  /** The image is not saved yet: it just goes away. */
+  protected removeImage(): void {
+    this.setImage(null);
+  }
+
   protected save(): void {
     if (this.isSaving() || !this.auth.user()?.propertyId) {
       return;
@@ -179,13 +225,18 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        await firstValueFrom(this.catalog.createBarService(this.draft()));
+        const idBarService = await firstValueFrom(this.catalog.createBarService(this.draft()));
+        const imageError = await this.uploadImage(idBarService);
         this.isSaving.set(false);
         this.open.set(false);
         this.created.emit();
+        this.imageError.set(imageError);
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        this.showTabOf(problem);
+        return (
+          serviceFieldError(problem, this.draftForm) ??
+          apiFieldErrorsOrGeneral(problem, this.draftForm, (general) => this.error.set(general))
         );
       } finally {
         this.isSaving.set(false);
@@ -196,6 +247,31 @@ export class BarServiceAddItemPanel implements UnsavedChanges, OnDestroy {
   protected async leave(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.open.set(false);
+    }
+  }
+
+  /** The image goes after the service, which stays saved also without it. */
+  private async uploadImage(idBarService: string): Promise<ApiProblem | null> {
+    const image = this.image();
+    if (!image) {
+      return null;
+    }
+    try {
+      await firstValueFrom(this.catalog.uploadServiceImage(idBarService, image));
+      return null;
+    } catch (error: unknown) {
+      return toApiProblem(error);
+    }
+  }
+
+  /** The tab of the first wrong field, where its error shows. */
+  private showTabOf(problem: ApiProblem): void {
+    const fields = serviceErrorFields(problem);
+    const tab = [PanelTab.GeneralInfo, PanelTab.Prices, PanelTab.Bookings].find((panelTab) =>
+      TAB_FIELDS[panelTab].some((field) => fields.includes(field)),
+    );
+    if (tab !== undefined) {
+      this.selectedTab.set(tab);
     }
   }
 
