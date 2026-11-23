@@ -2880,8 +2880,8 @@ Nessun corpo (204).
   ],
   "periodPrices": [
     {
-      "idSector": "string (UUID)",
-      "idPeriod": "number (intero)",
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -2931,8 +2931,8 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | number (intero) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -2976,7 +2976,7 @@ Nessun corpo (204).
 ```json
 {
   "idAdditionalItem": "string (UUID)",
-  "idArticle": "string (UUID)",
+  "idArticle": "string (UUID) | null",
   "idPackages": "string[] (UUID)",
   "isOnlineEnabled": "boolean",
   "isOnlineOnly": "boolean",
@@ -2990,8 +2990,8 @@ Nessun corpo (204).
   ],
   "periodPrices": [
     {
-      "idSector": "string (UUID)",
-      "idPeriod": "number (intero)",
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3035,7 +3035,7 @@ Nessun corpo (204).
 | Campo | Tipo |
 |---|---|
 | `idAdditionalItem` | string (UUID) |
-| `idArticle` | string (UUID) |
+| `idArticle` | string (UUID) \| null |
 | `idPackages` | string[] (UUID) |
 | `isOnlineEnabled` | boolean |
 | `isOnlineOnly` | boolean |
@@ -3045,8 +3045,8 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | number (intero) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3093,8 +3093,8 @@ Nessun corpo (204).
   ],
   "periodPrices": [
     {
-      "idSector": "string (UUID)",
-      "idPeriod": "number (intero)",
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3145,8 +3145,8 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | number (intero) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3281,8 +3281,8 @@ Nessun payload.
   ],
   "periodPrices": [
     {
-      "idSector": "string (UUID)",
-      "idPeriod": "number (intero)",
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3350,8 +3350,8 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | number (intero) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3476,8 +3476,8 @@ Nessun payload.
   ],
   "periodPrices": [
     {
-      "idSector": "string (UUID)",
-      "idPeriod": "number (intero)",
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3549,8 +3549,8 @@ Nessun payload.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | number (intero) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |
@@ -3627,8 +3627,8 @@ Nessun payload.
   ],
   "periodPrices": [
     {
-      "idSector": "string (UUID)",
-      "idPeriod": "number (intero)",
+      "idSector": "string (UUID) | null",
+      "idPeriod": "number (intero) | null",
       "halfDayPrice": "number (decimale, €) | null",
       "dailyPrice": "number (decimale, €) | null",
       "weekendPrice": "number (decimale, €) | null",
@@ -3697,8 +3697,8 @@ Nessun corpo (204).
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) |
-| `periodPrices[].idSector` | string (UUID) |
-| `periodPrices[].idPeriod` | number (intero) |
+| `periodPrices[].idSector` | string (UUID) \| null |
+| `periodPrices[].idPeriod` | number (intero) \| null |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null |

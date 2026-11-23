@@ -665,9 +665,9 @@ in una sola chiamata, tutto o niente**, come `POST /api/catalog/duplicate-wareho
   (`ToDtoAsync` di `ServiceItemsService` e di `AutomaticPricesService` lo esclude) e la copia è diversa dall'originale.
   L'utente risolve togliendo quel settore nel pannello, che lo mostra come "Settore/fila non più disponibile" ("Settori
   eliminati" nelle regole comuni dei pannelli di Servizi Bar).
-- **Un periodo eliminato fa fallire la copia**, come un settore: eliminato = tutte le sue righe di
-  `catalog.pricing_tariff_periods` sono eliminate. I prezzi e le disponibilità di un periodo di un'altra stagione, non
-  eliminato, invece **si copiano come sono**, come li tiene il salvataggio: oggi `ApplyAsync` li rifiuta con 422
+- **Un periodo eliminato fa fallire la copia**, come un settore: eliminato = ha solo righe eliminate in
+  `catalog.pricing_tariff_periods`. I prezzi e le disponibilità con una `key` senza nessuna riga in quella tabella invece **si
+  copiano come sono**, come li tiene il salvataggio: oggi `ApplyAsync` li rifiuta con 422
   `pricing.period_not_found`. L'utente risolve salvando la tab Prezzi: le letture non danno i prezzi dei periodi eliminati
   (sezioni 19, 28 e 35), quindi il salvataggio li toglie.
 - Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con il 404 della
@@ -2204,7 +2204,7 @@ prezzo e un'immagine caricata:
     con una disponibilità di un servizio orario, con un'icona tolta dal catalogo (`service.duplicate_icon_not_found`) e con un
     settore eliminato fra quelli a cui l'elemento è limitato (`service.duplicate_sector_not_found`; salvati i suoi settori
     senza quello, la duplicazione riesce). Con prezzi per un periodo eliminato `service.duplicate_period_not_found`; salvata
-    la tab Prezzi la duplicazione riesce. Con prezzi per un periodo di un'altra stagione, non eliminato: 204, e la copia li
+    la tab Prezzi la duplicazione riesce. Con prezzi per una `key` senza nessuna riga nei periodi: 204, e la copia li
     ha. Un servizio con il nome in tutte e 7 le lingue: la copia ha in ogni lingua il suffisso della sua lingua (" copia",
     " copy", " copie", " copia", " Kopie", " 副本", " نسخة") e le stesse descrizioni. Se in inglese "Coffee copy" esiste
     già ma in italiano "Caffè copia" no, la copia è "Caffè copia" e "Coffee copy 2".

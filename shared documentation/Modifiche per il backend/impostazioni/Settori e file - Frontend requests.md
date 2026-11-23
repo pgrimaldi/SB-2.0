@@ -165,6 +165,12 @@ più settori in una sola chiamata, tutto o niente**. È un'**API nuova**: il fro
   c'è più, le sue letture danno un elenco di settori vuoto (`ServiceItemsService.ToDtoAsync`,
   `AutomaticPricesService.ToDtoAsync` scartano gli id sconosciuti), che per la pagina Servizi vuol dire "Tutte le
   file/settori": il primo Salva toglie il limite senza che l'utente lo sappia.
+- **In più è usato anche il settore che un listino non eliminato** (pacchetto o articolo aggiuntivo) **ha fra quelli abilitati**
+  (salvati a parte con `Listino - Frontend requests.md`, sezione 5), o per cui ha una riga non eliminata di prezzi per periodo,
+  prezzi ridotti o prezzi intermedi. Oggi `CountUsagesAsync` (`SeasonSectorRepositories.cs:71`) conta solo
+  `pricing_price_list_sector_prices`: un settore abilitato, o con soli prezzi per periodo, si potrebbe eliminare, e il listino
+  resterebbe limitato a un settore che non c'è più. Contano in `priceLists`, ogni listino una volta; le convenzioni restano contate
+  come oggi.
 - **Come farlo lo sceglie lo sviluppatore del backend** (metodo nuovo di `SectorService`, conteggi per più settori
   insieme, transazione...), purché il risultato sia questo.
 
@@ -199,7 +205,7 @@ Nell'ordine in cui si controllano:
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `catalog.sector_not_found` | Un id non è un settore dello stabilimento (anche perché già eliminato). Non si elimina nessun settore. |
-| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`) e **in più** `services` e `automaticPrices`, quanti servizi (bar, normali e orari insieme) e quanti prezzi automatici sono limitati a quel settore, e `sectorName`, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. I conteggi ci sono sempre tutti, 0 compreso. |
+| 409 | `catalog.sector_in_use` | Un settore è ancora usato. Non si elimina nessun settore. `args` come in `DELETE /api/catalog/sectors/{id}` (`mapSpots`, `priceLists`, `stayLimits`, `discounts`, contati come `CountUsagesAsync`, più i listini di "Cosa ci serve") e **in più** `services` e `automaticPrices`, quanti servizi (bar, normali e orari insieme) e quanti prezzi automatici sono limitati a quel settore, e `sectorName`, il nome di quel settore, anche con un id solo: il messaggio dice sempre quale. I conteggi ci sono sempre tutti, 0 compreso. |
 
 Prima si controlla che tutti gli id siano settori dello stabilimento (404 se uno non lo è), poi che nessuno sia usato:
 con più settori in uso, `sectorName` e i conteggi sono quelli del primo in uso nell'ordine di `idSectors`.
@@ -407,7 +413,8 @@ API 2 e 3, con un token con `catalog.settings`:
    i conteggi; il settore non è eliminato.
 8. `bulk-delete` di un settore a cui è limitato solo un servizio (bar, normale o orario): 409 `catalog.sector_in_use`
    con `services` 1 e gli altri conteggi 0; lo stesso con un prezzo automatico (`automaticPrices` 1). Tolto il limite
-   dal servizio, o eliminato il servizio: 204.
+   dal servizio, o eliminato il servizio: 204. Lo stesso con un pacchetto che ha quel settore solo fra gli abilitati, o solo
+   un prezzo per periodo, ridotto o intermedio: 409 con `priceLists` 1; tolto dal pacchetto, o eliminato il pacchetto: 204.
 
 Salvataggi contemporanei:
 

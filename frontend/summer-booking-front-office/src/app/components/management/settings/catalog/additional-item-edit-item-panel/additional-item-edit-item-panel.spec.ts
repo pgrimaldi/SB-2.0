@@ -128,6 +128,20 @@ describe('AdditionalItemEditItemPanel', () => {
     expect(panel['error']()).toBeNull();
   });
 
+  it('should forget with Annulla the error of the backend on a field not changed', async () => {
+    const { panel, save } = await setup(
+      failing(ApiErrorCode.CatalogVatRateNotAllowed, 422, { rates: [4] }),
+    );
+
+    await save();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(1);
+    await panel['requestCancel']();
+    panel['startEdit']();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(0);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    expect(panel['draft']().vatRate).toBe(22);
+  });
+
   it.each([
     [ApiErrorCode.InventoryItemNotFound, 404, 'idArticle'],
     [ApiErrorCode.CatalogVatRateNotAllowed, 422, 'vatRate'],

@@ -57,7 +57,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   Info Generali) e `GET /api/catalog/tariff-periods` (i periodi della stagione corrente; il loro `key` numerico è l'`idPeriod` delle righe dei prezzi).
 - Le lingue senza nome restano vuote; le righe dei prezzi sono una per settore e una per settore e periodo, con i
   prezzi salvati o vuote.
-- I prezzi salvati di settori o periodi che il pannello non mostra (es. di un'altra stagione) restano da parte e
+- I prezzi salvati che il pannello non mostra (righe per tutte le file, senza periodo o di un periodo sconosciuto) restano da parte e
   ripartono invariati con "Salva".
 - Se la lettura fallisce il pannello si chiude e compare `app-read-error-popup` (il messaggio del `code`, Chiudi e
   Riprova, che riapre il pannello e rilegge; per un 404 solo Chiudi).
@@ -84,7 +84,9 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   del backend su un campo va sotto quel campo (`translations` sotto il nome, `reducedSeasonalPrices` sotto i
   prezzi ridotti, `sectorPrices` e `periodPrices` sotto la loro sezione).
 - `pricing.calculation_method_not_found` (sotto "Calcolo del prezzo") e `catalog.vat_rate_not_allowed` (sotto IVA, con le
-  aliquote ammesse), senza `errors[]`, aprono la tab Listino.
+  aliquote ammesse) arrivano senza `errors[]`.
+- Un errore su un campo apre la sua tab (`panelTabOf` di `package-panel-tabs.ts`, il primo campo sbagliato), come in Servizi.
+- "Annulla" toglie anche gli errori del backend sotto i campi (`clearApiFieldErrors`), nei due pannelli di modifica.
 - `inventory.item_not_found`: gli articoli si rileggono e quelli che non ci sono più escono dal pacchetto
   (`withExistingItems` di `package-items.ts`).
 - Errori dentro una lista o un oggetto (es. `translations[0].packageName`, `reducedSeasonalPrices[0].endsOn`),

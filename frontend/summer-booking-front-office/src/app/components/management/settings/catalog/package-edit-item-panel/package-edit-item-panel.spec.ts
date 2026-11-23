@@ -66,6 +66,7 @@ describe('PackageEditItemPanel', () => {
       management: {
         settings: {
           catalog: {
+            price_list: { calculation_methods: {}, monthly_settings: {}, weekend_settings: {} },
             packages: {
               form: {
                 tabs: { general_info: 'Info Generali', price_list: 'Listino' },
@@ -115,6 +116,35 @@ describe('PackageEditItemPanel', () => {
     expect(panel['draft']().idSectors).toEqual(['s1', 's9']);
     expect(sectorCombobox.mock.calls).toHaveLength(reads + 1);
     expect(panel['isSaveDisabled']()).toBe(false);
+  });
+
+  it('should forget with Annulla the error of the backend on a field not changed', async () => {
+    const { panel, save } = await setup({
+      selected: { vatRate: 20 },
+      updatePackage: vi.fn(() =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 422,
+              error: {
+                status: 422,
+                code: ApiErrorCode.CatalogVatRateNotAllowed,
+                args: { rates: [22] },
+              },
+            }),
+        ),
+      ),
+    });
+
+    panel['startEdit']();
+    await save();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(1);
+    panel['cancelEdit']();
+    panel['startEdit']();
+    expect(panel['draftForm'].vatRate().errors()).toHaveLength(0);
+    expect(panel['isSaveDisabled']()).toBe(false);
+    expect(panel['draft']().vatRate).toBe(20);
+    expect(panel.hasUnsavedChanges()).toBe(false);
   });
 
   it('should send back the items of the package that have no row', async () => {

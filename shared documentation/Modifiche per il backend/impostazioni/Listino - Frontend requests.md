@@ -37,8 +37,19 @@ Sono tutte **nuove**. Per il frontend sostituiscono le API di `/api/catalog/pric
 
 ## Regole comuni
 
-- **Le API esistenti non cambiano**: `/api/catalog/price-lists` (con le sue sotto-rotte) resta com'è; le nuove si aggiungono e
-  possono riusarne la logica (`PriceListsService`).
+- **Le API esistenti non cambiano**: `/api/catalog/price-lists` (con le sue sotto-rotte) tiene rotte, richieste e risposte di
+  oggi; le nuove si aggiungono e possono riusarne la logica (`PriceListsService`). **Ma non devono perdere i dati nuovi** delle
+  sezioni 5 e 13:
+  - `PUT /price-lists/{id}` lascia com'erano i dati che non conosce (aree, testo dei servizi inclusi,
+    `isIntermediatePricesIncluded`, prezzo ridotto di mezza giornata, legame fra pacchetto e prezzi ridotti) e
+    `{id}/duplicate` e `bulk-duplicate` li copiano;
+  - `isSectorRestricted` e `sectorIds` leggono e scrivono i settori abilitati salvati a parte (sezione 5);
+  - un prezzo ridotto con solo la mezza giornata non si perde e non diventa 0: oggi `ReducedPriceDto.Price` non può essere nullo
+    (`PriceListDtos.cs:37`) e `SetReducedPrices` toglie le righe che la `PUT` non manda (`PriceList.cs`);
+  - lo snapshot offline `price_catalog` (`ConfigSnapshotBuilder.PriceCatalogAsync`) contiene quello che serve al preventivo
+    (settori abilitati, prezzo ridotto di mezza giornata) e si rigenera quando cambia: `SnapshotTriggers` guarda il nome
+    dell'entità, che oggi deve cominciare con `PriceList` o `ReducedSeason`.
+- **Dati già salvati**: la migrazione della sezione 5 ("Dati già salvati") non cambia i prezzi e le vendite di oggi.
 - **Stabilimento dal token**: nessuna richiesta lo contiene.
 - **Permessi**: come le API dei listini di oggi, salvo dove la sezione dice altro. Senza permesso: 403 `auth.forbidden`.
 - **JSON** in camelCase, con i nomi esatti di questo documento. Date: giorni in UTC ISO 8601
@@ -264,6 +275,8 @@ sezione 12).
     tabella due righe con lo stesso nome. Per ogni lingua vale la regola di `CopyNames.Next` sui nomi dei pacchetti in quella
     lingua; il numero è il primo libero in quella lingua e può essere diverso da quello italiano;
   - gli articoli aggiuntivi legati al pacchetto di partenza non si legano alla copia, come oggi;
+  - i servizi inclusi (`includedServiceIds`) eliminati non si copiano e non danno errore, come oggi (`ToDtoAsync` li esclude): il
+    pannello non li mostra, quindi l'utente non potrebbe toglierli;
   - nel registro una voce `catalog.price_list_duplicated` per copia.
 - **Nomi in contemporanea**: i nomi non hanno un indice unico, quindi due duplicazioni dello stesso pacchetto nello stesso
   momento possono dare due copie con lo stesso nome. Va bene così: l'utente può rinominarle.
@@ -285,26 +298,26 @@ sezione 12).
 - **Un pacchetto che non si può copiare** risponde con un errore suo, che dice quale pacchetto e perché, e non si duplica
   niente. Oggi la copia rifà i controlli del salvataggio (`CopyAsync` chiama `ApplyAsync`) e può rispondere 422
   `catalog.vat_rate_not_allowed`, 422 `pricing.period_not_found` o 404 `catalog.sector_not_found`, senza dire di quale
-  pacchetto: con più righe scelte l'utente non può saperlo. Codici nuovi (`CatalogErrors`), dopo il 404, sul primo pacchetto che non va nell'ordine degli
-  id:
+  pacchetto: con più righe scelte l'utente non può saperlo. Codici nuovi (`CatalogErrors`), dopo il 404, sul primo pacchetto che
+  non va nell'ordine degli id; se un pacchetto ha più problemi, il primo nell'ordine della tabella:
 
   | Status | `code` | Quando | `args` |
   |---|---|---|---|
   | 422 | `pricing.duplicate_vat_rate_not_allowed` | L'IVA del pacchetto non è più tra le aliquote ammesse (`VatPolicy.ResolveAsync`). | `priceListName`, `rates` |
-  | 422 | `pricing.duplicate_period_not_found` | Il pacchetto ha prezzi per un periodo eliminato. | `priceListName` |
+  | 422 | `pricing.duplicate_period_not_found` | Il pacchetto ha prezzi, anche intermedi, per un periodo eliminato. | `priceListName` |
   | 422 | `pricing.duplicate_area_not_found` | Il pacchetto ha fra le aree abilitate un'area della mappa eliminata. | `priceListName` |
-  | 422 | `pricing.duplicate_sector_not_found` | Il pacchetto ha dati di un settore eliminato: un settore abilitato, un prezzo stagionale, per periodo o stagionale ridotto. | `priceListName` |
+  | 422 | `pricing.duplicate_sector_not_found` | Il pacchetto ha dati di un settore eliminato: un settore abilitato, un prezzo stagionale, per periodo, intermedio o stagionale ridotto. | `priceListName` |
 
-  `priceListName` è il nome nella lingua di `Accept-Language`, come in tabella.
+  `priceListName` è il nome nella lingua di `Accept-Language`, come in tabella; `rates` c'è solo con il codice dell'IVA.
 - **Un settore eliminato fa sempre fallire la copia**, in qualunque dato del pacchetto. Oggi succede solo con i prezzi per
   periodo: `ToDtoAsync` dà quel settore come UUID vuoto (`PriceListsService.cs:286`) e `ApplyAsync` non lo trova (`:203`);
   i settori abilitati e le righe di `sectorPrices` e `reducedPrices` di un settore eliminato invece si perdono in silenzio
   (`ToDtoAsync` li esclude), e la copia è diversa dall'originale. L'utente risolve modificando e salvando il pacchetto: le
   righe dei settori eliminati si scartano e un settore abilitato eliminato lo toglie lui (sezione 7).
-- **Un periodo eliminato fa fallire la copia**, come un settore: eliminato = tutte le sue righe di
-  `catalog.pricing_tariff_periods` sono eliminate. I prezzi di un periodo di un'altra stagione, non eliminato, invece **si
-  copiano come sono**, come li tiene il salvataggio (sezione 7): oggi `ApplyAsync` li rifiuta con 422
-  `pricing.period_not_found`. L'utente risolve salvando il pacchetto, che scarta le righe dei periodi eliminati (sezione 7).
+- **Un periodo eliminato fa fallire la copia**, come un settore: eliminato come lo dice la sezione 7 ("Periodi"), anche nei prezzi
+  intermedi. Le righe senza periodo o con una `key` sconosciuta invece **si copiano come sono**, come le tiene il salvataggio: oggi
+  `ApplyAsync` le rifiuta con 422 `pricing.period_not_found`. L'utente risolve salvando il pacchetto, che scarta le righe dei
+  periodi eliminati (sezione 7).
 - Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con
   `pricing.price_list_not_found` toglie gli id dalla selezione e ricarica la tabella.
 
@@ -376,7 +389,8 @@ insieme: una sola chiamata per creare, una per leggere, una per salvare.
   **Stabilimento** dal token (`CurrentProperty.IdAsync`).
 - **Registro**: `catalog.price_list_created` e `catalog.price_list_updated`, come oggi.
 - **Un solo predefinito**: `isDefault` e `isDefaultOnline` valgono come oggi (`ResetOtherDefaultsAsync`): segnandone uno, gli
-  altri pacchetti si spengono.
+  altri pacchetti si spengono, **nella stessa transazione** del salvataggio. Oggi è un secondo `SaveChangesAsync`
+  (`PriceListsService.cs:79-80` e `92-93`): un errore in mezzo lascia due predefiniti.
 - **Controllo di versione** su lettura e salvataggio (sezione 16).
 - **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
 
@@ -392,12 +406,12 @@ Nell'ordine in cui si controllano. Le righe 404 `pricing.price_list_not_found` e
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `pricing.price_list_not_found` | `idPackage` non è un pacchetto dello stabilimento (anche perché già eliminato). Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` manca o non è più la versione del pacchetto (sezione 16). Niente cambia. |
 | 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args` `{ "rates": [4, 5, 10, 22] }` come oggi (`VatPolicy.ResolveAsync`). Niente cambia. |
 | 422 | `pricing.calculation_method_not_found` | Il metodo di `calculationMethod` non è nel catalogo (`CatalogErrors.CalculationMethodNotFound`). Niente cambia. |
 | 404 | `catalog.sector_not_found` | Un id di `idSectors` non è un settore dello stabilimento, anche perché eliminato. Niente cambia. |
 | 404 | `map.spot_not_found` | Un id di `idSectorAreas` non è un'area della mappa dello stabilimento, anche perché eliminata (`CatalogErrors.MapSpotNotFound`). Niente cambia. |
 | 404 | `inventory.item_not_found` | Un `idInventoryItem` di `items` non è un articolo del magazzino dello stabilimento, anche perché eliminato (`CatalogErrors.InventoryItemNotFound`). Niente cambia. |
-| 409 | `resource.version_conflict` | `If-Match` manca o non è più la versione del pacchetto (sezione 16). Niente cambia. |
 
 Le righe di prezzo di settori o periodi eliminati non danno errore: si scartano (sezione 7).
 
@@ -407,6 +421,7 @@ Errori di campo del 400, con `field` uguale al nome nel corpo:
 |---|---|---|
 | `translations[i].packageName` | `validation.required` | Vuoto nella lingua di `Accept-Language` (`i` è la sua posizione nell'elenco). |
 | `translations[i].packageName` | `validation.max_length` | Oltre 255 caratteri (`PriceList.NameMaxLength`), in qualunque lingua. |
+| `translations` | `validation.invalid` | Una lingua sconosciuta o ripetuta (oggi un 500: `ToDictionary` in `ApplyAsync`). |
 | `maxPeopleQuantity` | `validation.out_of_range` | Fuori da 1-100, con `args.from` e `args.to` (`InclusiveBetween`). |
 | `maxAdditionalItemQuantity` | `validation.out_of_range` | Fuori da 0-100, con `args.from` e `args.to`. |
 | `items` | `validation.invalid` | Più di 50, una `quantity` fuori da 1-100 o lo stesso `idInventoryItem` due volte, come oggi. |
@@ -422,11 +437,15 @@ Errori di campo del 400, con `field` uguale al nome nel corpo:
 | `publicHolidayDates` | `validation.invalid` | Un giorno non valido o ripetuto, o più di 100. |
 | `intermediatePrices` | `validation.invalid` | Un prezzo fuori da 0-1.000.000, `dayQuantity` fuori da 1-90, un `idPeriod` assente, o la stessa `idPeriod` + `isFirstRow` + `dayQuantity` due volte. |
 
+Inoltre: un elenco assente o `null` vale `[]`; lo stesso id ripetuto in `idSectors` o `idSectorAreas` conta una volta; i prezzi si
+salvano con due decimali, arrotondati come oggi (`numeric(12,2)`); con `isPublicHolidaysIncluded` falso i giorni festivi non si
+salvano, come oggi (`PriceListsService.cs:252`). Nessun valore del corpo deve dare un 500.
+
 Il frontend controlla già nome, lunghezze, prezzi massimi, date dei prezzi ridotti e quantità. Mostra sotto il campo gli errori
-dei campi di primo livello, `catalog.vat_rate_not_allowed` (sotto IVA, con le aliquote di `rates`) e
-`pricing.calculation_method_not_found` (sotto "Calcolo del prezzo"); sopra i bottoni tutti gli altri, con il testo del loro
-`code`. Con `pricing.price_list_not_found` ricarica la tabella; con `catalog.sector_not_found` e `map.spot_not_found` rilegge
-settori e aree e mostra quelli eliminati come non più disponibili; con `inventory.item_not_found` rilegge gli articoli (sezione
+dei campi di primo livello che non sono id, `catalog.vat_rate_not_allowed` (sotto IVA, con le aliquote di `rates`) e
+`pricing.calculation_method_not_found` (sotto "Calcolo del prezzo"), aprendo la tab del campo; sopra i bottoni tutti gli altri, con
+il testo del loro `code`. Con `pricing.price_list_not_found` ricarica la tabella; con `catalog.sector_not_found` e
+`map.spot_not_found` rilegge settori e aree e mostra quelli eliminati come non più disponibili; con `inventory.item_not_found` rilegge gli articoli (sezione
 17) e toglie quelli che non ci sono più; con `resource.version_conflict` avvisa e rilegge il pacchetto.
 
 ## 5. POST /api/catalog/price-lists/create-package
@@ -520,7 +539,10 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   questa API salva i 7 nomi come arrivano e controlla come obbligatorio solo quello nella lingua di `Accept-Language`.
   Nella colonna `name` (non vuota, usata per ricerca, ordinamento e copie) mette il nome italiano se c'è, altrimenti
   quello nella lingua di `Accept-Language`. Esempio: utente inglese che scrive solo "Umbrella" → si salva, con
-  `name` = "Umbrella".
+  `name` = "Umbrella". **Se l'italiano non è stato scritto la lettura non lo dà**: in quell'esempio `get-package` risponde solo
+  `en`, altrimenti il salvataggio dopo lo fisserebbe come italiano. Come ricordare che quel `name` non è italiano lo decide lo
+  sviluppatore, allo stesso modo per servizi e listini (`Servizi - Frontend requests.md`, "Valori che il modello di oggi non può
+  salvare", 1). Per i pacchetti di oggi `name` è il nome italiano; `PUT /price-lists/{id}` scrive l'italiano.
 - `maxAdditionalItemQuantity` e `maxPeopleQuantity`: oggi `maxAdditionalItems` e `maxPeople`. Il pannello fa scegliere da 1 a
   15 oppure null; un valore più alto già salvato si legge, si mostra e torna uguale finché l'utente non ne sceglie un altro.
 - `items`: gli articoli di magazzino che compongono il pacchetto, come oggi (`items` con `inventoryItemId` + `quantity`), con
@@ -528,18 +550,25 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   dell'elenco fisso (sezione 17) e fa scegliere da 1 a 10; un valore più alto già salvato torna uguale finché l'utente non ne
   sceglie un altro. Gli articoli che il pannello non mostra ("Altro", senza codice) si leggono e tornano uguali. Restano com'erano
   anche `isAreaPackage` (falso in creazione) e il tipo con cui gli articoli sono salvati (`PackageItemKind.InventoryItem` o
-  `AreaItem`).
+  `AreaItem`); un articolo nuovo prende `AreaItem` se il pacchetto ha `isAreaPackage`, altrimenti `InventoryItem`, come oggi
+  (`PriceListsService.cs:212`).
 - `includedServices`: testo libero (campo "Servizi inclusi (opzionale)"), al massimo 1.000 caratteri, `null` se vuoto. **Va
   aggiunto** al listino: oggi non esiste (colonna nuova di testo, che può essere nulla). I servizi inclusi di oggi
   (`includedServiceIds`, righe `PackageItemKind.IncludedService`) il pannello non li ha: restano com'erano, `[]` in creazione.
 - `idSectorAreas`: id delle aree scelte in "Aree abilitate", gli stessi di `POST /api/catalog/sectors/sector-area-combobox`;
   `[]` = nessuna scelta. **Va aggiunto il legame fra pacchetto e aree della mappa** (tabella nuova): oggi esiste solo
   `isAreaPackage` (sì/no), che è un'altra cosa. La lettura dà **tutte le aree salvate, anche quelle eliminate**, che il
-  pannello mostra come "Area non più disponibile" perché l'utente le tolga.
+  pannello mostra come "Area non più disponibile" perché l'utente le tolga. **Si salvano soltanto**: il preventivo e le vendite
+  non le guardano, oggi come dopo questa modifica (limitano solo i settori di `idSectors`).
 - `idSectors`: al posto di `isSectorRestricted` + `sectorIds`. `[]` = tutti i settori e file.
   **Vanno salvati a parte**, non ricavati dalle righe dei prezzi. Oggi `PriceListsService.ApplyAsync` non salva
   `sectorIds` e in lettura i settori abilitati sono quelli con una riga in `sectorPrices`. Esempio: `idSectors` = [Fila 1,
   Fila 2] e prezzi per 10 settori → `GET /api/catalog/price-lists/get-package` risponde `idSectors` = [Fila 1, Fila 2].
+  Il pacchetto è limitato (`is_sector_restricted`) se `idSectors` non è vuoto, anche con soli settori eliminati. **Anche la vendita
+  usa i settori salvati a parte**: oggi il preventivo rifiuta con `pricing.package_not_for_sector` i settori senza una riga in
+  `sectorPrices` (`QuoteService.cs:120`, `PricingSource._hasSector`), e `sectorIds` di `GET /price-lists/{id}`
+  (`PriceListsService.cs:279`) e dello snapshot si ricavano allo stesso modo. Senza questa modifica il pacchetto dell'esempio si
+  venderebbe in 10 settori, e uno con solo prezzi per periodo in nessuno.
 - `isOnlineEnabled` e `isOnlineOnly`: al posto di `salesChannel`. Entrambi false = `manager_only`; `isOnlineEnabled`
   true = `manager_and_online`; `isOnlineOnly` true = `online_only`.
 - `reducedSeasonalPrices`: i prezzi stagionali ridotti del pacchetto, quanti se ne vogliono (`[]` se nessuno), ognuno
@@ -551,23 +580,45 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   pacchetto e ci salva i prezzi di `sectorPrices`; cambiare nome o date in un pacchetto non cambia la voce degli altri
   pacchetti che la usano. Il frontend li manda in ordine di `startsOn`. Le date sono giorni in UTC ISO 8601
   (`"2026-06-01T00:00:00.000Z"`), come in tutte le API del frontend, al posto di `DateOnly`. **Da aggiungere**:
+  - **il legame fra pacchetto e voce**, che resta anche senza prezzi: oggi esiste solo attraverso le righe dei prezzi ridotti, che
+    vogliono un settore (`PriceListReducedPriceConfiguration`), quindi un prezzo ridotto con `sectorPrices` vuoto ("Inizio
+    settembre" nell'esempio) sparirebbe. Si toglie quando il prezzo ridotto non arriva più, quando si elimina il pacchetto e con
+    `DELETE /api/catalog/reduced-seasons/{id}`; si copia con il pacchetto e fa parte della sua versione;
   - **il prezzo di mezza giornata**: oggi `PriceListReducedPrice` ha un prezzo solo, obbligatorio; servono
     `seasonalHalfDayPrice` e `seasonalPrice`, tutti e due facoltativi, almeno uno per riga;
   - **il preventivo** (`QuoteService`, `PricingSource`): con la mezza giornata usa il prezzo ridotto di mezza giornata, e se
     quello che serve è `null` calcola come senza prezzo ridotto. Deve cercare **fra i prezzi ridotti di quel pacchetto** con
     quelle date: oggi prende la prima voce dello stabilimento con quelle date (`reducedSeasons.FirstOrDefault`), quindi con
     due voci di pari date e nome diverso il prezzo del pacchetto può non trovarsi.
-- `sectorPrices`: `idSector` al posto di `sectorId`, il resto uguale.
+  La voce da riusare è quella con le stesse date e lo stesso nome, senza spazi ai lati e senza distinguere maiuscole e minuscole;
+  con più voci uguali, quella già legata al pacchetto, altrimenti la prima per id. Una voce creata così va nel registro come
+  `catalog.reduced_season_created`. Una voce che nessun pacchetto usa più **non si elimina**: resta fra quelle dello stabilimento
+  (`/api/catalog/reduced-seasons`), come oggi.
+- `sectorPrices`: `idSector` al posto di `sectorId`, il resto uguale. **Da correggere nel backend: il prezzo stagionale non arriva
+  al preventivo.** `PriceListSectorPrice` lo scrive in `BasePrice` (`PriceListSectorPrice.cs`, `Create` e `SetPrices`) e
+  `ToDtoAsync` lo rilegge da lì (`PriceListsService.cs:284`), ma il preventivo legge `SeasonalPrice` (`PricingSource.cs:61`), che
+  nessun codice scrive: un preventivo stagionale dà 0 con l'avviso `seasonal_price_missing`. Serve che il prezzo salvato sia quello
+  usato, anche per i listini già salvati; quale colonna tenere lo sceglie lo sviluppatore. Vale anche per gli articoli aggiuntivi.
+  Lo stesso errore c'è nei listini delle convenzioni (`PricingSource.cs:90`), fuori da questa pagina: lo si segnala soltanto.
 - **Le righe senza prezzi non si salvano**: il frontend manda una riga di `sectorPrices` per ogni settore e una di
   `periodPrices` per ogni settore e periodo, anche vuote (tutti i prezzi `null`). Oggi una riga vuota si salva
   (`SetSectorPrices`) e conta come uso del settore (`CountUsagesAsync`): nessun settore si potrebbe più eliminare. Vale anche
   per i `sectorPrices` dei prezzi ridotti. Il limite di 500 righe di `periodPrices` (`SavePriceListRequestValidator`) conta
-  solo le righe con almeno un prezzo.
+  solo le righe con almeno un prezzo. **Eccezione**: una riga di `periodPrices` senza prezzi si salva lo stesso se quel settore e
+  periodo ha, o riceve, prezzi intermedi, che nel database dipendono da quella riga (`PriceListStayPrice.PeriodPriceId`, in
+  cascata): toglierla li cancellerebbe. La lettura non la dà in `periodPrices`.
 - `periodPrices`: `idSector` al posto di `sectorId`. `idPeriod` (la `key` del periodo di `catalog/tariff-periods`) al
   posto di `periodKey`. Prezzi rinominati: `halfDayPrice` (`halfDay`), `dailyPrice` (`daily`), `weekendPrice` (`weekend`),
   `halfDayWeekendPrice` (`halfDayWeekend`), `halfDaySevenDaysPrice` (`halfDay7`), `sevenDaysPrice` (`days7`),
   `halfDayFourteenDaysPrice` (`halfDay14`), `fourteenDaysPrice` (`days14`), `halfDayMonthlyPrice` (`halfDayMonthly`),
   `monthlyPrice` (`monthly`). Non c'è `stayOverrides` (vedi `intermediatePrices`).
+- **Righe di `periodPrices` per tutte le file o senza periodo**: `idSector` e `idPeriod` possono essere `null`
+  (`PriceListPeriodPrice.SectorId` "NULL = tutte le file", `TariffPeriodGroup` senza valore nelle righe più vecchie), per esempio
+  dopo un'importazione (`PriceListTransferService`). La lettura le dà, il pannello non le mostra e le rimanda uguali; il
+  salvataggio e la copia le tengono come arrivano: non sono settori o periodi eliminati. Anche i loro prezzi intermedi restano
+  com'erano, finché `isIntermediatePricesIncluded` è vero. Se un prezzo intermedio crea la riga di un settore dove per quel periodo c'è solo la riga "tutte le file", la riga
+  nuova parte dai prezzi di quella: il preventivo usa la riga del settore quando c'è (`PricingSource`, `_rates`) e gli altri
+  soggiorni di quel settore costerebbero 0.
 - `sectorPrices` e `periodPrices` arrivano vuoti se l'utente non ha aperto la tab Listino: il pacchetto si crea senza
   prezzi.
 - `calculationMethod`: tendina "Calcolo del prezzo", null se non scelta. I valori sono i nomi .NET, come in tutti gli
@@ -579,32 +630,59 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   esente dà `null`; un pacchetto che ha già una natura la mantiene se `vatRate` è ancora `null`.
 - `monthlySetting`: tendina "Impostazione del mensile", null se non scelta: `EffectiveMonthDuration` (31 giorni),
   `ActualMonthDuration` (i giorni veri del mese) o `Fixed30Days` (30 giorni), come `PackagePricer.MonthDays`; oggi
-  `effective_month_duration`, `actual_month_duration` e `fixed30days`.
+  `effective_month_duration`, `actual_month_duration` e `fixed30_days` (`Codes.Of`).
 - `weekendSetting`: tendina "Impostazione del weekend", null se non scelta: `SaturdaySunday` (sabato e domenica) o
   `SundayOnly` (solo domenica); oggi `saturday_sunday` e `sunday_only`.
+- **`monthlySetting` e `weekendSetting` `null` restano `null`** anche in creazione e nella copia. Oggi le due colonne hanno un valore
+  predefinito nel database (`PriceListConfiguration.cs:191` e `203`) che EF usa quando inserisce un `null`: si salverebbero
+  `effective_month_duration` e `saturday_sunday`, e il prezzo cambierebbe (senza scelta il mese vale 30 giorni, con
+  `EffectiveMonthDuration` 31).
 - `isPublicHolidaysIncluded`: checkbox nell'intestazione della sezione "Festivi", al posto di `allowsPublicHolidays`.
 - `publicHolidayDates`: i giorni della sezione "Festivi" (scelti nel calendario di "Aggiungi festivi", tolti con il
   cestino), al posto di `holidayDates`. Giorni in UTC ISO 8601, in ordine, ognuno una volta sola, `[]` se nessuno.
   Spegnere il checkbox, dopo una conferma, svuota la lista.
 - `isIntermediatePricesIncluded`: checkbox nell'intestazione della sezione "Modifica prezzi intermedi". **Va aggiunto** al
   listino (oggi non esiste): vero o falso, falso per i pacchetti di oggi senza prezzi intermedi e vero per gli altri. Spegnerlo,
-  dopo una conferma, svuota `intermediatePrices`.
+  dopo una conferma ("tutti i prezzi intermedi verranno persi"), svuota `intermediatePrices`. **Con `false` il salvataggio toglie
+  tutti i prezzi intermedi del listino**, anche quelli che la lettura non restituisce (qui sotto): altrimenti il preventivo
+  continuerebbe a usarli (`PackagePricer`, `Overrides`).
 - `intermediatePrices`: i prezzi per numero di giorni scritti nella sezione, solo quelli con un prezzo (`[]` se nessuno), in
   ordine (prima `isFirstRow` true, poi per `idPeriod`, numerico, e `dayQuantity`). Ognuno ha `idPeriod` (la `key` di un periodo
   della stagione corrente), `isFirstRow` (true = "Fila 1", false = "Altre file"), `dayQuantity` (giorni di soggiorno, da 1 a
   90) e `price`. Una sola riga per `idPeriod` + `isFirstRow` + `dayQuantity`. **Sono gli `stayOverrides` di oggi**
-  (`catalog.pricing_price_list_stay_prices`, uno per settore, periodo e numero di giorni, fino a 366):
+  (`catalog.pricing_price_list_stay_prices`, uno per riga di `periodPrices` e numero di giorni, fino a 366; il loro `sector_id` non
+  si usa, conta il settore della riga, come nel preventivo):
   - "Fila 1" è il primo settore di `catalog/sectors/sector-combobox`, "Altre file" tutti gli altri;
-  - **lettura**: "Altre file" ha il prezzo di un numero di giorni solo se è lo stesso in tutti gli altri settori; altrimenti
-    non si restituisce. Non si restituiscono nemmeno i giorni oltre 90;
+  - **lettura**: "Altre file" ha il prezzo di un numero di giorni solo se è lo stesso in tutti gli altri settori, senza contare
+    quelli eliminati e quelli che in quel periodo non hanno nessun prezzo (per esempio un settore appena creato); altrimenti non si
+    restituisce. Non si restituiscono nemmeno i giorni oltre 90, i periodi eliminati e le righe "tutte le file";
   - **salvataggio**: scrive il prezzo nel primo settore o in tutti gli altri, e toglie quelli che la lettura restituirebbe e
     che non ci sono più. **Quelli che la lettura non restituisce restano com'erano**, a meno che per quel periodo e quei giorni
     non arrivi un prezzo di "Altre file";
   - i prezzi di 7, 14 e 30 giorni il frontend li scrive anche in `sevenDaysPrice`, `fourteenDaysPrice` e `monthlyPrice` delle
-    righe di `periodPrices` di quel periodo (della prima fila o delle altre), così i due valori arrivano uguali.
+    righe di `periodPrices` di quel periodo (della prima fila o delle altre). L'utente può poi cambiare quelle colonne: se i due
+    valori arrivano diversi si salvano tutti e due come arrivano, e il preventivo usa il prezzo intermedio, come oggi;
+  - i prezzi intermedi di un periodo eliminato mentre il pannello è aperto si scartano senza errore, come le righe di
+    `periodPrices` (sezione 7).
 - `isMapAssignable` non arriva: vale solo per gli articoli aggiuntivi (`PriceList.Update`).
 - Risposta: 204 senza corpo.
 - Errori: quelli delle regole comuni.
+
+### Dati già salvati
+
+La migrazione dei dati nuovi non deve cambiare i prezzi e le vendite di oggi, per pacchetti e articoli aggiuntivi:
+
+- **Settori abilitati**: per i listini con `is_sector_restricted` vero sono i settori con una riga non eliminata in
+  `catalog.pricing_price_list_sector_prices`, anche se il settore è eliminato. Senza, dopo il rilascio `idSectors` sarebbe `[]` e i
+  pacchetti limitati si venderebbero ovunque. Un listino limitato senza nessuna riga oggi non si vende in nessun settore: resta
+  così finché non si salva dal pannello.
+- **Righe senza prezzi** di `pricing_price_list_sector_prices` e `pricing_price_list_period_prices` (queste senza prezzi intermedi):
+  si tolgono, dopo aver ricavato i settori abilitati. Altrimenti continuano a contare come uso del settore e del periodo e ne
+  bloccano l'eliminazione.
+- **Prezzi ridotti**: il prezzo di mezza giornata delle righe di oggi parte uguale al loro prezzo, perché oggi vale per tutte e due
+  (`QuoteService`, `PriceSpot`); il legame fra pacchetto e voce c'è per ogni voce con almeno una riga.
+- **Prezzo stagionale**: quello salvato fino a oggi in `base_price` è quello che il preventivo deve usare.
+- **Prezzi intermedi**: `isIntermediatePricesIncluded` come detto sopra.
 
 ## 6. GET /api/catalog/price-lists/get-package?idPackage=…
 
@@ -668,6 +746,9 @@ quello del token. La risposta ha `idPackage` e gli stessi campi, con gli stessi 
 ```
 
 - `version`: la versione del pacchetto (stringa opaca, sezione 16), che il frontend rimanda con `update-package`.
+- **Nessuna riga di settori o periodi eliminati**, in `sectorPrices`, `periodPrices`, `intermediatePrices` e nei `sectorPrices` dei
+  prezzi ridotti. Oggi `ToDtoAsync` dà le righe di un settore eliminato con un UUID vuoto (`PriceListsService.cs:261` e `:286`): con
+  due settori eliminati il frontend rimanderebbe due righe uguali e ogni Salva risponderebbe 400.
 - `translations`: solo le lingue con un nome. Il frontend aggiunge le altre vuote.
 - `items`: anche gli articoli che il pannello non mostra; `idSectorAreas`: anche le aree eliminate.
 - `idSectors`: quelli salvati con `create-package` o `update-package`, non i settori che hanno una riga di prezzo; **anche
@@ -675,8 +756,8 @@ quello del token. La risposta ha `idPackage` e gli stessi campi, con gli stessi 
   limite non diventa mai "tutti i settori" (`[]`) senza che l'utente lo scelga.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
   `catalog/sectors/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
-  mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le
-  rimanda invariate con `update-package`.
+  mette i prezzi letti. Le righe che non mostra ("tutte le file", senza periodo o con una `key` che `catalog/tariff-periods` non dà)
+  le tiene da parte e le rimanda invariate con `update-package`.
 - `publicHolidayDates` e `intermediatePrices`: in qualsiasi ordine (il frontend li ordina).
 - `reducedSeasonalPrices`: in qualsiasi ordine (il frontend li ordina per `startsOn`). Anche i loro `sectorPrices`
   possono avere solo le righe salvate: il frontend fa una riga per ogni settore e le righe di settori che non conosce le
@@ -687,8 +768,8 @@ quello del token. La risposta ha `idPackage` e gli stessi campi, con gli stessi 
 
 Bottone "Salva" del pannello "Modifica pacchetto": il frontend manda tutto il pacchetto, con lo stesso corpo di
 `POST /api/catalog/price-lists/create-package` (vedi sopra) più `idPackage`. Il pacchetto prende tutti i valori mandati:
-`sectorPrices` e `periodPrices` hanno tutte le righe del pacchetto, anche quelle di settori o periodi che il pannello
-non mostra (es. di un'altra stagione), così nessun prezzo salvato si perde; lo stesso per i `sectorPrices` di ogni
+`sectorPrices` e `periodPrices` hanno tutte le righe del pacchetto, anche quelle che il pannello
+non mostra (sezione 6), così nessun prezzo salvato si perde; lo stesso per i `sectorPrices` di ogni
 prezzo stagionale ridotto. `reducedSeasonalPrices` ha tutti i prezzi ridotti rimasti, in ordine di `startsOn`: quelli
 tolti con il cestino non ci sono più e il backend li toglie dal pacchetto. Lo stesso per `publicHolidayDates`: tutti
 i giorni festivi rimasti, in ordine; e per `intermediatePrices`: tutti i prezzi intermedi scritti, in ordine (un prezzo
@@ -712,10 +793,17 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
 - Risposta: 204 senza corpo, con la nuova versione nell'header `ETag` (sezione 16).
 - Righe di settori o periodi che non esistono più: non devono far fallire il salvataggio, e nemmeno la creazione. Oggi
   `ApplyAsync` risponde 404 `catalog.sector_not_found` per un settore eliminato e 422 `pricing.period_not_found` per una `key`
-  che non è un periodo della stagione corrente. Il backend tiene come arrivano le righe dei periodi di un'altra stagione e
-  scarta in silenzio quelle dei settori e dei periodi eliminati (anche dentro i `sectorPrices` dei prezzi stagionali ridotti). Esempio: Fila 9 eliminata dopo l'apertura del pannello → "Salva"
-  risponde 204 e la riga di Fila 9 non si salva. Le righe tenute restano legate al loro periodo: se la loro `key` viene
-  riusata da un periodo nuovo, non devono finire su quello.
+  che non è un periodo della stagione corrente. Il backend scarta in silenzio le righe dei settori e dei periodi eliminati (anche
+  dentro i `sectorPrices` dei prezzi stagionali ridotti) e tiene come arrivano le altre. Esempio: Fila 9 eliminata dopo l'apertura
+  del pannello → "Salva" risponde 204 e la riga di Fila 9 non si salva.
+- **Periodi** (vale per letture, salvataggi e copie): lo stabilimento ha una stagione sola (`uq_catalog_pricing_seasons_property`) e i
+  periodi della prossima stagione (`catalog.pricing_next_season_periods`) non c'entrano. Un periodo **esiste** se ha almeno una riga
+  non eliminata in `catalog.pricing_tariff_periods`; è **eliminato** se ha solo righe eliminate; una `key` senza nessuna riga, o
+  `null`, si tiene e si copia com'è. Una `key` eliminata non si riusa (`Stagioni e periodi - Frontend requests.md`, sezione 3).
+- **Quello che è già salvato e torna uguale non dà errore**, anche se non rispetta i limiti nuovi: oggi due prezzi ridotti possono
+  avere giorni in comune (`SaveReducedSeasonRequestValidator`) e un'importazione può superare 500 righe. Il controllo dei giorni in
+  comune vale solo per i prezzi ridotti nuovi o con le date cambiate; i limiti di numero solo se il salvataggio aggiunge elementi.
+  Altrimenti quel listino non si potrebbe più salvare.
 - Un settore eliminato in `idSectors` invece risponde 404 `catalog.sector_not_found`, e un'area eliminata in `idSectorAreas` 404
   `map.spot_not_found`: non si salva niente, l'utente li toglie dalla tendina e salva di nuovo.
 - Errori: quelli delle regole comuni. Con 409 `resource.version_conflict` (senza `errors[]`) niente cambia: il frontend non lo
@@ -838,11 +926,12 @@ in una sola chiamata, tutto o niente**, come `duplicate-package-item` (sezione 3
   | Status | `code` | Quando | `args` |
   |---|---|---|---|
   | 422 | `pricing.duplicate_vat_rate_not_allowed` | L'IVA non è più tra le aliquote ammesse (`VatPolicy.ResolveAsync`). | `priceListName`, `rates` |
-  | 422 | `pricing.duplicate_period_not_found` | Ha prezzi per un periodo eliminato. | `priceListName` |
-  | 422 | `pricing.duplicate_sector_not_found` | Ha dati di un settore eliminato: un prezzo stagionale, per periodo o stagionale ridotto, o un settore abilitato. | `priceListName` |
+  | 422 | `pricing.duplicate_period_not_found` | Ha prezzi, anche intermedi, per un periodo eliminato. | `priceListName` |
+  | 422 | `pricing.duplicate_sector_not_found` | Ha dati di un settore eliminato: un prezzo stagionale, per periodo, intermedio o stagionale ridotto, o un settore abilitato. | `priceListName` |
 
-  `priceListName` è il nome nella lingua di `Accept-Language`, come in tabella. Settori e periodi eliminati, e i periodi di
-  un'altra stagione (che si copiano), come nella sezione 3. L'utente risolve salvando l'articolo aggiuntivo (sezione 15).
+  `priceListName` è il nome nella lingua di `Accept-Language`, come in tabella. Ordine dei codici, settori e periodi eliminati e
+  righe senza periodo (che si copiano) come nella sezione 3. L'utente risolve salvando l'articolo aggiuntivo, che toglie tutti i
+  dati di settori e periodi eliminati, anche quelli che il pannello non mostra (sezione 15).
 - Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con
   `pricing.price_list_not_found` toglie gli id dalla selezione e ricarica la tabella.
 
@@ -921,11 +1010,11 @@ Nell'ordine in cui si controllano. Le righe 404 `pricing.price_list_not_found` e
 | 403 | `catalog.property_required` | Token senza stabilimento. |
 | 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
 | 404 | `pricing.price_list_not_found` | `idAdditionalItem` non è un articolo aggiuntivo dello stabilimento (anche perché già eliminato). Niente cambia. |
+| 409 | `resource.version_conflict` | `If-Match` manca o non è più la versione dell'articolo aggiuntivo (sezione 16). Niente cambia. |
 | 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args.rates`, come per i pacchetti. Niente cambia. |
 | 422 | `pricing.calculation_method_not_found` | Il metodo di `calculationMethod` non è nel catalogo. Niente cambia. |
 | 404 | `inventory.item_not_found` | `idArticle` non è un articolo del magazzino dello stabilimento, anche perché eliminato (`CatalogErrors.InventoryItemNotFound`). Niente cambia. |
 | 404 | `pricing.package_not_found` (nuovo) | Un id di `idPackages` non è un pacchetto dello stabilimento, anche perché eliminato. Niente cambia. Oggi `ApplyAsync` (`PriceListsService.cs:229`) risponde `pricing.price_list_not_found`, lo stesso codice dell'articolo aggiuntivo che non c'è: il frontend non saprebbe quale dei due manca. |
-| 409 | `resource.version_conflict` | `If-Match` manca o non è più la versione dell'articolo aggiuntivo (sezione 16). Niente cambia. |
 
 Le righe di prezzo di settori o periodi eliminati non danno errore: si scartano (sezione 15).
 
@@ -937,8 +1026,10 @@ Errori di campo del 400, con `field` uguale al nome nel corpo:
 | `idPackages` | `validation.invalid` | Lo stesso id due volte. |
 | `vatRate`, `calculationMethod`, `monthlySetting`, `weekendSetting`, `sectorPrices`, `periodPrices`, `publicHolidayDates`, `intermediatePrices` | `validation.invalid` | Come nella tabella dei pacchetti. |
 
-Il frontend controlla già l'articolo obbligatorio e i prezzi massimi. Mostra sotto il campo gli errori dei campi di primo livello,
-`inventory.item_not_found` (sotto "Seleziona articolo"), `pricing.package_not_found` (sotto "Pacchetti"),
+Elenchi assenti, decimali e giorni festivi come per i pacchetti. Nessun valore del corpo deve dare un 500.
+
+Il frontend controlla già l'articolo obbligatorio e i prezzi massimi. Mostra sotto il campo gli errori dei campi di primo livello che
+non sono id, `inventory.item_not_found` (sotto "Seleziona articolo"), `pricing.package_not_found` (sotto "Pacchetti"),
 `catalog.vat_rate_not_allowed` (sotto IVA) e `pricing.calculation_method_not_found` (sotto "Calcolo del prezzo"); sopra i bottoni
 tutti gli altri, con il testo del loro `code`. Con `inventory.item_not_found` e `pricing.package_not_found` rilegge la tendina e
 mostra quello scelto come "Articolo non più disponibile" o "Pacchetto non più disponibile", finché l'utente non lo cambia o lo
@@ -995,7 +1086,8 @@ Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
   natura IVA predefinita con `vatRate` `null`, `isIntermediatePricesIncluded` nuovo, `intermediatePrices` al posto di
   `stayOverrides`. Qui le righe dei prezzi ci sono sempre, perché il pannello non ha tab.
 - **Dati che il pannello non mostra** (`maxPeople`, `isDefault`, `isDefaultOnline`, `isSectorRestricted` con i settori abilitati,
-  `reducedPrices`): vuoti o falsi in creazione, **com'erano** in modifica.
+  `reducedPrices`): vuoti o falsi in creazione, **com'erano** in modifica, tranne i settori abilitati e i prezzi ridotti di settori
+  eliminati, che il salvataggio toglie (per un articolo aggiuntivo il preventivo non guarda i settori abilitati).
 - Risposta: 204 senza corpo.
 - Errori: quelli delle regole comuni.
 
@@ -1035,12 +1127,16 @@ il frontend legge tutto l'articolo aggiuntivo in una sola chiamata e ci riempie 
 - `version`: la versione dell'articolo aggiuntivo (stringa opaca, sezione 16), che il frontend rimanda con
   `update-additional-services-article-item`.
 - `idArticle`: anche di un articolo di magazzino eliminato, che il pannello mostra come "Articolo non più disponibile" (oggi il
-  backend non lascia eliminare un articolo usato da un listino: 409 `inventory.item_in_use`).
+  backend non lascia eliminare un articolo usato da un listino: 409 `inventory.item_in_use`). Un articolo aggiuntivo importato può
+  non averne o averne più di uno (`PriceListTransferService`; il limite a uno è solo in `SavePriceListRequestValidator`): senza, si
+  legge `null` e il pannello chiede di sceglierlo; con più di uno si legge il primo (per id della riga) e gli altri restano finché
+  `idArticle` non cambia.
+- **Nessuna riga di settori o periodi eliminati**, come nella sezione 6.
 - `vatRate`: `null` per un articolo aggiuntivo esente, come nella sezione 5.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
   `catalog/sectors/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
-  mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le rimanda
-  invariate con `update-additional-services-article-item`.
+  mette i prezzi letti. Le righe che non mostra (sezione 6) le tiene da parte e le rimanda invariate con
+  `update-additional-services-article-item`.
 - `publicHolidayDates` e `intermediatePrices`: in qualsiasi ordine (il frontend li ordina).
 - Errori: quelli delle regole comuni, senza i 400.
 
@@ -1048,8 +1144,8 @@ il frontend legge tutto l'articolo aggiuntivo in una sola chiamata e ci riempie 
 
 Bottone "Salva" del pannello "Modifica articolo/servizio aggiuntivo": il frontend manda tutto il modulo, con lo stesso corpo di
 `create-additional-services-article-item` (sezione 13) più `idAdditionalItem`. L'articolo aggiuntivo prende tutti i valori mandati:
-`sectorPrices` e `periodPrices` hanno tutte le sue righe, anche quelle di settori o periodi che il pannello non mostra (es. di
-un'altra stagione), così nessun prezzo salvato si perde. `publicHolidayDates` ha tutti i giorni festivi rimasti, in ordine;
+`sectorPrices` e `periodPrices` hanno tutte le sue righe, anche quelle che il pannello non mostra (sezione 6), così nessun prezzo
+salvato si perde. `publicHolidayDates` ha tutti i giorni festivi rimasti, in ordine;
 `intermediatePrices` ha tutti i prezzi intermedi scritti, in ordine. Per il frontend sostituisce
 `PUT /api/catalog/price-lists/{id}`, che accetta solo `SavePriceListRequest`.
 
@@ -1067,8 +1163,7 @@ un'altra stagione), così nessun prezzo salvato si perde. `publicHolidayDates` h
 - Risposta: 204 senza corpo, con la nuova versione nell'header `ETag` (sezione 16).
 - **Quello che il frontend non manda resta com'era**: nome e traduzioni (se l'articolo non cambia), quantità, quantità massime dei
   pacchetti già collegati e i dati che il pannello non mostra (sezione 13).
-- Righe di settori o periodi che non esistono più: come in `update-package` (sezione 7), si scartano senza errore; quelle dei
-  periodi di un'altra stagione restano come arrivano.
+- Righe di settori o periodi che non esistono più, periodi e dati già salvati: come in `update-package` (sezione 7).
 - Errori: quelli delle regole comuni. Con 409 `resource.version_conflict` (senza `errors[]`) niente cambia: il frontend non lo
   mostra sopra i bottoni, avvisa e rilegge l'articolo aggiuntivo.
 
@@ -1094,8 +1189,10 @@ le API della tabella sotto.
   `If-Match` risponde allo stesso modo: il frontend lo manda sempre.
 - **`ETag` nelle risposte**: ogni salvataggio riuscito restituisce la nuova versione nell'header `ETag: "<version>"`,
   anche se risponde 204 senza corpo.
-- Il 409 `resource.version_conflict` si controlla dopo il 404 dell'elemento (`pricing.price_list_not_found`) e gli altri errori
-  delle regole comuni (sezioni 5-7 e 13-15).
+- Il 409 `resource.version_conflict` si controlla subito dopo il 404 dell'elemento (`pricing.price_list_not_found`), prima dei
+  controlli sui dati collegati (IVA, settori, aree, articoli, pacchetti). Esempio: eliminare un pacchetto lo toglie dagli articoli
+  aggiuntivi e ne cambia la versione; con l'ordine opposto l'utente riceverebbe 404 `pricing.package_not_found`, toglierebbe il
+  pacchetto, salverebbe e solo allora un 409 che gli fa perdere le modifiche.
 - **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
   dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
   la versione come una stringa opaca e non la confronta mai.
@@ -1104,8 +1201,11 @@ le API della tabella sotto.
 
 | Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
 |---|---|---|
-| `GET /api/catalog/price-lists/get-package` (sezione 6) | `POST /api/catalog/price-lists/update-package` (sezione 7) | Tutto il pacchetto: tutti i campi della risposta della sezione 6, nomi, prezzi e giorni festivi compresi |
-| `GET /api/catalog/price-lists/get-additional-services-article-item` (sezione 14) | `POST /api/catalog/price-lists/update-additional-services-article-item` (sezione 15) | Tutto l'articolo aggiuntivo: tutti i campi della risposta della sezione 14, prezzi e giorni festivi compresi |
+| `GET /api/catalog/price-lists/get-package` (sezione 6) | `POST /api/catalog/price-lists/update-package` (sezione 7) | Tutto il pacchetto: tutti i campi della risposta della sezione 6, nomi, prezzi e giorni festivi compresi, e qual è il primo settore (`isFirstRow` dipende da quello) |
+| `GET /api/catalog/price-lists/get-additional-services-article-item` (sezione 14) | `POST /api/catalog/price-lists/update-additional-services-article-item` (sezione 15) | Tutto l'articolo aggiuntivo: tutti i campi della risposta della sezione 14, prezzi e giorni festivi compresi, e qual è il primo settore |
+
+Il primo settore conta perché "Fila 1" è il primo di `catalog/sectors/sector-combobox`: se un altro utente elimina la Fila 1 o cambia
+l'ordine mentre il pannello è aperto, il salvataggio scriverebbe i prezzi intermedi di "Fila 1" su un'altra fila.
 
 Le altre API di questo documento non ne hanno bisogno: le creazioni (sezioni 5 e 13) non rimandano dati letti,
 cancellazione e duplicazione (sezioni 2, 3, 9 e 10) lavorano solo con gli id.
@@ -1126,8 +1226,8 @@ non ci sono si vedono, spente, con la scritta "Non in magazzino".
 ### Cosa ci serve
 
 - **Un'API nuova nel gruppo `/api/catalog/price-lists`** (`Endpoints/PriceListEndpoints.cs:19`). `GET /inventory-articles` e
-  `GET /inventory-items/lookup` restano come sono: vogliono `InventoryRead`, che chi gestisce il listino può non avere, e non
-  danno le quantità.
+  `GET /inventory-items/lookup` restano come sono: vogliono `InventoryRead`, che chi può leggere il listino (`CatalogRead`) può non
+  avere, e non danno le quantità.
 - **Tutti i 24 articoli dell'elenco fisso** (`InventoryArticle`), sempre, nell'ordine dell'enum, con il nome .NET; per ognuno
   gli articoli del magazzino dello stabilimento con quel codice (`catalog.inventory_items`, `article_code`), senza gli
   eliminati, in ordine naturale di nome; `[]` se non ce ne sono. Quelli senza codice ("Altro") non ci sono.
@@ -1184,8 +1284,8 @@ la `key` di un periodo eliminato non si riusa, altrimenti i prezzi salvati passe
   nome nella lingua di `Accept-Language` risponde 400 `validation.failed` su `translations[i].packageName`.
 - `idSectors` salvati con prezzi per tutti i settori tornano uguali in `GET /api/catalog/price-lists/get-package`, anche se uno
   è stato eliminato dopo; rimandarlo con `update-package` risponde 404 `catalog.sector_not_found`.
-- `update-package` e `update-additional-services-article-item` con una riga di un settore eliminato, o di un periodo
-  di un'altra stagione, rispondono 204: la prima non si salva, la seconda resta com'era.
+- `update-package` e `update-additional-services-article-item` con una riga di un settore o di un periodo eliminato, "tutte le file"
+  (`idSector` `null`) o con una `key` senza periodo, rispondono 204: le prime due non si salvano, le altre restano com'erano.
 - I salvataggi rispondono 204 senza corpo; elimina e duplica fanno tutti o nessuno.
 - Ovunque: lo stabilimento è quello del token, nessuna richiesta lo contiene.
 
@@ -1204,7 +1304,18 @@ API 5-7, con un token con `CatalogRead` e `CatalogPricing`:
   `map.spot_not_found`.
 - Un prezzo ridotto con i due prezzi: salvati e riletti; il preventivo di mezza giornata nelle sue date usa quello di mezza
   giornata. Due pacchetti con voci di pari date e nome diverso: ognuno ha il suo prezzo.
-- Righe di `sectorPrices` e `periodPrices` con tutti i prezzi `null`: 204, la lettura non le dà e il settore si può eliminare.
+- Righe di `sectorPrices` e `periodPrices` con tutti i prezzi `null`: 204, la lettura non le dà e il settore si può eliminare, se il
+  listino non lo ha fra quelli abilitati e non ha altri suoi prezzi. Una riga di periodo senza prezzi ma con un prezzo intermedio a 5
+  giorni: il prezzo intermedio si rilegge.
+- Preventivo: un pacchetto con `idSectors` [Fila 1], prezzi stagionali per 10 settori e nessun prezzo stagionale di Fila 1: si vende
+  solo in Fila 1. Un preventivo stagionale dà il `seasonalPrice` salvato, non 0, anche per un articolo aggiuntivo.
+- `idSectorAreas`: il preventivo non cambia con o senza aree.
+- Un prezzo ridotto con `sectorPrices` `[]`: salvato e riletto.
+- `isIntermediatePricesIncluded` `false` su un pacchetto con un prezzo a 120 giorni e uno a 5 giorni diverso fra gli altri settori:
+  dopo il salvataggio non ce n'è più nessuno.
+- `monthlySetting` e `weekendSetting` `null` in creazione: la lettura dà `null`; la copia ha `null`.
+- Creazione con `Accept-Language: en` e solo l'inglese: `get-package` dà solo `en`.
+- `PUT /price-lists/{id}` su un pacchetto con aree, testo dei servizi inclusi e prezzo ridotto di mezza giornata: restano.
 - Prezzi intermedi: "Altre file" a 5 giorni scritto: salvato in tutti gli altri settori. Un pacchetto con un prezzo a 5 giorni
   diverso fra gli altri settori e uno a 120 giorni: la lettura non li dà e un salvataggio non li cambia.
 - `monthlySetting` `ActualMonthDuration`: salvato e riletto. `maxPeopleQuantity` 40 già salvato: riletto e rimandato uguale.
@@ -1264,8 +1375,8 @@ API 2 e 3, con un token con `CatalogPricing`:
     `pricing.duplicate_sector_not_found` con `priceListName`, e nessuna copia. Con un'area abilitata eliminata: 422
     `pricing.duplicate_area_not_found`. Con un prezzo per un periodo eliminato: 422
     `pricing.duplicate_period_not_found`. Dopo un `update-package` di quel pacchetto (senza il settore eliminato in
-    `idSectors`) la duplicazione riesce. Un pacchetto con un prezzo per un periodo di un'altra stagione, non eliminato: 204, e
-    la copia ha quel prezzo.
+    `idSectors`) la duplicazione riesce. Un pacchetto con una riga senza periodo o con una `key` sconosciuta: 204, e la copia ha
+    quella riga.
 15. `idPackages` vuoto o assente: 400 `validation.failed` con `validation.required` su `idPackages`. Senza token 401
     `auth.unauthenticated`; senza `CatalogPricing` 403 `auth.forbidden`; token senza stabilimento 403
     `catalog.property_required`.

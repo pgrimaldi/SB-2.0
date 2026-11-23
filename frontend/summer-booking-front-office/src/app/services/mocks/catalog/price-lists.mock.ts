@@ -307,10 +307,7 @@ export const duplicatePackageItemsMock = (
       const code = copyError(PACKAGE_DETAILS.get(item.idPackage ?? ''));
       if (code) {
         return problem(request, 422, code, {
-          args: {
-            priceListName: packageNameIn(item, languageOf(request)) ?? '',
-            rates: VAT_RATES,
-          },
+          args: copyErrorArgs(code, packageNameIn(item, languageOf(request))),
         });
       }
     }
@@ -351,15 +348,25 @@ function copyError(details: PriceListDetails | undefined): ApiErrorCode | null {
   if (details?.vatRate != null && !VAT_RATES.includes(details.vatRate)) {
     return ApiErrorCode.PricingDuplicateVatRateNotAllowed;
   }
-  if (details?.idSectorAreas?.some((id) => !isAreaOfProperty(id))) {
-    return ApiErrorCode.PricingDuplicateAreaNotFound;
-  }
   if (details?.periodPrices.some(({ idPeriod }) => !isPeriodOfSeason(idPeriod))) {
     return ApiErrorCode.PricingDuplicatePeriodNotFound;
+  }
+  if (details?.idSectorAreas?.some((id) => !isAreaOfProperty(id))) {
+    return ApiErrorCode.PricingDuplicateAreaNotFound;
   }
   return details && !sectorsOf(details).every(isSectorOfProperty)
     ? ApiErrorCode.PricingDuplicateSectorNotFound
     : null;
+}
+
+function copyErrorArgs(
+  code: ApiErrorCode,
+  name: string | null,
+): Record<string, string | readonly number[]> {
+  return {
+    priceListName: name ?? '',
+    ...(code === ApiErrorCode.PricingDuplicateVatRateNotAllowed && { rates: VAT_RATES }),
+  };
 }
 
 /** Every sector there is data of. */
@@ -731,8 +738,8 @@ function packageData(row: PackageRow): Omit<PackageSelectedItem, 'version'> {
  * property from the access token: the package takes all the values sent, its `name` as in
  * `createPackageMock`. 204 without a body, with the new version in `ETag`; 401 without a valid access
  * token; 400 as `createPackageMock`; 404 `pricing.price_list_not_found` for a package that is not one
- * of its; 422 and 404 of its references (`referenceProblem`); 409 `resource.version_conflict` when
- * `If-Match` is not the version of the package. The rows of deleted sectors and periods, or without
+ * of its; 409 `resource.version_conflict` when `If-Match` is not the version of the package; 422 and
+ * 404 of its references (`referenceProblem`). The rows of deleted sectors and periods, or without
  * prices, are not saved.
  */
 export const updatePackageMock = (
@@ -753,13 +760,13 @@ export const updatePackageMock = (
   if (!row) {
     return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
-  const missing = referenceProblem(request, body);
-  if (missing) {
-    return missing;
-  }
   const conflict = versionConflict(request, packageData(row));
   if (conflict) {
     return conflict;
+  }
+  const missing = referenceProblem(request, body);
+  if (missing) {
+    return missing;
   }
   row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
   PACKAGE_DETAILS.set(
@@ -893,7 +900,7 @@ export const duplicateAdditionalItemsMock = (
       const code = copyError(ADDITIONAL_ITEM_DETAILS.get(idAdditionalItem ?? ''));
       if (code) {
         return problem(request, 422, code, {
-          args: { priceListName: additionalItemName ?? '', rates: VAT_RATES },
+          args: copyErrorArgs(code, additionalItemName),
         });
       }
     }
@@ -1197,13 +1204,13 @@ export const updateAdditionalItemMock = (
   if (!row) {
     return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
-  const missing = additionalItemReferenceProblem(request, body);
-  if (missing) {
-    return missing;
-  }
   const conflict = versionConflict(request, additionalItemData(row));
   if (conflict) {
     return conflict;
+  }
+  const missing = additionalItemReferenceProblem(request, body);
+  if (missing) {
+    return missing;
   }
   if (body.idArticle !== additionalItemData(row).idArticle) {
     row.additionalItemName = activeArticleName(DEMO_PROPERTY.id, body.idArticle);

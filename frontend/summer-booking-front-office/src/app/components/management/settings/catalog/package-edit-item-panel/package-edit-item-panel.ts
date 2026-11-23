@@ -36,6 +36,7 @@ import { LanguageBehaviour } from '../../../../../behaviours/i18n/language.behav
 import {
   apiFieldError,
   apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
 } from '../../../../../behaviours/validation/api-field-errors';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
 import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
@@ -70,6 +71,7 @@ import { TabGroup, TabGroupTab } from '../../../../shared/ui/tabs/tab-group/tab-
 import { SERVICE_LANGUAGES } from '../../services/shared/services-translations/services-translations';
 import { orderedItems, withExistingItems } from '../package-items';
 import { PackageGeneralInfoTab } from '../package-general-info-tab/package-general-info-tab';
+import { PanelTab, panelTabOf } from '../package-panel-tabs';
 import { PackageReducedPrice } from '../package-reduced-price/package-reduced-price';
 import {
   intermediatePricesOf,
@@ -89,12 +91,6 @@ interface PackageFormTexts {
     general_info: string;
     price_list: string;
   };
-}
-
-/** The tabs of the panel, in their order. */
-enum PanelTab {
-  GeneralInfo,
-  PriceList,
 }
 
 @Component({
@@ -292,6 +288,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
           this.reset();
           return undefined;
         }
+        this.showTabOf(problem);
         if (
           problem.code === ApiErrorCode.CatalogSectorNotFound ||
           problem.code === ApiErrorCode.MapSpotNotFound
@@ -302,11 +299,9 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
           this.refreshArticles();
         }
         if (problem.code === ApiErrorCode.PricingCalculationMethodNotFound) {
-          this.selectedTab.set(PanelTab.PriceList);
           return apiFieldError(this.draftForm.calculationMethod, problem.code);
         }
         if (problem.code === ApiErrorCode.CatalogVatRateNotAllowed) {
-          this.selectedTab.set(PanelTab.PriceList);
           return apiFieldError(this.draftForm.vatRate, problem.code, problem.args);
         }
         return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
@@ -316,6 +311,14 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
         this.isSaving.set(false);
       }
     });
+  }
+
+  /** The tab of the first wrong field, where its error shows. */
+  private showTabOf(problem: ApiProblem): void {
+    const tab = panelTabOf(problem);
+    if (tab !== null) {
+      this.selectedTab.set(tab);
+    }
   }
 
   protected async leave(): Promise<void> {
@@ -346,6 +349,7 @@ export class PackageEditItemPanel implements UnsavedChanges, OnDestroy {
 
   private cancelEdit(): void {
     this.draft.set(structuredClone(this.pristine()));
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
     this.reducedSeasonalPriceIndex.set(null);
     this.error.set(null);

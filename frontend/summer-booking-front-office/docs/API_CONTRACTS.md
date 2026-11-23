@@ -7304,7 +7304,7 @@ Listino: creazione pacchetto.
     "2026-06-02T00:00:00.000Z",
     "2026-08-15T00:00:00.000Z"
   ],
-  "isIntermediatePricesIncluded": false,
+  "isIntermediatePricesIncluded": true,
   "intermediatePrices": [
     {
       "idPeriod": 0,
@@ -7346,8 +7346,8 @@ Listino: creazione pacchetto.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1100` |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
-| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | number (intero) | `0` |
+| `periodPrices[].idSector` | string (UUID) \| null | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | number (intero) \| null | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
@@ -7365,7 +7365,7 @@ Listino: creazione pacchetto.
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
 | `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-06-02T00:00:00.000Z", "2026-08-15T00:00:00.000Z"]` |
-| `isIntermediatePricesIncluded` | boolean | `false` |
+| `isIntermediatePricesIncluded` | boolean | `true` |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
 | `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
@@ -7537,11 +7537,11 @@ Stato: 200 OK.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false,
+  "isPublicHolidaysIncluded": true,
   "publicHolidayDates": [
     "2026-08-15T00:00:00.000Z"
   ],
-  "isIntermediatePricesIncluded": false,
+  "isIntermediatePricesIncluded": true,
   "intermediatePrices": [
     {
       "idPeriod": 0,
@@ -7585,8 +7585,8 @@ Stato: 200 OK.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1100` |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
-| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | number (intero) | `0` |
+| `periodPrices[].idSector` | string (UUID) \| null | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | number (intero) \| null | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
@@ -7602,9 +7602,9 @@ Stato: 200 OK.
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
-| `isPublicHolidaysIncluded` | boolean | `false` |
+| `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
-| `isIntermediatePricesIncluded` | boolean | `false` |
+| `isIntermediatePricesIncluded` | boolean | `true` |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
 | `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
@@ -7716,11 +7716,11 @@ Listino: modifica pacchetto.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false,
+  "isPublicHolidaysIncluded": true,
   "publicHolidayDates": [
     "2026-08-15T00:00:00.000Z"
   ],
-  "isIntermediatePricesIncluded": false,
+  "isIntermediatePricesIncluded": true,
   "intermediatePrices": [
     {
       "idPeriod": 0,
@@ -7763,8 +7763,8 @@ Listino: modifica pacchetto.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `600` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `1200` |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 15, "dailyPrice": 25, "weekendPrice": 30, "halfDayWeekendPrice": 18, "halfDaySevenDaysPrice": 90, "sevenDaysPrice": 150, "halfDayFourteenDaysPrice": 170, "fourteenDaysPrice": 280, "halfDayMonthlyPrice": 320, "monthlyPrice": 520}]` |
-| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | number (intero) | `0` |
+| `periodPrices[].idSector` | string (UUID) \| null | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | number (intero) \| null | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `15` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `25` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `30` |
@@ -7780,9 +7780,9 @@ Listino: modifica pacchetto.
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
-| `isPublicHolidaysIncluded` | boolean | `false` |
+| `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
-| `isIntermediatePricesIncluded` | boolean | `false` |
+| `isIntermediatePricesIncluded` | boolean | `true` |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
 | `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
@@ -7970,11 +7970,11 @@ Listino: creazione articolo/servizio aggiuntivo.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false,
+  "isPublicHolidaysIncluded": true,
   "publicHolidayDates": [
     "2026-08-15T00:00:00.000Z"
   ],
-  "isIntermediatePricesIncluded": false,
+  "isIntermediatePricesIncluded": true,
   "intermediatePrices": [
     {
       "idPeriod": 0,
@@ -7998,8 +7998,8 @@ Listino: creazione articolo/servizio aggiuntivo.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `120` |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
-| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | number (intero) | `0` |
+| `periodPrices[].idSector` | string (UUID) \| null | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | number (intero) \| null | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
@@ -8015,9 +8015,9 @@ Listino: creazione articolo/servizio aggiuntivo.
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
-| `isPublicHolidaysIncluded` | boolean | `false` |
+| `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
-| `isIntermediatePricesIncluded` | boolean | `false` |
+| `isIntermediatePricesIncluded` | boolean | `true` |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
 | `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
@@ -8088,11 +8088,11 @@ Stato: 200 OK.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false,
+  "isPublicHolidaysIncluded": true,
   "publicHolidayDates": [
     "2026-08-15T00:00:00.000Z"
   ],
-  "isIntermediatePricesIncluded": false,
+  "isIntermediatePricesIncluded": true,
   "intermediatePrices": [
     {
       "idPeriod": 0,
@@ -8108,7 +8108,7 @@ Stato: 200 OK.
 | Property | Tipo | Esempio |
 |---|---|---|
 | `idAdditionalItem` | string (UUID) | `2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02` |
-| `idArticle` | string (UUID) | `afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62` |
+| `idArticle` | string (UUID) \| null | `afb531ab-f98b-4ba6-bc0b-fc7d86fa0d62` |
 | `idPackages` | string[] (UUID) | `["8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01"]` |
 | `isOnlineEnabled` | boolean | `true` |
 | `isOnlineOnly` | boolean | `false` |
@@ -8118,8 +8118,8 @@ Stato: 200 OK.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `120` |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
-| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | number (intero) | `0` |
+| `periodPrices[].idSector` | string (UUID) \| null | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | number (intero) \| null | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
@@ -8135,9 +8135,9 @@ Stato: 200 OK.
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
-| `isPublicHolidaysIncluded` | boolean | `false` |
+| `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
-| `isIntermediatePricesIncluded` | boolean | `false` |
+| `isIntermediatePricesIncluded` | boolean | `true` |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
 | `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |
@@ -8190,11 +8190,11 @@ Listino: modifica articolo/servizio aggiuntivo.
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
   "weekendSetting": "SaturdaySunday",
-  "isPublicHolidaysIncluded": false,
+  "isPublicHolidaysIncluded": true,
   "publicHolidayDates": [
     "2026-08-15T00:00:00.000Z"
   ],
-  "isIntermediatePricesIncluded": false,
+  "isIntermediatePricesIncluded": true,
   "intermediatePrices": [
     {
       "idPeriod": 0,
@@ -8219,8 +8219,8 @@ Listino: modifica articolo/servizio aggiuntivo.
 | `sectorPrices[].seasonalHalfDayPrice` | number (decimale, €) \| null | `60` |
 | `sectorPrices[].seasonalPrice` | number (decimale, €) \| null | `130` |
 | `periodPrices[]` | PackagePeriodPrice[] (array di oggetti) | `[{"idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "idPeriod": 0, "halfDayPrice": 4, "dailyPrice": 7, "weekendPrice": 9, "halfDayWeekendPrice": 5, "halfDaySevenDaysPrice": 25, "sevenDaysPrice": 42, "halfDayFourteenDaysPrice": 46, "fourteenDaysPrice": 80, "halfDayMonthlyPrice": 90, "monthlyPrice": 150}]` |
-| `periodPrices[].idSector` | string (UUID) | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
-| `periodPrices[].idPeriod` | number (intero) | `0` |
+| `periodPrices[].idSector` | string (UUID) \| null | `5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01` |
+| `periodPrices[].idPeriod` | number (intero) \| null | `0` |
 | `periodPrices[].halfDayPrice` | number (decimale, €) \| null | `4` |
 | `periodPrices[].dailyPrice` | number (decimale, €) \| null | `7` |
 | `periodPrices[].weekendPrice` | number (decimale, €) \| null | `9` |
@@ -8236,9 +8236,9 @@ Listino: modifica articolo/servizio aggiuntivo.
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
 | `weekendSetting` | string (enum PriceWeekendSetting) \| null | `SaturdaySunday` |
-| `isPublicHolidaysIncluded` | boolean | `false` |
+| `isPublicHolidaysIncluded` | boolean | `true` |
 | `publicHolidayDates` | string[] (date UTC ISO 8601) | `["2026-08-15T00:00:00.000Z"]` |
-| `isIntermediatePricesIncluded` | boolean | `false` |
+| `isIntermediatePricesIncluded` | boolean | `true` |
 | `intermediatePrices[]` | PackageIntermediatePrice[] (array di oggetti) | `[{"idPeriod": 0, "isFirstRow": true, "dayQuantity": 2, "price": 35}]` |
 | `intermediatePrices[].idPeriod` | number (intero) | `0` |
 | `intermediatePrices[].isFirstRow` | boolean | `true` |

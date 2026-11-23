@@ -33,6 +33,7 @@ import {
 import {
   apiFieldError,
   apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
 } from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
@@ -218,6 +219,7 @@ export class AdditionalItemEditItemPanel implements UnsavedChanges, OnDestroy {
   protected async requestCancel(): Promise<void> {
     if (await this.unsaved.confirmDiscard(this)) {
       this.draft.set(structuredClone(this.pristine()));
+      clearApiFieldErrors(this.draftForm);
       this.draftForm().reset();
       this.error.set(null);
       this.isEditing.set(false);
