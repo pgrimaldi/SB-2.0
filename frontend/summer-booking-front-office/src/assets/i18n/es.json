@@ -152,6 +152,7 @@
       "calculation_method_not_found": "Este cálculo del precio ya no está disponible: elige otro.",
       "price_list_not_found": "El elemento de la lista de precios ya no existe: puede que ya se haya eliminado.",
       "price_list_in_use": "{{priceListName}} no se puede eliminar: los artículos/servicios adicionales {{additionalItems}} se quedarían sin paquetes y valdrían para todos. Vincúlalos primero a otros paquetes o elimínalos.",
+      "package_not_found": "Un paquete elegido ya no existe: puede que ya se haya eliminado.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} no se puede duplicar: su IVA no está entre los tipos admitidos ({{rates}}). Cámbialo e inténtalo de nuevo.",
       "duplicate_period_not_found": "{{priceListName}} no se puede duplicar: tiene precios para un periodo eliminado. Ábrelo, modifícalo y guárdalo, e inténtalo de nuevo.",
       "duplicate_area_not_found": "{{priceListName}} no se puede duplicar: tiene un área del mapa eliminada. Ábrelo, quítala de las áreas habilitadas y guárdalo, e inténtalo de nuevo.",
@@ -1890,6 +1891,8 @@
             "online_enabled": "Reservas online",
             "online_only": "Solo online",
             "map_assignable": "Definir como artículo asignable en el mapa",
+            "missing_article": "Artículo ya no disponible",
+            "missing_package": "Paquete ya no disponible",
             "price_list": "Tarifa"
           }
         },

@@ -2756,7 +2756,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/additional-services-articles-list`
+### POST `/api/catalog/price-lists/additional-services-articles-list`
 
 **Payload JSON**
 
@@ -2812,7 +2812,7 @@ Nessun corpo (204).
 | `rows[].idAdditionalItem` | string (UUID) |
 | `rows[].additionalItemName` | string \| null |
 
-### POST `/api/catalog/delete-additional-services-article-item`
+### POST `/api/catalog/price-lists/delete-additional-services-article-item`
 
 **Payload JSON**
 
@@ -2836,7 +2836,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/duplicate-additional-services-article-item`
+### POST `/api/catalog/price-lists/duplicate-additional-services-article-item`
 
 **Payload JSON**
 
@@ -2860,7 +2860,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/create-additional-services-article-item`
+### POST `/api/catalog/price-lists/create-additional-services-article-item`
 
 **Payload JSON**
 
@@ -2894,6 +2894,7 @@ Nessun corpo (204).
       "monthlyPrice": "number (decimale, €) | null"
     }
   ],
+  "vatRate": "number | null",
   "calculationMethod": "string (enum PriceCalculationMethod) | null",
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
@@ -2942,6 +2943,7 @@ Nessun corpo (204).
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null |
 | `isCumulative` | boolean |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
@@ -2959,7 +2961,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### GET `/api/catalog/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
+### GET `/api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
 
 **Payload JSON** (query string)
 
@@ -3002,6 +3004,7 @@ Nessun corpo (204).
       "monthlyPrice": "number (decimale, €) | null"
     }
   ],
+  "vatRate": "number | null",
   "calculationMethod": "string (enum PriceCalculationMethod) | null",
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
@@ -3054,6 +3057,7 @@ Nessun corpo (204).
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null |
 | `isCumulative` | boolean |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
@@ -3068,7 +3072,7 @@ Nessun corpo (204).
 | `intermediatePrices[].price` | number |
 | `version` | string |
 
-### POST `/api/catalog/update-additional-services-article-item`
+### POST `/api/catalog/price-lists/update-additional-services-article-item`
 
 **Payload JSON**
 
@@ -3103,6 +3107,7 @@ Nessun corpo (204).
       "monthlyPrice": "number (decimale, €) | null"
     }
   ],
+  "vatRate": "number | null",
   "calculationMethod": "string (enum PriceCalculationMethod) | null",
   "isCumulative": "boolean",
   "monthlySetting": "string (enum PriceMonthlySetting) | null",
@@ -3152,6 +3157,7 @@ Nessun corpo (204).
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null |
+| `vatRate` | number \| null |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null |
 | `isCumulative` | boolean |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null |
@@ -3169,7 +3175,7 @@ Nessun corpo (204).
 
 Nessun corpo (204).
 
-### POST `/api/catalog/package-combobox`
+### POST `/api/catalog/price-lists/package-combobox`
 
 **Payload JSON**
 

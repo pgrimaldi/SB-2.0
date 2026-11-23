@@ -152,6 +152,7 @@
       "calculation_method_not_found": "Questo calcolo del prezzo non è più disponibile: scegline un altro.",
       "price_list_not_found": "La voce del listino non c'è più: forse è già stata eliminata.",
       "price_list_in_use": "{{priceListName}} non si può eliminare: gli articoli/servizi aggiuntivi {{additionalItems}} resterebbero senza pacchetti e varrebbero per tutti. Collegali prima ad altri pacchetti, o eliminali.",
+      "package_not_found": "Un pacchetto scelto non c'è più: forse è già stato eliminato.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} non si può duplicare: la sua IVA non è tra le aliquote ammesse ({{rates}}). Modificala e riprova.",
       "duplicate_period_not_found": "{{priceListName}} non si può duplicare: ha dei prezzi per un periodo eliminato. Aprilo, modificalo e salvalo, poi riprova.",
       "duplicate_area_not_found": "{{priceListName}} non si può duplicare: ha un'area della mappa eliminata. Aprilo, toglila dalle aree abilitate e salvalo, poi riprova.",
@@ -1890,6 +1891,8 @@
             "online_enabled": "Prenotazioni online",
             "online_only": "Solo online",
             "map_assignable": "Imposta come articolo assegnabile su mappa",
+            "missing_article": "Articolo non più disponibile",
+            "missing_package": "Pacchetto non più disponibile",
             "price_list": "Listino"
           }
         },

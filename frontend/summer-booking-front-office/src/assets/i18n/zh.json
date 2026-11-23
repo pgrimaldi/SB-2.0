@@ -152,6 +152,7 @@
       "calculation_method_not_found": "该价格计算方式已不可用：请选择其他方式。",
       "price_list_not_found": "价目表项目已不存在：可能已被删除。",
       "price_list_in_use": "无法删除 {{priceListName}}：附加物品/服务 {{additionalItems}} 将不再关联任何套餐，并会适用于所有套餐。请先将它们关联到其他套餐，或将其删除。",
+      "package_not_found": "所选套餐已不存在：可能已被删除。",
       "duplicate_vat_rate_not_allowed": "无法复制 {{priceListName}}：其增值税率不在允许的税率之内（{{rates}}）。请修改后重试。",
       "duplicate_period_not_found": "无法复制 {{priceListName}}：其中有已删除时段的价格。请打开并编辑、保存后重试。",
       "duplicate_area_not_found": "无法复制 {{priceListName}}：其中包含已删除的地图区域。请打开并从启用的区域中移除，保存后重试。",
@@ -1890,6 +1891,8 @@
             "online_enabled": "在线预订",
             "online_only": "仅限在线",
             "map_assignable": "设为可在地图上分配的物品",
+            "missing_article": "物品已不可用",
+            "missing_package": "套餐已不可用",
             "price_list": "价目表"
           }
         },

@@ -26,8 +26,7 @@ import { PublicHolidays } from '../public-holidays/public-holidays';
 export interface PriceListFields {
   readonly sectorPrices: FieldTree<PackageSectorPrice[]>;
   readonly periodPrices: FieldTree<PackagePeriodPrice[]>;
-  /** Only the packages have it. */
-  readonly vatRate?: FieldTree<number | null>;
+  readonly vatRate: FieldTree<number | null>;
   readonly calculationMethod: FieldTree<PriceCalculationMethod | null>;
   readonly isCumulative: FieldTree<boolean>;
   readonly monthlySetting: FieldTree<PriceMonthlySetting | null>;

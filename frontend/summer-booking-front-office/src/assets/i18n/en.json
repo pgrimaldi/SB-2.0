@@ -152,6 +152,7 @@
       "calculation_method_not_found": "This price calculation is no longer available: choose another one.",
       "price_list_not_found": "The price list item is no longer there: it may already have been deleted.",
       "price_list_in_use": "{{priceListName}} cannot be deleted: the additional items/services {{additionalItems}} would be left with no packages and would apply to all of them. First link them to other packages, or delete them.",
+      "package_not_found": "A chosen package is no longer there: it may already have been deleted.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} cannot be duplicated: its VAT is not one of the allowed rates ({{rates}}). Change it and try again.",
       "duplicate_period_not_found": "{{priceListName}} cannot be duplicated: it has prices for a deleted period. Open it, edit it and save it, then try again.",
       "duplicate_area_not_found": "{{priceListName}} cannot be duplicated: it has a deleted map area. Open it, take it away from the enabled areas and save it, then try again.",
@@ -1890,6 +1891,8 @@
             "online_enabled": "Online bookings",
             "online_only": "Online only",
             "map_assignable": "Set as item assignable on the map",
+            "missing_article": "Item no longer available",
+            "missing_package": "Package no longer available",
             "price_list": "Price list"
           }
         },

@@ -7795,7 +7795,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/additional-services-articles-list`
+### POST `/api/catalog/price-lists/additional-services-articles-list`
 
 Listino: elenco degli articoli/servizi aggiuntivi.
 
@@ -7848,7 +7848,7 @@ Stato: 200 OK.
 | `rows[].idAdditionalItem` | string (UUID) | `4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01` |
 | `rows[].additionalItemName` | string \| null | `Lettino` |
 
-### POST `/api/catalog/delete-additional-services-article-item`
+### POST `/api/catalog/price-lists/delete-additional-services-article-item`
 
 Listino: eliminazione degli articoli/servizi aggiuntivi.
 
@@ -7873,7 +7873,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/duplicate-additional-services-article-item`
+### POST `/api/catalog/price-lists/duplicate-additional-services-article-item`
 
 Listino: duplicazione degli articoli/servizi aggiuntivi.
 
@@ -7897,7 +7897,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### POST `/api/catalog/package-combobox`
+### POST `/api/catalog/price-lists/package-combobox`
 
 Listino: pacchetti per la tendina.
 
@@ -7927,7 +7927,7 @@ Stato: 200 OK.
 | `id` | string (UUID) | `8d3f1b20-6a4c-4b7e-9f10-2e3d4c5b6a01` |
 | `value` | string | `Ombrellone e 2 lettini` |
 
-### POST `/api/catalog/create-additional-services-article-item`
+### POST `/api/catalog/price-lists/create-additional-services-article-item`
 
 Listino: creazione articolo/servizio aggiuntivo.
 
@@ -7965,6 +7965,7 @@ Listino: creazione articolo/servizio aggiuntivo.
       "monthlyPrice": 150
     }
   ],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -8009,6 +8010,7 @@ Listino: creazione articolo/servizio aggiuntivo.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `80` |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `90` |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `150` |
+| `vatRate` | number \| null | `22` |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
@@ -8028,7 +8030,7 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-### GET `/api/catalog/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
+### GET `/api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem={idAdditionalItem}`
 
 Listino: articolo/servizio aggiuntivo da modificare.
 
@@ -8037,7 +8039,7 @@ Listino: articolo/servizio aggiuntivo da modificare.
 Nessun corpo: è una GET, l'id dell'articolo aggiuntivo va nella query string e lo stabilimento viene dal token.
 
 ```text
-/api/catalog/get-additional-services-article-item?idAdditionalItem=2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02
+/api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem=2b7e4c90-1d3a-4f5b-8c6d-7e8f9a0b1c02
 ```
 
 | Property | Tipo | Esempio |
@@ -8081,6 +8083,7 @@ Stato: 200 OK.
       "monthlyPrice": 150
     }
   ],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -8127,6 +8130,7 @@ Stato: 200 OK.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `80` |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `90` |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `150` |
+| `vatRate` | number \| null | `22` |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |
@@ -8141,7 +8145,7 @@ Stato: 200 OK.
 | `intermediatePrices[].price` | number | `35` |
 | `version` | string | `9864e3d5` |
 
-### POST `/api/catalog/update-additional-services-article-item`
+### POST `/api/catalog/price-lists/update-additional-services-article-item`
 
 Listino: modifica articolo/servizio aggiuntivo.
 
@@ -8181,6 +8185,7 @@ Listino: modifica articolo/servizio aggiuntivo.
       "monthlyPrice": 150
     }
   ],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -8226,6 +8231,7 @@ Listino: modifica articolo/servizio aggiuntivo.
 | `periodPrices[].fourteenDaysPrice` | number (decimale, €) \| null | `80` |
 | `periodPrices[].halfDayMonthlyPrice` | number (decimale, €) \| null | `90` |
 | `periodPrices[].monthlyPrice` | number (decimale, €) \| null | `150` |
+| `vatRate` | number \| null | `22` |
 | `calculationMethod` | string (enum PriceCalculationMethod) \| null | `Daily` |
 | `isCumulative` | boolean | `false` |
 | `monthlySetting` | string (enum PriceMonthlySetting) \| null | `EffectiveMonthDuration` |

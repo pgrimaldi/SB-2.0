@@ -13,6 +13,7 @@ export class AdditionalItemAddItemRequest {
   isMapAssignable = false;
   sectorPrices: PackageSectorPrice[] = [];
   periodPrices: PackagePeriodPrice[] = [];
+  vatRate: number | null = null;
   calculationMethod: PriceCalculationMethod | null = null;
   isCumulative = false;
   monthlySetting: PriceMonthlySetting | null = null;

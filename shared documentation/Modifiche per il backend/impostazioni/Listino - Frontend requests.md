@@ -21,14 +21,14 @@ periodo, festivi, prezzi intermedi).
 | 5 | POST | `/api/catalog/price-lists/create-package` | Crea un pacchetto con le due tab del pannello |
 | 6 | GET | `/api/catalog/price-lists/get-package` | Legge un pacchetto per il pannello di modifica |
 | 7 | POST | `/api/catalog/price-lists/update-package` | Salva un pacchetto modificato |
-| 8 | POST | `/api/catalog/additional-services-articles-list` | Tabella Articoli/Servizi aggiuntivi |
-| 9 | POST | `/api/catalog/delete-additional-services-article-item` | Cancella uno o più articoli aggiuntivi, tutti o nessuno |
-| 10 | POST | `/api/catalog/duplicate-additional-services-article-item` | Duplica uno o più articoli aggiuntivi, tutti o nessuno |
-| 11 | POST | `/api/catalog/package-combobox` | Tendina "Pacchetti" dei pannelli degli articoli aggiuntivi |
-| 12 | POST | `/api/catalog/article-combobox` | Tendina "Seleziona articolo" (anche Impostazioni magazzino) |
-| 13 | POST | `/api/catalog/create-additional-services-article-item` | Crea un articolo aggiuntivo |
-| 14 | GET | `/api/catalog/get-additional-services-article-item` | Legge un articolo aggiuntivo per il pannello di modifica |
-| 15 | POST | `/api/catalog/update-additional-services-article-item` | Salva un articolo aggiuntivo modificato |
+| 8 | POST | `/api/catalog/price-lists/additional-services-articles-list` | Tabella Articoli/Servizi aggiuntivi, con il nome nella lingua dell'utente |
+| 9 | POST | `/api/catalog/price-lists/delete-additional-services-article-item` | Elimina uno o più articoli aggiuntivi, tutti o nessuno |
+| 10 | POST | `/api/catalog/price-lists/duplicate-additional-services-article-item` | Duplica uno o più articoli aggiuntivi, tutti o nessuno |
+| 11 | POST | `/api/catalog/price-lists/package-combobox` | Tendina "Pacchetti" dei pannelli degli articoli aggiuntivi |
+| 12 | POST | `/api/catalog/article-combobox` e `/api/catalog/sectors/sector-combobox` | Richieste in altri documenti |
+| 13 | POST | `/api/catalog/price-lists/create-additional-services-article-item` | Crea un articolo aggiuntivo |
+| 14 | GET | `/api/catalog/price-lists/get-additional-services-article-item` | Legge un articolo aggiuntivo per il pannello di modifica |
+| 15 | POST | `/api/catalog/price-lists/update-additional-services-article-item` | Salva un articolo aggiuntivo modificato |
 | 16 | GET + POST | Le API 6, 7, 14 e 15 | Controllo di versione: `version` nelle letture, `If-Match` ed `ETag` nei salvataggi, 409 `resource.version_conflict` |
 | 17 | GET | `/api/catalog/price-lists/get-package-articles` | Gli articoli dei pannelli dei pacchetti e quali ci sono in magazzino |
 
@@ -37,9 +37,8 @@ Sono tutte **nuove**. Per il frontend sostituiscono le API di `/api/catalog/pric
 
 ## Regole comuni
 
-- **Le API esistenti non cambiano**: `/api/catalog/price-lists` (con le sue sotto-rotte) e
-  `GET /api/catalog/inventory-items/lookup` restano come sono; le nuove si aggiungono e possono riusarne la logica
-  (`PriceListsService`).
+- **Le API esistenti non cambiano**: `/api/catalog/price-lists` (con le sue sotto-rotte) resta com'è; le nuove si aggiungono e
+  possono riusarne la logica (`PriceListsService`).
 - **Stabilimento dal token**: nessuna richiesta lo contiene.
 - **Permessi**: come le API dei listini di oggi, salvo dove la sezione dice altro. Senza permesso: 403 `auth.forbidden`.
 - **JSON** in camelCase, con i nomi esatti di questo documento. Date: giorni in UTC ISO 8601
@@ -722,48 +721,59 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
 - Errori: quelli delle regole comuni. Con 409 `resource.version_conflict` (senza `errors[]`) niente cambia: il frontend non lo
   mostra sopra i bottoni, avvisa e rilegge il pacchetto.
 
-## 8. POST /api/catalog/additional-services-articles-list
+## 8. POST /api/catalog/price-lists/additional-services-articles-list
 
-Tabella della tab "Articoli/Servizi aggiuntivi" della pagina Listino (`/settings/catalog/2`), come `packages-list`.
-Per il frontend sostituisce `GET /price-lists?kind=additional`.
+Tabella della tab "Articoli/Servizi aggiuntivi" (`/settings/catalog/2`). Per il frontend sostituisce
+`GET /api/catalog/price-lists?kind=additional`. **Vale tutta la sezione 1** (API nuova nello stesso gruppo, richiesta standard
+delle tabelle, valori non validi, nome e ordine naturale, permesso `CatalogRead`, stabilimento dal token, errori e il loro
+ordine), con queste differenze:
 
-- Corpo: la richiesta standard delle tabelle, con le stesse regole di `packages-list` (`sortField`
-  `additionalItemName`).
+- **Righe**: i listini con `kind` `additional` dello stabilimento, senza gli eliminati.
+- **`sortField`**: `additionalItemName` oppure `""` (per nome, come `additionalItemName` e `Ascending`).
+- **Risposta**: ogni riga ha solo `idAdditionalItem` (`public_id`) e `additionalItemName`, scelto come `packageName`: il nome
+  nella lingua di `Accept-Language`, altrimenti la colonna `name`. Ricerca e ordinamento lavorano su questo nome.
 
 ```json
 {
   "page": 1,
   "pageSize": 10,
-  "search": "",
+  "search": "lettino",
   "filters": [],
-  "sortField": "",
+  "sortField": "additionalItemName",
   "sortDirection": "Ascending"
 }
 ```
-
-- Risposta 200 nello stile delle altre tabelle: `total` e `rows`, con `idAdditionalItem` (oggi `id`) e
-  `additionalItemName` (oggi `name`).
 
 ```json
 {
   "total": 2,
   "rows": [
     { "idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a01", "additionalItemName": "Lettino" },
-    { "idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a02", "additionalItemName": "Sdraio" }
+    { "idAdditionalItem": "4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a11", "additionalItemName": "Lettino extra famiglia" }
   ]
 }
 ```
 
-- Errori come `packages-list`.
+## 9. POST /api/catalog/price-lists/delete-additional-services-article-item
 
-## 9. POST /api/catalog/delete-additional-services-article-item
+**L'unica API con cui il frontend elimina gli articoli/servizi aggiuntivi**, dopo la conferma nel popup: il cestino di una riga
+la chiama con un id, "Elimina selezione" della tabella con tutti gli id scelti. Elimina **uno o più articoli aggiuntivi in una
+sola chiamata, tutto o niente**, come `delete-package-item` (sezione 2).
 
-Cestino di una riga e "elimina selezionati" della tabella della tab "Articoli/Servizi aggiuntivi" (pagina Listino),
-come `delete-package-item`. Per il frontend sostituisce `DELETE /price-lists/{id}` e `POST /price-lists/bulk-delete`
-per gli articoli aggiuntivi: qui arrivano **uno o più id insieme**, tutto o niente.
+### Cosa ci serve
 
-- Corpo: `idAdditionalItems`, gli `idAdditionalItem` delle righe di
-  `additional-services-articles-list`; uno solo con il cestino della riga, più con "elimina selezionati".
+- **Tutto o niente**, come la sezione 2: se anche un solo articolo della lista non si può eliminare, non si elimina nessuno.
+- **API nuova**: `DELETE /api/catalog/price-lists/{id}` e `POST /api/catalog/price-lists/bulk-delete` restano come sono e il
+  frontend non le usa, per gli stessi motivi della sezione 2.
+- **Solo articoli aggiuntivi**: l'id di un pacchetto (`kind` `package`) risponde 404 come un id che non esiste e non si elimina
+  niente.
+- **Stessi effetti della `DELETE` di oggi** per ogni articolo (`RemoveAsync`, `PriceListsService.cs:171`): soft delete e una voce
+  `catalog.price_list_deleted` nel registro per articolo. **Nessun altro controllo**: niente dipende da un articolo aggiuntivo, e
+  le prenotazioni tengono i loro dati come per i pacchetti.
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+- **Permesso**: `CatalogPricing` (`PriceListEndpoints.cs:17`). **Stabilimento** dal token.
+
+### Richiesta, risposta ed errori
 
 ```json
 {
@@ -771,28 +781,47 @@ per gli articoli aggiuntivi: qui arrivano **uno o più id insieme**, tutto o nie
 }
 ```
 
-- **Tutto o niente**: se un id non va bene non si elimina nessuno.
-- Risposta: 204 senza corpo.
-- Errori: 404 `resource.not_found` per un id che non è un articolo aggiuntivo dello stabilimento (anche un pacchetto)
-  o per `idAdditionalItems` vuoto; 403 `auth.forbidden` e 401 `auth.unauthenticated` come le altre tabelle.
+- `idAdditionalItems`: gli `idAdditionalItem` delle righe della sezione 8, almeno uno, con le stesse regole di `idPackages`
+  (sezione 2): lo stesso id ripetuto conta una volta, righe di più pagine, stessa nota sul tetto al numero di id.
+- Risposta: 204 senza corpo. Dopo il 204 gli id escono dalla selezione e la tabella si ricarica.
 
-```json
-{
-  "type": "https://errors.summerbooking/resource/not-found",
-  "status": 404,
-  "code": "resource.not_found",
-  "title": "Resource not found"
-}
-```
+Nell'ordine in cui si controllano:
 
-## 10. POST /api/catalog/duplicate-additional-services-article-item
+| Status | `code` | Quando |
+|---|---|---|
+| 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 403 | `auth.forbidden` | Utente senza il permesso `CatalogPricing`. |
+| 400 | `validation.failed` | `idAdditionalItems` assente o vuoto: `validation.required` su `idAdditionalItems` in `errors[]`. Il frontend non lo manda. |
+| 403 | `catalog.property_required` | Token senza stabilimento. |
+| 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 404 | `pricing.price_list_not_found` (`CatalogErrors.PriceListNotFound`) | Un id non è un articolo aggiuntivo dello stabilimento (anche perché già eliminato, o perché è un pacchetto). Non si elimina niente. |
 
-Bottone duplica di una riga e "duplica selezionati" della tabella della tab "Articoli/Servizi aggiuntivi" (pagina
-Listino), come `duplicate-package-item`. Per il frontend sostituisce `POST /price-lists/{id}/duplicate` e
-`POST /price-lists/bulk-duplicate` per gli articoli aggiuntivi: qui arrivano **uno o più id insieme**, tutto o niente.
+Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con
+`pricing.price_list_not_found` toglie gli id dalla selezione e ricarica la tabella.
 
-- Corpo: `idAdditionalItems`, come `delete-additional-services-article-item`; uno solo con il bottone
-  della riga, più con "duplica selezionati".
+## 10. POST /api/catalog/price-lists/duplicate-additional-services-article-item
+
+**L'unica API con cui il frontend duplica gli articoli/servizi aggiuntivi**, dopo la conferma nel popup: il bottone "Duplica" di
+una riga la chiama con un id, "Duplica selezione" della tabella con tutti gli id scelti. Duplica **uno o più articoli aggiuntivi
+in una sola chiamata, tutto o niente**, come `duplicate-package-item` (sezione 3).
+
+### Cosa ci serve
+
+- **Tutto o niente** e **solo articoli aggiuntivi**, come l'eliminazione.
+- **API nuova**: `POST /api/catalog/price-lists/{id}/duplicate` e `POST /api/catalog/price-lists/bulk-duplicate` restano come
+  sono e il frontend non le usa, per gli stessi motivi della sezione 3.
+- **Ogni copia è quella che il backend fa già** (`CopyAsync`, `PriceListsService.cs:145`), con le regole della sezione 3:
+  - un articolo aggiuntivo nuovo dello stesso stabilimento, con un `public_id` nuovo, `created_by_user_id` dell'utente del token e
+    **tutti** i dati di quello di partenza: articolo di magazzino con la sua quantità, pacchetti collegati con la loro quantità
+    massima, prezzi, prezzi intermedi, festivi e i dati che il pannello non mostra; **mai predefinito**;
+  - il **nome lo sceglie il backend** con `CopyNames.Next` fra i nomi degli articoli aggiuntivi: "Lettino copia", poi "Lettino
+    copia 2"; anche i nomi tradotti prendono il suffisso della loro lingua, come nella sezione 3;
+  - nel registro una voce `catalog.price_list_duplicated` per copia.
+- Nomi in contemporanea e id ripetuti come nella sezione 3.
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+- **Permesso**: `CatalogPricing`. **Stabilimento** dal token.
+
+### Richiesta, risposta ed errori
 
 ```json
 {
@@ -800,22 +829,41 @@ Listino), come `duplicate-package-item`. Per il frontend sostituisce `POST /pric
 }
 ```
 
-- **Tutto o niente**: se un id non va bene non si duplica nessuno.
-- Per ogni articolo una copia con gli stessi dati e un nome scelto dal backend che non si ripete fra gli articoli
-  aggiuntivi dello stabilimento, senza distinguere maiuscole e minuscole: per esempio "Lettino (copia)", poi
-  "Lettino (copia 2)".
-- Risposta: 204 senza corpo.
-- Errori: come `delete-additional-services-article-item`.
+- `idAdditionalItems`: come nell'eliminazione (sezione 9).
+- Risposta: 204 senza corpo. Dopo il 204 la selezione si svuota (solo per "Duplica selezione") e la tabella si ricarica.
+- Errori: gli stessi dell'eliminazione, nello stesso ordine. Con 404 `pricing.price_list_not_found` non si duplica niente.
+- **Un articolo aggiuntivo che non si può copiare** risponde con un errore suo, dopo il 404, sul primo che non va nell'ordine
+  degli id, e non si duplica niente. Sono i codici della sezione 3, con gli stessi motivi:
 
-## 11. POST /api/catalog/package-combobox
+  | Status | `code` | Quando | `args` |
+  |---|---|---|---|
+  | 422 | `pricing.duplicate_vat_rate_not_allowed` | L'IVA non è più tra le aliquote ammesse (`VatPolicy.ResolveAsync`). | `priceListName`, `rates` |
+  | 422 | `pricing.duplicate_period_not_found` | Ha prezzi per un periodo eliminato. | `priceListName` |
+  | 422 | `pricing.duplicate_sector_not_found` | Ha dati di un settore eliminato: un prezzo stagionale, per periodo o stagionale ridotto, o un settore abilitato. | `priceListName` |
 
-Tendina a scelta multipla "Pacchetti" dei pannelli di aggiunta e di modifica degli articoli/servizi aggiuntivi
-(pagina Listino), riletta a ogni apertura del pannello. Combobox standard come le altre del frontend (`catalog/sectors/sector-combobox`,
-`catalog/article-combobox`): tutti i pacchetti dello stabilimento, senza pagine, nel loro ordine.
+  `priceListName` è il nome nella lingua di `Accept-Language`, come in tabella. Settori e periodi eliminati, e i periodi di
+  un'altra stagione (che si copiano), come nella sezione 3. L'utente risolve salvando l'articolo aggiuntivo (sezione 15).
+- Il frontend mostra ogni errore nell'avviso "Operazione non riuscita", con il testo del suo `code`; con
+  `pricing.price_list_not_found` toglie gli id dalla selezione e ricarica la tabella.
 
-- POST senza corpo: lo stabilimento lo prende il backend dal token.
-- Risposta 200: un array di `{ id, value }`, con `id` = `idPackage` e `value` = nome del pacchetto, scelto
-  come `packageName` di `packages-list` (lingua di `Accept-Language`, altrimenti `name`); array vuoto se non ce ne sono.
+## 11. POST /api/catalog/price-lists/package-combobox
+
+Tendina a scelta multipla "Pacchetti" dei pannelli "Aggiungi nuovo articolo/servizio aggiuntivo" e "Modifica articolo/servizio
+aggiuntivo", riletta a ogni apertura del pannello. Segue la regola di tutte le tendine del frontend: `POST`, senza corpo né
+pagine, risposta `[{ id, value }]`.
+
+### Cosa ci serve
+
+- **Un'API nuova nel gruppo `/api/catalog/price-lists`** (`Endpoints/PriceListEndpoints.cs:19`). `GET /price-lists/lookup` resta
+  com'è: risponde `[{ id, kind, name }]` con il solo nome di `name` e un altro ordine, e la usa anche `ConfigSnapshotBuilder`.
+- **Tutti i pacchetti** (`kind` `package`) dello stabilimento, senza gli eliminati, in **ordine naturale** di `value`, come
+  `packages-list` (sezione 1).
+- **Permesso**: `CatalogRead`. **Stabilimento** dal token (`CurrentProperty.IdAsync`).
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+
+### Richiesta e risposta
+
+`POST` senza corpo. Risposta 200 con un array di `{ id, value }`, vuoto se non ci sono pacchetti. Nessun altro campo:
 
 ```json
 [
@@ -824,25 +872,84 @@ Tendina a scelta multipla "Pacchetti" dei pannelli di aggiunta e di modifica deg
 ]
 ```
 
-- Errori: 403 `auth.forbidden` per un utente senza il permesso per questa operazione; 401 `auth.unauthenticated`.
+| Campo | Da | Tipo | Note |
+|---|---|---|---|
+| `id` | `public_id` | string (UUID) | L'`idPackage` di `packages-list`: quello che i pannelli mandano e leggono in `idPackages`. |
+| `value` | `name` o traduzione | string | Il nome, scelto come `packageName` (sezione 1): lingua di `Accept-Language`, altrimenti `name`. |
 
-## 12. POST /api/catalog/article-combobox
+### Errori
 
-Tendina obbligatoria "Seleziona articolo" dei pannelli "Aggiungi nuovo articolo/servizio aggiuntivo" e "Modifica
-articolo/servizio aggiuntivo" (pagina Listino), riletta a ogni apertura del pannello. È la stessa API della tendina
-"Articolo" del popup "Aggiungi articolo" delle Impostazioni magazzino: **si fa una volta sola**, come la descrive la
-sezione 2 di `Impostazioni magazzino - Frontend requests.md` (rotta, risposta `[{ id, value }]`, ordine, permesso
-`CatalogRead`, errori e verifica).
+Gli stessi della sezione 4, nello stesso ordine: 401 `auth.unauthenticated`, 403 `auth.forbidden` (senza `CatalogRead`), 403
+`catalog.property_required`, 404 `catalog.property_not_found`. Il frontend mostra l'errore sotto la tendina, con il testo del suo
+`code`, e rilegge l'elenco quando l'utente prova ad aprirla.
 
-Per il Listino conta in più: l'`id` scelto è l'`idArticle` che il frontend manda in
-`create-additional-services-article-item` e `update-additional-services-article-item` e che legge in
-`get-additional-services-article-item`: deve essere lo stesso id.
+## 12. API richieste in altri documenti
 
-## 13. POST /api/catalog/create-additional-services-article-item
+I pannelli degli articoli/servizi aggiuntivi le usano senza differenze: si fanno una volta sola, come le descrive il loro
+documento.
 
-Bottone "Crea articolo/servizio" del pannello "Aggiungi nuovo articolo/servizio aggiuntivo" (pagina Listino): il
-frontend manda tutto il modulo in una sola chiamata. Per il frontend sostituisce `POST /api/catalog/price-lists` con
-`kind: "additional"`, che accetta solo `SavePriceListRequest`. Lo stabilimento lo prende il backend dal token.
+| API | A cosa serve qui | Dove è richiesta |
+|---|---|---|
+| `POST /api/catalog/article-combobox` | Tendina "Seleziona articolo": l'`id` è l'`idArticle` delle sezioni 13-15 | `Impostazioni magazzino - Frontend requests.md`, sezione 2 |
+| `POST /api/catalog/sectors/sector-combobox` | Le righe dei prezzi, una per settore | `Servizi - Frontend requests.md`, sezione 25 |
+
+## Regole comuni dei pannelli degli articoli/servizi aggiuntivi (sezioni 13-15)
+
+I pannelli "Aggiungi nuovo articolo/servizio aggiuntivo" e "Modifica articolo/servizio aggiuntivo" si leggono e si salvano in una
+sola chiamata, come quelli dei pacchetti.
+
+### Cosa ci serve
+
+- **API nuove nel gruppo `/api/catalog/price-lists`**, come quelle dei pacchetti. `POST /price-lists`, `GET` e
+  `PUT /price-lists/{id}` restano come sono e il frontend non le usa.
+- **Solo articoli aggiuntivi**: lettura e salvataggio accettano solo listini con `kind` `additional` dello stabilimento; ogni
+  altro id, anche di un pacchetto, risponde 404 `pricing.price_list_not_found`. La creazione li fa di questo tipo.
+- **Permesso**: `CatalogRead` per la lettura, `CatalogPricing` per creazione e salvataggio. **Stabilimento** dal token.
+- **Registro**: `catalog.price_list_created` e `catalog.price_list_updated`, come oggi.
+- **Controllo di versione** su lettura e salvataggio (sezione 16).
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo.
+
+### Errori
+
+Nell'ordine in cui si controllano. Le righe 404 `pricing.price_list_not_found` e 409 valgono per lettura e salvataggio.
+
+| Status | `code` | Quando |
+|---|---|---|
+| 401 | `auth.unauthenticated` | Token assente, scaduto o non valido. |
+| 403 | `auth.forbidden` | Utente senza il permesso (`CatalogRead` o `CatalogPricing`). |
+| 400 | `validation.failed` | Corpo non valido, con un elemento di `errors[]` per campo (tabella qui sotto). |
+| 403 | `catalog.property_required` | Token senza stabilimento. |
+| 404 | `catalog.property_not_found` | Lo stabilimento del token non esiste. |
+| 404 | `pricing.price_list_not_found` | `idAdditionalItem` non è un articolo aggiuntivo dello stabilimento (anche perché già eliminato). Niente cambia. |
+| 422 | `catalog.vat_rate_not_allowed` | `vatRate` non è un'aliquota del Paese dello stabilimento, con `args.rates`, come per i pacchetti. Niente cambia. |
+| 422 | `pricing.calculation_method_not_found` | Il metodo di `calculationMethod` non è nel catalogo. Niente cambia. |
+| 404 | `inventory.item_not_found` | `idArticle` non è un articolo del magazzino dello stabilimento, anche perché eliminato (`CatalogErrors.InventoryItemNotFound`). Niente cambia. |
+| 404 | `pricing.package_not_found` (nuovo) | Un id di `idPackages` non è un pacchetto dello stabilimento, anche perché eliminato. Niente cambia. Oggi `ApplyAsync` (`PriceListsService.cs:229`) risponde `pricing.price_list_not_found`, lo stesso codice dell'articolo aggiuntivo che non c'è: il frontend non saprebbe quale dei due manca. |
+| 409 | `resource.version_conflict` | `If-Match` manca o non è più la versione dell'articolo aggiuntivo (sezione 16). Niente cambia. |
+
+Le righe di prezzo di settori o periodi eliminati non danno errore: si scartano (sezione 15).
+
+Errori di campo del 400, con `field` uguale al nome nel corpo:
+
+| Campo | `code` | Quando |
+|---|---|---|
+| `idArticle` | `validation.required` | Assente o `null`. |
+| `idPackages` | `validation.invalid` | Lo stesso id due volte. |
+| `vatRate`, `calculationMethod`, `monthlySetting`, `weekendSetting`, `sectorPrices`, `periodPrices`, `publicHolidayDates`, `intermediatePrices` | `validation.invalid` | Come nella tabella dei pacchetti. |
+
+Il frontend controlla già l'articolo obbligatorio e i prezzi massimi. Mostra sotto il campo gli errori dei campi di primo livello,
+`inventory.item_not_found` (sotto "Seleziona articolo"), `pricing.package_not_found` (sotto "Pacchetti"),
+`catalog.vat_rate_not_allowed` (sotto IVA) e `pricing.calculation_method_not_found` (sotto "Calcolo del prezzo"); sopra i bottoni
+tutti gli altri, con il testo del loro `code`. Con `inventory.item_not_found` e `pricing.package_not_found` rilegge la tendina e
+mostra quello scelto come "Articolo non più disponibile" o "Pacchetto non più disponibile", finché l'utente non lo cambia o lo
+toglie; con `pricing.price_list_not_found` ricarica la tabella; con `resource.version_conflict` avvisa e rilegge l'articolo
+aggiuntivo.
+
+## 13. POST /api/catalog/price-lists/create-additional-services-article-item
+
+Bottone "Crea articolo/servizio" del pannello "Aggiungi nuovo articolo/servizio aggiuntivo" (pagina Listino): il frontend manda
+tutto il modulo in una sola chiamata. Per il frontend sostituisce `POST /api/catalog/price-lists` con `kind: "additional"`, che
+accetta solo `SavePriceListRequest`.
 
 ```json
 {
@@ -855,6 +962,7 @@ frontend manda tutto il modulo in una sola chiamata. Per il frontend sostituisce
     { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 60, "seasonalPrice": 120 }
   ],
   "periodPrices": [],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -868,32 +976,36 @@ frontend manda tutto il modulo in una sola chiamata. Per il frontend sostituisce
 
 Modifiche, campo per campo, rispetto a `SavePriceListRequest`:
 
-- `idArticle`: l'articolo di magazzino scelto in "Seleziona articolo" (id di `catalog/article-combobox`),
-  obbligatorio, al posto di `items` (che per un articolo aggiuntivo ha un solo elemento). Il nome dell'articolo
-  aggiuntivo è quello dell'articolo: il frontend non manda `name` né `translations`.
-- `idPackages`: pacchetti scelti in "Pacchetti" (id di `catalog/package-combobox`), `[]` = tutti i pacchetti, al
-  posto di `packageLinks` (il frontend non manda `maxCount`).
+- `kind`: il frontend non lo manda: questa API crea sempre un articolo aggiuntivo.
+- `idArticle`: l'articolo di magazzino scelto in "Seleziona articolo" (sezione 12), obbligatorio, al posto di `items`, che per un
+  articolo aggiuntivo ha un solo elemento (`SavePriceListRequestValidator`, `PriceListValidators.cs:42`). Il pannello non ha la
+  **quantità**: 1 in creazione, quella salvata in modifica.
+- **Nome**: il frontend non manda `name` né `translations`. In creazione `name` è quello dell'articolo di magazzino, senza
+  traduzioni. In modifica nome e traduzioni salvati **non cambiano**, così una copia resta "Lettino copia"; se `idArticle` è
+  diverso da quello salvato, `name` diventa quello del nuovo articolo e le traduzioni si tolgono.
+- `idPackages`: i pacchetti scelti in "Pacchetti" (sezione 11), `[]` = tutti i pacchetti, al posto di `packageLinks`. Il pannello
+  non ha la **quantità massima** per pacchetto (`maxCount`, 1-100): per i pacchetti già collegati resta quella salvata, per i nuovi
+  è 100. Il limite di articoli aggiuntivi del pacchetto (`maxAdditionalItems`) vale comunque (`QuoteService`).
 - `isOnlineEnabled` e `isOnlineOnly` ("Prenotazioni online" e "Solo online"): al posto di `salesChannel`, come in
-  `create-package`.
+  `create-package` (sezione 5).
 - `isMapAssignable`: uguale.
-- `sectorPrices`, `periodPrices`, `calculationMethod`, `isCumulative`, `monthlySetting`, `weekendSetting`,
-  `isPublicHolidaysIncluded`, `publicHolidayDates`, `isIntermediatePricesIncluded`, `intermediatePrices`: gli stessi
-  campi e valori di `create-package` (vedi sopra, con le stesse differenze).
-  `sectorPrices` e `periodPrices` hanno una riga per ogni settore e per ogni settore in ogni periodo della stagione
-  corrente.
+- `vatRate`, `sectorPrices`, `periodPrices`, `calculationMethod`, `isCumulative`, `monthlySetting`, `weekendSetting`,
+  `isPublicHolidaysIncluded`, `publicHolidayDates`, `isIntermediatePricesIncluded`, `intermediatePrices`: gli stessi campi e valori
+  di `create-package` (sezione 5), con le stesse differenze e le stesse cose da aggiungere: righe senza prezzi che non si salvano,
+  natura IVA predefinita con `vatRate` `null`, `isIntermediatePricesIncluded` nuovo, `intermediatePrices` al posto di
+  `stayOverrides`. Qui le righe dei prezzi ci sono sempre, perché il pannello non ha tab.
+- **Dati che il pannello non mostra** (`maxPeople`, `isDefault`, `isDefaultOnline`, `isSectorRestricted` con i settori abilitati,
+  `reducedPrices`): vuoti o falsi in creazione, **com'erano** in modifica.
 - Risposta: 204 senza corpo.
-- Errori: 404 `resource.not_found` per un `idArticle` che non è un articolo attivo dello stabilimento o un `idPackage`
-  che non è dei suoi; 400 `validation.failed` con `errors[]` per i valori fuori dagli enum (es. `calculationMethod`);
-  403 `auth.forbidden` e 401 `auth.unauthenticated` come le altre.
+- Errori: quelli delle regole comuni.
 
-## 14. GET /api/catalog/get-additional-services-article-item
+## 14. GET /api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem=…
 
-Apertura del pannello "Modifica articolo/servizio aggiuntivo" (matita della tabella Articoli/Servizi aggiuntivi,
-pagina Listino): il frontend legge tutto l'articolo aggiuntivo in una sola chiamata e ci riempie il modulo. Per il
-frontend sostituisce `GET /api/catalog/price-lists/{id}`, che risponde `PriceListDto`. L'id va nella query
-(`?idAdditionalItem=...`); lo stabilimento è quello del token. La risposta ha `idAdditionalItem` e gli stessi campi,
-con gli stessi nomi e valori, che il frontend manda a `POST /api/catalog/create-additional-services-article-item`
-(vedi sopra).
+Apertura del pannello "Modifica articolo/servizio aggiuntivo" (matita della tabella Articoli/Servizi aggiuntivi, pagina Listino):
+il frontend legge tutto l'articolo aggiuntivo in una sola chiamata e ci riempie il modulo. Per il frontend sostituisce
+`GET /api/catalog/price-lists/{id}`, che risponde `PriceListDto`. L'id va nella query string (`idAdditionalItem`). La risposta ha
+`idAdditionalItem` e gli stessi campi, con gli stessi nomi e valori, che il frontend manda a
+`create-additional-services-article-item` (sezione 13).
 
 ```json
 {
@@ -907,6 +1019,7 @@ con gli stessi nomi e valori, che il frontend manda a `POST /api/catalog/create-
     { "idSector": "5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01", "seasonalHalfDayPrice": 60, "seasonalPrice": 120 }
   ],
   "periodPrices": [],
+  "vatRate": 22,
   "calculationMethod": "Daily",
   "isCumulative": false,
   "monthlySetting": "EffectiveMonthDuration",
@@ -921,22 +1034,24 @@ con gli stessi nomi e valori, che il frontend manda a `POST /api/catalog/create-
 
 - `version`: la versione dell'articolo aggiuntivo (stringa opaca, sezione 16), che il frontend rimanda con
   `update-additional-services-article-item`.
+- `idArticle`: anche di un articolo di magazzino eliminato, che il pannello mostra come "Articolo non più disponibile" (oggi il
+  backend non lascia eliminare un articolo usato da un listino: 409 `inventory.item_in_use`).
+- `vatRate`: `null` per un articolo aggiuntivo esente, come nella sezione 5.
 - `sectorPrices` e `periodPrices`: solo le righe con dei prezzi salvati. Il frontend fa una riga per ogni settore di
   `catalog/sectors/sector-combobox`, e per ogni settore in ogni periodo della stagione corrente (`catalog/tariff-periods`), e ci
-  mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le
-  rimanda invariate con `update-additional-services-article-item`.
+  mette i prezzi letti. Le righe di settori o periodi che non mostra (es. di un'altra stagione) le tiene da parte e le rimanda
+  invariate con `update-additional-services-article-item`.
 - `publicHolidayDates` e `intermediatePrices`: in qualsiasi ordine (il frontend li ordina).
-- Errori: 404 `resource.not_found` per un articolo aggiuntivo che non è dello stabilimento; 401 `auth.unauthenticated`.
+- Errori: quelli delle regole comuni, senza i 400.
 
-## 15. POST /api/catalog/update-additional-services-article-item
+## 15. POST /api/catalog/price-lists/update-additional-services-article-item
 
-Bottone "Salva" del pannello "Modifica articolo/servizio aggiuntivo": il frontend manda tutto il modulo, con lo stesso
-corpo di `POST /api/catalog/create-additional-services-article-item` (vedi sopra) più `idAdditionalItem`. L'articolo
-aggiuntivo prende tutti i valori mandati: `sectorPrices` e `periodPrices` hanno tutte le sue righe, anche quelle di
-settori o periodi che il pannello non mostra (es. di un'altra stagione), così nessun prezzo salvato si perde.
-`publicHolidayDates` ha tutti i giorni festivi rimasti, in ordine: quelli tolti con il cestino non ci sono più;
-`intermediatePrices` ha tutti i prezzi intermedi scritti, in ordine.
-Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta solo `SavePriceListRequest`.
+Bottone "Salva" del pannello "Modifica articolo/servizio aggiuntivo": il frontend manda tutto il modulo, con lo stesso corpo di
+`create-additional-services-article-item` (sezione 13) più `idAdditionalItem`. L'articolo aggiuntivo prende tutti i valori mandati:
+`sectorPrices` e `periodPrices` hanno tutte le sue righe, anche quelle di settori o periodi che il pannello non mostra (es. di
+un'altra stagione), così nessun prezzo salvato si perde. `publicHolidayDates` ha tutti i giorni festivi rimasti, in ordine;
+`intermediatePrices` ha tutti i prezzi intermedi scritti, in ordine. Per il frontend sostituisce
+`PUT /api/catalog/price-lists/{id}`, che accetta solo `SavePriceListRequest`.
 
 ```json
 {
@@ -950,16 +1065,12 @@ Per il frontend sostituisce `PUT /api/catalog/price-lists/{id}`, che accetta sol
 
 - Header `If-Match: "<version>"` con la `version` letta con `get-additional-services-article-item` (sezione 16).
 - Risposta: 204 senza corpo, con la nuova versione nell'header `ETag` (sezione 16).
-- Righe di settori o periodi che non esistono più: non devono far fallire il salvataggio. Oggi `ApplyAsync` risponde
-  404 `catalog.sector_not_found` per un settore eliminato e 422 `pricing.period_not_found` per una `key` che non è un
-  periodo della stagione corrente. Il backend tiene come arrivano le righe dei periodi di un'altra stagione e scarta in
-  silenzio quelle dei settori e dei periodi eliminati. Esempio: Fila 9 eliminata dopo l'apertura del pannello → "Salva"
-  risponde 204 e la riga di Fila 9 non si salva. Le righe tenute restano legate al loro periodo: se la loro `key` viene
-  riusata da un periodo nuovo, non devono finire su quello.
-- Errori: come `POST /api/catalog/create-additional-services-article-item`, più 404 `resource.not_found` per un
-  `idAdditionalItem` che non è dello stabilimento e 409 `resource.version_conflict`, senza `errors[]`, quando
-  `If-Match` manca o non è più la versione dell'articolo aggiuntivo (sezione 16): niente cambia. Il frontend non lo
-  mostra sopra i bottoni: avvisa e rilegge l'articolo aggiuntivo.
+- **Quello che il frontend non manda resta com'era**: nome e traduzioni (se l'articolo non cambia), quantità, quantità massime dei
+  pacchetti già collegati e i dati che il pannello non mostra (sezione 13).
+- Righe di settori o periodi che non esistono più: come in `update-package` (sezione 7), si scartano senza errore; quelle dei
+  periodi di un'altra stagione restano come arrivano.
+- Errori: quelli delle regole comuni. Con 409 `resource.version_conflict` (senza `errors[]`) niente cambia: il frontend non lo
+  mostra sopra i bottoni, avvisa e rilegge l'articolo aggiuntivo.
 
 ## 16. Controllo di versione sui salvataggi di modifica
 
@@ -983,8 +1094,8 @@ le API della tabella sotto.
   `If-Match` risponde allo stesso modo: il frontend lo manda sempre.
 - **`ETag` nelle risposte**: ogni salvataggio riuscito restituisce la nuova versione nell'header `ETag: "<version>"`,
   anche se risponde 204 senza corpo.
-- Il 409 `resource.version_conflict` si controlla dopo il 404 dell'elemento (`pricing.price_list_not_found` per i pacchetti,
-  `resource.not_found` per gli articoli aggiuntivi) e prima degli altri 409.
+- Il 409 `resource.version_conflict` si controlla dopo il 404 dell'elemento (`pricing.price_list_not_found`) e gli altri errori
+  delle regole comuni (sezioni 5-7 e 13-15).
 - **Come farlo lo sceglie lo sviluppatore del backend** (il token `xmin` di Npgsql come nel documento offline, un hash
   dei dati coperti dalla versione, un contatore...): l'agente glielo chiede prima di scrivere codice. Il frontend tratta
   la versione come una stringa opaca e non la confronta mai.
@@ -994,7 +1105,7 @@ le API della tabella sotto.
 | Lettura (restituisce `version`) | Salvataggio (manda `If-Match`, risponde `ETag`) | Dati coperti dalla versione |
 |---|---|---|
 | `GET /api/catalog/price-lists/get-package` (sezione 6) | `POST /api/catalog/price-lists/update-package` (sezione 7) | Tutto il pacchetto: tutti i campi della risposta della sezione 6, nomi, prezzi e giorni festivi compresi |
-| `GET /api/catalog/get-additional-services-article-item` (sezione 14) | `POST /api/catalog/update-additional-services-article-item` (sezione 15) | Tutto l'articolo aggiuntivo: tutti i campi della risposta della sezione 14, prezzi e giorni festivi compresi |
+| `GET /api/catalog/price-lists/get-additional-services-article-item` (sezione 14) | `POST /api/catalog/price-lists/update-additional-services-article-item` (sezione 15) | Tutto l'articolo aggiuntivo: tutti i campi della risposta della sezione 14, prezzi e giorni festivi compresi |
 
 Le altre API di questo documento non ne hanno bisogno: le creazioni (sezioni 5 e 13) non rimandano dati letti,
 cancellazione e duplicazione (sezioni 2, 3, 9 e 10) lavorano solo con gli id.
@@ -1069,7 +1180,6 @@ la `key` di un periodo eliminato non si riusa, altrimenti i prezzi salvati passe
 
 ## Verifica
 
-- `package-combobox` dà il nome nella lingua di `Accept-Language`, altrimenti quello di `name`.
 - `create-package` con `Accept-Language: en` e solo il nome inglese risponde 204; `name` = il nome inglese. Senza il
   nome nella lingua di `Accept-Language` risponde 400 `validation.failed` su `translations[i].packageName`.
 - `idSectors` salvati con prezzi per tutti i settori tornano uguali in `GET /api/catalog/price-lists/get-package`, anche se uno
@@ -1116,8 +1226,7 @@ API 16, con un pacchetto e un articolo aggiuntivo di prova:
    `If-Match: "v1"`: 409 `resource.version_conflict`; resta quello che ha salvato la `PUT`.
 4. `update-package` senza `If-Match`: 409 `resource.version_conflict`; con un `idPackage` di un altro stabilimento:
    404 `pricing.price_list_not_found`, anche con un `If-Match` sbagliato.
-5. Gli stessi casi con `get-additional-services-article-item` e `update-additional-services-article-item` (404
-   `resource.not_found`).
+5. Gli stessi casi con `get-additional-services-article-item` e `update-additional-services-article-item`.
 
 API 1, con uno stabilimento di prova e il token di un utente con `CatalogRead`:
 
@@ -1166,3 +1275,36 @@ API 4, con una mappa con due aree ("Area 10" e "Area 2"), una terza eliminata e 
 16. `sector-area-combobox` senza corpo: 200 con `[Area 2, Area 10]`, ognuna con solo `id` (il `public_id` della postazione) e
     `value`. Uno stabilimento senza aree: 200 con `[]`. Senza token 401 `auth.unauthenticated`; senza `CatalogRead` 403
     `auth.forbidden`; token senza stabilimento 403 `catalog.property_required`.
+
+API 8-10, con 12 articoli aggiuntivi e 3 pacchetti:
+
+17. `additional-services-articles-list`: i casi 6-10 con `idAdditionalItem`, `additionalItemName` e `sortField`
+    `additionalItemName`; nessun pacchetto compare.
+18. `delete-additional-services-article-item` di due articoli: 204, non compaiono più e nel registro ci sono due voci
+    `catalog.price_list_deleted`; con un solo id, anche ripetuto: 204 e una voce. Con l'id di un pacchetto, di un altro
+    stabilimento o già eliminato: 404 `pricing.price_list_not_found` e nessuno è eliminato. Lo stesso con
+    `duplicate-additional-services-article-item`: nessuna copia.
+19. `duplicate-additional-services-article-item` di "Lettino" (traduzione inglese "Sunbed", legato a due pacchetti con quantità
+    massima 3 e 5, quantità dell'articolo 2): 204; c'è "Lettino copia" / "Sunbed copy" con gli stessi dati, compresi legami e
+    quantità. Di nuovo: "Lettino copia 2". Con un'IVA non più ammessa, un prezzo di un periodo eliminato o di un settore eliminato:
+    422 `pricing.duplicate_vat_rate_not_allowed`, `pricing.duplicate_period_not_found` o `pricing.duplicate_sector_not_found` con
+    `priceListName`, e nessuna copia; dopo `update-additional-services-article-item` la duplicazione riesce.
+20. `idAdditionalItems` vuoto o assente: 400 `validation.failed` con `validation.required` su `idAdditionalItems`. Permessi, token e
+    stabilimento come nei casi 10 e 15.
+
+API 11: `package-combobox` senza corpo dà tutti i pacchetti in ordine naturale ("Cabina 2" prima di "Cabina 10"), con il nome nella
+lingua di `Accept-Language`, altrimenti quello di `name`; nessun articolo aggiuntivo né pacchetto eliminato. Errori come nel caso 16.
+
+API 13-15, con un token con `CatalogRead` e `CatalogPricing`:
+
+21. `create-additional-services-article-item` con il corpo della sezione 13: 204; compare in tabella con il nome dell'articolo, la
+    lettura dà gli stessi dati, l'articolo ha quantità 1 e i pacchetti quantità massima 100. Una voce `catalog.price_list_created`.
+22. Un articolo con nome "Lettino copia", traduzione "Sunbed copy", quantità 2, un pacchetto con quantità massima 3, persone massime,
+    settori abilitati e prezzi ridotti: letto e salvato senza cambiare niente restano tutti com'erano. Aggiunto un pacchetto: il
+    primo resta a 3, il nuovo è a 100. Cambiato `idArticle`: il nome è quello del nuovo articolo, senza traduzioni.
+23. `idArticle` assente: 400 con `validation.required` su `idArticle`. Un articolo sconosciuto o eliminato: 404
+    `inventory.item_not_found`. Un pacchetto sconosciuto, eliminato o un articolo aggiuntivo in `idPackages`: 404
+    `pricing.package_not_found`. `vatRate` 7 in Italia: 422 `catalog.vat_rate_not_allowed` con `args.rates`; `null`: 204 e la lettura
+    dà `null`. In tutti i casi d'errore niente cambia.
+24. Lettura e salvataggio con l'id di un pacchetto, di un altro stabilimento o già eliminato: 404 `pricing.price_list_not_found`.
+    Righe di prezzo e prezzi intermedi come per i pacchetti; permessi, token e stabilimento come per le API 5-7.

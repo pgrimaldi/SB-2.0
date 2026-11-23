@@ -91,7 +91,8 @@ describe('PriceListService', () => {
 
     const call = controller.expectOne(
       ({ method, url }) =>
-        method === 'POST' && url === `${environment.apiBaseUrl}/catalog/package-combobox`,
+        method === 'POST' &&
+        url === `${environment.apiBaseUrl}/catalog/price-lists/package-combobox`,
     );
     expect(call.request.body).toBeNull();
     call.flush([{ id: 'k1', value: 'Ombrellone e 2 lettini' }]);
@@ -130,7 +131,8 @@ describe('PriceListService', () => {
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/create-additional-services-article-item`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/price-lists/create-additional-services-article-item`,
     );
     expect(call.request.body).toEqual({ ...request });
     controller.verify();
@@ -149,7 +151,8 @@ describe('PriceListService', () => {
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'GET' &&
-        url === `${environment.apiBaseUrl}/catalog/get-additional-services-article-item`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/price-lists/get-additional-services-article-item`,
     );
     expect(call.request.params.get('idAdditionalItem')).toBe('a1');
     call.flush({ idAdditionalItem: 'a1', idArticle: 'r1' });
@@ -188,7 +191,8 @@ describe('PriceListService', () => {
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/update-additional-services-article-item`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/price-lists/update-additional-services-article-item`,
     );
     expect(call.request.body).toEqual({ ...request, idAdditionalItem: 'a1' });
     expect(call.request.headers.get('If-Match')).toBe('"v1"');
@@ -222,7 +226,7 @@ describe('PriceListService', () => {
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/additional-services-articles-list`,
+        url === `${environment.apiBaseUrl}/catalog/price-lists/additional-services-articles-list`,
     );
     expect(call.request.body).toEqual(request);
     call.flush(page);
@@ -242,7 +246,8 @@ describe('PriceListService', () => {
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/delete-additional-services-article-item`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/price-lists/delete-additional-services-article-item`,
     );
     expect(call.request.body).toEqual({ idAdditionalItems: ['a1', 'a2'] });
     controller.verify();
@@ -260,7 +265,8 @@ describe('PriceListService', () => {
     const call = controller.expectOne(
       ({ method, url }) =>
         method === 'POST' &&
-        url === `${environment.apiBaseUrl}/catalog/duplicate-additional-services-article-item`,
+        url ===
+          `${environment.apiBaseUrl}/catalog/price-lists/duplicate-additional-services-article-item`,
     );
     expect(call.request.body).toEqual({ idAdditionalItems: ['a1', 'a2'] });
     controller.verify();

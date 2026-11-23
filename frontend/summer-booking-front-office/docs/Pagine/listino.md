@@ -168,7 +168,7 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 
 - "Calcolo del prezzo" (`calculationMethod`, enum `PriceCalculationMethod`: Prezzo proporzionale, giornaliero,
   logaritmico, giornaliero con weekend).
-- "IVA (%)" (`vatRate`, solo pacchetti, `price_list.vat`), come in Servizi: parte vuota, vuota vuol dire senza aliquota.
+- "IVA (%)" (`vatRate`, `price_list.vat`), come in Servizi: parte vuota, vuota vuol dire senza aliquota.
 - "Impostazione del mensile" (`monthlySetting`, `PriceMonthlySetting`: Durata effettiva del mese, che per il backend sono 31
   giorni; Giorni reali del mese; 30 giorni).
 - "Impostazione del weekend" (`weekendSetting`, `PriceWeekendSetting`: sabato e domenica, solo domenica).
@@ -239,12 +239,16 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
 - Copia della tab Pacchetti: titolo "Articoli/servizi aggiuntivi", `app-table` con ricerca, selezione, una colonna
   Nome (`additionalItemName`), azioni di riga cancella, duplica e modifica, bottone "Aggiungi articoli/servizi
   aggiuntivi"; testi `management.settings.catalog.additional_items.*`.
-- Righe da `POST /api/catalog/additional-services-articles-list` (`PriceListService.additionalItemList`, righe
-  `AdditionalItem`).
-- Cestino ed "elimina selezionati": `POST /api/catalog/delete-additional-services-article-item`.
-- Duplica e "duplica selezionati": `POST /api/catalog/duplicate-additional-services-article-item`.
-- Corpo `{ idAdditionalItems }`, tutto o niente, 204.
-- Con 404 `resource.not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
+- Righe da `POST /api/catalog/price-lists/additional-services-articles-list` (`PriceListService.additionalItemList`, righe
+  `AdditionalItem`): nome nella lingua dell'utente e ordine naturale, come i pacchetti.
+- Cestino ed "elimina selezionati": `POST /api/catalog/price-lists/delete-additional-services-article-item`.
+- Duplica e "duplica selezionati": `POST /api/catalog/price-lists/duplicate-additional-services-article-item` (i nomi delle
+  copie li sceglie il backend: "Lettino copia", poi "Lettino copia 2").
+- Corpo `{ idAdditionalItems }`, uno o più id, tutto o niente, 204.
+- Un articolo aggiuntivo che non si può duplicare: gli stessi 422 dei pacchetti (IVA, periodo, settore), con il suo nome nel
+  messaggio del popup. Nei mock: "Tenda" (IVA 20%), "Posto auto" (periodo) e "Cabina giornaliera" (settore); salvandoli, periodo
+  e settore si tolgono e si possono duplicare.
+- Con 404 `pricing.price_list_not_found` (elemento già eliminato da un altro utente), su Elimina, su Duplica e su Modifica
   (lettura del pannello e Salva), gli id escono dalla selezione e la tabella si ricarica (`reloadIfGone`, uscita
   `failed` dei popup e del pannello di modifica).
 
@@ -254,30 +258,39 @@ Rotta `/settings/catalog` · vista `views/settings/catalog/` (`Catalog`, `app-ca
   `AdditionalItemAddItemRequest`, conferma "Modifiche non salvate".
 - "Seleziona articolo", obbligatoria: articoli del magazzino da `POST /api/catalog/article-combobox`
   (`idArticle`).
-- "Pacchetti": scelta multipla da `POST /api/catalog/package-combobox` (`idPackages`; vuota = "Tutti i pacchetti").
+- "Pacchetti": scelta multipla da `POST /api/catalog/price-lists/package-combobox` (`idPackages`; vuota = "Tutti i pacchetti").
+- Un articolo o un pacchetto scelti che non ci sono più restano nelle loro tendine come "Articolo non più disponibile"
+  (`additional_items.form.missing_article`) e "Pacchetto non più disponibile" (`missing_package`), da cambiare o togliere
+  (`optionsWithMissing` di `options-with-missing.ts`).
 - Caselle "Prenotazioni online", "Solo online" e, in una cornice, "Imposta come articolo assegnabile su mappa"
   (`isMapAssignable`).
 - Poi il titolo "Listino" e `app-price-list-tab`, senza prezzi stagionali ridotti.
 - Le due tendine e le righe dei prezzi (`sector-combobox` e `catalog/tariff-periods`) si leggono a ogni apertura del
   pannello.
 - "Crea articolo/servizio" è spento finché manca l'articolo; manda tutto il modulo a
-  `POST /api/catalog/create-additional-services-article-item` (`PriceListService.createAdditionalItem`, 204).
+  `POST /api/catalog/price-lists/create-additional-services-article-item` (`PriceListService.createAdditionalItem`, 204).
+- Nome e quantità non sono nel pannello: il backend dà il nome dell'articolo e quantità 1, e 100 come quantità massima di ogni
+  pacchetto.
 - Spinner e pannello bloccato; se riesce il pannello si chiude e la tabella si ricarica, se fallisce gli errori
-  vanno sotto i campi o sopra i bottoni.
+  vanno sotto i campi o sopra i bottoni. Senza `errors[]`, sotto il loro campo: `inventory.item_not_found` (Seleziona articolo)
+  e `pricing.package_not_found` (Pacchetti), che rileggono la loro tendina, `catalog.vat_rate_not_allowed` (IVA) e
+  `pricing.calculation_method_not_found` (Calcolo del prezzo).
 
 ### Pannello Modifica (`app-additional-item-edit-item-panel`)
 
 - In `components/management/settings/catalog/additional-item-edit-item-panel/`, come il pannello Aggiungi, titolo
   "Modifica articolo/servizio aggiuntivo".
 - A ogni apertura legge l'articolo aggiuntivo con
-  `GET /api/catalog/get-additional-services-article-item?idAdditionalItem=` (`PriceListService.selectedAdditionalItem`,
+  `GET /api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem=` (`PriceListService.selectedAdditionalItem`,
   risposta `AdditionalItemSelectedItem`), le due tendine, i settori e i periodi; si apre in sola lettura. Se la lettura
   fallisce il pannello si chiude e compare `app-read-error-popup`, come per i pacchetti.
 - "Modifica" sblocca i campi; "Annulla" riporta i valori letti, chiedendo prima se ci sono modifiche.
 - "Salva" manda tutto il modulo con `idAdditionalItem` a
-  `POST /api/catalog/update-additional-services-article-item` (`PriceListService.updateAdditionalItem`, 204),
+  `POST /api/catalog/price-lists/update-additional-services-article-item` (`PriceListService.updateAdditionalItem`, 204),
   compresi i prezzi letti di settori o periodi che il pannello non mostra; se riesce il pannello si chiude e la
-  tabella si ricarica.
+  tabella si ricarica. Errori come in Aggiungi.
+- Quello che il pannello non ha lo tiene il backend: nome e traduzioni (cambiano solo se cambia l'articolo), quantità, quantità
+  massime dei pacchetti già collegati, persone massime, predefinito, settori abilitati e prezzi ridotti.
 - Controllo di versione come per i pacchetti: `version` in `AdditionalItemSelectedItem`, rimandata nell'header
   `If-Match` (`updateAdditionalItem(idAdditionalItem, request, version)`); con 409 `resource.version_conflict`
   `app-version-conflict-popup`, la tabella ricaricata e una nuova lettura dell'articolo aggiuntivo, delle tendine, dei settori e dei

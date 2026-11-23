@@ -13,8 +13,8 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, TreeValidationResult, form, required, submit } from '@angular/forms/signals';
-import { TranslatePipe } from '@ngx-translate/core';
-import { Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable, Subscription, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
 import { ErrorTextBehaviour } from '../../../../../behaviours/errors/error-text.behaviour';
 import { DropdownList } from '../../../../../behaviours/forms/dropdown-list';
@@ -22,9 +22,13 @@ import {
   UnsavedChanges,
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldError,
+  apiFieldErrorsOrGeneral,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { ComboboxItem } from '../../../../../entities/combobox/combobox-item';
+import { ApiErrorCode } from '../../../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../../../entities/errors/api-problem';
 import { AdditionalItemAddItemRequest } from '../../../../../entities/settings/catalog/additional-item-add-item-request';
 import { PackagePeriodPrice } from '../../../../../entities/settings/catalog/package-period-price';
@@ -42,8 +46,14 @@ import { FilledSelect } from '../../../../shared/ui/selects/filled-select/filled
 import { SelectOption } from '../../../../shared/ui/selects/select/select';
 import { SectionTitle } from '../../../../shared/ui/titles/section-title/section-title';
 import { intermediatePricesOf, maxPrices, periodPricesOf, sectorPricesOf } from '../price-limits';
+import { optionsWithMissing } from '../options-with-missing';
 import { PriceListTab } from '../price-list-tab/price-list-tab';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
+
+interface AdditionalItemFormTexts {
+  missing_article: string;
+  missing_package: string;
+}
 
 @Component({
   selector: 'app-additional-item-add-item-panel',
@@ -72,6 +82,7 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   private readonly warehouse = inject(WarehouseService);
   private readonly sectorService = inject(SectorService);
   private readonly seasons = inject(SeasonService);
+  private readonly translateService = inject(TranslateService);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   protected readonly validationText = inject(ValidationTextBehaviour);
@@ -85,23 +96,44 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
   });
   /** The form with nothing chosen: with an empty price for every row once the rows are read. */
   private readonly pristine = signal(comparableJson(new AdditionalItemAddItemRequest()));
+  private readonly texts = toSignal(
+    this.translateService.stream(
+      'management.settings.catalog.additional_items.form',
+    ) as Observable<AdditionalItemFormTexts>,
+    { initialValue: null },
+  );
   protected readonly articles = new DropdownList(
     () => this.warehouse.articleCombobox(),
     this.errorText,
+    () => this.areArticlesRead.set(true),
   );
+  private readonly areArticlesRead = signal(false);
   /** The name of the chosen article, in the rows of the intermediate prices. */
   protected readonly articleName = computed(
     () => this.articles.items().find(({ id }) => id === this.draft().idArticle)?.value ?? '',
   );
-  protected readonly articleOptions = computed<readonly SelectOption[]>(() =>
-    this.articles.items().map(({ id, value }) => ({ value: id, label: value })),
-  );
+  /** Also the chosen one when it is no longer there, for the user to choose another. */
+  protected readonly articleOptions = computed<readonly SelectOption[]>(() => {
+    const { idArticle } = this.draft();
+    return optionsWithMissing(
+      this.articles.items(),
+      this.areArticlesRead() && !this.articles.loadError() && idArticle !== null ? [idArticle] : [],
+      this.texts()?.missing_article ?? '',
+    );
+  });
   protected readonly packages = new DropdownList(
     () => this.priceLists.packageCombobox(),
     this.errorText,
+    () => this.arePackagesRead.set(true),
   );
+  private readonly arePackagesRead = signal(false);
+  /** Also the chosen ones that are no longer there, for the user to take away. */
   protected readonly packageOptions = computed<readonly SelectOption[]>(() =>
-    this.packages.items().map(({ id, value }) => ({ value: id, label: value })),
+    optionsWithMissing(
+      this.packages.items(),
+      this.arePackagesRead() && !this.packages.loadError() ? this.draft().idPackages : [],
+      this.texts()?.missing_package ?? '',
+    ),
   );
   protected readonly sectors = signal<readonly ComboboxItem[]>([]);
   protected readonly periods = signal<readonly SeasonPeriodItem[]>([]);
@@ -147,8 +179,23 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
         this.open.set(false);
         this.created.emit();
       } catch (error: unknown) {
-        return apiFieldErrorsOrGeneral(toApiProblem(error), this.draftForm, (problem) =>
-          this.error.set(problem),
+        const problem = toApiProblem(error);
+        if (problem.code === ApiErrorCode.InventoryItemNotFound) {
+          this.articles.load();
+          return apiFieldError(this.draftForm.idArticle, problem.code);
+        }
+        if (problem.code === ApiErrorCode.PricingPackageNotFound) {
+          this.packages.load();
+          return apiFieldError(this.draftForm.idPackages, problem.code);
+        }
+        if (problem.code === ApiErrorCode.PricingCalculationMethodNotFound) {
+          return apiFieldError(this.draftForm.calculationMethod, problem.code);
+        }
+        if (problem.code === ApiErrorCode.CatalogVatRateNotAllowed) {
+          return apiFieldError(this.draftForm.vatRate, problem.code, problem.args);
+        }
+        return apiFieldErrorsOrGeneral(problem, this.draftForm, (general) =>
+          this.error.set(general),
         );
       } finally {
         this.isSaving.set(false);
@@ -172,7 +219,9 @@ export class AdditionalItemAddItemPanel implements UnsavedChanges, OnDestroy {
     this.draftForm().reset();
     this.pristine.set(comparableJson(new AdditionalItemAddItemRequest()));
     this.articles.clear();
+    this.areArticlesRead.set(false);
     this.packages.clear();
+    this.arePackagesRead.set(false);
     this.sectors.set([]);
     this.periods.set([]);
     this.isPriceListLoaded.set(false);

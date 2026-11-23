@@ -152,6 +152,7 @@
       "calculation_method_not_found": "Ce calcul du prix n'est plus disponible : choisissez-en un autre.",
       "price_list_not_found": "L'élément du tarif n'existe plus : il a peut-être déjà été supprimé.",
       "price_list_in_use": "{{priceListName}} ne peut pas être supprimé : les articles/services supplémentaires {{additionalItems}} resteraient sans forfait et vaudraient pour tous. Associez-les d'abord à d'autres forfaits, ou supprimez-les.",
+      "package_not_found": "Un forfait choisi n'existe plus : il a peut-être déjà été supprimé.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} ne peut pas être dupliqué : sa TVA ne fait pas partie des taux autorisés ({{rates}}). Modifiez-la et réessayez.",
       "duplicate_period_not_found": "{{priceListName}} ne peut pas être dupliqué : il a des prix pour une période supprimée. Ouvrez-le, modifiez-le et enregistrez-le, puis réessayez.",
       "duplicate_area_not_found": "{{priceListName}} ne peut pas être dupliqué : il a une zone de la carte supprimée. Ouvrez-le, retirez-la des zones activées et enregistrez-le, puis réessayez.",
@@ -1890,6 +1891,8 @@
             "online_enabled": "Réservations en ligne",
             "online_only": "En ligne uniquement",
             "map_assignable": "Définir comme article attribuable sur la carte",
+            "missing_article": "Article plus disponible",
+            "missing_package": "Forfait plus disponible",
             "price_list": "Liste de prix"
           }
         },

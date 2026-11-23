@@ -142,7 +142,7 @@ export class AdditionalItems {
     table: { reload(): void },
     idAdditionalItems: readonly (string | null)[],
   ): void {
-    if (problem.code === ApiErrorCode.ResourceNotFound) {
+    if (problem.code === ApiErrorCode.PricingPriceListNotFound) {
       this.forgetDeleted(idAdditionalItems);
       table.reload();
     }

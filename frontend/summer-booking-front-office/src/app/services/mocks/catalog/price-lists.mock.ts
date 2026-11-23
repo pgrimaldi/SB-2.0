@@ -32,7 +32,7 @@ import { PackageSelectedItem } from '../../../entities/settings/catalog/package-
 import { Language } from '../../../entities/shared/language';
 import { onlyFieldsOf } from '../../api/only-fields-of';
 import { isAuthorized, unauthorized } from '../auth/auth.mock';
-import { MockFieldError, problem, resourceNotFound } from '../errors/problem.mock';
+import { MockFieldError, problem } from '../errors/problem.mock';
 import { DEMO_PROPERTY } from '../properties/properties.mock';
 import {
   activeArticleIdNamed,
@@ -223,7 +223,6 @@ export function priceListsUsingPeriod(key: number): string[] {
   ];
 }
 
-const MAX_PAGE_SIZE = 100;
 const SORT_FIELDS = ['packageName'] as const;
 
 /**
@@ -259,7 +258,7 @@ export const packageListMock = (request: HttpRequest<unknown>): Observable<HttpE
 
 /**
  * `POST /api/catalog/price-lists/delete-package-item`: deletes the given packages, all or nothing
- * (see `withPackages`); they leave the additional items they are linked to. 409
+ * (see `withRows`); they leave the additional items they are linked to. 409
  * `pricing.price_list_in_use` when one of these would be left with no packages, which means all.
  */
 export const deletePackageItemsMock = (
@@ -295,7 +294,7 @@ export const deletePackageItemsMock = (
 
 /**
  * `POST /api/catalog/price-lists/duplicate-package-item`: one copy of each given package, all or
- * nothing (see `withPackages`), with every data of the original, never the default one, and the first
+ * nothing (see `withRows`), with every data of the original, never the default one, and the first
  * free name in each language ("X copia", then "X copia 2"). 422 `pricing.duplicate_period_not_found`
  * or `pricing.duplicate_sector_not_found` for a package with prices for a deleted period or data of
  * a deleted sector.
@@ -341,11 +340,18 @@ export const duplicatePackageItemsMock = (
     return null;
   });
 
-function copyError(details: PackageAddItemRequest | undefined): ApiErrorCode | null {
+/** What a copy checks and a save tidies up, of a package or of an additional item. */
+type PriceListDetails = Pick<
+  AdditionalItemAddItemRequest,
+  'vatRate' | 'sectorPrices' | 'periodPrices'
+> &
+  Partial<Pick<PackageAddItemRequest, 'idSectorAreas' | 'idSectors' | 'reducedSeasonalPrices'>>;
+
+function copyError(details: PriceListDetails | undefined): ApiErrorCode | null {
   if (details?.vatRate != null && !VAT_RATES.includes(details.vatRate)) {
     return ApiErrorCode.PricingDuplicateVatRateNotAllowed;
   }
-  if (details?.idSectorAreas.some((id) => !isAreaOfProperty(id))) {
+  if (details?.idSectorAreas?.some((id) => !isAreaOfProperty(id))) {
     return ApiErrorCode.PricingDuplicateAreaNotFound;
   }
   if (details?.periodPrices.some(({ idPeriod }) => !isPeriodOfSeason(idPeriod))) {
@@ -356,20 +362,20 @@ function copyError(details: PackageAddItemRequest | undefined): ApiErrorCode | n
     : null;
 }
 
-/** Every sector the package has data of. */
-function sectorsOf(details: PackageAddItemRequest): (string | null)[] {
+/** Every sector there is data of. */
+function sectorsOf(details: PriceListDetails): (string | null)[] {
   return [
-    ...details.idSectors,
+    ...(details.idSectors ?? []),
     ...[
       ...details.sectorPrices,
       ...details.periodPrices,
-      ...details.reducedSeasonalPrices.flatMap(({ sectorPrices }) => sectorPrices),
+      ...(details.reducedSeasonalPrices ?? []).flatMap(({ sectorPrices }) => sectorPrices),
     ].map(({ idSector }) => idSector),
   ];
 }
 
 /** As the backend: the rows of a deleted sector or period, or without prices, are not saved. */
-function savedRows(details: PackageAddItemRequest): PackageAddItemRequest {
+function savedRows<T extends PriceListDetails>(details: T): T {
   const isKept = (row: PackageSectorPrice | PackagePeriodPrice): boolean =>
     isSectorOfProperty(row.idSector) &&
     Object.entries(row).some(
@@ -381,10 +387,12 @@ function savedRows(details: PackageAddItemRequest): PackageAddItemRequest {
     periodPrices: details.periodPrices.filter(
       (price) => isKept(price) && isPeriodOfSeason(price.idPeriod),
     ),
-    reducedSeasonalPrices: details.reducedSeasonalPrices.map((price) => ({
-      ...price,
-      sectorPrices: price.sectorPrices.filter(isKept),
-    })),
+    ...(details.reducedSeasonalPrices && {
+      reducedSeasonalPrices: details.reducedSeasonalPrices.map((price) => ({
+        ...price,
+        sectorPrices: price.sectorPrices.filter(isKept),
+      })),
+    }),
   };
 }
 
@@ -421,34 +429,44 @@ function copiedTranslation(
   };
 }
 
-/**
- * All or nothing: 404 `pricing.price_list_not_found` when one of `idPackages` is not a package of the
- * property, and nothing changes; 400 `validation.required` without ids; repeated ids count once. 204
- * without a body; 401 without a valid access token.
- */
 function withPackages(
   request: HttpRequest<unknown>,
   change: (packages: PackageRow[]) => Observable<HttpEvent<unknown>> | null,
 ): Observable<HttpEvent<unknown>> {
+  return withRows(
+    request,
+    'idPackages',
+    (id) => packagesOfProperty().filter(({ idPackage }) => idPackage === id),
+    change,
+  );
+}
+
+/**
+ * All or nothing: 404 `pricing.price_list_not_found` when one of the ids in `field` has no row, and
+ * nothing changes; 400 `validation.required` without ids; repeated ids count once. 204 without a
+ * body; 401 without a valid access token.
+ */
+function withRows<Row>(
+  request: HttpRequest<unknown>,
+  field: 'idPackages' | 'idAdditionalItems',
+  rowsOf: (id: unknown) => Row[],
+  change: (rows: Row[]) => Observable<HttpEvent<unknown>> | null,
+): Observable<HttpEvent<unknown>> {
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const { idPackages } = (request.body ?? {}) as { idPackages?: unknown };
-  const ids = Array.isArray(idPackages) ? [...new Set<unknown>(idPackages)] : [];
+  const sent = ((request.body ?? {}) as Record<string, unknown>)[field];
+  const ids = Array.isArray(sent) ? [...new Set<unknown>(sent)] : [];
   if (!ids.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
-      errors: [{ field: 'idPackages', code: ApiErrorCode.ValidationRequired }],
+      errors: [{ field, code: ApiErrorCode.ValidationRequired }],
     });
   }
-  const packages = ids.flatMap((id) =>
-    packagesOfProperty().filter(({ idPackage }) => idPackage === id),
-  );
-  if (packages.length !== ids.length) {
+  const rows = ids.flatMap(rowsOf);
+  if (rows.length !== ids.length) {
     return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
-  return (
-    change(packages) ?? of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600))
-  );
+  return change(rows) ?? of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 }
 
 function packagesOfProperty(): PackageRow[] {
@@ -476,17 +494,6 @@ function savedPackageName(
   const nameIn = (code: string): string | undefined =>
     translations?.find((translation) => translation.language === code)?.packageName?.trim();
   return nameIn('it') || nameIn(language) || null;
-}
-
-function compare(first: string | null, second: string | null): number {
-  if (first === null || second === null) {
-    return first === second ? 0 : first === null ? -1 : 1;
-  }
-  return first.trim().localeCompare(second.trim(), 'it', { sensitivity: 'base', numeric: true });
-}
-
-function positiveInteger(value: unknown, fallback: number): number {
-  return Number.isInteger(value) && (value as number) >= 1 ? (value as number) : fallback;
 }
 
 type CreatePackageBody = Partial<PackageAddItemRequest>;
@@ -723,10 +730,10 @@ function packageData(row: PackageRow): Omit<PackageSelectedItem, 'version'> {
  * `POST /api/catalog/price-lists/update-package` with `PackageAddItemRequest` and `idPackage`, the
  * property from the access token: the package takes all the values sent, its `name` as in
  * `createPackageMock`. 204 without a body, with the new version in `ETag`; 401 without a valid access
- * token; 404 `pricing.price_list_not_found` for a package that is not one of its; 400 as
- * `createPackageMock`; 409 `resource.version_conflict` when `If-Match` is not the version of the
- * package; 404 `catalog.sector_not_found` for a deleted sector among the enabled ones. The rows of
- * deleted sectors and periods, or without prices, are not saved.
+ * token; 400 as `createPackageMock`; 404 `pricing.price_list_not_found` for a package that is not one
+ * of its; 422 and 404 of its references (`referenceProblem`); 409 `resource.version_conflict` when
+ * `If-Match` is not the version of the package. The rows of deleted sectors and periods, or without
+ * prices, are not saved.
  */
 export const updatePackageMock = (
   request: HttpRequest<unknown>,
@@ -735,10 +742,6 @@ export const updatePackageMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreatePackageBody & { idPackage?: unknown };
-  const row = typeof body.idPackage === 'string' ? packageOf(body.idPackage) : null;
-  if (!row) {
-    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
-  }
   const language = request.headers.get('Accept-Language') ?? 'it';
   const errors = packageErrors(body, language);
   if (errors.length) {
@@ -746,13 +749,17 @@ export const updatePackageMock = (
       errors,
     });
   }
-  const conflict = versionConflict(request, packageData(row));
-  if (conflict) {
-    return conflict;
+  const row = typeof body.idPackage === 'string' ? packageOf(body.idPackage) : null;
+  if (!row) {
+    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
   const missing = referenceProblem(request, body);
   if (missing) {
     return missing;
+  }
+  const conflict = versionConflict(request, packageData(row));
+  if (conflict) {
+    return conflict;
   }
   row.packageName = savedPackageName(body.translations, language) ?? row.packageName;
   PACKAGE_DETAILS.set(
@@ -764,47 +771,69 @@ export const updatePackageMock = (
 
 type AdditionalItemRow = AdditionalItem & { propertyId: number };
 
-const ADDITIONAL_ITEM_NAMES = [
-  'Lettino',
-  'Sdraio',
-  'Sedia regista',
-  'Ombrellone aggiuntivo',
-  'Telo mare',
-  'Cassetta di sicurezza',
-  'Doccia calda',
-  'Posto auto',
-  'Cabina giornaliera',
-  'Tenda',
-  'Lettino extra famiglia',
+/** [name, article of the warehouse]: the name is the one of the article when it was chosen. */
+const ADDITIONAL_ITEM_ARTICLES = [
+  ['Lettino', 'Lettino'],
+  ['Sdraio', 'Sdraio'],
+  ['Sedia regista', 'Sedia regista'],
+  ['Ombrellone aggiuntivo', 'Ombrellone'],
+  ['Lettino XL', 'Lettino XL'],
+  ['Tavolino', 'Tavolino'],
+  ['Doccia calda', 'Doccia'],
+  ['Posto auto', 'Parcheggio'],
+  ['Cabina giornaliera', 'Cabina'],
+  ['Tenda', 'Tenda'],
+  ['Lettino extra famiglia', 'Lettino'],
 ];
 
-const ADDITIONAL_ITEMS: AdditionalItemRow[] = ADDITIONAL_ITEM_NAMES.map(
-  (additionalItemName, index) => ({
+const ADDITIONAL_ITEMS: AdditionalItemRow[] = ADDITIONAL_ITEM_ARTICLES.map(
+  ([additionalItemName], index) => ({
     propertyId: 1,
     idAdditionalItem: `4b7e9a31-2c5d-4f8e-a1b2-3c4d5e6f7a${String(index + 1).padStart(2, '0')}`,
     additionalItemName,
   }),
 );
 
-/** What the panels saved, by idAdditionalItem; an item never saved has only its article. */
-const ADDITIONAL_ITEM_DETAILS = new Map<string, AdditionalItemAddItemRequest>([
-  [
-    ADDITIONAL_ITEMS[2].idAdditionalItem ?? '',
+/** What the panels saved, by idAdditionalItem. */
+const ADDITIONAL_ITEM_DETAILS = new Map<string, AdditionalItemAddItemRequest>(
+  ADDITIONAL_ITEMS.map(({ idAdditionalItem, propertyId }, index) => [
+    idAdditionalItem ?? '',
     Object.assign(new AdditionalItemAddItemRequest(), {
-      idArticle: activeArticleIdNamed(
-        ADDITIONAL_ITEMS[2].propertyId,
-        ADDITIONAL_ITEMS[2].additionalItemName,
-      ),
-      idPackages: [PACKAGES[5].idPackage ?? ''],
+      idArticle: activeArticleIdNamed(propertyId, ADDITIONAL_ITEM_ARTICLES[index][1]),
+    }),
+  ]),
+);
+
+Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[0].idAdditionalItem ?? '') ?? {}, {
+  vatRate: 22,
+  isOnlineEnabled: true,
+});
+Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[2].idAdditionalItem ?? '') ?? {}, {
+  idPackages: [PACKAGES[5].idPackage ?? ''],
+});
+Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[7].idAdditionalItem ?? '') ?? {}, {
+  periodPrices: [
+    Object.assign(new PackagePeriodPrice(), {
+      idSector: '5c2a7e10-3b4d-4e6f-8a9b-0c1d2e3f4a01',
+      idPeriod: DELETED_PERIOD,
+      dailyPrice: 10,
     }),
   ],
-]);
+});
+Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[8].idAdditionalItem ?? '') ?? {}, {
+  sectorPrices: [
+    Object.assign(new PackageSectorPrice(), { idSector: DELETED_SECTOR, seasonalPrice: 300 }),
+  ],
+});
+Object.assign(ADDITIONAL_ITEM_DETAILS.get(ADDITIONAL_ITEMS[9].idAdditionalItem ?? '') ?? {}, {
+  vatRate: VAT_RATE_NO_LONGER_ALLOWED,
+});
 
 const ADDITIONAL_ITEM_SORT_FIELDS = ['additionalItemName'] as const;
 
 /**
- * `POST /api/catalog/additional-services-articles-list`: one page of the additional items/services
- * of the property of the token, in their own order unless sorted. 401 without a valid access token.
+ * `POST /api/catalog/price-lists/additional-services-articles-list`: one page of the additional
+ * items/services of the property of the token, as `packageListMock`.
  */
 export const additionalItemListMock = (
   request: HttpRequest<unknown>,
@@ -813,20 +842,22 @@ export const additionalItemListMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as Partial<PageRequest>;
-  const property = DEMO_PROPERTY;
-  const page = positiveInteger(body.page, 1);
-  const pageSize = Math.min(positiveInteger(body.pageSize, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
-  const found = ADDITIONAL_ITEMS.filter(
-    (row) =>
-      row.propertyId === property.id &&
-      (!search || row.additionalItemName?.trim().toLowerCase().includes(search)),
-  ).map((row) => onlyFieldsOf(AdditionalItem, row));
-  const field = ADDITIONAL_ITEM_SORT_FIELDS.find((name) => name === body.sortField);
-  if (field) {
-    const sign = body.sortDirection === 'Descending' ? -1 : 1;
-    found.sort((first, second) => sign * compare(first[field], second[field]));
+  const errors = tableRequestErrors(body, ADDITIONAL_ITEM_SORT_FIELDS);
+  if (errors.length) {
+    return problem(request, 400, ApiErrorCode.ValidationFailed, { errors });
   }
+  const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = body;
+  const search = typeof body.search === 'string' ? body.search.trim().toLowerCase() : '';
+  const sign = body.sortDirection === 'Descending' ? -1 : 1;
+  const found = additionalItemsOfProperty()
+    .map((row) => onlyFieldsOf(AdditionalItem, row))
+    .filter(
+      ({ additionalItemName }) =>
+        !search || additionalItemName?.trim().toLowerCase().includes(search),
+    )
+    .sort(
+      (first, second) => sign * naturalOrder(first.additionalItemName, second.additionalItemName),
+    );
   const answer: Page<AdditionalItem> = {
     total: found.length,
     rows: found.slice((page - 1) * pageSize, page * pageSize),
@@ -835,86 +866,70 @@ export const additionalItemListMock = (
 };
 
 /**
- * `POST /api/catalog/delete-additional-services-article-item`: deletes the given additional
- * items/services, all or nothing. 204 with no body; 404 when an id is not an additional item of the
- * property; 401 as the list.
+ * `POST /api/catalog/price-lists/delete-additional-services-article-item`: deletes the given
+ * additional items/services, all or nothing (see `withRows`).
  */
 export const deleteAdditionalItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idAdditionalItems?: string[] };
-  const property = DEMO_PROPERTY;
-  const items = additionalItemsOf(property.id, body.idAdditionalItems);
-  if (!items) {
-    return resourceNotFound(request);
-  }
-  for (const item of items) {
-    ADDITIONAL_ITEMS.splice(ADDITIONAL_ITEMS.indexOf(item), 1);
-    ADDITIONAL_ITEM_DETAILS.delete(item.idAdditionalItem ?? '');
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+): Observable<HttpEvent<unknown>> =>
+  withAdditionalItems(request, (items) => {
+    for (const item of items) {
+      ADDITIONAL_ITEMS.splice(ADDITIONAL_ITEMS.indexOf(item), 1);
+      ADDITIONAL_ITEM_DETAILS.delete(item.idAdditionalItem ?? '');
+    }
+    return null;
+  });
 
 /**
- * `POST /api/catalog/duplicate-additional-services-article-item`: one copy of each given additional
- * item/service at the end of the list, all or nothing, named by the backend ("X (copia)", then "X
- * (copia 2)"…). 204 with no body; 404 when an id is not an additional item of the property; 401 as
- * the list.
+ * `POST /api/catalog/price-lists/duplicate-additional-services-article-item`: one copy of each given
+ * additional item/service, all or nothing (see `withRows`), with every data of the original and the
+ * first free name ("X copia", then "X copia 2"). 422 as `duplicatePackageItemsMock`.
  */
 export const duplicateAdditionalItemsMock = (
   request: HttpRequest<unknown>,
-): Observable<HttpEvent<unknown>> => {
-  if (!isAuthorized(request)) {
-    return unauthorized(request);
-  }
-  const body = (request.body ?? {}) as { idAdditionalItems?: string[] };
-  const property = DEMO_PROPERTY;
-  const items = additionalItemsOf(property.id, body.idAdditionalItems);
-  if (!items) {
-    return resourceNotFound(request);
-  }
-  for (const item of items) {
-    const copy: AdditionalItemRow = {
-      propertyId: item.propertyId,
-      idAdditionalItem: crypto.randomUUID(),
-      additionalItemName: additionalItemCopyName(item),
-    };
-    const detail = ADDITIONAL_ITEM_DETAILS.get(item.idAdditionalItem ?? '');
-    if (detail) {
-      ADDITIONAL_ITEM_DETAILS.set(copy.idAdditionalItem ?? '', structuredClone(detail));
+): Observable<HttpEvent<unknown>> =>
+  withAdditionalItems(request, (items) => {
+    for (const { idAdditionalItem, additionalItemName } of items) {
+      const code = copyError(ADDITIONAL_ITEM_DETAILS.get(idAdditionalItem ?? ''));
+      if (code) {
+        return problem(request, 422, code, {
+          args: { priceListName: additionalItemName ?? '', rates: VAT_RATES },
+        });
+      }
     }
-    ADDITIONAL_ITEMS.push(copy);
-  }
-  return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
-};
+    for (const item of items) {
+      const copy: AdditionalItemRow = {
+        propertyId: item.propertyId,
+        idAdditionalItem: crypto.randomUUID(),
+        additionalItemName: copyName(
+          item.additionalItemName ?? '',
+          Language.It,
+          additionalItemsOfProperty().map(({ additionalItemName }) => additionalItemName),
+        ),
+      };
+      const details = ADDITIONAL_ITEM_DETAILS.get(item.idAdditionalItem ?? '');
+      if (details) {
+        ADDITIONAL_ITEM_DETAILS.set(copy.idAdditionalItem ?? '', structuredClone(details));
+      }
+      ADDITIONAL_ITEMS.push(copy);
+    }
+    return null;
+  });
 
-function additionalItemCopyName(item: AdditionalItemRow): string {
-  const taken = new Set(
-    ADDITIONAL_ITEMS.filter((row) => row.propertyId === item.propertyId).map((row) =>
-      row.additionalItemName?.trim().toLowerCase(),
-    ),
+function withAdditionalItems(
+  request: HttpRequest<unknown>,
+  change: (items: AdditionalItemRow[]) => Observable<HttpEvent<unknown>> | null,
+): Observable<HttpEvent<unknown>> {
+  return withRows(
+    request,
+    'idAdditionalItems',
+    (id) => additionalItemsOfProperty().filter(({ idAdditionalItem }) => idAdditionalItem === id),
+    change,
   );
-  let copy = `${item.additionalItemName} (copia)`;
-  for (let number = 2; taken.has(copy.trim().toLowerCase()); number++) {
-    copy = `${item.additionalItemName} (copia ${number})`;
-  }
-  return copy;
 }
 
-function additionalItemsOf(
-  propertyId: number,
-  idAdditionalItems: unknown,
-): AdditionalItemRow[] | null {
-  const ids = Array.isArray(idAdditionalItems) ? [...new Set(idAdditionalItems)] : [];
-  const items = ids
-    .map((id) =>
-      ADDITIONAL_ITEMS.find((row) => row.idAdditionalItem === id && row.propertyId === propertyId),
-    )
-    .filter((item): item is AdditionalItemRow => item !== undefined);
-  return ids.length && items.length === ids.length ? items : null;
+function additionalItemsOfProperty(): AdditionalItemRow[] {
+  return ADDITIONAL_ITEMS.filter(({ propertyId }) => propertyId === DEMO_PROPERTY.id);
 }
 
 /**
@@ -1026,8 +1041,9 @@ function isPrice(value: unknown): boolean {
 }
 
 /**
- * `POST /api/catalog/package-combobox` without a body: every package of the property, in its order,
- * as `{ id, value }`, the name as in `packageListMock`. 401 without a valid access token.
+ * `POST /api/catalog/price-lists/package-combobox` without a body: every package of the property, in
+ * the natural order of its name, as `{ id, value }`, the name as in `packageListMock`. 401 without a
+ * valid access token.
  */
 export const packageComboboxMock = (
   request: HttpRequest<unknown>,
@@ -1035,22 +1051,20 @@ export const packageComboboxMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const property = DEMO_PROPERTY;
-  const language = request.headers.get('Accept-Language') ?? 'it';
-  const items: ComboboxItem[] = PACKAGES.filter((row) => row.propertyId === property.id).map(
-    (row) => ({ id: row.idPackage ?? '', value: packageNameIn(row, language) ?? '' }),
-  );
+  const language = languageOf(request);
+  const items: ComboboxItem[] = packagesOfProperty()
+    .map((row) => ({ id: row.idPackage ?? '', value: packageNameIn(row, language) ?? '' }))
+    .sort((first, second) => naturalOrder(first.value, second.value));
   return of(new HttpResponse({ status: 200, url: request.url, body: items })).pipe(delay(150));
 };
 
 type CreateAdditionalItemBody = Partial<AdditionalItemAddItemRequest>;
 
 /**
- * `POST /api/catalog/create-additional-services-article-item` with `AdditionalItemAddItemRequest`:
- * the new additional item goes into the list with the name of its article. 204 without a body; 401
- * without a valid access token; 404 `resource.not_found` for an article that is not an active one
- * of the property or a package that is not one of its; 400 with one error per wrong choice (see
- * `choiceErrors`).
+ * `POST /api/catalog/price-lists/create-additional-services-article-item` with
+ * `AdditionalItemAddItemRequest`: the new additional item goes into the list with the name of its
+ * article. 204 without a body; 401 without a valid access token; 400 with one error per wrong field
+ * (see `additionalItemErrors`); 422 and 404 of its references (`additionalItemReferenceProblem`).
  */
 export const createAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -1059,49 +1073,82 @@ export const createAdditionalItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateAdditionalItemBody;
-  const property = DEMO_PROPERTY;
-  const name = additionalItemName(property.id, body);
-  if (name === null) {
-    return resourceNotFound(request);
-  }
-  const errors = choiceErrors(body);
+  const errors = additionalItemErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
+  const missing = additionalItemReferenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   const row: AdditionalItemRow = {
-    propertyId: property.id,
+    propertyId: DEMO_PROPERTY.id,
     idAdditionalItem: crypto.randomUUID(),
-    additionalItemName: name,
+    additionalItemName: activeArticleName(DEMO_PROPERTY.id, body.idArticle),
   };
   ADDITIONAL_ITEMS.push(row);
-  ADDITIONAL_ITEM_DETAILS.set(
-    row.idAdditionalItem ?? '',
-    structuredClone(
-      onlyFieldsOf(AdditionalItemAddItemRequest, body as AdditionalItemAddItemRequest),
-    ),
-  );
+  ADDITIONAL_ITEM_DETAILS.set(row.idAdditionalItem ?? '', savedAdditionalItem(body));
   return of(new HttpResponse({ status: 204, url: request.url })).pipe(delay(600));
 };
 
 /**
- * The name of the article of the item (the item takes it), null when the article is not an active
- * one of the property or a package is not one of its.
+ * The article; the packages each once; the VAT, when given, between 0 and 100; the choices and the
+ * prices of `choiceErrors`.
  */
-function additionalItemName(propertyId: number, body: CreateAdditionalItemBody): string | null {
-  const idPackages = Array.isArray(body.idPackages) ? body.idPackages : [];
-  const isEveryPackageKnown = idPackages.every((idPackage) =>
-    PACKAGES.some((row) => row.idPackage === idPackage && row.propertyId === propertyId),
-  );
-  return isEveryPackageKnown ? activeArticleName(propertyId, body.idArticle) : null;
+function additionalItemErrors(body: CreateAdditionalItemBody): MockFieldError[] {
+  const errors: MockFieldError[] = [];
+  if (!body.idArticle) {
+    errors.push({ field: 'idArticle', code: ApiErrorCode.ValidationRequired });
+  }
+  const idPackages = body.idPackages ?? [];
+  if (!Array.isArray(idPackages) || new Set(idPackages).size !== idPackages.length) {
+    errors.push({ field: 'idPackages', code: ApiErrorCode.ValidationInvalid });
+  }
+  if (body.vatRate != null && (body.vatRate <= 0 || body.vatRate >= 100)) {
+    errors.push({ field: 'vatRate', code: ApiErrorCode.ValidationInvalid });
+  }
+  return [...errors, ...choiceErrors(body)];
 }
 
 /**
- * `GET /api/catalog/get-additional-services-article-item?idAdditionalItem=…`, the property of the
- * access token: everything the item has, as the panels send it, and its version; an item never saved
- * has only the article with its name. 200; 401 without a valid access token; 404
- * `resource.not_found` for an item that is not one of its.
+ * The VAT, the article and the packages of the body, in the order of the backend: 422
+ * `catalog.vat_rate_not_allowed`, 404 `inventory.item_not_found` and `pricing.package_not_found`.
+ */
+function additionalItemReferenceProblem(
+  request: HttpRequest<unknown>,
+  body: CreateAdditionalItemBody,
+): Observable<never> | null {
+  const notAllowed = vatRateNotAllowed(request, body.vatRate);
+  if (notAllowed) {
+    return notAllowed;
+  }
+  if (!activeArticleName(DEMO_PROPERTY.id, body.idArticle)) {
+    return problem(request, 404, ApiErrorCode.InventoryItemNotFound);
+  }
+  return (body.idPackages ?? []).every(packageOf)
+    ? null
+    : problem(request, 404, ApiErrorCode.PricingPackageNotFound);
+}
+
+function savedAdditionalItem(body: CreateAdditionalItemBody): AdditionalItemAddItemRequest {
+  return savedRows(
+    structuredClone(
+      onlyFieldsOf(AdditionalItemAddItemRequest, body as AdditionalItemAddItemRequest),
+    ),
+  );
+}
+
+function additionalItemOf(idAdditionalItem: unknown): AdditionalItemRow | undefined {
+  return additionalItemsOfProperty().find((row) => row.idAdditionalItem === idAdditionalItem);
+}
+
+/**
+ * `GET /api/catalog/price-lists/get-additional-services-article-item?idAdditionalItem=…`, the
+ * property of the access token: everything the item has, as the panels send it, and its version.
+ * 200; 401 without a valid access token; 404 `pricing.price_list_not_found` for an item that is not
+ * one of its.
  */
 export const selectedAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -1109,37 +1156,29 @@ export const selectedAdditionalItemMock = (
   if (!isAuthorized(request)) {
     return unauthorized(request);
   }
-  const idAdditionalItem = request.params.get('idAdditionalItem');
-  const row = ADDITIONAL_ITEMS.find(
-    (item) => item.idAdditionalItem === idAdditionalItem && item.propertyId === DEMO_PROPERTY.id,
-  );
+  const row = additionalItemOf(request.params.get('idAdditionalItem'));
   if (!row) {
-    return resourceNotFound(request);
+    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
   }
   const data = additionalItemData(row);
   const answer: AdditionalItemSelectedItem = { ...data, version: versionOf(data) };
   return of(new HttpResponse({ status: 200, url: request.url, body: answer })).pipe(delay(300));
 };
 
-/**
- * What `GET /api/catalog/get-additional-services-article-item` answers besides the version: the
- * version covers it.
- */
+/** What the read of the additional item answers besides the version: the version covers it. */
 function additionalItemData(row: AdditionalItemRow): Omit<AdditionalItemSelectedItem, 'version'> {
-  const detail =
-    ADDITIONAL_ITEM_DETAILS.get(row.idAdditionalItem ?? '') ??
-    Object.assign(new AdditionalItemAddItemRequest(), {
-      idArticle: activeArticleIdNamed(row.propertyId, row.additionalItemName),
-    });
-  return { ...structuredClone(detail), idAdditionalItem: row.idAdditionalItem };
+  const details =
+    ADDITIONAL_ITEM_DETAILS.get(row.idAdditionalItem ?? '') ?? new AdditionalItemAddItemRequest();
+  return { ...structuredClone(details), idAdditionalItem: row.idAdditionalItem };
 }
 
 /**
- * `POST /api/catalog/update-additional-services-article-item` with `AdditionalItemAddItemRequest`,
- * `idAdditionalItem`: the item takes all the values sent and the name of its article. 204 without a
- * body, with the new version in `ETag`; 401 / 404 / 400 as `createAdditionalItemMock`, 404 also for
- * an item that is not one of the property; 409 `resource.version_conflict` when `If-Match` is not the
- * version of the item.
+ * `POST /api/catalog/price-lists/update-additional-services-article-item` with
+ * `AdditionalItemAddItemRequest` and `idAdditionalItem`: the item takes all the values sent, and the
+ * name of its article only when the article changes. 204 without a body, with the new version in
+ * `ETag`; 401 without a valid access token; 400, 422 and 404 as `createAdditionalItemMock`; 404
+ * `pricing.price_list_not_found` for an item that is not one of the property; 409
+ * `resource.version_conflict` when `If-Match` is not the version of the item.
  */
 export const updateAdditionalItemMock = (
   request: HttpRequest<unknown>,
@@ -1148,31 +1187,28 @@ export const updateAdditionalItemMock = (
     return unauthorized(request);
   }
   const body = (request.body ?? {}) as CreateAdditionalItemBody & { idAdditionalItem?: unknown };
-  const property = DEMO_PROPERTY;
-  const row = ADDITIONAL_ITEMS.find(
-    (item) => item.idAdditionalItem === body.idAdditionalItem && item.propertyId === property.id,
-  );
-  const name = additionalItemName(property.id, body);
-  if (!row || name === null) {
-    return resourceNotFound(request);
-  }
-  const errors = choiceErrors(body);
+  const errors = additionalItemErrors(body);
   if (errors.length) {
     return problem(request, 400, ApiErrorCode.ValidationFailed, {
       errors,
     });
   }
+  const row = additionalItemOf(body.idAdditionalItem);
+  if (!row) {
+    return problem(request, 404, ApiErrorCode.PricingPriceListNotFound);
+  }
+  const missing = additionalItemReferenceProblem(request, body);
+  if (missing) {
+    return missing;
+  }
   const conflict = versionConflict(request, additionalItemData(row));
   if (conflict) {
     return conflict;
   }
-  row.additionalItemName = name;
-  ADDITIONAL_ITEM_DETAILS.set(
-    row.idAdditionalItem ?? '',
-    structuredClone(
-      onlyFieldsOf(AdditionalItemAddItemRequest, body as AdditionalItemAddItemRequest),
-    ),
-  );
+  if (body.idArticle !== additionalItemData(row).idArticle) {
+    row.additionalItemName = activeArticleName(DEMO_PROPERTY.id, body.idArticle);
+  }
+  ADDITIONAL_ITEM_DETAILS.set(row.idAdditionalItem ?? '', savedAdditionalItem(body));
   return savedWithVersion(request, additionalItemData(row));
 };
 

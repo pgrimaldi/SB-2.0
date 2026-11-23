@@ -152,6 +152,7 @@
       "calculation_method_not_found": "Diese Preisberechnung ist nicht mehr verfügbar: Wähle eine andere.",
       "price_list_not_found": "Der Eintrag der Preisliste ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "price_list_in_use": "{{priceListName}} kann nicht gelöscht werden: Die zusätzlichen Artikel/Leistungen {{additionalItems}} hätten dann kein Paket mehr und würden für alle gelten. Verknüpfe sie zuerst mit anderen Paketen oder lösche sie.",
+      "package_not_found": "Ein gewähltes Paket ist nicht mehr vorhanden: Es wurde vielleicht schon gelöscht.",
       "duplicate_vat_rate_not_allowed": "{{priceListName}} kann nicht dupliziert werden: Die MwSt. ist keiner der zulässigen Sätze ({{rates}}). Ändere sie und versuche es erneut.",
       "duplicate_period_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt Preise für einen gelöschten Zeitraum. Öffne, bearbeite und speichere den Eintrag und versuche es erneut.",
       "duplicate_area_not_found": "{{priceListName}} kann nicht dupliziert werden: Es gibt einen gelöschten Bereich der Karte. Öffne den Eintrag, entferne den Bereich aus den freigegebenen und speichere, dann versuche es erneut.",
@@ -1890,6 +1891,8 @@
             "online_enabled": "Online-Buchungen",
             "online_only": "Nur online",
             "map_assignable": "Als auf der Karte zuweisbaren Artikel festlegen",
+            "missing_article": "Artikel nicht mehr verfügbar",
+            "missing_package": "Paket nicht mehr verfügbar",
             "price_list": "Preisliste"
           }
         },

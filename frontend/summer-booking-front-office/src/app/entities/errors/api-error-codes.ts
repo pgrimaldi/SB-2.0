@@ -65,6 +65,7 @@ export enum ApiErrorCode {
   PricingCalculationMethodNotFound = 'pricing.calculation_method_not_found',
   PricingPriceListNotFound = 'pricing.price_list_not_found',
   PricingPriceListInUse = 'pricing.price_list_in_use',
+  PricingPackageNotFound = 'pricing.package_not_found',
   PricingDuplicateVatRateNotAllowed = 'pricing.duplicate_vat_rate_not_allowed',
   PricingDuplicatePeriodNotFound = 'pricing.duplicate_period_not_found',
   PricingDuplicateAreaNotFound = 'pricing.duplicate_area_not_found',

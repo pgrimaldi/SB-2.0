@@ -1055,49 +1055,55 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/additional-services-articles-list`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/price-lists/additional-services-articles-list`
   ) {
     return additionalItemListMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/delete-additional-services-article-item`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/price-lists/delete-additional-services-article-item`
   ) {
     return deleteAdditionalItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/duplicate-additional-services-article-item`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/price-lists/duplicate-additional-services-article-item`
   ) {
     return duplicateAdditionalItemsMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/package-combobox`
+    request.url === `${environment.apiBaseUrl}/catalog/price-lists/package-combobox`
   ) {
     return packageComboboxMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/create-additional-services-article-item`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/price-lists/create-additional-services-article-item`
   ) {
     return createAdditionalItemMock(request);
   }
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/catalog/get-additional-services-article-item`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/price-lists/get-additional-services-article-item`
   ) {
     return selectedAdditionalItemMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/catalog/update-additional-services-article-item`
+    request.url ===
+      `${environment.apiBaseUrl}/catalog/price-lists/update-additional-services-article-item`
   ) {
     return updateAdditionalItemMock(request);
   }

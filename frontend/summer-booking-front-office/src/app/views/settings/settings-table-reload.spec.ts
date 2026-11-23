@@ -28,7 +28,7 @@ const VIEWS: readonly (readonly [Type<unknown>, string, ApiErrorCode])[] = [
   [AutomaticPrices, 'idSelectedAutomaticPrices', ApiErrorCode.ServiceAutomaticPriceNotFound],
   [TableBooking, 'idSelectedTableServices', ApiErrorCode.ServiceTableServiceNotFound],
   [Packages, 'idSelectedPackages', ApiErrorCode.PricingPriceListNotFound],
-  [AdditionalItems, 'idSelectedAdditionalItems', ApiErrorCode.ResourceNotFound],
+  [AdditionalItems, 'idSelectedAdditionalItems', ApiErrorCode.PricingPriceListNotFound],
 ];
 
 describe('tables of the settings', () => {
