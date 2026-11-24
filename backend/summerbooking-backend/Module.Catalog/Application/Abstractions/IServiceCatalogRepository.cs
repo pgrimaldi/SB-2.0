@@ -9,6 +9,9 @@ public interface IServiceCatalogRepository
 {
 	Task<(IReadOnlyList<ServiceSaleItem> Items, int Total)> ListAsync(ServiceFilter filter, int page, int pageSize, CancellationToken ct = default);
 	Task<IReadOnlyList<ServiceSaleItem>> ListAllAsync(long propertyId, CancellationToken ct = default);
+
+	/// <summary>Servizi con opzioni di prenotazione, disponibilità orarie e durate (per Booking).</summary>
+	Task<IReadOnlyList<ServiceSaleItem>> ListWithAvailabilityAsync(long propertyId, CancellationToken ct = default);
 	/// <summary>Servizio con varianti, traduzioni, opzioni, prezzi per periodo, file/settori e fasce.</summary>
 	Task<ServiceSaleItem?> FindAsync(long propertyId, Guid publicId, CancellationToken ct = default);
 	Task<IReadOnlyList<ServiceSaleItem>> FindManyAsync(long propertyId, IReadOnlyCollection<Guid> publicIds, CancellationToken ct = default);

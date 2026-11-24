@@ -5,6 +5,8 @@ namespace Module.Booking.Domain.Enums;
 /// </summary>
 public enum ResaleScope
 {
-	SeasonalWorkers = 0,
+	/// <summary>Solo sulle prenotazioni stagionali.</summary>
+	SeasonalOnly = 0,
+	/// <summary>Su tutti gli articoli, non solo sugli ombrelloni.</summary>
 	AllArticles = 1
 }

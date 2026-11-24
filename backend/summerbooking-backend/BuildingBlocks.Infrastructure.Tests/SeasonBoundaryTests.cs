@@ -20,8 +20,8 @@ public sealed class SeasonBoundaryTests
 	}
 
 	/// <summary>
-	/// Il confine è il <b>1 gennaio</b>, non il 1 aprile: è l'errore che la documentazione conteneva
-	/// fino al 2026-10-01 e che una conversione improvvisata in mesi riporterebbe dentro.
+	/// Il confine è il <b>1 gennaio</b>, non il 1 aprile: è l'errore che una conversione improvvisata
+	/// in mesi introdurrebbe.
 	/// </summary>
 	[Fact]
 	public void Il_confine_e_il_primo_gennaio_non_il_primo_aprile()

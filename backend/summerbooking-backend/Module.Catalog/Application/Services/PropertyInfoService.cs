@@ -1,4 +1,4 @@
-﻿using BuildingBlocks.Application.Validation;
+using BuildingBlocks.Application.Validation;
 using Module.Catalog.Application.Abstractions;
 using Module.Catalog.Application.Dtos;
 using Module.Catalog.Application.Validators;
@@ -11,12 +11,6 @@ using Shared.Security;
 using Shared.Utils;
 
 namespace Module.Catalog.Application.Services;
-
-public enum PropertyDocument
-{
-	Menu,
-	PriceList,
-}
 
 /// <summary>Impostazioni › Informazioni stabilimento: la scheda pubblica gestita dallo stabilimento del token.</summary>
 public sealed class PropertyInfoService
@@ -72,7 +66,8 @@ public sealed class PropertyInfoService
 			request.Name, Clean(request.Description), Clean(request.Regulation), Clean(request.Address), Clean(request.City), Clean(request.Cap),
 			Clean(request.Province), Clean(request.Region), countryId, request.Latitude, request.Longitude, Clean(request.Phone), Clean(request.Email),
 			Clean(request.Website), Clean(request.Facebook), Clean(request.Instagram), Clean(request.Whatsapp), request.OpenHoursFrom, request.OpenHoursTo,
-			request.IsFreeCancellation, request.CancellationNoticeHours, pets, Clean(request.VirtualTourUrl)), _user.UserId);
+			request.IsFreeCancellation, request.CancellationNoticeHours, pets, Clean(request.VirtualTourUrl),
+			request.CancellationPenalties?.Select(p => (p.NoticeHours, p.Percent)).ToList()), _user.UserId);
 
 		if (request.Slug is { } slug)
 		{
@@ -241,7 +236,7 @@ public sealed class PropertyInfoService
 		if (b is null)
 			return new PropertyInfoDto(
 				null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-				false, null, Codes.Of(PetsPolicy.OnRequest), null, null, [], null, null, []);
+				false, null, Codes.Of(PetsPolicy.OnRequest), null, null, [], null, null, [], []);
 
 		var photos = b.Photos.OrderBy(p => p.SortOrder).ToList();
 		var urls = await _media.UrlsAsync(photos.Select(p => (long?)p.MediaAssetId).Append(b.MainPhotoId).Append(b.MenuPdfId).Append(b.PriceListPdfId), ct);
@@ -258,7 +253,8 @@ public sealed class PropertyInfoService
 			b.CancellationPolicy.IsFreeCancellation, b.CancellationPolicy.NoticeHours, Codes.Of(b.PetsPolicy), b.VirtualTourUrl,
 			urls.UrlOf(b.MainPhotoId), photos.Select(p => new PhotoDto(p.PublicId, urls.UrlOf(p.MediaAssetId), p.SortOrder)).ToList(),
 			Document(b.MenuPdfId), Document(b.PriceListPdfId),
-			await _repository.FindAmenityCodesAsync(b.Amenities.Select(a => a.AmenityId).ToList(), ct));
+			await _repository.FindAmenityCodesAsync(b.Amenities.Select(a => a.AmenityId).ToList(), ct),
+			b.CancellationPenaltyHours.Zip(b.CancellationPenaltyPercents, (h, p) => new CancellationPenaltyDto(h, p)).ToList());
 	}
 
 	private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

@@ -101,6 +101,7 @@ public static class Module
 		// Contratti verso gli altri moduli (Booking, Payment, Audit).
 		services.AddScoped<ICustomerDirectory, CustomerDirectory>();
 		services.AddScoped<IUserDirectory, UserDirectory>();
+		services.AddScoped<Shared.Contracts.Events.IIntegrationEventHandler<Shared.Contracts.Catalog.MapSpotsChanged>, MapSpotsChangedHandler>();
 
 		return services;
 	}

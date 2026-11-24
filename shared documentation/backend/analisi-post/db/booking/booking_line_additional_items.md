@@ -1,5 +1,7 @@
 # Tabella `booking_line_additional_items`
 
+> **Applicato il 2026-11-05** (migration `BookingApiFoundation`): nuova `dates date[]` (giorni dell'articolo quando `date_scope = specific_dates`).
+
 > **Dominio**: C1 — `booking` · **sottoarea**: — (nucleo) · **schema**: `booking` · **nome flat**:
 > `booking_line_additional_items` · **forma canonica**: `booking.line_additional_items`.
 >

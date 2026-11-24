@@ -19,9 +19,9 @@ namespace Boot;
 /// </para>
 /// <para>
 /// <b>Perché è un comando e non un <c>UPDATE</c> a mano.</b> Perché un <c>UPDATE</c> a mano non lascia
-/// traccia, non si rivede, e si perde al primo ricaricamento del database da zero — è già accaduto il
-/// 2026-10-05, quando un drop e rimigrazione ha riportato tutte le 61 policy in prova e le corse
-/// successive non archiviavano più niente senza che niente lo dicesse. Un comando nel codice si legge,
+/// traccia, non si rivede, e si perde al primo ricaricamento del database da zero: un drop e
+/// rimigrazione riporta tutte le policy in prova e le corse successive smettono di archiviare senza
+/// che niente lo dica. Un comando nel codice si legge,
 /// si discute e si rifà con una riga.
 /// </para>
 /// <para>Uso:</para>

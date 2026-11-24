@@ -1,4 +1,4 @@
-﻿using Module.Payment.Domain.Enums;
+using Module.Payment.Domain.Enums;
 using Shared.Contracts;
 
 namespace Module.Payment.Domain.Entities;
@@ -39,4 +39,86 @@ public sealed class LedgerEntry : IAuditable, ISoftDeletable
 	public ICollection<LedgerEntryLine> Lines { get; private set; } = new List<LedgerEntryLine>();
 
 	private LedgerEntry() { }
+
+	/// <summary>
+	/// Incasso o acconto registrato a mano dal gestionale. Importo IVA compresa; la ripartizione dell'IVA per aliquota
+	/// e le righe per articolo sono da fare (oggi tutto l'importo è imponibile con aliquota 0).
+	/// </summary>
+	public static LedgerEntry ManualIncome(
+		Guid propertyId, Guid reservationId, decimal amount, PaymentMode mode, bool isDeposit, Guid? customerId, Guid? recordedBy,
+		DateTime occurredAt, DateOnly? stayFrom, DateOnly? stayTo)
+	{
+		if (amount <= 0)
+			throw new ArgumentOutOfRangeException(nameof(amount));
+		return new LedgerEntry
+		{
+			PublicId = Guid.CreateVersion7(),
+			PropertyId = propertyId,
+			ReservationPublicId = reservationId,
+			EntryType = isDeposit ? LedgerEntryType.Deposit : LedgerEntryType.Payment,
+			Direction = LedgerDirection.In,
+			PaymentMode = mode,
+			Source = LedgerSource.Manual,
+			NetAmount = decimal.Round(amount, 2, MidpointRounding.AwayFromZero),
+			Currency = "EUR",
+			CustomerPublicId = customerId,
+			RecordedByUserId = recordedBy,
+			OccurredAt = occurredAt,
+			StayFrom = stayFrom,
+			StayTo = stayTo,
+		};
+	}
+
+	/// <summary>Uscita di rimborso con lo stesso metodo dell'incasso: l'incasso originale resta.</summary>
+	public static LedgerEntry RefundOf(
+		Guid propertyId, Guid reservationId, decimal amount, PaymentMode? mode, LedgerSource source, Guid? customerId, Guid? recordedBy, DateTime occurredAt)
+	{
+		if (amount <= 0)
+			throw new ArgumentOutOfRangeException(nameof(amount));
+		return new LedgerEntry
+		{
+			PublicId = Guid.CreateVersion7(),
+			PropertyId = propertyId,
+			ReservationPublicId = reservationId,
+			EntryType = LedgerEntryType.Refund,
+			Direction = LedgerDirection.Out,
+			PaymentMode = mode,
+			Source = source,
+			NetAmount = decimal.Round(amount, 2, MidpointRounding.AwayFromZero),
+			Currency = "EUR",
+			CustomerPublicId = customerId,
+			RecordedByUserId = recordedBy,
+			OccurredAt = occurredAt,
+		};
+	}
+
+	/// <summary>
+	/// Metà di uno spostamento di incassato fra due prenotazioni («Dividi conto»): uscita da una, entrata nell'altra, con lo
+	/// stesso metodo e tipo (acconto o saldo). Non è un movimento di cassa e non si annulla da solo.
+	/// </summary>
+	public static LedgerEntry SplitTransfer(
+		Guid propertyId, Guid reservationId, decimal amount, PaymentMode? mode, bool isDeposit, LedgerDirection direction, Guid? customerId,
+		Guid? recordedBy, DateTime occurredAt)
+	{
+		if (amount <= 0)
+			throw new ArgumentOutOfRangeException(nameof(amount));
+		return new LedgerEntry
+		{
+			PublicId = Guid.CreateVersion7(),
+			PropertyId = propertyId,
+			ReservationPublicId = reservationId,
+			EntryType = isDeposit ? LedgerEntryType.Deposit : LedgerEntryType.Payment,
+			Direction = direction,
+			PaymentMode = mode,
+			Source = LedgerSource.ReservationSplit,
+			NetAmount = decimal.Round(amount, 2, MidpointRounding.AwayFromZero),
+			Currency = "EUR",
+			CustomerPublicId = customerId,
+			RecordedByUserId = recordedBy,
+			OccurredAt = occurredAt,
+		};
+	}
+
+	/// <summary>Importo con il segno del verso: positivo se entra, negativo se esce.</summary>
+	public decimal SignedAmount => Direction == LedgerDirection.In ? NetAmount + VatAmount : -(NetAmount + VatAmount);
 }

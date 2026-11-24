@@ -29,6 +29,23 @@ public sealed class CustomerRepository : ICustomerRepository
 	public Task<Customer?> GetAsync(Guid propertyId, Guid publicId, CancellationToken ct = default)
 		=> _db.Customers.FirstOrDefaultAsync(c => c.PropertyId == propertyId && c.PublicId == publicId, ct);
 
+	public async Task<IReadOnlyList<Customer>> ListByPublicIdsAsync(Guid propertyId, IReadOnlyCollection<Guid> publicIds, CancellationToken ct = default)
+		=> publicIds.Count == 0
+			? []
+			: await _db.Customers.Where(c => c.PropertyId == propertyId && publicIds.Contains(c.PublicId)).ToListAsync(ct);
+
+	public async Task<IReadOnlyList<Guid>> SearchIdsAsync(Guid propertyId, string text, int max, CancellationToken ct = default)
+	{
+		var pattern = LikePattern.Contains(text);
+		return await _db.Customers
+			.Where(c => c.PropertyId == propertyId
+				&& (EF.Functions.ILike(c.FullName ?? "", pattern) || EF.Functions.ILike(c.Email ?? "", pattern) || EF.Functions.ILike(c.Phone ?? "", pattern)))
+			.OrderByDescending(c => c.LastActivityAt)
+			.Select(c => c.PublicId)
+			.Take(max)
+			.ToListAsync(ct);
+	}
+
 	public async Task<IReadOnlyList<Customer>> FindByContactAsync(Guid propertyId, string? email, string? phone, CancellationToken ct = default)
 	{
 		if (email is null && phone is null)
@@ -44,6 +61,12 @@ public sealed class CustomerRepository : ICustomerRepository
 
 	public async Task<IReadOnlyList<Customer>> ListByUserAsync(long userId, CancellationToken ct = default)
 		=> await _db.Customers.Where(c => c.UserId == userId).ToListAsync(ct);
+
+	public async Task<IReadOnlyList<Customer>> ListByEmailAsync(string email, CancellationToken ct = default)
+	{
+		var lower = email.Trim().ToLowerInvariant();
+		return await _db.Customers.Where(c => c.Email != null && c.Email.ToLower() == lower).ToListAsync(ct);
+	}
 
 	public void Add(Customer customer) => _db.Customers.Add(customer);
 

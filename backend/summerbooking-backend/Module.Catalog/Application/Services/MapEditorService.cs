@@ -1,4 +1,4 @@
-﻿using BuildingBlocks.Application.Validation;
+using BuildingBlocks.Application.Validation;
 using Module.Catalog.Application.Abstractions;
 using Module.Catalog.Application.Dtos;
 using Module.Catalog.Application.Validators;
@@ -6,18 +6,14 @@ using Module.Catalog.Domain;
 using Module.Catalog.Domain.Entities;
 using Module.Catalog.Domain.Enums;
 using Shared.Contracts.Audit;
+using Shared.Contracts.Catalog;
+using Shared.Contracts.Events;
 using Shared.Contracts.Errors;
 using Shared.Dtos;
 using Shared.Security;
 using Shared.Utils;
 
 namespace Module.Catalog.Application.Services;
-
-public enum MapAxis
-{
-	Row,
-	Column,
-}
 
 /// <summary>
 /// Configurazione mappa: elementi nelle caselle del reticolo e operazioni su righe e colonne. Le prenotazioni delle
@@ -36,12 +32,15 @@ public sealed class MapEditorService
 	private readonly UpdateMapSpotRequestValidator _updateValidator;
 	private readonly PlaceMapSpotsRequestValidator _placeValidator;
 	private readonly BulkIdsRequestValidator _bulkValidator;
+	private readonly IIntegrationEventPublisher _events;
 
 	public MapEditorService(
 		IMapRepository map, ISectorRepository sectors, IUnitOfWork unitOfWork, CurrentProperty property, ICurrentUser user,
 		CatalogAudit audit, MapProjection projection, FillMapCellsRequestValidator fillValidator,
-		UpdateMapSpotRequestValidator updateValidator, PlaceMapSpotsRequestValidator placeValidator, BulkIdsRequestValidator bulkValidator)
+		UpdateMapSpotRequestValidator updateValidator, PlaceMapSpotsRequestValidator placeValidator, BulkIdsRequestValidator bulkValidator,
+		IIntegrationEventPublisher events)
 	{
+		_events = events;
 		_map = map;
 		_sectors = sectors;
 		_unitOfWork = unitOfWork;
@@ -89,6 +88,7 @@ public sealed class MapEditorService
 
 		_map.AddSpots(created);
 		await _unitOfWork.SaveChangesAsync(ct);
+		await PublishAsync([], created, false, ct);
 		await RecordAsync(AuditActionCodes.Catalog.MapSpotsCreated, new Dictionary<string, object?>
 		{
 			["spotType"] = request.SpotType,
@@ -213,6 +213,7 @@ public sealed class MapEditorService
 		_map.RemoveSpots(removed);
 
 		await _unitOfWork.SaveChangesAsync(ct);
+		await PublishAsync(removed, [], layout.ResetDeletesBookings, ct);
 		await RecordGridAsync(axis, "delete", index, removed.Count, ct);
 		return await _projection.MapAsync(propertyId, layout, spots.Except(removed).ToList(), ct);
 	}
@@ -229,6 +230,7 @@ public sealed class MapEditorService
 		_map.RemoveSpots(removed);
 
 		await _unitOfWork.SaveChangesAsync(ct);
+		await PublishAsync(removed, [], layout.ResetDeletesBookings, ct);
 		await RecordGridAsync(axis, "clear", index, removed.Count, ct);
 		return await _projection.MapAsync(propertyId, layout, spots.Except(removed).ToList(), ct);
 	}
@@ -241,6 +243,7 @@ public sealed class MapEditorService
 		layout.ClearGrid();
 
 		await _unitOfWork.SaveChangesAsync(ct);
+		await PublishAsync(spots, [], layout.ResetDeletesBookings, ct);
 		await RecordAsync(AuditActionCodes.Catalog.MapReset, new Dictionary<string, object?>
 		{
 			["removedSpots"] = spots.Count,
@@ -303,10 +306,22 @@ public sealed class MapEditorService
 	private async Task<MapSector> SectorAsync(long propertyId, Guid id, CancellationToken ct)
 		=> await _sectors.FindAsync(propertyId, id, ct) ?? throw DomainException.NotFound(CatalogErrors.SectorNotFound);
 
+	/// <summary>Postazioni tolte o create: Booking annulla o lascia senza postazione le prenotazioni, e le ricollega.</summary>
+	private async Task PublishAsync(IReadOnlyList<MapSpot> removed, IReadOnlyList<MapSpot> created, bool deletesBookings, CancellationToken ct)
+	{
+		if (removed.Count == 0 && created.Count == 0 || _user.PropertyId is not { } propertyId)
+			return;
+		static MapSpotRef Ref(MapSpot s) => new(s.PublicId, s.Label, Codes.Of(s.SpotType), s.GridRow ?? 0, s.GridColumn ?? 0);
+		await _events.PublishAsync(new MapSpotsChanged(
+			Guid.CreateVersion7(), DateTime.UtcNow, propertyId, removed.Select(Ref).ToList(), created.Select(Ref).ToList(), deletesBookings), ct);
+	}
+
 	private async Task RemoveAsync(IReadOnlyList<MapSpot> spots, CancellationToken ct)
 	{
 		_map.RemoveSpots(spots);
 		await _unitOfWork.SaveChangesAsync(ct);
+		var layout = await _map.FindLayoutAsync(await _property.IdAsync(ct), ct);
+		await PublishAsync(spots, [], layout?.ResetDeletesBookings ?? false, ct);
 		await RecordAsync(AuditActionCodes.Catalog.MapSpotsDeleted, new Dictionary<string, object?>
 		{
 			["count"] = spots.Count,

@@ -29,4 +29,46 @@ public sealed class ResaleCreditLedgerEntry : IAuditable
 	public Reservation? SourceReservation { get; private set; }
 
 	private ResaleCreditLedgerEntry() { }
+
+	/// <summary>Credito maturato perché un giorno ceduto è stato ripreso.</summary>
+	public static ResaleCreditLedgerEntry Earned(ResaleOffer offer, Guid customerId, int units, decimal amount, DateTime now, bool again)
+		=> new()
+		{
+			PropertyId = offer.PropertyId,
+			CustomerId = customerId,
+			ResaleOffer = offer,
+			SourceReservation = offer.SourceReservation,
+			EntryType = again ? ResaleCreditEntryType.Adjustment : ResaleCreditEntryType.Earned,
+			CreditUnits = units,
+			Amount = amount,
+			OccurredAt = now,
+			Note = again ? "Giorno ripreso di nuovo dopo un annullamento" : null,
+		};
+
+	/// <summary>Storno: chi aveva ripreso il giorno lo ha tolto.</summary>
+	public static ResaleCreditLedgerEntry Reversal(ResaleOffer offer, Guid customerId, int units, decimal amount, DateTime now)
+		=> new()
+		{
+			PropertyId = offer.PropertyId,
+			CustomerId = customerId,
+			ResaleOffer = offer,
+			SourceReservation = offer.SourceReservation,
+			EntryType = ResaleCreditEntryType.Reversed,
+			CreditUnits = -units,
+			Amount = -amount,
+			OccurredAt = now,
+		};
+
+	/// <summary>Correzione del gestore: crediti usati (negativi) o aggiunti a mano.</summary>
+	public static ResaleCreditLedgerEntry ManualAdjustment(Guid propertyId, Guid customerId, int units, decimal amount, string? note, DateTime now)
+		=> new()
+		{
+			PropertyId = propertyId,
+			CustomerId = customerId,
+			EntryType = ResaleCreditEntryType.Adjustment,
+			CreditUnits = units,
+			Amount = amount,
+			OccurredAt = now,
+			Note = string.IsNullOrWhiteSpace(note) ? null : note.Trim(),
+		};
 }

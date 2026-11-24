@@ -1112,13 +1112,6 @@ namespace Module.Catalog.Infrastructure.Migrations
                         .HasColumnName("applies_per_service")
                         .HasComment("true = per ogni servizio dell'ordine; false = una volta per ordine.");
 
-                    b.Property<bool>("AppliesToAllServices")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("applies_to_all_services")
-                        .HasComment("true = tutti i servizi; false = solo quelli di automatic_price_services.");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -1542,6 +1535,22 @@ namespace Module.Catalog.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("address")
                         .HasComment("Indirizzo pubblico.");
+
+                    b.PrimitiveCollection<short[]>("CancellationPenaltyHours")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint[]")
+                        .HasColumnName("cancellation_penalty_hours")
+                        .HasDefaultValueSql("'{}'")
+                        .HasComment("Trattenute sull'annullamento online: ore di preavviso sotto cui vale ciascuna (al massimo due).");
+
+                    b.PrimitiveCollection<short[]>("CancellationPenaltyPercents")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint[]")
+                        .HasColumnName("cancellation_penalty_percents")
+                        .HasDefaultValueSql("'{}'")
+                        .HasComment("Percentuale trattenuta per ciascuna soglia di cancellation_penalty_hours, nello stesso ordine.");
 
                     b.Property<string>("Cap")
                         .HasMaxLength(16)
@@ -5845,10 +5854,6 @@ namespace Module.Catalog.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_catalog_service_hourly_options");
 
-                    b.HasIndex("BookingOptionId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_service_hourly_options_booking_option_id");
-
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("uq_catalog_service_hourly_options_public_id");
@@ -8372,8 +8377,8 @@ namespace Module.Catalog.Infrastructure.Migrations
             modelBuilder.Entity("Module.Catalog.Domain.Entities.ServiceHourlyOption", b =>
                 {
                     b.HasOne("Module.Catalog.Domain.Entities.ServiceBookingOption", "BookingOption")
-                        .WithOne("HourlyOption")
-                        .HasForeignKey("Module.Catalog.Domain.Entities.ServiceHourlyOption", "BookingOptionId")
+                        .WithMany("HourlyOptions")
+                        .HasForeignKey("BookingOptionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_catalog_service_hourly_options_booking_option");
 
@@ -8730,7 +8735,7 @@ namespace Module.Catalog.Infrastructure.Migrations
 
             modelBuilder.Entity("Module.Catalog.Domain.Entities.ServiceBookingOption", b =>
                 {
-                    b.Navigation("HourlyOption");
+                    b.Navigation("HourlyOptions");
                 });
 
             modelBuilder.Entity("Module.Catalog.Domain.Entities.ServiceHourlyOption", b =>

@@ -46,13 +46,11 @@ public sealed class PriceListConfiguration : IEntityTypeConfiguration<PriceList>
 
 			.HasComment("Id pubblico stabile, copiato in Booking booking_lines.price_list_package_id.");
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
 
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
 
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 
 		builder.Property(x => x.CreatedAt)
 
@@ -297,7 +295,7 @@ public sealed class PriceListConfiguration : IEntityTypeConfiguration<PriceList>
 
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => x.PropertyId, "ix_catalog_pricing_price_lists_property_default")
 
 			.HasFilter("is_default AND deleted_at IS NULL")

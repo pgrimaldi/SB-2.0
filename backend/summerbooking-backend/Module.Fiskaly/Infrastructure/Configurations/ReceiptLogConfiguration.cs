@@ -30,7 +30,7 @@ public sealed class ReceiptLogConfiguration : IEntityTypeConfiguration<ReceiptLo
 			.HasColumnName("property_id")
 			.HasComment("public_id di catalog.properties, copiato — nessuna FK cross-schema. Ridondante con lo scontrino, comodo per filtrare i log.");
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => new { x.PropertyId, x.CreatedAt }, "ix_fiskaly_receipt_logs_property_date")
 			.IsDescending(false, true)
 			.HasDatabaseName("ix_fiskaly_receipt_logs_property_date");

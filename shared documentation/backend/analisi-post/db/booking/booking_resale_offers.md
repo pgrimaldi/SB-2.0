@@ -100,6 +100,23 @@ Correzioni rispetto al legacy:
 - **Relazioni**: PK; referenziata da `booking_resource_consumptions.source_id` (`source_kind = resale`)
   e da `booking_resale_credit_ledger.resale_offer_id`.
 
+### public_id
+- **Legacy**: — (nuovo, 2026-11-06)
+- **Descrizione**: id pubblico dell'offerta nelle API (`offerId`).
+- **Tipo**: `uuid`, `UNIQUE`.
+- **Default**: `gen_random_uuid()` (righe migrate); il backend scrive un UUIDv7.
+- **Nullabile**: No.
+- **Relazioni**: —.
+
+### excludes_from_price
+- **Legacy**: — (nuovo, 2026-11-06)
+- **Descrizione**: assenza con «Conferma e ricalcola prezzo»: il giorno non si paga; il preventivo lo salta anche nelle
+  modifiche successive della prenotazione.
+- **Tipo**: `boolean`.
+- **Default**: `false` (le assenze migrate restano pagate: il legacy non distingueva).
+- **Nullabile**: No.
+- **Relazioni**: —.
+
 ### property_id
 - **Legacy**: `booking_absence_details.property_id` / `sharing_details.property_id` (con placeholder `9999`)
 - **Descrizione**: stabilimento.

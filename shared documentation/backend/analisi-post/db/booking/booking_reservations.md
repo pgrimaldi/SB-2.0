@@ -1,5 +1,7 @@
 # Tabella `booking_reservations`
 
+> **Applicato il 2026-11-05** (migration `BookingApiFoundation`, API in [`90-api-booking.md`](../../../progettazione/90-api-booking.md)): tolto `no_show` dall'enum (il tipo si ricrea) e `is_split`; nuove colonne `checked_in_at`/`checked_out_at`/`checkout_effective_at` (copiate dalle righe), `cancellation_reason` + `cancelled_at`, `confirmation_expires_at`, `confirmed_by_user_id`/`confirmed_at`, `manual_discount_type`/`_value`/`_amount`, `surcharge_label`/`_type`/`_value`, `renewed_from_reservation_id`, `split_from_reservation_id`, `note_updated_at`/`note_updated_by_user_id`, `paid_mark_entry_id`. `agreement_partner_id`/`listing_type` restano come riepilogo (prima riga con convenzione): il dettaglio per riga è in `booking_agreement_lines`. Cestino = `deleted_at` **e** `cancelled_at` valorizzati (le eliminate nel vecchio gestionale non hanno `cancelled_at`).
+
 > **Dominio**: C1 — `booking` · **sottoarea**: — (nucleo) · **schema**: `booking` · **nome flat**:
 > `booking_reservations` · **forma canonica**: `booking.reservations`.
 >

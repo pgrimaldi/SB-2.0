@@ -1,5 +1,7 @@
 # Tabella `booking_quick_action_dates`
 
+> **Tabella tolta il 2026-11-05** (migration `BookingApiFoundation`): le «azioni rapide» del planner si eliminano (decisione del committente, A6.3), niente migrazione dei dati; spec e trasformazione dell'utility 01 tolte. Scheda tenuta come storia.
+
 > **Dominio**: C1 — `booking` · **sottoarea**: — (nucleo) · **schema**: `booking` · **nome flat**:
 > `booking_quick_action_dates` · **forma canonica**: `booking.quick_action_dates`.
 >

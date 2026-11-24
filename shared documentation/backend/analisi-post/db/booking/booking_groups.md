@@ -45,6 +45,14 @@ Correzioni rispetto al legacy:
 - **Nullabile**: No.
 - **Relazioni**: PK; referenziata da [`booking_group_members.group_id`](booking_group_members.md).
 
+### public_id
+- **Legacy**: — (nuovo, 2026-11-06)
+- **Descrizione**: id pubblico del gruppo nelle API (`/api/booking/groups/{id}`).
+- **Tipo**: `uuid`.
+- **Default**: `gen_random_uuid()` (le righe migrate lo ricevono dal default; il backend scrive un UUIDv7).
+- **Nullabile**: No.
+- **Relazioni**: `UNIQUE` (`uq_booking_groups_public_id`).
+
 ### property_id
 - **Legacy**: `booking_groups.property_id` (`int`, `NOT NULL`)
 - **Descrizione**: stabilimento proprietario del gruppo.

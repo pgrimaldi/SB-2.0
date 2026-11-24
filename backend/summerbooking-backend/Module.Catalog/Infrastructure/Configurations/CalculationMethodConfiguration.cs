@@ -20,10 +20,9 @@ public sealed class CalculationMethodConfiguration : IEntityTypeConfiguration<Ca
 			.HasMaxLength(40)
 			.IsRequired()
 			.HasComment("Codice canonico del metodo (proportional, daily, daily_with_weekend, logarithmic).");
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()
@@ -44,11 +43,10 @@ public sealed class CalculationMethodConfiguration : IEntityTypeConfiguration<Ca
 			.IsRequired()
 			.HasComment("Metodo selezionabile nell'editor prezzi.");
 
-		// Seed 2026-09-15: questa tabella non aveva NESSUN seed (ne' qui ne' altrove nel modulo) -
-		// bug reale, non un dato che "si e' svuotato": ogni riga di catalog.agreement_price_lists/
-		// pricing_price_lists porta un calculation_method_id 1-4 (assunto dall'ETL di migrazione,
-		// utility/01-migrazione-test/mappings/catalog/catalog_pricing_price_lists.yaml), ma senza
-		// queste 4 righe l'INSERT falliva SEMPRE per violazione della FK
+		// Seed obbligatorio: ogni riga di catalog.agreement_price_lists/pricing_price_lists porta un
+		// calculation_method_id 1-4 (assunto dall'ETL di migrazione,
+		// utility/01-migrazione-test/mappings/catalog/catalog_pricing_price_lists.yaml), e senza
+		// queste 4 righe l'INSERT fallisce per violazione della FK
 		// fk_catalog_agreement_price_lists_calculation_method (e l'omologa su pricing_price_lists).
 		// Ordine/id 1-4 gia' documentato e assunto altrove (vedi commento nella spec YAML sopra) -
 		// da NON riordinare senza aggiornare anche l'enum_map li'.

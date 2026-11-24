@@ -37,6 +37,9 @@ public sealed class Bathhouse : IAuditable, ISoftDeletable
 	public TimeOnly? OpenHoursFrom { get; private set; }
 	public TimeOnly? OpenHoursTo { get; private set; }
 	public CancellationPolicy CancellationPolicy { get; private set; } = null!;
+	/// <summary>Trattenute sull'annullamento online (al massimo due): ore di preavviso sotto cui vale ciascuna, parallele a <see cref="CancellationPenaltyPercents"/>.</summary>
+	public short[] CancellationPenaltyHours { get; private set; } = [];
+	public short[] CancellationPenaltyPercents { get; private set; } = [];
 	public PetsPolicy PetsPolicy { get; private set; }
 	public long? MainPhotoId { get; private set; }
 	public MediaAsset? MainPhoto { get; private set; }
@@ -101,6 +104,9 @@ public sealed class Bathhouse : IAuditable, ISoftDeletable
 		OpenHoursFrom = info.OpenHoursFrom;
 		OpenHoursTo = info.OpenHoursTo;
 		CancellationPolicy = new CancellationPolicy(info.IsFreeCancellation, info.CancellationNoticeHours);
+		var penalties = info.IsFreeCancellation ? (info.CancellationPenalties ?? []).OrderByDescending(p => p.Hours).ToList() : [];
+		CancellationPenaltyHours = penalties.Select(p => p.Hours).ToArray();
+		CancellationPenaltyPercents = penalties.Select(p => p.Percent).ToArray();
 		PetsPolicy = info.PetsPolicy;
 		VirtualTourUrl = info.VirtualTourUrl;
 		UpdatedByUserPublicId = updatedBy;

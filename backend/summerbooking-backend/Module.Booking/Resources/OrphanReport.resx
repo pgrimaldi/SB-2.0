@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FileName" xml:space="preserve">
+    <value>prenotazioni-da-sistemare</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Prenotazioni da sistemare dopo la modifica della mappa</value>
+  </data>
+  <data name="Property" xml:space="preserve">
+    <value>Stabilimento: {0}</value>
+  </data>
+  <data name="PrintedAt" xml:space="preserve">
+    <value>Stampato il {0}</value>
+  </data>
+  <data name="Column_BookingNumber" xml:space="preserve">
+    <value>N. prenotazione</value>
+  </data>
+  <data name="Column_Customer" xml:space="preserve">
+    <value>Cliente</value>
+  </data>
+  <data name="Column_Spot" xml:space="preserve">
+    <value>Postazione</value>
+  </data>
+  <data name="Column_SpotType" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+  <data name="Column_Position" xml:space="preserve">
+    <value>Posizione</value>
+  </data>
+  <data name="Column_From" xml:space="preserve">
+    <value>Dal</value>
+  </data>
+  <data name="Column_To" xml:space="preserve">
+    <value>Al</value>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Nessuna prenotazione da sistemare.</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Pagina</value>
+  </data>
+</root>

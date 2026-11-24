@@ -14,8 +14,8 @@ namespace Module.Catalog.Infrastructure.Infras;
 /// <remarks>
 /// <para>
 /// <b>Perché questa policy ha un job scritto a mano e le altre sessanta no.</b> Il motore generico
-/// sa applicare qualunque policy il cui perimetro sia esprimibile come confronto su una colonna —
-/// dal 2026-10-05 anche con <c>target_filter</c>. Questa non lo è:
+/// sa applicare qualunque policy il cui perimetro sia esprimibile come confronto su una colonna,
+/// anche con <c>target_filter</c>. Questa non lo è:
 /// </para>
 /// <blockquote>
 /// «le prime 3 foto per <c>sort_order</c> più la copertina restano pubblicate <b>per sempre</b>, le

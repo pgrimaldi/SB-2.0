@@ -109,7 +109,7 @@ public sealed class MessageTemplateConfiguration : IEntityTypeConfiguration<Mess
 			.HasComment("Soft-delete.");
 
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => new { x.PropertyId, x.TemplateKind, x.Channel, x.Culture }, "ix_notification_templates_lookup")
 			.HasFilter("is_active AND deleted_at IS NULL")
 			.HasDatabaseName("ix_notification_templates_lookup");

@@ -39,7 +39,7 @@ internal static class ContentRules
 
 	/// <summary>Tutte le disponibilità di un servizio orario, dei prezzi e delle opzioni di prenotazione.</summary>
 	public static IEnumerable<HourlyOptionDto> HourlyOptions(SaveServiceRequest r)
-		=> (r.HourlyPrices ?? []).SelectMany(p => p.Options ?? []).Concat((r.BookingOptions ?? []).Where(o => o.Hourly is not null).Select(o => o.Hourly!));
+		=> (r.HourlyPrices ?? []).SelectMany(p => p.Options ?? []).Concat((r.BookingOptions ?? []).SelectMany(o => o.Hourly ?? []));
 }
 
 /// <summary>Disponibilità di un servizio orario.</summary>
@@ -58,7 +58,6 @@ public sealed class HourlyOptionValidator : AbstractValidator<HourlyOptionDto>
 		RuleFor(x => x.CustomSlot!.DurationMinutes).InclusiveBetween((short)1, (short)1440).When(x => x.CustomSlot is not null);
 		RuleFor(x => x.CustomSlot!.Price).NotNull().InclusiveBetween(0m, 100_000m).When(x => x.CustomSlot is { IsEnabled: true });
 		RuleFor(x => x.VatRate).ExclusiveBetween(0m, 100m).When(x => x.VatRate is not null);
-		RuleFor(x => x.MaxPerSlot).GreaterThan((short)0).When(x => x.MaxPerSlot is not null);
 	}
 }
 
@@ -120,9 +119,20 @@ public sealed class SaveServiceRequestValidator : AbstractValidator<SaveServiceR
 			.WithErrorCode(ValidationErrorCodes.Invalid);
 		RuleFor(x => x).Must(x => (x.HourlyPrices ?? []).All(p => p.PeriodKey is null != x.HasPeriodPrices))
 			.WithErrorCode(ValidationErrorCodes.Invalid).OverridePropertyName("hourlyPrices").When(x => x.Kind == Codes.Of(ServiceSaleKind.Hourly));
-		RuleForEach(x => x.HourlyPrices).ChildRules(p => p.RuleForEach(i => i.Options).SetValidator(new HourlyOptionValidator()));
-		RuleForEach(x => x.BookingOptions).ChildRules(o => o.RuleFor(i => i.Hourly!).SetValidator(new HourlyOptionValidator()).When(i => i.Hourly is not null));
-		RuleFor(x => x.BookingOptions).Must(o => o is null || o.All(i => i.Hourly is null)).WithErrorCode(ValidationErrorCodes.Invalid)
+		RuleForEach(x => x.HourlyPrices).ChildRules(p =>
+		{
+			p.RuleForEach(i => i.Options).SetValidator(new HourlyOptionValidator());
+			p.RuleFor(i => i.MaxPerSlot).GreaterThan((short)0).When(i => i.MaxPerSlot is not null);
+		});
+		RuleForEach(x => x.BookingOptions).ChildRules(o =>
+		{
+			o.RuleForEach(i => i.Hourly).SetValidator(new HourlyOptionValidator());
+			o.RuleFor(i => i.Hourly).Must(h => h is null || h.Count <= ContentRules.MaxHourlyOptions).WithErrorCode(ValidationErrorCodes.Invalid);
+		});
+		// Servizi bar e standard: niente disponibilità oraria, giorni della settimana, massimo per fascia, fasce fisse.
+		RuleFor(x => x.BookingOptions).Must(o => o is null || o.All(i => (i.Hourly is null || i.Hourly.Count == 0)
+				&& (i.Weekdays is null || i.Weekdays.Count == 0) && i.MaxPerSlot is null && !i.HasFixedTimeSlots))
+			.WithErrorCode(ValidationErrorCodes.Invalid)
 			.When(x => x.Kind != Codes.Of(ServiceSaleKind.Hourly));
 	}
 }
@@ -136,7 +146,7 @@ public sealed class SaveAutomaticPriceRequestValidator : AbstractValidator<SaveA
 		RuleFor(x => x.Price).InclusiveBetween(0m, 100_000m);
 		RuleFor(x => x).Must(x => ContentRules.Vat(x.VatRate, x.VatNature)).WithErrorCode(ValidationErrorCodes.Invalid).OverridePropertyName("vatRate");
 		RuleFor(x => x.Translations).Must(ContentRules.Translations).WithErrorCode(ValidationErrorCodes.Invalid);
-		RuleFor(x => x.ServiceIds).NotEmpty().When(x => !x.AppliesToAllServices);
+		RuleFor(x => x.ServiceIds).NotEmpty();
 		RuleFor(x => x.Periods).Must(p => p is null || p.Count <= 50).WithErrorCode(ValidationErrorCodes.Invalid);
 		RuleForEach(x => x.Periods).ChildRules(p =>
 		{

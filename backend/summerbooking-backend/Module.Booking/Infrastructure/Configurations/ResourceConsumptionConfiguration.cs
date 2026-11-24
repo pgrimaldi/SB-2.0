@@ -81,6 +81,8 @@ public sealed class ResourceConsumptionConfiguration : IEntityTypeConfiguration<
 			.HasColumnName("state")
 			.HasColumnType("booking.consumption_state")
 			.HasDefaultValueSql("'confirmed'")
+			// Il default del database non è il valore 0 dell'enum (held): senza sentinella EF non invierebbe held.
+			.HasSentinel((ConsumptionState)(-1))
 			.IsRequired()
 			.HasComment("Stato del consumo, indipendente dal pagamento: bloccato temporaneamente, occupazione effettiva, liberato");
 
@@ -108,10 +110,9 @@ public sealed class ResourceConsumptionConfiguration : IEntityTypeConfiguration<
 			.HasColumnType("booking.booking_channel")
 			.HasComment("Canale della prenotazione di origine, per statistiche sui consumi; NULL per manual_hold");
 
-		// bug reale osservato il 2026-09-16: created_at/updated_at non avevano default now() a
-		// schema (nessuna convenzione EF globale lo applica, verificato in ModuleDbContextConventions
-		// - solo converter UTC e query filter soft-delete) - un ETL che omette queste colonne
-		// dall'INSERT (comportamento normale, per lasciare scattare il default) falliva NOT NULL.
+		// Default now() a schema su created_at/updated_at: nessuna convenzione EF globale lo applica
+		// (ModuleDbContextConventions mette solo il converter UTC e il query filter soft-delete), e un ETL
+		// che omette queste colonne dall'INSERT per lasciare scattare il default fallirebbe sul NOT NULL.
 		builder.Property(x => x.CreatedAt)
 			.HasColumnName("created_at")
 			.IsRequired()

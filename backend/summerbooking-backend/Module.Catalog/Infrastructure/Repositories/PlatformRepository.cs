@@ -159,6 +159,11 @@ public sealed class PlatformRepository : IPlatformRepository
 	public async Task<IReadOnlyList<TariffPeriod>> FindSeasonPeriodsAsync(long propertyId, CancellationToken ct = default)
 		=> await _db.PricingSeasons.AsNoTracking().Where(s => s.PropertyId == propertyId).SelectMany(s => s.TariffPeriods).ToListAsync(ct);
 
+	public async Task<IReadOnlyList<TariffPeriod>> FindNextSeasonPeriodsAsync(long propertyId, CancellationToken ct = default)
+		=> (await _db.PricingSeasons.AsNoTracking().Where(s => s.PropertyId == propertyId).SelectMany(s => s.NextSeasonPeriods).ToListAsync(ct))
+			.Select(p => TariffPeriod.Create(p.SeasonId, p.PeriodGroupKey, p.Name, p.StartsOn, p.EndsOn))
+			.ToList();
+
 	public async Task<IReadOnlyList<PriceListPeriodPrice>> ListPeriodPricesAsync(long priceListId, CancellationToken ct = default)
 		=> await _db.Set<PriceListPeriodPrice>().AsNoTracking().Where(p => p.PriceListId == priceListId).ToListAsync(ct);
 

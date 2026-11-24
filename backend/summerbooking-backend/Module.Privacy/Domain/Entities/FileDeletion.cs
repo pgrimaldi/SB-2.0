@@ -12,11 +12,9 @@ namespace Module.Privacy.Domain.Entities;
 /// l'operazione e' stata davvero eseguita (<see cref="ExecutedAt"/>).
 /// </summary>
 /// <remarks>
-/// ⚠️ <b>Il nome della tabella dice meno di quello che fa.</b> <c>privacy_file_deletions</c> nasce il
-/// 2026-10-03 quando l'unica azione era la cancellazione; dal 2026-10-05 porta anche
-/// <c>archive_object</c>, che <b>non cancella niente</b>. Il nome e' rimasto per non rinominare una
-/// tabella gia' documentata in cinque posti: <see cref="Action"/> e' la colonna da guardare, e il suo
-/// default e' <c>delete_object</c> perche' e' quello che erano tutte le righe prima.
+/// ⚠️ <b>Il nome della tabella dice meno di quello che fa.</b> <c>privacy_file_deletions</c> porta,
+/// oltre alle cancellazioni, anche <c>archive_object</c>, che <b>non cancella niente</b>:
+/// <see cref="Action"/> e' la colonna da guardare, e il suo default e' <c>delete_object</c>.
 /// </remarks>
 /// <remarks>
 /// La forma e' la stessa del checkpoint di <c>utility/02-migrazione-file</c>, e per la stessa ragione:
@@ -55,10 +53,9 @@ public sealed class FileDeletion : IAuditable
 	/// su una classe di storage piu' fredda lasciandolo dov'e'.
 	/// </summary>
 	/// <remarks>
-	/// ⚠️ Senza questa colonna le due azioni erano indistinguibili in coda, e il job che la svuota
-	/// avrebbe <b>cancellato</b> i PDF degli scontrini fiscali che la policy a 36 mesi vuole soltanto
-	/// raffreddare — e che devono vivere dieci anni. Fino al 2026-10-05 il motore saltava quelle due
-	/// policy proprio per questo.
+	/// ⚠️ Senza questa colonna le due azioni sarebbero indistinguibili in coda, e il job che la svuota
+	/// <b>cancellerebbe</b> i PDF degli scontrini fiscali che la policy a 36 mesi vuole soltanto
+	/// raffreddare — e che devono vivere dieci anni.
 	/// <para>
 	/// Riusa l'enum <c>privacy.retention_action</c> invece di averne uno suo, cosi' il valore in coda
 	/// e' <b>lo stesso</b> che si legge sulla policy che l'ha deciso. Un vincolo CHECK limita la

@@ -35,6 +35,14 @@ public sealed class ServiceCatalogRepository : IServiceCatalogRepository
 	public async Task<IReadOnlyList<ServiceSaleItem>> ListAllAsync(long propertyId, CancellationToken ct = default)
 		=> await _db.ServiceSaleItems.AsNoTracking().Where(s => s.PropertyId == propertyId).OrderBy(s => s.Kind).ThenBy(s => s.Name).ToListAsync(ct);
 
+	public async Task<IReadOnlyList<ServiceSaleItem>> ListWithAvailabilityAsync(long propertyId, CancellationToken ct = default)
+		=> await _db.ServiceSaleItems
+			.Include(s => s.BookingOptions)
+			.Include(s => s.HourlyOptions).ThenInclude(h => h.Slots)
+			.AsSplitQuery().AsNoTracking()
+			.Where(s => s.PropertyId == propertyId)
+			.ToListAsync(ct);
+
 	public Task<ServiceSaleItem?> FindAsync(long propertyId, Guid publicId, CancellationToken ct = default)
 		=> _db.ServiceSaleItems
 			.Include(s => s.Variants).Include(s => s.Translations).Include(s => s.BookingOptions)

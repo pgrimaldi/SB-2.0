@@ -21,7 +21,12 @@ public interface ICustomerRepository
 
 	Task<Customer?> GetAsync(Guid propertyId, Guid publicId, CancellationToken ct = default);
 	Task<IReadOnlyList<Customer>> FindByContactAsync(Guid propertyId, string? email, string? phone, CancellationToken ct = default);
+	Task<IReadOnlyList<Customer>> ListByPublicIdsAsync(Guid propertyId, IReadOnlyCollection<Guid> publicIds, CancellationToken ct = default);
+	Task<IReadOnlyList<Guid>> SearchIdsAsync(Guid propertyId, string text, int max, CancellationToken ct = default);
 	Task<IReadOnlyList<Customer>> ListByUserAsync(long userId, CancellationToken ct = default);
+
+	/// <summary>Contatti di tutti gli stabilimenti con questa email.</summary>
+	Task<IReadOnlyList<Customer>> ListByEmailAsync(string email, CancellationToken ct = default);
 
 	void Add(Customer customer);
 	void Remove(Customer customer);

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Module.Notification.Infrastructure.ExternalApi;
@@ -24,6 +24,7 @@ public static class Module
 		services.AddSingleton<IValidateOptions<OutboundOptions>, OutboundOptionsValidator>();
 		services.AddSingleton<OutboundGuard>();
 		services.AddSingleton<ITransactionalEmailSender, SmtpTransactionalEmailSender>();
+		services.AddScoped<Shared.Contracts.Events.IIntegrationEventHandler<Shared.Contracts.Booking.BookingActivity>, Application.Services.BookingActivityHandler>();
 		return services;
 	}
 }

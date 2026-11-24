@@ -147,7 +147,7 @@ public sealed class AutomaticPricesService
 		=> CopyNames.Taken((await _repository.ListAutomaticAsync(propertyId, ct)).Select(p => p.Name));
 
 	private static SaveAutomaticPriceRequest ToRequest(AutomaticPriceDto d) => new(
-		d.Name, d.Description, d.Price, d.VatRate, d.VatNature, d.IconId, d.IsPurchasable, d.AppliesPerService, d.AppliesToAllServices,
+		d.Name, d.Description, d.Price, d.VatRate, d.VatNature, d.IconId, d.IsPurchasable, d.AppliesPerService,
 		d.ServiceIds, d.Periods, d.IsSectorRestricted, d.SectorIds, d.Translations);
 
 	private static BulkResult Bulk(IReadOnlyList<Guid> ids, IReadOnlySet<Guid> done)
@@ -174,19 +174,15 @@ public sealed class AutomaticPricesService
 		if (r.IconId is { } iconPublicId)
 			iconId = await _repository.FindIconIdAsync(iconPublicId, ct) ?? throw DomainException.NotFound(CatalogErrors.ServiceIconNotFound);
 
-		var serviceIds = new List<long>();
-		if (!r.AppliesToAllServices)
-		{
-			var requested = (r.ServiceIds ?? []).Distinct().ToList();
-			var found = await _repository.FindIdsAsync(price.PropertyId, requested, ct);
-			if (found.Count != requested.Count)
-				throw DomainException.NotFound(CatalogErrors.ServiceNotFound);
-			serviceIds = found.Values.ToList();
-		}
+		var requested = (r.ServiceIds ?? []).Distinct().ToList();
+		var found = await _repository.FindIdsAsync(price.PropertyId, requested, ct);
+		if (found.Count != requested.Count)
+			throw DomainException.NotFound(CatalogErrors.ServiceNotFound);
+		var serviceIds = found.Values.ToList();
 
 		price.Update(new AutomaticPriceData(
 			r.Name, ContentMapping.Clean(r.Description), r.Price, rate, nature, iconId, iconId is null ? price.IconAssetId : null, r.IsPurchasable,
-			r.AppliesPerService, r.AppliesToAllServices, r.IsSectorRestricted));
+			r.AppliesPerService, r.IsSectorRestricted));
 		price.SetTranslations(ContentMapping.Translations(r.Translations));
 		price.SetServices(serviceIds);
 		price.SetSectors(r.IsSectorRestricted ? await ContentMapping.SectorIdsAsync(_sectors, price.PropertyId, r.SectorIds, ct) : []);
@@ -195,7 +191,7 @@ public sealed class AutomaticPricesService
 	}
 
 	private static AutomaticPriceData Data(AutomaticPrice p, int? iconId, long? assetId) => new(
-		p.Name, p.Description, p.Price, p.VatRate, p.VatNature, iconId, assetId, p.IsPurchasable, p.AppliesPerService, p.AppliesToAllServices,
+		p.Name, p.Description, p.Price, p.VatRate, p.VatNature, iconId, assetId, p.IsPurchasable, p.AppliesPerService,
 		p.IsSectorRestricted);
 
 	private async Task<AutomaticPrice> LoadAsync(Guid id, CancellationToken ct)
@@ -211,7 +207,7 @@ public sealed class AutomaticPricesService
 		return new AutomaticPriceDto(
 			p.PublicId, p.Name, p.Description, p.Price, p.VatRate, p.VatNature is { } n ? Codes.Of(n) : null, icon?.PublicId,
 			p.IconAssetId is { } a ? urls.UrlOf(a) : icon is { } i ? urls.UrlOf(i.AssetId) : null, p.IsPurchasable, p.AppliesPerService,
-			p.AppliesToAllServices, p.Services.Select(s => services.GetValueOrDefault(s.SaleItemId)).Where(g => g != Guid.Empty).ToList(),
+			p.Services.Select(s => services.GetValueOrDefault(s.SaleItemId)).Where(g => g != Guid.Empty).ToList(),
 			p.Periods.OrderBy(x => x.StartsOn).Select(x => new AutomaticPricePeriodDto(x.StartsOn, x.EndsOn, ContentMapping.CodesOf(x.Weekdays),
 				x.TimeRanges.OrderBy(r => r.From).Select(r => new DateRangeTimeDto(r.From, r.To)).ToList())).ToList(), p.IsSectorRestricted,
 			p.Sectors.Select(x => sectors.GetValueOrDefault(x.SectorId)).Where(g => g != Guid.Empty).ToList(),

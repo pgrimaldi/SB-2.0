@@ -20,7 +20,7 @@ public sealed class FiskalyCashRegisterConfiguration : IEntityTypeConfiguration<
 			.IsRequired()
 			.HasComment("Account Fiskaly (stabilimento) a cui la cassa appartiene.");
 		// Overload con nome: due HasIndex sulle stesse colonne senza nome sono LO STESSO indice per EF,
-		// e il secondo ne sovrascrive nome, filtro e unicità. Fino al 2026-10-06 a DB ne esisteva uno solo.
+		// e il secondo ne sovrascrive nome, filtro e unicità.
 		builder.HasIndex(x => x.AccountId, "ix_fiskaly_cash_registers_account")
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("ix_fiskaly_cash_registers_account");

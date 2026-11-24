@@ -69,6 +69,18 @@ public sealed class BathhouseConfiguration : IEntityTypeConfiguration<Bathhouse>
 				.HasComment("Ore di preavviso richieste, valorizzato solo se is_free_cancellation = true.");
 		});
 		builder.Navigation(x => x.CancellationPolicy).IsRequired();
+		builder.Property(x => x.CancellationPenaltyHours)
+			.HasColumnName("cancellation_penalty_hours")
+			.HasColumnType("smallint[]")
+			.HasDefaultValueSql("'{}'")
+			.IsRequired()
+			.HasComment("Trattenute sull'annullamento online: ore di preavviso sotto cui vale ciascuna (al massimo due).");
+		builder.Property(x => x.CancellationPenaltyPercents)
+			.HasColumnName("cancellation_penalty_percents")
+			.HasColumnType("smallint[]")
+			.HasDefaultValueSql("'{}'")
+			.IsRequired()
+			.HasComment("Percentuale trattenuta per ciascuna soglia di cancellation_penalty_hours, nello stesso ordine.");
 
 		builder.Property(x => x.PetsPolicy)
 			.HasColumnName("pets_policy")

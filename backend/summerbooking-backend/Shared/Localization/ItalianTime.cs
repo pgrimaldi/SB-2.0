@@ -12,4 +12,8 @@ public static class ItalianTime
 
 	public static DateTime FromUtc(DateTime utc)
 		=> TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), Zone);
+
+	/// <summary>Un'ora civile italiana in UTC.</summary>
+	public static DateTime ToUtc(DateTime local)
+		=> TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), Zone);
 }

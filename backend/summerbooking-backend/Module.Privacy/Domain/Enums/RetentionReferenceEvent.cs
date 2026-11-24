@@ -18,7 +18,7 @@ public enum RetentionReferenceEvent
 	/// <c>identity.account_subscriptions.status</c> (<c>cancelled</c> = cessazione esplicita,
 	/// <c>expired</c> senza rinnovo = cessazione di fatto, <c>suspended</c> = nessuna delle due) e la
 	/// data e' <c>closed_at</c> dell'ultimo periodo in
-	/// <c>identity.account_subscription_periods</c>. Decisione del titolare del 2026-10-02: derivarla
+	/// <c>identity.account_subscription_periods</c>. Decisione del titolare: derivarla
 	/// invece di aggiungere uno stato che qualcuno deve ricordarsi di scrivere.
 	/// </summary>
 	PropertyCeased = 0,

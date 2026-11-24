@@ -113,6 +113,10 @@ postazione (vedi [`_motore-di-prezzo-e-sconti.md`](_motore-di-prezzo-e-sconti.md
 punto in cui questa logica è più visibile (spostando una postazione dentro/fuori dal gruppo il totale
 si ridistribuisce).
 
+> **Nel nuovo sistema** (decisione del committente, 2026-11-02): il prezzo cumulativo **non** riguarda i gruppi.
+> Vale solo dentro la stessa prenotazione, come il preventivo di Catalog; spostare una prenotazione dentro o fuori
+> da un gruppo non cambia il suo prezzo.
+
 ---
 
 ## 6. Validazione e allineamento dati
@@ -129,7 +133,8 @@ si ridistribuisce).
 ## 7. Riepilogo "calcoli / logiche / eventi" della voce Planner
 
 - **Calcoli**: nessuno proprio del planner; il prezzo (incluso il cumulativo di gruppo) è del motore
-  lato client, che il planner mostra e ricalcola allo spostamento.
+  lato client, che il planner mostra e ricalcola allo spostamento. Nel nuovo sistema il cumulativo vale solo
+  dentro la stessa prenotazione (§5).
 - **Logiche**: stato cella per giorno; prossima data occupata; espansione intervallo → riga per
   giorno (blocco postazione); unicità nome gruppo; una prenotazione in un solo gruppo; regole di
   spostamento (blocco se scontrinata).

@@ -16,6 +16,20 @@ public sealed class SpotHoldConfiguration : IEntityTypeConfiguration<SpotHold>
 		builder.HasKey(x => x.Id).HasName("pk_booking_spot_holds");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
 
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasDefaultValueSql("gen_random_uuid()")
+			.HasComment("Id pubblico della riserva nelle API; le righe migrate lo ricevono dal default.");
+
+		builder.Property(x => x.SyncSeq)
+			.HasColumnName("sync_seq")
+			.HasDefaultValueSql("nextval('booking.sync_seq')")
+			.ValueGeneratedOnAddOrUpdate()
+			.HasComment("Cursore di sincronizzazione dei dispositivi: nuovo numero a ogni modifica (trigger).");
+		builder.HasIndex(x => new { x.PropertyId, x.SyncSeq }).HasDatabaseName("ix_booking_spot_holds_sync");
+
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
 			.IsRequired()
@@ -108,6 +122,10 @@ public sealed class SpotHoldConfiguration : IEntityTypeConfiguration<SpotHold>
 		builder.HasIndex(x => new { x.PropertyId, x.ResourceId, x.StartDate, x.EndDate })
 			.HasFilter("hold_status = 'active'")
 			.HasDatabaseName("ix_booking_spot_holds_property_resource_dates");
+
+		builder.HasIndex(x => x.PublicId)
+			.IsUnique()
+			.HasDatabaseName("uq_booking_spot_holds_public_id");
 
 		builder.HasIndex(x => x.HeldUntil)
 			.HasFilter("hold_status = 'active' AND held_until IS NOT NULL")

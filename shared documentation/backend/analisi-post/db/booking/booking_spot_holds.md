@@ -1,5 +1,7 @@
 # Tabella `booking_spot_holds`
 
+> **Applicato il 2026-11-05** (migration `BookingApiFoundation`): nuova `public_id` (default `gen_random_uuid()` per le righe migrate, `uq_booking_spot_holds_public_id`), usata dalle API delle riserve.
+
 > **Dominio**: C1 — `booking` · **sottoarea**: `hold` · **schema**: `booking` · **nome flat**:
 > `booking_spot_holds` · **forma canonica**: `booking.spot_holds`.
 >

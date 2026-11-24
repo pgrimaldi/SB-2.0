@@ -13,7 +13,15 @@ public sealed class BookingGroupConfiguration : IEntityTypeConfiguration<Booking
 			"(comitiva, famiglia su più ombrelloni); non è la prenotazione multipla."));
 
 		builder.HasKey(x => x.Id).HasName("pk_booking_groups");
+		builder.Ignore(x => x.LiveMembers);
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
+
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasDefaultValueSql("gen_random_uuid()")
+			.HasComment("Id pubblico del gruppo nelle API; le righe migrate lo ricevono dal default.");
 
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
@@ -52,6 +60,10 @@ public sealed class BookingGroupConfiguration : IEntityTypeConfiguration<Booking
 			.IsUnique()
 			.HasFilter("deleted_at IS NULL")
 			.HasDatabaseName("uq_booking_groups_property_name");
+
+		builder.HasIndex(x => x.PublicId)
+			.IsUnique()
+			.HasDatabaseName("uq_booking_groups_public_id");
 
 		builder.HasIndex(x => x.PropertyId)
 			.HasFilter("deleted_at IS NULL")

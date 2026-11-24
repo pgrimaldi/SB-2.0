@@ -73,11 +73,16 @@ modifiche `catalog.settings`. Ogni risposta è la scheda intera (`PropertyInfoDt
 - `PropertyInfoDto`: `{ name, slug, description, regulation, address, city, cap, province, region, countryCode, latitude,
   longitude, phone, email, website, facebook, instagram, whatsapp, openHoursFrom, openHoursTo, isFreeCancellation,
   cancellationNoticeHours, petsPolicy, virtualTourUrl, mainPhotoUrl, photos: [{ id, url, sortOrder }],
-  menuPdf: { fileName, url }, priceListPdf, amenityCodes }`. `petsPolicy` = `allowed`, `not_allowed`, `on_request`.
+  menuPdf: { fileName, url }, priceListPdf, amenityCodes, cancellationPenalties: [{ noticeHours, percent }] }`. `petsPolicy` =
+  `allowed`, `not_allowed`, `on_request`.
 - La scheda nasce al primo salvataggio. Il nome vale anche per lo stabilimento (come nel legacy).
 - **Slug**: minuscole, cifre e trattini; `null` lo genera dal nome la prima volta e poi lo lascia com'è; già usato da
   un'altra struttura: 409 `catalog.slug_taken`.
-- Preavviso di cancellazione (ore) solo con la cancellazione gratuita; latitudine e longitudine insieme.
+- **Cancellazione online** (dal 2026-11-06, BK-02): `isFreeCancellation` = il cliente può annullare online (false = non
+  permessa); `cancellationNoticeHours` = fino a quante ore prima, elenco chiuso 3, 12, 24, 48, 72, 168 (una settimana).
+  `cancellationPenalties` (al massimo due, solo con la cancellazione permessa): annullando con meno di `noticeHours` di
+  anticipo (più del preavviso) si trattiene `percent` del pagato. Lo applica Booking all'annullamento del cliente.
+  Latitudine e longitudine insieme.
 - Immagini png, jpeg o webp fino a 5 MB (422 `catalog.invalid_image`); PDF fino a 10 MB (422 `catalog.invalid_pdf`).
 
 ## Registrazione di una struttura
@@ -169,18 +174,21 @@ Impostazioni › Servizi. Lettura `catalog.read`, modifiche `catalog.settings`.
   - `allergens` (solo bar): `gluten`, `crustaceans`, `eggs`, `fish`, `peanuts`, `soybeans`, `milk`, `nuts`, `celery`,
     `mustard`, `sesame`, `sulphites`, `lupin`, `molluscs`. `variants` solo per i bar.
   - `translations`: lingue diverse dall'italiano (en, fr, es, de, zh, ar), una volta ciascuna.
-  - `bookingOptions` (ripetibili): `{ startsOn, endsOn, weekdays, managementFrom, managementTo, onlineFrom, onlineTo,
-    maxPerHour, maxPerDay, maxPerSlot, intervalMinutes, minItems, maxItems, hourly }`; `weekdays` vuoto = tutti i giorni.
-    `hourly` solo per i servizi orari: la disponibilità valida nelle date dell'opzione (vedi sotto).
+  - `bookingOptions` (ripetibili, i periodi di disponibilità): `{ startsOn, endsOn, weekdays, managementFrom, managementTo,
+    onlineFrom, onlineTo, maxPerHour, maxPerDay, maxPerSlot, intervalMinutes, minItems, maxItems, hourly,
+    hasFixedTimeSlots }`. Servizi **bar e standard** (dal 2026-11-06, modello del front): niente `weekdays`, `maxPerSlot`,
+    `hourly`, `hasFixedTimeSlots` (400 se presenti). Servizi **orari**: `hourly` è un **elenco** di impostazioni per giorni
+    della settimana diversi nello stesso periodo (orario, durate, prezzi, `HourlyOptionDto`); `maxPerSlot` e
+    `hasFixedTimeSlots` valgono per **tutto il periodo**.
   - **Servizi orari** (dal 2026-11-05): i prezzi sono **disponibilità**. `hourlyPrices` = `[{ periodKey, options }]`:
     con `hasPeriodPrices` un gruppo per periodo tariffario (`periodKey` di `GET /tariff-periods`), senza un solo gruppo
-    con `periodKey` = null. Ogni disponibilità (`HourlyOptionDto`):
-    `{ timeFrom, timeTo, weekdays, slots: [{ durationMinutes, isEnabled, price, id }], customSlot, vatRate, maxPerSlot,
-    hasFixedTimeSlots }`.
+    con `periodKey` = null; il gruppo porta `hasFixedTimeSlots` e `maxPerSlot`, validi per tutto il periodo. Ogni
+    disponibilità (`HourlyOptionDto`): `{ timeFrom, timeTo, weekdays, slots: [{ durationMinutes, isEnabled, price, id }],
+    customSlot, vatRate }`.
     - `slots`: durate standard 10, 15, 30, 45, 60, 90, 120, 180, 240, 300, 360 minuti, una volta ciascuna; una durata
       attiva vuole il prezzo. `customSlot` = durata personalizzata (1…1440 minuti).
-    - `vatRate` null = quella del servizio; `maxPerSlot` = massimo di prenotazioni per fascia; `hasFixedTimeSlots` =
-      partenze a orari fissi, una dopo l'altra.
+    - `vatRate` null = quella del servizio; `maxPerSlot` (del periodo) = massimo di prenotazioni per fascia;
+      `hasFixedTimeSlots` (del periodo) = partenze a orari fissi, una dopo l'altra.
     - `id` delle durate solo in risposta: è il `timeSlotId` del preventivo. Si rigenera a ogni salvataggio.
     - Al più 20 disponibilità per gruppo. Errori: 400 `validation.invalid` (durata non standard, periodo con
       `hasPeriodPrices` = false o viceversa, `hourly` su un servizio non orario), 422 `pricing.period_not_found`.
@@ -188,9 +196,10 @@ Impostazioni › Servizi. Lettura `catalog.read`, modifiche `catalog.settings`.
       vecchio sistema (e la durata personalizzata, quando leggibile).
   - Eliminando un servizio lo si toglie dai prezzi automatici che lo citavano.
 - **Prezzo automatico** (`AutomaticPriceDto`): `{ id, name, description, price, vatRate, vatNature, iconId, imageUrl,
-  isPurchasable, appliesPerService, appliesToAllServices, serviceIds, periods, isSectorRestricted, sectorIds,
-  translations }`. `appliesPerService` = per ogni servizio dell'ordine invece che una volta per ordine; senza
-  `appliesToAllServices` serve almeno un servizio.
+  isPurchasable, appliesPerService, serviceIds, periods, isSectorRestricted, sectorIds, translations }`.
+  `appliesPerService` = per ogni servizio dell'ordine invece che una volta per ordine. I servizi si scelgono uno per uno,
+  almeno uno: «si applica a tutti i servizi» non esiste più (dal 2026-11-06; la migration `ServicesAlignedToFront` ha
+  legato i prezzi che lo avevano a tutti i servizi di quel momento).
   - `periods` (dal 2026-11-05): `[{ startsOn, endsOn, weekdays, timeRanges: [{ from, to }] }]`, al più 50. Date null =
     senza limite; `weekdays` vuoto = tutti i giorni; `timeRanges` vuoto = tutto il giorno. Nessun periodo = sempre.
     Il prezzo si applica a un servizio dell'ordine se un periodo copre il suo giorno, il giorno della settimana e l'ora.
@@ -425,7 +434,7 @@ Senza autenticazione, sotto `/public`; i testi tradotti seguono `Accept-Language
   (vuoto = tutte). Il frontend chiama `POST …/views` quando lo mostra; i contatori si azzerano ogni notte.
 - **Aggiornamento**: la ricerca si ricalcola da sola dopo ogni modifica che la riguarda (vetrina, foto, dotazioni,
   badge, stato e cestino, listini, stagione, impostazioni online, «mi piace», abbonamento), all'avvio del backend e
-  ogni notte alle 00:05.
+  ogni notte all'ora italiana di `Catalog:Jobs:NightlyAt` (predefinita 00:05).
 - **Non ancora disponibile**: disponibilità delle postazioni sulla mappa e prenotazione (Booking), prezzo esatto di
   una prenotazione (fase 3, preventivo).
 
@@ -469,7 +478,9 @@ Il prezzo di una prenotazione lo calcola il backend (il legacy lo faceva nel bro
   vale la scelta del gestore: suggerito, originale o sconto (lo sconto solo sulle postazioni ammesse).
 - **Cumulativo** (pacchetti e aggiuntivi con il cumulativo, giornata intera, almeno due postazioni dello stesso
   pacchetto e fila): prezzo sul totale dei giorni-postazione di ogni periodo, ripartito per giorni; il centesimo che
-  avanza va all'ultima postazione.
+  avanza va all'ultima postazione. Stessa regola per i blocchi separati della **stessa postazione** (prenotazione ripetuta,
+  B9): Booking la chiede con `IQuoteCalculator.QuoteCumulativeBlocksAsync`, che restituisce la quota di ogni blocco (null
+  se il pacchetto non è cumulativo, se un blocco ha giorni senza periodo o senza prezzo, o un prezzo stagionale ridotto).
 - **Aggiuntivi**: stesso calcolo del pacchetto, per quantità; se l'aggiuntivo è legato a dei pacchetti vale solo con
   quelli e fino al massimo indicato; il pacchetto limita il totale degli aggiuntivi.
 - **Convenzioni**: `agreementPriceListId` usa il listino della struttura convenzionata; `voucherPriceListId` sottrae il
@@ -487,8 +498,8 @@ Il prezzo di una prenotazione lo calcola il backend (il legacy lo faceva nel bro
   `pricing.beyond_booking_horizon` (`args: { days }`), `pricing.half_day_not_allowed`, `pricing.seasonal_not_allowed`,
   `pricing.dates_not_allowed`, `pricing.spot_not_online`, `pricing.stay_limit` (`args: { minDays, maxDays }`),
   `pricing.package_not_online`, `pricing.service_not_online`, `pricing.manual_price_not_allowed`.
-- **Non ancora disponibile** (Booking): disponibilità di postazioni e articoli, capienza dei servizi, conteggio degli
-  utilizzi degli sconti, salvataggio della prenotazione con gli importi del preventivo.
+- Disponibilità di postazioni e articoli, capienza dei servizi, conteggio degli utilizzi degli sconti e salvataggio della
+  prenotazione con gli importi del preventivo sono in Booking (90-api-booking.md).
 
 ## Snapshot di configurazione
 

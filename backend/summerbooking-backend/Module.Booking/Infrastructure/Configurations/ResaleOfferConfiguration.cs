@@ -16,6 +16,22 @@ public sealed class ResaleOfferConfiguration : IEntityTypeConfiguration<ResaleOf
 		builder.HasKey(x => x.Id).HasName("pk_booking_resale_offers");
 		builder.Property(x => x.Id).UseIdentityAlwaysColumn();
 
+		builder.Property(x => x.PublicId)
+			.HasColumnName("public_id")
+			.ValueGeneratedNever()
+			.IsRequired()
+			.HasDefaultValueSql("gen_random_uuid()")
+			.HasComment("Id pubblico dell'offerta nelle API; le righe migrate lo ricevono dal default.");
+
+		builder.Property(x => x.ExcludesFromPrice)
+			.HasColumnName("excludes_from_price")
+			.HasDefaultValue(false)
+			.IsRequired()
+			.HasComment("Assenza con «ricalcola prezzo»: il giorno non si paga");
+
+		builder.Ignore(x => x.IsLive);
+		builder.Ignore(x => x.EarnsCredit);
+
 		builder.Property(x => x.PropertyId)
 			.HasColumnName("property_id")
 			.IsRequired()
@@ -99,6 +115,10 @@ public sealed class ResaleOfferConfiguration : IEntityTypeConfiguration<ResaleOf
 		builder.HasIndex(x => new { x.PropertyId, x.ResourceId, x.OfferDate })
 			.HasFilter("offer_state = 'available' AND deleted_at IS NULL")
 			.HasDatabaseName("ix_booking_resale_offers_availability");
+
+		builder.HasIndex(x => x.PublicId)
+			.IsUnique()
+			.HasDatabaseName("uq_booking_resale_offers_public_id");
 
 		builder.HasIndex(x => x.BookingLineId)
 			.HasFilter("deleted_at IS NULL")

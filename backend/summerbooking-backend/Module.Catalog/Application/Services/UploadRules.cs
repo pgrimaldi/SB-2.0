@@ -27,6 +27,3 @@ public static class UploadRules
 			});
 	}
 }
-
-/// <summary>File ricevuto da un form multipart.</summary>
-public sealed record UploadedFile(string FileName, string ContentType, long Length, Stream Content);

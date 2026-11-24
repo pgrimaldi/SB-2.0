@@ -1,4 +1,4 @@
-﻿using BuildingBlocks.Application.Validation;
+using BuildingBlocks.Application.Validation;
 using Module.Catalog.Application.Abstractions;
 using Module.Catalog.Application.Dtos;
 using Module.Catalog.Application.Validators;
@@ -82,7 +82,7 @@ public sealed class PlatformPropertiesService
 		if (property.DeletedAt is not null)
 			throw DomainException.Conflict(CatalogErrors.PropertyInTrash);
 		_repository.TrashProperty(property, _clock.UtcNow);
-		await SaveTrashChangeAsync(property, "trashed", AuditActionCodes.Catalog.PlatformPropertyTrashed, ct);
+		await SaveTrashChangeAsync(property, PropertyTrashChanges.Trashed, AuditActionCodes.Catalog.PlatformPropertyTrashed, ct);
 	}
 
 	public async Task<AdminPropertyDto> RestoreAsync(Guid id, CancellationToken ct = default)
@@ -91,7 +91,7 @@ public sealed class PlatformPropertiesService
 		if (row.Property.DeletedAt is null)
 			throw DomainException.Conflict(CatalogErrors.PropertyNotInTrash);
 		_repository.RestoreProperty(row.Property);
-		await SaveTrashChangeAsync(row.Property, "restored", AuditActionCodes.Catalog.PlatformPropertyRestored, ct);
+		await SaveTrashChangeAsync(row.Property, PropertyTrashChanges.Restored, AuditActionCodes.Catalog.PlatformPropertyRestored, ct);
 		return ToDto(row, await LookupsAsync(ct));
 	}
 
@@ -102,7 +102,7 @@ public sealed class PlatformPropertiesService
 		if (property.DeletedAt is null)
 			throw DomainException.Conflict(CatalogErrors.PropertyNotInTrash);
 		property.Purge(_clock.UtcNow);
-		await SaveTrashChangeAsync(property, "purged", AuditActionCodes.Catalog.PlatformPropertyPurged, ct);
+		await SaveTrashChangeAsync(property, PropertyTrashChanges.Purged, AuditActionCodes.Catalog.PlatformPropertyPurged, ct);
 	}
 
 	public async Task<AdminPropertyDto> SetRegionAsync(Guid id, SetPropertyRegionRequest request, CancellationToken ct = default)

@@ -26,4 +26,20 @@ public sealed class BookingServiceTimeSlot : IAuditable, ISoftDeletable
 	public Reservation Reservation { get; private set; } = null!;
 
 	private BookingServiceTimeSlot() { }
+
+	internal static BookingServiceTimeSlot Create(
+		BookingServiceLine line, Guid? timeSlotId, TimeOnly start, TimeOnly end, DateOnly date, short seats, string? label, decimal? price)
+		=> new()
+		{
+			ServiceLine = line,
+			Reservation = line.Reservation,
+			PropertyId = line.PropertyId,
+			TimeSlotId = timeSlotId,
+			SlotStart = start,
+			SlotEnd = end,
+			ServiceDate = date,
+			Seats = seats,
+			SlotLabelSnapshot = label,
+			SlotPrice = price,
+		};
 }

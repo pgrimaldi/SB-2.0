@@ -145,7 +145,7 @@ public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
 		// Matching per email dentro lo stabilimento. La scheda lo progettava su lower(email), ma la colonna
 		// è citext: un indice sulla colonna è già case-insensitive e serve le query `email = @x` senza
-		// espressioni. Fino al 2026-10-06 l'indice non esisteva.
+		// espressioni.
 		builder.HasIndex(x => new { x.PropertyId, x.Email })
 			.HasFilter("deleted_at IS NULL AND email IS NOT NULL")
 			.HasDatabaseName("ix_identity_customer_customers_property_email");

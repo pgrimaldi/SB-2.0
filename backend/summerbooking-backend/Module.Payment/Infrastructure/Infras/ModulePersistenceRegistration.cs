@@ -3,7 +3,6 @@ using BuildingBlocks.Infrastructure.Retention;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Module.Payment.Domain.Enums;
 using Npgsql;
 using Shared.Infrastructure;
 
@@ -22,32 +21,7 @@ public static class ModulePersistenceRegistration
 
 		var dataSourceBuilder = new NpgsqlDataSourceBuilder(ModuleConnectionStrings.Resolve(configuration));
 
-		// Mappatura degli enum nativi PostgreSQL del modulo, in coppia con le
-		// modelBuilder.HasPostgresEnum<TEnum> di DbContext.OnModelCreating (stessa lista di
-		// DesignTimeDbContextFactory).
-		dataSourceBuilder.MapEnum<TransactionSubject>("payment.transaction_subject");
-		dataSourceBuilder.MapEnum<OnlinePaymentType>("payment.online_payment_type");
-		dataSourceBuilder.MapEnum<SalesChannel>("payment.sales_channel");
-		dataSourceBuilder.MapEnum<ChargeStatus>("payment.charge_status");
-		dataSourceBuilder.MapEnum<ConnectOnboardingState>("payment.connect_onboarding_state");
-		dataSourceBuilder.MapEnum<CommissionExemption>("payment.commission_exemption");
-		dataSourceBuilder.MapEnum<LedgerEntryType>("payment.ledger_entry_type");
-		dataSourceBuilder.MapEnum<LedgerDirection>("payment.ledger_direction");
-		dataSourceBuilder.MapEnum<PaymentMode>("payment.payment_mode");
-		dataSourceBuilder.MapEnum<LedgerSource>("payment.ledger_source");
-		dataSourceBuilder.MapEnum<LedgerLineKind>("payment.ledger_line_kind");
-		dataSourceBuilder.MapEnum<PaymentRequestStatus>("payment.payment_request_status");
-		dataSourceBuilder.MapEnum<PaymentRequestOrigin>("payment.payment_request_origin");
-		dataSourceBuilder.MapEnum<PosSystem>("payment.pos_system");
-		dataSourceBuilder.MapEnum<PosChargeStatus>("payment.pos_charge_status");
-		dataSourceBuilder.MapEnum<RefundStatus>("payment.refund_status");
-		dataSourceBuilder.MapEnum<RefundReason>("payment.refund_reason");
-		dataSourceBuilder.MapEnum<WalletKind>("payment.wallet_kind");
-		dataSourceBuilder.MapEnum<WalletStatus>("payment.wallet_status");
-		dataSourceBuilder.MapEnum<WalletMovementType>("payment.wallet_movement_type");
-		dataSourceBuilder.MapEnum<WalletMovementSource>("payment.wallet_movement_source");
-		dataSourceBuilder.MapEnum<WebhookProvider>("payment.webhook_provider");
-		dataSourceBuilder.MapEnum<WebhookProcessingStatus>("payment.webhook_processing_status");
+		PaymentEnumMappings.Apply(dataSourceBuilder);
 
 		// Tetto del pool: ogni modulo ha il PROPRIO NpgsqlDataSource, quindi l'host ne ha
 		// uno per modulo. Senza limite sarebbero 100 ciascuno (default Npgsql) contro un
@@ -57,7 +31,7 @@ public static class ModulePersistenceRegistration
 		var dataSource = dataSourceBuilder.Build();
 
 		services.AddDbContext<DbContext>((_, optionsBuilder) =>
-			optionsBuilder.UseNpgsql(dataSource, npgsql => npgsql.MigrationsHistoryTable(ModuleConnectionStrings.MigrationsHistoryTable, DbContext.Schema))
+			optionsBuilder.UseNpgsql(dataSource, npgsql => PaymentEnumMappings.Apply(npgsql).MigrationsHistoryTable(ModuleConnectionStrings.MigrationsHistoryTable, DbContext.Schema))
 			.UseSnakeCaseNamingConvention());
 
 		// Job di retention del modulo: applica le policy di privacy_retention_policies che

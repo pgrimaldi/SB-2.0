@@ -24,9 +24,9 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
 		// Nessun HasDefaultValue su queste tre colonne, ed e' deliberato: `HasData` OMETTE dall'INSERT
 		// le colonne il cui valore coincide col default CLR del tipo (false per bool, 0 per short),
 		// perche' non distingue "impostato a false" da "non impostato". Con un default dichiarato
-		// diverso dal default CLR il valore seminato evapora e vince quello del database: e' cosi' che
-		// `is_staff` e' finito a true per systemadmin e consumer, che il seed dichiara false (corretto
-		// il 2026-09-30). E' la stessa famiglia del tranello sulle colonne enum (HasDefaultValueSql,
+		// diverso dal default CLR il valore seminato evapora e vince quello del database (es. `is_staff`
+		// finirebbe a true per systemadmin e consumer, che il seed dichiara false). E' la stessa famiglia
+		// del tranello sulle colonne enum (HasDefaultValueSql,
 		// mai HasDefaultValue). Qui un default non serve a nulla: la tabella semina tutte le proprie righe.
 		builder.Property(x => x.IsAssignableViaPanel)
 			.HasColumnName("is_assignable_via_panel")
@@ -65,7 +65,7 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
 			new { Id = 11L, Code = "affiliate", IsAssignableViaPanel = true, IsStaff = true, SortOrder = (short)90, CreatedAt = seedTimestamp, UpdatedAt = seedTimestamp },
 			new { Id = 12L, Code = "advancedlifeguard", IsAssignableViaPanel = true, IsStaff = true, SortOrder = (short)100, CreatedAt = seedTimestamp, UpdatedAt = seedTimestamp },
 			new { Id = 13L, Code = "marketing", IsAssignableViaPanel = true, IsStaff = true, SortOrder = (short)110, CreatedAt = seedTimestamp, UpdatedAt = seedTimestamp },
-			// Come cashoperator ma senza prenotazioni passate (decisione del 2026-10-07).
+			// Come cashoperator ma senza prenotazioni passate.
 			new { Id = 14L, Code = "dailycashoperator", IsAssignableViaPanel = true, IsStaff = true, SortOrder = (short)55, CreatedAt = seedTimestamp, UpdatedAt = seedTimestamp });
 	}
 }

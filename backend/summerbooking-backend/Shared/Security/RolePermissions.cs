@@ -1,4 +1,4 @@
-﻿namespace Shared.Security;
+namespace Shared.Security;
 
 /// <summary>
 /// Matrice ruolo→permessi: chi legge la lista contatti, chi ne vede i dettagli e li modifica, chi accetta i
@@ -18,6 +18,19 @@ public static class RolePermissions
 
 	// Impostazioni dello stabilimento (magazzino, listini, sconti, mappa): titolare, amministratore e user1.
 	private static readonly string[] SettingsRoles = [RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1];
+
+	// Prenotazioni: come nel vecchio gestionale (menu, pulsanti e redirect per ruolo), ma controllate qui. Il bagnino vede
+	// mappa e magazzino senza importi; il bagnino avanzato in più segna arrivi e uscite, sposta e crea gruppi; l'affiliato
+	// lavora solo sulle sue postazioni e non incassa; la cassa non vede l'elenco delle prenotazioni; user1 non cambia i
+	// prezzi. Il cassiere giornaliero (ruolo nuovo) vale come la cassa, senza eliminare.
+	private static readonly string[] BookingReadRoles =
+	[
+		RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1, RoleCodes.Manager, RoleCodes.CashOperator, RoleCodes.DailyCashOperator,
+		RoleCodes.Lifeguard, RoleCodes.AdvancedLifeguard, RoleCodes.Affiliate,
+	];
+
+	private static readonly string[] CashRoles =
+		[RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1, RoleCodes.Manager, RoleCodes.CashOperator, RoleCodes.DailyCashOperator];
 
 	private static readonly Dictionary<string, HashSet<string>> Matrix = Build();
 
@@ -58,6 +71,18 @@ public static class RolePermissions
 			RoleCodes.AdvancedLifeguard, RoleCodes.CashOperator, RoleCodes.DailyCashOperator);
 		Grant(Permissions.AgreementsManage, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Manager);
 		Grant(Permissions.RevenueManage, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Manager, RoleCodes.User1);
+		Grant(Permissions.BookingsRead, BookingReadRoles);
+		Grant(Permissions.BookingsList, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1, RoleCodes.Manager);
+		Grant(Permissions.BookingsPlanner, CashRoles);
+		Grant(Permissions.BookingsAmounts, [.. BookingReadRoles.Where(r => r is not RoleCodes.Lifeguard and not RoleCodes.AdvancedLifeguard)]);
+		Grant(Permissions.BookingsWrite, [.. CashRoles, RoleCodes.Affiliate]);
+		Grant(Permissions.BookingsMove, [.. CashRoles, RoleCodes.Affiliate, RoleCodes.AdvancedLifeguard]);
+		Grant(Permissions.BookingsOnline, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.Manager, RoleCodes.CashOperator, RoleCodes.DailyCashOperator);
+		Grant(Permissions.BookingsPricing, [.. CashRoles.Where(r => r != RoleCodes.User1)]);
+		Grant(Permissions.BookingsCheckIn, [.. CashRoles, RoleCodes.Affiliate, RoleCodes.AdvancedLifeguard]);
+		Grant(Permissions.BookingsDelete, RoleCodes.SuperAdmin, RoleCodes.Admin, RoleCodes.User1, RoleCodes.Manager, RoleCodes.CashOperator, RoleCodes.Affiliate);
+		Grant(Permissions.BookingsCleanup, RoleCodes.SuperAdmin, RoleCodes.Admin);
+		Grant(Permissions.PaymentsRecord, CashRoles);
 		return matrix;
 	}
 }

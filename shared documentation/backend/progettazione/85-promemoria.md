@@ -160,7 +160,8 @@ Catalog (2026-10); non hanno ancora punti nel codice.
 - **Situazione**: dal 2026-10-25 Catalog elimina (cancellazione logica) le postazioni con l'eliminazione singola o
   multipla, lo svuotamento o l'eliminazione di righe e colonne e «Reimposta mappa», ma le prenotazioni di quelle
   postazioni restano come sono. L'impostazione del gestore `map_layouts.reset_deletes_bookings` (decisione C4)
-  dice cosa farne: `false` = ricollegarle per numero quando la postazione viene ricreata, `true` = cancellarle
+  dice cosa farne: `false` = ricollegarle quando la postazione viene ricreata (per posizione, poi per nome: vedi la
+  decisione sotto), `true` = cancellarle
   anche se pagate o scontrinate. Le voci di registro `catalog.map_spots_deleted`, `catalog.map_grid_changed` e
   `catalog.map_reset` hanno il numero di postazioni coinvolte.
 - **Quando chiuderlo**: sviluppando Booking (evento di Catalog con le postazioni eliminate e l'impostazione, oppure

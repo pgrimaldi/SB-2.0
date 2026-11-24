@@ -9,8 +9,7 @@ namespace Module.Catalog.Tests;
 /// <remarks>
 /// <para>
 /// ⚠️ <b>Questo è l'unico modo di verificare quel job, e il motivo va saputo.</b> Il legacy non ha mai
-/// avuto gli abbonamenti — erano gestiti fuori dal portale e attivati a mano (risposta del titolare
-/// del 2026-10-02, Q10) — quindi <c>identity.account_subscriptions</c> è <b>vuota</b> sui dati
+/// avuto gli abbonamenti — erano gestiti fuori dal portale e attivati a mano — quindi <c>identity.account_subscriptions</c> è <b>vuota</b> sui dati
 /// migrati, e la cessazione non è calcolabile per nessuno stabilimento storico. Il perimetro su dati
 /// reali trova zero righe <i>per costruzione</i>, e continuerà a trovarne zero finché gli abbonamenti
 /// non saranno gestiti dal nuovo sistema.

@@ -69,13 +69,9 @@ public sealed class Account : IAuditable, ISoftDeletable
 	/// <see cref="IsResourceScopeRestricted"/> e' attivo.
 	/// </summary>
 	/// <remarks>
-	/// Era una tabella figlia (<c>identity.access_user_resource_scopes</c>), collassata in array il
-	/// 2026-09-30. La riserva su questa scelta era
-	/// la perdita della storia per singola assegnazione (<c>created_at</c>/<c>deleted_at</c> di
-	/// riga): i dati migrati la sciolgono — 19 assegnazioni, **due soli** istanti di creazione e
-	/// **nessuna** revoca mai registrata, cioe' due scritture in blocco. Quella storia non esisteva,
-	/// e il committente ha confermato (2026-09-30) che non serve tracciare chi concede o revoca un
-	/// permesso, ne' quando.
+	/// Array e non tabella figlia: non si conserva la storia per singola assegnazione
+	/// (<c>created_at</c>/<c>deleted_at</c> di riga) perche' non serve tracciare chi concede o revoca
+	/// un permesso, ne' quando (scelta del committente).
 	/// </remarks>
 	public string[] ResourceScopes { get; private set; } = [];
 	/// <summary>Accettazione di privacy e termini alla registrazione pubblica (prova del consenso).</summary>

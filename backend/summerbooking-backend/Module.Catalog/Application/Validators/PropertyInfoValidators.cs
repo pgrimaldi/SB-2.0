@@ -37,9 +37,23 @@ public sealed class SavePropertyInfoRequestValidator : AbstractValidator<SavePro
 			.When(x => !string.IsNullOrEmpty(x.VirtualTourUrl));
 		RuleFor(x => x.OpenHoursTo).GreaterThan(x => x.OpenHoursFrom!.Value).When(x => x.OpenHoursFrom is not null && x.OpenHoursTo is not null);
 		RuleFor(x => x.CancellationNoticeHours).Null().When(x => !x.IsFreeCancellation);
-		RuleFor(x => x.CancellationNoticeHours).InclusiveBetween((short)1, (short)720).When(x => x.CancellationNoticeHours is not null);
+		RuleFor(x => x.CancellationNoticeHours).Must(h => CancellationWindows.Contains(h!.Value)).WithErrorCode(ValidationErrorCodes.Invalid)
+			.When(x => x.CancellationNoticeHours is not null);
+		RuleFor(x => x.CancellationPenalties).Must(p => p is null || p.Count == 0).When(x => !x.IsFreeCancellation).WithErrorCode(ValidationErrorCodes.Invalid);
+		RuleFor(x => x.CancellationPenalties).Must(p => p is null || (p.Count <= 2 && p.Select(i => i.NoticeHours).Distinct().Count() == p.Count))
+			.WithErrorCode(ValidationErrorCodes.Invalid);
+		RuleForEach(x => x.CancellationPenalties).ChildRules(p =>
+		{
+			p.RuleFor(i => i.NoticeHours).Must(h => CancellationWindows.Contains(h)).WithErrorCode(ValidationErrorCodes.Invalid);
+			p.RuleFor(i => i.Percent).InclusiveBetween((short)1, (short)100);
+		});
+		RuleFor(x => x).Must(x => (x.CancellationPenalties ?? []).All(p => x.CancellationNoticeHours is null || p.NoticeHours > x.CancellationNoticeHours))
+			.WithErrorCode(ValidationErrorCodes.Invalid).OverridePropertyName("cancellationPenalties");
 		RuleFor(x => x.PetsPolicy).Must(c => Codes.TryParse<PetsPolicy>(c, out _)).WithErrorCode(ValidationErrorCodes.Invalid);
 	}
+
+	/// <summary>Tempi di cancellazione ammessi (elenco chiuso): 3, 12, 24, 48, 72 ore e una settimana.</summary>
+	public static readonly IReadOnlySet<short> CancellationWindows = new HashSet<short> { 3, 12, 24, 48, 72, 168 };
 
 	public static bool BeHttpUrl(string? url)
 		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https";

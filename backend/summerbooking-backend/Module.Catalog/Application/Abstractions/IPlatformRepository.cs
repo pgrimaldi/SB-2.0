@@ -59,5 +59,8 @@ public interface IPlatformRepository
 	void RemoveShowcaseEntry(ShowcaseEntry entry);
 	Task<IReadOnlyDictionary<long, Guid>> FindPropertyPublicIdsAsync(IReadOnlyCollection<long> propertyIds, CancellationToken ct = default);
 	Task<IReadOnlyList<TariffPeriod>> FindSeasonPeriodsAsync(long propertyId, CancellationToken ct = default);
+
+	/// <summary>Periodi della stagione successiva, nella forma dei periodi correnti (stessa chiave): per il rinnovo.</summary>
+	Task<IReadOnlyList<TariffPeriod>> FindNextSeasonPeriodsAsync(long propertyId, CancellationToken ct = default);
 	Task<IReadOnlyList<PriceListPeriodPrice>> ListPeriodPricesAsync(long priceListId, CancellationToken ct = default);
 }

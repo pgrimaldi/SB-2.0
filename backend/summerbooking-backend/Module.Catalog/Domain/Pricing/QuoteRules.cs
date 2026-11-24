@@ -41,9 +41,10 @@ public sealed record DiscountableLine(decimal Amount, long? SectorId, DiscountSe
 /// </summary>
 public static class DiscountRules
 {
-	public static bool IsValid(Discount d, QuoteChannel channel, DateOnly from, DateOnly to, DateTime nowLocal)
+	/// <param name="ignoreUses">Codice già usato da quella prenotazione: il suo utilizzo è già contato.</param>
+	public static bool IsValid(Discount d, QuoteChannel channel, DateOnly from, DateOnly to, DateTime nowLocal, bool ignoreUses = false)
 	{
-		if (!d.IsActive || d.MaxUses is { } max && d.UsedCount >= max)
+		if (!d.IsActive || !ignoreUses && d.MaxUses is { } max && d.UsedCount >= max)
 			return false;
 		if (d.ApplicableChannel == DiscountApplicableChannel.ManagerOnly && channel != QuoteChannel.Manager
 			|| d.ApplicableChannel == DiscountApplicableChannel.OnlineOnly && channel != QuoteChannel.Online)

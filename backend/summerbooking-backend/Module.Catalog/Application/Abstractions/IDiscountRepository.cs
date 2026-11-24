@@ -13,4 +13,9 @@ public interface IDiscountRepository
 	Task<bool> CodeExistsAsync(long propertyId, string code, long? exceptId, CancellationToken ct = default);
 	void Add(Discount discount);
 	void Remove(Discount discount);
+
+	/// <summary>Un utilizzo in più, solo se sotto il massimo: un solo UPDATE, sicuro anche con prenotazioni contemporanee.</summary>
+	Task<bool> TryRedeemAsync(long propertyId, Guid publicId, CancellationToken ct = default);
+
+	Task ReleaseAsync(long propertyId, Guid publicId, CancellationToken ct = default);
 }

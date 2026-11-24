@@ -37,4 +37,38 @@ public sealed class BookingServiceLine : IAuditable, ISoftDeletable
 	public ICollection<BookingServiceTimeSlot> TimeSlots { get; private set; } = new List<BookingServiceTimeSlot>();
 
 	private BookingServiceLine() { }
+
+	/// <summary>Un servizio dell'ordine (bar, standard, orario) o un prezzo automatico, con l'importo del preventivo.</summary>
+	public static BookingServiceLine Create(
+		Reservation reservation, BookingLine? line, ServiceCategory kind, Guid? saleItemId, string name, string? variant, short quantity,
+		decimal total, decimal? vatRate, DateOnly? date)
+	{
+		if (quantity < 1)
+			throw new ArgumentOutOfRangeException(nameof(quantity));
+		return new BookingServiceLine
+		{
+			PublicId = Guid.CreateVersion7(),
+			Reservation = reservation,
+			BookingLine = line,
+			PropertyId = reservation.PropertyId,
+			Kind = kind,
+			SaleItemId = saleItemId,
+			NameSnapshot = name,
+			VariantLabel = string.IsNullOrWhiteSpace(variant) ? null : variant.Trim(),
+			Quantity = quantity,
+			UnitPrice = decimal.Round(total / quantity, 2, MidpointRounding.AwayFromZero),
+			LineTotal = total,
+			VatRate = vatRate,
+			ServiceDate = date,
+			BookingChannel = reservation.Channel,
+		};
+	}
+
+	/// <summary>Servizio orario: la fascia prenotata.</summary>
+	public BookingServiceTimeSlot AddSlot(Guid? timeSlotId, TimeOnly start, TimeOnly end, DateOnly date, string? label)
+	{
+		var slot = BookingServiceTimeSlot.Create(this, timeSlotId, start, end, date, (short)Quantity, label, LineTotal);
+		TimeSlots.Add(slot);
+		return slot;
+	}
 }

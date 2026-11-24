@@ -1,4 +1,4 @@
-﻿using Shared.Contracts.Events;
+using Shared.Contracts.Events;
 
 namespace Shared.Contracts.Catalog;
 
@@ -24,3 +24,25 @@ public sealed record PropertyStatusChanged(
 /// ripristino tornano attive; dall'eliminazione definitiva partono i tempi di conservazione dei dati.
 /// </summary>
 public sealed record PropertyTrashChanged(Guid EventId, DateTime OccurredAt, Guid PropertyId, string Change) : IIntegrationEvent;
+
+/// <summary>Valori di <see cref="PropertyTrashChanged.Change"/>.</summary>
+public static class PropertyTrashChanges
+{
+	public const string Trashed = "trashed";
+	public const string Restored = "restored";
+	public const string Purged = "purged";
+}
+
+/// <summary>Una postazione della mappa, come la vedono le prenotazioni: per ricollegarle dopo «Reimposta mappa».</summary>
+/// <param name="SpotType">Codice snake_case del tipo (umbrella, sunbed…).</param>
+public sealed record MapSpotRef(Guid Id, string? Label, string SpotType, short Row, short Column);
+
+/// <summary>
+/// Postazioni tolte o create nell'editor della mappa («Reimposta mappa», righe e colonne cancellate, postazioni eliminate o
+/// aggiunte). Con <paramref name="DeletesBookings"/> le prenotazioni delle postazioni tolte si annullano; senza restano
+/// senza postazione finché una postazione nuova dello stesso tipo non occupa la stessa posizione.
+/// </summary>
+public sealed record MapSpotsChanged(
+	Guid EventId, DateTime OccurredAt, Guid PropertyId, IReadOnlyList<MapSpotRef> Removed, IReadOnlyList<MapSpotRef> Created, bool DeletesBookings)
+	: IIntegrationEvent;
+
