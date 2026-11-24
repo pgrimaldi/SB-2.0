@@ -54,8 +54,8 @@ campi bloccati durante le chiamate API, campi data e coppie Dal / Al.
   testo tradotto del primo errore (chiave `invalidate.<kind>`, con i valori dell'errore e il nome del campo, es.
   `management.settings.warehouse.form.field_names.quantity` = "della quantità").
 - Il messaggio compare solo dopo che l'utente ha cambiato o lasciato il campo e segue la lingua. Un'eccezione: nei pannelli
-  di modifica di Servizi e Listino, premendo Modifica, i campi letti già sbagliati si segnano subito
-  (`draftForm().markAsTouched()` in `startEdit`), perché tengono spento Salva.
+  di modifica di Servizi e Listino, premendo Modifica, e in Sharing, che è sempre modificabile, dopo la lettura, i campi
+  letti già sbagliati si segnano subito (`markAsTouched()` sul form), perché tengono spento Salva.
 - Per i campi di una lista, dove non si può tenere un signal per campo, il template legge lo stesso testo con
   `text(field, chiaveNomeCampo)`.
 - Il wrapper riceve il testo con `[error]`: bordo rosso da 2px, sfondo rosato e messaggio rosso

@@ -840,7 +840,9 @@
         },
         "save": "Salva",
         "field_names": {
-          "days": "dei giorni"
+          "days": "dei giorni",
+          "credits": "dei crediti",
+          "credit_value": "del credito"
         },
         "saved": {
           "title": "Impostazioni salvate",

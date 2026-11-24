@@ -840,7 +840,9 @@
         },
         "save": "حفظ",
         "field_names": {
-          "days": "الأيام"
+          "days": "الأيام",
+          "credits": "الأرصدة",
+          "credit_value": "الرصيد"
         },
         "saved": {
           "title": "تم حفظ الإعدادات",

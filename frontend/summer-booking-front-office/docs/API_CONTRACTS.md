@@ -1270,7 +1270,7 @@ Il corpo è solo il testo dei termini e condizioni in HTML, come stringa JSON (t
 
 ## /sharing
 
-### GET `/api/sharing/general-information`
+### GET `/api/booking/sharing/general-information`
 
 Sharing: impostazioni generali.
 
@@ -1305,20 +1305,20 @@ Stato: 200 OK.
 |---|---|---|
 | `isSharingEnabled` | boolean | `true` |
 | `isMinimumBookingDayEnabled` | boolean | `true` |
-| `minimumBookingDayQuantity` | number (intero) \| null | `3` |
+| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null | `3` |
 | `isOnlySeasonalEnabled` | boolean | `false` |
 | `isEnabledOnAllArticles` | boolean | `true` |
 | `isScheduledAbsenceSharing` | boolean | `true` |
 | `isManualCreditAssignmentEnabled` | boolean | `false` |
-| `resoldDayCreditQuantity` | number (intero) \| null | `1` |
-| `manualCreditValue` | number (decimale, €) \| null | `2.5` |
+| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) | `1` |
+| `manualCreditValue` | number (decimale, €, 0-100.000) | `2.5` |
 | `isAutomaticVoucherEnabled` | boolean | `true` |
-| `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
+| `voucherCreditValue` | number (decimale, €, 0-100.000) | `5.5` |
 | `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
+| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) | `10` |
 | `version` | string | `106cb2d0` |
 
-### POST `/api/sharing/save-information`
+### POST `/api/booking/sharing/save-information`
 
 Sharing: salvataggio delle impostazioni.
 
@@ -1346,17 +1346,17 @@ Sharing: salvataggio delle impostazioni.
 |---|---|---|
 | `isSharingEnabled` | boolean | `true` |
 | `isMinimumBookingDayEnabled` | boolean | `true` |
-| `minimumBookingDayQuantity` | number (intero) \| null | `3` |
+| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null | `3` |
 | `isOnlySeasonalEnabled` | boolean | `false` |
 | `isEnabledOnAllArticles` | boolean | `true` |
 | `isScheduledAbsenceSharing` | boolean | `true` |
 | `isManualCreditAssignmentEnabled` | boolean | `false` |
-| `resoldDayCreditQuantity` | number (intero) \| null | `1` |
-| `manualCreditValue` | number (decimale, €) \| null | `2.5` |
+| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) | `1` |
+| `manualCreditValue` | number (decimale, €, 0-100.000) | `2.5` |
 | `isAutomaticVoucherEnabled` | boolean | `true` |
-| `voucherCreditValue` | number (decimale, €) \| null | `5.5` |
+| `voucherCreditValue` | number (decimale, €, 0-100.000) | `5.5` |
 | `isPrepaidCardTopUpEnabled` | boolean | `false` |
-| `prepaidCardCreditValue` | number (decimale, €) \| null | `10` |
+| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) | `10` |
 
 #### Response
 

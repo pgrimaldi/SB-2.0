@@ -1,3 +1,6 @@
+export const MAX_SHARING_QUANTITY = 2_147_483_647;
+export const MAX_SHARING_CREDIT_VALUE = 100_000;
+
 export class SharingSaveInformationRequest {
   isSharingEnabled = false;
   isMinimumBookingDayEnabled = false;

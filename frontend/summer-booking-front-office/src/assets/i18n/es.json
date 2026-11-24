@@ -840,7 +840,9 @@
         },
         "save": "Guardar",
         "field_names": {
-          "days": "de los días"
+          "days": "de los días",
+          "credits": "de los créditos",
+          "credit_value": "del crédito"
         },
         "saved": {
           "title": "Ajustes guardados",

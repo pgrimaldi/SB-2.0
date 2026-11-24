@@ -10,7 +10,15 @@ import {
   untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormField, TreeValidationResult, disabled, form, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  TreeValidationResult,
+  applyWhen,
+  disabled,
+  form,
+  max,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom, of, switchMap } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
@@ -34,10 +42,30 @@ import { FilledNumberField } from '../../../components/shared/ui/inputs/filled-n
 import { Toggle } from '../../../components/shared/ui/toggles/toggle/toggle';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { SharingSaveInformationRequest } from '../../../entities/settings/sharing/sharing-save-information-request';
+import {
+  MAX_SHARING_CREDIT_VALUE,
+  MAX_SHARING_QUANTITY,
+  SharingSaveInformationRequest,
+} from '../../../entities/settings/sharing/sharing-save-information-request';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../services/api/only-fields-of';
 import { SharingService } from '../../../services/api/sharing/sharing.service';
+
+const FIELD_NAMES: Partial<Record<keyof SharingSaveInformationRequest, string>> = {
+  minimumBookingDayQuantity: 'management.settings.sharing.field_names.days',
+  resoldDayCreditQuantity: 'management.settings.sharing.field_names.credits',
+  manualCreditValue: 'management.settings.sharing.field_names.credit_value',
+  voucherCreditValue: 'management.settings.sharing.field_names.credit_value',
+  prepaidCardCreditValue: 'management.settings.sharing.field_names.credit_value',
+};
+
+/** The values wanted by each option while it is on. */
+const OPTION_VALUES = [
+  ['isMinimumBookingDayEnabled', ['minimumBookingDayQuantity']],
+  ['isManualCreditAssignmentEnabled', ['resoldDayCreditQuantity', 'manualCreditValue']],
+  ['isAutomaticVoucherEnabled', ['voucherCreditValue']],
+  ['isPrepaidCardTopUpEnabled', ['prepaidCardCreditValue']],
+] as const;
 
 @Component({
   selector: 'app-sharing',
@@ -82,17 +110,23 @@ export class Sharing implements UnsavedChanges, OnDestroy {
       path.minimumBookingDayQuantity,
       ({ valueOf }) => !valueOf(path.isMinimumBookingDayEnabled),
     );
-    greaterThan(path.minimumBookingDayQuantity, 0);
+    for (const [option, values] of OPTION_VALUES) {
+      applyWhen(
+        path,
+        ({ value }) => value()[option],
+        (chosen) => values.forEach((name) => greaterThan(chosen[name], 0)),
+      );
+    }
+    max(path.minimumBookingDayQuantity, MAX_SHARING_QUANTITY);
+    max(path.resoldDayCreditQuantity, MAX_SHARING_QUANTITY);
+    max(path.manualCreditValue, MAX_SHARING_CREDIT_VALUE);
+    max(path.voucherCreditValue, MAX_SHARING_CREDIT_VALUE);
+    max(path.prepaidCardCreditValue, MAX_SHARING_CREDIT_VALUE);
   });
   protected readonly fieldErrors = Object.fromEntries(
     (Object.keys(this.information()) as (keyof SharingSaveInformationRequest)[]).map((name) => [
       name,
-      this.validationText.message(
-        this.informationForm[name],
-        name === 'minimumBookingDayQuantity'
-          ? 'management.settings.sharing.field_names.days'
-          : undefined,
-      ),
+      this.validationText.message(this.informationForm[name], FIELD_NAMES[name]),
     ]),
   ) as Readonly<Record<keyof SharingSaveInformationRequest, Signal<string | null>>>;
   protected readonly canSave = computed(() => this.loaded() && !this.isSaving());
@@ -107,13 +141,15 @@ export class Sharing implements UnsavedChanges, OnDestroy {
 
   constructor() {
     this.unsaved.watch(this);
-    // Turning the minimum on with no valid days says at once why Salva is off.
-    effect(() => {
-      const minimum = this.informationForm.isMinimumBookingDayEnabled();
-      if (minimum.dirty() && minimum.value()) {
-        untracked(() => this.informationForm.minimumBookingDayQuantity().markAsTouched());
-      }
-    });
+    // Turning an option on without its values says at once why Salva is off.
+    for (const [option, values] of OPTION_VALUES) {
+      effect(() => {
+        const field = this.informationForm[option]();
+        if (field.dirty() && field.value()) {
+          untracked(() => values.forEach((name) => this.informationForm[name]().markAsTouched()));
+        }
+      });
+    }
     effect((onCleanup) => {
       this.reloads();
       this.dataReload?.();
@@ -131,6 +167,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
             this.information.set(read);
             this.informationForm().reset();
             this.loaded.set(true);
+            this.informationForm().markAsTouched();
           },
           error: (error: unknown) => {
             this.loaded.set(false);
@@ -143,7 +180,9 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   }
 
   hasUnsavedChanges(): boolean {
-    return comparableJson(this.information()) !== comparableJson(this.savedInformation);
+    return (
+      comparableJson(asSaved(this.information())) !== comparableJson(asSaved(this.savedInformation))
+    );
   }
 
   protected save(): void {
@@ -154,7 +193,7 @@ export class Sharing implements UnsavedChanges, OnDestroy {
       this.isSaving.set(true);
       this.error.set(null);
       try {
-        const sent = this.information();
+        const sent = asSaved(this.information());
         this.version = await firstValueFrom(this.sharing.saveInformation(sent, this.version));
         // The new version goes with what was sent, even if a reading changed the form meanwhile.
         this.savedInformation = sent;
@@ -180,4 +219,18 @@ export class Sharing implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
+}
+
+/** As the backend keeps them: no days with the minimum off, 0 for an empty number. */
+function asSaved(information: SharingSaveInformationRequest): SharingSaveInformationRequest {
+  return {
+    ...information,
+    minimumBookingDayQuantity: information.isMinimumBookingDayEnabled
+      ? information.minimumBookingDayQuantity
+      : null,
+    resoldDayCreditQuantity: information.resoldDayCreditQuantity ?? 0,
+    manualCreditValue: information.manualCreditValue ?? 0,
+    voucherCreditValue: information.voucherCreditValue ?? 0,
+    prepaidCardCreditValue: information.prepaidCardCreditValue ?? 0,
+  };
 }

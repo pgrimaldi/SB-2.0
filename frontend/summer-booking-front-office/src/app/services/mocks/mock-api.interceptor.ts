@@ -490,14 +490,14 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (
     request.method === 'GET' &&
-    request.url === `${environment.apiBaseUrl}/sharing/general-information`
+    request.url === `${environment.apiBaseUrl}/booking/sharing/general-information`
   ) {
     return sharingGeneralInformationMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/sharing/save-information`
+    request.url === `${environment.apiBaseUrl}/booking/sharing/save-information`
   ) {
     return saveSharingInformationMock(request);
   }

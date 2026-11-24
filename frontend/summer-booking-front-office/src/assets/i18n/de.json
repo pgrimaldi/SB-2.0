@@ -840,7 +840,9 @@
         },
         "save": "Speichern",
         "field_names": {
-          "days": "der Tage"
+          "days": "der Tage",
+          "credits": "der Guthaben",
+          "credit_value": "des Guthabens"
         },
         "saved": {
           "title": "Einstellungen gespeichert",

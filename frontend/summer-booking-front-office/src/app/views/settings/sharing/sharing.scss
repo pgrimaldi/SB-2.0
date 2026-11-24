@@ -54,6 +54,13 @@
     width: max-content;
     max-width: 16rem;
   }
+
+  // Here it runs under the label before the field.
+  .sharing__credits > & {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 // As tall as the field beside, with the text in the middle.
@@ -135,6 +142,13 @@
   color: var(--color__layout__error);
   font-size: 0.8125rem;
   line-height: 1.125rem;
+}
+
+// No wider than the label and the field together.
+@media (48rem <= width < 64rem) {
+  .sharing__credits .sharing__field ::ng-deep .filled__number__field__error {
+    max-width: 13.375rem;
+  }
 }
 
 @media (width < 48rem) {

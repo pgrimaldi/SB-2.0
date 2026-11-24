@@ -840,7 +840,9 @@
         },
         "save": "Enregistrer",
         "field_names": {
-          "days": "des jours"
+          "days": "des jours",
+          "credits": "des crédits",
+          "credit_value": "du crédit"
         },
         "saved": {
           "title": "Paramètres enregistrés",

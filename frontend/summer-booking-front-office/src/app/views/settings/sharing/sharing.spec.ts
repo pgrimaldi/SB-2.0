@@ -7,9 +7,22 @@ import { of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
 import { SharingGeneralInformation } from '../../../entities/settings/sharing/sharing-general-information';
-import { SharingSaveInformationRequest } from '../../../entities/settings/sharing/sharing-save-information-request';
+import {
+  MAX_SHARING_CREDIT_VALUE,
+  MAX_SHARING_QUANTITY,
+  SharingSaveInformationRequest,
+} from '../../../entities/settings/sharing/sharing-save-information-request';
 import { SharingService } from '../../../services/api/sharing/sharing.service';
 import { Sharing } from './sharing';
+
+/** As the backend keeps the settings when nothing is on. */
+const EMPTY = {
+  ...new SharingSaveInformationRequest(),
+  resoldDayCreditQuantity: 0,
+  manualCreditValue: 0,
+  voucherCreditValue: 0,
+  prepaidCardCreditValue: 0,
+};
 
 describe('Sharing', () => {
   const setup = async (information = new SharingGeneralInformation()) => {
@@ -53,17 +66,68 @@ describe('Sharing', () => {
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
   });
 
-  it('should show at once the error of the days when the minimum is turned off and on again', async () => {
-    const information = new SharingGeneralInformation();
-    information.isMinimumBookingDayEnabled = true;
-    information.minimumBookingDayQuantity = 0;
-    const { element, click } = await setup(information);
-    const daysError = () => element.querySelector('.sharing__amount .filled__number__field__error');
+  it('should say at once which value an option turned on still wants, and save nothing without it', async () => {
+    const { fixture, element, click, saveInformation } = await setup();
+    const form = fixture.componentInstance['informationForm'];
+    const errors = () => element.querySelectorAll('.filled__number__field__error').length;
+    const check = async (index: number) => {
+      element.querySelectorAll<HTMLInputElement>('app-checkbox input')[index].click();
+      await fixture.whenStable();
+    };
 
-    expect(daysError()).toBeNull();
+    expect(errors()).toBe(0);
     await click(1);
+    expect(errors()).toBe(1);
+    await check(0);
+    expect(errors()).toBe(3);
+    await check(1);
+    await check(2);
+    expect(errors()).toBe(5);
+
+    fixture.componentInstance['save']();
+    await fixture.whenStable();
+    expect(saveInformation).not.toHaveBeenCalled();
+
+    form.minimumBookingDayQuantity().value.set(MAX_SHARING_QUANTITY);
+    form.resoldDayCreditQuantity().value.set(1);
+    form.manualCreditValue().value.set(MAX_SHARING_CREDIT_VALUE);
+    form.voucherCreditValue().value.set(0.5);
+    form.prepaidCardCreditValue().value.set(MAX_SHARING_CREDIT_VALUE + 1);
+    expect(form().valid()).toBe(false);
+    form.prepaidCardCreditValue().value.set(10);
+    expect(form().valid()).toBe(true);
+  });
+
+  it('should say at once why settings read without the value of their option cannot be saved', async () => {
+    const { element } = await setup(
+      Object.assign(new SharingGeneralInformation(), {
+        ...EMPTY,
+        isAutomaticVoucherEnabled: true,
+      }),
+    );
+
+    expect(element.querySelectorAll('.filled__number__field__error')).toHaveLength(1);
+  });
+
+  it('should save no days with the minimum off and 0 for an empty number, which are not changes', async () => {
+    const { fixture, click, save, saveInformation } = await setup(
+      Object.assign(new SharingGeneralInformation(), {
+        ...EMPTY,
+        isMinimumBookingDayEnabled: true,
+        minimumBookingDayQuantity: 3,
+      }),
+    );
+    const { componentInstance: sharing } = fixture;
+    saveInformation.mockReturnValue(of('v2'));
+
+    sharing['informationForm'].voucherCreditValue().value.set(null);
+    expect(sharing.hasUnsavedChanges()).toBe(false);
+
     await click(1);
-    expect(daysError()).not.toBeNull();
+    await save();
+    expect(saveInformation).toHaveBeenCalledWith(EMPTY, null);
+    expect(sharing['informationForm']().value()).toEqual(EMPTY);
+    expect(sharing.hasUnsavedChanges()).toBe(false);
   });
 
   it('should read the settings again and say why when someone changed them after the read', async () => {
@@ -82,10 +146,7 @@ describe('Sharing', () => {
     await click(0);
 
     await save();
-    expect(saveInformation).toHaveBeenCalledWith(
-      { ...new SharingSaveInformationRequest(), isSharingEnabled: true },
-      'v1',
-    );
+    expect(saveInformation).toHaveBeenCalledWith({ ...EMPTY, isSharingEnabled: true }, 'v1');
     expect(generalInformation).toHaveBeenCalledTimes(2);
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
     expect(document.querySelector('.table__error__popup')).not.toBeNull();

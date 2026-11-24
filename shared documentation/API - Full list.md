@@ -7002,7 +7002,7 @@ Nessun corpo (204).
 
 ## Sharing
 
-### GET `/api/sharing/general-information`
+### GET `/api/booking/sharing/general-information`
 
 **Payload JSON**
 
@@ -7014,17 +7014,17 @@ Nessun payload.
 {
   "isSharingEnabled": "boolean",
   "isMinimumBookingDayEnabled": "boolean",
-  "minimumBookingDayQuantity": "number (intero) | null",
+  "minimumBookingDayQuantity": "number (intero, 1-2.147.483.647) | null",
   "isOnlySeasonalEnabled": "boolean",
   "isEnabledOnAllArticles": "boolean",
   "isScheduledAbsenceSharing": "boolean",
   "isManualCreditAssignmentEnabled": "boolean",
-  "resoldDayCreditQuantity": "number (intero) | null",
-  "manualCreditValue": "number (decimale, €) | null",
+  "resoldDayCreditQuantity": "number (intero, 0-2.147.483.647)",
+  "manualCreditValue": "number (decimale, €, 0-100.000)",
   "isAutomaticVoucherEnabled": "boolean",
-  "voucherCreditValue": "number (decimale, €) | null",
+  "voucherCreditValue": "number (decimale, €, 0-100.000)",
   "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €) | null",
+  "prepaidCardCreditValue": "number (decimale, €, 0-100.000)",
   "version": "string"
 }
 ```
@@ -7039,20 +7039,20 @@ Nessun payload.
 |---|---|
 | `isSharingEnabled` | boolean |
 | `isMinimumBookingDayEnabled` | boolean |
-| `minimumBookingDayQuantity` | number (intero) \| null |
+| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null |
 | `isOnlySeasonalEnabled` | boolean |
 | `isEnabledOnAllArticles` | boolean |
 | `isScheduledAbsenceSharing` | boolean |
 | `isManualCreditAssignmentEnabled` | boolean |
-| `resoldDayCreditQuantity` | number (intero) \| null |
-| `manualCreditValue` | number (decimale, €) \| null |
+| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) |
+| `manualCreditValue` | number (decimale, €, 0-100.000) |
 | `isAutomaticVoucherEnabled` | boolean |
-| `voucherCreditValue` | number (decimale, €) \| null |
+| `voucherCreditValue` | number (decimale, €, 0-100.000) |
 | `isPrepaidCardTopUpEnabled` | boolean |
-| `prepaidCardCreditValue` | number (decimale, €) \| null |
+| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) |
 | `version` | string |
 
-### POST `/api/sharing/save-information`
+### POST `/api/booking/sharing/save-information`
 
 **Payload JSON**
 
@@ -7060,17 +7060,17 @@ Nessun payload.
 {
   "isSharingEnabled": "boolean",
   "isMinimumBookingDayEnabled": "boolean",
-  "minimumBookingDayQuantity": "number (intero) | null",
+  "minimumBookingDayQuantity": "number (intero, 1-2.147.483.647) | null",
   "isOnlySeasonalEnabled": "boolean",
   "isEnabledOnAllArticles": "boolean",
   "isScheduledAbsenceSharing": "boolean",
   "isManualCreditAssignmentEnabled": "boolean",
-  "resoldDayCreditQuantity": "number (intero) | null",
-  "manualCreditValue": "number (decimale, €) | null",
+  "resoldDayCreditQuantity": "number (intero, 0-2.147.483.647)",
+  "manualCreditValue": "number (decimale, €, 0-100.000)",
   "isAutomaticVoucherEnabled": "boolean",
-  "voucherCreditValue": "number (decimale, €) | null",
+  "voucherCreditValue": "number (decimale, €, 0-100.000)",
   "isPrepaidCardTopUpEnabled": "boolean",
-  "prepaidCardCreditValue": "number (decimale, €) | null"
+  "prepaidCardCreditValue": "number (decimale, €, 0-100.000)"
 }
 ```
 
@@ -7084,17 +7084,17 @@ Nessun corpo (204).
 |---|---|
 | `isSharingEnabled` | boolean |
 | `isMinimumBookingDayEnabled` | boolean |
-| `minimumBookingDayQuantity` | number (intero) \| null |
+| `minimumBookingDayQuantity` | number (intero, 1-2.147.483.647) \| null |
 | `isOnlySeasonalEnabled` | boolean |
 | `isEnabledOnAllArticles` | boolean |
 | `isScheduledAbsenceSharing` | boolean |
 | `isManualCreditAssignmentEnabled` | boolean |
-| `resoldDayCreditQuantity` | number (intero) \| null |
-| `manualCreditValue` | number (decimale, €) \| null |
+| `resoldDayCreditQuantity` | number (intero, 0-2.147.483.647) |
+| `manualCreditValue` | number (decimale, €, 0-100.000) |
 | `isAutomaticVoucherEnabled` | boolean |
-| `voucherCreditValue` | number (decimale, €) \| null |
+| `voucherCreditValue` | number (decimale, €, 0-100.000) |
 | `isPrepaidCardTopUpEnabled` | boolean |
-| `prepaidCardCreditValue` | number (decimale, €) \| null |
+| `prepaidCardCreditValue` | number (decimale, €, 0-100.000) |
 
 **Response tabella**
 

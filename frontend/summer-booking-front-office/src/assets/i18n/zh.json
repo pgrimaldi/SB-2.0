@@ -840,7 +840,9 @@
         },
         "save": "保存",
         "field_names": {
-          "days": "天数"
+          "days": "天数",
+          "credits": "积分数",
+          "credit_value": "积分"
         },
         "saved": {
           "title": "设置已保存",

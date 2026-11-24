@@ -840,7 +840,9 @@
         },
         "save": "Save",
         "field_names": {
-          "days": "days"
+          "days": "days",
+          "credits": "credits",
+          "credit_value": "credit"
         },
         "saved": {
           "title": "Settings saved",

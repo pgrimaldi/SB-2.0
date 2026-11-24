@@ -10,7 +10,7 @@ import { ifMatch, versionOf } from '../versions/version-headers';
 @Injectable({ providedIn: 'root' })
 export class SharingService {
   private readonly httpClient = inject(HttpClient);
-  private readonly endpoint = `${environment.apiBaseUrl}/sharing`;
+  private readonly endpoint = `${environment.apiBaseUrl}/booking/sharing`;
 
   readonly generalInformation = (): Observable<SharingGeneralInformation> =>
     this.httpClient.get<SharingGeneralInformation>(`${this.endpoint}/general-information`);
