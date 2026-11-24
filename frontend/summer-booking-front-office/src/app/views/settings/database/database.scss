@@ -30,6 +30,10 @@
   }
 }
 
+:host-context([dir='rtl']) .database__back img {
+  scale: -1 1;
+}
+
 .database__heading__trash {
   --page-title-color: var(--color__layout__text__soft);
 }
@@ -66,12 +70,18 @@
   }
 }
 
-.database__expiry {
+.database__expiry,
+.database__limit {
   flex: 1;
   margin: 0;
   color: var(--color__main__theme__one);
   font-size: 0.8125rem;
   line-height: 1.125rem;
+}
+
+.database__limit {
+  margin-bottom: 0.5rem;
+  color: var(--color__layout__error);
 }
 
 // With the chips under the search, less room under the title (and above it from 1920px), so the
@@ -222,11 +232,4 @@
     --date-range-select-height: 2.25rem;
     --date-range-select-text-size: 0.875rem;
   }
-}
-
-.database__limit {
-  margin: 0 0 0.5rem;
-  color: var(--color__layout__error);
-  font-size: 0.8125rem;
-  line-height: 1.125rem;
 }

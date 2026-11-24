@@ -122,7 +122,8 @@
       "reservation_not_found": "One or more bookings no longer exist.",
       "reservation_not_in_trash": "One or more bookings are no longer in the trash.",
       "restore_window_expired": "One or more bookings can no longer be restored: they have been in the trash for more than 30 days.",
-      "spot_unavailable": "One or more spots are no longer free on the days of the booking."
+      "spot_unavailable": "One or more spots are no longer free on the days of the booking.",
+      "version_conflict": "A booking was changed in the meantime: try again."
     },
     "payment": {
       "property_required": "Your account is not linked to a property: sign in with an account of the property."

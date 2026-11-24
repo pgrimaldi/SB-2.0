@@ -35,9 +35,18 @@ Le azioni usano le API che ci sono già, così come sono: "Cancella dati" `POST 
 - **Codici**: `reservationKind`, `reservationStatus` e `paymentStatus` sono quelli che il backend ha già (`Codes.Of` e `PaymentStatuses`).
 - **JSON** in camelCase, con i nomi esatti di questo documento. Gli id sono i `public_id` (UUID).
 - **Errori** nel formato Problem Details del backend, con `code`, `traceId` ed `errors[]` quando ci sono.
-- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo: l'agente glielo chiede, in particolare per
-  ordinare e cercare sul nome del cliente (modulo Identity) e su quello della convenzione (modulo Catalog), che non stanno nello schema
-  `booking`. Paginazione e `total` devono valere su tutto l'elenco ordinato, non sulla sola pagina.
+- **Valori assenti o che non si leggono**: un corpo assente o non JSON, o un tipo sbagliato, non arrivano ai validatori: in Development
+  400 `validation.failed` senza `errors[]`, negli altri ambienti 400 senza corpo (`Boot/Program.cs` non imposta
+  `RouteHandlerOptions.ThrowOnBadRequest`). Nei DTO i campi sono nullable: `search`, `sortField` e `filters` assenti o `null` valgono `""`,
+  `""` e `[]`; `page`, `pageSize` e `sortDirection` assenti danno `validation.invalid` sul campo. Date e UUID dei filtri sono stringhe che
+  si leggono nel codice. Nessun valore dà un 500. Il frontend non manda questi valori.
+- **Come farlo lo sceglie lo sviluppatore del backend**, purché il risultato sia questo: l'agente glielo chiede. In particolare il nome
+  del cliente sta nel modulo Identity e quello della convenzione nel modulo Catalog, fuori dallo schema `booking`:
+  - per la convenzione oggi non c'è nessun contratto da cui Booking possa leggere il nome (`IBookingCatalog` non lo dà): ne serve uno in
+    `Shared/Contracts/Catalog`, con i nomi per id, senza le eliminate;
+  - per il cliente serve ordinare e cercare senza tetti (vedi "Richiesta");
+  - paginazione e `total` valgono su tutto l'elenco ordinato, non sulla sola pagina; i nomi della pagina si leggono in una volta sola, mai
+    uno per riga. Le righe delle postazioni non servono alla risposta.
 
 ## 1. POST /api/booking/reservations/reservation-list
 
@@ -68,21 +77,26 @@ La richiesta standard delle tabelle del frontend, con le stesse regole e gli ste
 ```
 
 - `pageSize`: 10, 20, 50 o 100.
-- `search`: `""` = nessuna ricerca, al massimo 100 caratteri. Trova quello che trova già `GET /api/booking/reservations`
-  (`ReservationQuery.Search`): numero di prenotazione, nome, email o telefono del cliente, nome della postazione.
+- `search`: `""` = nessuna ricerca, al massimo 100 caratteri. Guarda gli stessi campi di `GET /api/booking/reservations`: numero di
+  prenotazione, nome, email o telefono del cliente, nome della postazione. **Senza i suoi tetti**: la `GET` si ferma ai 500 clienti con
+  attività più recente e a 200 postazioni, e fra queste guarda solo quelle oggi sulla mappa (`ReservationService.ListAsync`,
+  `CustomerRepository.SearchIdsAsync`). Così mancherebbero righe, e `total` sarebbe sbagliato, proprio per le prenotazioni vecchie che questa
+  pagina serve a ripulire. La postazione si cerca anche sul nome salvato nella prenotazione (`SpotLabelSnapshot`).
 - `filters`: un oggetto per campo, `value` sempre un array con almeno un valore. I valori dello stesso campo sono alternative, i campi
   diversi valgono tutti insieme. `[]` = nessun filtro.
-- `sortField`: un campo della tabella "Ordine", oppure `""`.
+- `sortField`: un campo della tabella "Ordine", oppure `""`. Altri valori: `validation.invalid` su `sortField`.
+- **Validatore proprio**: `ReservationQueryValidator` ha altre regole (`page` dà `out_of_range`, `pageSize` accetta 25, 200 e 300, il
+  periodo dà l'errore su `to`).
 
 ### Filtri
 
 | `field` | Valori | Regola |
 |---|---|---|
-| `datetimeFrom`, `datetimeTo` | un valore; sempre insieme | Le prenotazioni con almeno un giorno nel periodo, come `From` e `To` della `GET`. Sono **giorni**, non istanti: conta la data scritta (`2026-07-01`), senza fuso; `datetimeTo` è compreso. |
+| `datetimeFrom`, `datetimeTo` | un valore | Le prenotazioni il cui intervallo da `StayFrom` a `StayTo` tocca il periodo, anche con giorni vuoti in mezzo. Una prenotazione senza date non sta in nessun periodo (la `GET` invece la include sempre). Sono **giorni**, non istanti: conta la data scritta (`2026-07-01`), senza fuso; `datetimeTo` è compreso. Il frontend li manda sempre insieme; uno solo limita solo da quel lato. Più di un valore: `validation.invalid` su `filters`. |
 | `bookingTypology` | `Daily`, `MultiDay`, `SevenDays`, `FourteenDays`, `Monthly`, `Seasonal` | Vedi sotto. |
-| `agreementBooking` | `Yes`, `No` | `Yes`: la prenotazione ha una convenzione (`AgreementPartnerId`, o una riga di convenzione non eliminata). `No`: le altre. |
+| `agreementBooking` | `Yes`, `No` | `Yes`: la prenotazione ha una convenzione (`AgreementPartnerId`, o una riga di convenzione non eliminata), anche se la convenzione è stata poi eliminata dall'anagrafica (la riga mostra `null`). `No`: le altre. |
 | `idAffiliatedHotel` | id delle convenzioni (API 3) | Le prenotazioni con una di quelle convenzioni, come `AgreementPartnerId` della `GET`. Un id che non c'è non è un errore: non trova niente. |
-| `paymentStatus` | `unpaid`, `paid`, `partial` | Come `PaymentStatus` della `GET`, ma anche più di uno. |
+| `paymentStatus` | `unpaid`, `paid`, `partial` | Come `PaymentStatus` della `GET`, ma anche più di uno. Una prenotazione con totale 0 è `paid`, mai `unpaid`. |
 
 **`bookingTypology`** oggi nel backend non esiste: c'è solo `HasSeasonalPass`. Il frontend propone questa regola, sui giorni della
 prenotazione (da `StayFrom` a `StayTo`, compresi), che l'agente **conferma con lo sviluppatore**. Ogni prenotazione ha una sola
@@ -99,9 +113,9 @@ tipologia:
 
 Una prenotazione senza date, e senza abbonamento, non ha tipologia.
 
-Un `field` non previsto o ripetuto, un array vuoto, un valore fuori elenco, una data o un UUID che non si legge: 400 `validation.failed`
-con `validation.invalid` su `filters`. `datetimeTo` prima di `datetimeFrom`: `validation.end_before_start` su `filters`. Il frontend non li
-manda.
+Un elemento `null`, un `field` non previsto o ripetuto, un array vuoto o con un `null`, un valore fuori elenco, una data o un UUID che
+non si legge: 400 `validation.failed` con `validation.invalid` su `filters`. `datetimeTo` prima di `datetimeFrom`:
+`validation.end_before_start` su `filters`. Il frontend non li manda.
 
 ### Ordine
 
@@ -155,7 +169,7 @@ il `total` vero. È un DTO con `total` e `rows`, non `PagedResult`.
 | `customerName` | `CustomerCard.FullName` | string o `null` | Come `CustomerName` di `ReservationSummaryDto`. |
 | `reservationKind` | `Kind` | `spot` o `service` | `ReservationSummaryDto` oggi non lo ha. |
 | `dateFrom`, `dateTo` | `StayFrom`, `StayTo` | string (giorno UTC) o `null` | Il giorno a mezzanotte UTC. |
-| `agreementName` | nome della convenzione | string o `null` | La convenzione è quella di `AgreementPartnerId` di `ReservationSummaryDto`; la `GET` dà solo l'id. `null` senza convenzione o se è stata eliminata. |
+| `agreementName` | nome della convenzione | string o `null` | La `GET` dà solo l'id. Con più convenzioni: quella della riga di convenzione non eliminata con l'id interno più basso, altrimenti quella della testata (oggi `Summary` prende la prima senza un ordine). `null` senza convenzione o se è stata eliminata. |
 | `reservationStatus` | `Status` | `pending`, `confirmed` o `cancelled` | |
 | `isTrashed` | `IsTrashed` | boolean | Sempre `false`. |
 
@@ -174,7 +188,7 @@ Tabella del Cestino. Richiesta, filtri, ordine, risposta ed errori sono quelli d
 - **`sortField` `""`**: le ultime messe nel cestino prima (`DeletedAt` decrescente), come oggi.
 - `reservationStatus` è `cancelled` e `isTrashed` `true` in ogni riga.
 
-Il frontend la chiama anche senza ricerca né filtri dopo un ripristino o un'eliminazione, per sapere se il cestino è vuoto (`total` 0).
+Senza ricerca né filtri il frontend usa `total` per sapere se il cestino è vuoto.
 
 ## 3. POST /api/catalog/agreement-partners/agreement-partner-combobox
 
@@ -223,17 +237,32 @@ Per il ripristino di uno stabilimento il caso è già gestito: `ReactivateAfterP
 `OnlineConfirmationState` è in attesa e non tocca quelle annullate per un altro motivo. Se e come correggerlo lo decide lo sviluppatore:
 l'agente glielo segnala. Il frontend non cambia.
 
+**Altri due casi del ripristino** (`TrashService.RestoreAsync`):
+
+- dopo un `SpotUnavailable` al salvataggio non chiama `DiscardChanges()` (come fanno `RenewalService` e `SharingService`): le prenotazioni
+  dopo, nella stessa richiesta, possono risultare non disponibili per sbaglio;
+- una prenotazione in attesa di **pagamento** (`PaymentHoldUntil`, che `CancelForTrash` non tocca) torna confermata come quella in attesa
+  di conferma.
+
+**Affiliato**: vede solo le prenotazioni con una sua postazione (`90-api-booking.md`, "Affiliato"; `CanSeeAsync` in `BookingSupport.cs`), ma
+`ReservationService.ListAsync` e `TrashService` non lo controllano, e il ruolo ha `bookings.delete`: con il cestino vedrebbe le
+prenotazioni, e i clienti, di tutto lo stabilimento. L'agente chiede allo sviluppatore se le API 1 e 2 devono filtrare per le sue
+postazioni (nella query, non dopo la paginazione).
+
 ## Verifica
 
 1. Senza token: 401; senza il permesso: 403 `auth.forbidden` (`bookings.list` per la 1, `bookings.delete` per la 2, `CatalogRead` per la 3);
    con un token senza stabilimento: 403. Le API esistenti rispondono come prima.
-2. `reservation-list` con 12 prenotazioni e `pageSize` 10: `total` 12, 10 righe nella pagina 1, 2 nella 2, nessuna nella 3 con `total` 12.
-   Nessuna prenotazione del cestino o di un altro stabilimento. Una di soli servizi ha `reservationKind` `service`.
-3. Ricerca per nome del cliente, numero di prenotazione e nome della postazione: la prenotazione si trova in tutti e tre i casi.
+2. Un corpo che non si legge: 400. `search`, `sortField` e `filters` assenti: come `""`, `""` e `[]`. `reservation-list` con 12
+   prenotazioni e `pageSize` 10: `total` 12, 10 righe nella pagina 1, 2 nella 2, nessuna nella 3 con `total` 12. Nessuna prenotazione del cestino o di un altro stabilimento. Una di soli servizi ha `reservationKind` `service`.
+3. Ricerca per nome, email e telefono del cliente, numero di prenotazione e nome della postazione (anche tolta dalla mappa): la
+   prenotazione si trova sempre. Con più di 500 clienti che corrispondono, `total` le conta tutte.
 4. Ordine per ognuno dei sei campi, nei due versi, con i valori mancanti in fondo e le pagine coerenti fra loro.
 5. Ogni filtro da solo, due valori dello stesso campo (alternative) e due campi insieme. Periodo di un giorno: solo le prenotazioni che
-   lo toccano. Una prenotazione di 7 giorni con l'abbonamento è solo `Seasonal`.
+   lo toccano, nessuna senza date. Una prenotazione di 7 giorni con l'abbonamento è solo `Seasonal`; una con totale 0 è `paid`. Con due
+   convenzioni si vede quella con l'id interno più basso; con una convenzione eliminata `agreementName` è `null` e il filtro `Yes` la trova.
 6. `page` 0, `pageSize` 25, `sortField` sconosciuto, un filtro con un valore fuori elenco o vuoto, `search` di 101 caratteri: 400 con il suo
    `errors[]`.
-7. `trash-list`: solo le prenotazioni del cestino, le ultime eliminate prima, `isTrashed` `true`. Dopo `POST /api/booking/trash/empty`: `total` 0.
-8. `agreement-partner-combobox`: le stesse convenzioni di `lookup`, con `id` e `value`; una convenzione eliminata non c'è.
+7. `trash-list`: solo le prenotazioni del cestino, le ultime eliminate prima con `sortField` `""`, `isTrashed` `true`; ricerca, filtri, ordine
+   e pagine come la 1. Un affiliato con postazioni limitate: quello che lo sviluppatore ha deciso. Dopo `POST /api/booking/trash/empty`: `total` 0.
+8. `agreement-partner-combobox`: le stesse convenzioni di `lookup`, con `id` e `value`; una convenzione eliminata non c'è; senza convenzioni `[]`.

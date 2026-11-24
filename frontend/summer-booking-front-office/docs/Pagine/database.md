@@ -70,7 +70,8 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
 - Conferma chiama lo spostamento nel cestino con lo spinner su Conferma e il popup bloccato. Password sbagliata sotto il
   campo (`booking.password_invalid`), altri errori sopra i bottoni.
 - Con 2xx il popup si chiude ed emette `confirmed` con il risultato: la pagina svuota la selezione, ricarica la tabella e
-  mostra `app-message-popup` senza titolo, "Gli elementi selezionati sono stati spostati nel cestino", con il solo bottone Ok.
+  mostra `app-message-popup` senza titolo, "Gli elementi selezionati sono stati spostati nel cestino", con il solo bottone Ok (se
+  qualcuna non è riuscita, il motivo al posto del messaggio: vedi "Azioni sulle righe scelte").
 - Chiudendo il popup la password si cancella.
 - Nel popup c'è un campo nome utente nascosto e in sola lettura (`autocomplete="username"`, con l'email dell'utente
   collegato, mai inviato), come consiglia Chrome per i moduli di sola password: senza, il gestore delle password del
@@ -110,8 +111,8 @@ Rotta `/settings/database`, vista `views/settings/database/` (`Database`). Il Ce
   ricarica. Se riesce le righe scelte si svuotano; se fallisce l'errore va nel popup "Operazione non riuscita"
   (`app-alert-popup`, icona `GeneralIcon_Warning.svg`).
 - È spento quando il cestino è vuoto (`isTrashEmpty`): totale 0 della lista del cestino letta senza ricerca né filtri,
-  così una ricerca senza risultati non lo spegne. Dopo Ripristina o Elimina definitivamente riusciti la pagina rilegge
-  il totale senza ricerca né filtri; dopo Svuota cestino riuscito lo spegne subito.
+  così una ricerca senza risultati non lo spegne; all'apertura è spento finché la lista non arriva. Dopo Svuota cestino riuscito
+  si spegne subito. Con una ricerca o un filtro può restare acceso a cestino vuoto: premerlo non fa danni.
 
 ### Ripristina ed Elimina definitivamente
 
@@ -137,6 +138,7 @@ In `DatabaseService` (lo stabilimento lo prende il backend dal token):
 - `POST /api/booking/trash/trash-list` (`trashItemList`): stesso corpo e stessa risposta.
 - `POST /api/catalog/agreement-partners/agreement-partner-combobox` (`affiliatedHotelCombobox`): POST senza corpo,
   `ComboboxItem[]`.
+- `POST /api/booking/trash/empty` (`emptyTrash`): POST senza corpo; la risposta `{ purged }` non si usa.
 - `POST /api/booking/cleanup/move-to-trash` (`moveToTrash`): corpo `{ ids, password }`, risposta `BulkResult`.
 - `POST /api/booking/trash/restore` (`restoreBookingItem`): corpo `{ ids }`, l'array degli id delle righe scelte, risposta
   `BulkResult`.

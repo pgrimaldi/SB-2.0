@@ -168,7 +168,7 @@
   [(open)]="isDeleteForeverAsked"
   (confirmed)="isDeleteForeverAsked.set(false); deleteForever(table)"
 />
-<app-page-spinner [isLoading]="isEmptyingTrash() || isRestoring() || isDeletingForever()" />
+<app-page-spinner [isLoading]="isRunning()" />
 <app-alert-popup
   [title]="'alert.error_title' | translate"
   [text]="actionErrorMessage() ?? ''"

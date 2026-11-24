@@ -122,7 +122,8 @@
       "reservation_not_found": "Una o più prenotazioni non ci sono più.",
       "reservation_not_in_trash": "Una o più prenotazioni non sono più nel cestino.",
       "restore_window_expired": "Una o più prenotazioni non si possono più ripristinare: sono nel cestino da più di 30 giorni.",
-      "spot_unavailable": "Una o più postazioni non sono più libere nei giorni della prenotazione."
+      "spot_unavailable": "Una o più postazioni non sono più libere nei giorni della prenotazione.",
+      "version_conflict": "Nel frattempo una prenotazione è stata modificata: riprova."
     },
     "payment": {
       "property_required": "Il tuo account non è collegato a uno stabilimento: accedi con un account dello stabilimento."

@@ -122,7 +122,8 @@
       "reservation_not_found": "一个或多个预订已不存在。",
       "reservation_not_in_trash": "一个或多个预订已不在回收站中。",
       "restore_window_expired": "一个或多个预订无法再恢复：它们在回收站中已超过 30 天。",
-      "spot_unavailable": "一个或多个位置在预订日期内已不再空闲。"
+      "spot_unavailable": "一个或多个位置在预订日期内已不再空闲。",
+      "version_conflict": "期间有预订被修改，请重试。"
     },
     "payment": {
       "property_required": "您的账户未关联任何浴场：请使用浴场的账户登录。"
@@ -894,13 +895,13 @@
         },
         "empty_trash": {
           "title": "清空回收站",
-          "text": "你正在清空回收站。\n所有数据将被永久删除。此操作不可撤销。",
+          "text": "您正在清空回收站。\n所有数据将被永久删除。此操作不可撤销。",
           "cancel": "取消",
           "confirm": "确认"
         },
         "delete_forever": {
           "title": "永久删除",
-          "text": "你正在永久删除所选项目。",
+          "text": "您正在永久删除所选项目。",
           "cancel": "取消",
           "confirm": "确认"
         }

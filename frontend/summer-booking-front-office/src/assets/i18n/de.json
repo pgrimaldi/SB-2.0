@@ -122,7 +122,8 @@
       "reservation_not_found": "Eine oder mehrere Buchungen gibt es nicht mehr.",
       "reservation_not_in_trash": "Eine oder mehrere Buchungen sind nicht mehr im Papierkorb.",
       "restore_window_expired": "Eine oder mehrere Buchungen können nicht mehr wiederhergestellt werden: Sie sind seit mehr als 30 Tagen im Papierkorb.",
-      "spot_unavailable": "Ein oder mehrere Plätze sind an den Tagen der Buchung nicht mehr frei."
+      "spot_unavailable": "Ein oder mehrere Plätze sind an den Tagen der Buchung nicht mehr frei.",
+      "version_conflict": "Eine Buchung wurde inzwischen geändert: Versuche es noch einmal."
     },
     "payment": {
       "property_required": "Dein Konto ist mit keinem Strandbad verbunden: Melde dich mit einem Konto des Strandbads an."
@@ -889,7 +890,7 @@
           "title": "Papierkorb",
           "expiry": "Nach 30 Tagen im Papierkorb werden die Buchungen automatisch gelöscht.",
           "empty": "Alles leeren",
-          "restore": "Zurück",
+          "restore": "Wiederherstellen",
           "delete_forever": "Endgültig löschen"
         },
         "empty_trash": {

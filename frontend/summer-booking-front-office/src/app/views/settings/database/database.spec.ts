@@ -13,8 +13,10 @@ import { Database } from './database';
 
 describe('Database', () => {
   const setup = async (result: BulkResult) => {
-    const trashItemList = vi.fn(() => of({ total: 0, rows: [] }));
+    const trashItemList = vi.fn(() => of({ total: 1, rows: [] }));
     const restoreBookingItem = vi.fn(() => of(result));
+    const deleteSelectedItem = vi.fn(() => of(result));
+    const emptyTrash = vi.fn(() => of(undefined));
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -22,7 +24,10 @@ describe('Database', () => {
         provideNativeDateAdapter(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         { provide: ActivatedRoute, useValue: { snapshot: { data: { isTrash: true } } } },
-        { provide: DatabaseService, useValue: { trashItemList, restoreBookingItem } },
+        {
+          provide: DatabaseService,
+          useValue: { trashItemList, restoreBookingItem, deleteSelectedItem, emptyTrash },
+        },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
     });
@@ -49,9 +54,25 @@ describe('Database', () => {
       fixture.componentInstance['idSelectedBookings'].set(ids);
       await fixture.whenStable();
     };
-    const restore = () =>
-      fixture.nativeElement.querySelector('.database__restore button') as HTMLButtonElement;
-    return { fixture, select, restore, trashItemList, restoreBookingItem };
+    const button = (name: string) =>
+      fixture.nativeElement.querySelector(`.database__${name} button`) as HTMLButtonElement;
+    const confirm = async () => {
+      [...document.querySelectorAll<HTMLButtonElement>('.confirm__popup__actions button')]
+        .at(-1)!
+        .click();
+      await fixture.whenStable();
+    };
+    return {
+      fixture,
+      select,
+      button,
+      restore: () => button('restore'),
+      confirm,
+      trashItemList,
+      restoreBookingItem,
+      deleteSelectedItem,
+      emptyTrash,
+    };
   };
 
   afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
@@ -67,7 +88,7 @@ describe('Database', () => {
     restore().click();
     await fixture.whenStable();
     expect(restoreBookingItem).toHaveBeenCalledWith(['b1', 'b2']);
-    expect(trashItemList).toHaveBeenCalled();
+    expect(trashItemList).toHaveBeenCalledTimes(1);
     expect(restore().disabled).toBe(true); // nothing chosen any more
     expect(document.querySelector('.alert__popup')).toBeNull();
   });
@@ -83,6 +104,25 @@ describe('Database', () => {
     await fixture.whenStable();
     expect(document.querySelector('.alert__popup')?.textContent).toContain('error.unknown');
     expect(restore().disabled).toBe(true);
+  });
+
+  it('should delete for good and empty the trash only once confirmed', async () => {
+    const result = { succeeded: ['b1'], failed: [] };
+    const { fixture, select, button, confirm, deleteSelectedItem, emptyTrash } =
+      await setup(result);
+    await select(['b1']);
+
+    button('delete__forever').click();
+    await fixture.whenStable();
+    expect(deleteSelectedItem).not.toHaveBeenCalled();
+    await confirm();
+    expect(deleteSelectedItem).toHaveBeenCalledWith(['b1']);
+
+    button('empty__trash').click();
+    await fixture.whenStable();
+    expect(emptyTrash).not.toHaveBeenCalled();
+    await confirm();
+    expect(emptyTrash).toHaveBeenCalledTimes(1);
   });
 
   it('should not act on more bookings than the backend takes at a time', async () => {

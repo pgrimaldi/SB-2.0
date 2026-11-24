@@ -48,6 +48,7 @@ export enum ApiErrorCode {
   BookingReservationNotInTrash = 'booking.reservation_not_in_trash',
   BookingRestoreWindowExpired = 'booking.restore_window_expired',
   BookingSpotUnavailable = 'booking.spot_unavailable',
+  BookingVersionConflict = 'booking.version_conflict',
   PaymentPropertyRequired = 'payment.property_required',
   NotificationPropertyRequired = 'notification.property_required',
   NotificationTestEmailFailed = 'notification.test_email_failed',

@@ -121,8 +121,9 @@
       "password_invalid": "Mot de passe incorrect.",
       "reservation_not_found": "Une ou plusieurs réservations n'existent plus.",
       "reservation_not_in_trash": "Une ou plusieurs réservations ne sont plus dans la corbeille.",
-      "restore_window_expired": "Une ou plusieurs réservations ne peuvent plus être restaurées : elles sont dans la corbeille depuis plus de 30 jours.",
-      "spot_unavailable": "Un ou plusieurs emplacements ne sont plus libres aux jours de la réservation."
+      "restore_window_expired": "Une ou plusieurs réservations ne peuvent plus être rétablies : elles sont dans la corbeille depuis plus de 30 jours.",
+      "spot_unavailable": "Un ou plusieurs emplacements ne sont plus libres aux jours de la réservation.",
+      "version_conflict": "Une réservation a été modifiée entre-temps : réessayez."
     },
     "payment": {
       "property_required": "Votre compte n'est lié à aucun établissement : connectez-vous avec un compte de l'établissement."

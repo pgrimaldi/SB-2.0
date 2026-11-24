@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  WritableSignal,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateAdapter } from '@angular/material/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -70,7 +63,7 @@ import { FilterField } from '../../../entities/enums/filter-field';
 import { ReservationKind } from '../../../entities/enums/reservation-kind';
 import { ReservationStatus } from '../../../entities/enums/reservation-status';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { DEFAULT_PAGE_SIZE, PageFilter } from '../../../entities/pagination/page';
+import { PageFilter } from '../../../entities/pagination/page';
 import { BulkResult } from '../../../entities/shared/bulk-result';
 import { DateRange } from '../../../entities/shared/date-range';
 import { DatabaseService } from '../../../services/api/database/database.service';
@@ -162,12 +155,10 @@ export class Database {
   protected readonly canAct = computed(() => !!this.idBookings().length && !this.isOverLimit());
   protected readonly isDeleteAsked = signal(false);
   protected readonly isTrashedShown = signal(false);
-  protected readonly isEmptyingTrash = signal(false);
   protected readonly isEmptyTrashAsked = signal(false);
-  protected readonly isTrashEmpty = signal(false);
-  protected readonly isRestoring = signal(false);
+  protected readonly isTrashEmpty = signal(true);
   protected readonly isDeleteForeverAsked = signal(false);
-  protected readonly isDeletingForever = signal(false);
+  protected readonly isRunning = signal(false);
   protected readonly closeIcon = ['/assets/images/GeneralIcon_Close.svg'] as const;
   protected readonly isActionErrorShown = signal(false);
   /** [X, warning]. */
@@ -337,20 +328,6 @@ export class Database {
       ),
     );
 
-  private toRow(
-    item: ExistingBookingItem,
-    texts: DatabaseTexts,
-    day: Intl.DateTimeFormat,
-  ): ExistingBookingRow {
-    return {
-      ...item,
-      reservationKind: item.reservationKind && texts.reservation_kind[item.reservationKind],
-      dateFrom: item.dateFrom ? day.format(new Date(item.dateFrom)) : null,
-      dateTo: item.dateTo ? day.format(new Date(item.dateTo)) : null,
-      reservationStatus: item.reservationStatus && texts.reservation_status[item.reservationStatus],
-    };
-  }
-
   protected removeChip(chip: BookingFilterChip): void {
     this.bookingFilters.update((filters) => ({ ...filters, ...chip.emptied }));
   }
@@ -362,56 +339,50 @@ export class Database {
     }
   }
 
-  /** The page waits under a spinner; then the table is read again, whatever the answer. */
+  protected openTrash(): void {
+    void this.router.navigateByUrl('/settings/database/trash');
+  }
+
+  protected clearFilters(): void {
+    this.bookingFilters.set(new ExistingBookingFilters());
+    this.dateRange.set(null);
+  }
+
   protected emptyTrash(table: Table<ExistingBookingRow, object>): void {
-    this.run(this.isEmptyingTrash, this.database.emptyTrash(), table, () =>
-      this.isTrashEmpty.set(true),
-    );
+    this.run(this.database.emptyTrash(), table, () => this.isTrashEmpty.set(true));
   }
 
   protected restore(table: Table<ExistingBookingRow, object>): void {
-    this.run(
-      this.isRestoring,
-      this.database.restoreBookingItem(this.idBookings()),
-      table,
-      (result) => {
-        this.showFailure(result);
-        this.readIsTrashEmpty();
-      },
+    this.run(this.database.restoreBookingItem(this.idBookings()), table, (result) =>
+      this.showFailure(result),
     );
   }
 
   protected deleteForever(table: Table<ExistingBookingRow, object>): void {
-    this.run(
-      this.isDeletingForever,
-      this.database.deleteSelectedItem(this.idBookings()),
-      table,
-      (result) => {
-        this.showFailure(result);
-        this.readIsTrashEmpty();
-      },
+    this.run(this.database.deleteSelectedItem(this.idBookings()), table, (result) =>
+      this.showFailure(result),
     );
   }
 
+  /** The page waits under a spinner; then the table is read again, whatever the answer. */
   private run<T>(
-    isRunning: WritableSignal<boolean>,
     call: Observable<T>,
     table: Table<ExistingBookingRow, object>,
     done: (answer: T) => void,
   ): void {
-    if (isRunning() || !this.auth.user()?.propertyId) {
+    if (this.isRunning() || !this.auth.user()?.propertyId) {
       return;
     }
-    isRunning.set(true);
+    this.isRunning.set(true);
     call.subscribe({
       next: (answer) => {
-        isRunning.set(false);
+        this.isRunning.set(false);
         this.idSelectedBookings.set([]);
         done(answer);
         table.reload();
       },
       error: (error: unknown) => {
-        isRunning.set(false);
+        this.isRunning.set(false);
         this.showError(toApiProblem(error));
         table.reload();
       },
@@ -431,27 +402,19 @@ export class Database {
     this.isActionErrorShown.set(true);
   }
 
-  // The table may be showing a search or filters: its total is not the whole trash.
-  private readIsTrashEmpty(): void {
-    this.database
-      .trashItemList({
-        page: 1,
-        pageSize: DEFAULT_PAGE_SIZE,
-        search: '',
-        filters: [],
-        sortField: '',
-        sortDirection: 'Ascending',
-      })
-      .subscribe({ next: (page) => this.isTrashEmpty.set(page.total === 0) });
-  }
-
-  protected openTrash(): void {
-    void this.router.navigateByUrl('/settings/database/trash');
-  }
-
-  protected clearFilters(): void {
-    this.bookingFilters.set(new ExistingBookingFilters());
-    this.dateRange.set(null);
+  private toRow(
+    item: ExistingBookingItem,
+    texts: DatabaseTexts,
+    day: Intl.DateTimeFormat,
+  ): ExistingBookingRow {
+    const { reservationKind: kind, reservationStatus: status } = item;
+    return {
+      ...item,
+      reservationKind: kind && (texts.reservation_kind[kind] ?? kind),
+      dateFrom: item.dateFrom ? day.format(new Date(item.dateFrom)) : null,
+      dateTo: item.dateTo ? day.format(new Date(item.dateTo)) : null,
+      reservationStatus: status && (texts.reservation_status[status] ?? status),
+    };
   }
 }
 

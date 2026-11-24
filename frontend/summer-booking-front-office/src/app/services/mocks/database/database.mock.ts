@@ -280,7 +280,7 @@ function bookingPageMock(
     dateFrom: row.dateFrom,
     dateTo: row.dateTo,
     agreementName: row.agreementName,
-    reservationStatus: row.reservationStatus,
+    reservationStatus: isTrash ? ReservationStatus.Cancelled : row.reservationStatus,
     isTrashed: isTrash,
   }));
 

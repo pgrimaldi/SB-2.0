@@ -122,7 +122,8 @@
       "reservation_not_found": "Una o más reservas ya no existen.",
       "reservation_not_in_trash": "Una o más reservas ya no están en la papelera.",
       "restore_window_expired": "Una o más reservas ya no se pueden restaurar: llevan más de 30 días en la papelera.",
-      "spot_unavailable": "Una o más plazas ya no están libres en los días de la reserva."
+      "spot_unavailable": "Uno o más puestos ya no están libres en los días de la reserva.",
+      "version_conflict": "Mientras tanto se ha modificado una reserva: inténtalo de nuevo."
     },
     "payment": {
       "property_required": "Tu cuenta no está vinculada a ningún establecimiento: inicia sesión con una cuenta del establecimiento."
