@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BookingLimitRule } from '../../../entities/settings/online-booking-configuration/booking-limit-rule';
-import { LegendItemRequest } from '../../../entities/settings/online-booking-configuration/legend-item-request';
+import { LegendItem } from '../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../entities/settings/online-booking-configuration/online-booking-options';
 import { OnlineBookingOptionsUpdateRequest } from '../../../entities/settings/online-booking-configuration/online-booking-options-update-request';
 import { OnlineBookingPeriod } from '../../../entities/settings/online-booking-configuration/online-booking-period';
@@ -33,7 +33,9 @@ export class OnlineSettingsService {
       .pipe(map(versionOf));
 
   readonly onlineServicesOptions = (): Observable<OnlineBookingServicesOptions> =>
-    this.httpClient.get<OnlineBookingServicesOptions>(`${this.endpoint}/services`);
+    this.httpClient
+      .get<OnlineBookingServicesOptions>(`${this.endpoint}/services`)
+      .pipe(map((answer) => onlyFieldsOf(OnlineBookingServicesOptions, answer)));
 
   /** Every option, changed or not. Gives back the new version. */
   readonly updateOnlineServicesOptions = (
@@ -52,6 +54,12 @@ export class OnlineSettingsService {
 /** The backend sends and takes days (`2026-05-01`) and times with the seconds; the form wants midnight UTC and `HH:mm`. */
 function optionsOf(answer: OnlineBookingOptions): OnlineBookingOptions {
   const options = onlyFieldsOf(OnlineBookingOptions, answer);
+  // A field the server does not know would be saved empty: the reading fails instead.
+  for (const field of Object.keys(new OnlineBookingOptionsUpdateRequest())) {
+    if (options[field as keyof OnlineBookingOptions] === undefined) {
+      throw new Error(`Missing ${field} in the online booking options.`);
+    }
+  }
   return {
     ...options,
     allowedPeriods: options.allowedPeriods.map((period) => ({
@@ -71,7 +79,7 @@ function optionsOf(answer: OnlineBookingOptions): OnlineBookingOptions {
   };
 }
 
-function bodyOf(options: OnlineBookingOptionsUpdateRequest): object {
+function bodyOf(options: OnlineBookingOptionsUpdateRequest): OnlineBookingOptionsUpdateRequest {
   return {
     ...onlyFieldsOf(OnlineBookingOptionsUpdateRequest, options),
     allowedPeriods: options.allowedPeriods.map((period) => ({
@@ -84,7 +92,7 @@ function bodyOf(options: OnlineBookingOptionsUpdateRequest): object {
       startsOn: dayOf(rule.startsOn),
       endsOn: dayOf(rule.endsOn),
     })),
-    legend: options.legend.map((item) => onlyFieldsOf(LegendItemRequest, item)),
+    legend: options.legend.map((item) => onlyFieldsOf(LegendItem, item)),
   };
 }
 

@@ -3,9 +3,7 @@ import { SupplementType } from '../../enums/supplement-type';
 
 export const MAX_SURCHARGE_PERCENTAGE = 100;
 export const MAX_SURCHARGE_AMOUNT = 10_000;
-/** HTML characters, formatting included. */
 export const MAX_SERVICES_SECTION_TITLE_LENGTH = 2000;
-/** HTML characters, formatting included. */
 export const MAX_ONLINE_USEFUL_INFO_LENGTH = 10_000;
 
 export class OnlineBookingServicesOptionsUpdateRequest {

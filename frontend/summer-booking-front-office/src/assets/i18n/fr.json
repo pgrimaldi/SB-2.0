@@ -127,7 +127,7 @@
       "export_too_large": "Il y a {total, number, integer} entrées à exporter, mais on peut en exporter au maximum {max, number, integer} : réduisez la période ou les filtres et réessayez."
     },
     "map": {
-      "spot_not_found": "La zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
+      "spot_not_found": "Une place ou une zone de la carte n'existe plus : elle a peut-être déjà été supprimée.",
       "spots_outside_grid": "Des emplacements sont hors de ces dimensions : il faut au moins {{rows}} rangées et {{columns}} articles par rangée.",
       "invalid_image": "L'image doit être au format PNG, JPEG ou WebP et ne pas dépasser 5 Mo.",
       "icon_not_found": "L'icône n'existe plus : choisissez-en une autre."
@@ -397,7 +397,12 @@
           "configure": "Configurer le compte Stripe",
           "how_it_works": "Comment ça marche :",
           "step_1": "Connectez-vous ou inscrivez-vous sur Stripe",
-          "step_2": "Recevez et effectuez des paiements facilement"
+          "step_2": "Recevez et effectuez des paiements facilement",
+          "blocked": {
+            "title": "Connexion non démarrée",
+            "text": "Le navigateur bloque le stockage de la page : autorisez-le pour ce site et réessayez.",
+            "close": "Fermer"
+          }
         },
         "options": {
           "title": "Gérer les options",
@@ -408,8 +413,8 @@
           "title": "Code iframe pour votre site web",
           "subtitle": "Permettez à vos clients de réserver parasols, transats et services directement depuis votre site en quelques clics.",
           "description": "Copiez et collez le code d'intégration dans la section souhaitée de votre site. Le widget synchronise les disponibilités en temps réel avec le plan du logiciel.",
-          "direct_link": "Lien direct",
-          "copy": "Copier le lien",
+          "direct_link": "Code d'intégration",
+          "copy": "Copier le code",
           "copied": {
             "title": "Code copié",
             "text": "Collez-le dans la page de votre site.",
@@ -419,7 +424,8 @@
             "title": "Code non copié",
             "text": "Sélectionnez le code et copiez-le à la main.",
             "close": "Fermer"
-          }
+          },
+          "no_address": "L'établissement n'a pas encore d'adresse sur le site public : le code apparaîtra ici dès qu'il en aura une."
         },
         "booking_options": {
           "title": "Options réservations en ligne",
@@ -480,8 +486,9 @@
           "legend": {
             "title": "Configurer la légende",
             "add": "Ajouter un élément",
-            "name_placeholder": "Nom de l'élément",
-            "choose_icon": "Choisir une icône"
+            "choose_icon": "Choisir une icône",
+            "name": "Nom de l'élément",
+            "no_icons": "Aucune icône disponible."
           },
           "payment_methods": {
             "title": "Moyens de paiement acceptés",
@@ -498,9 +505,9 @@
             "sector": "Rangée/secteur",
             "date_from": "Du",
             "date_to": "Au",
-            "min": "Min",
-            "max": "Max",
-            "missing_sector": "Secteur/rangée n'est plus disponible"
+            "min": "Jours min",
+            "max": "Jours max",
+            "missing_sector": "Rangée/secteur indisponible"
           },
           "periods": {
             "hint": "Cliquez sur deux dates pour choisir une période",
@@ -2164,7 +2171,8 @@
     "online_booking_configuration": {
       "periods": {
         "overlap": "Deux plages de dates se chevauchent.",
-        "max": "Au maximum {{max}} plages de dates."
+        "max": "Au maximum {{max}} plages de dates.",
+        "required": "Choisissez au moins une plage de dates."
       },
       "booking_limits": {
         "days_required": "Indiquez au moins un minimum ou un maximum de jours.",

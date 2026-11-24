@@ -51,7 +51,9 @@ header di sicurezza e CSP.
 - Nello storage restano solo segni non segreti:
   - `sb.signed-in` dice all'avvio se provare a rinnovare la sessione; sta in `sessionStorage` (segno della scheda) o,
     con "Ricordami", in `localStorage` (segno condiviso);
-  - `sb.session-name` è il nome della sessione (vedi "Sessione su più schede").
+  - `sb.session-name` è il nome della sessione (vedi "Sessione su più schede");
+  - `sb.stripe-connect-state`, in `sessionStorage`, è il valore casuale mandato a Stripe Connect, da ritrovare al ritorno; si
+    toglie quando la sessione finisce nella scheda.
 - L'access token si allega alle chiamate solo tramite l'interceptor (`services/api/auth.interceptor.ts`) e solo verso
   l'API dell'applicazione, mai verso domini terzi.
 - Login, rinnovo e logout (`POST /api/identity/auth/login`, `/refresh`, `/logout`) usano solo il cookie del refresh

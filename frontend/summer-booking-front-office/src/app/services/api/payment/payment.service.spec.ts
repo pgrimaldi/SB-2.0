@@ -11,16 +11,19 @@ describe('PaymentService', () => {
     });
     const payment = TestBed.inject(PaymentService);
     const controller = TestBed.inject(HttpTestingController);
+    let account: string | null | undefined;
 
-    payment.stripeInformation().subscribe();
+    payment.stripeInformation().subscribe((answer) => (account = answer));
 
-    const request = controller.expectOne(
+    const call = controller.expectOne(
       ({ method, url, params }) =>
         method === 'GET' &&
         url === `${environment.apiBaseUrl}/payment/get-stripe-information` &&
         params.keys().length === 0,
-    ).request;
-    expect(request.body).toBeNull();
+    );
+    expect(call.request.body).toBeNull();
+    call.flush(null);
+    expect(account).toBeNull();
     controller.verify();
   });
 });

@@ -24,6 +24,7 @@ import {
   ValidationError,
   applyEach,
   applyWhen,
+  disabled,
   form,
   max,
   metadata,
@@ -42,7 +43,10 @@ import {
   UnsavedChangesBehaviour,
 } from '../../../../../behaviours/forms/unsaved-changes.behaviour';
 import { fileLinkOf } from '../../../../../behaviours/files/file-link';
-import { apiFieldErrorsOrGeneral } from '../../../../../behaviours/validation/api-field-errors';
+import {
+  apiFieldErrorsOrGeneral,
+  clearApiFieldErrors,
+} from '../../../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../../../behaviours/validation/validation-text.behaviour';
 import { MapIconCategory } from '../../../../../entities/enums/map-icon-category';
 import { OnlineBookingAudience } from '../../../../../entities/enums/online-booking-audience';
@@ -56,11 +60,11 @@ import {
   BookingLimitRule,
   MAX_BOOKING_LIMIT_DAYS,
 } from '../../../../../entities/settings/online-booking-configuration/booking-limit-rule';
-import { LegendItem } from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import {
+  LegendItem,
   MAX_LEGEND_ITEM_QUANTITY,
   MAX_LEGEND_LABEL_LENGTH,
-} from '../../../../../entities/settings/online-booking-configuration/legend-item-request';
+} from '../../../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../../../entities/settings/online-booking-configuration/online-booking-options';
 import { OnlineBookingOptionsDraft } from '../../../../../entities/settings/online-booking-configuration/online-booking-options-draft';
 import {
@@ -79,8 +83,9 @@ import { OnlineSettingsService } from '../../../../../services/api/catalog/onlin
 import { SectorService } from '../../../../../services/api/catalog/sector.service';
 import { toApiProblem } from '../../../../../services/api/errors/to-api-problem';
 import { onlyFieldsOf } from '../../../../../services/api/only-fields-of';
-import { showFirstError } from '../../../../shared/forms/first-error';
+import { showFirstError, showMessage } from '../../../../shared/forms/first-error';
 import {
+  MaxLengthError,
   maxHtmlLength,
   rangesOverlap,
   requiredText,
@@ -89,6 +94,7 @@ import {
 import { Button, ButtonAppearance, ButtonSize } from '../../../../shared/ui/buttons/button/button';
 import { IconButton } from '../../../../shared/ui/buttons/icon-button/icon-button';
 import { Checkbox } from '../../../../shared/ui/checkboxes/checkbox/checkbox';
+import { DATA_RELOAD } from '../../../../shared/ui/data/data-reload';
 import { PeriodCalendar } from '../../../../shared/ui/datepickers/period-calendar/period-calendar';
 import {
   IconPickerPopup,
@@ -108,11 +114,12 @@ import { SectionTitle } from '../../../../shared/ui/titles/section-title/section
 import { Toggle } from '../../../../shared/ui/toggles/toggle/toggle';
 import { comparableJson } from '../../../../shared/forms/text-comparison';
 import { ReadErrorPopup } from '../../../read-error-popup/read-error-popup';
+import { optionsWithMissing } from '../../catalog/options-with-missing';
 import { VersionConflictPopup } from '../../../version-conflict-popup/version-conflict-popup';
 
 interface BookingOptionsTexts {
   supplement_types: Record<'none' | 'percentage' | 'fixed', string>;
-  online_booking_blocks: Record<OnlineBookingBlockKey, string>;
+  online_booking_blocks: Record<OnlineBookingBlock, string>;
   online_booking_audiences: Record<'all' | 'contacts_only', string>;
   booking_limits: { missing_sector: string };
   yes: string;
@@ -124,8 +131,8 @@ interface OnlineBookingError extends ValidationError {
   readonly max?: number;
 }
 
-/** The kinds of error of this form: `invalidate.<kind>`. */
 enum OnlineBookingErrorKind {
+  PeriodsRequired = 'online_booking_configuration.periods.required',
   PeriodsOverlap = 'online_booking_configuration.periods.overlap',
   TooManyPeriods = 'online_booking_configuration.periods.max',
   LimitWithoutDays = 'online_booking_configuration.booking_limits.days_required',
@@ -138,27 +145,6 @@ enum Answer {
   Yes = 'Yes',
   No = 'No',
 }
-
-type OnlineBookingBlockKey =
-  | 'disabled'
-  | 'three_hours_before'
-  | 'five_hours_before'
-  | 'eight_hours_before'
-  | 'twelve_hours_before'
-  | 'twenty_four_hours_before'
-  | 'forty_eight_hours_before'
-  | 'seventy_two_hours_before';
-
-const ONLINE_BOOKING_BLOCK_KEYS: Readonly<Record<OnlineBookingBlock, OnlineBookingBlockKey>> = {
-  [OnlineBookingBlock.Disabled]: 'disabled',
-  [OnlineBookingBlock.ThreeHoursBefore]: 'three_hours_before',
-  [OnlineBookingBlock.FiveHoursBefore]: 'five_hours_before',
-  [OnlineBookingBlock.EightHoursBefore]: 'eight_hours_before',
-  [OnlineBookingBlock.TwelveHoursBefore]: 'twelve_hours_before',
-  [OnlineBookingBlock.TwentyFourHoursBefore]: 'twenty_four_hours_before',
-  [OnlineBookingBlock.FortyEightHoursBefore]: 'forty_eight_hours_before',
-  [OnlineBookingBlock.SeventyTwoHoursBefore]: 'seventy_two_hours_before',
-};
 
 @Component({
   selector: 'app-online-booking-options-panel',
@@ -195,6 +181,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
 
   private readonly translateService = inject(TranslateService);
   private readonly auth = inject(AuthBehaviour);
+  private readonly dataReload = inject(DATA_RELOAD, { optional: true });
   private readonly injector = inject(EnvironmentInjector);
   private readonly mapService = inject(MapService);
   private readonly onlineSettings = inject(OnlineSettingsService);
@@ -216,6 +203,7 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   protected readonly calendarIcon = ['/assets/images/GeneralIcon_Calendar.svg'] as const;
   protected readonly addIcon = ['/assets/images/OnlineBookingConfiguration_AddRule.svg'] as const;
   protected readonly removeIcon = ['/assets/images/GeneralIcon_Delete.svg'] as const;
+  protected readonly emptyIconIcon = ['/assets/images/GeneralIcon_CloseRed.svg'] as const;
   /** [bold, italic, underline, bulleted list, numbered list, link]. */
   protected readonly richTextIcons = [
     '/assets/images/GeneralIcon_Bold.svg',
@@ -257,23 +245,25 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     () => (this.auth.user()?.propertyId ? this.sectorService.sectorCombobox() : EMPTY),
     this.errorText,
   );
-  /** A saved sector that is not in the list any more stays chosen, with its own text. */
-  protected readonly sectorOptions = computed<readonly SelectOption[]>(() => {
-    const options = this.sectors.items().map(({ id, value }) => ({ value: id, label: value }));
-    const missing = this.sectors.isRead()
-      ? this.draft().stayLimits.flatMap(({ sectorId }) =>
-          sectorId && !options.some(({ value }) => value === sectorId) ? [sectorId] : [],
-        )
-      : [];
-    return [
-      ...options,
-      ...[...new Set(missing)].map((value) => ({
-        value,
-        label: this.texts()?.booking_limits.missing_sector ?? '',
-      })),
-    ];
+  protected readonly sectorOptions = computed<readonly SelectOption[]>(() =>
+    optionsWithMissing(
+      this.sectors,
+      [...new Set(this.draft().stayLimits.map(({ sectorId }) => sectorId))].filter(
+        (sectorId) => sectorId !== null,
+      ),
+      this.texts()?.booking_limits.missing_sector ?? '',
+    ),
+  );
+  /** The days of the other rules of the same sector, for each rule. */
+  protected readonly takenPeriods = computed<readonly (readonly BookingLimitRule[])[]>(() => {
+    const rules = this.draft().stayLimits;
+    return rules.map(({ sectorId }, index) =>
+      rules.filter(
+        (other, otherIndex) =>
+          otherIndex !== index && sectorId !== null && other.sectorId === sectorId,
+      ),
+    );
   });
-  /** The icons of the legend: those of the map, without its backgrounds. */
   protected readonly icons = new DropdownList<MapCatalogIcon>(
     () => this.mapService.iconCatalog(),
     this.errorText,
@@ -284,10 +274,9 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
       return id && link && category !== MapIconCategory.Template ? [{ value: id, url: link }] : [];
     }),
   );
-  /** The element of the legend whose icon is being chosen. */
   protected readonly pickingItem = signal<number | null>(null);
   protected readonly isPickerOpen = computed(
-    () => this.pickingItem() !== null && this.icons.isRead(),
+    () => this.open() && this.pickingItem() !== null && this.icons.isRead(),
   );
   protected readonly isFetchingIcons = computed(
     () => this.pickingItem() !== null && !this.icons.isRead() && !this.icons.loadError(),
@@ -301,11 +290,21 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   /** The values as the API gave them: the form is compared with them. */
   private loaded = new OnlineBookingOptionsDraft();
   private version: string | null = null;
-  /** Whether a supplement was chosen: only a change by the user empties its value, never a reading. */
-  private hadSupplement = false;
+  /** Only a change of the type by the user empties the value, never a reading. */
+  private shownType = SupplementType.None;
   protected readonly draftForm = form(this.draft, (path) => {
-    validate(path.allowedPeriods, ({ value }): OnlineBookingError | undefined => {
+    disabled(
+      path.isLocationRestricted,
+      ({ value, valueOf }) => !value() && !valueOf(path.allowedSpotIds).length,
+    );
+    validate(path.allowedPeriods, ({ value, valueOf }): OnlineBookingError | undefined => {
       const periods = value();
+      if (!valueOf(path.isPeriodRestricted)) {
+        return undefined;
+      }
+      if (!periods.length) {
+        return { kind: OnlineBookingErrorKind.PeriodsRequired };
+      }
       if (periods.length > MAX_ONLINE_BOOKING_PERIOD_QUANTITY) {
         return {
           kind: OnlineBookingErrorKind.TooManyPeriods,
@@ -331,13 +330,20 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
         );
       },
     );
-    timeRange(path.morningFrom, path.morningTo);
-    timeRange(path.afternoonFrom, path.afternoonTo);
+    applyWhen(
+      path,
+      ({ value }) => value().allowsHalfDay,
+      (chosen) => {
+        timeRange(chosen.morningFrom, chosen.morningTo);
+        timeRange(chosen.afternoonFrom, chosen.afternoonTo);
+      },
+    );
     applyWhen(
       path.afternoonConversionTime,
       ({ valueOf }) => valueOf(path.isAfternoonConversionEnabled),
       (time) => required(time),
     );
+    required(path.onlineBookingBlock);
     min(path.maxSpotsPerBooking, 1);
     max(path.maxSpotsPerBooking, MAX_ONLINE_BOOKING_QUANTITY);
     min(path.bookingHorizonDays, 0);
@@ -374,6 +380,11 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     applyEach(path.legend, (item) => {
       requiredText(item.label);
       metadata(item.label, MAX_LENGTH, () => MAX_LEGEND_LABEL_LENGTH);
+      validate(item.label, ({ value }): MaxLengthError | undefined =>
+        (value()?.length ?? 0) > MAX_LEGEND_LABEL_LENGTH
+          ? { kind: 'max_length', max: MAX_LEGEND_LABEL_LENGTH }
+          : undefined,
+      );
     });
     maxHtmlLength(path.goodToKnow, MAX_ONLINE_USEFUL_INFO_LENGTH);
     maxHtmlLength(path.usefulInfo, MAX_ONLINE_USEFUL_INFO_LENGTH);
@@ -458,14 +469,16 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
   >(() =>
     Object.values(OnlineBookingBlock).map((value) => ({
       value,
-      label: this.texts()?.online_booking_blocks[ONLINE_BOOKING_BLOCK_KEYS[value]] ?? '',
+      label: this.texts()?.online_booking_blocks[value] ?? '',
     })),
   );
 
   constructor() {
     this.unsaved.watch(this);
     effect((onCleanup) => {
+      this.dataReload?.();
       if (!this.open()) {
+        untracked(() => this.stop());
         return;
       }
       const subscription = untracked(() => this.load());
@@ -473,12 +486,16 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     });
     effect(() => {
       const field = this.draftForm.isPeriodRestricted();
-      if (field.dirty() && !field.value()) {
-        untracked(() =>
-          this.draftForm
-            .allowedPeriods()
-            .value.set(this.loaded.isPeriodRestricted ? [] : this.loaded.allowedPeriods),
-        );
+      if (field.dirty()) {
+        const isOn = field.value();
+        untracked(() => {
+          const periods = this.draftForm.allowedPeriods();
+          if (isOn) {
+            periods.markAsTouched();
+          } else {
+            periods.value.set(this.loaded.isPeriodRestricted ? [] : this.loaded.allowedPeriods);
+          }
+        });
       }
     });
     effect(() => {
@@ -506,14 +523,15 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
       }
     });
     effect(() => {
-      const hasSupplement = this.hasSupplement();
+      const type = this.draftForm.surchargeType().value();
       untracked(() => {
-        if (this.hadSupplement !== hasSupplement) {
-          const value = this.draftForm.surchargeValue();
-          value.value.set(hasSupplement ? null : this.valueWithoutSupplement());
-          value.markAsTouched();
+        if (this.shownType === type) {
+          return;
         }
-        this.hadSupplement = hasSupplement;
+        this.shownType = type;
+        const value = this.draftForm.surchargeValue();
+        value.value.set(type === SupplementType.None ? this.valueWithoutSupplement() : null);
+        value.markAsTouched();
       });
     });
   }
@@ -536,6 +554,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
 
   protected addBookingLimitRule(): void {
     this.draftForm.stayLimits().value.update((rules) => [...rules, new BookingLimitRule()]);
+    // Says at once why Salva is off.
+    this.draftForm.stayLimits[this.draft().stayLimits.length - 1]().markAsTouched();
   }
 
   protected removeBookingLimitRule(index: number): void {
@@ -546,10 +566,13 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
 
   protected addLegendItem(): void {
     this.draftForm.legend().value.update((items) => [...items, new LegendItem()]);
+    this.draftForm.legend[this.draft().legend.length - 1]().markAsTouched();
   }
 
   protected removeLegendItem(index: number): void {
-    this.pickingItem.set(null);
+    this.pickingItem.update((picking) =>
+      picking === null || picking < index ? picking : picking === index ? null : picking - 1,
+    );
     this.draftForm
       .legend()
       .value.update((items) => items.filter((_, itemIndex) => itemIndex !== index));
@@ -559,7 +582,6 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     return fileLinkOf(item.iconUrl().value(), this.origin);
   }
 
-  /** The icons are read the first time one is chosen. */
   protected pickIcon(index: number): void {
     this.pickingItem.set(index);
     if (!this.icons.isRead()) {
@@ -581,6 +603,11 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     const item = this.draftForm.legend[index];
     item.iconId().value.set(iconId);
     item.iconUrl().value.set(this.icons.items().find(({ id }) => id === iconId)?.url ?? null);
+  }
+
+  protected emptyIcon(item: FieldTree<LegendItem>): void {
+    item.iconId().value.set(null);
+    item.iconUrl().value.set(null);
   }
 
   protected setBookingConfirmation(answer: Answer | null): void {
@@ -626,6 +653,8 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     }).then((isSaved) => {
       if (!isSaved) {
         showFirstError(this.content(), '.online__booking__options__panel__error', this.injector);
+      } else if (this.error()) {
+        showMessage(this.content(), '.online__booking__options__panel__general', this.injector);
       }
     });
   }
@@ -647,8 +676,10 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     this.isLoaded.set(false);
     this.isSaving.set(false);
     this.isSuspended.set(false);
-    this.pickingItem.set(null);
     this.sectors.clear();
+    if (this.icons.loadError()) {
+      this.icons.clear();
+    }
     this.fill(new OnlineBookingOptionsDraft());
     if (!this.auth.user()?.propertyId) {
       return undefined;
@@ -672,10 +703,17 @@ export class OnlineBookingOptionsPanel implements UnsavedChanges, OnDestroy {
     });
   }
 
+  /** Closed while something is being read: its answer is not wanted any more. */
+  private stop(): void {
+    this.isReading.set(false);
+    this.pickingItem.set(null);
+  }
+
   private fill(options: OnlineBookingOptionsDraft): void {
-    this.hadSupplement = options.surchargeType !== SupplementType.None;
+    this.shownType = options.surchargeType;
     this.loaded = options;
     this.draft.set(options);
+    clearApiFieldErrors(this.draftForm);
     this.draftForm().reset();
   }
 
@@ -706,7 +744,7 @@ function savedOf(draft: OnlineBookingOptionsDraft): OnlineBookingOptionsUpdateRe
   };
 }
 
-/** The order of the periods and of the payment methods means nothing. */
+/** The order of the periods and of the payment methods means nothing, nor the address of a chosen icon. */
 function comparable(draft: OnlineBookingOptionsDraft): string {
   return comparableJson([
     {
@@ -715,6 +753,7 @@ function comparable(draft: OnlineBookingOptionsDraft): string {
         .map(({ startsOn, endsOn }) => `${startsOn} ${endsOn}`)
         .sort(),
       paymentMethods: [...draft.paymentMethods].sort(),
+      legend: draft.legend.map((item) => ({ ...item, iconUrl: item.iconId ? null : item.iconUrl })),
     },
     draft.isAfternoonConversionEnabled,
   ]);

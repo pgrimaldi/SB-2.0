@@ -8,7 +8,7 @@
   (closeRequest)="leave()"
   (save)="save()"
 >
-  <div #content class="online__booking__options__panel" [attr.inert]="isReading() ? '' : null">
+  <div #content [attr.inert]="isReading() ? '' : null">
     @if (isSuspended()) {
       <p class="online__booking__options__panel__notice">
         {{
@@ -44,6 +44,7 @@
             'management.settings.online_booking_configuration.booking_options.periods' | translate
           "
           [pathIcon]="calendarIcons"
+          [disabledPeriods]="draftForm.allowedPeriods().value()"
           [formField]="draftForm.allowedPeriods"
         />
         @if (fieldErrors.allowedPeriods(); as error) {
@@ -330,6 +331,7 @@
               "
               [isMandatory]="true"
               [pathIcon]="calendarIcon"
+              [disabledPeriods]="takenPeriods()[ruleIndex] ?? []"
               [error]="validationText.text(rule.startsOn)"
               [formField]="rule.startsOn"
             />
@@ -342,6 +344,7 @@
               [isMandatory]="true"
               [pathIcon]="calendarIcon"
               [minDate]="rule.startsOn().value()"
+              [disabledPeriods]="takenPeriods()[ruleIndex] ?? []"
               [error]="validationText.text(rule.endsOn)"
               [formField]="rule.endsOn"
             />
@@ -428,27 +431,37 @@
             <div class="online__booking__options__panel__legend">
               <app-filled-text-field
                 class="online__booking__options__panel__legend__name"
-                [placeholder]="
-                  'management.settings.online_booking_configuration.booking_options.legend.name_placeholder'
+                [label]="
+                  'management.settings.online_booking_configuration.booking_options.legend.name'
                     | translate
                 "
+                [isMandatory]="true"
                 [error]="validationText.text(item.label)"
                 [formField]="item.label"
               />
-              <app-button
-                class="online__booking__options__panel__legend__icon"
-                [appearance]="ButtonAppearance.Light"
-                [size]="ButtonSize.Small"
-                [isFullWidth]="true"
-                [pathIcon]="icon ? [icon] : null"
-                [isLoading]="isFetchingIcons() && pickingItem() === itemIndex"
-                (clicked)="pickIcon(itemIndex)"
-              >
-                {{
-                  'management.settings.online_booking_configuration.booking_options.legend.choose_icon'
-                    | translate
-                }}
-              </app-button>
+              <span class="online__booking__options__panel__legend__icon">
+                <app-button
+                  [appearance]="ButtonAppearance.Light"
+                  [size]="ButtonSize.Small"
+                  [isFullWidth]="true"
+                  [pathIcon]="icon ? [icon] : null"
+                  [disabled]="isFetchingIcons() && pickingItem() !== itemIndex"
+                  [isLoading]="isFetchingIcons() && pickingItem() === itemIndex"
+                  (clicked)="pickIcon(itemIndex)"
+                >
+                  {{
+                    'management.settings.online_booking_configuration.booking_options.legend.choose_icon'
+                      | translate
+                  }}
+                </app-button>
+                @if (item.iconUrl().value()) {
+                  <app-icon-button
+                    class="online__booking__options__panel__legend__empty"
+                    [pathIcon]="emptyIconIcon"
+                    (click)="emptyIcon(item)"
+                  />
+                }
+              </span>
               <app-icon-button
                 class="online__booking__options__panel__legend__remove"
                 [pathIcon]="removeIcon"
@@ -459,7 +472,7 @@
         </div>
       }
       @if (icons.loadError(); as error) {
-        <p class="online__booking__options__panel__error">{{ error }}</p>
+        <p class="online__booking__options__panel__icons__error">{{ error }}</p>
       }
     </section>
     <section class="online__booking__options__panel__section">
@@ -503,7 +516,7 @@
       />
     </section>
     @if (errorMessage(); as errorMessage) {
-      <p class="online__booking__options__panel__error">{{ errorMessage }}</p>
+      <p class="online__booking__options__panel__general">{{ errorMessage }}</p>
     }
   </div>
 </app-side-panel>
@@ -513,6 +526,12 @@
       | translate
   "
   [pathIcon]="pathIcon()"
+  [text]="
+    iconChoices().length
+      ? ''
+      : ('management.settings.online_booking_configuration.booking_options.legend.no_icons'
+        | translate)
+  "
   [choices]="iconChoices()"
   [chosenIcon]="pickedIcon()"
   [open]="isPickerOpen()"

@@ -22,7 +22,11 @@
           {{ 'management.settings.online_booking_configuration.stripe.configure_text' | translate }}
         </p>
       </div>
-      <app-button [pathIcon]="configureStripeIcon" (clicked)="openStripePage()">
+      <app-button
+        [pathIcon]="configureStripeIcon"
+        [disabled]="!canConnectStripe"
+        (clicked)="openStripePage()"
+      >
         {{ 'management.settings.online_booking_configuration.stripe.configure' | translate }}
       </app-button>
     </div>
@@ -85,9 +89,22 @@
           {{ 'management.settings.online_booking_configuration.iframe.direct_link' | translate }}
         </h3>
         @if (iframeCode(); as code) {
-          <p>{{ code }}</p>
+          <p>
+            <bdi dir="ltr">{{ code }}</bdi>
+          </p>
         } @else if (slugErrorMessage(); as message) {
           <p class="online__booking__configuration__iframe__error">{{ message }}</p>
+          <app-button
+            class="online__booking__configuration__iframe__retry"
+            [size]="ButtonSize.Small"
+            (clicked)="readSlugAgain()"
+          >
+            <span appI18nText="table.load_error.retry"></span>
+          </app-button>
+        } @else if (isSlugRead()) {
+          <p>
+            {{ 'management.settings.online_booking_configuration.iframe.no_address' | translate }}
+          </p>
         }
       </div>
       <app-button
@@ -107,6 +124,13 @@
 <app-online-booking-services-options-popup
   [pathIcon]="closeIcon"
   [(open)]="isServicesOptionsOpen"
+/>
+<app-message-popup
+  [pathIcon]="closeIcon"
+  [title]="'management.settings.online_booking_configuration.stripe.blocked.title' | translate"
+  [text]="'management.settings.online_booking_configuration.stripe.blocked.text' | translate"
+  [texts]="'management.settings.online_booking_configuration.stripe.blocked' | translate"
+  [(open)]="isStripeBlocked"
 />
 <app-message-popup
   [pathIcon]="closeIcon"

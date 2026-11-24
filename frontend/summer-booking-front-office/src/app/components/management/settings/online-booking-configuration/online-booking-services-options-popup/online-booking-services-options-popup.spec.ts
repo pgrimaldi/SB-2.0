@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
+import { By } from '@angular/platform-browser';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { Observable, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../../../behaviours/auth/auth.behaviour';
@@ -36,6 +37,7 @@ class OnlineBookingServicesOptionsPopupHost {
 describe('OnlineBookingServicesOptionsPopup', () => {
   const setup = async (
     updateOnlineServicesOptions = vi.fn((): Observable<string | null> => of('v2')),
+    onlineServicesOptions = (): Observable<OnlineBookingServicesOptions> => of(OPTIONS),
   ) => {
     TestBed.configureTestingModule({
       providers: [
@@ -43,7 +45,7 @@ describe('OnlineBookingServicesOptionsPopup', () => {
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         {
           provide: OnlineSettingsService,
-          useValue: { onlineServicesOptions: () => of(OPTIONS), updateOnlineServicesOptions },
+          useValue: { onlineServicesOptions, updateOnlineServicesOptions },
         },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
@@ -76,7 +78,11 @@ describe('OnlineBookingServicesOptionsPopup', () => {
       [...popup()!.querySelectorAll<HTMLButtonElement>('app-button button')].find((button) =>
         button.textContent?.includes('save'),
       )!;
-    return { fixture, popup, checkboxes, save, updateOnlineServicesOptions };
+    const form = (
+      fixture.debugElement.query(By.directive(OnlineBookingServicesOptionsPopup))
+        .componentInstance as OnlineBookingServicesOptionsPopup
+    )['draftForm'];
+    return { fixture, popup, checkboxes, save, form, updateOnlineServicesOptions };
   };
 
   it('should send back everything it read, with the payment methods and the value it does not show', async () => {
@@ -122,5 +128,55 @@ describe('OnlineBookingServicesOptionsPopup', () => {
 
     expect(popup()).toBeNull();
     expect(document.body.textContent).toContain('Operazione non riuscita');
+  });
+
+  it('should close when the options cannot be read', async () => {
+    const { popup } = await setup(undefined, () =>
+      throwError(
+        () => new HttpErrorResponse({ status: 403, error: { code: ApiErrorCode.AuthForbidden } }),
+      ),
+    );
+
+    expect(popup()).toBeNull();
+    expect(document.querySelector('mat-dialog-container')).not.toBeNull();
+  });
+
+  it('should want the value again when the kind of supplement changes', async () => {
+    const { fixture, save, form } = await setup(undefined, () =>
+      of({ ...OPTIONS, surchargeType: SupplementType.Percentage, surchargeValue: 10 }),
+    );
+
+    expect(save().disabled).toBe(false);
+    form.surchargeType().value.set(SupplementType.Fixed);
+    await fixture.whenStable();
+    expect(form.surchargeValue().value()).toBeNull();
+    expect(save().disabled).toBe(true);
+  });
+
+  it('should drop the errors of the backend at the next opening', async () => {
+    const { fixture, save } = await setup(
+      vi.fn(() =>
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: {
+                code: ApiErrorCode.ValidationFailed,
+                errors: [{ field: 'usefulInfo', code: ApiErrorCode.ValidationMaxLength }],
+              },
+            }),
+        ),
+      ),
+    );
+
+    save().click();
+    await fixture.whenStable();
+    expect(save().disabled).toBe(true);
+
+    fixture.componentInstance.open.set(false);
+    await fixture.whenStable();
+    fixture.componentInstance.open.set(true);
+    await fixture.whenStable();
+    expect(save().disabled).toBe(false);
   });
 });

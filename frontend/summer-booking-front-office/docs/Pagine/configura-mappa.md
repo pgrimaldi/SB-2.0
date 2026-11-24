@@ -38,13 +38,13 @@ Rotta `/settings/map-configuration` · vista `views/settings/map-configuration/`
 ## Icone sconosciute e X di svuotamento
 
 - Un nome d'icona che quel bottone non offre (fuori da `choicesOf`) mostra nel bottone la X rossa
-  `MapConfiguration_CloseRed.svg` e sotto "Icona non esistente" (`invalidate.unknown_icon`), anche in sola lettura.
+  `GeneralIcon_CloseRed.svg` e sotto "Icona non esistente" (`invalidate.unknown_icon`), anche in sola lettura.
   Salva resta spento finché non la si svuota o se ne sceglie un'altra.
 - Lo stesso vale per un'icona che il backend dà come scelta ma senza un nome del frontend (`name` null con `isDefault`
   falso, per esempio una mappa configurata prima dei nomi): così Salva non manda mai `null` sopra un'icona che
   l'utente non ha visto. `name` null con `isDefault` vero vuol dire nessuna icona scelta: bottone vuoto.
 - Ogni bottone con un'icona (anche sconosciuta) ha in alto a destra una piccola X rossa (`app-icon-button` con
-  `MapConfiguration_CloseRed.svg`, cerchio bianco da 1.25rem con ombra, sopra l'angolo del bottone).
+  `GeneralIcon_CloseRed.svg`, cerchio bianco da 1.25rem con ombra, sopra l'angolo del bottone).
 - La X svuota subito l'icona (`null`, conta come modifica, Annulla chiede); compare solo in Modifica ed è spenta
   durante il salvataggio.
 

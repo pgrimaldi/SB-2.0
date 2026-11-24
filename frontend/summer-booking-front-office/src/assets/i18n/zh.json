@@ -127,7 +127,7 @@
       "export_too_large": "要导出的记录有 {total, number, integer} 条，但最多只能导出 {max, number, integer} 条：请缩小时间范围或筛选条件后重试。"
     },
     "map": {
-      "spot_not_found": "地图区域已不存在：可能已被删除。",
+      "spot_not_found": "地图上的某个位置或区域已不存在：可能已被删除。",
       "spots_outside_grid": "有位置超出这些尺寸：至少需要 {{rows}} 排，每排 {{columns}} 个物品。",
       "invalid_image": "图片必须是 PNG、JPEG 或 WebP 格式，且不超过 5 MB。",
       "icon_not_found": "图标已不存在：请选择其他图标。"
@@ -397,7 +397,12 @@
           "configure": "配置您的 Stripe 账户",
           "how_it_works": "使用方法：",
           "step_1": "登录或注册 Stripe",
-          "step_2": "轻松开始收款和付款"
+          "step_2": "轻松开始收款和付款",
+          "blocked": {
+            "title": "未能开始连接",
+            "text": "浏览器阻止了页面存储：请为此网站允许存储后重试。",
+            "close": "关闭"
+          }
         },
         "options": {
           "title": "管理选项",
@@ -408,8 +413,8 @@
           "title": "您网站的 iframe 代码",
           "subtitle": "让您的客人只需点击几下，即可直接在您的网站上预订遮阳伞、躺椅和服务。",
           "description": "将嵌入代码复制并粘贴到您网站的所需位置。该小部件会与管理系统的地图实时同步可用情况。",
-          "direct_link": "直接链接",
-          "copy": "复制链接",
+          "direct_link": "嵌入代码",
+          "copy": "复制代码",
           "copied": {
             "title": "代码已复制",
             "text": "请将其粘贴到您网站的页面中。",
@@ -419,7 +424,8 @@
             "title": "代码未复制",
             "text": "请选中代码并手动复制。",
             "close": "关闭"
-          }
+          },
+          "no_address": "该浴场在公共网站上还没有地址：有了地址后代码会显示在这里。"
         },
         "booking_options": {
           "title": "在线预订选项",
@@ -445,7 +451,7 @@
             "percentage": "百分比",
             "fixed": "固定"
           },
-          "supplement_value": "附加费金额",
+          "supplement_value": "附加费数值",
           "online_booking_block": "在线预订截止",
           "online_booking_blocks": {
             "disabled": "已停用",
@@ -480,8 +486,9 @@
           "legend": {
             "title": "设置图例",
             "add": "添加项目",
-            "name_placeholder": "项目名称",
-            "choose_icon": "选择图标"
+            "choose_icon": "选择图标",
+            "name": "项目名称",
+            "no_icons": "没有可用的图标。"
           },
           "payment_methods": {
             "title": "接受的付款方式",
@@ -498,9 +505,9 @@
             "sector": "排/区域",
             "date_from": "从",
             "date_to": "至",
-            "min": "最少",
-            "max": "最多",
-            "missing_sector": "区域/排已不可用"
+            "min": "最少天数",
+            "max": "最多天数",
+            "missing_sector": "排/区域已不可用"
           },
           "periods": {
             "hint": "点击两个日期以选择一个时间段",
@@ -519,7 +526,7 @@
             "percentage": "百分比",
             "fixed": "固定"
           },
-          "supplement_value": "附加费金额",
+          "supplement_value": "附加费数值",
           "confirmation_required": "需要确认预订",
           "payment_methods": {
             "title": "接受的付款方式",
@@ -2164,7 +2171,8 @@
     "online_booking_configuration": {
       "periods": {
         "overlap": "有两个日期区间重叠。",
-        "max": "最多 {{max}} 个日期区间。"
+        "max": "最多 {{max}} 个日期区间。",
+        "required": "请至少选择一个日期区间。"
       },
       "booking_limits": {
         "days_required": "请至少填写最少天数或最多天数之一。",

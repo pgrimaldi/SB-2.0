@@ -7317,7 +7317,8 @@ Nessun payload.
     {
       "id": "string (UUID) | null",
       "label": "string (al massimo 100 caratteri)",
-      "iconId": "string (UUID) | null"
+      "iconId": "string (UUID) | null",
+      "iconUrl": "string (URL) | null"
     }
   ],
   "goodToKnow": "string (HTML, al massimo 10.000 caratteri) | null",
@@ -7422,10 +7423,11 @@ Nessun payload.
 | `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) |
 | `stayLimits[].minDays` | number (intero 1-366) \| null |
 | `stayLimits[].maxDays` | number (intero 1-366) \| null |
-| `legend[]` | LegendItemRequest[] (array di oggetti, al massimo 30) |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) |
 | `legend[].id` | string (UUID) \| null |
 | `legend[].label` | string (al massimo 100 caratteri) |
 | `legend[].iconId` | string (UUID) \| null |
+| `legend[].iconUrl` | string (URL) \| null |
 | `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null |
 | `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null |
 

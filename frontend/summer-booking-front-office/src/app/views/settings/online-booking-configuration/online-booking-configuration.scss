@@ -2,6 +2,7 @@
 
 .online__booking__configuration {
   --button-text-size: 0.75rem;
+  --button-height: 1.75rem;
 
   display: flex;
   flex-direction: column;
@@ -165,6 +166,10 @@ ol {
 
 .online__booking__configuration__iframe__error {
   color: var(--color__layout__error);
+}
+
+.online__booking__configuration__iframe__retry {
+  justify-self: start;
 }
 
 .online__booking__configuration__iframe__copy {

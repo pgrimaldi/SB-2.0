@@ -39,6 +39,8 @@ const SIGNED_IN_KEY = 'sb.signed-in';
 const SESSION_NAME_KEY = 'sb.session-name';
 /** Where older versions kept the token (readable by scripts): removed at start-up. */
 const LEGACY_SESSION_KEY = 'sb.session';
+/** The random `state` sent to Stripe Connect, for the return from it: it ends with the session. */
+export const STRIPE_CONNECT_STATE_KEY = 'sb.stripe-connect-state';
 const CHANNEL_NAME = 'sb-auth';
 export const LOGOUT_RETRY_DELAY = 1000;
 /** A call on the refresh cookie that has not answered by then fails, and the next one can start. */
@@ -261,7 +263,7 @@ export class AuthBehaviour implements OnDestroy {
     this.changeHands();
     this.session.set(null);
     this.sessionName = null;
-    this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
+    this.forgetTab();
     if (ownsCookie) {
       this.localStorage()?.removeItem(SIGNED_IN_KEY);
       this.localStorage()?.removeItem(SESSION_NAME_KEY);
@@ -337,8 +339,13 @@ export class AuthBehaviour implements OnDestroy {
     this.changeHands();
     this.session.set(null);
     this.sessionName = null;
-    this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
+    this.forgetTab();
     void this.router.navigateByUrl('/');
+  }
+
+  private forgetTab(): void {
+    this.sessionStorage()?.removeItem(SIGNED_IN_KEY);
+    this.sessionStorage()?.removeItem(STRIPE_CONNECT_STATE_KEY);
   }
 
   /** A refresh still running belongs to the session before: the next one asks again. */

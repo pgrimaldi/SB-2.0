@@ -127,7 +127,7 @@
       "export_too_large": "Es gibt {total, number, integer} Einträge zum Exportieren, aber höchstens {max, number, integer} können exportiert werden: Schränke den Zeitraum oder die Filter ein und versuche es erneut."
     },
     "map": {
-      "spot_not_found": "Der Bereich der Karte ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
+      "spot_not_found": "Ein Platz oder Bereich der Karte ist nicht mehr vorhanden: Er wurde vielleicht schon gelöscht.",
       "spots_outside_grid": "Einige Plätze liegen außerhalb dieser Größe: Es braucht mindestens {{rows}} Reihen und {{columns}} Artikel pro Reihe.",
       "invalid_image": "Das Bild muss PNG, JPEG oder WebP sein und darf höchstens 5 MB groß sein.",
       "icon_not_found": "Das Symbol ist nicht mehr vorhanden: Wähle ein anderes."
@@ -389,15 +389,20 @@
       },
       "online_booking_configuration": {
         "stripe": {
-          "title": "Verbinden Sie Ihr Stripe-Konto",
-          "subtitle": "Erhalten Sie Zahlungen für Online-Buchungen einfach und sicher.",
-          "description": "Summer Booking nutzt Stripe für die Online-Zahlungen Ihrer Buchungen, mit schnellen und sicheren Transaktionen und dem Schutz persönlicher Daten und Zahlungsdaten.",
+          "title": "Verbinde dein Stripe-Konto",
+          "subtitle": "Erhalte Zahlungen für Online-Buchungen einfach und sicher.",
+          "description": "Summer Booking nutzt Stripe für die Online-Zahlungen deiner Buchungen, mit schnellen und sicheren Transaktionen und dem Schutz persönlicher Daten und Zahlungsdaten.",
           "configure_title": "Stripe-Konto einrichten",
-          "configure_text": "Verbinden Sie Ihr bestehendes Stripe-Konto oder erstellen Sie ein neues, um Zahlungen für Online-Buchungen zu erhalten.",
+          "configure_text": "Verbinde dein bestehendes Stripe-Konto oder erstelle ein neues, um Zahlungen für Online-Buchungen zu erhalten.",
           "configure": "Stripe-Konto einrichten",
           "how_it_works": "So funktioniert es:",
           "step_1": "Bei Stripe anmelden oder registrieren",
-          "step_2": "Zahlungen einfach empfangen und tätigen"
+          "step_2": "Zahlungen einfach empfangen und tätigen",
+          "blocked": {
+            "title": "Verbindung nicht gestartet",
+            "text": "Der Browser blockiert den Speicher der Seite: Erlaube ihn für diese Website und versuche es erneut.",
+            "close": "Schließen"
+          }
         },
         "options": {
           "title": "Optionen verwalten",
@@ -405,11 +410,11 @@
           "online_booking_services": "Optionen Service-Buchungen"
         },
         "iframe": {
-          "title": "Iframe-Code für Ihre Website",
-          "subtitle": "Ihre Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf Ihrer Website.",
-          "description": "Kopieren Sie den Einbettungscode an die gewünschte Stelle Ihrer Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
-          "direct_link": "Direkter Link",
-          "copy": "Link kopieren",
+          "title": "Iframe-Code für deine Website",
+          "subtitle": "Deine Gäste buchen Sonnenschirme, Liegen und Services mit wenigen Klicks direkt auf deiner Website.",
+          "description": "Kopiere den Einbettungscode an die gewünschte Stelle deiner Website. Das Widget gleicht die Verfügbarkeiten in Echtzeit mit dem Plan der Verwaltungssoftware ab.",
+          "direct_link": "Einbettungscode",
+          "copy": "Code kopieren",
           "copied": {
             "title": "Code kopiert",
             "text": "Füge ihn in die Seite deiner Website ein.",
@@ -419,7 +424,8 @@
             "title": "Code nicht kopiert",
             "text": "Markiere den Code und kopiere ihn von Hand.",
             "close": "Schließen"
-          }
+          },
+          "no_address": "Das Strandbad hat noch keine Adresse auf der öffentlichen Website: Der Code erscheint hier, sobald es eine hat."
         },
         "booking_options": {
           "title": "Optionen Online-Buchungen",
@@ -480,8 +486,9 @@
           "legend": {
             "title": "Legende festlegen",
             "add": "Element hinzufügen",
-            "name_placeholder": "Name des Elements",
-            "choose_icon": "Symbol auswählen"
+            "choose_icon": "Symbol auswählen",
+            "name": "Name des Elements",
+            "no_icons": "Keine Symbole verfügbar."
           },
           "payment_methods": {
             "title": "Akzeptierte Zahlungsarten",
@@ -498,12 +505,12 @@
             "sector": "Reihe/Sektor",
             "date_from": "Vom",
             "date_to": "Bis",
-            "min": "Min",
-            "max": "Max",
-            "missing_sector": "Sektor/Reihe nicht mehr verfügbar"
+            "min": "Min. Tage",
+            "max": "Max. Tage",
+            "missing_sector": "Reihe/Sektor nicht mehr verfügbar"
           },
           "periods": {
-            "hint": "Klicken Sie auf zwei Daten, um einen Zeitraum zu wählen",
+            "hint": "Klicke auf zwei Daten, um einen Zeitraum zu wählen",
             "selected": "Gewählte Zeiträume:"
           },
           "suspended": "Der Online-Verkauf ist von der Plattform ausgesetzt: Du kannst die Optionen ändern, aber Kunden können nicht online buchen."
@@ -2164,7 +2171,8 @@
     "online_booking_configuration": {
       "periods": {
         "overlap": "Zwei Datumsbereiche überschneiden sich.",
-        "max": "Höchstens {{max}} Datumsbereiche."
+        "max": "Höchstens {{max}} Datumsbereiche.",
+        "required": "Wähle mindestens einen Datumsbereich."
       },
       "booking_limits": {
         "days_required": "Gib mindestens ein Minimum oder Maximum an Tagen an.",

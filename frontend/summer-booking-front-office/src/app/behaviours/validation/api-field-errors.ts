@@ -70,7 +70,7 @@ export function clearApiFieldErrors<TModel extends object>(form: FieldTree<TMode
     const field = fields[name]();
     if (field.errors().some(({ kind }) => kind === API_ERROR_KIND)) {
       const value = field.value();
-      field.value.set(Array.isArray(value) ? [...value] : value === null ? undefined : null);
+      field.value.set(Array.isArray(value) ? [...value] : value === null ? '' : null);
       field.errors();
       field.value.set(value);
     }

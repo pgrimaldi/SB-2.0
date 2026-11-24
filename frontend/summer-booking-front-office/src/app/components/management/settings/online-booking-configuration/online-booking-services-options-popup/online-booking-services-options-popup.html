@@ -1,12 +1,12 @@
 <ng-template #content>
-  <div class="online__booking__services__options__popup">
+  <div #popup class="online__booking__services__options__popup">
     <h2 class="online__booking__services__options__popup__title">
       {{ 'management.settings.online_booking_configuration.services_options.title' | translate }}
     </h2>
 
     <div
       class="online__booking__services__options__popup__form"
-      [attr.inert]="isLoading() || isSaving() ? '' : null"
+      [attr.inert]="isReading() || isSaving() ? '' : null"
     >
       <section class="online__booking__services__options__popup__section">
         <app-toggle [formField]="draftForm.isEnabled" [error]="fieldErrors.isEnabled()">
@@ -127,7 +127,7 @@
     </div>
 
     @if (errorMessage(); as errorMessage) {
-      <p class="online__booking__services__options__popup__error">{{ errorMessage }}</p>
+      <p class="online__booking__services__options__popup__general">{{ errorMessage }}</p>
     }
 
     <div class="online__booking__services__options__popup__buttons">
@@ -143,7 +143,7 @@
       <app-button
         [size]="ButtonSize.Small"
         [isFullWidth]="true"
-        [disabled]="isLoading() || !isLoaded() || draftForm().invalid()"
+        [disabled]="isSaveDisabled()"
         [isLoading]="isSaving()"
         (clicked)="save()"
       >

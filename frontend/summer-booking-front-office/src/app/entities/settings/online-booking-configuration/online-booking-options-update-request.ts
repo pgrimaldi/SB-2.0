@@ -8,7 +8,6 @@ import { OnlineBookingPeriod } from './online-booking-period';
 
 export const MAX_ONLINE_BOOKING_PERIOD_QUANTITY = 50;
 export const MAX_ONLINE_BOOKING_HORIZON_DAYS = 730;
-/** The limit of the column that keeps spots and bookings. */
 export const MAX_ONLINE_BOOKING_QUANTITY = 32_767;
 
 export class OnlineBookingOptionsUpdateRequest {

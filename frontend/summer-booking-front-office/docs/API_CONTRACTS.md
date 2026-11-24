@@ -6481,7 +6481,8 @@ Prenotazioni online: salvataggio delle opzioni.
     {
       "id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01",
       "label": "Ombrellone libero",
-      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01"
+      "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01",
+      "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"
     }
   ],
   "goodToKnow": null,
@@ -6525,10 +6526,11 @@ Prenotazioni online: salvataggio delle opzioni.
 | `stayLimits[].endsOn` | string (giorno AAAA-MM-GG) | `2027-08-31` |
 | `stayLimits[].minDays` | number (intero 1-366) \| null | `3` |
 | `stayLimits[].maxDays` | number (intero 1-366) \| null | `14` |
-| `legend[]` | LegendItemRequest[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01"}]` |
+| `legend[]` | LegendItem[] (array di oggetti, al massimo 30) | `[{"id": "8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01", "label": "Ombrellone libero", "iconId": "2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01", "iconUrl": "/assets/images/MapConfiguration_Umbrella1.svg"}]` |
 | `legend[].id` | string (UUID) \| null | `8b2c4d60-1e2f-4a3b-9c4d-5e6f7a8b9c01` |
 | `legend[].label` | string (al massimo 100 caratteri) | `Ombrellone libero` |
 | `legend[].iconId` | string (UUID) \| null | `2e9d4c10-6b7a-4f8e-9d0c-1b2a3f4e5d01` |
+| `legend[].iconUrl` | string (URL) \| null | `/assets/images/MapConfiguration_Umbrella1.svg` |
 | `goodToKnow` | string (HTML, al massimo 10.000 caratteri) \| null | `null` |
 | `usefulInfo` | string (HTML, al massimo 10.000 caratteri) \| null | `<p>Il parcheggio è gratuito per i clienti.</p>` |
 

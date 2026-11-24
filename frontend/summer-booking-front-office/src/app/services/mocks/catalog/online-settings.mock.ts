@@ -9,11 +9,12 @@ import { MAX_BOOKING_LIMIT_DAYS } from '../../../entities/settings/online-bookin
 import {
   MAX_LEGEND_ITEM_QUANTITY,
   MAX_LEGEND_LABEL_LENGTH,
-} from '../../../entities/settings/online-booking-configuration/legend-item-request';
+} from '../../../entities/settings/online-booking-configuration/legend-item';
 import { OnlineBookingOptions } from '../../../entities/settings/online-booking-configuration/online-booking-options';
 import {
   MAX_ONLINE_BOOKING_HORIZON_DAYS,
   MAX_ONLINE_BOOKING_PERIOD_QUANTITY,
+  MAX_ONLINE_BOOKING_QUANTITY,
   OnlineBookingOptionsUpdateRequest,
 } from '../../../entities/settings/online-booking-configuration/online-booking-options-update-request';
 import { OnlineBookingServicesOptions } from '../../../entities/settings/online-booking-configuration/online-booking-services-options';
@@ -32,13 +33,18 @@ import { savedWithVersion, versionConflict, versionOf } from '../versions/versio
 import { mapCatalogIcon } from './map.mock';
 import { SECTORS } from './sectors-data.mock';
 
+const SPOTS: readonly string[] = [
+  '7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01',
+  '7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e02',
+];
+
 /** As the backend keeps them: days without the time, times with the seconds. */
 let bookingOptions: OnlineBookingOptionsUpdateRequest = {
   ...new OnlineBookingOptionsUpdateRequest(),
   isEnabled: true,
   isMapPick: true,
   isLocationRestricted: true,
-  allowedSpotIds: ['7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e01', '7d1e2f30-4a5b-4c6d-8e9f-0a1b2c3d4e02'],
+  allowedSpotIds: [...SPOTS],
   isPeriodRestricted: true,
   allowedPeriods: [{ startsOn: '2027-05-15', endsOn: '2027-09-20' }],
   allowsHalfDay: true,
@@ -93,7 +99,7 @@ export const onlineBookingOptionsMock = (
  * (until the page is reloaded). 200 with the options saved, the new version in `ETag`; 401 without a
  * valid access token; 400 with one error per wrong field; 409 `resource.version_conflict` when the
  * options changed after the read; 404 `catalog.sector_not_found`, `catalog.stay_limit_not_found`,
- * `map.icon_not_found`; 409 `catalog.stay_limit_overlap`.
+ * `map.icon_not_found`; 422 `map.spot_not_found`; 409 `catalog.stay_limit_overlap`.
  */
 export const updateOnlineBookingOptionsMock = (
   request: HttpRequest<unknown>,
@@ -110,40 +116,20 @@ export const updateOnlineBookingOptionsMock = (
   if (conflict) {
     return conflict;
   }
-  if (
-    body.stayLimits.some(({ sectorId }) => !SECTORS.some(({ idSector }) => idSector === sectorId))
-  ) {
-    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
+  const refused = referenceProblem(request, body);
+  if (refused) {
+    return refused;
   }
-  if (
-    body.stayLimits.some(
-      ({ id }) => id && !bookingOptions.stayLimits.some((rule) => rule.id === id),
-    )
-  ) {
-    return problem(request, 404, ApiErrorCode.CatalogStayLimitNotFound);
-  }
-  if (
-    body.stayLimits.some((rule, index) =>
-      body.stayLimits
-        .slice(index + 1)
-        .some((other) => other.sectorId === rule.sectorId && rangesOverlap(rule, other)),
-    )
-  ) {
-    return problem(request, 409, ApiErrorCode.CatalogStayLimitOverlap);
-  }
-  const legend = body.legend.map(({ id, label, iconId }) => {
-    const read = bookingOptions.legend.find((item) => id !== null && item.id === id);
-    const isSameIcon = !!read && read.iconId === iconId;
+  const legend = body.legend.map((item) => {
+    const read = bookingOptions.legend.find(({ id }) => item.id !== null && id === item.id);
+    const isSameIcon = item.iconId === null ? item.iconUrl !== null : item.iconId === read?.iconId;
     return {
-      id: id ?? crypto.randomUUID(),
-      label: label?.trim() ?? null,
-      iconId,
-      iconUrl: isSameIcon ? read.iconUrl : iconId ? mapCatalogIcon(iconId).url : null,
+      id: read?.id ?? crypto.randomUUID(),
+      label: item.label?.trim() ?? null,
+      iconId: item.iconId,
+      iconUrl: isSameIcon ? (read?.iconUrl ?? null) : mapCatalogIcon(item.iconId ?? '').url,
     };
   });
-  if (legend.some(({ iconId, iconUrl }) => iconId && !iconUrl)) {
-    return problem(request, 404, ApiErrorCode.MapIconNotFound);
-  }
   bookingOptions = {
     ...onlyFieldsOf(OnlineBookingOptionsUpdateRequest, body),
     surchargeValue: body.surchargeType === SupplementType.None ? 0 : body.surchargeValue,
@@ -191,21 +177,57 @@ function bookingErrors(body: OnlineBookingOptionsUpdateRequest): MockFieldError[
         body.allowedPeriods.slice(index + 1).some((other) => rangesOverlap(period, other)),
       ),
   );
-  outOfRange('maxSpotsPerBooking', body.maxSpotsPerBooking, 1, 32_767);
-  outOfRange('maxBookingsPerDay', body.maxBookingsPerDay, 1, 32_767);
+  for (const field of ['maxSpotsPerBooking', 'maxBookingsPerDay'] as const) {
+    const value = body[field];
+    if (value !== null && (value < 1 || value > MAX_ONLINE_BOOKING_QUANTITY)) {
+      errors.push({ field, code: ApiErrorCode.ValidationOutOfRange, args: { value: 0 } });
+    }
+  }
+  for (const [from, to] of [
+    ['morningFrom', 'morningTo'],
+    ['afternoonFrom', 'afternoonTo'],
+  ] as const) {
+    const start = body[from];
+    const end = body[to];
+    if (start && end && end <= start) {
+      errors.push({ field: to, code: ApiErrorCode.ValidationOutOfRange, args: { value: start } });
+    }
+  }
+  body.allowedPeriods.forEach(({ startsOn, endsOn }, index) => {
+    if (startsOn && endsOn && endsOn < startsOn) {
+      errors.push({
+        field: `allowedPeriods[${index}]`,
+        code: ApiErrorCode.ValidationEndBeforeStart,
+      });
+    }
+  });
   outOfRange('bookingHorizonDays', body.bookingHorizonDays, 0, MAX_ONLINE_BOOKING_HORIZON_DAYS);
-  body.stayLimits.forEach(({ startsOn, endsOn, minDays, maxDays }, index) => {
+  body.stayLimits.forEach((rule, index) => {
+    const { startsOn, endsOn, minDays, maxDays } = rule;
     const field = `stayLimits[${index}]`;
+    invalid(`${field}.id`, isRepeated(body.stayLimits, index));
+    for (const name of ['sectorId', 'startsOn', 'endsOn'] as const) {
+      if (!rule[name]) {
+        errors.push({ field: `${field}.${name}`, code: ApiErrorCode.ValidationRequired });
+      }
+    }
     if (startsOn && endsOn && endsOn < startsOn) {
       errors.push({ field: `${field}.endsOn`, code: ApiErrorCode.ValidationEndBeforeStart });
     }
     invalid(`${field}.minDays`, minDays === null && maxDays === null);
     outOfRange(`${field}.minDays`, minDays, 1, MAX_BOOKING_LIMIT_DAYS);
     outOfRange(`${field}.maxDays`, maxDays, 1, MAX_BOOKING_LIMIT_DAYS);
-    invalid(`${field}.maxDays`, minDays !== null && maxDays !== null && maxDays < minDays);
+    if (minDays !== null && maxDays !== null && maxDays < minDays) {
+      errors.push({
+        field: `${field}.maxDays`,
+        code: ApiErrorCode.ValidationOutOfRange,
+        args: { value: minDays },
+      });
+    }
   });
   invalid('legend', body.legend.length > MAX_LEGEND_ITEM_QUANTITY);
   body.legend.forEach(({ label }, index) => {
+    invalid(`legend[${index}].id`, isRepeated(body.legend, index));
     if (!label?.trim()) {
       errors.push({ field: `legend[${index}].label`, code: ApiErrorCode.ValidationRequired });
     } else if (label.length > MAX_LEGEND_LABEL_LENGTH) {
@@ -226,6 +248,51 @@ function bookingErrors(body: OnlineBookingOptionsUpdateRequest): MockFieldError[
     }
   }
   return errors;
+}
+
+function isRepeated(rows: readonly { id: string | null }[], index: number): boolean {
+  const { id } = rows[index];
+  return id !== null && rows.findIndex((row) => row.id === id) !== index;
+}
+
+/** The elements of the property the save names must exist. */
+function referenceProblem(
+  request: HttpRequest<unknown>,
+  body: OnlineBookingOptionsUpdateRequest,
+): Observable<never> | null {
+  const { stayLimits, legend, allowedSpotIds } = body;
+  if (stayLimits.some(({ sectorId }) => !SECTORS.some(({ idSector }) => idSector === sectorId))) {
+    return problem(request, 404, ApiErrorCode.CatalogSectorNotFound);
+  }
+  if (
+    stayLimits.some(({ id }) => id && !bookingOptions.stayLimits.some((rule) => rule.id === id))
+  ) {
+    return problem(request, 404, ApiErrorCode.CatalogStayLimitNotFound);
+  }
+  if (
+    legend.some(
+      ({ id, iconId }) =>
+        iconId &&
+        !mapCatalogIcon(iconId).id &&
+        !bookingOptions.legend.some((item) => item.id === id && item.iconId === iconId),
+    )
+  ) {
+    return problem(request, 404, ApiErrorCode.MapIconNotFound);
+  }
+  const ids = allowedSpotIds.filter((id) => !SPOTS.includes(id));
+  if (ids.length) {
+    return problem(request, 422, ApiErrorCode.MapSpotNotFound);
+  }
+  if (
+    stayLimits.some((rule, index) =>
+      stayLimits
+        .slice(index + 1)
+        .some((other) => other.sectorId === rule.sectorId && rangesOverlap(rule, other)),
+    )
+  ) {
+    return problem(request, 409, ApiErrorCode.CatalogStayLimitOverlap);
+  }
+  return null;
 }
 
 function isSurcharge(type: SupplementType, value: number | null): boolean {
@@ -279,7 +346,10 @@ export const updateOnlineServicesOptionsMock = (
   if (conflict) {
     return conflict;
   }
-  servicesOptions = onlyFieldsOf(OnlineBookingServicesOptionsUpdateRequest, body);
+  servicesOptions = {
+    ...onlyFieldsOf(OnlineBookingServicesOptionsUpdateRequest, body),
+    surchargeValue: body.surchargeType === SupplementType.None ? 0 : body.surchargeValue,
+  };
   return savedWithVersion(request, servicesOptions, withVersion(servicesOptions));
 };
 

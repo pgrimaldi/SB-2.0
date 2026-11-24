@@ -73,6 +73,19 @@ describe('OnlineSettingsService', () => {
     controller.verify();
   });
 
+  it('should not read options without a field the save would send back empty', () => {
+    const { onlineSettings, controller } = setup();
+    const failed = vi.fn();
+
+    onlineSettings.onlineBookingOptions().subscribe({ error: failed });
+
+    const { legend, ...answer } = new OnlineBookingOptions();
+    expect(legend).toEqual([]);
+    controller.expectOne(`${environment.apiBaseUrl}/catalog/online-settings`).flush(answer);
+    expect(failed).toHaveBeenCalled();
+    controller.verify();
+  });
+
   it('should save every online booking option with the days of the backend, the version in If-Match, and give back the new one', () => {
     const { onlineSettings, controller } = setup();
     const options = Object.assign(new OnlineBookingOptions(), {
@@ -80,6 +93,17 @@ describe('OnlineSettingsService', () => {
       isBlocked: true,
       allowedPeriods: [
         { startsOn: '2027-05-15T00:00:00.000Z', endsOn: '2027-09-20T00:00:00.000Z' },
+      ],
+      morningFrom: '08:00',
+      stayLimits: [
+        {
+          id: 'l1',
+          sectorId: 's1',
+          startsOn: '2027-08-01T00:00:00.000Z',
+          endsOn: '2027-08-31T00:00:00.000Z',
+          minDays: 3,
+          maxDays: null,
+        },
       ],
       legend: [{ id: 'e1', label: 'Libero', iconId: null, iconUrl: '/icon.svg' }],
       version: 'v1',
@@ -99,7 +123,18 @@ describe('OnlineSettingsService', () => {
       allowedSpotIds: ['spot1'],
       isBlocked: true,
       allowedPeriods: [{ startsOn: '2027-05-15', endsOn: '2027-09-20' }],
-      legend: [{ id: 'e1', label: 'Libero', iconId: null }],
+      morningFrom: '08:00',
+      stayLimits: [
+        {
+          id: 'l1',
+          sectorId: 's1',
+          startsOn: '2027-08-01',
+          endsOn: '2027-08-31',
+          minDays: 3,
+          maxDays: null,
+        },
+      ],
+      legend: [{ id: 'e1', label: 'Libero', iconId: null, iconUrl: '/icon.svg' }],
     });
     expect(put.request.headers.get('If-Match')).toBe('"v1"');
     put.flush({ ...options, version: 'v2' }, { headers: { ETag: '"v2"' } });

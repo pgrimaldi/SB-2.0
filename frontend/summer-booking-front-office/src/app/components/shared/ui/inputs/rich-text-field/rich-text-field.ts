@@ -24,6 +24,7 @@ import Paragraph from '@tiptap/extension-paragraph';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import { UndoRedo } from '@tiptap/extensions';
+import { EditorState } from '@tiptap/pm/state';
 import { Button, ButtonSize } from '../../buttons/button/button';
 import { IconButton } from '../../buttons/icon-button/icon-button';
 import { resolveIcons } from '../../icons/icons';
@@ -67,7 +68,8 @@ let nextId = 0;
 /**
  * Text with bold, italic, underline, bulleted and numbered lists and links, on TipTap (ProseMirror).
  * The value is HTML made only of those elements (the editor drops anything else, pasted content
- * too), or null when empty. Links: only safe schemes (no `javascript:`), opened in a new tab.
+ * too), or null when empty. Links: only safe schemes (no `javascript:`), opened in a new tab. A value
+ * from outside starts the undo history again: undoing never takes it away or brings back an older one.
  */
 @Component({
   selector: 'app-rich-text-field',
@@ -159,6 +161,9 @@ export class RichTextField implements OnDestroy {
         if (this.editor && value !== this.shownValue) {
           this.shownValue = value;
           this.editor.commands.setContent(value ?? '', { emitUpdate: false });
+          const { doc, plugins } = this.editor.state;
+          this.editor.view.updateState(EditorState.create({ doc, plugins }));
+          this.isLinkOpen.set(false);
         }
       });
     });

@@ -70,7 +70,7 @@ interface IconPicking {
   isOccupied: boolean;
 }
 
-const RED_CLOSE_ICON = '/assets/images/MapConfiguration_CloseRed.svg';
+const RED_CLOSE_ICON = '/assets/images/GeneralIcon_CloseRed.svg';
 
 /** An icon the backend says is chosen, without a name of the frontend: shown as unknown. */
 const UNNAMED_ICON = 'UnnamedIcon';

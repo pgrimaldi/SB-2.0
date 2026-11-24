@@ -127,7 +127,7 @@
       "export_too_large": "There are {total, number, integer} entries to export, but at most {max, number, integer} can be exported: narrow the period or the filters and try again."
     },
     "map": {
-      "spot_not_found": "The map area is no longer there: it may already have been deleted.",
+      "spot_not_found": "A spot or area of the map is no longer there: it may already have been deleted.",
       "spots_outside_grid": "Some spots are outside these sizes: at least {{rows}} rows and {{columns}} items per row are needed.",
       "invalid_image": "The image must be PNG, JPEG or WebP and no larger than 5 MB.",
       "icon_not_found": "The icon is no longer there: choose another one."
@@ -397,7 +397,12 @@
           "configure": "Set up your Stripe account",
           "how_it_works": "How it works:",
           "step_1": "Sign in or sign up on Stripe",
-          "step_2": "Start receiving and making payments easily"
+          "step_2": "Start receiving and making payments easily",
+          "blocked": {
+            "title": "Connection not started",
+            "text": "The browser blocks the storage of the page: allow it for this site and try again.",
+            "close": "Close"
+          }
         },
         "options": {
           "title": "Manage options",
@@ -408,8 +413,8 @@
           "title": "Iframe code for your website",
           "subtitle": "Let your guests book umbrellas, sunbeds and services directly from your website in a few clicks.",
           "description": "Copy and paste the embed code into the section you want on your site. The widget syncs availability in real time with the map of the management system.",
-          "direct_link": "Direct link",
-          "copy": "Copy link",
+          "direct_link": "Embed code",
+          "copy": "Copy code",
           "copied": {
             "title": "Code copied",
             "text": "Paste it into the page of your website.",
@@ -419,7 +424,8 @@
             "title": "Code not copied",
             "text": "Select the code and copy it by hand.",
             "close": "Close"
-          }
+          },
+          "no_address": "The property has no address on the public site yet: the code will appear here once it has one."
         },
         "booking_options": {
           "title": "Online booking options",
@@ -480,8 +486,9 @@
           "legend": {
             "title": "Set up legend",
             "add": "Add item",
-            "name_placeholder": "Item name",
-            "choose_icon": "Choose icon"
+            "choose_icon": "Choose icon",
+            "name": "Item name",
+            "no_icons": "No icons available."
           },
           "payment_methods": {
             "title": "Accepted payment methods",
@@ -498,9 +505,9 @@
             "sector": "Row/sector",
             "date_from": "From",
             "date_to": "To",
-            "min": "Min",
-            "max": "Max",
-            "missing_sector": "Sector/row no longer available"
+            "min": "Min days",
+            "max": "Max days",
+            "missing_sector": "Row/sector no longer available"
           },
           "periods": {
             "hint": "Click two dates to select a range",
@@ -2164,7 +2171,8 @@
     "online_booking_configuration": {
       "periods": {
         "overlap": "Two date ranges overlap.",
-        "max": "At most {{max}} date ranges."
+        "max": "At most {{max}} date ranges.",
+        "required": "Choose at least one date range."
       },
       "booking_limits": {
         "days_required": "Enter at least one of minimum and maximum days.",

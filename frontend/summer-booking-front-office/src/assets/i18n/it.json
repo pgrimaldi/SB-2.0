@@ -127,7 +127,7 @@
       "export_too_large": "Le voci da esportare sono {total, number, integer}, ma se ne possono esportare al massimo {max, number, integer}: restringi il periodo o i filtri e riprova."
     },
     "map": {
-      "spot_not_found": "L'area della mappa non c'è più: forse è già stata eliminata.",
+      "spot_not_found": "Una postazione o un'area della mappa non c'è più: forse è già stata eliminata.",
       "spots_outside_grid": "Ci sono postazioni fuori da queste misure: servono almeno {{rows}} file e {{columns}} articoli per fila.",
       "invalid_image": "L'immagine deve essere PNG, JPEG o WebP e non superare i 5 MB.",
       "icon_not_found": "L'icona non c'è più: scegline un'altra."
@@ -397,7 +397,12 @@
           "configure": "Configura il tuo account Stripe",
           "how_it_works": "Come funziona:",
           "step_1": "Accedi o registrati su Stripe",
-          "step_2": "Inizia a ricevere ed effettuare pagamenti facilmente"
+          "step_2": "Inizia a ricevere ed effettuare pagamenti facilmente",
+          "blocked": {
+            "title": "Collegamento non avviato",
+            "text": "Il browser blocca la memoria della pagina: abilitala per questo sito e riprova.",
+            "close": "Chiudi"
+          }
         },
         "options": {
           "title": "Gestisci opzioni",
@@ -408,8 +413,8 @@
           "title": "Codice iframe per il tuo sito web",
           "subtitle": "Permetti ai tuoi ospiti di prenotare ombrelloni, lettini e servizi direttamente dal tuo sito web in pochi clic.",
           "description": "Copia e incolla il codice incorporabile nella sezione desiderata del tuo sito. Il widget sincronizza le disponibilità in tempo reale con la mappa del gestionale.",
-          "direct_link": "Link Diretto",
-          "copy": "Copia Link",
+          "direct_link": "Codice da incorporare",
+          "copy": "Copia codice",
           "copied": {
             "title": "Codice copiato",
             "text": "Incollalo nella pagina del tuo sito.",
@@ -419,7 +424,8 @@
             "title": "Codice non copiato",
             "text": "Seleziona il codice e copialo a mano.",
             "close": "Chiudi"
-          }
+          },
+          "no_address": "Lo stabilimento non ha ancora un indirizzo sul sito pubblico: il codice comparirà qui quando lo avrà."
         },
         "booking_options": {
           "title": "Opzioni prenotazioni online",
@@ -480,8 +486,9 @@
           "legend": {
             "title": "Imposta legenda",
             "add": "Aggiungi elemento",
-            "name_placeholder": "Nome dell'elemento",
-            "choose_icon": "Seleziona icona"
+            "choose_icon": "Seleziona icona",
+            "name": "Nome dell'elemento",
+            "no_icons": "Nessuna icona disponibile."
           },
           "payment_methods": {
             "title": "Metodi di pagamento accettati",
@@ -498,8 +505,8 @@
             "sector": "Fila/settore",
             "date_from": "Dal",
             "date_to": "Al",
-            "min": "Min",
-            "max": "Max",
+            "min": "Giorni min",
+            "max": "Giorni max",
             "missing_sector": "Settore/fila non più disponibile"
           },
           "periods": {
@@ -2164,7 +2171,8 @@
     "online_booking_configuration": {
       "periods": {
         "overlap": "Due intervalli di date si sovrappongono.",
-        "max": "Al massimo {{max}} intervalli di date."
+        "max": "Al massimo {{max}} intervalli di date.",
+        "required": "Scegli almeno un intervallo di date."
       },
       "booking_limits": {
         "days_required": "Indica almeno uno fra minimo e massimo di giorni.",
