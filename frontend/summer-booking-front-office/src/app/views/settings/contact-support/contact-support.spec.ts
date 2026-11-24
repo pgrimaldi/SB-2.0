@@ -7,7 +7,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
 import { ApiErrorCode } from '../../../entities/errors/api-error-codes';
-import { SystemService } from '../../../services/api/system/system.service';
+import { NotificationService } from '../../../services/api/notification/notification.service';
 import { ContactSupport } from './contact-support';
 
 describe('ContactSupport', () => {
@@ -24,7 +24,7 @@ describe('ContactSupport', () => {
       providers: [
         provideTranslateService(),
         { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
-        { provide: SystemService, useValue: { contactSupport, supportInfo } },
+        { provide: NotificationService, useValue: { contactSupport, supportInfo } },
         { provide: DATA_RELOAD, useValue: language },
         { provide: AuthBehaviour, useValue: { user: signal({ propertyId: 'p1' }) } },
       ],
@@ -107,6 +107,20 @@ describe('ContactSupport', () => {
     expect(document.body.textContent).toContain('invalidate.required');
     await fill();
     expect(send().disabled).toBe(false);
+  });
+
+  it('should send only with an email and a mobile phone the backend accepts', async () => {
+    const { send, type, fill, fields } = await setup();
+    await fill();
+
+    await type(2, 'anna.bianchi');
+    expect(send().disabled).toBe(true);
+    await type(2, 'anna.bianchi@example.com');
+    await type(3, '+39 334 567 8901');
+    expect(send().disabled).toBe(true);
+    await type(3, '334 567 8901');
+    expect(send().disabled).toBe(false);
+    expect([0, 1, 2, 4].map((index) => fields()[index].maxLength)).toEqual([100, 100, 255, 2000]);
   });
 
   it('should send the trimmed fields, null without a mobile phone, then thank and empty the form', async () => {

@@ -8370,7 +8370,7 @@ Nessun payload.
 
 ## Assistenza e guide
 
-### POST `/api/system/info-support`
+### GET `/api/notification/support/info`
 
 **Payload JSON**
 
@@ -8398,7 +8398,7 @@ Nessun payload.
 | `mailAddress` | string |
 | `supportHour` | string[] |
 
-### POST `/api/system/contact-support`
+### POST `/api/notification/support/contact`
 
 **Payload JSON**
 

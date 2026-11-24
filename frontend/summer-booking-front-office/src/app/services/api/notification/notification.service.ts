@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
+import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { EmailConfigurationData } from '../../../entities/settings/email-configuration/email-configuration-data';
 import { EmailConfigurationRequest } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { onlyFieldsOf } from '../only-fields-of';
@@ -34,4 +36,14 @@ export class NotificationService {
         { headers: ifMatch(version), observe: 'response' },
       )
       .pipe(map(versionOf));
+
+  readonly supportInfo = (): Observable<SupportInfo> =>
+    this.httpClient.get<SupportInfo>(`${this.endpoint}/support/info`);
+
+  /** The backend sends the message to the support team. Answers 204 with no body. */
+  readonly contactSupport = (request: ContactSupportRequest): Observable<void> =>
+    this.httpClient.post<void>(
+      `${this.endpoint}/support/contact`,
+      onlyFieldsOf(ContactSupportRequest, request),
+    );
 }

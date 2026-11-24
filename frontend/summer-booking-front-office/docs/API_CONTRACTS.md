@@ -9334,15 +9334,13 @@ Stato: 204 No Content (nessun corpo).
 
 Nessun corpo.
 
-## /system
-
-### POST `/api/system/info-support`
+### GET `/api/notification/support/info`
 
 Assistenza: contatti e orari.
 
 #### Payload
 
-Nessun corpo né parametri: lo stabilimento viene dal token.
+Nessun corpo né parametri.
 
 #### Response
 
@@ -9365,7 +9363,7 @@ Stato: 200 OK.
 | `mailAddress` | string | `info@summerbooking.it` |
 | `supportHour` | string[] | `["1 maggio - 30 settembre, dal lunedì alla domenica: dalle 8:30 alle 20:00", "1 ottobre - 30 aprile, dal lunedì al venerdì: dalle 9:00 alle 18:00"]` |
 
-### POST `/api/system/contact-support`
+### POST `/api/notification/support/contact`
 
 Assistenza: messaggio al supporto.
 
@@ -9376,7 +9374,7 @@ Assistenza: messaggio al supporto.
   "firstName": "Mario",
   "lastName": "Rossi",
   "email": "mario.rossi@example.com",
-  "mobilePhone": "+39 333 123 4567",
+  "mobilePhone": "333 123 4567",
   "message": "Buongiorno, vorrei sapere come esportare il listino."
 }
 ```
@@ -9386,7 +9384,7 @@ Assistenza: messaggio al supporto.
 | `firstName` | string | `Mario` |
 | `lastName` | string | `Rossi` |
 | `email` | string | `mario.rossi@example.com` |
-| `mobilePhone` | string \| null | `+39 333 123 4567` |
+| `mobilePhone` | string \| null | `333 123 4567` |
 | `message` | string | `Buongiorno, vorrei sapere come esportare il listino.` |
 
 #### Response

@@ -8,7 +8,15 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { FormField, TreeValidationResult, form, readonly, submit } from '@angular/forms/signals';
+import {
+  FormField,
+  MAX_LENGTH,
+  TreeValidationResult,
+  form,
+  metadata,
+  readonly,
+  submit,
+} from '@angular/forms/signals';
 import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthBehaviour } from '../../../behaviours/auth/auth.behaviour';
@@ -20,18 +28,28 @@ import {
 import { apiFieldErrorsOrGeneral } from '../../../behaviours/validation/api-field-errors';
 import { ValidationTextBehaviour } from '../../../behaviours/validation/validation-text.behaviour';
 import { DATA_RELOAD } from '../../../components/shared/ui/data/data-reload';
-import { comparableJson } from '../../../components/shared/forms/text-comparison';
-import { requiredText } from '../../../components/shared/forms/validators';
+import { comparableJson, trimmedText } from '../../../components/shared/forms/text-comparison';
+import {
+  emailAddress,
+  phoneNumberWithoutPrefix,
+  requiredText,
+} from '../../../components/shared/forms/validators';
 import { Button, ButtonSize } from '../../../components/shared/ui/buttons/button/button';
 import { MessagePopup } from '../../../components/shared/ui/dialogs/message-popup/message-popup';
 import { SectionTitle } from '../../../components/shared/ui/titles/section-title/section-title';
 import { FilledTextField } from '../../../components/shared/ui/inputs/filled-text-field/filled-text-field';
 import { FilledTextarea } from '../../../components/shared/ui/inputs/filled-textarea/filled-textarea';
 import { ApiProblem } from '../../../entities/errors/api-problem';
-import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
+import {
+  ContactSupportRequest,
+  MAX_CONTACT_EMAIL_LENGTH,
+  MAX_CONTACT_MESSAGE_LENGTH,
+  MAX_CONTACT_NAME_LENGTH,
+  MAX_CONTACT_PHONE_LENGTH,
+} from '../../../entities/settings/contact-support/contact-support-request';
 import { SupportInfo } from '../../../entities/settings/contact-support/support-info';
 import { toApiProblem } from '../../../services/api/errors/to-api-problem';
-import { SystemService } from '../../../services/api/system/system.service';
+import { NotificationService } from '../../../services/api/notification/notification.service';
 
 @Component({
   selector: 'app-contact-support',
@@ -49,7 +67,7 @@ import { SystemService } from '../../../services/api/system/system.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContactSupport implements UnsavedChanges, OnDestroy {
-  private readonly system = inject(SystemService);
+  private readonly notification = inject(NotificationService);
   private readonly auth = inject(AuthBehaviour);
   private readonly errorText = inject(ErrorTextBehaviour);
   private readonly unsaved = inject(UnsavedChangesBehaviour);
@@ -75,9 +93,15 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
     // What is sent cannot change until the server answers.
     readonly(path, { when: () => this.isLoading() });
     requiredText(path.firstName);
+    metadata(path.firstName, MAX_LENGTH, () => MAX_CONTACT_NAME_LENGTH);
     requiredText(path.lastName);
+    metadata(path.lastName, MAX_LENGTH, () => MAX_CONTACT_NAME_LENGTH);
     requiredText(path.email);
+    emailAddress(path.email);
+    metadata(path.email, MAX_LENGTH, () => MAX_CONTACT_EMAIL_LENGTH);
+    phoneNumberWithoutPrefix(path.mobilePhone, MAX_CONTACT_PHONE_LENGTH);
     requiredText(path.message);
+    metadata(path.message, MAX_LENGTH, () => MAX_CONTACT_MESSAGE_LENGTH);
   });
   protected readonly firstNameError = this.validationText.message(this.contactForm.firstName);
   protected readonly lastNameError = this.validationText.message(this.contactForm.lastName);
@@ -98,7 +122,7 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
         return;
       }
       const subscription = untracked(() =>
-        this.system.supportInfo().subscribe({
+        this.notification.supportInfo().subscribe({
           next: (supportInfo) => {
             this.supportInfo.set(supportInfo);
             this.supportInfoError.set(null);
@@ -130,13 +154,13 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
       this.error.set(null);
       try {
         await firstValueFrom(
-          this.system.contactSupport({
+          this.notification.contactSupport({
             ...contact,
-            firstName: trimmed(contact.firstName),
-            lastName: trimmed(contact.lastName),
-            email: trimmed(contact.email),
-            mobilePhone: trimmed(contact.mobilePhone),
-            message: trimmed(contact.message),
+            firstName: trimmedText(contact.firstName),
+            lastName: trimmedText(contact.lastName),
+            email: trimmedText(contact.email),
+            mobilePhone: trimmedText(contact.mobilePhone),
+            message: trimmedText(contact.message),
           }),
         );
         this.contact.set(new ContactSupportRequest());
@@ -155,8 +179,4 @@ export class ContactSupport implements UnsavedChanges, OnDestroy {
   ngOnDestroy(): void {
     this.unsaved.unwatch(this);
   }
-}
-
-function trimmed(text: string | null): string | null {
-  return text?.trim() || null;
 }

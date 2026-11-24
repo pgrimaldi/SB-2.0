@@ -150,7 +150,7 @@ import {
   saveEmailConfigurationMock,
   sendTestEmailMock,
 } from './notification/notification.mock';
-import { contactSupportMock, supportInfoMock } from './system/system.mock';
+import { contactSupportMock, supportInfoMock } from './notification/support.mock';
 import {
   addPrinterMock,
   deletePrinterMock,
@@ -324,15 +324,15 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   if (
-    request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/system/info-support`
+    request.method === 'GET' &&
+    request.url === `${environment.apiBaseUrl}/notification/support/info`
   ) {
     return supportInfoMock(request);
   }
 
   if (
     request.method === 'POST' &&
-    request.url === `${environment.apiBaseUrl}/system/contact-support`
+    request.url === `${environment.apiBaseUrl}/notification/support/contact`
   ) {
     return contactSupportMock(request);
   }

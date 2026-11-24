@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { SmtpSecurity } from '../../../entities/enums/smtp-security';
+import { ContactSupportRequest } from '../../../entities/settings/contact-support/contact-support-request';
 import { EmailConfigurationRequest } from '../../../entities/settings/email-configuration/email-configuration-request';
 import { NotificationService } from './notification.service';
 
@@ -58,6 +59,29 @@ describe('NotificationService', () => {
     });
     expect(test.request.body).toEqual(REQUEST);
     expect(test.request.headers.has('If-Match')).toBe(false);
+    controller.verify();
+  });
+
+  it('should read the support contacts and send the message to the support', () => {
+    const { notification, controller } = setup();
+    const contact: ContactSupportRequest = {
+      ...new ContactSupportRequest(),
+      firstName: 'Anna',
+      message: 'Vorrei informazioni.',
+    };
+
+    notification.supportInfo().subscribe();
+    notification.contactSupport(contact).subscribe();
+
+    controller.expectOne({
+      method: 'GET',
+      url: `${environment.apiBaseUrl}/notification/support/info`,
+    });
+    const post = controller.expectOne({
+      method: 'POST',
+      url: `${environment.apiBaseUrl}/notification/support/contact`,
+    });
+    expect(post.request.body).toEqual(contact);
     controller.verify();
   });
 });

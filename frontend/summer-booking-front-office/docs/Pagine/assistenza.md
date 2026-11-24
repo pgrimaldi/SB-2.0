@@ -23,16 +23,21 @@ Rotta `/settings/contact-support`, vista `views/settings/contact-support/` (`Con
   riuscito.
 - Nome, Cognome, Email e Messaggio sono obbligatori (`requiredText`, che conta come vuoto anche un testo di soli spazi;
   messaggio generico "Campo obbligatorio", `invalidate.required`); il Cellulare è facoltativo.
+- I limiti sono quelli del backend: Nome e Cognome 100 caratteri, Email 255 e con il formato di un indirizzo
+  (`emailAddress`), Cellulare 32 e solo cifre e spazi (`phoneNumberWithoutPrefix`; il riempimento automatico è
+  `tel-national`, senza `+`), Messaggio 2000.
 - "Invia messaggio" è attivo solo con il form valido e chiama l'invio con lo spinner sul bottone.
 - Se riesce, il form si svuota e compare `app-message-popup` "Messaggio inviato con successo" con Chiudi.
 - Se fallisce, i dati restano: l'errore di un campo va sotto quel campo, gli altri sopra il bottone.
-- L'invio della mail lo gestisce il backend.
+- L'invio della mail lo gestisce il backend: 429 `auth.too_many_attempts` con troppi messaggi dello stesso utente, 503
+  `notification.unavailable` se non può partire.
 
 ## API
 
-In `SystemService` (lo stabilimento lo prende il backend dal token):
+In `NotificationService` (lo stabilimento lo prende il backend dal token), chieste al backend in
+`Assistenza e guide - Frontend requests.md`:
 
-- `POST /api/system/info-support` (`supportInfo`): POST senza corpo, risposta `SupportInfo` con `phoneNumber`,
-  `mailAddress` e `supportHour` (una riga per periodo, già nella lingua dell'utente).
-- `POST /api/system/contact-support` (`contactSupport`): corpo `ContactSupportRequest` con `firstName`, `lastName`,
+- `GET /api/notification/support/info` (`supportInfo`): risposta `SupportInfo` con `phoneNumber`, `mailAddress` e `supportHour`
+  (una riga per periodo, già nella lingua dell'utente).
+- `POST /api/notification/support/contact` (`contactSupport`): corpo `ContactSupportRequest` con `firstName`, `lastName`,
   `email`, `mobilePhone` (`null` se vuoto) e `message`, testi senza spazi ai lati.
